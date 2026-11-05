@@ -164,9 +164,10 @@ def analyze(root: Path) -> dict:
         "routes": routes[:200],
         "ci": ci,
         "docs": docs,
+        "manifests": manifest,
         "dependencies": manifest["dependencies"],
         "scripts": manifest["scripts"],
-        "top_imports": dict(imports.most_common(25)),
+        "top_imports": [name for name, _ in imports.most_common(25)],
         "largest_sources": sources[:150],
     }
 

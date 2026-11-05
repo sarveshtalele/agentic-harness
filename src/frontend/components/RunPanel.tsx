@@ -148,7 +148,7 @@ export function ApprovalCard({ approval, projectId, onDecided }: { approval: any
   const payload = approval.payload || {};
   const rejects = (payload.confidence?.records || []).filter((r: any) => r.verdict === "REJECT");
   // The server is the real check; this only hides what it would refuse
-  const allowed = !project || (approval.gate === null || approval.gate === undefined ? project.can_write : project.can_sign.includes(approval.gate));
+  const allowed = !project || (approval.gate === null || approval.gate === undefined ? project.can_write : (project.can_sign || []).includes(approval.gate));
   const decide = async (approved: boolean) => {
     setBusy(true);
     setError("");
@@ -309,7 +309,7 @@ export function RunPanel({ runId, projectId, onFinished }: { runId: string; proj
   };
 
   if (!run) return null;
-  const open = run.approvals.filter((a: any) => a.status === "pending");
+  const open = (Array.isArray(run.approvals) ? run.approvals : []).filter((a: any) => a?.status === "pending");
   const cancel = async () => {
     if (!confirm("Stop this run?")) return;
     try {
@@ -323,14 +323,15 @@ export function RunPanel({ runId, projectId, onFinished }: { runId: string; proj
   const toolCalls = events.filter((e) => e.type === "tool").length;
   const agentCalls = events.filter((e) => e.type === "agent").length;
   const live = run.status === "running";
+  const state = run.state || {};
   return (
     <Card
-      title={<span className="flex flex-wrap items-center gap-2">Run <span className="mono text-xs font-normal">{run.id.slice(-8)}</span> <Badge>{run.workflow}</Badge> <span data-testid="run-status"><Badge>{run.status}</Badge></span>{live && <Loader2 className="h-4 w-4 animate-spin text-indigo-500" />}</span>}
+      title={<span className="flex flex-wrap items-center gap-2">Run <span className="mono text-xs font-normal">{(run.id || "").slice(-8)}</span> <Badge>{run.workflow}</Badge> <span data-testid="run-status"><Badge>{run.status}</Badge></span>{live && <Loader2 className="h-4 w-4 animate-spin text-indigo-500" />}</span>}
       actions={(live || run.status === "waiting_approval") ? <Button variant="danger" className="!px-2 !py-1 !text-xs" onClick={cancel}>Stop run</Button> : undefined}
     >
       <div className="space-y-3">
         <dl className="grid grid-cols-2 gap-2 text-center md:grid-cols-4" data-testid="run-metrics">
-          {[["Elapsed", duration(run.started_at, run.ended_at, now)], ["Tokens", (run.tokens_in + run.tokens_out).toLocaleString()], ["Agent calls", agentCalls], ["Tool calls", toolCalls]].map(([k, v]) => (
+          {[["Elapsed", duration(run.started_at, run.ended_at, now)], ["Tokens", ((run.tokens_in || 0) + (run.tokens_out || 0)).toLocaleString()], ["Agent calls", agentCalls], ["Tool calls", toolCalls]].map(([k, v]) => (
             <div key={k as string} className="rounded-lg bg-slate-100 py-1.5 dark:bg-slate-900"><dd className="text-sm font-bold">{v}</dd><dt className="text-[11px] text-slate-500">{k}</dt></div>
           ))}
         </dl>
@@ -346,18 +347,18 @@ export function RunPanel({ runId, projectId, onFinished }: { runId: string; proj
         )}
         <Link className="text-xs text-indigo-500 underline" href={`/projects/${projectId}/observability?run=${runId}`}>Open full trace</Link>
         {(run.status === "failed" || run.status === "interrupted") && <FailureCard run={run} onRetry={retry} busy={retrying} />}
-        {(run.state.branch || run.state.pull_request) && (
+        {(state.branch || state.pull_request) && (
           <div className="flex flex-wrap items-center gap-3 text-sm">
-            {run.state.branch && <span>Branch <span className="mono text-xs">{run.state.branch}</span></span>}
-            {run.state.commit && <span>Commit <span className="mono text-xs">{run.state.commit.slice(0, 10)}</span></span>}
-            {run.state.worktree && <a className="text-indigo-500 underline" href={`/api/runs/${run.id}/changes.zip`}>Download changed files</a>}
-            {run.state.patch_doc && <a className="text-indigo-500 underline" href={`/api/documents/${run.state.patch_doc}/export/patch`}>Download patch</a>}
-            {run.state.pull_request && <a className="text-indigo-500 underline" target="_blank" rel="noreferrer" href={run.state.pull_request.url}>Pull request #{run.state.pull_request.number}</a>}
-            {run.state.pull_request && <Button variant="secondary" className="!px-2 !py-1 !text-xs" onClick={async () => { if (confirm("Squash-merge this pull request on GitHub?")) { try { await api(`/runs/${run.id}/merge-pr`, { method: "POST" }); toast("Pull request merged"); } catch (e: any) { toast(e.message, "error"); } } }}>Merge</Button>}
+            {state.branch && <span>Branch <span className="mono text-xs">{state.branch}</span></span>}
+            {state.commit && <span>Commit <span className="mono text-xs">{(state.commit || "").slice(0, 10)}</span></span>}
+            {state.worktree && <a className="text-indigo-500 underline" href={`/api/runs/${run.id}/changes.zip`}>Download changed files</a>}
+            {state.patch_doc && <a className="text-indigo-500 underline" href={`/api/documents/${state.patch_doc}/export/patch`}>Download patch</a>}
+            {state.pull_request && <a className="text-indigo-500 underline" target="_blank" rel="noreferrer" href={state.pull_request.url}>Pull request #{state.pull_request.number}</a>}
+            {state.pull_request && <Button variant="secondary" className="!px-2 !py-1 !text-xs" onClick={async () => { if (confirm("Squash-merge this pull request on GitHub?")) { try { await api(`/runs/${run.id}/merge-pr`, { method: "POST" }); toast("Pull request merged"); } catch (e: any) { toast(e.message, "error"); } } }}>Merge</Button>}
           </div>
         )}
-        {run.state.source_files !== undefined && <p className="text-sm" data-testid="scan-coverage">Reviewed <b>{run.state.reviewed_files?.length || 0}</b> of <b>{run.state.source_files}</b> source files{run.state.unreviewed_files?.length ? `. Not reviewed: ${run.state.unreviewed_files.join(", ")}` : ""}</p>}
-        {run.state.summary?.verdict && <p className="text-sm">Result <Badge>{run.state.summary.verdict}</Badge> {run.state.summary.passed}/{run.state.summary.executed} tests passed, {run.state.summary.coverage}% requirement coverage</p>}
+        {state.source_files !== undefined && <p className="text-sm" data-testid="scan-coverage">Reviewed <b>{state.reviewed_files?.length || 0}</b> of <b>{state.source_files}</b> source files{state.unreviewed_files?.length ? `. Not reviewed: ${state.unreviewed_files.join(", ")}` : ""}</p>}
+        {state.summary?.verdict && <p className="text-sm">Result <Badge>{state.summary.verdict}</Badge> {state.summary.passed}/{state.summary.executed} tests passed, {state.summary.coverage}% requirement coverage</p>}
         {open.map((a: any) => <ApprovalCard key={a.id} approval={a} projectId={projectId} onDecided={decided} />)}
         <LiveLog events={events} live={live} />
         <div className="max-h-[28rem] space-y-1 overflow-y-auto text-xs" data-testid="run-events">
@@ -418,7 +419,7 @@ function buildStages(events: any[], status: string) {
 export function RunList({ projectId, workflow, activeId, onPick, refreshKey }: { projectId: string; workflow?: string[]; activeId?: string | null; onPick: (id: string) => void; refreshKey?: unknown }) {
   const [runs, setRuns] = useState<any[]>([]);
   useEffect(() => {
-    const load = () => api(`/projects/${projectId}/runs`).then((items) => setRuns(items.filter((r: any) => !workflow || workflow.includes(r.workflow)))).catch(() => {});
+    const load = () => api(`/projects/${projectId}/runs`).then((items) => setRuns(Array.isArray(items) ? items.filter((r: any) => !workflow || workflow.includes(r.workflow)) : [])).catch(() => {});
     load();
     const timer = setInterval(load, 5000);
     return () => clearInterval(timer);

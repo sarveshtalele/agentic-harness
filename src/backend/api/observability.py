@@ -6,6 +6,7 @@ import json
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import Response
 
+from backend.api.common import _project
 from backend.core import auth
 from backend.db import db, now, rows
 from backend.maf import observability
@@ -21,6 +22,15 @@ def _scoped() -> str | None:
 
 @router.get("/api/observability")
 def get_log(project_id: str | None = None, run_id: str | None = None, kind: str = "", q: str = "", limit: int = Query(300, ge=1, le=2000), before: str = ""):
+    try:
+        return observability.query(project_id, run_id, kind, q, limit, before, _scoped())
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc
+
+
+@router.get("/api/projects/{project_id}/observability")
+def get_project_observability(project_id: str, run_id: str | None = None, kind: str = "", q: str = "", limit: int = Query(300, ge=1, le=2000), before: str = ""):
+    _project(project_id)
     try:
         return observability.query(project_id, run_id, kind, q, limit, before, _scoped())
     except ValueError as exc:

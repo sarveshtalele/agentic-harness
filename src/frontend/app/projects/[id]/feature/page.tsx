@@ -18,12 +18,13 @@ export default function FeaturePage() {
   const [runId, setRunId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  if (!project.repo) return <Empty title="Feature Builder needs code"><Link className="text-indigo-500 underline" href={`/projects/${project.id}/repository`}>Connect a repository or upload a ZIP</Link></Empty>;
+  if (!project?.repo) return <Empty title="Feature Builder needs code"><Link className="text-indigo-500 underline" href={`/projects/${project?.id || ""}/repository`}>Connect a repository or upload a ZIP</Link></Empty>;
   const start = async () => {
     setBusy(true);
     setError("");
     try {
-      setRunId((await api(`/projects/${project.id}/runs`, { json: { workflow: "change", model, input: { kind: "feature", title, spec, install_deps: install } } })).id);
+      const run = await api(`/projects/${project.id}/runs`, { json: { workflow: "change", model, input: { kind: "feature", title, spec, install_deps: install } } });
+      if (run?.id) setRunId(run.id);
     } catch (e: any) {
       setError(e.message);
     } finally {

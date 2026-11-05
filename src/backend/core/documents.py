@@ -87,7 +87,7 @@ def get(doc_id: str, version: int | None = None) -> dict:
     if not current:
         raise KeyError(f"{doc_id} v{version}")
     extra = gherkin.validate(current["content"]) if doc["kind"] == "gherkin" else None
-    return {**doc, "version": current["version"], "content": current["content"], "data": json.loads(current["data"]),
+    return {**doc, "version": current["version"], "content": current["content"], "data": json.loads(current["data"]) if current.get("data") else None,
             "sha256": current["sha256"], "author": current["author"], "note": current["note"],
             "prompt_ref": current["prompt_ref"], "run_id": current["run_id"], "version_created_at": current["created_at"], "gherkin": extra}
 

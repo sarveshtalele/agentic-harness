@@ -39,6 +39,7 @@ def chat_agents():
 
 @router.get("/api/projects/{project_id}/chats")
 def list_chats(project_id: str):
+    _project(project_id)
     with db() as con:
         return rows(con.execute("SELECT t.*, (SELECT COUNT(*) FROM chat_messages m WHERE m.thread_id=t.id) AS messages FROM chat_threads t WHERE project_id=? ORDER BY updated_at DESC", (project_id,)))
 
@@ -57,7 +58,7 @@ def get_chat(thread_id: str):
     with db() as con:
         thread = row(con.execute("SELECT * FROM chat_threads WHERE id=?", (thread_id,)))
     if not thread:
-        raise KeyError(thread_id)
+        raise HTTPException(404, f"Chat thread not found: {thread_id}")
     return {**thread, "messages": agui.thread_messages(thread_id)}
 
 
@@ -86,6 +87,7 @@ def delete_chat(thread_id: str):
 
 @router.get("/api/projects/{project_id}/memories")
 def list_memories(project_id: str):
+    _project(project_id)
     with db() as con:
         return rows(con.execute("SELECT * FROM memories WHERE project_id=? ORDER BY created_at DESC", (project_id,)))
 

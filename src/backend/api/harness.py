@@ -13,6 +13,7 @@ from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
 
+from backend.api.common import _project
 from backend.config import ROOT
 from backend.harness.discovery import LocalSkillDiscovery
 from backend.harness.harness_agent import HarnessAgent
@@ -263,6 +264,7 @@ async def stream_chat(req: ChatRequest):
 # Project-scoped Harness Chat endpoint
 @router.post("/api/projects/{project_id}/harness/chat")
 async def project_stream_chat(project_id: str, req: ChatRequest):
+    _project(project_id)
     req.projectId = project_id
     prompt_text = req.message or req.prompt or ""
     # Prepend project context binding if not already bound

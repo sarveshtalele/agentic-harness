@@ -57,10 +57,11 @@ def seed_database():
 
     log.info("Database is empty. Seeding initial enterprise QE projects and harness knowledge...")
 
-    # 1. Project: Agentic QE Platform & Framework
+    # 1. Projects
     p1_id = "prj_agentic_qe"
     p2_id = "prj_fintech_gateway"
     p3_id = "prj_ecommerce_core"
+    p4_id = "prj_mcp_market"
     ts = now()
 
     with db() as con:
@@ -77,40 +78,106 @@ def seed_database():
             "INSERT INTO projects (id, name, description, created_at, updated_at, archived, owner_id) VALUES (?, ?, ?, ?, ?, 0, 'admin')",
             (p3_id, "Enterprise Cloud Checkout", "Global distributed cart, inventory lock, and multi-currency checkout service.", ts, ts)
         )
-
-        # Repositories
-        p1_analysis = json.dumps({
-            "languages": ["TypeScript", "Python", "Shell"],
-            "frameworks": ["Next.js", "FastAPI", "Playwright"],
-            "components": ["Harness Engine", "Local Skill Discovery", "MAF Protocol Adapter", "SQLite WAL"],
-            "total_files": 142
-        })
         con.execute(
-            "INSERT INTO repo_sources (project_id, kind, url, ref, commit_sha, analysis, scanned_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (p1_id, "github", "https://github.com/sarveshtalele/agentic-qe", "main", "a7f3e9c", p1_analysis, ts)
+            "INSERT INTO projects (id, name, description, created_at, updated_at, archived, owner_id) VALUES (?, ?, ?, ?, ?, 0, 'admin')",
+            (p4_id, "MCP Server Market", "Enterprise MCP Server Market with control room and financial calculations", ts, ts)
         )
 
-        p2_analysis = json.dumps({
-            "languages": ["Python", "Rust", "SQL"],
-            "frameworks": ["FastAPI", "Tokio", "PostgreSQL"],
-            "components": ["Idempotency Guard", "Token Vault", "Webhook Dispatcher"],
-            "total_files": 89
-        })
-        con.execute(
-            "INSERT INTO repo_sources (project_id, kind, url, ref, commit_sha, analysis, scanned_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (p2_id, "github", "https://github.com/fintech/zero-trust-gateway", "main", "b41d8e2", p2_analysis, ts)
-        )
+        # Repositories: scan disk if repo exists, else provide complete normalized analysis
+        import shutil
+        from backend.config import ROOT, repo_dir
+        from backend.repos import scan, git, ingest
 
-        p3_analysis = json.dumps({
-            "languages": ["TypeScript", "Go"],
-            "frameworks": ["React", "Gin", "Redis"],
-            "components": ["Cart Sync", "Inventory Lock", "Checkout State Machine"],
-            "total_files": 115
-        })
-        con.execute(
-            "INSERT INTO repo_sources (project_id, kind, url, ref, commit_sha, analysis, scanned_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (p3_id, "github", "https://github.com/enterprise/ecommerce-core", "main", "e993ab1", p3_analysis, ts)
-        )
+        for pid, git_url, commit_fallback, default_meta in [
+            (p1_id, "https://github.com/sarveshtalele/agentic-qe", "2015360a4f74fd4830bea2ed7a6103fda921326e", {
+                "mode": "brownfield",
+                "languages": {"TypeScript": 8, "Python": 7},
+                "lines_of_code": {"TypeScript": 450, "Python": 680},
+                "frameworks": ["Next.js", "FastAPI", "Playwright"],
+                "test_runners": ["pytest", "vitest", "playwright"],
+                "total_files": 16,
+                "source_files": 12,
+                "test_files": ["tests/test_gates.py", "tests/test_api.py", "tests/e2e/harness.spec.ts"],
+                "test_file_count": 3,
+                "routes": [{"method": "GET", "path": "/api/health", "file": "backend/app/main.py", "line": 34},
+                           {"method": "GET", "path": "/api/gates", "file": "backend/app/main.py", "line": 38}],
+                "ci": [".github/workflows/ci.yml"],
+                "entrypoints": ["backend/app/main.py", "frontend/src/index.ts"],
+                "manifests": {"dependencies": {}, "scripts": {}},
+                "docs": ["README.md"],
+                "top_imports": ["fastapi", "pydantic", "pytest", "react"],
+            }),
+            (p2_id, "https://github.com/fintech/zero-trust-gateway", "97b04f5eab9bf302b23db03297fd7560c57c3530", {
+                "mode": "brownfield",
+                "languages": {"Python": 10},
+                "lines_of_code": {"Python": 820},
+                "frameworks": ["FastAPI"],
+                "test_runners": ["pytest"],
+                "total_files": 12,
+                "source_files": 9,
+                "test_files": ["tests/test_payments.py", "tests/test_vault.py"],
+                "test_file_count": 2,
+                "routes": [{"method": "GET", "path": "/health", "file": "src/gateway/main.py", "line": 23},
+                           {"method": "POST", "path": "/api/v1/tokens/tokenize", "file": "src/gateway/main.py", "line": 27}],
+                "ci": [".github/workflows/ci.yml"],
+                "entrypoints": ["src/gateway/main.py"],
+                "manifests": {"dependencies": {}, "scripts": {}},
+                "docs": ["README.md"],
+                "top_imports": ["fastapi", "pydantic", "pytest", "uuid"],
+            }),
+            (p3_id, "https://github.com/enterprise/ecommerce-core", "d0943f9a93b08caee6a46e1cdb227219da337bd9", {
+                "mode": "brownfield",
+                "languages": {"TypeScript": 9},
+                "lines_of_code": {"TypeScript": 560},
+                "frameworks": ["Express", "React"],
+                "test_runners": ["vitest"],
+                "total_files": 9,
+                "source_files": 7,
+                "test_files": ["tests/cart.test.ts"],
+                "test_file_count": 1,
+                "routes": [{"method": "GET", "path": "/api/health", "file": "src/server.ts", "line": 11},
+                           {"method": "POST", "path": "/api/cart/items", "file": "src/server.ts", "line": 15}],
+                "ci": [".github/workflows/ci.yml"],
+                "entrypoints": ["src/server.ts"],
+                "manifests": {"dependencies": {}, "scripts": {}},
+                "docs": ["README.md"],
+                "top_imports": ["express", "vitest", "redis"],
+            }),
+            (p4_id, "https://github.com/sarveshtalele/mcp-server-market", "f914e9bc6d1a179ed177e37789e7dff96884110a", {
+                "mode": "brownfield",
+                "languages": {"Python": 67, "TypeScript": 26, "JavaScript": 1, "CSS": 1},
+                "lines_of_code": {"Python": 7625, "TypeScript": 2742, "CSS": 713, "JavaScript": 7},
+                "frameworks": [],
+                "test_runners": ["pytest"],
+                "total_files": 123,
+                "source_files": 82,
+                "test_files": [],
+                "test_file_count": 13,
+                "routes": [],
+                "ci": [],
+                "entrypoints": [],
+                "manifests": {"dependencies": {}, "scripts": {}},
+                "docs": ["README.md"],
+                "top_imports": ["fastapi", "pydantic", "sqlalchemy"],
+            }),
+        ]:
+            rdir = repo_dir(pid)
+            cached = ROOT / "data" / "projects" / pid / "repo"
+            if not rdir.exists() and cached.exists():
+                rdir.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copytree(cached, rdir, symlinks=True)
+
+            if rdir.exists() and any(p.is_file() for p in rdir.iterdir() if p.name != ".git"):
+                analysis = ingest.normalize_analysis(scan.analyze(rdir), rdir)
+                commit = git.head(rdir) or commit_fallback
+            else:
+                analysis = ingest.normalize_analysis(default_meta, rdir)
+                commit = commit_fallback
+
+            con.execute(
+                "INSERT INTO repo_sources (project_id, kind, url, ref, commit_sha, analysis, scanned_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (pid, "git", git_url, "main", commit, json.dumps(analysis), ts)
+            )
 
         # Documents & Versions for prj_agentic_qe
         d1_id = "doc_aqe_prd"
@@ -225,4 +292,43 @@ Autonomous quality engineering platform combining Microsoft Agent Framework (MAF
             (p1_id, ts)
         )
 
-    log.info("Database successfully seeded with 3 realistic enterprise projects, specs, and gate status.")
+        # Seed baseline documents, findings, and gates for p2, p3, p4
+        for pid, doc_id, doc_title, doc_content, fnd_id, fnd_rule, fnd_title in [
+            (p2_id, "doc_fintech_prd", "Zero-Trust Financial Gateway Architecture Spec",
+             "# Zero-Trust Financial Gateway Architecture\n\nHigh-throughput payment orchestration and tokenization engine with PCI-DSS compliance.",
+             "fnd_fintech_tls", "CRYPTO_POLICY", "TLS 1.2 Deprecation Notice"),
+            (p3_id, "doc_ecom_prd", "Enterprise Cloud Checkout System Spec",
+             "# Enterprise Cloud Checkout Architecture\n\nGlobal distributed cart, inventory lock, and multi-currency checkout service.",
+             "fnd_ecom_cart", "CONCURRENCY_POLICY", "Cart state race condition during flash sale"),
+            (p4_id, "doc_mcp_prd", "MCP Server Market Protocol Gateway Spec",
+             "# MCP Server Market Architecture\n\nEnterprise Model Context Protocol (MCP) server registry, playground, and gateway.",
+             "fnd_mcp_auth", "API_AUTH_POLICY", "Standardize token auth headers across proxy nodes"),
+        ]:
+            con.execute(
+                "INSERT INTO documents (id, project_id, kind, title, status, current_version, created_at, updated_at) VALUES (?, ?, 'prd', ?, 'approved', 1, ?, ?)",
+                (doc_id, pid, doc_title, ts, ts)
+            )
+            con.execute(
+                "INSERT INTO document_versions (document_id, version, content, sha256, author, note, created_at) VALUES (?, 1, ?, ?, 'Principal Architect', 'Initial baseline spec', ?)",
+                (doc_id, doc_content, sha256(doc_content), ts)
+            )
+            con.execute(
+                """INSERT INTO findings 
+                (id, project_id, source, rule, severity, title, file, line, evidence, explanation, status, fingerprint, created_at)
+                VALUES (?, ?, 'security_audit', ?, 'medium', ?, 'src/main.py', 1, 'compliance review', 'Verified against enterprise security baseline.', 'open', ?, ?)""",
+                (fnd_id, pid, fnd_rule, fnd_title, f"fp_{fnd_id}", ts)
+            )
+            for g, st, reason in [
+                (0, "approved", "Repository structure and AST scanned successfully"),
+                (1, "approved", "Requirements baseline verified"),
+                (2, "pending", "Strategy plan under review"),
+                (3, "draft", "Pending case design"),
+                (4, "draft", "Pending code generation"),
+                (5, "draft", "Pending final release sign-off"),
+            ]:
+                con.execute(
+                    "INSERT INTO gates (project_id, gate, status, decided_by, reason, signature, decided_at) VALUES (?, ?, ?, 'admin', ?, 'sig_harness_001', ?)",
+                    (pid, g, st, reason, ts)
+                )
+
+    log.info("Database successfully seeded with 4 realistic enterprise projects, specs, and gate status.")

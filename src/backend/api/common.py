@@ -13,7 +13,7 @@ def _project(project_id: str) -> dict:
     with db() as con:
         found = row(con.execute("SELECT * FROM projects WHERE id=?", (project_id,)))
     if not found:
-        raise KeyError(project_id)
+        raise HTTPException(404, f"Project not found: {project_id}")
     return found
 
 

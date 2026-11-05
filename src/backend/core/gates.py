@@ -33,15 +33,20 @@ def status(project_id: str) -> list[dict]:
     result = []
     for number, (name, description) in GATES.items():
         record = stored.get(number)
+        sig_valid = None
+        if record and record.get("signature"):
+            try:
+                msg = _message(project_id, number, record.get("status") or "", record.get("decided_by") or "", record.get("decided_at") or "")
+                sig_valid = verify_signature(msg, str(record["signature"]))
+            except Exception:
+                sig_valid = False
         result.append({
             "gate": number, "name": name, "description": description,
             "status": record["status"] if record else "pending",
             "decided_by": record["decided_by"] if record else None,
             "decided_at": record["decided_at"] if record else None,
             "reason": record["reason"] if record else "",
-            "signature_valid": verify_signature(
-                _message(project_id, number, record["status"], record["decided_by"], record["decided_at"]), record["signature"]
-            ) if record else None,
+            "signature_valid": sig_valid,
         })
     return result
 

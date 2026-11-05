@@ -39,6 +39,8 @@ class DecisionIn(BaseModel):
 @router.post("/api/projects/{project_id}/runs", status_code=201)
 async def start_run(project_id: str, body: RunIn):
     _project(project_id)
+    if body.model:
+        auth.permit_model(auth.signer(), body.model)
     try:
         return await engine.start(project_id, body.workflow, body.input, body.model)
     except engine.RunActive as exc:
@@ -49,6 +51,7 @@ async def start_run(project_id: str, body: RunIn):
 
 @router.get("/api/projects/{project_id}/runs")
 def list_runs(project_id: str):
+    _project(project_id)
     with db() as con:
         return rows(con.execute("SELECT id, workflow, status, error, tokens_in, tokens_out, started_at, ended_at FROM runs WHERE project_id=? ORDER BY started_at DESC LIMIT 100", (project_id,)))
 
@@ -106,7 +109,14 @@ def all_approvals():
         items = rows(con.execute(
             """SELECT a.*, p.name AS project_name, r.workflow FROM approvals a JOIN projects p ON p.id=a.project_id JOIN runs r ON r.id=a.run_id
                WHERE a.status='pending' AND p.archived=0 ORDER BY a.created_at DESC"""))
-    return [{**a, "payload": json.loads(a["payload"])} for a in items if auth.can_see_project(a["project_id"])]
+    def _load_payload(p):
+        if not p:
+            return {}
+        try:
+            return json.loads(p)
+        except Exception:
+            return {}
+    return [{**a, "payload": _load_payload(a.get("payload"))} for a in items if auth.can_see_project(a["project_id"])]
 
 
 @router.get("/api/runs/{run_id}/changes.zip")

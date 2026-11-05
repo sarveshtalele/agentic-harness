@@ -10,7 +10,7 @@ import { Empty, Spinner, useToast } from "./ui";
 export function ApprovalsList({ projectId, onChange }: { projectId?: string; onChange?: () => void }) {
   const [items, setItems] = useState<any[] | null>(null);
   const toast = useToast();
-  const load = useCallback(() => api("/approvals").then((all) => setItems(all.filter((a: any) => !projectId || a.project_id === projectId))), [projectId]);
+  const load = useCallback(() => api("/approvals").then((all) => setItems(Array.isArray(all) ? all.filter((a: any) => !projectId || a.project_id === projectId) : [])).catch(() => setItems([])), [projectId]);
   useEffect(() => {
     load();
     const timer = setInterval(load, 10_000);

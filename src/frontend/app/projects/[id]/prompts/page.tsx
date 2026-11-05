@@ -17,21 +17,31 @@ export default function PromptsPage() {
   const [note, setNote] = useState("");
   const [error, setError] = useState("");
   const toast = useToast();
-  const loadAll = useCallback(() => api("/prompts").then(setAll), []);
+  const loadAll = useCallback(() => api("/prompts").then((res) => setAll(Array.isArray(res) ? res : [])).catch(() => setAll([])), []);
   useEffect(() => {
     loadAll();
-    api("/evals").then(setEvalAgents);
+    api("/evals").then((res) => setEvalAgents(Array.isArray(res) ? res : [])).catch(() => setEvalAgents([]));
   }, [loadAll]);
   const open = async (name: string) => {
     setAgent(name);
-    const items = await api(`/prompts/${name}`);
-    setHistory(items);
-    setBody(items.find((p: any) => p.active)?.body || "");
-    setEvalRuns(await api(`/evals/${name}`));
+    try {
+      const items = await api(`/prompts/${name}`);
+      const safeItems = Array.isArray(items) ? items : [];
+      setHistory(safeItems);
+      setBody(safeItems.find((p: any) => p?.active)?.body || "");
+      const runs = await api(`/evals/${name}`);
+      setEvalRuns(Array.isArray(runs) ? runs : []);
+    } catch (e: any) {
+      setError(e.message);
+    }
   };
   if (!all) return <Spinner />;
-  const agents = [...new Set(all.map((p) => p.agent))];
-  const active = history.find((p) => p.active);
+  const safeAll = Array.isArray(all) ? all : [];
+  const safeHistory = Array.isArray(history) ? history : [];
+  const safeEvalAgents = Array.isArray(evalAgents) ? evalAgents : [];
+  const safeEvalRuns = Array.isArray(evalRuns) ? evalRuns : [];
+  const agents = [...new Set(safeAll.map((p) => p?.agent).filter(Boolean))];
+  const active = safeHistory.find((p) => p?.active);
   const save = async () => {
     setError("");
     try {
@@ -50,7 +60,7 @@ export default function PromptsPage() {
       <div className="grid gap-4 md:grid-cols-[230px_1fr] [&>*]:min-w-0">
         <Card>
           <ul className="space-y-0.5 text-sm">{agents.map((name) => {
-            const latest = all.find((p) => p.agent === name && p.active);
+            const latest = safeAll.find((p) => p?.agent === name && p?.active);
             return <li key={name}><button onClick={() => open(name)} className={`flex w-full items-center justify-between rounded px-2 py-1 text-left hover:bg-slate-100 dark:hover:bg-slate-900 ${agent === name ? "bg-indigo-600/15 font-semibold" : ""}`}><span className="truncate">{name.replace(/_/g, " ")}</span><span className="text-xs text-slate-500">v{latest?.version}</span></button></li>;
           })}</ul>
         </Card>
@@ -64,14 +74,14 @@ export default function PromptsPage() {
               </div>
               <ErrorNote message={error} />
             </Card>
-            {evalAgents.includes(agent) && (
-              <Card title="Evaluations" actions={<Button variant="secondary" busy={evaluating} onClick={async () => { setEvaluating(true); setError(""); try { await api(`/agents/${agent}/evals`, { method: "POST" }); setEvalRuns(await api(`/evals/${agent}`)); } catch (e: any) { setError(e.message); } finally { setEvaluating(false); } }}>Run with the real model</Button>}>
-                {evalRuns.length ? <ul className="space-y-1 text-sm">{evalRuns.map((r) => <li key={r.id} className="flex items-center justify-between gap-2"><span className="mono truncate text-xs">{r.prompt_ref}</span><span className="flex shrink-0 items-center gap-2 text-xs">{when(r.created_at)} <Badge tone={r.passed === r.total ? "emerald" : "rose"}>{`${r.passed}/${r.total} passed`}</Badge></span></li>)}</ul> : <p className="text-sm text-slate-500">Not evaluated yet.</p>}
+            {safeEvalAgents.includes(agent) && (
+              <Card title="Evaluations" actions={<Button variant="secondary" busy={evaluating} onClick={async () => { setEvaluating(true); setError(""); try { await api(`/agents/${agent}/evals`, { method: "POST" }); const runs = await api(`/evals/${agent}`); setEvalRuns(Array.isArray(runs) ? runs : []); } catch (e: any) { setError(e.message); } finally { setEvaluating(false); } }}>Run with the real model</Button>}>
+                {safeEvalRuns.length ? <ul className="space-y-1 text-sm">{safeEvalRuns.map((r) => <li key={r.id} className="flex items-center justify-between gap-2"><span className="mono truncate text-xs">{r.prompt_ref}</span><span className="flex shrink-0 items-center gap-2 text-xs">{when(r.created_at)} <Badge tone={r.passed === r.total ? "emerald" : "rose"}>{`${r.passed}/${r.total} passed`}</Badge></span></li>)}</ul> : <p className="text-sm text-slate-500">Not evaluated yet.</p>}
               </Card>
             )}
-            {evalAgents.includes(agent) && <Card title="Scores by version"><VersionScores agent={agent} versions={history} /><p className="mt-2 text-[11px] text-slate-500">Measure a new version on the agent page before relying on these numbers. A version never measured reads Not measured.</p></Card>}
+            {safeEvalAgents.includes(agent) && <Card title="Scores by version"><VersionScores agent={agent} versions={safeHistory} /><p className="mt-2 text-[11px] text-slate-500">Measure a new version on the agent page before relying on these numbers. A version never measured reads Not measured.</p></Card>}
             <Card title="History">
-              <ul className="divide-y divide-slate-200 text-sm dark:divide-slate-800">{history.map((p) => (
+              <ul className="divide-y divide-slate-200 text-sm dark:divide-slate-800">{safeHistory.map((p) => (
                 <li key={p.version} className="flex items-center justify-between gap-2 py-1.5">
                   <span className="min-w-0"><b>v{p.version}</b> <span className="text-xs text-slate-500">{p.author_name} · {when(p.created_at)} · {p.note}</span></span>
                   {p.active ? <Badge tone="emerald">active</Badge> : <Button variant="secondary" className="!px-2 !py-1 !text-xs" onClick={async () => { await api(`/prompts/${agent}/activate/${p.version}`, { method: "POST" }); await open(agent); loadAll(); toast(`Rolled back to v${p.version}`); }}><Check className="h-3 w-3" /> Activate</Button>}

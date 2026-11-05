@@ -9,10 +9,15 @@ import { Badge, Button, Card, Empty, ErrorNote, Field, inputClass, PageTitle, Sp
 import { api, when } from "../../../lib/api";
 
 function nextStep(data: any, base: string): { label: string; href: string } {
-  if (data.pending_approvals.length) return { label: `Review: ${data.pending_approvals[0].title}`, href: `${base}/runs/${data.pending_approvals[0].run_id}` };
-  if (!data.repo && !data.documents.length) return { label: "Connect a repository, or write requirements in BA Studio", href: `${base}/repository` };
-  if (data.repo && !data.recent_runs.some((r: any) => r.workflow === "bug_scan")) return { label: "Scan the repository for bugs", href: `${base}/bugs` };
-  if (!data.gates.every((g: any) => g.status === "approved")) return { label: "Continue the QE lifecycle", href: `${base}/qe` };
+  const pending = Array.isArray(data?.pending_approvals) ? data.pending_approvals : [];
+  const documents = Array.isArray(data?.documents) ? data.documents : [];
+  const recentRuns = Array.isArray(data?.recent_runs) ? data.recent_runs : [];
+  const gates = Array.isArray(data?.gates) ? data.gates : [];
+
+  if (pending.length) return { label: `Review: ${pending[0].title || "Pending decision"}`, href: `${base}/runs/${pending[0].run_id}` };
+  if (!data?.repo && !documents.length) return { label: "Connect a repository, or write requirements in BA Studio", href: `${base}/repository` };
+  if (data?.repo && !recentRuns.some((r: any) => r?.workflow === "bug_scan")) return { label: "Scan the repository for bugs", href: `${base}/bugs` };
+  if (!gates.every((g: any) => g?.status === "approved")) return { label: "Continue the QE lifecycle", href: `${base}/qe` };
   return { label: "All gates approved. Review the release document", href: `${base}/documents` };
 }
 
@@ -26,7 +31,7 @@ function Members({ project, refresh }: { project: any; refresh: () => void }) {
   const [role, setRole] = useState("developer");
   const [newOwner, setNewOwner] = useState("");
   const [error, setError] = useState("");
-  const load = () => api(`/projects/${project.id}/members`).then(setItems).catch((e) => setError(e.message));
+  const load = () => api(`/projects/${project.id}/members`).then((res) => setItems(Array.isArray(res) ? res : [])).catch((e) => setError(e.message));
   useEffect(() => { load(); }, [project.id]);
   const run = async (work: () => Promise<unknown>) => {
     setError("");
@@ -36,7 +41,7 @@ function Members({ project, refresh }: { project: any; refresh: () => void }) {
     <Card title="Members">
       <div data-testid="members">
         {items && items.length ? (
-          <ul className="mb-2 space-y-1 text-sm">{items.map((m) => <li key={m.user_id} className="flex items-center justify-between gap-2"><span>{m.username} <Badge>{m.role.replace("_", " ")}</Badge></span><Button variant="secondary" aria-label={`Remove ${m.username}`} onClick={() => run(() => api(`/projects/${project.id}/members/${m.user_id}`, { method: "DELETE" }))}><Trash2 className="h-4 w-4" /></Button></li>)}</ul>
+          <ul className="mb-2 space-y-1 text-sm">{items.map((m) => <li key={m.user_id} className="flex items-center justify-between gap-2"><span>{m.username} <Badge>{(m.role || "").replace("_", " ")}</Badge></span><Button variant="secondary" aria-label={`Remove ${m.username}`} onClick={() => run(() => api(`/projects/${project.id}/members/${m.user_id}`, { method: "DELETE" }))}><Trash2 className="h-4 w-4" /></Button></li>)}</ul>
         ) : <p className="mb-2 text-sm text-slate-500">No members. Only you can see this project.</p>}
         <div className="flex flex-wrap items-end gap-2">
           <Field label="Username" hint="The exact username."><input name="member-username" autoComplete="off" className={inputClass} value={username} onChange={(e) => setUsername(e.target.value)} /></Field>
@@ -59,24 +64,30 @@ export default function OverviewPage() {
   const { project, refresh } = useProject();
   const [data, setData] = useState<any>(null);
   useEffect(() => {
-    api(`/projects/${project.id}/overview`).then(setData);
+    api(`/projects/${project.id}/overview`).then(setData).catch(() => setData({}));
   }, [project.id]);
   if (!data) return <Spinner />;
   const base = `/projects/${project.id}`;
   const step = nextStep(data, base);
-  const a = data.repo?.analysis;
+  const repo = data?.repo;
+  const a = repo?.analysis || {};
+  const languages = (a?.languages && typeof a.languages === "object") ? Object.keys(a.languages) : [];
+  const frameworks = Array.isArray(a?.frameworks) ? a.frameworks : [];
+  const gates = Array.isArray(data?.gates) ? data.gates : [];
+  const recentRuns = Array.isArray(data?.recent_runs) ? data.recent_runs : [];
+  const documents = Array.isArray(data?.documents) ? data.documents : [];
   return (
     <>
       <PageTitle
-        title={project.name}
-        subtitle={project.description}
+        title={project?.name || "Project"}
+        subtitle={project?.description}
         actions={
           <div className="flex items-center gap-2">
             <Button
               variant="secondary"
               onClick={async () => {
-                const name = prompt("Project name", project.name)?.trim();
-                if (name && name !== project.name) {
+                const name = prompt("Project name", project?.name)?.trim();
+                if (name && name !== project?.name) {
                   await api(`/projects/${project.id}`, { method: "PATCH", json: { name } });
                   refresh();
                 }
@@ -91,18 +102,18 @@ export default function OverviewPage() {
       <Link href={step.href} className="mb-4 block rounded-xl border border-indigo-500/50 bg-indigo-500/10 p-3 text-sm font-semibold text-indigo-700 hover:bg-indigo-500/15 dark:text-indigo-300">Next: {step.label}</Link>
       <div className="grid gap-4 md:grid-cols-2">
         <Card title={<Link className="hover:text-indigo-500" href={`${base}/repository`}>Repository</Link>} actions={<Link className="text-xs text-indigo-500" href={`${base}/repository`}>Manage</Link>}>
-          {data.repo ? (
+          {repo ? (
             <dl className="space-y-1 text-sm">
-              <div className="truncate"><b>{data.repo.kind === "git" ? "Git" : "ZIP"}:</b> {data.repo.url}</div>
-              <div><b>Commit:</b> <span className="mono text-xs">{data.repo.commit_sha.slice(0, 10)}</span></div>
-              <div><b>Files:</b> {a.total_files} · <b>Test files:</b> {a.test_file_count}</div>
-              <div className="flex flex-wrap gap-1">{Object.keys(a.languages).map((l) => <Badge key={l} tone="indigo">{l}</Badge>)}{a.frameworks.map((f: string) => <Badge key={f}>{f}</Badge>)}</div>
+              <div className="truncate"><b>{repo.kind === "git" ? "Git" : "ZIP"}:</b> {repo.url || "Connected"}</div>
+              <div><b>Commit:</b> <span className="mono text-xs">{(repo.commit_sha || "").slice(0, 10)}</span></div>
+              <div><b>Files:</b> {a.total_files ?? 0} · <b>Test files:</b> {a.test_file_count ?? 0}</div>
+              <div className="flex flex-wrap gap-1">{languages.map((l) => <Badge key={l} tone="indigo">{l}</Badge>)}{frameworks.map((f: string) => <Badge key={f}>{f}</Badge>)}</div>
             </dl>
           ) : <Empty title="No repository connected">Greenfield projects can start from BA Studio.</Empty>}
         </Card>
         <Card title={<Link className="hover:text-indigo-500" href={`${base}/governance`}>Quality gates</Link>} actions={<Link className="text-xs text-indigo-500" href={`${base}/governance`}>Governance</Link>}>
           <ul className="space-y-1 text-sm">
-            {data.gates.map((g: any) => (
+            {gates.map((g: any) => (
               <li key={g.gate}><Link href={`${base}/qe`} className="flex items-center justify-between gap-2 rounded hover:text-indigo-500">
                 <span>G{g.gate} {g.name}</span>
                 <span className="flex items-center gap-2 text-xs text-slate-500">{g.decided_by_name}<Badge>{g.status}</Badge></span>
@@ -110,20 +121,20 @@ export default function OverviewPage() {
             ))}
           </ul>
         </Card>
-        {["owner", "admin"].includes(project.my_role) && <Members project={project} refresh={refresh} />}
+        {["owner", "admin"].includes(project?.my_role) && <Members project={project} refresh={refresh} />}
         <Card title={<Link className="hover:text-indigo-500" href={`${base}/runs`}>Recent runs</Link>} actions={<Link className="text-xs text-indigo-500" href={`${base}/runs`}>All runs</Link>}>
-          {data.recent_runs.length ? (
+          {recentRuns.length ? (
             <ul className="space-y-1 text-sm">
-              {data.recent_runs.map((r: any) => (
+              {recentRuns.map((r: any) => (
                 <li key={r.id} className="flex items-center justify-between gap-2"><Link className="truncate hover:underline" href={`${base}/runs/${r.id}`}>{r.workflow} · {when(r.started_at)}</Link><Badge>{r.status}</Badge></li>
               ))}
             </ul>
           ) : <p className="text-sm text-slate-500">No workflow has run yet.</p>}
         </Card>
         <Card title={<Link className="hover:text-indigo-500" href={`${base}/documents`}>Latest documents</Link>} actions={<Link className="text-xs text-indigo-500" href={`${base}/documents`}>All documents</Link>}>
-          {data.documents.length ? (
+          {documents.length ? (
             <ul className="space-y-1 text-sm">
-              {data.documents.map((d: any) => (
+              {documents.map((d: any) => (
                 <li key={d.id} className="flex items-center justify-between gap-2"><Link className="truncate hover:underline" href={`${base}/documents/${d.id}`}>{d.title}</Link><span className="flex shrink-0 items-center gap-1 text-xs">{d.kind} v{d.current_version}<Badge>{d.status}</Badge></span></li>
               ))}
             </ul>

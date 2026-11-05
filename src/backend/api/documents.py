@@ -51,6 +51,7 @@ def all_documents():
 
 @router.get("/api/projects/{project_id}/documents")
 def list_documents(project_id: str, kind: str | None = None):
+    _project(project_id)
     return documents.list_for(project_id, kind)
 
 

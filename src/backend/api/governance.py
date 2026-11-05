@@ -16,6 +16,7 @@ router = APIRouter()
 
 @router.get("/api/projects/{project_id}/gates")
 def project_gates(project_id: str):
+    _project(project_id)
     return _named(gates.status(project_id))
 
 
@@ -39,13 +40,22 @@ def decide_gate(project_id: str, gate: int, body: GateIn):
 
 @router.get("/api/projects/{project_id}/approvals")
 def project_approvals(project_id: str, status: str = "pending"):
+    _project(project_id)
     with db() as con:
         items = rows(con.execute("SELECT * FROM approvals WHERE project_id=? AND status=? ORDER BY created_at DESC", (project_id, status)))
-    return [{**a, "payload": json.loads(a["payload"])} for a in items]
+    def _parse_payload(payload):
+        if not payload:
+            return {}
+        try:
+            return json.loads(payload)
+        except Exception:
+            return {}
+    return [{**a, "payload": _parse_payload(a.get("payload"))} for a in items]
 
 
 @router.get("/api/projects/{project_id}/ledger")
 def project_ledger(project_id: str):
+    _project(project_id)
     found = ledger.entries(project_id)
     names = auth.display_names({e["actor"] for e in found})
     return {"entries": [{**e, "actor_name": names.get(e["actor"], e["actor"])} for e in found], "verification": ledger.verify(project_id)}
@@ -65,7 +75,7 @@ def list_prompts():
 def prompt_history(agent: str):
     items = prompts.history(agent)
     if not items:
-        raise KeyError(agent)
+        raise HTTPException(404, f"Prompt history not found for agent: {agent}")
     names = auth.display_names({i["author"] for i in items})
     return [{**i, "author_name": names.get(i["author"], i["author"])} for i in items]
 
@@ -106,7 +116,7 @@ async def run_all_evals():
 def agent_detail(agent: str):
     item = next((a for a in governance.overview() if a["key"] == agent), None)
     if not item:
-        raise KeyError(agent)
+        raise HTTPException(404, f"Agent not found: {agent}")
     item = {**item, "settings_by_name": auth.display_names({item["settings_by"]}).get(item["settings_by"], item["settings_by"]) if item.get("settings_by") else None}
     admin = auth.current_user.get()["role"] == "admin"  # recent calls and events span projects
     return {**item, "calls_recent": governance.recent_calls(agent) if admin else [], "events_recent": governance.recent_events(agent) if admin else [], "evals": evals.history(agent), "has_evals": agent in evals.available()}
@@ -169,6 +179,7 @@ def eval_history(agent: str):
 @router.get("/api/projects/{project_id}/metrics")
 def metrics(project_id: str):
     """Numbers computed from stored runs and events. Empty until real work has happened."""
+    _project(project_id)
     with db() as con:
         by_status = rows(con.execute("SELECT workflow, status, COUNT(*) AS count, SUM(tokens_in) AS tokens_in, SUM(tokens_out) AS tokens_out FROM runs WHERE project_id=? GROUP BY workflow, status", (project_id,)))
         durations = rows(con.execute("SELECT workflow, ROUND(AVG((julianday(ended_at)-julianday(started_at))*86400),1) AS avg_seconds, COUNT(*) AS count FROM runs WHERE project_id=? AND ended_at IS NOT NULL GROUP BY workflow", (project_id,)))

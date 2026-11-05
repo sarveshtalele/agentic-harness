@@ -24,9 +24,9 @@ export default function BAPage() {
   const [error, setError] = useState("");
   const toast = useToast();
 
-  const loadTemplates = useCallback(() => api(`/templates?project_id=${project.id}`).then(setTemplates), [project.id]);
-  const loadSources = useCallback(() => api(`/projects/${project.id}/sources`).then(setSources), [project.id]);
-  const loadDocs = useCallback(() => api(`/projects/${project.id}/documents`).then((items) => setDocs(items.filter((d: any) => ["brd", "prd", "stories", "gherkin"].includes(d.kind)))), [project.id]);
+  const loadTemplates = useCallback(() => api(`/templates?project_id=${project.id}`).then((res) => setTemplates(Array.isArray(res) ? res : [])).catch(() => setTemplates([])), [project.id]);
+  const loadSources = useCallback(() => api(`/projects/${project.id}/sources`).then((res) => setSources(Array.isArray(res) ? res : [])).catch(() => setSources([])), [project.id]);
+  const loadDocs = useCallback(() => api(`/projects/${project.id}/documents`).then((items) => setDocs(Array.isArray(items) ? items.filter((d: any) => ["brd", "prd", "stories", "gherkin"].includes(d?.kind)) : [])).catch(() => setDocs([])), [project.id]);
   useEffect(() => {
     loadTemplates();
     loadSources();
@@ -41,11 +41,14 @@ export default function BAPage() {
     return () => clearInterval(timer);
   }, [runId, loadDocs]);
 
-  const recent = docs.filter((d) => d.run_id !== runId || !runId).slice(0, 8);
+  const safeDocs = Array.isArray(docs) ? docs : [];
+  const safeTemplates = Array.isArray(templates) ? templates : [];
+  const safeSources = Array.isArray(sources) ? sources : [];
+  const recent = safeDocs.filter((d) => d && (d.run_id !== runId || !runId)).slice(0, 8);
   const docLink = (d: any) => (
-    <li key={d.id} className="flex items-center justify-between gap-2"><Link className="truncate text-indigo-600 hover:underline dark:text-indigo-300" href={`/projects/${project.id}/documents/${d.id}`}>{d.title}</Link><span className="flex shrink-0 items-center gap-1 text-xs"><Badge>{d.kind}</Badge>v{d.current_version}<Badge>{d.status}</Badge></span></li>
+    <li key={d.id} className="flex items-center justify-between gap-2"><Link className="truncate text-indigo-600 hover:underline dark:text-indigo-300" href={`/projects/${project.id}/documents/${d.id}`}>{d.title || "Untitled"}</Link><span className="flex shrink-0 items-center gap-1 text-xs"><Badge>{d.kind}</Badge>v{d.current_version}<Badge>{d.status}</Badge></span></li>
   );
-  const template = templates.find((t) => t.id === templateId);
+  const template = safeTemplates.find((t) => t?.id === templateId);
   const start = async () => {
     setBusy(true);
     setError("");
@@ -81,7 +84,7 @@ export default function BAPage() {
       const created = await upload("/templates/upload", form);
       await loadTemplates();
       setTemplateId(created.id);
-      toast(`Template added with ${created.headings.length} sections`);
+      toast(`Template added with ${created?.headings?.length || 0} sections`);
     } catch (e: any) {
       setError(e.message);
     }
@@ -96,9 +99,9 @@ export default function BAPage() {
               <Field label="Brief"><textarea name="brief" rows={6} className={inputClass} placeholder="What should be built, for whom, and why. Agents use only what you give them; unknowns become Open Questions." value={brief} onChange={(e) => setBrief(e.target.value)} /></Field>
               <div className="grid gap-3 md:grid-cols-2">
                 <Field label="Document title"><input name="doc-title" className={inputClass} value={title} onChange={(e) => setTitle(e.target.value)} placeholder={template?.name} /></Field>
-                <Field label="Template"><select aria-label="Template" className={inputClass} value={templateId} onChange={(e) => setTemplateId(e.target.value)}>{templates.map((t) => <option key={t.id} value={t.id}>{t.name}{t.builtin ? "" : " (yours)"}</option>)}</select></Field>
+                <Field label="Template"><select aria-label="Template" className={inputClass} value={templateId} onChange={(e) => setTemplateId(e.target.value)}>{safeTemplates.map((t) => <option key={t.id} value={t.id}>{t.name}{t.builtin ? "" : " (yours)"}</option>)}</select></Field>
               </div>
-              {template && <p className="text-xs text-slate-500">Sections: {template.headings.join(" · ")}</p>}
+              {template && Array.isArray(template.headings) && template.headings.length > 0 && <p className="text-xs text-slate-500">Sections: {template.headings.join(" · ")}</p>}
               <label className="flex w-fit cursor-pointer items-center gap-1.5 text-xs font-semibold text-indigo-500"><Upload className="h-3.5 w-3.5" /> Upload your own template (.md, .docx)<input type="file" name="template-file" accept=".md,.txt,.docx" className="hidden" onChange={(e) => addTemplate(e.target.files?.[0])} /></label>
               <ErrorNote message={error} />
               <ModelPicker value={model} onChange={setModel} compact />
@@ -111,8 +114,8 @@ export default function BAPage() {
           <RunDocuments projectId={project.id} runId={runId} />
           <Card title="Source documents">
             <label className="mb-2 inline-flex cursor-pointer items-center gap-1.5 text-xs font-semibold text-indigo-500"><Upload className="h-3.5 w-3.5" /> Upload (.md, .txt, .pdf, .docx, .xlsx, .pptx)<input type="file" name="source-file" accept=".md,.txt,.pdf,.docx,.xlsx,.pptx,.csv,.json,.yaml,.yml" className="hidden" onChange={(e) => addSource(e.target.files?.[0])} /></label>
-            {sources.length ? (
-              <ul className="space-y-1 text-sm">{sources.map((s) => (
+            {safeSources.length ? (
+              <ul className="space-y-1 text-sm">{safeSources.map((s) => (
                 <li key={s.id}><label className="flex items-center gap-2"><input type="checkbox" checked={selected.includes(s.id)} onChange={(e) => setSelected(e.target.checked ? [...selected, s.id] : selected.filter((x) => x !== s.id))} /><span className="truncate" title={s.filename}>{s.filename}</span></label></li>
               ))}</ul>
             ) : <p className="text-xs text-slate-500">None uploaded.</p>}

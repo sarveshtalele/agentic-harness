@@ -1,7 +1,7 @@
 """Skills API, read only. The skills are the plugin folders under skills/, validated by MAF at startup."""
 from __future__ import annotations
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from backend.core import skills
 
@@ -20,5 +20,8 @@ def list_skills():
 
 @router.get("/api/skills/{name}")
 def get_skill(name: str):
-    skill = skills.get(name)  # KeyError is a 404
+    try:
+        skill = skills.get(name)
+    except KeyError:
+        raise HTTPException(404, f"Skill not found: {name}")
     return {**_summary(skill), "body": skill.body, "reference_text": skill.references}

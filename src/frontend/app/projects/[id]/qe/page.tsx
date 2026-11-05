@@ -18,30 +18,35 @@ export default function QEPage() {
   const [model, setModel] = useState("");
   const [docs, setDocs] = useState<any[]>([]);
   const [error, setError] = useState("");
-  const load = useCallback(() => api(`/projects/${project.id}/documents`).then(setDocs), [project.id]);
+  const load = useCallback(() => api(`/projects/${project.id}/documents`).then((res) => setDocs(Array.isArray(res) ? res : [])).catch(() => setDocs([])), [project.id]);
   useEffect(() => {
     load();
     api(`/projects/${project.id}/runs`).then((runs) => {
-      const active = runs.find((r: any) => r.workflow === "qe" && ["running", "waiting_approval"].includes(r.status));
-      if (active) setRunId(active.id);
-    });
+      if (Array.isArray(runs)) {
+        const active = runs.find((r: any) => r?.workflow === "qe" && ["running", "waiting_approval"].includes(r?.status));
+        if (active) setRunId(active.id);
+      }
+    }).catch(() => {});
   }, [load, project.id]);
   const start = async () => {
     setError("");
     try {
-      setRunId((await api(`/projects/${project.id}/runs`, { json: { workflow: "qe", model, input: { install_deps: install } } })).id);
+      const res = await api(`/projects/${project.id}/runs`, { json: { workflow: "qe", model, input: { install_deps: install } } });
+      if (res?.id) setRunId(res.id);
     } catch (e: any) {
       setError(e.message);
     }
   };
+  const safeDocs = Array.isArray(docs) ? docs : [];
+  const safeGates = Array.isArray(gates) ? gates : [];
   return (
     <>
       <PageTitle title="QE Studio" subtitle="The full test lifecycle with a human approval at each gate. Zero executed tests is INCONCLUSIVE, never PASS." />
       <Card className="mb-4">
         <ol className="flex flex-wrap gap-2">
           {STAGES.map(([name, gate, kind]) => {
-            const doc = docs.find((d) => d.kind === kind);
-            const record = gates.find((g) => `G${g.gate}` === gate);
+            const doc = safeDocs.find((d) => d?.kind === kind);
+            const record = safeGates.find((g) => `G${g?.gate}` === gate);
             const body = <span className="block rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs dark:border-slate-800"><b>{name}</b> {gate && <Badge>{record?.status || "pending"}</Badge>}{doc && <span className="ml-1 text-indigo-500">v{doc.current_version}</span>}</span>;
             return <li key={name}>{doc ? <Link href={`/projects/${project.id}/documents/${doc.id}`}>{body}</Link> : body}</li>;
           })}

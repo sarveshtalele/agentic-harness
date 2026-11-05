@@ -40,7 +40,7 @@ export function ProjectShell({ children }: { children: ReactNode }) {
     Promise.all([api(`/projects/${id}`), api(`/projects/${id}/gates`)])
       .then(([p, g]) => {
         setProject(p);
-        setGates(g);
+        setGates(Array.isArray(g) ? g : []);
       })
       .catch((e) => setError(e.message));
   }, [id]);

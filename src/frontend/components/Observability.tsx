@@ -131,8 +131,11 @@ export function Observability({ projectId }: { projectId?: string }) {
   }, [load, live]);
 
   if (!data) return error ? <ErrorNote message={error} /> : <Spinner />;
-  const tiles: [string, number | string][] = [["Runs", data.runs.length], ["Skills", data.counts.skill], ["Agent calls", data.counts.agent], ["Tokens", data.tokens.toLocaleString()], ["Tool calls", data.counts.tool], ["MCP tool calls", data.counts.mcp], ["Guardrails", data.counts.guardrail], ["Errors", data.errors]];
-  const broken = data.integrity.filter((i: any) => !i.valid);
+  const runs = Array.isArray(data.runs) ? data.runs : [];
+  const counts = data.counts || {};
+  const integrity = Array.isArray(data.integrity) ? data.integrity : [];
+  const tiles: [string, number | string][] = [["Runs", runs.length], ["Skills", counts.skill || 0], ["Agent calls", counts.agent || 0], ["Tokens", (data.tokens || 0).toLocaleString()], ["Tool calls", counts.tool || 0], ["MCP tool calls", counts.mcp || 0], ["Guardrails", counts.guardrail || 0], ["Errors", data.errors || 0]];
+  const broken = integrity.filter((i: any) => !i?.valid);
   return (
     <div className="space-y-4">
       <dl className="grid grid-cols-2 gap-2 text-center md:grid-cols-4 xl:grid-cols-8" data-testid="observability-tiles">
@@ -140,9 +143,9 @@ export function Observability({ projectId }: { projectId?: string }) {
       </dl>
       <p className={`flex items-center gap-1.5 text-sm ${broken.length ? "text-rose-500" : "text-emerald-600 dark:text-emerald-400"}`} data-testid="ledger-integrity">
         {broken.length ? <ShieldAlert className="h-4 w-4" /> : <ShieldCheck className="h-4 w-4" />}
-        {broken.length ? `Audit ledger failed verification for: ${broken.map((i: any) => i.project).join(", ")}` : `Audit ledger verified for ${data.integrity.length} ${data.integrity.length === 1 ? "project" : "projects"}`}
+        {broken.length ? `Audit ledger failed verification for: ${broken.map((i: any) => i?.project).join(", ")}` : `Audit ledger verified for ${integrity.length} ${integrity.length === 1 ? "project" : "projects"}`}
       </p>
-      {data.counts.mcp === 0 && <p className="text-xs text-slate-500" data-testid="mcp-note">MCP tools: none recorded. This application connects to no MCP server, so its agents use only built-in tools.</p>}
+      {counts.mcp === 0 && <p className="text-xs text-slate-500" data-testid="mcp-note">MCP tools: none recorded. This application connects to no MCP server, so its agents use only built-in tools.</p>}
       <Card>
         <div className="mb-3 flex flex-wrap items-center gap-2">
           {!projectId && (

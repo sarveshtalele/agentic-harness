@@ -34,8 +34,8 @@ export default function DocumentPage() {
   const load = useCallback(async () => {
     const [d, v] = await Promise.all([api(`/documents/${docId}`), api(`/documents/${docId}/versions`)]);
     setDoc(d);
-    setDraft(d.content);
-    setVersions(v);
+    setDraft(d?.content || "");
+    setVersions(Array.isArray(v) ? v : []);
   }, [docId]);
   useEffect(() => {
     load().catch((e) => setError(e.message));
@@ -118,9 +118,9 @@ export default function DocumentPage() {
         <div>
           <h1 className="text-xl font-bold">{doc.title}</h1>
           <p className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-slate-500">
-            <Badge tone="indigo">{doc.kind}</Badge> <span data-testid="doc-version">v{doc.version}</span> <Badge>{doc.status}</Badge> by {doc.author_name}
+            <Badge tone="indigo">{doc.kind}</Badge> <span data-testid="doc-version">v{doc.version ?? doc.current_version ?? 1}</span> <Badge>{doc.status}</Badge> by {doc.author_name}
             {doc.prompt_ref && <span className="mono">{doc.prompt_ref}</span>}
-            <span className="mono" title={doc.sha256}>sha256 {doc.sha256.slice(0, 12)}</span>
+            <span className="mono" title={doc.sha256}>sha256 {(doc.sha256 || "").slice(0, 12)}</span>
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -143,7 +143,7 @@ export default function DocumentPage() {
           <Button variant="secondary" busy={working === "refine"} disabled={!refineText.trim() || !!dirty} title={dirty ? "Save your edits first" : undefined} onClick={refine}>Refine with agent</Button>
         </div>
       )}
-      {reviewResult && <div className="mb-3"><Card title={<span>Review of v{reviewResult.version}: score {reviewResult.score} <Badge>{reviewResult.verdict}</Badge></span>}><ul className="list-disc space-y-0.5 pl-5 text-sm">{reviewResult.issues.map((i: string, n: number) => <li key={n}>{i}</li>)}</ul></Card></div>}
+      {reviewResult && <div className="mb-3"><Card title={<span>Review of v{reviewResult.version}: score {reviewResult.score} <Badge>{reviewResult.verdict}</Badge></span>}><ul className="list-disc space-y-0.5 pl-5 text-sm">{Array.isArray(reviewResult.issues) && reviewResult.issues.map((i: string, n: number) => <li key={n}>{i}</li>)}</ul></Card></div>}
       {tab === "document" && (
         <Card>
           {doc.kind === "patch"
@@ -159,9 +159,9 @@ export default function DocumentPage() {
       )}
       {tab !== "history" && (
         <div className="sticky bottom-0 z-10 mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-white/95 p-2 backdrop-blur dark:border-slate-800 dark:bg-[#0b1329]/95" data-testid="save-bar">
-          <span className="text-xs text-slate-500" data-testid="signing-as">Signing as {user.username}</span>
+          <span className="text-xs text-slate-500" data-testid="signing-as">Signing as {user?.username}</span>
           <input aria-label="Change note" className={`${inputClass} max-w-md`} placeholder="What changed" value={note} onChange={(e) => setNote(e.target.value)} />
-          {doc.would_reopen?.length > 0 && <span className="text-xs text-amber-600 dark:text-amber-400" data-testid="reopen-warning">Saving a change reopens {reopenText(doc.would_reopen)}. Each needs a new approval on the Governance page.</span>}
+          {Array.isArray(doc.would_reopen) && doc.would_reopen.length > 0 && <span className="text-xs text-amber-600 dark:text-amber-400" data-testid="reopen-warning">Saving a change reopens {reopenText(doc.would_reopen)}. Each needs a new approval on the Governance page.</span>}
           <Button onClick={save} busy={busy} disabled={!dirty}><Save className="h-4 w-4" /> Save version</Button>
           {dirty ? <><Button variant="secondary" onClick={() => setDraft(doc.content)}>Discard changes</Button><span className="text-xs text-amber-500">Unsaved changes</span></> : <span className="text-xs text-slate-500">Select any text or table cell to edit it</span>}
         </div>
@@ -184,7 +184,7 @@ export default function DocumentPage() {
             </ul>
           </Card>
           <Card>
-            {diff ? <pre className="mono overflow-auto text-xs">{diff.split("\n").map((l, i) => <div key={i} className={l.startsWith("+") ? "text-emerald-500" : l.startsWith("-") ? "text-rose-500" : ""}>{l || " "}</div>)}</pre>
+            {typeof diff === "string" && diff ? <pre className="mono overflow-auto text-xs">{diff.split("\n").map((l, i) => <div key={i} className={l.startsWith("+") ? "text-emerald-500" : l.startsWith("-") ? "text-rose-500" : ""}>{l || " "}</div>)}</pre>
               : viewing ? <pre className="mono overflow-auto whitespace-pre-wrap text-xs">{viewing.content}</pre>
               : <p className="text-sm text-slate-500">Pick a version to view it or compare it.</p>}
           </Card>

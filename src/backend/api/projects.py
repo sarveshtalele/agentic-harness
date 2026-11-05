@@ -42,11 +42,26 @@ def _project_summary(item: dict) -> dict:
             {"p": item["id"]},
         ).fetchone()
         repo = con.execute("SELECT kind, url, commit_sha, analysis FROM repo_sources WHERE project_id=?", (item["id"],)).fetchone()
-    analysis = json.loads(repo["analysis"]) if repo else {}
+    analysis = {}
+    if repo and repo["analysis"]:
+        try:
+            analysis = json.loads(repo["analysis"])
+        except Exception:
+            analysis = {}
     mine = auth.project_role(item["id"])
     can_sign = [g for g in range(6) if not auth.gate_signing_problem(item["id"], g)]
+    repo_info = None
+    if repo:
+        commit_sha = (repo["commit_sha"] or "")[:10]
+        langs = analysis.get("languages") or []
+        repo_info = {
+            "kind": repo["kind"],
+            "url": repo["url"],
+            "commit": commit_sha,
+            "languages": list(langs)[:4] if isinstance(langs, (list, dict, tuple)) else [],
+        }
     return {**item, "my_role": mine, "can_write": auth.can_write(item["id"]), "can_sign": can_sign, **dict(counts), "archived": bool(item["archived"]),
-            "repo": {"kind": repo["kind"], "url": repo["url"], "commit": repo["commit_sha"][:10], "languages": list(analysis.get("languages", {}))[:4]} if repo else None}
+            "repo": repo_info}
 
 
 @router.get("/api/projects")
@@ -139,9 +154,20 @@ def transfer(project_id: str, body: TransferIn):
 
 @router.get("/api/projects/{project_id}/overview")
 def overview(project_id: str):
+    _project(project_id)
     with db() as con:
         pending = rows(con.execute("SELECT id, run_id, gate, title, summary, created_at FROM approvals WHERE project_id=? AND status='pending' ORDER BY created_at", (project_id,)))
         latest = rows(con.execute("SELECT id, workflow, status, started_at, ended_at, error FROM runs WHERE project_id=? ORDER BY started_at DESC LIMIT 6", (project_id,)))
     repo = ingest.get(project_id)
+    repo_data = None
+    if repo:
+        analysis_data = repo.get("analysis") or {}
+        repo_data = {
+            "kind": repo.get("kind"),
+            "url": repo.get("url"),
+            "commit_sha": repo.get("commit_sha"),
+            "scanned_at": repo.get("scanned_at"),
+            "analysis": {k: analysis_data.get(k) for k in ("mode", "languages", "frameworks", "test_runners", "total_files", "test_file_count")},
+        }
     return {"project": get_project(project_id), "gates": gates.status(project_id), "pending_approvals": pending, "recent_runs": latest,
-            "documents": documents.list_for(project_id)[:8], "repo": {k: repo[k] for k in ("kind", "url", "commit_sha", "scanned_at")} | {"analysis": {k: repo["analysis"].get(k) for k in ("mode", "languages", "frameworks", "test_runners", "total_files", "test_file_count")}} if repo else None}
+            "documents": documents.list_for(project_id)[:8], "repo": repo_data}

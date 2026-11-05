@@ -1,9 +1,10 @@
 """Findings API."""
 from __future__ import annotations
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
+from backend.api.common import _project
 from backend.core import auth, ledger
 from backend.db import db, row, rows
 from backend.maf import agui, engine, evals, governance, llm, workflows  # noqa: F401 - workflows registers definitions
@@ -27,6 +28,7 @@ class FindingPatch(BaseModel):
 @router.get("/api/projects/{project_id}/findings")
 def findings(project_id: str, status: str = "open"):
     """Open means still to do: it includes findings a fix was tried on whose tests did not pass."""
+    _project(project_id)
     with db() as con:
         return rows(con.execute(
             "SELECT * FROM findings WHERE project_id=? AND (status=? OR (?='open' AND status='fix_attempted')) ORDER BY CASE severity WHEN 'critical' THEN 0 WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 ELSE 4 END, file, line",
@@ -38,7 +40,7 @@ def patch_finding(finding_id: str, body: FindingPatch):
     with db() as con:
         found = row(con.execute("SELECT project_id FROM findings WHERE id=?", (finding_id,)))
         if not found:
-            raise KeyError(finding_id)
+            raise HTTPException(404, f"Finding not found: {finding_id}")
         con.execute("UPDATE findings SET status=? WHERE id=?", (body.status, finding_id))
     ledger.append(found["project_id"], auth.signer(), f"finding.{body.status}", finding_id)
     return {"id": finding_id, "status": body.status}

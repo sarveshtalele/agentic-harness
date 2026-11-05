@@ -5,7 +5,7 @@ import asyncio
 import tempfile
 from pathlib import Path
 
-from fastapi import APIRouter, File, UploadFile
+from fastapi import APIRouter, File, HTTPException, UploadFile
 from fastapi.responses import (
     PlainTextResponse,
     Response,
@@ -13,7 +13,7 @@ from fastapi.responses import (
 from pydantic import BaseModel, Field
 
 from backend.api.common import _project, _save_upload
-from backend.config import project_dir, repo_dir
+from backend.config import project_dir, repo_dir, sandbox_dir
 from backend.core import auth
 from backend.core.security import safe_path
 from backend.maf import agui, engine, evals, governance, llm, workflows  # noqa: F401 - workflows registers definitions
@@ -31,14 +31,28 @@ class GitIn(BaseModel):
 @router.get("/api/projects/{project_id}/repo")
 def get_repo(project_id: str):
     _project(project_id)
-    repo = ingest.get(project_id)
-    return {**repo, "sandbox": sandbox.info(project_id)} if repo else None
+    try:
+        repo = ingest.get(project_id)
+    except (FileNotFoundError, KeyError):
+        return None
+    except Exception:
+        return None
+    if not repo:
+        return None
+    try:
+        sbox_info = sandbox.info(project_id)
+    except Exception:
+        sbox_info = None
+    return {**repo, "sandbox": sbox_info}
 
 
 @router.post("/api/projects/{project_id}/repo/git")
 async def connect_git(project_id: str, body: GitIn):
     _project(project_id)
-    return await asyncio.to_thread(ingest.from_git, project_id, body.url, body.ref, body.credential_id, auth.signer())
+    try:
+        return await asyncio.to_thread(ingest.from_git, project_id, body.url, body.ref, body.credential_id, auth.signer())
+    except (FileNotFoundError, KeyError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
 
 
 @router.post("/api/projects/{project_id}/repo/zip")
@@ -48,7 +62,10 @@ async def upload_zip(project_id: str, file: UploadFile = File(...)):
     with tempfile.TemporaryDirectory(dir=project_dir(project_id)) as tmp:
         archive = Path(tmp) / "upload.zip"
         await _save_upload(file, archive)
-        return await asyncio.to_thread(ingest.from_zip, project_id, archive, file.filename or "upload.zip", auth.signer())
+        try:
+            return await asyncio.to_thread(ingest.from_zip, project_id, archive, file.filename or "upload.zip", auth.signer())
+        except (FileNotFoundError, KeyError) as exc:
+            raise HTTPException(status_code=400, detail=str(exc))
 
 
 class LocalIn(BaseModel):
@@ -58,29 +75,72 @@ class LocalIn(BaseModel):
 @router.post("/api/projects/{project_id}/repo/local")
 async def import_local(project_id: str, body: LocalIn):
     _project(project_id)
-    return await asyncio.to_thread(ingest.from_local, project_id, body.path, auth.signer())
+    try:
+        return await asyncio.to_thread(ingest.from_local, project_id, body.path, auth.signer())
+    except (FileNotFoundError, KeyError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
 
 
 @router.post("/api/projects/{project_id}/repo/resync")
 async def resync(project_id: str):
-    return await asyncio.to_thread(ingest.resync, project_id, auth.signer())
+    _project(project_id)
+    try:
+        return await asyncio.to_thread(ingest.resync, project_id, auth.signer())
+    except (FileNotFoundError, KeyError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
 
 
 @router.delete("/api/projects/{project_id}/repo", status_code=204)
 def disconnect(project_id: str):
-    ingest.disconnect(project_id, auth.signer())
+    _project(project_id)
+    try:
+        ingest.disconnect(project_id, auth.signer())
+    except (FileNotFoundError, KeyError):
+        pass
     return Response(status_code=204)
 
 
 @router.get("/api/projects/{project_id}/repo/tree")
 def repo_tree(project_id: str):
+    _project(project_id)
     root = repo_dir(project_id)
-    return {"files": scan.tree(root) if root.exists() else []}
+    files = []
+    if root.exists():
+        files = scan.tree(root)
+    if not files:
+        sbox = sandbox_dir(project_id)
+        if sbox.exists():
+            files = scan.tree(sbox)
+    return {"files": files or []}
 
 
 @router.get("/api/projects/{project_id}/repo/file", response_class=PlainTextResponse)
 def repo_file(project_id: str, path: str):
-    target = safe_path(repo_dir(project_id), path)
+    _project(project_id)
+    root = repo_dir(project_id)
+    if not root.exists():
+        sbox = sandbox_dir(project_id)
+        if sbox.exists():
+            root = sbox
+    try:
+        target = safe_path(root, path)
+    except (ValueError, KeyError, FileNotFoundError):
+        raise HTTPException(status_code=404, detail=f"File not found: {path}")
+
     if not target.is_file():
-        raise KeyError(path)
-    return scan._read(target) or "(binary, empty, or too large to display)"
+        # Fallback to sandbox if root was repo_dir
+        try:
+            sbox_target = safe_path(sandbox_dir(project_id), path)
+            if sbox_target.is_file():
+                target = sbox_target
+        except Exception:
+            pass
+
+    if not target.is_file():
+        raise HTTPException(status_code=404, detail=f"File not found: {path}")
+
+    try:
+        content = scan._read(target)
+        return content if content else "(binary, empty, or too large to display)"
+    except (FileNotFoundError, KeyError, OSError):
+        raise HTTPException(status_code=404, detail=f"File not found: {path}")

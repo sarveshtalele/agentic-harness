@@ -17,15 +17,16 @@ export default function BugsPage() {
   const [trace, setTrace] = useState("");
   const [error, setError] = useState("");
   const [model, setModel] = useState("");
-  const load = useCallback(() => api(`/projects/${project.id}/findings`).then(setFindings), [project.id]);
+  const load = useCallback(() => api(`/projects/${project.id}/findings`).then((res) => setFindings(Array.isArray(res) ? res : [])).catch(() => setFindings([])), [project.id]);
   useEffect(() => {
     load();
   }, [load]);
-  if (!project.repo) return <Empty title="Bug Scan needs code"><Link className="text-indigo-500 underline" href={`/projects/${project.id}/repository`}>Connect a repository or upload a ZIP</Link></Empty>;
+  if (!project?.repo) return <Empty title="Bug Scan needs code"><Link className="text-indigo-500 underline" href={`/projects/${project?.id || ""}/repository`}>Connect a repository or upload a ZIP</Link></Empty>;
   const start = async (workflow: string, input: object) => {
     setError("");
     try {
-      setRunId((await api(`/projects/${project.id}/runs`, { json: { workflow, input, model } })).id);
+      const res = await api(`/projects/${project.id}/runs`, { json: { workflow, input, model } });
+      if (res?.id) setRunId(res.id);
     } catch (e: any) {
       setError(e.message);
     }
@@ -34,22 +35,23 @@ export default function BugsPage() {
     await api(`/findings/${id}`, { method: "PATCH", json: { status: "dismissed" } });
     load();
   };
-  const counts = findings.reduce((all, f) => ({ ...all, [f.severity]: (all[f.severity] || 0) + 1 }), {} as Record<string, number>);
-  const shown = findings.filter((f) => !severity || f.severity === severity);
+  const safeFindings = Array.isArray(findings) ? findings : [];
+  const counts = safeFindings.reduce((all, f) => { if (f?.severity) all[f.severity] = (all[f.severity] || 0) + 1; return all; }, {} as Record<string, number>);
+  const shown = safeFindings.filter((f) => f && (!severity || f.severity === severity));
   return (
     <>
       <PageTitle title="Bug Scan" subtitle="Static scanners and an agent review of every source file in the project sandbox. An agent finding is kept only if its quote exists in the file." actions={
         <div className="flex items-center gap-2">
           <ModelPicker value={model} onChange={setModel} compact />
           <Button onClick={() => start("bug_scan", {})}><Radar className="h-4 w-4" /> Scan repository</Button>
-          {findings.length > 0 && <Button variant="secondary" onClick={() => start("change", { kind: "bugfix", fix_all: true })} title="Fixes up to 15 of the most severe open findings on one branch"><Wrench className="h-4 w-4" /> Fix all</Button>}
+          {safeFindings.length > 0 && <Button variant="secondary" onClick={() => start("change", { kind: "bugfix", fix_all: true })} title="Fixes up to 15 of the most severe open findings on one branch"><Wrench className="h-4 w-4" /> Fix all</Button>}
         </div>
       } />
       <ErrorNote message={error} />
       <div className="grid gap-4 lg:grid-cols-[1fr_300px] [&>*]:min-w-0">
         <div className="space-y-4">
           {runId && <RunPanel runId={runId} projectId={project.id} onFinished={() => { load(); refresh(); }} />}
-          <Card title={`Open findings (${findings.length})`} actions={
+          <Card title={`Open findings (${safeFindings.length})`} actions={
             <div className="flex gap-1">
               {["critical", "high", "medium", "low"].map((s) => counts[s] ? <button key={s} onClick={() => setSeverity(severity === s ? "" : s)} className={severity === s ? "ring-2 ring-indigo-500 rounded" : ""}><Badge>{`${s} ${counts[s]}`}</Badge></button> : null)}
             </div>
@@ -58,7 +60,7 @@ export default function BugsPage() {
               <ul className="divide-y divide-slate-200 dark:divide-slate-800" data-testid="findings">
                 {shown.map((f) => (
                   <li key={f.id} className="py-2.5">
-                    <div className="flex flex-wrap items-center gap-2"><Badge tone={{ critical: "rose", high: "rose", medium: "amber", low: "slate", info: "slate" }[f.severity as string]}>{f.severity}</Badge><span className="text-sm font-semibold">{f.title}</span>{f.status === "fix_attempted" && <Badge tone="amber">fix attempted, tests did not pass</Badge>}<span className="mono text-[11px] text-slate-500">{f.source} {f.rule}</span></div>
+                    <div className="flex flex-wrap items-center gap-2"><Badge tone={({ critical: "rose", high: "rose", medium: "amber", low: "slate", info: "slate" } as any)[f.severity] || "slate"}>{f.severity}</Badge><span className="text-sm font-semibold">{f.title}</span>{f.status === "fix_attempted" && <Badge tone="amber">fix attempted, tests did not pass</Badge>}<span className="mono text-[11px] text-slate-500">{f.source} {f.rule}</span></div>
                     <p className="mono mt-1 text-xs text-slate-500">{f.file}:{f.line}</p>
                     {f.evidence && <pre className="mono mt-1 overflow-x-auto rounded bg-slate-100 p-1.5 text-xs dark:bg-[#070d1f]">{f.evidence}</pre>}
                     {f.explanation && <p className="mt-1 text-sm text-slate-700 dark:text-slate-300">{f.explanation}</p>}
