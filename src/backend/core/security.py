@@ -56,7 +56,21 @@ def sign(message: str) -> str:
 
 
 def verify_signature(message: str, signature: str) -> bool:
+    if not signature or not isinstance(signature, str):
+        return False
     return hmac.compare_digest(sign(message), signature)
+
+
+def sign_ledger_entry(project_id: str, seq: int, ts: str, actor: str, action: str, target: str, data: str) -> str:
+    """Compute HMAC-SHA256 signature for an audit ledger entry to guarantee authenticity."""
+    message = f"{project_id}|{seq}|{ts}|{actor}|{action}|{target}|{data}"
+    return sign(message)
+
+
+def verify_ledger_signature(project_id: str, seq: int, ts: str, actor: str, action: str, target: str, data: str, signature: str) -> bool:
+    """Verify that an audit ledger entry signature matches the platform HMAC key and has not been forged."""
+    message = f"{project_id}|{seq}|{ts}|{actor}|{action}|{target}|{data}"
+    return verify_signature(message, signature)
 
 
 def sha256(text: str | bytes) -> str:
@@ -141,13 +155,31 @@ PROTECTED = {".git", ".venv", "venv", "node_modules", ".qe"}
 
 
 def safe_path(root: Path, relative: str, *, for_write: bool = False) -> Path:
-    """Resolve relative inside root, following symlinks, and refuse any escape."""
+    """Resolve relative inside root, strictly following real paths, and refuse any traversal or symlink escape."""
+    if not isinstance(relative, str):
+        raise PathEscape(f"Relative path must be string, got {type(relative).__name__}")
     if "\x00" in relative:
         raise PathEscape("Path contains a NUL byte")
+    
+    clean_rel = relative.replace("\\", "/").strip()
     base = root.resolve()
-    target = (base / relative.replace("\\", "/")).resolve()
+    
+    # Check for direct traversal patterns
+    parts = Path(clean_rel).parts
+    if any(p == ".." for p in parts):
+        # Resolve path strictly and verify confinement
+        target = (base / clean_rel).resolve()
+        if not target.is_relative_to(base):
+            raise PathEscape(f"Path traversal escape detected: {relative}")
+    else:
+        target = (base / clean_rel).resolve()
+
     if not target.is_relative_to(base):
         raise PathEscape(f"Path escapes the workspace: {relative}")
+
+    if for_write and target == base:
+        raise PathEscape(f"Cannot target root workspace directory for write: {relative}")
+
     if for_write and PROTECTED & {p.lower() for p in target.relative_to(base).parts}:
         raise PathEscape(f"Protected path: {relative}")
     return target

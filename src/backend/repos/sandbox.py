@@ -5,11 +5,12 @@ ponytail: this isolates by folder and environment, not by operating system. Use 
 """
 from __future__ import annotations
 
+import asyncio
 import os
+import re
+import shlex
 import shutil
 import subprocess
-import asyncio
-import shlex
 from pathlib import Path
 
 from backend.config import project_dir, repo_dir, sandbox_dir
@@ -112,8 +113,15 @@ def info(project_id: str) -> dict:
     }
 
 
+SENSITIVE_ENV_PATTERN = re.compile(
+    r"(?i)(key|secret|token|password|passwd|auth|cred|atlas|openai|anthropic|aws|github|bearer|private)"
+)
+
+
 def clean_sandbox_env(extra_env: dict | None = None) -> dict:
-    """Zero-trust allowlist of environment variables for isolated subprocess executions."""
+    """Zero-trust allowlist of environment variables for isolated subprocess executions.
+    Ambient credentials, keys, and tokens are strictly excluded.
+    """
     from backend.config import ROOT
 
     allowed = {
@@ -121,7 +129,7 @@ def clean_sandbox_env(extra_env: dict | None = None) -> dict:
         "TEMP", "TMP", "USER", "TERM", "SHELL", "HOME", "NODE_PATH",
         "NPM_CONFIG_CACHE", "PYTHONPATH"
     }
-    env = {k: v for k, v in os.environ.items() if k in allowed}
+    env = {k: v for k, v in os.environ.items() if k in allowed and not SENSITIVE_ENV_PATTERN.search(k)}
     env.setdefault("PYTHONDONTWRITEBYTECODE", "1")
     if "HOME" not in env:
         env["HOME"] = "/tmp"
@@ -135,7 +143,13 @@ def clean_sandbox_env(extra_env: dict | None = None) -> dict:
         env.setdefault("NODE_PATH", str(root_modules))
 
     if extra_env:
-        env.update(extra_env)
+        # Strip any sensitive environment variable before passing to sandbox
+        safe_extra = {
+            str(k): str(v)
+            for k, v in extra_env.items()
+            if not SENSITIVE_ENV_PATTERN.search(str(k))
+        }
+        env.update(safe_extra)
     return env
 
 
@@ -183,21 +197,35 @@ def execute_command(
     """Execute arbitrary command cleanly in the project sandbox or repo with timeout support (None or 600s)."""
     sbox = sandbox_dir(project_id)
     repo = ensure_sandbox(project_id)
+    boundary = project_dir(project_id).resolve()
 
     if cwd is not None:
-        work_dir = Path(cwd)
+        work_dir = Path(cwd).resolve()
+        if not work_dir.is_relative_to(boundary):
+            return {
+                "status": "error",
+                "exit_code": -1,
+                "message": f"Working directory escapes project sandbox boundary: {cwd}",
+                "cwd": str(work_dir),
+            }
     elif in_sandbox and sbox.exists():
-        work_dir = sbox
+        work_dir = sbox.resolve()
     else:
-        work_dir = repo
+        work_dir = repo.resolve()
 
     if isinstance(command, str):
         cmd = shlex.split(command)
+    elif isinstance(command, (list, tuple)):
+        cmd = [str(a) for a in command]
     else:
-        cmd = list(command)
+        return {"status": "error", "exit_code": -1, "message": "Command must be string or list"}
 
     if not cmd:
         return {"status": "error", "exit_code": -1, "message": "Command cannot be empty"}
+
+    # Strictly disallow NUL bytes in arguments
+    if any("\x00" in str(arg) for arg in cmd):
+        return {"status": "error", "exit_code": -1, "message": "Command contains NUL byte"}
 
     binary_name = cmd[0]
     binary_path = shutil.which(binary_name)
@@ -214,6 +242,7 @@ def execute_command(
             capture_output=True,
             text=True,
             timeout=timeout,
+            shell=False,
         )
         return {
             "status": "success" if proc.returncode == 0 else "error",
@@ -248,14 +277,21 @@ def run_npx(
     timeout: int | None = 600,
     in_sandbox: bool = True,
 ) -> dict:
-    """Execute an npx command cleanly in the sandbox."""
+    """Execute an npx command cleanly in the sandbox, checking for argument injection."""
     if isinstance(command, str):
         args = shlex.split(command)
+    elif isinstance(command, (list, tuple)):
+        args = [str(a) for a in command]
     else:
-        args = list(command)
+        return {"status": "error", "exit_code": -1, "message": "Command must be string or list"}
 
     if args and args[0] == "npx":
         args = args[1:]
+
+    # Defend against argument injection and shell escapes in npx
+    dangerous_flags = {"--shell", "--call", "-c", "/bin/sh", "/bin/bash", "sh", "bash"}
+    if any(arg.strip() in dangerous_flags for arg in args):
+        return {"status": "error", "exit_code": -1, "message": "Disallowed argument or shell escape in npx command"}
 
     npx_binary = shutil.which("npx")
     if not npx_binary:
@@ -401,7 +437,8 @@ def execute_code(project_id: str, code: str, runtime: str = "python", timeout: i
             env=clean_sandbox_env(),
             capture_output=True,
             text=True,
-            timeout=timeout
+            timeout=timeout,
+            shell=False,
         )
         return {
             "status": "success" if proc.returncode == 0 else "error",
@@ -432,7 +469,7 @@ def install_dependencies(project_id: str, package: str = "", manager: str = "pip
         cmd = [python, "-m", "pip", "install"] + ([package] if package else ["-r", "requirements.txt"])
     
     try:
-        proc = subprocess.run(cmd, cwd=repo, env=clean_sandbox_env(), capture_output=True, text=True, timeout=300)
+        proc = subprocess.run(cmd, cwd=repo, env=clean_sandbox_env(), capture_output=True, text=True, timeout=300, shell=False)
         return {
             "status": "success" if proc.returncode == 0 else "error",
             "exit_code": proc.returncode,

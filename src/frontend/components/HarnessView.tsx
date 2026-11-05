@@ -46,6 +46,8 @@ import {
   Zap,
   Code2,
   Bug,
+  Paperclip,
+  Upload,
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -222,6 +224,176 @@ function formatRelativeTime(timestamp: number): string {
   return `${days}d`;
 }
 
+const GATE_TITLES: Record<number, string> = {
+  0: "Gate 0: Intake & Scope Boundary",
+  1: "Gate 1: Requirements & Acceptance Criteria",
+  2: "Gate 2: Test Strategy & Risk Allocation",
+  3: "Gate 3: Deterministic Test Design",
+  4: "Gate 4: Synthetic Test Data",
+  5: "Gate 5: Sandboxed Test Execution",
+  6: "Gate 6: Autonomous Healing & Assertion Preservation",
+  7: "Gate 7: Coverage Audit & Traceability",
+  8: "Gate 8: Production Release Confidence Sign-Off",
+};
+
+interface HarnessApprovalCardProps {
+  approval: any;
+  projectId: string;
+  onDecide: (approvalId: string, approved: boolean, feedback: string) => Promise<void>;
+}
+
+function HarnessApprovalCard({ approval, projectId, onDecide }: HarnessApprovalCardProps) {
+  const [feedback, setFeedback] = useState("");
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [decidedStatus, setDecidedStatus] = useState<string | null>(
+    approval.status && approval.status !== "pending" ? approval.status : null
+  );
+
+  const gateNumber = approval.gate ?? approval.gateNumber ?? (approval.payload?.gate);
+  const gateTitle = gateNumber !== undefined && gateNumber !== null
+    ? (GATE_TITLES[gateNumber] || `Gate ${gateNumber}: Quality Verification`)
+    : (approval.gateName || (approval.toolName ? `Action: ${approval.toolName}` : "Quality Gate Sign-off"));
+
+  const title = approval.title || approval.gateName || (approval.toolName ? `Execute ${approval.toolName}` : "Gate Sign-off Request");
+  const summary = approval.summary || approval.artifactSummary || "This action requires explicit Human-in-the-Loop authorization before proceeding.";
+
+  const handleDecision = async (approved: boolean) => {
+    if (!approved && !showFeedback && !feedback.trim()) {
+      setShowFeedback(true);
+      return;
+    }
+    setBusy(true);
+    try {
+      await onDecide(approval.id, approved, feedback.trim());
+      setDecidedStatus(approved ? "approved" : "rejected");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (decidedStatus) {
+    return (
+      <div className={`my-3 rounded-2xl border p-3.5 shadow-xs transition ${
+        decidedStatus === "approved"
+          ? "border-emerald-500/40 bg-emerald-50/50 dark:border-emerald-500/30 dark:bg-emerald-950/20"
+          : "border-rose-500/40 bg-rose-50/50 dark:border-rose-500/30 dark:bg-rose-950/20"
+      }`}>
+        <div className="flex items-center justify-between text-xs">
+          <div className="flex items-center gap-2">
+            {decidedStatus === "approved" ? (
+              <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+            ) : (
+              <X className="h-4 w-4 text-rose-600 dark:text-rose-400" />
+            )}
+            <span className="font-semibold text-slate-800 dark:text-slate-200">
+              {decidedStatus === "approved" ? "Signed Off & Approved ✓" : "Rejected ✕"} · {title}
+            </span>
+          </div>
+          <span className="font-mono text-[10px] text-slate-400">
+            {feedback ? `Reason: ${feedback}` : "Recorded in SQLite & Audit Ledger"}
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="my-3 rounded-2xl border-2 border-indigo-500/40 bg-indigo-50/30 p-4 shadow-md backdrop-blur-xs dark:border-indigo-500/40 dark:bg-indigo-950/20">
+      {/* Header with Gate Badge & Meta */}
+      <div className="flex items-start justify-between gap-3 mb-2.5">
+        <div className="flex items-center gap-2.5">
+          <div className="rounded-xl bg-indigo-600 p-2 text-white shadow-xs">
+            <ShieldCheck className="h-4 w-4" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="rounded-full bg-indigo-600/10 px-2.5 py-0.5 font-mono text-[11px] font-bold text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300">
+                {gateTitle}
+              </span>
+              <span className="rounded bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-400">
+                Sign-off Required
+              </span>
+            </div>
+            <h4 className="mt-0.5 text-sm font-bold text-slate-900 dark:text-white">
+              {title}
+            </h4>
+          </div>
+        </div>
+
+        {/* Reviewer Metadata */}
+        <div className="text-right text-[11px] text-slate-500 dark:text-slate-400">
+          <div className="font-medium text-slate-700 dark:text-slate-300">Reviewer: Principal Test Architect / QA Lead</div>
+          <div className="font-mono text-[10px] text-slate-400">
+            {approval.created_at ? `Waiting since ${formatRelativeTime(typeof approval.created_at === "number" ? approval.created_at : Date.parse(approval.created_at))}` : "Pending Review"}
+          </div>
+        </div>
+      </div>
+
+      {/* Summary Box */}
+      <div className="mb-3 rounded-xl border border-slate-200/80 bg-white/80 p-3 text-xs leading-relaxed text-slate-700 dark:border-slate-800 dark:bg-slate-900/80 dark:text-slate-300">
+        <p>{summary}</p>
+        {approval.args && Object.keys(approval.args).length > 0 && (
+          <div className="mt-2 rounded-lg bg-slate-100 p-2 font-mono text-[11px] dark:bg-slate-950 max-h-28 overflow-x-auto">
+            {JSON.stringify(approval.args, null, 2)}
+          </div>
+        )}
+      </div>
+
+      {/* Optional Feedback / Reason Field */}
+      {(showFeedback || feedback) && (
+        <div className="mb-3">
+          <label className="mb-1 block text-[11px] font-semibold text-slate-600 dark:text-slate-400">
+            Decision Reason / Feedback (optional for approval, required for rejection):
+          </label>
+          <input
+            type="text"
+            value={feedback}
+            onChange={(e) => setFeedback(e.target.value)}
+            placeholder="e.g. Assertion integrity verified, all Gherkin criteria satisfied..."
+            className="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 font-mono"
+          />
+        </div>
+      )}
+
+      {/* Action Buttons */}
+      <div className="flex items-center justify-between gap-2 pt-2 border-t border-indigo-200/50 dark:border-indigo-900/50">
+        <button
+          type="button"
+          onClick={() => setShowFeedback(!showFeedback)}
+          className="text-[11px] font-medium text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-300 cursor-pointer"
+        >
+          {showFeedback ? "Hide Reason Input" : "Add Reason / Feedback"}
+        </button>
+
+        <div className="flex items-center gap-2">
+          {/* Reject (Rose) */}
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => handleDecision(false)}
+            className="flex items-center gap-1.5 rounded-xl bg-rose-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-rose-500 disabled:opacity-50 transition cursor-pointer"
+          >
+            {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <X className="h-3.5 w-3.5" />}
+            <span>✕ Reject</span>
+          </button>
+
+          {/* Approve (Emerald) */}
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => handleDecision(true)}
+            className="flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-emerald-500 disabled:opacity-50 transition cursor-pointer"
+          >
+            {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="h-3.5 w-3.5" />}
+            <span>✓ Approve</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function HarnessView({
   initialProjectId,
   onProjectChange,
@@ -260,6 +432,19 @@ export function HarnessView({
   const [isExecuting, setIsExecuting] = useState(false);
   const [activeAgentId, setActiveAgentId] = useState("principal-test-architect");
   const [mode, setMode] = useState<"plan" | "execute">("plan");
+
+  // Real-time Human-in-the-Loop pending approvals state
+  const [pendingApprovals, setPendingApprovals] = useState<any[]>([]);
+
+  // Template document upload state
+  const [uploadedTemplate, setUploadedTemplate] = useState<{
+    id: string;
+    name: string;
+    filename: string;
+    sectionsCount: number;
+  } | null>(null);
+  const [uploadingTemplate, setUploadingTemplate] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Bottom chat toolbar popover dropdowns
   const [showModelDropdown, setShowModelDropdown] = useState(false);
@@ -390,19 +575,119 @@ export function HarnessView({
       .catch(() => setConfiguredModels([]));
   }, [loadProjects]);
 
-  // 3. Load Selected Target Project Details & Gates
+  // 3. Load Selected Target Project Details, Gates & Pending Approvals
+  const loadPendingApprovals = useCallback(async () => {
+    if (!selectedProjectId) return;
+    try {
+      const list = await api(`/projects/${selectedProjectId}/approvals`);
+      setPendingApprovals(Array.isArray(list) ? list : []);
+    } catch {
+      setPendingApprovals([]);
+    }
+  }, [selectedProjectId]);
+
   useEffect(() => {
     if (!selectedProjectId) return;
     Promise.all([
       api(`/projects/${selectedProjectId}`),
       api(`/projects/${selectedProjectId}/gates`),
+      api(`/projects/${selectedProjectId}/approvals`).catch(() => []),
     ])
-      .then(([proj, gList]) => {
+      .then(([proj, gList, apprList]) => {
         setTargetProject(proj);
         setGates(gList || []);
+        setPendingApprovals(Array.isArray(apprList) ? apprList : []);
       })
       .catch(() => {});
   }, [selectedProjectId]);
+
+  useEffect(() => {
+    loadPendingApprovals();
+    const timer = setInterval(loadPendingApprovals, 10000);
+    return () => clearInterval(timer);
+  }, [loadPendingApprovals]);
+
+  // Handle Human-in-the-Loop Gate Approval Decision
+  const handleDecideApproval = async (approvalId: string, approved: boolean, reason: string = "") => {
+    try {
+      if (selectedProjectId) {
+        await api(`/projects/${selectedProjectId}/approvals/${approvalId}/decide`, {
+          method: "POST",
+          json: { approved, feedback: reason },
+        });
+      } else {
+        await api(`/approvals/${approvalId}/decide`, {
+          method: "POST",
+          json: { approved, feedback: reason },
+        });
+      }
+      toast(approved ? "Approval confirmed ✓" : "Approval rejected ✕");
+      setPendingApprovals((prev) => prev.filter((a) => a.id !== approvalId));
+      if (selectedProjectId) {
+        api(`/projects/${selectedProjectId}/gates`).then(setGates).catch(() => {});
+      }
+      loadPendingApprovals();
+      loadSessions();
+    } catch (e: any) {
+      toast(`Decision error: ${e.message}`, "error");
+      throw e;
+    }
+  };
+
+  // Handle Template Document Upload (.md, .docx, .txt, .pdf)
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingTemplate(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("name", file.name.replace(/\.[^/.]+$/, ""));
+      formData.append("kind", "brd");
+      if (selectedProjectId) {
+        formData.append("project_id", selectedProjectId);
+      }
+      const endpoint = selectedProjectId
+        ? `/api/projects/${selectedProjectId}/templates/upload`
+        : `/api/templates/upload`;
+
+      const res = await fetch(endpoint, {
+        method: "POST",
+        body: formData,
+      });
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(errText || "Template upload failed");
+      }
+      const data = await res.json();
+      const sectionsCount = Array.isArray(data.headings) ? data.headings.length : 1;
+      const templateInfo = {
+        id: data.id || "tpl_uploaded",
+        name: data.name || file.name,
+        filename: file.name,
+        sectionsCount: Math.max(1, sectionsCount),
+      };
+      setUploadedTemplate(templateInfo);
+
+      const notice = `Uploaded template: ${file.name} (${templateInfo.sectionsCount} sections). Type your instructions or click 'Generate BRD from Template'.`;
+      toast(`Uploaded template: ${file.name} (${templateInfo.sectionsCount} sections)`);
+
+      const sysMsg: ChatMessage = {
+        id: `msg_sys_${Date.now()}`,
+        role: "system",
+        content: notice,
+        createdAt: Date.now(),
+      };
+      setCurrentSession((prev) =>
+        prev ? { ...prev, messages: [...prev.messages, sysMsg] } : prev
+      );
+    } catch (err: any) {
+      toast(`Upload failed: ${err.message}`, "error");
+    } finally {
+      setUploadingTemplate(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
 
   // 4. Load Rich Skills Catalog with NVIDIA Skill Specter Evaluation
   useEffect(() => {
@@ -998,6 +1283,23 @@ export function HarnessView({
               loadEvaluations();
             } else if (ev.type === "DOCUMENT_CREATED") {
               toast(`📄 Documentation created & saved to project!`);
+            } else if (ev.type === "TOOL_APPROVAL_REQUEST") {
+              const incoming = {
+                id: ev.approvalId,
+                title: ev.gate?.gateName || `Approval: ${ev.toolName}`,
+                summary: ev.gate?.artifactSummary || `Sign-off required for ${ev.toolName}`,
+                gate: ev.gate?.gateNumber,
+                gateName: ev.gate?.gateName,
+                toolName: ev.toolName,
+                args: ev.args,
+                status: "pending",
+                created_at: Date.now(),
+              };
+              setPendingApprovals((prev) => {
+                if (prev.some((p) => p.id === incoming.id)) return prev;
+                return [incoming, ...prev];
+              });
+              toast(`⚠️ Quality Gate sign-off requested: ${incoming.title}`);
             } else if (ev.type === "RUN_FINISHED") {
               setIsExecuting(false);
             }
@@ -1332,6 +1634,24 @@ export function HarnessView({
             </div>
           )}
 
+          {/* HITL Sign-off Required Alert Banner */}
+          {pendingApprovals.length > 0 && (
+            <div className="bg-amber-500/10 border-b border-amber-500/30 px-4 py-2.5 flex items-center justify-between text-xs">
+              <div className="flex items-center gap-2 text-amber-800 dark:text-amber-200">
+                <ShieldAlert className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 animate-pulse" />
+                <span className="font-semibold">
+                  Human-in-the-Loop Sign-off Required:
+                </span>
+                <span>
+                  {pendingApprovals.length} pending {pendingApprovals.length === 1 ? "gate decision awaits" : "gate decisions await"} your review before execution can proceed.
+                </span>
+              </div>
+              <span className="rounded-full bg-amber-500/20 px-2.5 py-0.5 font-mono text-[10px] font-bold text-amber-700 dark:text-amber-300">
+                Gate Sign-off
+              </span>
+            </div>
+          )}
+
           {/* Messages Stream */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {(!currentSession?.messages || currentSession.messages.length === 0) && (
@@ -1353,8 +1673,12 @@ export function HarnessView({
                     return (
                       <button
                         key={g.id}
-                        onClick={() => handleSendMessage(g.prompt)}
-                        className="group flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-3 shadow-xs hover:border-indigo-500 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/60 transition text-left"
+                        type="button"
+                        onClick={() => {
+                          setInputPrompt(g.prompt);
+                          textareaRef.current?.focus();
+                        }}
+                        className="group flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-3 shadow-xs hover:border-indigo-500 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/60 transition text-left cursor-pointer"
                       >
                         <div className="space-y-1.5">
                           <div className="flex items-center justify-between">
@@ -1375,7 +1699,7 @@ export function HarnessView({
                           </p>
                         </div>
                         <div className="mt-2.5 flex items-center gap-1 text-[10px] font-semibold text-indigo-500 group-hover:translate-x-0.5 transition">
-                          <span>Execute Goal</span>
+                          <span>Customize & Send</span>
                           <ArrowRight className="h-3 w-3" />
                         </div>
                       </button>
@@ -1519,6 +1843,17 @@ export function HarnessView({
                 </div>
               );
             })}
+
+            {/* Real-time Interactive Human-in-the-Loop (HITL) Approval Cards */}
+            {pendingApprovals.map((appr) => (
+              <HarnessApprovalCard
+                key={appr.id}
+                approval={appr}
+                projectId={selectedProjectId}
+                onDecide={handleDecideApproval}
+              />
+            ))}
+
             <div ref={messagesEndRef} />
           </div>
 
@@ -1573,6 +1908,41 @@ export function HarnessView({
 
             {/* Input Container Box Matching Modern Chat UI */}
             <div className="relative rounded-2xl border border-slate-300 bg-white shadow-sm focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 transition">
+              {/* Uploaded Template Quick Action Banner */}
+              {uploadedTemplate && (
+                <div className="flex items-center justify-between gap-2 px-3.5 py-1.5 bg-indigo-50/80 dark:bg-indigo-950/40 border-b border-indigo-100 dark:border-indigo-900/40 rounded-t-2xl text-xs">
+                  <div className="flex items-center gap-2 truncate">
+                    <Paperclip className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
+                    <span className="font-semibold text-indigo-950 dark:text-indigo-200 truncate">
+                      Uploaded template: {uploadedTemplate.filename}
+                    </span>
+                    <span className="rounded bg-indigo-200/60 dark:bg-indigo-900/60 px-1.5 py-0.2 text-[10px] font-bold text-indigo-800 dark:text-indigo-300">
+                      {uploadedTemplate.sectionsCount} {uploadedTemplate.sectionsCount === 1 ? "section" : "sections"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setInputPrompt(`Generate complete Business Requirements Document (BRD) from uploaded template '${uploadedTemplate.name}' for this project.`);
+                        textareaRef.current?.focus();
+                      }}
+                      className="rounded-lg bg-indigo-600 px-2.5 py-1 text-[11px] font-semibold text-white shadow-xs hover:bg-indigo-500 transition cursor-pointer"
+                    >
+                      ⚡ Generate BRD from Template
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setUploadedTemplate(null)}
+                      className="rounded p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                      title="Clear template"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* Textarea */}
               <textarea
                 ref={textareaRef}
@@ -1632,6 +2002,28 @@ export function HarnessView({
                     className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200 transition"
                   >
                     <Plus className="h-4 w-4" />
+                  </button>
+
+                  {/* Document Upload Button for .md, .docx, .txt, .pdf templates */}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".md,.docx,.txt,.pdf"
+                    className="hidden"
+                    onChange={handleFileUpload}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    title="Upload Template Document (.md, .docx, .txt, .pdf)"
+                    disabled={uploadingTemplate}
+                    className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200 transition cursor-pointer"
+                  >
+                    {uploadingTemplate ? (
+                      <Loader2 className="h-4 w-4 animate-spin text-indigo-500" />
+                    ) : (
+                      <Paperclip className="h-4 w-4" />
+                    )}
                   </button>
 
                   {/* Model Selector Dropdown Pill */}

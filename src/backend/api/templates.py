@@ -37,7 +37,10 @@ def add_template(body: TemplateIn, project_id: str | None = None):
 
 @router.post("/api/templates/upload", status_code=201)
 async def upload_template(file: UploadFile = File(...), name: str = Form(""), kind: str = Form("brd"), project_id: str | None = Form(None)):
-    return files.add_template(project_id or None, name or Path(file.filename or "template").stem, kind, files.extract_text(file.filename or "", await file.read()))
+    text = files.extract_text(file.filename or "", await file.read())
+    if not files.template_headings(text):
+        text = f"# {name or Path(file.filename or 'template').stem}\n\n{text}"
+    return files.add_template(project_id or None, name or Path(file.filename or "template").stem, kind, text)
 
 
 @router.delete("/api/templates/{template_id}", status_code=204)

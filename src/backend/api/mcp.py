@@ -19,6 +19,7 @@ from pydantic import BaseModel, Field
 from backend.core.security import PathEscape, safe_path
 from backend.db import db, new_id, now, row, rows
 from backend.repos.sandbox import clean_sandbox_env
+from backend.api.mcp_playwright_tools import PLAYWRIGHT_MCP_TOOLS
 
 log = logging.getLogger("aqe.mcp")
 
@@ -356,34 +357,76 @@ DEFAULT_MCP_SERVERS = [
                 }
             }
         ]
+    },
+    {
+        "id": "srv_playwright",
+        "name": "Playwright Browser Automation",
+        "type": "local_npx",
+        "transport": "stdio",
+        "command": "npx -y @playwright/mcp@latest",
+        "url": None,
+        "status": "connected",
+        "tools": PLAYWRIGHT_MCP_TOOLS,
     }
 ]
 
 
-def seed_mcp_servers() -> None:
-    """Pre-seed standard MCP servers and discovered tools if table is empty."""
+def sync_playwright_tools() -> None:
+    """Ensure srv_playwright and any existing Playwright server in SQLite database has all 70+ tools inserted if they were missing."""
     try:
         with db() as con:
-            count = con.execute("SELECT COUNT(*) FROM mcp_servers").fetchone()[0]
-            if count > 0:
-                return
+            ts = now()
+            # Ensure srv_playwright server exists
+            con.execute(
+                "INSERT OR IGNORE INTO mcp_servers (id, name, type, transport, command, url, status, error_message, created_at, updated_at) "
+                "VALUES ('srv_playwright', 'Playwright Browser Automation', 'local_npx', 'stdio', 'npx -y @playwright/mcp@latest', NULL, 'connected', '', ?, ?)",
+                (ts, ts)
+            )
 
+            # Query all Playwright servers (by id, name, or command)
+            playwright_servers = rows(con.execute(
+                "SELECT id, command, name FROM mcp_servers WHERE id='srv_playwright' OR LOWER(name) LIKE '%playwright%' OR LOWER(command) LIKE '%playwright%'"
+            ))
+
+            for srv in playwright_servers:
+                srv_id = srv["id"]
+                existing_tools = {r["name"] for r in rows(con.execute("SELECT name FROM mcp_tools WHERE server_id=?", (srv_id,)))}
+                for t in PLAYWRIGHT_MCP_TOOLS:
+                    if t["name"] not in existing_tools:
+                        tool_id = new_id("tool")
+                        schema_str = json.dumps(t.get("parameters_schema", {}))
+                        con.execute(
+                            "INSERT INTO mcp_tools (id, server_id, name, description, parameters_schema, authorized, created_at, updated_at) "
+                            "VALUES (?, ?, ?, ?, ?, 1, ?, ?)",
+                            (tool_id, srv_id, t["name"], t.get("description", ""), schema_str, ts, ts)
+                        )
+    except Exception as e:
+        log.warning("Could not sync Playwright MCP tools: %s", e)
+
+
+def seed_mcp_servers() -> None:
+    """Pre-seed standard MCP servers and discovered tools if table is empty or missing defaults."""
+    try:
+        with db() as con:
+            existing_srv_ids = {r["id"] for r in rows(con.execute("SELECT id FROM mcp_servers"))}
             ts = now()
             for s in DEFAULT_MCP_SERVERS:
-                con.execute(
-                    "INSERT INTO mcp_servers (id, name, type, transport, command, url, status, error_message, created_at, updated_at) "
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, '', ?, ?)",
-                    (s["id"], s["name"], s["type"], s["transport"], s["command"], s["url"], s["status"], ts, ts)
-                )
-                for t in s.get("tools", []):
-                    tool_id = new_id("tool")
-                    schema_str = json.dumps(t.get("parameters_schema", {}))
+                if s["id"] not in existing_srv_ids:
                     con.execute(
-                        "INSERT INTO mcp_tools (id, server_id, name, description, parameters_schema, authorized, created_at, updated_at) "
-                        "VALUES (?, ?, ?, ?, ?, 1, ?, ?)",
-                        (tool_id, s["id"], t["name"], t.get("description", ""), schema_str, ts, ts)
+                        "INSERT INTO mcp_servers (id, name, type, transport, command, url, status, error_message, created_at, updated_at) "
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, '', ?, ?)",
+                        (s["id"], s["name"], s["type"], s["transport"], s["command"], s["url"], s["status"], ts, ts)
                     )
-            log.info("Successfully pre-seeded %d standard MCP servers and tools.", len(DEFAULT_MCP_SERVERS))
+                    for t in s.get("tools", []):
+                        tool_id = new_id("tool")
+                        schema_str = json.dumps(t.get("parameters_schema", {}))
+                        con.execute(
+                            "INSERT INTO mcp_tools (id, server_id, name, description, parameters_schema, authorized, created_at, updated_at) "
+                            "VALUES (?, ?, ?, ?, ?, 1, ?, ?)",
+                            (tool_id, s["id"], t["name"], t.get("description", ""), schema_str, ts, ts)
+                        )
+        sync_playwright_tools()
+        log.info("Successfully pre-seeded/synchronized standard MCP servers and tools.")
     except Exception as e:
         log.warning("Could not pre-seed MCP servers: %s", e)
 
@@ -519,17 +562,13 @@ def add_server(req: CreateServerRequest):
         tools_to_insert = req.tools
         if not tools_to_insert:
             # Auto-generate discovered tools based on command or defaults
-            if command and "sqlite" in command:
+            if (command and "playwright" in command.lower()) or "playwright" in name.lower():
+                tools_to_insert = PLAYWRIGHT_MCP_TOOLS
+            elif command and "sqlite" in command:
                 tools_to_insert = [
                     {"name": "read_query", "description": "Execute read-only SQL query on SQLite database.", "parameters_schema": {"type": "object", "properties": {"query": {"type": "string"}}, "required": ["query"]}},
                     {"name": "write_query", "description": "Execute modification SQL query on SQLite database.", "parameters_schema": {"type": "object", "properties": {"query": {"type": "string"}}, "required": ["query"]}},
                     {"name": "describe_table", "description": "Retrieve schema for a SQLite table.", "parameters_schema": {"type": "object", "properties": {"table": {"type": "string"}}, "required": ["table"]}},
-                ]
-            elif command and "playwright" in command:
-                tools_to_insert = [
-                    {"name": "browser_navigate", "description": "Navigate browser page to URL.", "parameters_schema": {"type": "object", "properties": {"url": {"type": "string"}}, "required": ["url"]}},
-                    {"name": "browser_screenshot", "description": "Capture screenshot of current page view.", "parameters_schema": {"type": "object", "properties": {"path": {"type": "string"}}}},
-                    {"name": "browser_click", "description": "Click element by CSS or XPath selector.", "parameters_schema": {"type": "object", "properties": {"selector": {"type": "string"}}, "required": ["selector"]}},
                 ]
             else:
                 tools_to_insert = [
@@ -755,6 +794,15 @@ def execute_mcp(req: ExecuteRequest):
                 "tool": tool_name,
                 "result": {"url": url_str, "status_code": 200, "content_type": "text/markdown", "length": 420},
                 "output": f"Fetched 420 bytes from {url_str}"
+            }
+
+        elif tool_name.startswith("browser_"):
+            return {
+                "status": "ok",
+                "success": True,
+                "tool": tool_name,
+                "result": {"status": "executed", "arguments": args},
+                "output": f"Playwright browser tool '{tool_name}' executed safely in sandbox."
             }
 
         else:

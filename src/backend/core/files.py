@@ -43,20 +43,8 @@ def extract_text(filename: str, blob: bytes) -> str:
 
 
 def _docx_to_markdown(blob: bytes) -> str:
-    doc = Document(io.BytesIO(blob))
-    out: list[str] = []
-    for paragraph in doc.paragraphs:
-        text = paragraph.text.strip()
-        if not text:
-            continue
-        match = re.match(r"Heading (\d)", paragraph.style.name or "")
-        out.append(f"{'#' * int(match.group(1))} {text}" if match else text)
-    for table in doc.tables:
-        for i, table_row in enumerate(table.rows):
-            out.append("| " + " | ".join(c.text.strip() for c in table_row.cells) + " |")
-            if i == 0:
-                out.append("|" + " --- |" * len(table_row.cells))
-    return "\n\n".join(out)
+    from backend.repos.doc_parser import parse_docx_to_markdown
+    return parse_docx_to_markdown(blob)
 
 
 def seed_templates() -> None:

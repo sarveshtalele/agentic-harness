@@ -17,8 +17,14 @@ from backend.maf.agents import CHAT_READ, DOCS, POLICIES, READ, AgentPolicy  # n
 INJECTION = re.compile(
     r"(?:ignore\s+(all\s+|any\s+)?(the\s+)?(previous|prior|above|earlier)\s+(instructions|prompts|rules)"
     r"|disregard\s+(all\s+|any\s+)?(the\s+)?(previous|prior|above|your)\s+(instructions|prompts|rules)"
-    r"|reveal\s+(your\s+|the\s+)?(system\s+)?(prompt|instructions)"
+    r"|forget\s+(all\s+|any\s+)?(the\s+)?(previous|prior|above|earlier)\s+(instructions|prompts|rules)"
+    r"|override\s+(all\s+|any\s+)?(the\s+)?(system\s+|safety\s+|security\s+)?(prompt|prompts|instructions|rules|guardrails|policies)"
+    r"|reveal\s+(your\s+|the\s+)?(system\s+|hidden\s+)?(prompt|instructions)"
     r"|you\s+are\s+now\s+(a|an|in)\b"
+    r"|(?:enter|enable|activate)\s+developer\s+mode\b"
+    r"|(?:dan\s+mode|do\s+anything\s+now)\b"
+    r"|bypass\s+(all\s+)?(safety|security|guardrails|content\s+filters)\b"
+    r"|jailbreak\b"
     r"|send\s+.{0,40}(api[_ ]?key|token|credential|secret).{0,40}\bto\b"
     r")[^\n.]*\.?",  # the whole sentence goes, or its tail still gives the order
     re.I,

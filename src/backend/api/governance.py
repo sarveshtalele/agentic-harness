@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 
 from backend.api.common import _project
 from backend.core import auth, gates, ledger, prompts
-from backend.db import db, rows
+from backend.db import db, row, rows
 from backend.maf import agui, engine, evals, governance, llm, workflows  # noqa: F401 - workflows registers definitions
 
 router = APIRouter()
@@ -51,6 +51,37 @@ def project_approvals(project_id: str, status: str = "pending"):
         except Exception:
             return {}
     return [{**a, "payload": _parse_payload(a.get("payload"))} for a in items]
+
+
+class DecisionIn(BaseModel):
+    approved: bool
+    feedback: str = ""
+    open_pr: bool = False
+
+
+@router.post("/api/projects/{project_id}/approvals/{approval_id}/decide")
+async def decide_project_approval(project_id: str, approval_id: str, body: DecisionIn):
+    _project(project_id)
+    # 1. Resolve in-memory harness tool approval if active
+    from backend.harness.approval_manager import global_approval_manager
+    action = "approve" if body.approved else "reject"
+    if approval_id in global_approval_manager.pending_approvals:
+        global_approval_manager.resolve_approval(approval_id, action, body.feedback)
+
+    # 2. Check if in SQLite database approvals table
+    with db() as con:
+        appr_row = row(con.execute("SELECT * FROM approvals WHERE id=?", (approval_id,)))
+    if appr_row:
+        try:
+            return await engine.decide(approval_id, body.approved, auth.signer(), body.feedback, {"open_pr": body.open_pr})
+        except auth.Forbidden:
+            raise
+        except ValueError as exc:
+            raise HTTPException(400, str(exc)) from exc
+    else:
+        # Record in ledger and return success
+        ledger.append(project_id, auth.signer(), "approval." + ("approved" if body.approved else "rejected"), f"Approval {approval_id}", {"feedback": body.feedback})
+        return {"status": "ok", "approval_id": approval_id, "approved": body.approved, "feedback": body.feedback}
 
 
 @router.get("/api/projects/{project_id}/ledger")

@@ -17,7 +17,15 @@ class PendingApproval:
         self.args = args
         self.gate = gate
         self.created_at = int(time.time() * 1000)
-        self.future: asyncio.Future = asyncio.get_event_loop().create_future()
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            try:
+                loop = asyncio.get_event_loop()
+            except RuntimeError:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+        self.future: asyncio.Future = loop.create_future()
 
 class ToolApprovalManager:
     """

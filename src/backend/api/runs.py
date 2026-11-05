@@ -17,7 +17,7 @@ from pydantic import BaseModel, Field
 from backend.api.common import _project
 from backend.core import auth, ledger
 from backend.core.security import safe_path
-from backend.db import db, rows
+from backend.db import db, row, rows
 from backend.maf import agui, engine, evals, governance, llm, workflows  # noqa: F401 - workflows registers definitions
 from backend.repos import git, github, ingest
 
@@ -154,9 +154,29 @@ async def merge_pr(run_id: str):
 
 @router.post("/api/approvals/{approval_id}/decide")
 async def decide(approval_id: str, body: DecisionIn):
+    from backend.harness.approval_manager import global_approval_manager
+    action = "approve" if body.approved else "reject"
+    if approval_id in global_approval_manager.pending_approvals:
+        global_approval_manager.resolve_approval(approval_id, action, body.feedback)
+
+    with db() as con:
+        appr_row = row(con.execute("SELECT * FROM approvals WHERE id=?", (approval_id,)))
+    if not appr_row:
+        return {"status": "ok", "approval_id": approval_id, "approved": body.approved, "feedback": body.feedback}
+
     try:
         return await engine.decide(approval_id, body.approved, auth.signer(), body.feedback, {"open_pr": body.open_pr})
     except auth.Forbidden:
         raise  # a role refusal is 403, not a bad request
     except ValueError as exc:
         raise HTTPException(400, str(exc)) from exc
+
+
+@router.post("/api/approvals")
+async def post_approval_decision(req: dict):
+    approval_id = req.get("approvalId") or req.get("id") or ""
+    action = req.get("action") or ("approve" if req.get("approved") else "reject")
+    feedback = req.get("feedback") or ""
+    approved = action in ("approve", "always_approve")
+    dec_body = DecisionIn(approved=approved, feedback=feedback)
+    return await decide(approval_id, dec_body)

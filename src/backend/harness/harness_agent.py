@@ -37,25 +37,47 @@ class HarnessAgent:
 
     def _resolve_skill_tool(self, skill_name: str, display_name: str) -> tuple[str, Dict[str, Any]]:
         target = skill_name.lower()
-        if "discover" in target or "analyz" in target or "ast" in target:
-            return "qe_discover_repo", {}
-        elif "requirement" in target:
-            return "qe_analyze_requirements", {"feature": display_name}
+        if "tree" in target:
+            return "view_tree", {"maxDepth": 3}
+        elif "read_file" in target:
+            return "read_file", {"filePath": "package.json"}
+        elif "discover" in target or "analyz" in target or "ast" in target or "inspect" in target:
+            return "inspect_repo", {}
+        elif "story" in target or "stori" in target or "requirement" in target:
+            return "create_user_stories", {"feature": display_name}
+        elif "gherkin" in target:
+            return "generate_gherkin", {"featureTitle": display_name}
         elif "plan" in target or "strategy" in target:
             return "qe_plan_strategy", {"scope": display_name}
         elif "design" in target or "case" in target:
             return "qe_design_cases", {"area": "Skill Execution"}
+        elif "implement" in target or "build" in target:
+            return "implement_feature", {"filePath": "src/features/sample.ts", "code": "// Feature implementation\n"}
         elif "generate" in target or "code" in target:
             return "qe_generate_code", {"caseId": "TC-SKILL-001", "runner": "vitest"}
-        elif "run" in target or "execut" in target:
-            return "qe_run_tests", {"command": "npx --no-install vitest run"}
+        elif "run" in target or "execut" in target or "sandbox" in target:
+            return "run_sandbox_command", {"command": "npx --no-install vitest run"}
         elif "heal" in target or "doctor" in target:
-            return "qe_diagnose_and_heal", {"failedTestFile": "tests/test_harness_backend.py", "errorTrace": "Automated skill heal"}
+            return "heal_test_drift", {"failedTestFile": "tests/test_harness_backend.py", "errorTrace": "Automated skill heal"}
+        elif "defect" in target or "bug" in target or "finding" in target:
+            return "scan_defects", {}
+        elif "lifecycle" in target:
+            return "run_quality_lifecycle", {"scope": display_name}
+        elif "gate" in target:
+            return "check_gates", {}
+        elif "approval" in target:
+            return "list_pending_approvals", {}
+        elif "log" in target or "observ" in target:
+            return "query_system_logs", {"limit": 20}
+        elif "error" in target:
+            return "get_error_summary", {}
+        elif "mcp" in target:
+            return "list_mcp_servers", {}
         elif "audit" in target or "security" in target:
             return "qe_security_audit", {}
         elif "trace" in target or "sign" in target or "review" in target:
             return "qe_confidence_review", {"artifactType": "skill_review"}
-        return "qe_discover_repo", {}
+        return "inspect_repo", {}
 
     async def run(
         self,
@@ -656,8 +678,44 @@ class HarnessAgent:
             p_lower = user_prompt.lower()
             if "security" in p_lower or "audit" in p_lower:
                 tool_calls_to_execute.append({"name": "qe_security_audit", "args": {}})
-            elif "discover" in p_lower or "scan" in p_lower or "start" in p_lower:
-                tool_calls_to_execute.append({"name": "qe_discover_repo", "args": {}})
+            elif "view tree" in p_lower or "view_tree" in p_lower or "directory" in p_lower:
+                tool_calls_to_execute.append({"name": "view_tree", "args": {"maxDepth": 3}})
+            elif "read file" in p_lower or "read_file" in p_lower:
+                tool_calls_to_execute.append({"name": "read_file", "args": {"filePath": "package.json"}})
+            elif "inspect repo" in p_lower or "inspect_repo" in p_lower or "scan repo" in p_lower or "discover" in p_lower:
+                tool_calls_to_execute.append({"name": "inspect_repo", "args": {}})
+            elif "user stories" in p_lower or "user story" in p_lower or "ba studio" in p_lower:
+                tool_calls_to_execute.append({"name": "create_user_stories", "args": {"feature": "Core Business Flow"}})
+            elif "gherkin" in p_lower or "acceptance criteria" in p_lower:
+                tool_calls_to_execute.append({"name": "generate_gherkin", "args": {"featureTitle": "Core Business Flow"}})
+            elif "update document" in p_lower or "update doc" in p_lower:
+                tool_calls_to_execute.append({"name": "update_document", "args": {"documentId": "doc_latest", "content": "# Updated Architecture\n\nPreserved SHA-256."}})
+            elif "read document" in p_lower:
+                tool_calls_to_execute.append({"name": "read_document", "args": {"documentId": "doc_latest"}})
+            elif "sandbox command" in p_lower or "run command" in p_lower or "sandbox" in p_lower:
+                tool_calls_to_execute.append({"name": "run_sandbox_command", "args": {"command": "npx --no-install vitest run"}})
+            elif "implement feature" in p_lower or "build feature" in p_lower or "feature builder" in p_lower:
+                tool_calls_to_execute.append({"name": "implement_feature", "args": {"filePath": "src/features/sample.ts", "code": "// Feature implementation\nexport const active = true;\n"}})
+            elif "scan defects" in p_lower or "defect" in p_lower or "bug" in p_lower or "finding" in p_lower:
+                tool_calls_to_execute.append({"name": "scan_defects", "args": {}})
+            elif "heal" in p_lower or "drift" in p_lower:
+                tool_calls_to_execute.append({"name": "heal_test_drift", "args": {"failedTestFile": "e2e/tc-auth-003.spec.ts", "errorTrace": "TimeoutError"}})
+            elif "lifecycle" in p_lower or "testing lifecycle" in p_lower:
+                tool_calls_to_execute.append({"name": "run_quality_lifecycle", "args": {"scope": "Full QE Lifecycle"}})
+            elif "check gates" in p_lower or "gates" in p_lower or "gate" in p_lower:
+                tool_calls_to_execute.append({"name": "check_gates", "args": {}})
+            elif "pending approvals" in p_lower or "list approvals" in p_lower or "approvals" in p_lower:
+                tool_calls_to_execute.append({"name": "list_pending_approvals", "args": {}})
+            elif "decide approval" in p_lower:
+                tool_calls_to_execute.append({"name": "decide_approval", "args": {"approvalId": "appr_test", "approved": True}})
+            elif "logs" in p_lower or "log" in p_lower or "observability" in p_lower:
+                tool_calls_to_execute.append({"name": "query_system_logs", "args": {"limit": 25}})
+            elif "error summary" in p_lower or "errors" in p_lower:
+                tool_calls_to_execute.append({"name": "get_error_summary", "args": {}})
+            elif "mcp servers" in p_lower or "mcp list" in p_lower:
+                tool_calls_to_execute.append({"name": "list_mcp_servers", "args": {}})
+            elif "mcp tool" in p_lower or "mcp" in p_lower:
+                tool_calls_to_execute.append({"name": "execute_mcp_tool", "args": {"serverId": "mcp-playwright", "toolName": "navigate"}})
             elif "plan" in p_lower or "strategy" in p_lower:
                 tool_calls_to_execute.append({"name": "qe_plan_strategy", "args": {"scope": "Full Workspace Audit"}})
             elif "design" in p_lower or "case" in p_lower:
@@ -666,12 +724,10 @@ class HarnessAgent:
                 tool_calls_to_execute.append({"name": "qe_generate_code", "args": {"caseId": "TC-AUTH-001", "runner": "vitest"}})
             elif "run" in p_lower or "execute" in p_lower or "test" in p_lower:
                 tool_calls_to_execute.append({"name": "qe_run_tests", "args": {"command": "npx --no-install vitest run"}})
-            elif "heal" in p_lower:
-                tool_calls_to_execute.append({"name": "qe_diagnose_and_heal", "args": {"failedTestFile": "e2e/tc-auth-003.spec.ts", "errorTrace": "TimeoutError"}})
             elif "confidence" in p_lower or "review" in p_lower or "sign" in p_lower:
                 tool_calls_to_execute.append({"name": "qe_confidence_review", "args": {"artifactType": "code"}})
             else:
-                tool_calls_to_execute.append({"name": "qe_discover_repo", "args": {}})
+                tool_calls_to_execute.append({"name": "inspect_repo", "args": {}})
 
         # 7. Execute Tools Sequentially with Mode, HITL Gate Approval & Guardrails
         executed_records: List[ToolCallRecord] = []
@@ -699,7 +755,7 @@ class HarnessAgent:
                 yield AGUIProtocol.text_chunk(f"\n> ⚠️ **Harness Plan Mode Protection:** {reason}\n\n")
                 continue
 
-            # Check Gate Approval
+            # Check Gate Approval / HITL Info
             gate_info = None
             if tool.gate_number:
                 gate_info = {
@@ -708,6 +764,15 @@ class HarnessAgent:
                     "confidenceScore": 94,
                     "confidenceVerdict": "APPROVED",
                     "artifactSummary": f"Execution of {tool_name} requires sign-off at Quality Gate {tool.gate_number}.",
+                    "status": "pending"
+                }
+            elif tool.requires_approval:
+                gate_info = {
+                    "gateNumber": 0,
+                    "gateName": f"Action Approval: {tool_name}",
+                    "confidenceScore": 95,
+                    "confidenceVerdict": "PENDING_REVIEW",
+                    "artifactSummary": f"Execution of destructive/code-changing action '{tool_name}' requires Human-in-the-Loop confirmation.",
                     "status": "pending"
                 }
 

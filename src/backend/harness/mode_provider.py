@@ -27,11 +27,23 @@ class AgentModeProvider:
             "glob",
             "grep",
             "todos_",
+            "inspect_",
+            "view_",
+            "create_user_stories",
+            "generate_gherkin",
+            "create_document",
+            "read_document",
+            "check_gates",
+            "scan_defects",
+            "list_",
+            "query_",
+            "get_",
             "qe_discover",
             "qe_extract_requirements",
             "qe_plan_strategy",
             "qe_design_cases",
             "qe_confidence_review",
+            "qe_security_audit",
         ]
 
         if any(tool_name.startswith(p) for p in allowed_prefixes):
