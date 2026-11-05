@@ -1,6 +1,6 @@
 "use client";
 
-import { Pencil, Trash2, UserPlus, Terminal } from "lucide-react";
+import { Pencil, Play, Trash2, UserPlus, Terminal } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useProject } from "../../../components/ProjectShell";
@@ -67,7 +67,61 @@ export default function OverviewPage() {
   const a = data.repo?.analysis;
   return (
     <>
-      <PageTitle title={project.name} subtitle={project.description} actions={<Button variant="secondary" onClick={async () => { const name = prompt("Project name", project.name)?.trim(); if (name && name !== project.name) { await api(`/projects/${project.id}`, { method: "PATCH", json: { name } }); refresh(); } }}><Pencil className="h-4 w-4" /> Rename</Button>} />
+      <PageTitle
+        title={project.name}
+        subtitle={project.description}
+        actions={
+          <div className="flex items-center gap-2">
+            <Link
+              href={`${base}/harness`}
+              className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 transition"
+            >
+              <Terminal className="h-4 w-4" />
+              <span>Launch QE Harness</span>
+            </Link>
+            <Button
+              variant="secondary"
+              onClick={async () => {
+                const name = prompt("Project name", project.name)?.trim();
+                if (name && name !== project.name) {
+                  await api(`/projects/${project.id}`, { method: "PATCH", json: { name } });
+                  refresh();
+                }
+              }}
+            >
+              <Pencil className="h-4 w-4" /> Rename
+            </Button>
+          </div>
+        }
+      />
+
+      {/* Prominent QE Harness Banner in Project Above Section */}
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-indigo-500/30 bg-indigo-50/70 p-4 dark:border-indigo-500/20 dark:bg-indigo-950/40">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-md">
+            <Terminal className="h-5 w-5" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Autonomous QE Harness</h3>
+              <span className="rounded-full bg-indigo-600/15 px-2 py-0.5 text-[11px] font-bold text-indigo-700 dark:text-indigo-300">
+                MAF 2.0
+              </span>
+            </div>
+            <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+              Execute full test engineering cycles, 58 local skills, memory, and automated quality gates verification.
+            </p>
+          </div>
+        </div>
+        <Link
+          href={`${base}/harness`}
+          className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 transition"
+        >
+          <Play className="h-3.5 w-3.5" />
+          <span>Open QE Harness</span>
+        </Link>
+      </div>
+
       <Link href={step.href} className="mb-4 block rounded-xl border border-indigo-500/50 bg-indigo-500/10 p-3 text-sm font-semibold text-indigo-700 hover:bg-indigo-500/15 dark:text-indigo-300">Next: {step.label}</Link>
       <div className="grid gap-4 md:grid-cols-2">
         <Card title={<Link className="hover:text-indigo-500" href={`${base}/repository`}>Repository</Link>} actions={<Link className="text-xs text-indigo-500" href={`${base}/repository`}>Manage</Link>}>
