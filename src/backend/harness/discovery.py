@@ -174,7 +174,7 @@ class LocalSkillDiscovery:
                                     category=category_label,
                                     source=source_label,
                                     path=skill_md,
-                                    command=f"/skill {skill_name}",
+                                    command=f"/{skill_name}",
                                     argumentHint=fm.get("argument-hint"),
                                     author=fm.get("author", "Sarvesh Talele"),
                                     version=fm.get("version", "1.0.0"),

@@ -88,6 +88,7 @@ class SessionState(BaseModel):
     mode: str = "plan"  # plan or execute
     activeAgentId: str = "principal-test-architect"
     systemPrompt: Optional[str] = None
+    projectId: Optional[str] = None
     messages: List[ChatMessage] = Field(default_factory=list)
     todos: List[TodoItem] = Field(default_factory=list)
     ledger: MagenticLedger = Field(default_factory=MagenticLedger)
@@ -158,7 +159,7 @@ class AgentSessionManager:
         except Exception as e:
             print(f"[MAF Session] Error saving session {session.id}: {e}")
 
-    def create_session(self, name: Optional[str] = None, mode: str = "plan") -> SessionState:
+    def create_session(self, name: Optional[str] = None, mode: str = "plan", project_id: Optional[str] = None) -> SessionState:
         now = int(time.time() * 1000)
         sess_id = f"sess_{now}_{os.urandom(3).hex()}"
         sess_name = name or f"QE Session #{len(self.list_sessions()) + 1}"
@@ -167,6 +168,7 @@ class AgentSessionManager:
             name=sess_name,
             workingDir=os.getcwd(),
             mode=mode,
+            projectId=project_id,
             createdAt=now,
             updatedAt=now
         )

@@ -66,7 +66,8 @@ async def list_sessions():
 async def create_session(data: Dict[str, Any] = {}):
     name = data.get("name")
     mode = data.get("mode", "plan")
-    session = session_manager.create_session(name, mode)
+    project_id = data.get("projectId")
+    session = session_manager.create_session(name, mode, project_id=project_id)
     return {"session": session.model_dump()}
 
 
@@ -133,6 +134,14 @@ async def get_plugins():
     }
 
 
+@router.get("/api/harness/skills")
+async def get_skills():
+    all_skills = skill_discovery.list_skills()
+    return {
+        "skills": all_skills,
+        "total": len(all_skills)
+    }
+
 @router.get("/api/harness/tools")
 async def get_tools():
     qe_tools = build_qe_tools(workspace_dir)
@@ -177,8 +186,10 @@ async def stream_chat(req: ChatRequest):
     if req.sessionId:
         session = session_manager.get_session(req.sessionId)
     if not session:
-        session = session_manager.create_session("Live QE Campaign", req.mode or "plan")
+        session = session_manager.create_session("Live QE Campaign", req.mode or "plan", project_id=req.projectId)
 
+    if req.projectId:
+        session.projectId = req.projectId
     if req.mode and req.mode != session.mode:
         session.mode = req.mode
     chosen_agent = req.agentId or req.activeAgentId

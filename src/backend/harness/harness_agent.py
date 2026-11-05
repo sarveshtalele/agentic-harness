@@ -34,6 +34,28 @@ class HarnessAgent:
             from backend.harness.discovery import LocalSkillDiscovery
             self.skill_discovery = LocalSkillDiscovery(self.workspace_dir)
 
+    def _resolve_skill_tool(self, skill_name: str, display_name: str) -> tuple[str, Dict[str, Any]]:
+        target = skill_name.lower()
+        if "discover" in target or "analyz" in target or "ast" in target:
+            return "qe_discover_repo", {}
+        elif "requirement" in target:
+            return "qe_analyze_requirements", {"feature": display_name}
+        elif "plan" in target or "strategy" in target:
+            return "qe_plan_strategy", {"scope": display_name}
+        elif "design" in target or "case" in target:
+            return "qe_design_cases", {"area": "Skill Execution"}
+        elif "generate" in target or "code" in target:
+            return "qe_generate_code", {"caseId": "TC-SKILL-001", "runner": "vitest"}
+        elif "run" in target or "execut" in target:
+            return "qe_run_tests", {"command": "npx --no-install vitest run"}
+        elif "heal" in target or "doctor" in target:
+            return "qe_diagnose_and_heal", {"failedTestFile": "tests/test_harness_backend.py", "errorTrace": "Automated skill heal"}
+        elif "audit" in target or "security" in target:
+            return "qe_security_audit", {}
+        elif "trace" in target or "sign" in target or "review" in target:
+            return "qe_confidence_review", {"artifactType": "skill_review"}
+        return "qe_discover_repo", {}
+
     async def run(
         self,
         session: SessionState,
@@ -156,7 +178,7 @@ class HarnessAgent:
             elif cmd in ("/skills", "/skill"):
                 all_local_skills = self.skill_discovery.list_skills()
 
-                if not arg:
+                if not arg or arg == "undefined":
                     # Render all discovered local skills categorized
                     categories: Dict[str, list] = {}
                     for s in all_local_skills:
@@ -180,7 +202,7 @@ class HarnessAgent:
                         f"### ⚡ Local Machine Skills Catalog ({len(all_local_skills)} Discovered Skills)\n\n"
                         f"Dynamically indexed from your local machine across `agentic-qe`, `~/.agents/skills`, `~/.claude/skills`, and `Antigravity`.\n\n"
                         + "\n".join(cat_sections) +
-                        f"\n💡 *Invoke any skill using:* `/skill <name>` (e.g. `/skill qe-discover`, `/skill qe-heal`, `/skill caveman`)\n"
+                        f"\n💡 *Invoke any skill directly using:* `/<skill-name>` (e.g. `/qe-discover`, `/qe-plan`, `/security-audit`, `/qe-heal`)\n"
                     )
                     user_msg = ChatMessage(id=f"msg_u_{now}", role="user", content=prompt_trimmed, createdAt=now)
                     asst_msg = ChatMessage(id=f"msg_a_{now+1}", role="assistant", content=skills_catalog, createdAt=now+1)
@@ -207,36 +229,12 @@ class HarnessAgent:
                     yield AGUIProtocol.text_chunk(skill_info)
 
                     # Determine executable tool for this skill
-                    tool_name = "qe_discover_repo"
-                    tool_args = {}
-                    if "discover" in target_skill_name or "analyz" in target_skill_name:
-                        tool_name = "qe_discover_repo"
-                    elif "plan" in target_skill_name or "strategy" in target_skill_name:
-                        tool_name = "qe_plan_strategy"
-                        tool_args = {"scope": sk.displayName}
-                    elif "design" in target_skill_name or "case" in target_skill_name:
-                        tool_name = "qe_design_cases"
-                        tool_args = {"area": "Skill Execution"}
-                    elif "generate" in target_skill_name or "code" in target_skill_name:
-                        tool_name = "qe_generate_code"
-                        tool_args = {"caseId": "TC-SKILL-001", "runner": "vitest"}
-                    elif "run" in target_skill_name or "execut" in target_skill_name:
-                        tool_name = "qe_run_tests"
-                        tool_args = {"command": "npx --no-install vitest run"}
-                    elif "heal" in target_skill_name or "doctor" in target_skill_name:
-                        tool_name = "qe_diagnose_and_heal"
-                        tool_args = {"failedTestFile": "tests/test_harness_backend.py", "errorTrace": "Automated skill heal"}
-                    elif "audit" in target_skill_name or "security" in target_skill_name:
-                        tool_name = "qe_security_audit"
-                    elif "trace" in target_skill_name or "sign" in target_skill_name or "review" in target_skill_name:
-                        tool_name = "qe_confidence_review"
-                        tool_args = {"artifactType": "skill_review"}
-
+                    tool_name, tool_args = self._resolve_skill_tool(sk.name, sk.displayName)
                     skill_tool_override = {"name": tool_name, "args": tool_args}
                     user_prompt = f"Execute local skill {sk.name}: {sk.description}"
                 else:
                     closest = [s['name'] for s in all_local_skills if target_skill_name in s['name']][:6]
-                    suggestion_text = f"Did you mean: {', '.join([f'`/skill {c}`' for c in closest])}?" if closest else "Use `/skills` to browse all 58 local skills."
+                    suggestion_text = f"Did you mean: {', '.join([f'`/{c}`' for c in closest])}?" if closest else "Use `/skills` to browse all 58 local skills."
                     err_msg = f"❌ **Skill Not Found on Local Machine:** `{target_skill_name}`\n\n{suggestion_text}\n"
                     user_msg = ChatMessage(id=f"msg_u_{now}", role="user", content=prompt_trimmed, createdAt=now)
                     asst_msg = ChatMessage(id=f"msg_a_{now+1}", role="assistant", content=err_msg, createdAt=now+1)
@@ -298,21 +296,34 @@ class HarnessAgent:
                     return
 
             elif cmd in ("/audit", "/security-audit"):
+                skill_tool_override = {"name": "qe_security_audit", "args": {}}
                 user_prompt = "Run complete Cloudflare Security Audit on the codebase."
-            elif cmd == "/qe-start":
+            elif cmd in ("/qe-start", "/discover"):
+                skill_tool_override = {"name": "qe_discover_repo", "args": {}}
                 user_prompt = "Discover repository structure, detect test frameworks, and initialize test strategy."
             elif cmd in ("/qe-heal", "/heal"):
+                skill_tool_override = {"name": "qe_diagnose_and_heal", "args": {"failedTestFile": "tests/test_harness_backend.py", "errorTrace": "Automated harness heal"}}
                 user_prompt = "Diagnose test failures and heal drifted selectors while preserving assertions."
             elif cmd in ("/qe-plan", "/plan"):
                 session.mode = "plan"
                 self.mode_provider.set_mode("plan")
                 yield AGUIProtocol.state_delta({"mode": "plan"})
+                skill_tool_override = {"name": "qe_plan_strategy", "args": {"scope": arg or "Full Workspace Audit"}}
                 user_prompt = f"Plan level-allocated test strategy for: {arg or 'Full Workspace'}"
             elif cmd in ("/qe-execute", "/execute"):
                 session.mode = "execute"
                 self.mode_provider.set_mode("execute")
                 yield AGUIProtocol.state_delta({"mode": "execute"})
+                skill_tool_override = {"name": "qe_run_tests", "args": {"command": "npx --no-install vitest run"}}
                 user_prompt = f"Execute test generation and running for: {arg or 'Designed test cases'}"
+            elif self.skill_discovery.get_skill(cmd.lstrip("/").lower()):
+                sk = self.skill_discovery.get_skill(cmd.lstrip("/").lower())
+                session.activeAgentId = sk.assignedAgent
+                self.todo_provider.todos_add(session, [f"Execute skill: {sk.name} ({sk.displayName})"], agent_id=sk.assignedAgent)
+                yield AGUIProtocol.agent_switch(sk.assignedAgent, sk.assignedAgent)
+                tool_name, tool_args = self._resolve_skill_tool(sk.name, sk.displayName)
+                skill_tool_override = {"name": tool_name, "args": tool_args}
+                user_prompt = f"Execute skill {sk.name} ({sk.displayName}): {sk.description}\n\nTask instructions:\n{sk.content[:1000]}"
 
         # 2. Record User Message
         user_msg = ChatMessage(
