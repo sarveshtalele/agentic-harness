@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, Bot, Bug, CheckSquare, ChevronLeft, ChevronRight, Code2, FileText, Files, FolderGit2, History, Home, Lock, ScrollText, Settings, ShieldCheck } from "lucide-react";
+import { Activity, Bot, Bug, CheckSquare, ChevronLeft, ChevronRight, Code2, FileText, Files, FolderGit2, History, Home, Lock, ScrollText, Settings, ShieldCheck, Terminal } from "lucide-react";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from "react";
@@ -16,6 +16,7 @@ const nav = [
   { href: "/feature", label: "Feature Builder", icon: Code2 },
   { href: "/bugs", label: "Bug Scan", icon: Bug },
   { href: "/qe", label: "QE Studio", icon: ShieldCheck },
+  { href: "/harness", label: "QE Harness", icon: Terminal },
   { href: "/approvals", label: "Approvals", icon: CheckSquare },
   { href: "/governance", label: "Governance", icon: Lock },
   { href: "/runs", label: "Runs & Metrics", icon: History },

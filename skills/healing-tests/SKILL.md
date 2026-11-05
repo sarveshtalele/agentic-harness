@@ -1,11 +1,9 @@
 ---
 name: healing-tests
 description: Diagnoses execution failures, distinguishes true defects from flaky test bugs, and repairs selectors and fixtures while preserving assertions. Use when tests fail or need healing.
-compatibility: Requires Node.js 22.18+ (runs TypeScript natively)
 metadata:
   author: Sarvesh Talele
-  version: "1.6.0"
-allowed-tools: Read Glob Grep Edit Bash(node ${CLAUDE_SKILL_DIR}/scripts/diagnose-failure.ts *) Bash(node ${CLAUDE_SKILL_DIR}/scripts/apply-healing.ts *)
+  version: "1.4.0"
 ---
 
 # Healing Tests
@@ -13,7 +11,7 @@ allowed-tools: Read Glob Grep Edit Bash(node ${CLAUDE_SKILL_DIR}/scripts/diagnos
 Autonomous diagnostic and remediation engine for failed tests.
 
 ## When to use
-Activate when executing `/agentic-qe:qe-heal`, or whenever a test failure needs root-cause classification and potential self-healing.
+Activate when the heal stage runs (plugin command `qe-heal`), or whenever a test failure needs root-cause classification and potential self-healing.
 
 ## Workflow
 1. **Trace Analysis:** Ingest error message, stack trace, and DOM snapshot.
@@ -27,8 +25,6 @@ Activate when executing `/agentic-qe:qe-heal`, or whenever a test failure needs 
 
 Failure signatures and the allowed or forbidden remediation for each: [references/HEALING_PATTERNS.md](references/HEALING_PATTERNS.md).
 
-## Scripts
-- `node "${CLAUDE_SKILL_DIR}/scripts/diagnose-failure.ts" <failure.json>` with `{"errorMessage","stackTrace"}` prints the category (`SELECTOR_DRIFT`, `APPLICATION_DEFECT`, `ENVIRONMENT_ERROR`) and whether it can be healed.
-- `node "${CLAUDE_SKILL_DIR}/scripts/apply-healing.ts" <test-file> <broken-selector> <healed-selector>` prints the patched source in `patchedCode` and refuses any patch that changes the assertion count. It never writes the file; apply the diff with Edit after the user approves it.
-
-In Codex, paths are relative to this skill's folder.
+## Platform code steps
+- **Diagnosis:** given the error message and stack trace, the platform returns the category (`SELECTOR_DRIFT`, `APPLICATION_DEFECT`, `ENVIRONMENT_ERROR`) and whether it can be healed. Implemented as `classify_failure` in `qe/execution.py`.
+- **Patch check:** given the test file, the broken selector and the healed selector, the platform returns the patched source as `patchedCode` and refuses any patch that changes the assertion count. Implemented as `assertions_preserved` in `qe/execution.py`. It never writes the file; the diff is applied only after the user approves it.

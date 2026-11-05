@@ -71,39 +71,22 @@ for _router in ROUTERS:
 
 
 PUBLIC_PATHS = {"/api/health", "/api/auth/login", "/api/auth/status"}
-HARNESS_PREFIXES = (
-    "/api/config",
-    "/api/skills",
-    "/api/agents",
-    "/api/plugins",
-    "/api/tools",
-    "/api/mcp",
-    "/api/sessions",
-    "/api/chat",
-    "/api/stop",
-    "/api/approvals",
-    "/api/projects",
-)
 
 
 @app.middleware("http")
 async def session_guard(request: Request, call_next):
-    """Deny by default for protected resources, with harness & public route bypass for local tools & UI."""
+    """Deny by default: every API and chat path needs a session, and then access to the item it names."""
     path = request.url.path
-    is_public = path in PUBLIC_PATHS or path.startswith(HARNESS_PREFIXES) or not path.startswith(("/api/", "/agui/"))
-    
+    if path in PUBLIC_PATHS or not path.startswith(("/api/", "/agui/")):
+        return await call_next(request)
     user = auth.session_user(request.cookies.get(auth.COOKIE))
-    if user:
-        auth.current_user.set(user)
-        request.state.user_id = user["id"]
-        if refusal := auth.access_problem(request.method, path, user):
-            return fail(request, refusal[0], refusal[1])
-        return await call_next(request)
-
-    if is_public:
-        return await call_next(request)
-
-    return fail(request, 401, "Sign in first", action="Sign in again.")
+    if not user:
+        return fail(request, 401, "Sign in first", action="Sign in again.")
+    if refusal := auth.access_problem(request.method, path, user):
+        return fail(request, refusal[0], refusal[1])
+    auth.current_user.set(user)
+    request.state.user_id = user["id"]
+    return await call_next(request)
 
 
 @app.middleware("http")

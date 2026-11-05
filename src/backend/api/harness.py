@@ -1,7 +1,7 @@
 """MAF 2.0 Harness API Router.
 Exposes streaming SSE chat, persistent session management,
-58 local machine skills discovery, MCP tool server integration,
-and human-in-the-loop gate approvals.
+58 local machine skills discovery, and MCP tool server integration,
+using the centralized platform credentials and project permissions.
 """
 from __future__ import annotations
 
@@ -14,16 +14,14 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
 
 from backend.config import ROOT
-from backend.harness.approval_manager import global_approval_manager
 from backend.harness.discovery import LocalSkillDiscovery
 from backend.harness.harness_agent import HarnessAgent
-from backend.harness.llm_client import LLMClient
-from backend.harness.llm_config import LLMConfig, load_llm_config, save_llm_config
+from backend.harness.llm_config import LLMConfig
 from backend.harness.mcp_manager import MCPClientManager, MCPServerConfig
 from backend.harness.project_repository import global_project_repo
-from backend.harness.qe_agents import list_all_agents
 from backend.harness.qe_tools import build_qe_tools
 from backend.harness.session import AgentSessionManager, SessionState, TodoItem
+from backend.maf import llm as platform_llm
 
 router = APIRouter(tags=["harness"])
 
@@ -38,53 +36,33 @@ active_abort_events: Dict[str, asyncio.Event] = {}
 
 class ChatRequest(BaseModel):
     sessionId: Optional[str] = None
-    message: str
+    message: Optional[str] = None
+    prompt: Optional[str] = None
     mode: Optional[str] = "plan"
     agentId: Optional[str] = None
+    activeAgentId: Optional[str] = None
     systemPrompt: Optional[str] = None
+    projectId: Optional[str] = None
 
 
 class StopRequest(BaseModel):
     sessionId: str
 
 
-class ApprovalDecisionRequest(BaseModel):
-    approvalId: str
-    action: str
-    feedback: Optional[str] = None
+@router.get("/api/harness/config")
+async def get_harness_config():
+    pub = platform_llm.public()
+    return {
+        **pub,
+        "is_configured": pub.get("configured", False),
+    }
 
-
-@router.get("/api/config")
-async def get_config():
-    config = load_llm_config()
-    client = LLMClient(config)
-    data = config.model_dump()
-    is_conf = client.is_configured()
-    data["configured"] = is_conf
-    data["is_configured"] = is_conf
-    data["has_api_key"] = bool(config.api_key.strip() if config.api_key else False)
-    return data
-
-
-@router.post("/api/config")
-async def update_config(config_data: Dict[str, Any]):
-    config = LLMConfig(**config_data)
-    save_llm_config(config)
-    client = LLMClient(config)
-    data = config.model_dump()
-    is_conf = client.is_configured()
-    data["configured"] = is_conf
-    data["is_configured"] = is_conf
-    data["has_api_key"] = bool(config.api_key.strip() if config.api_key else False)
-    return {"status": "success", "config": data}
-
-
-@router.get("/api/sessions")
+@router.get("/api/harness/sessions")
 async def list_sessions():
     return {"sessions": session_manager.list_sessions()}
 
 
-@router.post("/api/sessions")
+@router.post("/api/harness/sessions")
 async def create_session(data: Dict[str, Any] = {}):
     name = data.get("name")
     mode = data.get("mode", "plan")
@@ -92,7 +70,7 @@ async def create_session(data: Dict[str, Any] = {}):
     return {"session": session.model_dump()}
 
 
-@router.get("/api/sessions/{session_id}")
+@router.get("/api/harness/sessions/{session_id}")
 async def get_session(session_id: str):
     session = session_manager.get_session(session_id)
     if not session:
@@ -100,7 +78,7 @@ async def get_session(session_id: str):
     return {"session": session.model_dump()}
 
 
-@router.patch("/api/sessions/{session_id}")
+@router.patch("/api/harness/sessions/{session_id}")
 async def update_session(session_id: str, data: Dict[str, Any]):
     session = session_manager.get_session(session_id)
     if not session:
@@ -121,18 +99,13 @@ async def update_session(session_id: str, data: Dict[str, Any]):
     return {"session": session.model_dump()}
 
 
-@router.delete("/api/sessions/{session_id}")
+@router.delete("/api/harness/sessions/{session_id}")
 async def delete_session(session_id: str):
     deleted = session_manager.delete_session(session_id)
     return {"success": deleted}
 
 
-@router.get("/api/agents")
-async def get_agents():
-    return {"agents": list_all_agents()}
-
-
-@router.get("/api/plugins")
+@router.get("/api/harness/plugins")
 async def get_plugins():
     all_skills = skill_discovery.list_skills()
     qe_skills = [s["name"] for s in all_skills if "agentic-qe" in s.get("source", "").lower()]
@@ -160,24 +133,7 @@ async def get_plugins():
     }
 
 
-@router.get("/api/skills")
-async def get_skills():
-    skills = skill_discovery.list_skills()
-    return {
-        "skills": skills,
-        "total": len(skills)
-    }
-
-
-@router.get("/api/skills/{skill_name}")
-async def get_skill(skill_name: str):
-    sk = skill_discovery.get_skill(skill_name)
-    if not sk:
-        raise HTTPException(status_code=404, detail=f"Skill '{skill_name}' not found on local machine.")
-    return {"skill": sk.model_dump()}
-
-
-@router.get("/api/tools")
+@router.get("/api/harness/tools")
 async def get_tools():
     qe_tools = build_qe_tools(workspace_dir)
     tools_list = [
@@ -194,19 +150,19 @@ async def get_tools():
     return {"tools": tools_list}
 
 
-@router.get("/api/mcp")
+@router.get("/api/harness/mcp")
 async def get_mcp():
     return {"servers": mcp_manager.list_servers()}
 
 
-@router.post("/api/mcp")
+@router.post("/api/harness/mcp")
 async def add_mcp(data: Dict[str, Any]):
     conf = MCPServerConfig(**data)
     mcp_manager.add_server(conf)
     return {"success": True, "server": conf.model_dump()}
 
 
-@router.post("/api/stop")
+@router.post("/api/harness/stop")
 async def stop_execution(req: StopRequest):
     event = active_abort_events.get(req.sessionId)
     if event:
@@ -215,24 +171,7 @@ async def stop_execution(req: StopRequest):
     return {"success": True, "stopped": False, "message": "No active execution for session"}
 
 
-@router.get("/api/approvals")
-async def get_approvals():
-    return {"pending": global_approval_manager.get_pending_list()}
-
-
-@router.post("/api/approvals")
-async def resolve_approval(req: ApprovalDecisionRequest):
-    resolved = global_approval_manager.resolve_approval(
-        req.approvalId,
-        req.action,
-        req.feedback
-    )
-    if not resolved:
-        raise HTTPException(status_code=404, detail="Approval request not found or resolved")
-    return {"success": True, "approvalId": req.approvalId, "action": req.action}
-
-
-@router.post("/api/chat")
+@router.post("/api/harness/chat")
 async def stream_chat(req: ChatRequest):
     session = None
     if req.sessionId:
@@ -242,20 +181,30 @@ async def stream_chat(req: ChatRequest):
 
     if req.mode and req.mode != session.mode:
         session.mode = req.mode
-    if req.agentId and req.agentId != session.activeAgentId:
-        session.activeAgentId = req.agentId
+    chosen_agent = req.agentId or req.activeAgentId
+    if chosen_agent and chosen_agent != session.activeAgentId:
+        session.activeAgentId = chosen_agent
     if req.systemPrompt:
         session.systemPrompt = req.systemPrompt
 
-    llm_conf = load_llm_config()
+    # Centralized Platform LLM credentials from settings/environment
+    central_cfg = platform_llm.current()
+    llm_conf = LLMConfig(
+        provider="openai",
+        model=central_cfg.get("model") or "gpt-4o",
+        api_key=central_cfg.get("api_key") or "",
+        base_url=central_cfg.get("base_url") or "https://api.openai.com/v1"
+    )
+
     abort_event = asyncio.Event()
     active_abort_events[session.id] = abort_event
+    prompt_text = req.message or req.prompt or ""
 
     async def event_generator():
         try:
             async for sse_chunk in harness_agent.run(
                 session=session,
-                user_prompt=req.message,
+                user_prompt=prompt_text,
                 llm_config=llm_conf,
                 abort_event=abort_event
             ):
@@ -273,3 +222,19 @@ async def stream_chat(req: ChatRequest):
             "X-Accel-Buffering": "no"
         }
     )
+
+
+# Project-scoped Harness Chat endpoint
+@router.post("/api/projects/{project_id}/harness/chat")
+async def project_stream_chat(project_id: str, req: ChatRequest):
+    req.projectId = project_id
+    prompt_text = req.message or req.prompt or ""
+    # Prepend project context binding if not already bound
+    p = global_project_repo.get_project(project_id)
+    if p:
+        prefix = f"[Project Context: {p['name']} ({project_id})]\n"
+        if not prompt_text.startswith(prefix) and not prompt_text.startswith("/"):
+            prompt_text = f"{prefix}{prompt_text}"
+    req.message = prompt_text
+    req.prompt = prompt_text
+    return await stream_chat(req)

@@ -27,7 +27,7 @@ export const QualityGatesTracker: React.FC<QualityGatesTrackerProps> = ({ gates 
       name: def.name,
       status: "not_started",
       score: null,
-      updatedAt: Date.now(),
+      updatedAt: 0,
     };
     return { ...def, ...state };
   });

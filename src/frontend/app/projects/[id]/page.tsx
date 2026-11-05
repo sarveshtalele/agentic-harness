@@ -1,6 +1,6 @@
 "use client";
 
-import { Pencil, Trash2, UserPlus } from "lucide-react";
+import { Pencil, Trash2, UserPlus, Terminal } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useProject } from "../../../components/ProjectShell";
@@ -89,6 +89,25 @@ export default function OverviewPage() {
               </Link></li>
             ))}
           </ul>
+        </Card>
+        <Card title={<Link className="hover:text-indigo-500 flex items-center gap-2" href={`${base}/harness`}><Terminal className="h-4 w-4 text-indigo-500" /> QE Harness</Link>} actions={<Link className="text-xs font-semibold text-indigo-500 hover:underline" href={`${base}/harness`}>Open Harness</Link>}>
+          <div className="space-y-2 text-sm">
+            <p className="text-slate-600 dark:text-slate-400">
+              Interactive multi-agent execution harness powered by MAF 2.0 with live thinking, 58 local skills, and automated quality gates verification.
+            </p>
+            <div className="flex flex-wrap gap-1.5 pt-1">
+              <span className="rounded bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300">/plan</span>
+              <span className="rounded bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300">/execute</span>
+              <span className="rounded bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300">/skills</span>
+              <span className="rounded bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300">/audit</span>
+              <span className="rounded bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300">/heal</span>
+            </div>
+            <div className="pt-2">
+              <Link href={`${base}/harness`} className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 transition">
+                <Terminal className="h-3.5 w-3.5" /> Launch QE Harness
+              </Link>
+            </div>
+          </div>
         </Card>
         {["owner", "admin"].includes(project.my_role) && <Members project={project} refresh={refresh} />}
         <Card title={<Link className="hover:text-indigo-500" href={`${base}/runs`}>Recent runs</Link>} actions={<Link className="text-xs text-indigo-500" href={`${base}/runs`}>All runs</Link>}>

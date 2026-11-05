@@ -44,7 +44,7 @@ class LocalSkillDiscovery:
                 "agentic-qe (Plugin)",
                 "Quality Engineering"
             ),
-            # 2. Local workspace skills if any
+            # 2. Local workspace skills and plugins
             (
                 os.path.join(self.workspace_root, "skills"),
                 "Workspace Skills",
@@ -54,6 +54,16 @@ class LocalSkillDiscovery:
                 os.path.join(self.workspace_root, ".skills"),
                 "Workspace Hidden Skills",
                 "Project Specific"
+            ),
+            (
+                os.path.join(self.workspace_root, "plugins", "agentic-qe", "skills"),
+                "Agentic QE Plugin",
+                "Quality Engineering"
+            ),
+            (
+                os.path.join(self.workspace_root, "plugins"),
+                "Workspace Plugins",
+                "Security & Extensions"
             ),
             # 3. Claude Code local skills
             (

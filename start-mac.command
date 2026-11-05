@@ -1,5 +1,4 @@
 #!/bin/sh
-# Double-click to start Agentic QE Platform & Claude Code Desktop Harness on macOS
+# Double-click to run Agentic QE Platform. Needs Python 3.12+, Node.js 20+, and Git.
 cd "$(dirname "$0")" || exit 1
-chmod +x run.sh bin/harness harness
-exec ./run.sh
+exec python3 scripts/dev.py up

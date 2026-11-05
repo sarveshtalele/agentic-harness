@@ -140,18 +140,25 @@ def test_api_health():
     assert res.status_code == 200
     assert res.json()["status"] == "ok"
 
-def test_api_config_unconfigured_by_default():
-    """Verify /api/config correctly returns configured=False when no key is set."""
-    res = client.get("/api/config")
+@pytest.fixture
+def auth_client():
+    with TestClient(app) as test_client:
+        login_res = test_client.post("/api/auth/login", json={"username": "qa-admin", "password": os.environ["ATLAS_ADMIN_PASSWORD"]})
+        assert login_res.status_code == 200
+        yield test_client
+
+def test_api_config_unconfigured_by_default(auth_client):
+    """Verify /api/harness/config correctly returns configured=False when no key is set."""
+    res = auth_client.get("/api/harness/config")
     assert res.status_code == 200
     data = res.json()
     assert "is_configured" in data
     assert "configured" in data
     assert "has_api_key" in data
 
-def test_api_plugins_distinct_from_mcp():
+def test_api_plugins_distinct_from_mcp(auth_client):
     """Verify SEC-06: Distinct endpoints and data models for Plugins vs MCP."""
-    res_plugins = client.get("/api/plugins")
+    res_plugins = auth_client.get("/api/harness/plugins")
     assert res_plugins.status_code == 200
     plugins = res_plugins.json()["plugins"]
     assert len(plugins) == 1
@@ -159,25 +166,25 @@ def test_api_plugins_distinct_from_mcp():
     assert "skills" in plugins[0]
     assert len(plugins[0]["skills"]) >= 10
 
-    res_mcp = client.get("/api/mcp")
+    res_mcp = auth_client.get("/api/harness/mcp")
     assert res_mcp.status_code == 200
     servers = res_mcp.json()["servers"]
     assert isinstance(servers, list)
 
-def test_api_sessions_crud():
+def test_api_sessions_crud(auth_client):
     """Verify session creation, read, and deletion."""
-    create_res = client.post("/api/sessions", json={"name": "Unit Test Session", "mode": "plan"})
+    create_res = auth_client.post("/api/harness/sessions", json={"name": "Unit Test Session", "mode": "plan"})
     assert create_res.status_code == 200
     sess = create_res.json()["session"]
     sess_id = sess["id"]
     assert sess["name"] == "Unit Test Session"
     assert sess["mode"] == "plan"
 
-    get_res = client.get(f"/api/sessions/{sess_id}")
+    get_res = auth_client.get(f"/api/harness/sessions/{sess_id}")
     assert get_res.status_code == 200
     assert get_res.json()["session"]["id"] == sess_id
 
-    del_res = client.delete(f"/api/sessions/{sess_id}")
+    del_res = auth_client.delete(f"/api/harness/sessions/{sess_id}")
     assert del_res.status_code == 200
     assert del_res.json()["success"] is True
 
@@ -264,9 +271,9 @@ def test_negative_assertion_preservation_enforcement():
     assert valid is False
     assert "Assertion Preservation Guardrail" in err
 
-def test_negative_session_not_found():
+def test_negative_session_not_found(auth_client):
     """Verify 404 response for invalid session IDs."""
-    res = client.get("/api/sessions/non-existent-session-uuid-1234")
+    res = auth_client.get("/api/harness/sessions/non-existent-session-uuid-1234")
     assert res.status_code == 404
 
 def test_harness_slash_commands_streaming():

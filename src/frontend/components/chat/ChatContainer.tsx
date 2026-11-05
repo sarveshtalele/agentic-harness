@@ -275,7 +275,7 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
                   content: streamingContent || "",
                   thought: streamingThought,
                   agentId: activeAgent.id,
-                  createdAt: Date.now(),
+                  createdAt: 0,
                 }}
                 isStreaming={true}
                 onResolveApproval={onResolveApproval}
