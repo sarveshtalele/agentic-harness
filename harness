@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Root alias for Agentic QE Harness (Mac / Linux)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+exec "$SCRIPT_DIR/bin/harness" "$@"

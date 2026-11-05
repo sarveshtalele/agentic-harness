@@ -28,7 +28,9 @@ ROOT = Path(__file__).resolve().parents[1]
 FRONTEND = ROOT / "src" / "frontend"
 VENV = ROOT / ".venv"
 PYTHON = VENV / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
-ENV = {**os.environ, "PYTHONPATH": str(ROOT / "src")}
+if not PYTHON.exists():
+    PYTHON = Path(sys.executable)
+ENV = {**os.environ, "PYTHONPATH": str(ROOT / "src") + os.pathsep + str(ROOT)}
 BACKEND = [str(PYTHON), "-m", "uvicorn", "backend.app:app", "--host", os.environ.get("ATLAS_HOST", "127.0.0.1"), "--port", os.environ.get("ATLAS_PORT", "8000")]
 
 
