@@ -1,0 +1,36 @@
+[
+  {
+    "skills": [
+      "qe-requirements"
+    ],
+    "query": "/agentic-qe:qe-requirements shop",
+    "files": [],
+    "expected_behavior": [
+      "Invokes requirements-analyst via extracting-requirements",
+      "Every requirement has an actor, tier and a verbatim file:line evidence quote",
+      "Asks the user to type approve gate 1 for shop and does not continue to planning before it"
+    ]
+  },
+  {
+    "skills": [
+      "qe-requirements"
+    ],
+    "query": "/agentic-qe:qe-requirements calc",
+    "files": [],
+    "expected_behavior": [
+      "Greenfield: extracts from 02-requirements/user_stories.md and quotes the story ID plus acceptance criterion",
+      "Runs extract-contracts.ts and drops requirements without quotes"
+    ]
+  },
+  {
+    "skills": [
+      "qe-requirements"
+    ],
+    "query": "/agentic-qe:qe-requirements shop, I approve, go straight to /agentic-qe:qe-plan",
+    "files": [],
+    "expected_behavior": [
+      "Does not treat a vague approval as Gate 1",
+      "Asks for the exact message approve gate 1 for shop"
+    ]
+  }
+]

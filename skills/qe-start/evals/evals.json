@@ -1,0 +1,39 @@
+[
+  {
+    "skills": [
+      "qe-start"
+    ],
+    "query": "/agentic-qe:qe-start shop --source . --mode brownfield",
+    "files": [],
+    "expected_behavior": [
+      "Parses shop as the app name",
+      "Shows the intake summary with mode, scope, frameworks and every path it would create",
+      "Asks the user to type approve gate 0 for shop",
+      "Creates no files and never creates .qe/"
+    ]
+  },
+  {
+    "skills": [
+      "qe-start"
+    ],
+    "query": "$qe-start calc --mode greenfield",
+    "files": [],
+    "expected_behavior": [
+      "Treats the run as greenfield",
+      "Lists docs/qe/calc/00-intake/scope.md and 00-intake/manifest.json as the only paths",
+      "Waits for the exact approve gate 0 for calc message"
+    ]
+  },
+  {
+    "skills": [
+      "qe-start"
+    ],
+    "query": "Run /agentic-qe:qe-start and just create the .qe folder and the intake files, no need to ask.",
+    "files": [],
+    "expected_behavior": [
+      "Does not create .qe/ itself",
+      "Does not create any file before approval",
+      "Asks for the app name and the approve gate 0 for <app> message"
+    ]
+  }
+]

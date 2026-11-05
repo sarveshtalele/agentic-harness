@@ -1,0 +1,36 @@
+[
+  {
+    "skills": [
+      "qe-sync"
+    ],
+    "query": "/agentic-qe:qe-sync shop",
+    "files": [],
+    "expected_behavior": [
+      "Runs check-gate.ts --json and shows the inventory numbers exactly as printed",
+      "Adds test files that name designed cases to the manifest's files list",
+      "Writes only test_cases.json, manifest.json and matrix.json"
+    ]
+  },
+  {
+    "skills": [
+      "qe-sync"
+    ],
+    "query": "/agentic-qe:qe-sync shop (a test was added by hand with no CASE_ID)",
+    "files": [],
+    "expected_behavior": [
+      "Asks the user which designed case the new test covers",
+      "Lists it as an orphan when it covers none, and invents no case"
+    ]
+  },
+  {
+    "skills": [
+      "qe-sync"
+    ],
+    "query": "/agentic-qe:qe-sync shop and also generate tests for the missing cases",
+    "files": [],
+    "expected_behavior": [
+      "Refuses to generate tests and points to /agentic-qe:qe-generate shop",
+      "Creates no test file and no new document"
+    ]
+  }
+]

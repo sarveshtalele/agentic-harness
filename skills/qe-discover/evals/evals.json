@@ -1,0 +1,37 @@
+[
+  {
+    "skills": [
+      "qe-discover"
+    ],
+    "query": "/agentic-qe:qe-discover shop",
+    "files": [],
+    "expected_behavior": [
+      "Activates analyzing-repositories and repo-intelligence-analyst",
+      "Reports languages, frameworks, test runners and the existing test count",
+      "Lists 01-discovery/architecture.json and 01-discovery/summary.md and asks before writing them"
+    ]
+  },
+  {
+    "skills": [
+      "qe-discover"
+    ],
+    "query": "/agentic-qe:qe-discover calc --mode greenfield",
+    "files": [],
+    "expected_behavior": [
+      "Skips code scanning because no source exists",
+      "Records the intended stack taken from the user or asks for it",
+      "Suggests /agentic-qe:qe-stories as the next command"
+    ]
+  },
+  {
+    "skills": [
+      "qe-discover"
+    ],
+    "query": "/agentic-qe:qe-discover shop and write the files straight away",
+    "files": [],
+    "expected_behavior": [
+      "Still lists every path and waits for an explicit yes",
+      "Writes nothing outside docs/qe/shop/"
+    ]
+  }
+]

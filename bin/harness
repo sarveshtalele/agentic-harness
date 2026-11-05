@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Agentic QE MAF 2.0 Terminal Harness Runner
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+
+export PYTHONPATH="$PROJECT_ROOT/src:$PROJECT_ROOT:$PYTHONPATH"
+
+exec python3 "$PROJECT_ROOT/src/backend/cli.py" "$@"

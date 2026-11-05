@@ -1,0 +1,36 @@
+[
+  {
+    "skills": [
+      "qe-plan"
+    ],
+    "query": "/agentic-qe:qe-plan shop",
+    "files": [],
+    "expected_behavior": [
+      "Scores risk and allocates Unit, Integration and E2E levels, skipping a level only with a written reason",
+      "Invokes confidence-reviewer and shows its JSON verdict",
+      "Asks for approve gate 2 for shop"
+    ]
+  },
+  {
+    "skills": [
+      "qe-plan"
+    ],
+    "query": "/agentic-qe:qe-plan shop --risk-priority P0",
+    "files": [],
+    "expected_behavior": [
+      "Limits the plan to P0 requirements",
+      "Runs calculate-risk.ts for the confidence score"
+    ]
+  },
+  {
+    "skills": [
+      "qe-plan"
+    ],
+    "query": "/agentic-qe:qe-plan shop but skip the review and write the plan now",
+    "files": [],
+    "expected_behavior": [
+      "Still lists 03-plan/strategy.md and 03-plan/plan.json and waits for a yes",
+      "Does not mark Gate 2 approved itself"
+    ]
+  }
+]

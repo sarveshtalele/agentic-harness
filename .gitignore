@@ -1,0 +1,59 @@
+# Dependencies
+node_modules/
+.venv/
+venv/
+env/
+
+# Next.js & Frontend Build
+src/frontend/.next/
+.next-*/
+docs/evidence/server.log
+src/frontend/out/
+src/frontend/dist/
+src/frontend/build/
+.next/
+
+# Python Cache & Testing
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Local databases and logs
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+*.db
+data/
+workspaces/
+*.zip
+
+# Environment & Credentials
+.env
+.env.local
+*.env
+
+# Operating System
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Large archive files
+*.zip
+agent-framework.pdf
+.sessions/
+test-results/
+
+# Azure packages and the clean export
+dist/
+
+# Personal editor settings
+.vscode/

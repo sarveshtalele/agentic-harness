@@ -1,0 +1,36 @@
+[
+  {
+    "skills": [
+      "qe-design"
+    ],
+    "query": "/agentic-qe:qe-design shop",
+    "files": [],
+    "expected_behavior": [
+      "Designs at least 1 Positive, 2-3 Negative and 1 Exception case per requirement",
+      "Assigns an oracle (specified, derived, metamorphic or golden) to each case",
+      "Tags each case with a level and asks for approve gate 3 for shop"
+    ]
+  },
+  {
+    "skills": [
+      "qe-design"
+    ],
+    "query": "/agentic-qe:qe-design shop --technique bva",
+    "files": [],
+    "expected_behavior": [
+      "Applies only boundary value analysis",
+      "Validates the cases with generate-cases.ts"
+    ]
+  },
+  {
+    "skills": [
+      "qe-design"
+    ],
+    "query": "/agentic-qe:qe-design shop and write 04-design/test_cases.json without showing me",
+    "files": [],
+    "expected_behavior": [
+      "Lists the two output paths and waits for the user's yes",
+      "Does not claim Gate 3 approval"
+    ]
+  }
+]

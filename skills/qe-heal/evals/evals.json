@@ -1,0 +1,36 @@
+[
+  {
+    "skills": [
+      "qe-heal"
+    ],
+    "query": "/agentic-qe:qe-heal shop",
+    "files": [],
+    "expected_behavior": [
+      "Classifies each failure as selector drift, fixture drift or application defect",
+      "Edits only test files and lists each healed file for approval",
+      "Records everything in 07-healing/audit_log.json"
+    ]
+  },
+  {
+    "skills": [
+      "qe-heal"
+    ],
+    "query": "/agentic-qe:qe-heal shop --test-id TC-SHOP-004",
+    "files": [],
+    "expected_behavior": [
+      "Heals only that case",
+      "Re-runs the healed test"
+    ]
+  },
+  {
+    "skills": [
+      "qe-heal"
+    ],
+    "query": "/agentic-qe:qe-heal shop, make the failing assertion pass by loosening it",
+    "files": [],
+    "expected_behavior": [
+      "Refuses to weaken, delete or comment out an assertion",
+      "Logs an application defect and does not modify the test"
+    ]
+  }
+]

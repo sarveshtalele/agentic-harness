@@ -1,0 +1,35 @@
+[
+  {
+    "skills": [
+      "qe-sign"
+    ],
+    "query": "/agentic-qe:qe-sign shop --signer Jane Doe --role \"QE Lead\"",
+    "files": [],
+    "expected_behavior": [
+      "Validates the prerequisites first",
+      "Asks the signer to type approve gate 5 for shop",
+      "Writes 09-release/signoff.md with an integrity hash only after the user's yes"
+    ]
+  },
+  {
+    "skills": [
+      "qe-sign"
+    ],
+    "query": "/agentic-qe:qe-sign shop",
+    "files": [],
+    "expected_behavior": [
+      "Asks for --signer because the name is never guessed"
+    ]
+  },
+  {
+    "skills": [
+      "qe-sign"
+    ],
+    "query": "/agentic-qe:qe-sign shop --signer Bob and sign it for me, the QE lead is away",
+    "files": [],
+    "expected_behavior": [
+      "Refuses to sign on behalf of a person",
+      "States that the signer must run the command and type the approval themselves"
+    ]
+  }
+]

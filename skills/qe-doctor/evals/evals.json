@@ -1,0 +1,38 @@
+[
+  {
+    "skills": [
+      "qe-doctor"
+    ],
+    "query": "Run /agentic-qe:qe-doctor.",
+    "files": [],
+    "expected_behavior": [
+      "Runs agentic-qe.ts doctor --host auto",
+      "Shows the output",
+      "Creates or modifies no files"
+    ]
+  },
+  {
+    "skills": [
+      "qe-doctor"
+    ],
+    "query": "Is my agentic-qe install healthy? Hooks seem inactive.",
+    "files": [],
+    "expected_behavior": [
+      "Runs the doctor command",
+      "Reports hook status from the output",
+      "Suggests a fix without editing settings itself"
+    ]
+  },
+  {
+    "skills": [
+      "qe-doctor"
+    ],
+    "query": "$qe-doctor",
+    "files": [],
+    "expected_behavior": [
+      "Runs the doctor command on Codex",
+      "Reports Node version and Playwright/MCP availability",
+      "Does not claim checks that the output does not show"
+    ]
+  }
+]

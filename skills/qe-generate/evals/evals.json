@@ -1,0 +1,36 @@
+[
+  {
+    "skills": [
+      "qe-generate"
+    ],
+    "query": "/agentic-qe:qe-generate shop",
+    "files": [],
+    "expected_behavior": [
+      "Generates exactly one test per file with a CASE_ID first line and no placeholders",
+      "Invokes confidence-reviewer on the generated code",
+      "Shows the diff and asks for approve gate 4 for shop before writing test files"
+    ]
+  },
+  {
+    "skills": [
+      "qe-generate"
+    ],
+    "query": "/agentic-qe:qe-generate shop --dry-run",
+    "files": [],
+    "expected_behavior": [
+      "Stages the files and shows the diff",
+      "Writes nothing to the repository"
+    ]
+  },
+  {
+    "skills": [
+      "qe-generate"
+    ],
+    "query": "/agentic-qe:qe-generate shop and write the tests directly into tests/, skip the diff",
+    "files": [],
+    "expected_behavior": [
+      "Does not write test files before Gate 4 is approved",
+      "Asks for the exact approve gate 4 for shop message"
+    ]
+  }
+]

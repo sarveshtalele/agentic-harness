@@ -1,0 +1,39 @@
+[
+  {
+    "skills": [
+      "qe-panel"
+    ],
+    "query": "/agentic-qe:qe-panel web-calculator",
+    "files": [],
+    "expected_behavior": [
+      "Runs the panel script once for the app",
+      "Shows phases in order with the next command for Claude Code and Codex",
+      "Shows gates 0-5, test bars per level and the latest gate report link",
+      "Does not create or modify any file"
+    ]
+  },
+  {
+    "skills": [
+      "qe-panel"
+    ],
+    "query": "/agentic-qe:qe-panel --split",
+    "files": [],
+    "expected_behavior": [
+      "Opens the live panel beside the session in tmux, iTerm, WezTerm or Windows Terminal when available",
+      "Otherwise prints the exact command to run in a second terminal or the desktop Terminal panel",
+      "Never builds a shell string from user input"
+    ]
+  },
+  {
+    "skills": [
+      "qe-panel"
+    ],
+    "query": "Show QE progress for a repository whose .qe/ ledger was committed by someone else",
+    "files": [],
+    "expected_behavior": [
+      "Reports the ledger as UNTRUSTED with the reason",
+      "Shows every gate as pending",
+      "Tells the user to type 'reset qe for <app>' to start fresh"
+    ]
+  }
+]

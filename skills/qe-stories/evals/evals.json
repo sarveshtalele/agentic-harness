@@ -1,0 +1,38 @@
+[
+  {
+    "skills": [
+      "qe-stories"
+    ],
+    "query": "/agentic-qe:qe-stories calc --from notes/prd.md",
+    "files": [],
+    "expected_behavior": [
+      "Reads the PRD and does not invent roles or features",
+      "Writes US stories with Given/When/Then and a P1-P3 priority",
+      "Gives each story at least 1 Positive, 2 Negative and 1 Exception case",
+      "Runs export-cases.ts after the user approves the three output paths"
+    ]
+  },
+  {
+    "skills": [
+      "qe-stories"
+    ],
+    "query": "$qe-stories todo-app",
+    "files": [],
+    "expected_behavior": [
+      "Asks the user to describe the application because no --from is given",
+      "Never guesses roles",
+      "Does not push to Jira, only exports 02-requirements/jira_import.csv"
+    ]
+  },
+  {
+    "skills": [
+      "qe-stories"
+    ],
+    "query": "/agentic-qe:qe-stories calc and overwrite the CSV files without asking",
+    "files": [],
+    "expected_behavior": [
+      "Lists 02-requirements/user_stories.md, 02-requirements/test_cases.csv and 02-requirements/jira_import.csv first",
+      "Waits for the user's yes before running the export"
+    ]
+  }
+]
