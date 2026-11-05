@@ -73,6 +73,7 @@ def llm_settings():
 
 
 @router.put("/api/settings/llm")
+@router.post("/api/settings/llm")
 def update_llm(body: LLMIn):
     return llm.update(body.base_url, body.model, body.api_key)
 

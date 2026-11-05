@@ -98,6 +98,14 @@ export function ProjectShell({ children }: { children: ReactNode }) {
             <span className="rounded bg-slate-100 px-2 py-0.5 text-[11px] font-mono text-slate-500 dark:bg-slate-800 dark:text-slate-400">{id}</span>
           </div>
           <div className="flex items-center gap-2">
+            <Link
+              href={`/harness?project=${id}`}
+              title="Open in Autonomous QE Harness"
+              className="flex items-center gap-1.5 rounded-lg border border-indigo-500/30 bg-indigo-50 px-2.5 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:text-indigo-300 dark:hover:bg-indigo-900/60 transition shadow-sm"
+            >
+              <Terminal className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
+              <span>QE Harness</span>
+            </Link>
             <Link href="/settings" className="flex items-center gap-1.5 rounded-lg border border-slate-300 px-2.5 py-1.5 text-[11px] font-semibold dark:border-slate-700">
               <span className={`h-1.5 w-1.5 rounded-full ${llm?.configured ? "bg-emerald-500" : "bg-rose-500"}`} />
               <span className="mono">{llm?.configured ? llm.model : "No model configured"}</span>
