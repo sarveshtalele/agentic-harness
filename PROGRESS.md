@@ -4,6 +4,7 @@ Written by `scripts/hooks/activity_log.py`. Times are local.
 
 | Time | Event | Detail |
 |---|---|---|
+| 2026-11-05 20:30:00 | MILESTONE | Unified Agentic QE Platform & Claude Code Desktop Harness deployed to https://github.com/sarveshtalele/agentic-harness.git with SQLite WAL project knowledge persistence, headless CLI (bin/harness), 58 local skills, and 13 Ashish Patel harness patterns. |
 | 2026-10-31 20:49:13 | before | Bash: ls [redacted] |
 | 2026-10-31 20:49:13 | DECISION | Replace hand-rolled MAF engine with real agent-framework 1.24 packages; real LLM tool-call probe passed |
 | 2026-10-31 20:49:13 | DECISION | Audit: 68 passing legacy tests assert tautologies and simulated tokens, so they prove nothing; rewrite |
