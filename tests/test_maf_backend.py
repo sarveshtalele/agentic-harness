@@ -125,9 +125,9 @@ def test_real_qe_tools_execution():
     assert code_res["caseId"] == "TC-TEST-001"
     assert os.path.exists(os.path.join(WORKSPACE_DIR, code_res["filePath"]))
 
-    # 5. qe_security_audit (Cloudflare Audit Skill)
+    # 5. qe_security_audit (Cloudflare Audit Skill & NVIDIA Skill Specter)
     sec_audit = asyncio.run(tools["qe_security_audit"].execute({}, None))
-    assert sec_audit["auditStandard"] == "Cloudflare Security Audit Skill"
+    assert "Cloudflare Security" in sec_audit["auditStandard"]
     assert sec_audit["status"] == "PASSED"
     assert len(sec_audit["checks"]) >= 5
 

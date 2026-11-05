@@ -223,6 +223,11 @@ export function HarnessView({
   const [slashFilter, setSlashFilter] = useState("");
   const [paletteIndex, setPaletteIndex] = useState(0);
 
+  // Session Delete & Rename Custom Popups
+  const [deleteSessionModal, setDeleteSessionModal] = useState<{ id: string; name: string } | null>(null);
+  const [renameSessionModal, setRenameSessionModal] = useState<{ id: string; name: string } | null>(null);
+  const [renameInputVal, setRenameInputVal] = useState("");
+
   const abortControllerRef = useRef<AbortController | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const msgSeqRef = useRef<number>(1);
@@ -368,11 +373,41 @@ export function HarnessView({
     return map;
   }, [projects, allSessions]);
 
-  // Handle Project Switching
+  // Handle Project Switching: sync project, URL, and switch to that project's session
   const handleSelectProject = (newProjectId: string) => {
+    if (!newProjectId) return;
     setSelectedProjectId(newProjectId);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("project", newProjectId);
+      window.history.replaceState({}, "", url.toString());
+    }
     if (onProjectChange) {
       onProjectChange(newProjectId);
+    }
+    setExpandedProjects((prev) => ({ ...prev, [newProjectId]: true }));
+
+    const projSessions = sessionsByProject[newProjectId] || [];
+    if (projSessions.length > 0) {
+      handleSelectSession(projSessions[0].id);
+    } else {
+      const projName = projects.find((p) => p.id === newProjectId)?.name || "Project";
+      api("/harness/sessions", {
+        method: "POST",
+        json: {
+          name: `${projName} Session #1`,
+          mode: mode,
+          projectId: newProjectId,
+        },
+      })
+        .then((res) => {
+          if (res && res.session) {
+            setAllSessions((prev) => [res.session, ...prev]);
+            setActiveSessionId(res.session.id);
+            setCurrentSession(res.session);
+          }
+        })
+        .catch(() => {});
     }
   };
 
@@ -418,31 +453,45 @@ export function HarnessView({
     }
   };
 
-  // Rename Session
-  const handleRenameSession = async (sessionId: string, currentName: string) => {
-    const newName = window.prompt("Enter new session title:", currentName);
-    if (!newName || newName.trim() === "" || newName === currentName) return;
+  // Open Rename Session Popup Window
+  const handleOpenRename = (sessionId: string, currentName: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setRenameSessionModal({ id: sessionId, name: currentName });
+    setRenameInputVal(currentName);
+  };
+
+  const handleConfirmRename = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!renameSessionModal || !renameInputVal.trim()) return;
+    const newName = renameInputVal.trim();
+    const sessionId = renameSessionModal.id;
     try {
       await api(`/harness/sessions/${sessionId}`, {
         method: "PATCH",
-        json: { title: newName.trim(), name: newName.trim() },
+        json: { title: newName, name: newName },
       });
       setAllSessions((prev) =>
-        prev.map((s) => (s.id === sessionId ? { ...s, name: newName.trim() } : s))
+        prev.map((s) => (s.id === sessionId ? { ...s, name: newName } : s))
       );
       if (currentSession?.id === sessionId) {
-        setCurrentSession((prev) => (prev ? { ...prev, name: newName.trim() } : prev));
+        setCurrentSession((prev) => (prev ? { ...prev, name: newName } : prev));
       }
       toast("Session renamed successfully");
+      setRenameSessionModal(null);
     } catch (e: any) {
       toast(`Failed to rename session: ${e.message}`, "error");
     }
   };
 
-  // Delete Session
-  const handleDeleteSession = async (sessionId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!window.confirm("Are you sure you want to delete this chat session?")) return;
+  // Open Delete Confirmation Popup Window
+  const handleOpenDelete = (sessionId: string, sessionName: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setDeleteSessionModal({ id: sessionId, name: sessionName });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteSessionModal) return;
+    const sessionId = deleteSessionModal.id;
     try {
       await api(`/harness/sessions/${sessionId}`, {
         method: "DELETE",
@@ -450,6 +499,7 @@ export function HarnessView({
       const updated = allSessions.filter((s) => s.id !== sessionId);
       setAllSessions(updated);
       toast("Session deleted");
+      setDeleteSessionModal(null);
       if (activeSessionId === sessionId) {
         if (updated.length > 0) {
           handleSelectSession(updated[0].id);
@@ -797,10 +847,16 @@ export function HarnessView({
               if (ev.delta) {
                 setCurrentSession((prev) => {
                   if (!prev) return prev;
+                  let nextLedger = prev.ledger;
+                  if (ev.delta.ledger) {
+                    const existing = Array.isArray(prev.ledger) ? prev.ledger : [];
+                    const incoming = Array.isArray(ev.delta.ledger) ? ev.delta.ledger : [ev.delta.ledger];
+                    nextLedger = [...incoming, ...existing];
+                  }
                   return {
                     ...prev,
                     todos: ev.delta.todos || prev.todos,
-                    ledger: ev.delta.ledger ? [ev.delta.ledger, ...(prev.ledger || [])] : prev.ledger,
+                    ledger: nextLedger,
                     mode: ev.delta.mode || prev.mode,
                   };
                 });
@@ -895,25 +951,8 @@ export function HarnessView({
           </div>
         </div>
 
-        {/* Right Action Controls: Agent Selector & Inspector Drawer Toggle */}
+        {/* Right Action Controls: Inspector Drawer Toggle */}
         <div className="flex items-center gap-2">
-          {/* Autonomous MAF Agent Selector */}
-          <div className="flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs shadow-sm dark:border-slate-700 dark:bg-slate-900">
-            <ActiveAgentIcon className={`h-4 w-4 ${activeAgent.color}`} />
-            <select
-              aria-label="Select Autonomous MAF Agent"
-              className="bg-transparent font-medium text-slate-800 focus:outline-none dark:text-slate-200 cursor-pointer"
-              value={activeAgentId}
-              onChange={(e) => handleSelectAgent(e.target.value)}
-            >
-              {AGENTS.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.name} ({a.role})
-                </option>
-              ))}
-            </select>
-          </div>
-
           {/* Right Inspector Drawer Toggle */}
           <button
             onClick={() => setInspectorOpen(!inspectorOpen)}
@@ -1100,20 +1139,14 @@ export function HarnessView({
                                 {/* Hover Session Action Buttons: Rename & Delete */}
                                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                   <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleRenameSession(s.id, s.name);
-                                    }}
+                                    onClick={(e) => handleOpenRename(s.id, s.name, e)}
                                     title="Rename session"
                                     className="p-0.5 hover:text-indigo-400 rounded"
                                   >
                                     <Pencil className="h-3 w-3" />
                                   </button>
                                   <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleDeleteSession(s.id, e);
-                                    }}
+                                    onClick={(e) => handleOpenDelete(s.id, s.name, e)}
                                     title="Delete session"
                                     className="p-0.5 hover:text-rose-400 rounded"
                                   >
@@ -2156,6 +2189,72 @@ export function HarnessView({
                 </Button>
                 <Button type="submit" disabled={newProjBusy || !newProjName.trim()}>
                   {newProjBusy ? "Creating..." : "Create Project"}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 5. Delete Session Confirmation Popup Modal */}
+      {deleteSessionModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl dark:border-slate-800 dark:bg-[#0b1329] space-y-3">
+            <div className="flex items-center gap-2.5 text-rose-600 dark:text-rose-400">
+              <div className="rounded-xl bg-rose-100 p-2 dark:bg-rose-950/60">
+                <Trash2 className="h-5 w-5" />
+              </div>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Delete Conversation</h3>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Are you sure you want to delete <span className="font-semibold text-slate-800 dark:text-slate-200">"{deleteSessionModal.name}"</span>? All messages and ledger checkpoints in this session will be permanently removed.
+            </p>
+            <div className="pt-2 flex justify-end gap-2">
+              <Button type="button" variant="secondary" onClick={() => setDeleteSessionModal(null)}>
+                Cancel
+              </Button>
+              <Button type="button" variant="danger" onClick={handleConfirmDelete}>
+                Delete
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 6. Rename Session Popup Modal */}
+      {renameSessionModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl dark:border-slate-800 dark:bg-[#0b1329]">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <Pencil className="h-4 w-4 text-indigo-500" />
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Rename Conversation</h3>
+              </div>
+              <button
+                onClick={() => setRenameSessionModal(null)}
+                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <form onSubmit={handleConfirmRename} className="mt-3 space-y-3">
+              <Field label="Session Title">
+                <input
+                  type="text"
+                  required
+                  autoFocus
+                  value={renameInputVal}
+                  onChange={(e) => setRenameInputVal(e.target.value)}
+                  placeholder="e.g. Unit Test Strategy Analysis"
+                  className={inputClass}
+                />
+              </Field>
+              <div className="pt-2 flex justify-end gap-2">
+                <Button type="button" variant="secondary" onClick={() => setRenameSessionModal(null)}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={!renameInputVal.trim()}>
+                  Save Changes
                 </Button>
               </div>
             </form>
