@@ -15,16 +15,20 @@ echo "=========================================================="
 lsof -ti:8000 | xargs kill -9 2>/dev/null || true
 lsof -ti:3000 | xargs kill -9 2>/dev/null || true
 
+# Ensure database is migrated and seeded
+export PYTHONPATH="$DIR/src:$DIR:$PYTHONPATH"
+python3 -c "from backend import db; from backend.core.seed_data import seed_database; db.migrate(); seed_database()"
+
 # Start Python backend
-echo "Starting Python FastAPI backend..."
-python3 backend/main.py &
+echo "Starting Python FastAPI backend on port 8000..."
+python3 -m uvicorn backend.app:app --host 127.0.0.1 --port 8000 &
 BACKEND_PID=$!
 
 sleep 2
 
 # Start Next.js frontend
-echo "Starting Next.js frontend..."
-npm run dev &
+echo "Starting Next.js frontend on port 3000..."
+npm --prefix src/frontend run dev &
 FRONTEND_PID=$!
 
 echo ""
