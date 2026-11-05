@@ -61,10 +61,11 @@ class QEGuardrails:
     def validate_assertion_preservation(cls, original_content: str, proposed_content: str) -> Tuple[bool, str]:
         """
         NEVER weaken, delete, or comment out assertions to make a test pass.
+        Zero Trust Assertion Preservation Rule (Cloudflare P0 / NVIDIA Specter).
         """
         assertion_regex = r"(expect\([^)]+\)\.[a-zA-Z0-9_]+|assert\s+[a-zA-Z0-9_]+|assertEquals|assertTrue)"
-        orig_matches = re.findall(assertion_regex, original_content)
-        prop_matches = re.findall(assertion_regex, proposed_content)
+        orig_matches = [m.strip() for m in re.findall(assertion_regex, original_content)]
+        prop_matches = [m.strip() for m in re.findall(assertion_regex, proposed_content)]
 
         if len(prop_matches) < len(orig_matches):
             return False, (
@@ -72,9 +73,10 @@ class QEGuardrails:
                 f"({len(orig_matches)} -> {len(prop_matches)}). Weakening assertions is strictly forbidden."
             )
 
-        trivial_regex = r"(expect\(true\)\.toBe\(true\)|assert\s+True|assert\s+1\s*==\s*1)"
+        # Check for trivial assertions or skips
+        trivial_regex = r"(expect\(true\)\.toBe\(true\)|assert\s+True|assert\s+1\s*==\s*1|assert\s+2\s*==\s*2|pytest\.skip|test\.skip)"
         if re.search(trivial_regex, proposed_content, re.IGNORECASE) and not re.search(trivial_regex, original_content, re.IGNORECASE):
-            return False, "Assertion Preservation Guardrail: Introduced trivial assertion (assert True). Real behavior assertions must be preserved."
+            return False, "Assertion Preservation Guardrail: Introduced trivial assertion or test skip. Real behavior assertions must be preserved."
 
         return True, ""
 

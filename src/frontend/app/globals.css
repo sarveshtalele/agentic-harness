@@ -48,3 +48,17 @@ code, pre, textarea.mono, .mono {
 .doc-cell:focus { box-shadow: inset 0 0 0 2px rgb(99 102 241); }
 .doc-text-input { field-sizing: content; min-height: 3rem; resize: vertical; }
 .prose-atlas th { background: rgb(99 102 241 / 0.1); }
+
+/* Hide Next.js Turbo / dev badge ("N" icon) and error toast overlay completely */
+#__next-build-watcher,
+[data-next-badge],
+[data-nextjs-toast],
+[data-nextjs-dialog-overlay],
+nextjs-portal,
+#nextjs-dev-overlay,
+div[data-nextjs-toast="true"] {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}

@@ -6,6 +6,7 @@ process.env.COPILOTKIT_TELEMETRY_DISABLED = "true";
 const backend = process.env.ATLAS_BACKEND_URL || "http://127.0.0.1:8000";
 
 const nextConfig: NextConfig = {
+  devIndicators: false,
   distDir: process.env.ATLAS_DIST_DIR || ".next",
   // Azure startup sets this: the server then runs from a small self-contained folder.
   ...(process.env.ATLAS_STANDALONE ? { output: "standalone" as const } : {}),

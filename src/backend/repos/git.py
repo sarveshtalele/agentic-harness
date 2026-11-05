@@ -28,6 +28,10 @@ def run(args: list[str], cwd: Path | None = None, token: str | None = None, time
     git = shutil.which("git")
     if not git:
         raise GitError("git is not installed or not on PATH")
+    if cwd is not None and not Path(cwd).exists():
+        if check:
+            raise GitError(f"Directory {cwd} does not exist")
+        return ""
     try:
         done = subprocess.run([git, *args], cwd=cwd, env=_env(token), capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout)
     except subprocess.TimeoutExpired as exc:
@@ -57,15 +61,19 @@ def clone(url: str, target: Path, ref: str = "", token: str | None = None) -> No
 
 
 def is_shallow(repo: Path) -> bool:
+    if not repo.exists():
+        return False
     return run(["rev-parse", "--is-shallow-repository"], cwd=repo, check=False) == "true"
 
 
 def head(repo: Path) -> str:
+    if not repo.exists():
+        return ""
     return run(["rev-parse", "HEAD"], cwd=repo, check=False)
 
 
 def is_repo(repo: Path) -> bool:
-    return (repo / ".git").exists()
+    return repo.exists() and (repo / ".git").exists()
 
 
 def init_snapshot(repo: Path, message: str) -> None:
