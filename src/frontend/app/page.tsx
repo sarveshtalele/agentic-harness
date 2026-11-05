@@ -141,8 +141,8 @@ export default function ProjectsPage() {
                 <h2 className="truncate font-bold hover:text-indigo-600 transition">{p.name}</h2>
               </Link>
               <Link
-                href={`/projects/${p.id}/harness`}
-                title="Open in QE Harness"
+                href={`/harness?project=${p.id}`}
+                title="Launch in QE Harness"
                 className="flex items-center gap-1 rounded bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold text-indigo-600 hover:bg-indigo-600 hover:text-white dark:bg-indigo-950/60 dark:text-indigo-400 dark:hover:bg-indigo-600 dark:hover:text-white transition"
               >
                 <Terminal className="h-3 w-3" />

@@ -1,9 +1,15 @@
 "use client";
 
-import { Chat } from "../../../../components/Chat";
-import { useProject } from "../../../../components/ProjectShell";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect } from "react";
 
-export default function ChatPage() {
-  const { project } = useProject();
-  return <Chat projectId={project.id} />;
+export default function ProjectChatRedirect() {
+  const { id } = useParams<{ id: string }>();
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace(`/harness?project=${id}`);
+  }, [id, router]);
+
+  return null;
 }

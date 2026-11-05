@@ -72,13 +72,6 @@ export default function OverviewPage() {
         subtitle={project.description}
         actions={
           <div className="flex items-center gap-2">
-            <Link
-              href={`${base}/harness`}
-              className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 transition"
-            >
-              <Terminal className="h-4 w-4" />
-              <span>Launch QE Harness</span>
-            </Link>
             <Button
               variant="secondary"
               onClick={async () => {
@@ -94,33 +87,6 @@ export default function OverviewPage() {
           </div>
         }
       />
-
-      {/* Prominent QE Harness Banner in Project Above Section */}
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-indigo-500/30 bg-indigo-50/70 p-4 dark:border-indigo-500/20 dark:bg-indigo-950/40">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-md">
-            <Terminal className="h-5 w-5" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Autonomous QE Harness</h3>
-              <span className="rounded-full bg-indigo-600/15 px-2 py-0.5 text-[11px] font-bold text-indigo-700 dark:text-indigo-300">
-                MAF 2.0
-              </span>
-            </div>
-            <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
-              Execute full test engineering cycles, 58 local skills, memory, and automated quality gates verification.
-            </p>
-          </div>
-        </div>
-        <Link
-          href={`${base}/harness`}
-          className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 transition"
-        >
-          <Play className="h-3.5 w-3.5" />
-          <span>Open QE Harness</span>
-        </Link>
-      </div>
 
       <Link href={step.href} className="mb-4 block rounded-xl border border-indigo-500/50 bg-indigo-500/10 p-3 text-sm font-semibold text-indigo-700 hover:bg-indigo-500/15 dark:text-indigo-300">Next: {step.label}</Link>
       <div className="grid gap-4 md:grid-cols-2">
@@ -143,25 +109,6 @@ export default function OverviewPage() {
               </Link></li>
             ))}
           </ul>
-        </Card>
-        <Card title={<Link className="hover:text-indigo-500 flex items-center gap-2" href={`${base}/harness`}><Terminal className="h-4 w-4 text-indigo-500" /> QE Harness</Link>} actions={<Link className="text-xs font-semibold text-indigo-500 hover:underline" href={`${base}/harness`}>Open Harness</Link>}>
-          <div className="space-y-2 text-sm">
-            <p className="text-slate-600 dark:text-slate-400">
-              Interactive multi-agent execution harness powered by MAF 2.0 with live thinking, 58 local skills, and automated quality gates verification.
-            </p>
-            <div className="flex flex-wrap gap-1.5 pt-1">
-              <span className="rounded bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300">/plan</span>
-              <span className="rounded bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300">/execute</span>
-              <span className="rounded bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300">/skills</span>
-              <span className="rounded bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300">/audit</span>
-              <span className="rounded bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300">/heal</span>
-            </div>
-            <div className="pt-2">
-              <Link href={`${base}/harness`} className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 transition">
-                <Terminal className="h-3.5 w-3.5" /> Launch QE Harness
-              </Link>
-            </div>
-          </div>
         </Card>
         {["owner", "admin"].includes(project.my_role) && <Members project={project} refresh={refresh} />}
         <Card title={<Link className="hover:text-indigo-500" href={`${base}/runs`}>Recent runs</Link>} actions={<Link className="text-xs text-indigo-500" href={`${base}/runs`}>All runs</Link>}>

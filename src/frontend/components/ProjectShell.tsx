@@ -10,7 +10,6 @@ import { ErrorNote, Spinner, ThemeToggle } from "./ui";
 
 const nav = [
   { href: "", label: "Overview", icon: Home },
-  { href: "/harness", label: "QE Harness", icon: Terminal },
   { href: "/repository", label: "Repository", icon: FolderGit2 },
   { href: "/ba", label: "BA Studio", icon: FileText },
   { href: "/documents", label: "Documents", icon: Files },
@@ -22,7 +21,6 @@ const nav = [
   { href: "/runs", label: "Runs & Metrics", icon: History },
   { href: "/observability", label: "Observability", icon: Activity },
   { href: "/prompts", label: "Prompts", icon: ScrollText },
-  { href: "/chat", label: "Copilot", icon: Bot },
 ];
 
 const ProjectContext = createContext<{ project: any; gates: any[]; refresh: () => void }>({ project: null, gates: [], refresh: () => {} });
@@ -95,11 +93,10 @@ export function ProjectShell({ children }: { children: ReactNode }) {
       </aside>
       <div className="min-w-0 flex-1">
         <header className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white/95 px-5 py-2 backdrop-blur dark:border-slate-800 dark:bg-[#060a17]/90">
-          <Link href={`${base}/harness`} className="flex items-center gap-1.5 rounded-lg border border-indigo-500/30 bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:text-indigo-300">
-            <Terminal className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
-            <span>QE Harness</span>
-            <span className="rounded bg-indigo-600/20 px-1 py-0.2 text-[10px] font-mono">MAF 2.0</span>
-          </Link>
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-slate-800 dark:text-slate-200 text-sm">{project?.name || "Project"}</span>
+            <span className="rounded bg-slate-100 px-2 py-0.5 text-[11px] font-mono text-slate-500 dark:bg-slate-800 dark:text-slate-400">{id}</span>
+          </div>
           <div className="flex items-center gap-2">
             <Link href="/settings" className="flex items-center gap-1.5 rounded-lg border border-slate-300 px-2.5 py-1.5 text-[11px] font-semibold dark:border-slate-700">
               <span className={`h-1.5 w-1.5 rounded-full ${llm?.configured ? "bg-emerald-500" : "bg-rose-500"}`} />

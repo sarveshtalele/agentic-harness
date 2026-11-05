@@ -1,23 +1,15 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { ProjectShell } from "../../../../components/ProjectShell";
-import { HarnessView } from "../../../../components/HarnessView";
+import { useEffect } from "react";
 
-export default function ProjectHarnessPage() {
+export default function ProjectHarnessRedirect() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
 
-  return (
-    <ProjectShell>
-      <HarnessView
-        initialProjectId={id}
-        onProjectChange={(newProjectId: string) => {
-          if (newProjectId && newProjectId !== id) {
-            router.push(`/projects/${newProjectId}/harness`);
-          }
-        }}
-      />
-    </ProjectShell>
-  );
+  useEffect(() => {
+    router.replace(`/harness?project=${id}`);
+  }, [id, router]);
+
+  return null;
 }

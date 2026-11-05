@@ -5,16 +5,25 @@ import {
   Bot,
   Brain,
   CheckCircle2,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   Clock,
   Compass,
   Cpu,
+  Filter,
+  Folder,
   FolderGit2,
+  FolderPlus,
   Layers,
   Loader2,
+  PanelLeftClose,
+  PanelLeftOpen,
   PanelRightClose,
   PanelRightOpen,
   Play,
   Plus,
+  Search,
   Send,
   Shield,
   ShieldAlert,
@@ -22,11 +31,13 @@ import {
   Square,
   Terminal,
   Wrench,
+  X,
   Zap,
 } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Badge, Button, ErrorNote, Markdown, useToast } from "./ui";
+import { useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Badge, Button, ErrorNote, Field, Markdown, inputClass, useToast } from "./ui";
 import { api } from "../lib/api";
 
 export interface SkillItem {
@@ -60,6 +71,7 @@ export interface HarnessSession {
   name: string;
   mode: "plan" | "execute";
   activeAgentId?: string;
+  projectId?: string;
   createdAt: number;
   updatedAt: number;
   messages: ChatMessage[];
@@ -80,14 +92,27 @@ const AGENTS = [
 ];
 
 const CORE_COMMANDS = [
-  { cmd: "/plan", desc: "Formulate test strategy & risk allocation", icon: Compass },
-  { cmd: "/execute", desc: "Run test execution workflows", icon: Play },
-  { cmd: "/audit", desc: "Run full security & quality gates audit", icon: Shield },
-  { cmd: "/heal", desc: "Diagnose and repair test failures", icon: Activity },
-  { cmd: "/gates", desc: "Evaluate 8 QE quality gates", icon: ShieldCheck },
+  { cmd: "/qe-discover", desc: "Discover repository AST, frameworks, and architecture", icon: Search },
+  { cmd: "/qe-plan", desc: "Formulate level-allocated test strategy & risk allocation", icon: Compass },
+  { cmd: "/qe-generate", desc: "Generate deterministic test automation code", icon: Terminal },
+  { cmd: "/qe-execute", desc: "Execute sandboxed test suites and parse outcomes", icon: Play },
+  { cmd: "/qe-heal", desc: "Diagnose failures and heal selectors without weakening assertions", icon: Activity },
+  { cmd: "/security-audit", desc: "Execute complete Cloudflare security audit against codebase", icon: Shield },
+  { cmd: "/gates", desc: "Evaluate all 8 Quality Engineering Gates", icon: ShieldCheck },
   { cmd: "/skills", desc: "Browse 59 discovered local machine skills", icon: Zap },
-  { cmd: "/projects", desc: "List all target projects", icon: FolderGit2 },
 ];
+
+function formatRelativeTime(timestamp: number): string {
+  if (!timestamp) return "";
+  const diff = Math.max(0, Date.now() - timestamp);
+  const minutes = Math.floor(diff / 60000);
+  if (minutes < 1) return "now";
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h`;
+  const days = Math.floor(hours / 24);
+  return `${days}d`;
+}
 
 export function HarnessView({
   initialProjectId,
@@ -97,15 +122,30 @@ export function HarnessView({
   onProjectChange?: (projectId: string) => void;
 }) {
   const toast = useToast();
+  const searchParams = useSearchParams();
+  const urlProject = searchParams?.get("project") || undefined;
 
   const [projects, setProjects] = useState<any[]>([]);
-  const [selectedProjectId, setSelectedProjectId] = useState<string>(initialProjectId || "");
+  const [selectedProjectId, setSelectedProjectId] = useState<string>(initialProjectId || urlProject || "");
   const [targetProject, setTargetProject] = useState<any>(null);
   const [gates, setGates] = useState<any[]>([]);
 
-  const [sessions, setSessions] = useState<HarnessSession[]>([]);
+  // All Sessions across all projects for the Antigravity-style left sidebar
+  const [allSessions, setAllSessions] = useState<HarnessSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string>("");
   const [currentSession, setCurrentSession] = useState<HarnessSession | null>(null);
+
+  // Left sidebar state: icon-only collapsed mode vs expanded tree mode
+  const [isLeftCollapsed, setIsLeftCollapsed] = useState(false);
+  const [projectFilter, setProjectFilter] = useState("");
+  const [showFilter, setShowFilter] = useState(false);
+  const [expandedProjects, setExpandedProjects] = useState<Record<string, boolean>>({});
+
+  // Modal for creating new project directly from Harness
+  const [showNewProjectModal, setShowNewProjectModal] = useState(false);
+  const [newProjName, setNewProjName] = useState("");
+  const [newProjDesc, setNewProjDesc] = useState("");
+  const [newProjBusy, setNewProjBusy] = useState(false);
 
   const [inputPrompt, setInputPrompt] = useState("");
   const [isExecuting, setIsExecuting] = useState(false);
@@ -127,30 +167,33 @@ export function HarnessView({
   const msgSeqRef = useRef<number>(1);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // 1. Sync target project with initialProjectId prop
+  // 1. Sync target project with initialProjectId prop or query param
   useEffect(() => {
-    if (initialProjectId && initialProjectId !== selectedProjectId) {
-      setSelectedProjectId(initialProjectId);
+    const target = initialProjectId || urlProject;
+    if (target && target !== selectedProjectId) {
+      setSelectedProjectId(target);
     }
-  }, [initialProjectId]);
+  }, [initialProjectId, urlProject, selectedProjectId]);
 
   // 2. Load Projects List & Centralized LLM Config
-  useEffect(() => {
-    api("/projects")
-      .then((projs) => {
-        setProjects(projs || []);
-        if (!selectedProjectId && projs && projs.length > 0) {
-          setSelectedProjectId(projs[0].id);
-        }
-      })
-      .catch(() => {});
+  const loadProjects = useCallback(async () => {
+    try {
+      const projs = await api("/projects");
+      setProjects(projs || []);
+      if (!selectedProjectId && projs && projs.length > 0) {
+        setSelectedProjectId(projs[0].id);
+      }
+    } catch {}
+  }, [selectedProjectId]);
 
+  useEffect(() => {
+    loadProjects();
     api("/settings/llm")
       .then(setLlmConfig)
       .catch(() => setLlmConfig(null));
-  }, [selectedProjectId]);
+  }, [loadProjects]);
 
-  // 2. Load Selected Target Project Details & Gates
+  // 3. Load Selected Target Project Details & Gates
   useEffect(() => {
     if (!selectedProjectId) return;
     Promise.all([
@@ -164,7 +207,7 @@ export function HarnessView({
       .catch(() => {});
   }, [selectedProjectId]);
 
-  // 3. Load Rich Skills Catalog from /api/harness/skills
+  // 4. Load Rich Skills Catalog from /api/harness/skills
   useEffect(() => {
     api("/harness/skills")
       .then((data) => {
@@ -173,7 +216,6 @@ export function HarnessView({
         }
       })
       .catch(() => {
-        // Fallback to plugins endpoint if skills endpoint fails
         api("/harness/plugins")
           .then((pData) => {
             const plugins = pData.plugins || [];
@@ -182,7 +224,7 @@ export function HarnessView({
               const formatted: SkillItem[] = qe.skills.map((s: string) => ({
                 name: s,
                 displayName: s.replace("-", " ").replace(/\b\w/g, (c) => c.toUpperCase()),
-                description: `Autonomous QE capability: ${s}`,
+                description: `Autonomous ${s} capability`,
                 category: "Quality Engineering",
                 command: `/${s}`,
               }));
@@ -193,44 +235,56 @@ export function HarnessView({
       });
   }, []);
 
-  // 4. Load Sessions for Target Project
+  // 5. Load All Sessions Across Projects
   const loadSessions = useCallback(async () => {
     try {
       const res = await api("/harness/sessions");
-      const sessList = res.sessions || [];
-      const projSessions = sessList.filter(
-        (s: any) =>
-          (selectedProjectId && s.id.startsWith(`proj_${selectedProjectId}_`)) ||
-          (selectedProjectId && s.workingDir?.includes(selectedProjectId)) ||
-          sessList.length <= 3
-      );
-      const listToUse = projSessions.length > 0 ? projSessions : sessList;
+      const sessList: HarnessSession[] = res.sessions || [];
+      setAllSessions(sessList);
 
-      if (listToUse.length === 0) {
+      if (sessList.length === 0) {
+        // Create initial session for active project
         const created = await api("/harness/sessions", {
           method: "POST",
           json: {
-            name: `${targetProject?.name || "Target Project"} QE Session`,
+            name: `${targetProject?.name || "Target Project"} Session #1`,
             mode: "plan",
+            projectId: selectedProjectId || undefined,
             workingDir: targetProject?.repo?.url || "",
           },
         });
-        setSessions([created.session]);
+        setAllSessions([created.session]);
         setActiveSessionId(created.session.id);
         setCurrentSession(created.session);
       } else {
-        setSessions(listToUse);
-        if (!activeSessionId || !listToUse.find((s: any) => s.id === activeSessionId)) {
-          setActiveSessionId(listToUse[0].id);
-          setCurrentSession(listToUse[0]);
-          setMode(listToUse[0].mode || "plan");
-          if (listToUse[0].activeAgentId) setActiveAgentId(listToUse[0].activeAgentId);
+        // Find best active session: match activeSessionId, or first matching selectedProjectId, or first overall
+        let match = sessList.find((s) => s.id === activeSessionId);
+        if (!match && selectedProjectId) {
+          match = sessList.find((s) => s.projectId === selectedProjectId);
+        }
+        if (!match) {
+          match = sessList[0];
+        }
+        if (match) {
+          setActiveSessionId(match.id);
+          // Fetch full session details
+          api(`/harness/sessions/${match.id}`)
+            .then((res) => {
+              if (res.session) {
+                setCurrentSession(res.session);
+                setMode(res.session.mode || "plan");
+                if (res.session.activeAgentId) setActiveAgentId(res.session.activeAgentId);
+              }
+            })
+            .catch(() => {
+              setCurrentSession(match as HarnessSession);
+            });
         }
       }
     } catch (e: any) {
       console.warn("Could not load sessions:", e);
     }
-  }, [selectedProjectId, targetProject, activeSessionId]);
+  }, [selectedProjectId, targetProject?.name, targetProject?.repo?.url, activeSessionId]);
 
   useEffect(() => {
     loadSessions();
@@ -241,7 +295,21 @@ export function HarnessView({
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [currentSession?.messages?.length, isExecuting]);
 
-  // Handle Target Project Switching
+  // Group all sessions by project ID
+  const sessionsByProject = useMemo(() => {
+    const map: Record<string, HarnessSession[]> = {};
+    for (const p of projects) {
+      map[p.id] = [];
+    }
+    for (const s of allSessions) {
+      const pId = s.projectId || (projects[0]?.id ?? "unassigned");
+      if (!map[pId]) map[pId] = [];
+      map[pId].push(s);
+    }
+    return map;
+  }, [projects, allSessions]);
+
+  // Handle Project Switching
   const handleSelectProject = (newProjectId: string) => {
     setSelectedProjectId(newProjectId);
     if (onProjectChange) {
@@ -249,39 +317,89 @@ export function HarnessView({
     }
   };
 
-  // Create new session
+  // Create new session under the active project
   const handleCreateSession = async () => {
     try {
+      const projName = projects.find((p) => p.id === selectedProjectId)?.name || "QE";
+      const projSessions = sessionsByProject[selectedProjectId] || [];
       const res = await api("/harness/sessions", {
         method: "POST",
         json: {
-          name: `${targetProject?.name || "QE"} Session #${sessions.length + 1}`,
+          name: `${projName} Session #${projSessions.length + 1}`,
           mode: mode,
+          projectId: selectedProjectId,
           workingDir: targetProject?.repo?.url || "",
         },
       });
       const newSess = res.session;
-      setSessions((prev) => [newSess, ...prev]);
+      setAllSessions((prev) => [newSess, ...prev]);
       setActiveSessionId(newSess.id);
       setCurrentSession(newSess);
-      toast("New QE session created");
+      toast("New session created");
     } catch (e: any) {
       setError(e.message);
     }
   };
 
-  // Switch session
-  const handleSelectSession = (id: string) => {
-    const s = sessions.find((item) => item.id === id);
-    if (s) {
-      setActiveSessionId(id);
-      setCurrentSession(s);
-      setMode(s.mode || "plan");
-      if (s.activeAgentId) setActiveAgentId(s.activeAgentId);
+  // Switch session directly
+  const handleSelectSession = async (id: string) => {
+    setActiveSessionId(id);
+    try {
+      const res = await api(`/harness/sessions/${id}`);
+      if (res.session) {
+        setCurrentSession(res.session);
+        setMode(res.session.mode || "plan");
+        if (res.session.activeAgentId) setActiveAgentId(res.session.activeAgentId);
+        if (res.session.projectId && res.session.projectId !== selectedProjectId) {
+          handleSelectProject(res.session.projectId);
+        }
+      }
+    } catch (e: any) {
+      setError(e.message);
     }
   };
 
-  // Switch agent
+  // Create New Project Dialog Submission
+  const handleCreateProjectSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newProjName.trim()) return;
+    setNewProjBusy(true);
+    try {
+      const created = await api("/projects", {
+        json: {
+          name: newProjName.trim(),
+          description: newProjDesc.trim() || `Project for autonomous QE testing`,
+        },
+      });
+      await loadProjects();
+      setSelectedProjectId(created.id);
+      if (onProjectChange) onProjectChange(created.id);
+
+      // Create initial session for the new project
+      const sessRes = await api("/harness/sessions", {
+        method: "POST",
+        json: {
+          name: `${created.name} Session #1`,
+          mode: "plan",
+          projectId: created.id,
+        },
+      });
+      setAllSessions((prev) => [sessRes.session, ...prev]);
+      setActiveSessionId(sessRes.session.id);
+      setCurrentSession(sessRes.session);
+
+      setShowNewProjectModal(false);
+      setNewProjName("");
+      setNewProjDesc("");
+      toast(`Project "${created.name}" created and loaded into Harness`);
+    } catch (err: any) {
+      setError(err.message || "Failed to create project");
+    } finally {
+      setNewProjBusy(false);
+    }
+  };
+
+  // Switch active agent
   const handleSelectAgent = async (agentId: string) => {
     setActiveAgentId(agentId);
     if (currentSession) {
@@ -375,17 +493,16 @@ export function HarnessView({
     setInputPrompt("");
     setShowSlashPalette(false);
     setError("");
-    setIsExecuting(true);
 
-    const seq = msgSeqRef.current++;
-    const userMessageId = `msg_u_${seq}`;
-    const assistantMessageId = `msg_a_${seq + 1}`;
+    const now = Date.now();
+    const userMessageId = `msg_u_${now}`;
+    const assistantMessageId = `msg_a_${now + 1}`;
 
     const userMsg: ChatMessage = {
       id: userMessageId,
       role: "user",
       content: prompt,
-      createdAt: 0,
+      createdAt: now,
     };
 
     const asstMsg: ChatMessage = {
@@ -393,65 +510,64 @@ export function HarnessView({
       role: "assistant",
       content: "",
       thinking: "",
-      createdAt: 0,
-      agentId: activeAgentId,
       toolCalls: [],
+      createdAt: now + 1,
+      agentId: activeAgentId,
     };
 
     setCurrentSession((prev) => {
       if (!prev) return prev;
-      const existing = Array.isArray(prev.messages) ? prev.messages : [];
+      const msgs = Array.isArray(prev.messages) ? prev.messages : [];
       return {
         ...prev,
-        messages: [...existing, userMsg, asstMsg],
+        messages: [...msgs, userMsg, asstMsg],
       };
     });
 
-    const controller = new AbortController();
-    abortControllerRef.current = controller;
+    setIsExecuting(true);
+    const abortCtrl = new AbortController();
+    abortControllerRef.current = abortCtrl;
 
     try {
-      const chatEndpoint = selectedProjectId
-        ? `/api/projects/${selectedProjectId}/harness/chat`
-        : "/api/harness/chat";
-
-      const response = await fetch(chatEndpoint, {
+      const response = await fetch("/api/harness/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "same-origin",
-        signal: controller.signal,
         body: JSON.stringify({
           sessionId: currentSession.id,
-          prompt,
-          mode,
-          activeAgentId,
+          prompt: prompt,
+          mode: mode,
+          agentId: activeAgentId,
           projectId: selectedProjectId,
         }),
+        signal: abortCtrl.signal,
       });
 
       if (!response.ok) {
-        throw new Error(`Execution error: HTTP ${response.status}`);
+        throw new Error(`Harness communication failed (${response.status})`);
       }
 
-      const reader = response.body?.getReader();
-      if (!reader) throw new Error("No readable stream response");
+      if (!response.body) {
+        throw new Error("No readable stream received from Harness");
+      }
 
-      const decoder = new TextDecoder("utf-8");
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
       let buffer = "";
 
       while (true) {
-        const { value, done } = await reader.read();
+        const { done, value } = await reader.read();
         if (done) break;
 
         buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
+        const lines = buffer.split("\n\n");
         buffer = lines.pop() || "";
 
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (!trimmed.startsWith("data: ")) continue;
+        for (const block of lines) {
+          const trimmed = block.trim();
+          if (!trimmed.startsWith("data:")) continue;
+          const jsonStr = trimmed.replace(/^data:\s*/, "");
+          if (!jsonStr) continue;
 
-          const jsonStr = trimmed.slice(6);
           try {
             const ev = JSON.parse(jsonStr);
 
@@ -525,15 +641,14 @@ export function HarnessView({
               setActiveAgentId(ev.toAgentId);
             } else if (ev.type === "TODOS_UPDATED") {
               setCurrentSession((prev) => (prev ? { ...prev, todos: ev.todos } : prev));
-            } else if (ev.type === "LEDGER_RECORD_ADDED") {
-              setCurrentSession((prev) => (prev ? { ...prev, ledger: [...(prev.ledger || []), ev.record] } : prev));
+            } else if (ev.type === "LEDGER_ENTRY") {
+              setCurrentSession((prev) => {
+                if (!prev) return prev;
+                const currentLedger = prev.ledger || [];
+                return { ...prev, ledger: [ev.entry, ...currentLedger] };
+              });
             } else if (ev.type === "RUN_FINISHED") {
-              // Reload gates
-              if (selectedProjectId) {
-                api(`/projects/${selectedProjectId}/gates`).then(setGates).catch(() => {});
-              }
-            } else if (ev.type === "ERROR") {
-              setError(ev.error || "Harness execution failed");
+              setIsExecuting(false);
             }
           } catch {}
         }
@@ -554,7 +669,7 @@ export function HarnessView({
 
   return (
     <div className="flex flex-col h-[calc(100vh-6.5rem)] -mt-2">
-      {/* 1. Top Harness Hierarchy & Control Bar */}
+      {/* 1. Top Control Bar: "Project in Harness" Hierarchy */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-3 pt-1 dark:border-slate-800">
         <div className="flex flex-wrap items-center gap-3">
           {/* Harness Logo & Title */}
@@ -575,45 +690,38 @@ export function HarnessView({
             </div>
           </div>
 
-          {/* Target Project Selector: "Project in Harness" Hierarchy */}
+          {/* Project Selector: Renamed from Target to Project with Create Option */}
           <div className="flex items-center gap-1.5 pl-3 border-l border-slate-200 dark:border-slate-800">
-            <span className="text-xs font-bold text-slate-500">Target:</span>
-            <select
-              aria-label="Target Project in Harness"
-              className="rounded-lg border border-indigo-500/30 bg-indigo-50/50 px-2.5 py-1 text-xs font-bold text-indigo-900 shadow-sm hover:border-indigo-500 focus:outline-none dark:border-indigo-500/30 dark:bg-indigo-950/40 dark:text-indigo-200"
-              value={selectedProjectId}
-              onChange={(e) => handleSelectProject(e.target.value)}
-            >
-              {projects.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Session Switcher */}
-          <div className="hidden lg:flex items-center gap-1.5 pl-2">
-            <select
-              aria-label="Active QE Session"
-              className="rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs font-semibold text-slate-800 shadow-sm hover:border-slate-400 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
-              value={activeSessionId}
-              onChange={(e) => handleSelectSession(e.target.value)}
-            >
-              {sessions.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name} ({s.messages?.length || 0} msgs)
-                </option>
-              ))}
-            </select>
-            <button
-              onClick={handleCreateSession}
-              title="New Session"
-              aria-label="Create new session"
-              className="rounded-lg border border-slate-300 p-1 text-slate-600 hover:bg-slate-100 hover:text-indigo-600 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
-            >
-              <Plus className="h-4 w-4" />
-            </button>
+            <span className="text-xs font-bold text-slate-500">Project:</span>
+            <div className="flex items-center gap-1">
+              <select
+                aria-label="Select Project in Harness"
+                className="rounded-lg border border-indigo-500/30 bg-indigo-50/50 px-2.5 py-1 text-xs font-bold text-indigo-900 shadow-sm hover:border-indigo-500 focus:outline-none dark:border-indigo-500/30 dark:bg-indigo-950/40 dark:text-indigo-200 cursor-pointer"
+                value={selectedProjectId}
+                onChange={(e) => {
+                  if (e.target.value === "__NEW_PROJECT__") {
+                    setShowNewProjectModal(true);
+                  } else {
+                    handleSelectProject(e.target.value);
+                  }
+                }}
+              >
+                {projects.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+                <option disabled>──────────</option>
+                <option value="__NEW_PROJECT__">+ Create New Project...</option>
+              </select>
+              <button
+                onClick={() => setShowNewProjectModal(true)}
+                title="Create New Project"
+                className="rounded-lg border border-slate-300 p-1 text-slate-600 hover:bg-slate-100 hover:text-indigo-600 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
+              >
+                <FolderPlus className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -624,7 +732,7 @@ export function HarnessView({
             <ActiveAgentIcon className={`h-4 w-4 ${activeAgent.color}`} />
             <select
               aria-label="Select Autonomous MAF Agent"
-              className="bg-transparent font-medium text-slate-800 focus:outline-none dark:text-slate-200"
+              className="bg-transparent font-medium text-slate-800 focus:outline-none dark:text-slate-200 cursor-pointer"
               value={activeAgentId}
               onChange={(e) => handleSelectAgent(e.target.value)}
             >
@@ -660,7 +768,7 @@ export function HarnessView({
             <span>{llmConfig?.configured ? llmConfig.model : "Setup Model"}</span>
           </Link>
 
-          {/* Inspector Drawer Toggle */}
+          {/* Right Inspector Drawer Toggle */}
           <button
             onClick={() => setInspectorOpen(!inspectorOpen)}
             title={inspectorOpen ? "Hide Inspector Pane" : "Show Inspector Pane"}
@@ -676,11 +784,192 @@ export function HarnessView({
 
       <ErrorNote message={error} />
 
-      {/* 2. Main Harness Split Area */}
+      {/* 2. Main 3-Pane Harness Layout */}
       <div className="flex flex-1 min-h-0 gap-3 pt-3 overflow-hidden">
-        {/* Interaction / Chat Console */}
+        {/* Left Window: Antigravity-Style Projects & Conversation Tree (Icon-Only Collapsible) */}
+        {isLeftCollapsed ? (
+          <aside className="w-14 shrink-0 flex flex-col items-center py-3 border border-slate-200 bg-white rounded-2xl shadow-sm dark:border-slate-800 dark:bg-[#0b1329] transition-all">
+            <button
+              onClick={() => setIsLeftCollapsed(false)}
+              title="Expand Conversations pane"
+              className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-indigo-600 dark:hover:bg-slate-800 dark:text-slate-400"
+            >
+              <PanelLeftOpen className="h-4 w-4" />
+            </button>
+            <div className="my-2 w-8 border-t border-slate-200 dark:border-slate-800" />
+            <button
+              onClick={handleCreateSession}
+              title="New Conversation"
+              className="rounded-lg bg-indigo-600 p-2 text-white shadow hover:bg-indigo-500 transition"
+            >
+              <Plus className="h-4 w-4" />
+            </button>
+            <div className="my-2 w-8 border-t border-slate-200 dark:border-slate-800" />
+            <button
+              onClick={() => setIsLeftCollapsed(false)}
+              title={`Projects (${projects.length})`}
+              className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-indigo-600 dark:hover:bg-slate-800 dark:text-slate-400"
+            >
+              <Folder className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setShowNewProjectModal(true)}
+              title="Create New Project"
+              className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-indigo-600 dark:hover:bg-slate-800 dark:text-slate-400"
+            >
+              <FolderPlus className="h-4 w-4" />
+            </button>
+          </aside>
+        ) : (
+          <aside className="w-64 shrink-0 flex flex-col rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden dark:border-slate-800 dark:bg-[#0b1329] transition-all">
+            {/* Header: Title and Collapse Button */}
+            <div className="flex items-center justify-between p-3 border-b border-slate-200 dark:border-slate-800">
+              <div className="flex items-center gap-1.5 font-bold text-xs text-slate-700 dark:text-slate-300">
+                <Terminal className="h-3.5 w-3.5 text-indigo-500" />
+                <span>Conversations</span>
+              </div>
+              <button
+                onClick={() => setIsLeftCollapsed(true)}
+                title="Collapse to icon-only view"
+                className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+              >
+                <PanelLeftClose className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* + New Session Button */}
+            <div className="p-2.5 border-b border-slate-200/60 dark:border-slate-800/60">
+              <button
+                onClick={handleCreateSession}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 transition"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                <span>New Conversation</span>
+              </button>
+            </div>
+
+            {/* Projects Header & Filter Action */}
+            <div className="px-3 pt-3 pb-1 flex items-center justify-between text-xs">
+              <div className="flex items-center gap-1.5 font-bold text-slate-600 dark:text-slate-400">
+                <span>Projects</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setShowFilter(!showFilter)}
+                  title="Filter Projects"
+                  className={`rounded p-1 hover:bg-slate-100 dark:hover:bg-slate-800 ${
+                    showFilter ? "text-indigo-600 dark:text-indigo-400 bg-slate-100 dark:bg-slate-800" : "text-slate-400"
+                  }`}
+                >
+                  <Filter className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  onClick={() => setShowNewProjectModal(true)}
+                  title="Create New Project"
+                  className="rounded p-1 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-slate-800"
+                >
+                  <FolderPlus className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Optional Project Filter Search Box */}
+            {showFilter && (
+              <div className="px-2.5 pb-2">
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-2 h-3.5 w-3.5 text-slate-400" />
+                  <input
+                    type="text"
+                    value={projectFilter}
+                    onChange={(e) => setProjectFilter(e.target.value)}
+                    placeholder="Filter projects..."
+                    className="w-full rounded-lg border border-slate-200 bg-slate-50 py-1 pl-8 pr-2 text-xs focus:outline-none focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-900 text-slate-800 dark:text-slate-200"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Antigravity-Style Project Tree with Sessions */}
+            <div className="flex-1 overflow-y-auto p-2 space-y-2 text-xs">
+              {projects
+                .filter((p) => p.name.toLowerCase().includes(projectFilter.toLowerCase()))
+                .map((proj) => {
+                  const isProjectSelected = proj.id === selectedProjectId;
+                  const projSessions = sessionsByProject[proj.id] || [];
+                  const isExpanded = expandedProjects[proj.id] ?? true;
+
+                  return (
+                    <div key={proj.id} className="space-y-0.5">
+                      {/* Project Folder Row */}
+                      <div
+                        onClick={() => {
+                          handleSelectProject(proj.id);
+                          setExpandedProjects((prev) => ({ ...prev, [proj.id]: !isExpanded }));
+                        }}
+                        className={`flex items-center justify-between rounded-lg px-2 py-1.5 cursor-pointer font-medium transition ${
+                          isProjectSelected
+                            ? "bg-indigo-50 text-indigo-900 dark:bg-indigo-950/40 dark:text-indigo-200"
+                            : "text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/60"
+                        }`}
+                      >
+                        <div className="flex items-center gap-1.5 truncate">
+                          <Folder className="h-3.5 w-3.5 shrink-0 text-indigo-500" />
+                          <span className="truncate">{proj.name}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {projSessions.length > 0 && (
+                            <span className="text-[10px] text-slate-400">{projSessions.length}</span>
+                          )}
+                          <ChevronRight
+                            className={`h-3 w-3 text-slate-400 transition-transform ${isExpanded ? "rotate-90" : ""}`}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Sessions Under This Project */}
+                      {isExpanded && (
+                        <div className="pl-3.5 space-y-0.5">
+                          {projSessions.map((s) => {
+                            const isActive = s.id === activeSessionId;
+                            const relTime = formatRelativeTime(s.updatedAt || s.createdAt);
+                            return (
+                              <div
+                                key={s.id}
+                                onClick={() => {
+                                  handleSelectProject(proj.id);
+                                  handleSelectSession(s.id);
+                                }}
+                                className={`flex items-center justify-between rounded-lg px-2.5 py-1.5 cursor-pointer text-xs transition ${
+                                  isActive
+                                    ? "bg-slate-900 text-white dark:bg-slate-800 shadow-sm font-semibold"
+                                    : "text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/40"
+                                }`}
+                              >
+                                <span className="truncate flex-1 pr-1">{s.name}</span>
+                                {relTime && (
+                                  <span
+                                    className={`text-[10px] shrink-0 font-mono ${
+                                      isActive ? "text-indigo-300" : "text-slate-400"
+                                    }`}
+                                  >
+                                    {relTime}
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+            </div>
+          </aside>
+        )}
+
+        {/* Center Pane: Agent Execution Console */}
         <div className="flex flex-1 flex-col min-w-0 rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden dark:border-slate-800 dark:bg-[#0b1329]">
-          {/* Target Project Context HUD Header */}
+          {/* Project HUD Context Header */}
           {targetProject && (
             <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50/70 px-4 py-2 text-xs dark:border-slate-800 dark:bg-slate-950/40">
               <div className="flex items-center gap-2 truncate">
@@ -705,7 +994,7 @@ export function HarnessView({
                   <Terminal className="h-6 w-6" />
                 </div>
                 <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">
-                  QE Harness Active for {targetProject?.name || "Target"}
+                  QE Harness Active for {targetProject?.name || "Project"}
                 </h3>
                 <p className="max-w-md text-xs text-slate-500 mt-1">
                   Type <span className="font-mono font-bold text-indigo-500">/</span> to browse local skills and commands. Directly execute skills like <span className="font-mono text-indigo-500">/qe-discover</span>, <span className="font-mono text-indigo-500">/qe-plan</span>, or <span className="font-mono text-indigo-500">/security-audit</span>.
@@ -725,100 +1014,108 @@ export function HarnessView({
               </div>
             )}
 
-            {currentSession?.messages?.map((msg) => (
-              <div
-                key={msg.id}
-                className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-              >
-                {msg.role !== "user" && (
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-sm">
-                    <Bot className="h-4 w-4" />
-                  </div>
-                )}
+            {currentSession?.messages?.map((msg) => {
+              const isUser = msg.role === "user";
+              const isAssistant = msg.role === "assistant";
+              const agentInfo = AGENTS.find((a) => a.id === msg.agentId) || activeAgent;
 
+              return (
                 <div
-                  className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm shadow-sm ${
-                    msg.role === "user"
-                      ? "bg-indigo-600 text-white"
-                      : "border border-slate-200 bg-white text-slate-900 dark:border-slate-800 dark:bg-slate-900/90 dark:text-slate-100"
-                  }`}
+                  key={msg.id}
+                  className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"}`}
                 >
-                  {/* Thinking Reasoning Accordion */}
-                  {msg.thinking && (
-                    <details className="mb-3 rounded-lg border border-slate-200 bg-slate-50/80 p-2 text-xs dark:border-slate-800 dark:bg-slate-950/60">
-                      <summary className="flex cursor-pointer items-center gap-1.5 font-semibold text-slate-600 dark:text-slate-400">
-                        <Brain className="h-3.5 w-3.5 text-indigo-500" />
-                        <span>Harness Reasoning Process</span>
-                      </summary>
-                      <div className="mt-2 font-mono text-[11px] text-slate-600 whitespace-pre-wrap dark:text-slate-400 border-t border-slate-200/50 pt-2 dark:border-slate-800/50">
-                        {msg.thinking}
-                      </div>
-                    </details>
+                  {!isUser && (
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400">
+                      <agentInfo.icon className="h-4 w-4" />
+                    </div>
                   )}
 
-                  {/* Tool Call Cards */}
-                  {msg.toolCalls && msg.toolCalls.length > 0 && (
-                    <div className="mb-3 space-y-1.5">
-                      {msg.toolCalls.map((tc) => (
-                        <div
-                          key={tc.id}
-                          className="rounded-lg border border-slate-200 bg-slate-50 p-2 text-xs dark:border-slate-800 dark:bg-slate-950"
-                        >
-                          <div className="flex items-center justify-between">
-                            <span className="flex items-center gap-1.5 font-mono font-semibold text-slate-700 dark:text-slate-300">
-                              <Wrench className="h-3.5 w-3.5 text-amber-500" />
-                              {tc.name}
-                            </span>
-                            <span
-                              className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
-                                tc.status === "completed"
-                                  ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                                  : tc.status === "failed"
-                                  ? "bg-rose-500/10 text-rose-600"
-                                  : "bg-amber-500/10 text-amber-600 animate-pulse"
-                              }`}
-                            >
-                              {tc.status.toUpperCase()}
-                            </span>
-                          </div>
-                          {tc.result && (
-                            <details className="mt-1">
-                              <summary className="cursor-pointer text-[10px] text-slate-500">View output</summary>
-                              <pre className="mt-1 max-h-32 overflow-x-auto rounded bg-slate-100 p-1.5 text-[10px] font-mono text-slate-800 dark:bg-slate-900 dark:text-slate-200">
-                                {tc.result}
-                              </pre>
-                            </details>
-                          )}
+                  <div className={`max-w-[85%] space-y-2 ${isUser ? "items-end" : "items-start"}`}>
+                    {/* Header info */}
+                    <div className={`flex items-center gap-2 text-[11px] text-slate-400 ${isUser ? "justify-end" : "justify-start"}`}>
+                      <span className="font-semibold text-slate-700 dark:text-slate-300">
+                        {isUser ? "You" : agentInfo.name}
+                      </span>
+                      <span>·</span>
+                      <span>{new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                    </div>
+
+                    {/* Thinking Process Accordion */}
+                    {msg.thinking && (
+                      <details className="rounded-xl border border-indigo-100 bg-indigo-50/50 p-2 text-xs dark:border-indigo-950/50 dark:bg-indigo-950/20">
+                        <summary className="cursor-pointer font-mono font-semibold text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">
+                          <Brain className="h-3.5 w-3.5 animate-pulse" />
+                          <span>Specialist Thinking & Reasoning</span>
+                        </summary>
+                        <div className="mt-2 font-mono text-[11px] whitespace-pre-wrap text-slate-600 dark:text-slate-300 pl-2 border-l-2 border-indigo-400">
+                          {msg.thinking}
                         </div>
-                      ))}
-                    </div>
-                  )}
+                      </details>
+                    )}
 
-                  {/* Markdown Body */}
-                  {msg.content ? (
-                    <Markdown>{msg.content}</Markdown>
-                  ) : isExecuting && msg.role === "assistant" ? (
-                    <div className="flex items-center gap-2 text-xs text-slate-400 py-1">
-                      <Loader2 className="h-3.5 w-3.5 animate-spin text-indigo-500" />
-                      <span>Specialist executing in harness sandbox...</span>
-                    </div>
-                  ) : null}
+                    {/* Tool Call Cards */}
+                    {msg.toolCalls && msg.toolCalls.length > 0 && (
+                      <div className="space-y-1.5">
+                        {msg.toolCalls.map((tc) => (
+                          <div
+                            key={tc.id}
+                            className="rounded-xl border border-slate-200 bg-slate-50/80 p-2 text-xs dark:border-slate-800 dark:bg-slate-900/60"
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-1.5 font-mono font-semibold text-indigo-600 dark:text-indigo-400">
+                                <Wrench className="h-3.5 w-3.5" />
+                                <span>{tc.name}</span>
+                              </div>
+                              <span
+                                className={`rounded px-1.5 py-0.2 text-[10px] font-bold ${
+                                  tc.status === "completed"
+                                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                                    : tc.status === "running"
+                                    ? "bg-amber-500/10 text-amber-600 animate-pulse"
+                                    : "bg-rose-500/10 text-rose-600"
+                                }`}
+                              >
+                                {tc.status.toUpperCase()}
+                              </span>
+                            </div>
+                            {tc.result && (
+                              <div className="mt-1.5 font-mono text-[11px] bg-slate-100 p-2 rounded-lg dark:bg-slate-950 overflow-x-auto max-h-36 whitespace-pre-wrap">
+                                {typeof tc.result === "string" ? tc.result : JSON.stringify(tc.result, null, 2)}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
 
-                  <div className="mt-1 flex items-center justify-end text-[10px] opacity-60">
-                    <Clock className="mr-1 h-3 w-3" />
-                    {msg.createdAt > 0
-                      ? new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-                      : "just now"}
+                    {/* Message Body */}
+                    {msg.content && (
+                      <div
+                        className={`rounded-2xl p-3 text-sm shadow-sm ${
+                          isUser
+                            ? "bg-indigo-600 text-white"
+                            : "border border-slate-200 bg-white text-slate-800 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
+                        }`}
+                      >
+                        {isUser ? (
+                          <p className="whitespace-pre-wrap">{msg.content}</p>
+                        ) : (
+                          <Markdown>{msg.content}</Markdown>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Quick Command Pills Bar */}
-          <div className="flex flex-wrap items-center gap-1 border-t border-slate-200 bg-slate-50/50 px-3 py-1.5 dark:border-slate-800 dark:bg-slate-950/40">
-            <span className="text-[11px] font-bold text-slate-400 mr-1">Skills:</span>
+          {/* Quick Command Chips */}
+          <div className="flex items-center gap-1.5 px-3 py-1.5 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/30 overflow-x-auto">
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider shrink-0">
+              Skills:
+            </span>
             {["/qe-discover", "/qe-plan", "/qe-generate", "/qe-execute", "/qe-heal", "/security-audit"].map((cmd) => (
               <button
                 key={cmd}
@@ -831,7 +1128,7 @@ export function HarnessView({
             ))}
           </div>
 
-          {/* 3. Interactive Input Box with Slash Command Autocomplete Palette */}
+          {/* Interactive Input Box with Slash Command Autocomplete Palette */}
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -927,7 +1224,7 @@ export function HarnessView({
                     className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold shadow-sm"
                   >
                     <Square className="h-3.5 w-3.5 fill-current" />
-                    <span>Stop</span>
+                    <span>Stop Execution</span>
                     <span className="hidden sm:inline font-mono text-[10px] opacity-75">ESC</span>
                   </Button>
                 ) : (
@@ -944,13 +1241,13 @@ export function HarnessView({
               </div>
             </div>
             <div className="mt-1.5 flex items-center justify-between text-[11px] text-slate-400 px-1">
-              <span>Type <kbd className="rounded border px-1 font-mono text-[10px]">/</kbd> for skills · Enter to send · Shift+Enter for newline</span>
-              <span>Target: {targetProject?.name}</span>
+              <span>Type <span className="font-mono text-indigo-500">/</span> for skills · Enter to send · Shift+Enter for newline</span>
+              <span>Project: {targetProject?.name || "Active"}</span>
             </div>
           </form>
         </div>
 
-        {/* 4. Collapsible Inspector Drawer */}
+        {/* Right Pane: Collapsible Inspector Drawer */}
         {inspectorOpen && (
           <aside className="w-80 shrink-0 flex flex-col rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden dark:border-slate-800 dark:bg-[#0b1329]">
             {/* Inspector Navigation Tabs */}
@@ -1100,7 +1397,9 @@ export function HarnessView({
                         <span className="font-semibold text-slate-800 dark:text-slate-200">{rec.title}</span>
                         <Badge tone="indigo">{rec.type}</Badge>
                       </div>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400">{rec.detail}</p>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                        {typeof rec.detail === "string" ? rec.detail : JSON.stringify(rec.detail)}
+                      </p>
                     </div>
                   ))
                 ) : (
@@ -1164,6 +1463,66 @@ export function HarnessView({
           </aside>
         )}
       </div>
+
+      {/* 3. Create New Project Modal */}
+      {showNewProjectModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-[#0b1329]">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <FolderPlus className="h-5 w-5 text-indigo-600" />
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">Create New Project</h3>
+              </div>
+              <button
+                onClick={() => setShowNewProjectModal(false)}
+                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateProjectSubmit} className="mt-4 space-y-4">
+              <Field label="Project Name">
+                <input
+                  required
+                  type="text"
+                  value={newProjName}
+                  onChange={(e) => setNewProjName(e.target.value)}
+                  placeholder="e.g. NextGen Microservices"
+                  className={inputClass}
+                />
+              </Field>
+
+              <Field label="Description">
+                <textarea
+                  rows={2}
+                  value={newProjDesc}
+                  onChange={(e) => setNewProjDesc(e.target.value)}
+                  placeholder="e.g. Core microservices under test with 8 quality gates"
+                  className={inputClass}
+                />
+              </Field>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => setShowNewProjectModal(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  busy={newProjBusy}
+                  disabled={!newProjName.trim()}
+                >
+                  Create Project
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

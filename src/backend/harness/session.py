@@ -129,6 +129,7 @@ class AgentSessionManager:
                             "name": data.get("name"),
                             "mode": data.get("mode"),
                             "activeAgentId": data.get("activeAgentId"),
+                            "projectId": data.get("projectId") or "prj_agentic_qe",
                             "messagesCount": len(data.get("messages", [])),
                             "todosCount": len(data.get("todos", [])),
                             "updatedAt": data.get("updatedAt", 0),
