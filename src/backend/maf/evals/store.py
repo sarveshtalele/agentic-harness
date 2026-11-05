@@ -115,8 +115,16 @@ def detail(agent: str) -> dict:
             spread[metric] = {"runs": len(runs), "min": min(runs), "max": max(runs), "mean": mean(runs)}
     live = [r for r in every if r["source"] == "live"]
     info = METRICS_BY_AGENT.get(agent)
+    def _metric_entry(m: str) -> dict:
+        if not applies(agent, m):
+            return {"metric": m, "label": LABELS[m], "state": "n/a", "status": "n/a"}
+        row = latest_by_metric.get(m)
+        if not row:
+            return {"metric": m, "label": LABELS[m], "state": "not_measured", "status": "not_measured", "reason": "Not measured: no evaluation has run"}
+        return {"metric": m, "label": LABELS[m], "state": row.get("status", "measured"), **row}
+
     return {"agent": agent, "applies": {m: applies(agent, m) for m in LABELS}, "recall_basis": info[2] if info else "", "agent_measure": info[3] if info else "",
-            "metrics": [{"metric": m, "label": LABELS[m], **({"state": "n/a"} if not applies(agent, m) else latest_by_metric.get(m, {"state": "not_measured", "reason": "Not measured: no evaluation has run"}))} for m in LABELS],
+            "metrics": [_metric_entry(m) for m in LABELS],
             "trend": [{"metric": m, "points": [{"prompt_ref": ref, "mean": mean(vals), "runs": len(vals), "min": min(vals), "max": max(vals)} for ref, vals in by.items()]} for m, by in trend.items()],
             "spread": spread, "live": {"replies": len(live), "citations": sum(r["n"] for r in live), "mean": (sum(r["value"] * r["n"] for r in live) / max(1, sum(r["n"] for r in live))) if live else None}}
 

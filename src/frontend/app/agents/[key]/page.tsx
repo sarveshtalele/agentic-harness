@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Play } from "lucide-react";
+import { ArrowLeft, Play, Info, ShieldCheck, Lock, AlertTriangle, ShieldAlert, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -25,6 +25,14 @@ const CHANGE_CONTROLS: [string, string][] = [
   ["Named human approval", "Nothing is committed without it, and agents cannot approve."],
   ["Disable switch and token limits", "The admin can stop it at once."],
 ];
+
+function InfoTip({ text }: { text: string }) {
+  return (
+    <span className="inline-flex items-center ml-1 text-slate-400 hover:text-indigo-500 cursor-help transition" title={text}>
+      <Info className="h-3.5 w-3.5" />
+    </span>
+  );
+}
 
 function Detail({ agentKey }: { agentKey: string }) {
   const { user } = useAuth();
@@ -134,11 +142,97 @@ function Detail({ agentKey }: { agentKey: string }) {
             <tbody>{item.calls_recent.map((c: any) => <tr key={c.id} className="border-t border-slate-200 dark:border-slate-800" title={c.error}><td className="py-1">{when(c.created_at)}</td><td>{c.source}</td><td>{c.tokens_in + c.tokens_out}</td><td>{c.latency_ms}</td><td>{c.tool_calls}</td><td><Badge tone={c.status === "ok" ? "emerald" : "rose"}>{c.status}</Badge></td></tr>)}</tbody></table></div>
         ) : <p className="text-sm text-slate-500">No calls recorded.</p>}
       </Card>
-      {item.events_recent.length > 0 && (
-        <Card title="Guardrail events">
-          <ul className="space-y-1 text-xs">{item.events_recent.map((e: any) => <li key={e.id}><Badge tone="amber">{e.action}</Badge> <b>{e.kind.replace(/_/g, " ")}</b> {e.detail} <span className="text-slate-500">{when(e.created_at)}</span></li>)}</ul>
-        </Card>
-      )}
+      {/* Guardrail Policy Architecture Cards */}
+      <Card title="Active Security Guardrails & Enforcements">
+        <div className="grid gap-3 md:grid-cols-2 text-xs">
+          <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-3 dark:border-slate-800 dark:bg-slate-900/40 space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                <ShieldCheck className="h-4 w-4 text-emerald-500" />
+                Prompt Injection Demarcation
+              </span>
+              <Badge tone="emerald">Active</Badge>
+            </div>
+            <p className="text-slate-500 dark:text-slate-400">
+              NVIDIA Skill Specter Tier 1 standard: XML boundary framing (`&lt;skill&gt;`, `&lt;reference&gt;`, `TASK:`) and automatic neutralization of hostile prompt overrides.
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-3 dark:border-slate-800 dark:bg-slate-900/40 space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                <Lock className="h-4 w-4 text-indigo-500" />
+                Zero-Trust Assertion Preservation
+              </span>
+              <Badge tone="indigo">Enforced</Badge>
+            </div>
+            <p className="text-slate-500 dark:text-slate-400">
+              Cloudflare P0 standard: Healing and test-generation tools strictly reject candidate patches that delete, weaken, or substitute assertions with trivial checks.
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-3 dark:border-slate-800 dark:bg-slate-900/40 space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                <ShieldAlert className="h-4 w-4 text-amber-500" />
+                Sandbox Boundary &amp; Path Traversal
+              </span>
+              <Badge tone="amber">Strict</Badge>
+            </div>
+            <p className="text-slate-500 dark:text-slate-400">
+              Canonical realpath boundary isolation with NUL byte guards. Strict directory containment prevents path traversal and writes to protected folders (`.git`, `.venv`, `.qe`).
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-3 dark:border-slate-800 dark:bg-slate-900/40 space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                <AlertTriangle className="h-4 w-4 text-rose-500" />
+                Secret Scanner &amp; Redaction
+              </span>
+              <Badge tone="rose">Real-time</Badge>
+            </div>
+            <p className="text-slate-500 dark:text-slate-400">
+              Shannon entropy calculation and multi-vendor regex scanning (GitHub tokens, AWS, GCP, Slack, private keys) auto-redacting sensitive credentials before model consumption.
+            </p>
+          </div>
+        </div>
+      </Card>
+
+      {/* Recent Guardrail Interceptions as Individual Cards */}
+      <Card title={`Recent Guardrail Interception Events (${item.events_recent.length})`}>
+        {item.events_recent.length > 0 ? (
+          <div className="grid gap-2.5 md:grid-cols-2">
+            {item.events_recent.map((e: any) => (
+              <div
+                key={e.id}
+                className="rounded-xl border border-amber-200/80 bg-amber-50/30 p-3 text-xs dark:border-amber-900/50 dark:bg-amber-950/20 space-y-2"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200">
+                    <ShieldAlert className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                    <span>{e.kind.replace(/_/g, " ")}</span>
+                  </div>
+                  <Badge tone={e.action === "neutralize" || e.action === "neutralized" ? "amber" : "rose"}>
+                    {e.action}
+                  </Badge>
+                </div>
+
+                <div className="rounded-lg bg-slate-900 p-2 font-mono text-[11px] text-amber-200 break-all border border-slate-800">
+                  {e.detail}
+                </div>
+
+                <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400">
+                  <span>Enforcement: Automated Runtime Filter</span>
+                  <span>{when(e.created_at)}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-slate-500 py-3 text-center">No security guardrail violations detected on this agent.</p>
+        )}
+      </Card>
     </div>
   );
 }

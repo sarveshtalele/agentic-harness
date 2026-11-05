@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { AppShell } from "../../components/AppShell";
-import { Badge, Button, Empty, ErrorNote, PageTitle, Spinner } from "../../components/ui";
+import { Badge, Button, Empty, ErrorNote, Markdown, PageTitle, Spinner } from "../../components/ui";
 import { api } from "../../lib/api";
 import { 
   ShieldCheck, 
@@ -336,9 +336,9 @@ export default function SkillsPage() {
                 {loadingDetail ? (
                   <div className="py-8 text-center"><Spinner /></div>
                 ) : detail?.body ? (
-                  <pre className="font-mono max-h-80 overflow-auto whitespace-pre-wrap rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs text-slate-800 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
-                    {detail.body}
-                  </pre>
+                  <div className="max-h-96 overflow-y-auto rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs dark:border-slate-800 dark:bg-slate-900 leading-relaxed text-slate-800 dark:text-slate-200">
+                    <Markdown>{detail.body}</Markdown>
+                  </div>
                 ) : (
                   <p className="text-xs text-slate-400 italic">No detailed instruction body available.</p>
                 )}

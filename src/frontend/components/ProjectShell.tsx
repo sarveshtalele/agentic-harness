@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, Bot, Bug, CheckSquare, ChevronLeft, ChevronRight, Code2, FileText, Files, FolderGit2, History, Home, Lock, ScrollText, Settings, ShieldCheck, Terminal } from "lucide-react";
+import { Activity, Bot, Bug, CheckSquare, ChevronLeft, ChevronRight, Code2, Cpu, FileText, Files, FolderGit2, History, Home, Lock, ScrollText, Settings, ShieldCheck, Terminal } from "lucide-react";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from "react";
@@ -81,6 +81,9 @@ export function ProjectShell({ children }: { children: ReactNode }) {
           })}
         </nav>
         <div className="space-y-1 border-t border-slate-200 pt-2 dark:border-slate-800">
+          <Link href="/mcp" title="MCP Servers" className={`flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-semibold text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-900 ${collapsed ? "justify-center" : ""}`}>
+            <Cpu className="h-4 w-4 shrink-0" /> {!collapsed && "MCP Servers"}
+          </Link>
           <Link href="/templates" title="Templates" className={`flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-semibold text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-900 ${collapsed ? "justify-center" : ""}`}>
             <FileText className="h-4 w-4 shrink-0" /> {!collapsed && "Templates"}
           </Link>

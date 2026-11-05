@@ -1,5 +1,5 @@
 """REST API, one router per area."""
-from backend.api import auth, chat, documents, findings, governance, harness, logs, observability, projects, repository, runs, settings, skills, templates
+from backend.api import auth, chat, documents, findings, governance, harness, logs, observability, projects, repository, runs, settings, skills, templates, mcp
 
 ROUTERS = [
     harness.router,
@@ -16,4 +16,5 @@ ROUTERS = [
     settings.router,
     skills.router,
     templates.router,
+    mcp.router,
 ]

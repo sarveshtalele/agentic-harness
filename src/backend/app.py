@@ -52,6 +52,8 @@ async def lifespan(_: FastAPI):
     database.migrate()
     from backend.core.seed_data import seed_database
     seed_database()
+    from backend.api.mcp import seed_mcp_servers
+    seed_mcp_servers()
     prompts.seed()
     skill_lib.load()  # a skill MAF cannot load is a warning in the log and is absent
     files.seed_templates()

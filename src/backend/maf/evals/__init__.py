@@ -109,7 +109,8 @@ def skill_cases(agent_key: str) -> list[dict]:
 
 
 def benchmarks() -> list[str]:
-    return sorted(p.name for p in BENCH_DIR.iterdir() if (p / "labels.json").is_file()) if BENCH_DIR.is_dir() else []
+    # Exclude legacy demo benchmarks 'finance' and 'shop' per user specification
+    return sorted(p.name for p in BENCH_DIR.iterdir() if (p / "labels.json").is_file() and p.name not in {"finance", "shop"}) if BENCH_DIR.is_dir() else []
 
 
 def _labels(name: str) -> dict:
@@ -223,6 +224,8 @@ def _aggregate(agent_key: str, prompt_ref: str, results: list[dict], ragas: dict
     base = {"eval_id": eval_id, "batch": batch, "benchmark": benchmark, "labels_reviewed": reviewed}
     cases = [r for r in results if r.get("measured") is not None]
     wanted = {m for r in cases for m in r.get("wanted", [])}
+    if ragas:
+        wanted |= {m for m in store.RAGAS if store.applies(agent_key, m)}
     for metric in ("groundedness", "faithfulness", "recall", "f1"):  # the four tiles always get a row, n/a where they do not apply
         if not store.applies(agent_key, metric):
             store.record(agent_key, prompt_ref, metric, status="n/a", reason="Does not apply to this agent", **base)
@@ -263,7 +266,8 @@ def _aggregate(agent_key: str, prompt_ref: str, results: list[dict], ragas: dict
 
 async def _ragas(agent_key: str, results: list[dict]) -> dict:
     """Per metric: the values with their cases, or the status and reason there are none. One batch through MAF's Evaluator interface."""
-    asked = [(r, [m for m in r["wanted"] if m in store.RAGAS]) for r in results if r.get("_item") and any(m in store.RAGAS for m in r.get("wanted", []))]
+    target_metrics = [m for m in store.RAGAS if store.applies(agent_key, m)]
+    asked = [(r, [m for m in r.get("wanted", target_metrics) if m in store.RAGAS] or target_metrics) for r in results if r.get("_item")]
     if not asked:
         return {}
     model_name = next((r["model"] for r, _ in asked if r.get("model")), "")

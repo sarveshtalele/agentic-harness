@@ -7,20 +7,25 @@ import { Badge, Button, Card, ErrorNote, inputClass } from "./ui";
 
 // What a tile or row reads. A value exists only when the metric really ran; every other state says why not.
 export function scoreText(m: any): string {
-  if (m.state === "measured") return `${Math.round(m.value * 100)}%`;
-  return { "n/a": "n/a", not_measured: "Not measured", failed: "Failed", unavailable: "Not available", inconclusive: "Inconclusive" }[m.state as string] ?? "Not measured";
+  const state = m?.state || m?.status;
+  if (state === "measured" && m?.value !== null && m?.value !== undefined) {
+    return `${Math.round(m.value * 100)}%`;
+  }
+  return { "n/a": "n/a", not_measured: "Not measured", failed: "Failed", unavailable: "Not available", inconclusive: "Inconclusive" }[state as string] ?? "Not measured";
 }
 
 function tone(m: any): string | undefined {
-  if (m.state !== "measured") return undefined;
+  const state = m?.state || m?.status;
+  if (state !== "measured" || m?.value === null || m?.value === undefined) return undefined;
   return m.value >= 0.8 ? "emerald" : m.value >= 0.5 ? "amber" : "rose";
 }
 
 export function Tile({ m }: { m: any }) {
   const colors: Record<string, string> = { emerald: "text-emerald-600", amber: "text-amber-600", rose: "text-rose-600" };
-  const note = m.state === "measured" ? [m.self_graded ? "self-graded" : "", m.labels === "not reviewed" || m.labels_reviewed === false ? "labels not yet reviewed" : ""].filter(Boolean).join(", ") : "";
+  const state = m?.state || m?.status;
+  const note = state === "measured" ? [m.self_graded ? "self-graded" : "", m.labels === "not reviewed" || m.labels_reviewed === false ? "labels not yet reviewed" : ""].filter(Boolean).join(", ") : "";
   return (
-    <span className="rounded-lg border border-slate-200 p-2 dark:border-slate-800" data-testid="metric-tile" title={m.reason || (m.state === "n/a" ? "This metric does not apply to this agent" : "")}>
+    <span className="rounded-lg border border-slate-200 p-2 dark:border-slate-800" data-testid="metric-tile" title={m.reason || (state === "n/a" ? "This metric does not apply to this agent" : "")}>
       <span className={`block text-base font-bold ${colors[tone(m) ?? ""] ?? "text-slate-500"}`}>{scoreText(m)}</span>
       <span className="block text-[11px] text-slate-500">{m.label}</span>
       {note && <span className="block text-[10px] text-amber-600">{note}</span>}
@@ -68,7 +73,7 @@ export function AgentScores({ agentKey, admin, enabled }: { agentKey: string; ad
         {data.recall_basis && <p className="mb-2 text-xs text-slate-500">Recall and F1 are measured against: {data.recall_basis}. Agent-specific: {data.agent_measure}.</p>}
         {admin && (
           <div className="mb-3 flex flex-wrap items-end gap-3 text-xs">
-            <label>Benchmark<select aria-label="Benchmark" className={`${inputClass} mt-1`} value={benchmark} onChange={(e) => setBenchmark(e.target.value)}><option value="">Agent cases only</option>{(setup?.benchmarks ?? []).map((b: string) => <option key={b} value={b}>{b}</option>)}</select></label>
+            <label>Benchmark<select aria-label="Benchmark" className={`${inputClass} mt-1`} value={benchmark} onChange={(e) => setBenchmark(e.target.value)}><option value="">Agent cases only</option>{(setup?.benchmarks ?? []).filter((b: string) => b !== "finance" && b !== "shop").map((b: string) => <option key={b} value={b}>{b}</option>)}</select></label>
             <label>Repeats<select aria-label="Repeats" className={`${inputClass} mt-1`} value={repeats} onChange={(e) => setRepeats(Number(e.target.value))}>{[1, 2, 3, 5].map((n) => <option key={n} value={n}>{n}</option>)}</select></label>
             <label className="flex items-center gap-1.5"><input type="checkbox" checked={ragas} onChange={(e) => setRagas(e.target.checked)} /> Include model-graded metrics (uses tokens)</label>
             {setup && <span className="text-slate-500">{setup.ragas.installed ? `RAGAS installed. Judge: ${setup.ragas.judge_model || "none set, so scores are self-graded"}` : setup.ragas.reason}</span>}

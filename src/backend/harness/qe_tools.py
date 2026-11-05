@@ -205,7 +205,11 @@ def build_qe_tools(workspace_dir: str) -> List[FunctionTool]:
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE
             )
-            stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=30.0)
+            timeout_val = args.get("timeout", 600.0)
+            if timeout_val is None:
+                stdout, stderr = await proc.communicate()
+            else:
+                stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=float(timeout_val))
             exit_code = proc.returncode
 
             return {
@@ -216,7 +220,7 @@ def build_qe_tools(workspace_dir: str) -> List[FunctionTool]:
                 "success": exit_code == 0
             }
         except asyncio.TimeoutError:
-            return {"command": command, "error": "Execution timed out after 30 seconds", "exitCode": -1}
+            return {"command": command, "error": f"Execution timed out after {timeout_val} seconds", "exitCode": -1}
         except Exception as e:
             return {
                 "command": command,

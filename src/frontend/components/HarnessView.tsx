@@ -31,6 +31,7 @@ import {
   Pencil,
   Play,
   Plus,
+  RefreshCw,
   Search,
   Send,
   Shield,
@@ -43,6 +44,8 @@ import {
   Wrench,
   X,
   Zap,
+  Code2,
+  Bug,
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -148,6 +151,65 @@ const CORE_COMMANDS = [
   { cmd: "/skills", desc: "Browse 59 discovered local machine skills", icon: Zap },
 ];
 
+const HARNESS_GOALS = [
+  {
+    id: "brd",
+    title: "Create BRD",
+    desc: "Generate full Business Requirements Document with 8 quality gates & compliance",
+    prompt: "Create a complete Business Requirements Document (BRD) with all 8 quality gates, Cloudflare and NVIDIA Specter compliance tables for this project.",
+    icon: FileText,
+    badge: "Requirements"
+  },
+  {
+    id: "prd",
+    title: "Create PRD",
+    desc: "Author Product Requirements Document with user stories & Gherkin criteria",
+    prompt: "Create a comprehensive Product Requirements Document (PRD) with user stories and Gherkin acceptance criteria.",
+    icon: Layers,
+    badge: "Product"
+  },
+  {
+    id: "lifecycle",
+    title: "Run Testing Lifecycle",
+    desc: "Execute autonomous test engineering lifecycle (Gate 0 through Gate 8 sign-off)",
+    prompt: "Run the complete Quality Engineering testing lifecycle for this project across all 8 quality gates.",
+    icon: RefreshCw,
+    badge: "Full QE Loop"
+  },
+  {
+    id: "feature",
+    title: "Feature Building",
+    desc: "Implement and verify features end-to-end in project sandbox",
+    prompt: "Start autonomous feature building in sandbox environment: analyze codebase, design test suite, and implement required code.",
+    icon: Code2,
+    badge: "Sandbox Build"
+  },
+  {
+    id: "bugfix",
+    title: "GitHub Bug Fix & PR",
+    desc: "Scan repository, diagnose broken tests or defect drift, heal code & create PR",
+    prompt: "Scan repository for defects, diagnose test drift, heal broken test cases with assertion preservation, and prepare a GitHub PR.",
+    icon: Bug,
+    badge: "Defect Repair"
+  },
+  {
+    id: "security",
+    title: "Run Security Audit",
+    desc: "Perform Cloudflare Zero-Trust & NVIDIA Skill Specter security evaluation",
+    prompt: "Execute comprehensive security audit using Cloudflare Zero-Trust methodology and NVIDIA Skill Specter scorecard.",
+    icon: ShieldCheck,
+    badge: "Security Audit"
+  },
+  {
+    id: "connect_repo",
+    title: "Connect & Scan Repo",
+    desc: "Clone target repository into sandbox, scan AST manifests, and generate test strategy",
+    prompt: "Connect and scan repository: inspect AST dependencies, package manifests, and generate test strategy.",
+    icon: FolderGit2,
+    badge: "Intake Scan"
+  }
+];
+
 function formatRelativeTime(timestamp: number): string {
   if (!timestamp) return "";
   const diff = Math.max(0, Date.now() - timestamp);
@@ -204,9 +266,70 @@ export function HarnessView({
   const [showModeDropdown, setShowModeDropdown] = useState(false);
 
   // Inspector Drawer tabs: gates | evals | todos | ledger | skills
-  const [activeTab, setActiveTab] = useState<"gates" | "evals" | "todos" | "ledger" | "skills">("gates");
+  const [activeTab, setActiveTab] = useState<"gates" | "evals" | "todos" | "ledger" | "skills">("skills");
   const [inspectorOpen, setInspectorOpen] = useState(true);
   const [error, setError] = useState("");
+
+  // Dynamically compute skills loaded in this session with execution metadata
+  const sessionLoadedSkills = useMemo(() => {
+    const list: Array<{
+      name: string;
+      timestamp: number;
+      status: string;
+      args?: any;
+      agentName?: string;
+      durationMs?: number;
+    }> = [];
+
+    const sess: any = currentSession;
+    if (sess?.toolsUsed) {
+      Object.entries(sess.toolsUsed).forEach(([name, count]) => {
+        list.push({
+          name,
+          timestamp: currentSession?.updatedAt || Date.now(),
+          status: "active",
+          args: { calls: count },
+          agentName: "Agent",
+          durationMs: 85
+        });
+      });
+    }
+
+    if (currentSession?.messages) {
+      currentSession.messages.forEach((msg: any) => {
+        const toolCalls = msg.toolCalls || msg.tool_calls;
+        if (toolCalls) {
+          toolCalls.forEach((tc: any) => {
+            if (!list.some((s) => s.name === tc.name && s.timestamp === (tc.timestamp || msg.createdAt))) {
+              list.push({
+                name: tc.name,
+                timestamp: tc.timestamp || msg.createdAt,
+                status: tc.status || "completed",
+                args: tc.args,
+                agentName: AGENTS.find((a) => a.id === msg.agentId)?.name || "Agent",
+                durationMs: tc.durationMs || 120
+              });
+            }
+          });
+        }
+        if (msg.role === "user" && msg.content.startsWith("/")) {
+          const cmd = msg.content.slice(1).split(" ")[0];
+          if (!list.some((s) => s.name === cmd)) {
+            list.push({
+              name: cmd,
+              timestamp: msg.createdAt,
+              status: "executed",
+              args: { prompt: msg.content },
+              agentName: "User Directive",
+              durationMs: 45
+            });
+          }
+        }
+      });
+    }
+
+    return list;
+  }, [currentSession]);
 
   // Skills & NVIDIA Skill Specter state
   const [skillsCatalog, setSkillsCatalog] = useState<SkillItem[]>([]);
@@ -1217,22 +1340,47 @@ export function HarnessView({
                   <Terminal className="h-6 w-6" />
                 </div>
                 <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">
-                  QE Harness Active for {targetProject?.name || "Project"}
+                  Autonomous QE Harness Active · {targetProject?.name || "Project"}
                 </h3>
-                <p className="max-w-md text-xs text-slate-500 mt-1">
-                  Type <span className="font-mono font-bold text-indigo-500">/</span> to browse local skills and commands. Directly execute skills like <span className="font-mono text-indigo-500">/qe-discover</span>, <span className="font-mono text-indigo-500">/qe-plan</span>, or <span className="font-mono text-indigo-500">/security-audit</span>.
+                <p className="max-w-lg text-xs text-slate-500 mt-1">
+                  Select a core Quality Engineering goal below, or type your instructions. The harness automatically routes tasks to specialized MAF agents.
                 </p>
-                <div className="mt-4 flex flex-wrap justify-center gap-1.5 max-w-lg">
-                  {CORE_COMMANDS.slice(0, 6).map((sc) => (
-                    <button
-                      key={sc.cmd}
-                      onClick={() => handleSendMessage(sc.cmd)}
-                      className="flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:border-indigo-400 hover:text-indigo-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
-                    >
-                      <span className="font-mono text-indigo-500">{sc.cmd}</span>
-                      <span className="text-[11px] text-slate-400">· {sc.desc.split(" ")[0]}</span>
-                    </button>
-                  ))}
+
+                {/* Rich Goal Cards Grid */}
+                <div className="mt-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 max-w-3xl text-left">
+                  {HARNESS_GOALS.map((g) => {
+                    const Icon = g.icon;
+                    return (
+                      <button
+                        key={g.id}
+                        onClick={() => handleSendMessage(g.prompt)}
+                        className="group flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-3 shadow-xs hover:border-indigo-500 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/60 transition text-left"
+                      >
+                        <div className="space-y-1.5">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <div className="rounded-lg bg-indigo-50 p-1.5 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400 group-hover:scale-105 transition">
+                                <Icon className="h-4 w-4" />
+                              </div>
+                              <span className="text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition">
+                                {g.title}
+                              </span>
+                            </div>
+                            <span className="rounded bg-indigo-50 px-1.5 py-0.5 text-[9px] font-bold text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400">
+                              {g.badge}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                            {g.desc}
+                          </p>
+                        </div>
+                        <div className="mt-2.5 flex items-center gap-1 text-[10px] font-semibold text-indigo-500 group-hover:translate-x-0.5 transition">
+                          <span>Execute Goal</span>
+                          <ArrowRight className="h-3 w-3" />
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -1682,17 +1830,27 @@ export function HarnessView({
         {/* Right Pane: Collapsible Inspector Drawer (Gates, Evals, Tasks, Ledger, Skills) */}
         {inspectorOpen && (
           <aside className="w-80 shrink-0 flex flex-col rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden dark:border-slate-800 dark:bg-[#0b1329]">
-            {/* Inspector Navigation Tabs: 8 Gates, Evals, Tasks, Ledger, Skills */}
+            {/* Inspector Navigation Tabs: Loaded Skills, Session Tasks, Evals, Ledger */}
             <div className="flex border-b border-slate-200 bg-slate-50/80 text-[11px] font-semibold dark:border-slate-800 dark:bg-slate-950/60">
               <button
-                onClick={() => setActiveTab("gates")}
+                onClick={() => setActiveTab("skills")}
                 className={`flex-1 py-2 text-center transition ${
-                  activeTab === "gates"
+                  activeTab === "skills"
                     ? "border-b-2 border-indigo-600 text-indigo-600 bg-white dark:bg-[#0b1329] dark:text-indigo-400 font-bold"
                     : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
                 }`}
               >
-                8 Gates
+                Skills ({sessionLoadedSkills.length})
+              </button>
+              <button
+                onClick={() => setActiveTab("todos")}
+                className={`flex-1 py-2 text-center transition ${
+                  activeTab === "todos"
+                    ? "border-b-2 border-indigo-600 text-indigo-600 bg-white dark:bg-[#0b1329] dark:text-indigo-400 font-bold"
+                    : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                }`}
+              >
+                Tasks ({currentSession?.todos?.length || 0})
               </button>
               <button
                 onClick={() => setActiveTab("evals")}
@@ -1705,16 +1863,6 @@ export function HarnessView({
                 Evals
               </button>
               <button
-                onClick={() => setActiveTab("todos")}
-                className={`flex-1 py-2 text-center transition ${
-                  activeTab === "todos"
-                    ? "border-b-2 border-indigo-600 text-indigo-600 bg-white dark:bg-[#0b1329] dark:text-indigo-400 font-bold"
-                    : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-                }`}
-              >
-                Tasks
-              </button>
-              <button
                 onClick={() => setActiveTab("ledger")}
                 className={`flex-1 py-2 text-center transition ${
                   activeTab === "ledger"
@@ -1722,68 +1870,9 @@ export function HarnessView({
                     : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
                 }`}
               >
-                Ledger
-              </button>
-              <button
-                onClick={() => setActiveTab("skills")}
-                className={`flex-1 py-2 text-center transition ${
-                  activeTab === "skills"
-                    ? "border-b-2 border-indigo-600 text-indigo-600 bg-white dark:bg-[#0b1329] dark:text-indigo-400 font-bold"
-                    : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-                }`}
-              >
-                Skills
+                Ledger ({currentSession?.ledger?.length || 0})
               </button>
             </div>
-
-            {/* Tab 1: 8 Quality Gates for Target Project */}
-            {activeTab === "gates" && (
-              <div className="flex-1 overflow-y-auto p-3 space-y-2 text-xs">
-                <div className="flex items-center justify-between pb-1">
-                  <span className="font-bold text-slate-700 dark:text-slate-300">
-                    Quality Gates ({targetProject?.name})
-                  </span>
-                  {selectedProjectId && (
-                    <Link href={`/projects/${selectedProjectId}/qe`} className="text-[11px] text-indigo-500 hover:underline">
-                      QE Studio
-                    </Link>
-                  )}
-                </div>
-                {gates.map((g: any) => {
-                  const isApproved = g.status === "approved";
-                  const isRevise = g.status === "revise";
-                  const isRejected = g.status === "rejected";
-                  return (
-                    <div
-                      key={g.gate}
-                      className="flex items-center justify-between rounded-lg border border-slate-200 p-2 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50"
-                    >
-                      <div className="min-w-0 pr-2">
-                        <div className="font-semibold text-slate-800 dark:text-slate-200 truncate">
-                          G{g.gate} {g.name}
-                        </div>
-                        <div className="text-[10px] text-slate-400 truncate">
-                          {g.decided_by_name || "Pending evaluation"}
-                        </div>
-                      </div>
-                      <span
-                        className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold ${
-                          isApproved
-                            ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                            : isRevise
-                            ? "bg-amber-500/10 text-amber-600"
-                            : isRejected
-                            ? "bg-rose-500/10 text-rose-600"
-                            : "bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
-                        }`}
-                      >
-                        {g.status.toUpperCase()}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
 
             {/* Tab 2: Agent Evaluations (RAGAS, Faithfulness, Groundedness, Recall@K) */}
             {activeTab === "evals" && (
@@ -1961,76 +2050,62 @@ export function HarnessView({
               </div>
             )}
 
-            {/* Tab 5: Recreated Skills Section as Rich Cards with NVIDIA Skill Specter */}
+            {/* Tab: Loaded Skills in Active Chat Session */}
             {activeTab === "skills" && (
               <div className="flex-1 overflow-y-auto p-3 space-y-2 text-xs">
-                {/* Search Box */}
-                <div className="relative mb-2">
-                  <Search className="absolute left-2.5 top-2 h-3.5 w-3.5 text-slate-400" />
-                  <input
-                    type="text"
-                    value={skillSearchQuery}
-                    onChange={(e) => setSkillSearchQuery(e.target.value)}
-                    placeholder={`Search ${skillsCatalog.length} skills...`}
-                    className="w-full rounded-lg border border-slate-200 bg-slate-50 py-1 pl-8 pr-2 text-xs focus:outline-none focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-900 text-slate-800 dark:text-slate-200"
-                  />
-                </div>
-
                 <div className="flex items-center justify-between pb-1">
                   <span className="font-bold text-slate-700 dark:text-slate-300">
-                    Discovered Skills ({filteredSkills.length})
+                    Loaded Skills ({sessionLoadedSkills.length})
                   </span>
                   <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold">
-                    🛡️ NVIDIA Specter
+                    ⚡ Live Context
                   </span>
                 </div>
 
-                {filteredSkills.length > 0 ? (
+                {sessionLoadedSkills.length > 0 ? (
                   <div className="space-y-2">
-                    {filteredSkills.map((sk) => {
-                      const score = sk.specterScore || 98;
-                      const grade = sk.specterGrade || "A+";
-                      const cmd = `/${sk.name}`;
-
-                      return (
-                        <div
-                          key={sk.name}
-                          onClick={() => setPreviewSkill(sk)}
-                          className="cursor-pointer rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm hover:border-indigo-500 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/60 transition space-y-1.5 group"
-                        >
-                          {/* Card Header */}
-                          <div className="flex items-center justify-between">
-                            <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400 group-hover:underline">
-                              {cmd}
-                            </span>
-                            <span className="rounded bg-emerald-50 px-1.5 py-0.5 font-mono text-[10px] font-bold text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                              🛡️ {score}/100 {grade}
-                            </span>
-                          </div>
-
-                          <div className="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate">
-                            {sk.displayName}
-                          </div>
-
-                          <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2">
-                            {sk.description || `Autonomous ${sk.displayName} capability`}
-                          </p>
-
-                          {/* Card Footer: Assigned Agent & Preview Pill */}
-                          <div className="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-slate-800/80 text-[10px]">
-                            <span className="text-slate-400 truncate max-w-[140px]">
-                              {sk.assignedAgent || "MAF Specialist"}
-                            </span>
-                            <span className="text-indigo-600 dark:text-indigo-400 font-semibold group-hover:underline">
-                              Preview & Inspect →
-                            </span>
-                          </div>
+                    {sessionLoadedSkills.map((sk, idx) => (
+                      <div
+                        key={`${sk.name}-${idx}`}
+                        className="rounded-xl border border-slate-200 bg-white p-2.5 shadow-xs dark:border-slate-800 dark:bg-slate-900/60 transition space-y-1.5"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400 text-xs">
+                            /{sk.name}
+                          </span>
+                          <span className="rounded bg-emerald-50 px-1.5 py-0.5 font-mono text-[9px] font-bold text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                            {sk.status.toUpperCase()}
+                          </span>
                         </div>
-                      );
-                    })}
+
+                        <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400">
+                          <span>Agent: <b className="text-slate-700 dark:text-slate-300">{sk.agentName || "Harness Specialist"}</b></span>
+                          <span>{new Date(sk.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</span>
+                        </div>
+
+                        {sk.args && (
+                          <details className="mt-1">
+                            <summary className="cursor-pointer text-[10px] text-indigo-500 hover:underline">
+                              Execution Metadata &amp; Arguments
+                            </summary>
+                            <pre className="mt-1 max-h-32 overflow-x-auto rounded bg-slate-100 p-1.5 font-mono text-[9px] text-slate-700 dark:bg-slate-950 dark:text-slate-300 whitespace-pre-wrap">
+                              {JSON.stringify(sk.args, null, 2)}
+                            </pre>
+                          </details>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 ) : (
-                  <p className="text-center py-6 text-slate-400">No matching skills found.</p>
+                  <div className="text-center py-12 px-3 text-slate-400 space-y-2">
+                    <div className="h-10 w-10 mx-auto rounded-xl bg-slate-100 dark:bg-slate-800/80 flex items-center justify-center text-slate-500">
+                      <Cpu className="h-5 w-5" />
+                    </div>
+                    <p className="font-semibold text-slate-700 dark:text-slate-300">No Skills Loaded Yet</p>
+                    <p className="text-[11px] text-slate-500 max-w-xs mx-auto">
+                      Skills are loaded dynamically into session context as you execute goals or instruct the harness.
+                    </p>
+                  </div>
                 )}
               </div>
             )}

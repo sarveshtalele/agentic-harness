@@ -45,3 +45,7 @@ def project_dir(project_id: str) -> Path:
 
 def repo_dir(project_id: str) -> Path:
     return project_dir(project_id) / "repo"
+
+
+def sandbox_dir(project_id: str) -> Path:
+    return project_dir(project_id) / "sandbox"
