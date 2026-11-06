@@ -19,6 +19,10 @@ class AGUIProtocol:
         return AGUIProtocol.format_sse({"type": "THOUGHT_CHUNK", "chunk": thought})
 
     @staticmethod
+    def thinking_chunk(thought: str) -> str:
+        return AGUIProtocol.thought_chunk(thought)
+
+    @staticmethod
     def agent_switch(agent_id: str, agent_name: str) -> str:
         return AGUIProtocol.format_sse({"type": "AGENT_SWITCH", "agentId": agent_id, "agentName": agent_name})
 

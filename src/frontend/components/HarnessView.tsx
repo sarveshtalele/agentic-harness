@@ -48,6 +48,11 @@ import {
   Bug,
   Paperclip,
   Upload,
+  Copy,
+  Check,
+  MoreVertical,
+  FileDown,
+  Share2,
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -537,10 +542,16 @@ export function HarnessView({
   const [renameSessionModal, setRenameSessionModal] = useState<{ id: string; name: string } | null>(null);
   const [renameInputVal, setRenameInputVal] = useState("");
 
+  // Message Actions State: Copied ID & Active 3-dots Menu Popover
+  const [copiedMsgId, setCopiedMsgId] = useState<string | null>(null);
+  const [activeMessageMenuId, setActiveMessageMenuId] = useState<string | null>(null);
+
   const abortControllerRef = useRef<AbortController | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const msgSeqRef = useRef<number>(1);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const activeSessionIdRef = useRef<string>(activeSessionId);
+  activeSessionIdRef.current = activeSessionId;
 
   // 1. Sync target project with initialProjectId prop or query param
   useEffect(() => {
@@ -739,7 +750,8 @@ export function HarnessView({
         setActiveSessionId(created.session.id);
         setCurrentSession(created.session);
       } else {
-        let match = sessList.find((s) => s.id === activeSessionId);
+        const curId = activeSessionIdRef.current;
+        let match = sessList.find((s) => s.id === curId);
         if (!match && selectedProjectId) {
           match = sessList.find((s) => s.projectId === selectedProjectId);
         }
@@ -764,7 +776,7 @@ export function HarnessView({
     } catch (e: any) {
       console.warn("Could not load sessions:", e);
     }
-  }, [selectedProjectId, targetProject?.name, targetProject?.repo?.url, activeSessionId]);
+  }, [selectedProjectId, targetProject?.name, targetProject?.repo?.url]);
 
   useEffect(() => {
     loadSessions();
@@ -805,7 +817,7 @@ export function HarnessView({
 
     const projSessions = sessionsByProject[newProjectId] || [];
     if (projSessions.length > 0) {
-      handleSelectSession(projSessions[0].id);
+      handleSelectSession(projSessions[0].id, newProjectId);
     } else {
       const projName = projects.find((p) => p.id === newProjectId)?.name || "Project";
       api("/harness/sessions", {
@@ -851,8 +863,8 @@ export function HarnessView({
     }
   };
 
-  // Switch session directly
-  const handleSelectSession = async (id: string) => {
+  // Switch session directly with full project alignment and no flicker
+  const handleSelectSession = async (id: string, targetProjectId?: string) => {
     setActiveSessionId(id);
     try {
       const res = await api(`/harness/sessions/${id}`);
@@ -860,8 +872,18 @@ export function HarnessView({
         setCurrentSession(res.session);
         setMode(res.session.mode || "plan");
         if (res.session.activeAgentId) setActiveAgentId(res.session.activeAgentId);
-        if (res.session.projectId && res.session.projectId !== selectedProjectId) {
-          handleSelectProject(res.session.projectId);
+        const pId = res.session.projectId || targetProjectId;
+        if (pId && pId !== selectedProjectId) {
+          setSelectedProjectId(pId);
+          if (typeof window !== "undefined") {
+            const url = new URL(window.location.href);
+            url.searchParams.set("project", pId);
+            window.history.replaceState({}, "", url.toString());
+          }
+          if (onProjectChange) {
+            onProjectChange(pId);
+          }
+          setExpandedProjects((prev) => ({ ...prev, [pId]: true }));
         }
       }
     } catch (e: any) {
@@ -1038,7 +1060,8 @@ export function HarnessView({
 
   // Download Generated Documentation as Markdown (.md)
   const handleDownloadMarkdown = (title: string, content: string) => {
-    const blob = new Blob([content], { type: "text/markdown;charset=utf-8" });
+    const cleanContent = cleanMarkdownContent(content);
+    const blob = new Blob([cleanContent], { type: "text/markdown;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -1048,6 +1071,112 @@ export function HarnessView({
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     toast("Documentation downloaded (.md)");
+  };
+
+  // Clean markdown content to unwrap raw code fences if returned in ```markdown ... ```
+  const cleanMarkdownContent = (text: string): string => {
+    if (!text) return "";
+    let content = text.trim();
+    if (content.startsWith("```markdown") && content.endsWith("```")) {
+      content = content.slice(11, -3).trim();
+    } else if (content.startsWith("```md") && content.endsWith("```")) {
+      content = content.slice(5, -3).trim();
+    }
+    return content;
+  };
+
+  // Convert markdown to rich HTML for Word .docx export
+  const markdownToWordHtml = (markdown: string): string => {
+    let html = markdown
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+
+    // Code blocks
+    html = html.replace(/```([a-z]*)\n([\s\S]*?)```/g, (_, lang, code) => {
+      return `<pre style="background:#0f172a;color:#f8fafc;padding:10pt;font-family:Consolas,monospace;border-radius:4pt;"><code>${code}</code></pre>`;
+    });
+
+    // Headers
+    html = html.replace(/^### (.*$)/gim, '<h3 style="font-size:13pt;color:#334155;margin-top:12pt;margin-bottom:4pt;font-weight:bold;">$1</h3>');
+    html = html.replace(/^## (.*$)/gim, '<h2 style="font-size:16pt;color:#1e40af;margin-top:16pt;margin-bottom:6pt;font-weight:bold;border-bottom:1pt solid #cbd5e1;padding-bottom:2pt;">$1</h2>');
+    html = html.replace(/^# (.*$)/gim, '<h1 style="font-size:20pt;color:#1e3a8a;margin-top:20pt;margin-bottom:8pt;font-weight:bold;border-bottom:2pt solid #1e3a8a;padding-bottom:4pt;">$1</h1>');
+
+    // Bold & Italic
+    html = html.replace(/\*\*\*(.*?)\*\*\*/g, '<b><i>$1</i></b>');
+    html = html.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+    html = html.replace(/\*(.*?)\*/g, '<i>$1</i>');
+
+    // Inline code
+    html = html.replace(/`([^`]+)`/g, '<code style="background:#f1f5f9;color:#b91c1c;padding:2pt 4pt;font-family:Consolas,monospace;font-size:10pt;">$1</code>');
+
+    // Bullet items
+    html = html.replace(/^\s*-\s+(.*$)/gim, '<li style="margin-bottom:3pt;">$1</li>');
+    html = html.replace(/(<li[\s\S]*<\/li>)/, '<ul style="padding-left:18pt;margin-top:4pt;margin-bottom:8pt;">$1</ul>');
+
+    // Paragraphs
+    const lines = html.split("\n\n");
+    return lines.map((line) => {
+      const trimmed = line.trim();
+      if (!trimmed) return "";
+      if (trimmed.startsWith("<h") || trimmed.startsWith("<pre") || trimmed.startsWith("<ul") || trimmed.startsWith("<li")) return trimmed;
+      return `<p style="font-size:11pt;line-height:1.5;margin-top:0;margin-bottom:6pt;color:#1e293b;">${trimmed.replace(/\n/g, "<br/>")}</p>`;
+    }).join("\n");
+  };
+
+  // Copy message response
+  const handleCopyMessage = (content: string, id: string) => {
+    if (!content) return;
+    navigator.clipboard.writeText(content);
+    setCopiedMsgId(id);
+    toast("Response copied to clipboard");
+    setTimeout(() => {
+      setCopiedMsgId((prev) => (prev === id ? null : prev));
+    }, 2000);
+  };
+
+  // Export as Word Document (.docx)
+  const handleExportDocx = (title: string, markdownContent: string) => {
+    const cleanContent = cleanMarkdownContent(markdownContent);
+    const bodyHtml = markdownToWordHtml(cleanContent);
+    const wordDocHtml = `
+      <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+      <head>
+        <meta charset='utf-8'>
+        <title>${title}</title>
+        <style>
+          body { font-family: 'Calibri', 'Segoe UI', Arial, sans-serif; font-size: 11pt; line-height: 1.5; color: #1e293b; margin: 1in; }
+          h1 { font-size: 18pt; color: #1e3a8a; font-weight: bold; margin-top: 18pt; margin-bottom: 6pt; border-bottom: 1.5pt solid #1e3a8a; }
+          h2 { font-size: 14pt; color: #1e40af; font-weight: bold; margin-top: 14pt; margin-bottom: 4pt; border-bottom: 0.5pt solid #cbd5e1; }
+          h3 { font-size: 12pt; color: #334155; font-weight: bold; margin-top: 10pt; margin-bottom: 3pt; }
+          table { border-collapse: collapse; width: 100%; margin-top: 8pt; margin-bottom: 12pt; font-size: 10pt; }
+          th, td { border: 1pt solid #cbd5e1; padding: 6pt 8pt; text-align: left; vertical-align: top; }
+          th { background-color: #f1f5f9; font-weight: bold; color: #0f172a; }
+          ul, ol { margin-top: 4pt; margin-bottom: 8pt; padding-left: 20pt; }
+          li { margin-bottom: 3pt; }
+          code { font-family: 'Consolas', monospace; background-color: #f1f5f9; color: #b91c1c; padding: 2pt 4pt; font-size: 9.5pt; }
+          pre { font-family: 'Consolas', monospace; background-color: #0f172a; color: #f8fafc; padding: 8pt; margin: 8pt 0; border-radius: 4pt; }
+        </style>
+      </head>
+      <body>
+        <div style="margin-bottom: 16pt; border-bottom: 2pt solid #4f46e5; padding-bottom: 8pt;">
+          <h2 style="color: #4f46e5; margin: 0;">Agentic QE Platform & Harness</h2>
+          <p style="font-size: 9pt; color: #64748b; margin: 2pt 0 0 0;">Synchronized Workspace Documentation · Exported ${new Date().toLocaleDateString()}</p>
+        </div>
+        ${bodyHtml}
+      </body>
+      </html>
+    `;
+    const blob = new Blob([wordDocHtml], { type: "application/msword;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${(title || "chat-response").toLowerCase().replace(/[^a-z0-9]+/g, "-")}.docx`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast("Exported as Word document (.docx)");
   };
 
   // Autocomplete Palette Commands List
@@ -1163,6 +1292,7 @@ export function HarnessView({
       const response = await fetch("/api/harness/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           sessionId: currentSession.id,
           message: prompt,
@@ -1561,8 +1691,7 @@ export function HarnessView({
                               <div
                                 key={s.id}
                                 onClick={() => {
-                                  handleSelectProject(proj.id);
-                                  handleSelectSession(s.id);
+                                  handleSelectSession(s.id, proj.id);
                                 }}
                                 className={`group relative flex items-center justify-between rounded-lg px-2.5 py-1.5 cursor-pointer text-xs transition ${
                                   isActive
@@ -1784,10 +1913,10 @@ export function HarnessView({
                       </div>
                     )}
 
-                    {/* Message Body */}
+                    {/* Message Body with Rich Markdown & Message Actions */}
                     {msg.content && (
                       <div
-                        className={`rounded-2xl p-3 text-sm shadow-sm ${
+                        className={`group/msg relative rounded-2xl p-3 text-sm shadow-sm ${
                           isUser
                             ? "bg-indigo-600 text-white"
                             : "border border-slate-200 bg-white text-slate-800 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
@@ -1796,7 +1925,70 @@ export function HarnessView({
                         {isUser ? (
                           <p className="whitespace-pre-wrap">{msg.content}</p>
                         ) : (
-                          <Markdown>{msg.content}</Markdown>
+                          <Markdown>{cleanMarkdownContent(msg.content)}</Markdown>
+                        )}
+
+                        {/* Per-Message Action Toolbar: Copy, 3-dots Menu for .md and .docx */}
+                        {!isUser && (
+                          <div className="mt-2.5 flex items-center justify-end gap-1.5 border-t border-slate-100 pt-1.5 text-slate-400 dark:border-slate-800/60">
+                            {/* Copy button */}
+                            <button
+                              onClick={() => handleCopyMessage(cleanMarkdownContent(msg.content), msg.id)}
+                              className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200 transition"
+                              title="Copy response"
+                            >
+                              {copiedMsgId === msg.id ? (
+                                <>
+                                  <Check className="h-3 w-3 text-emerald-500" />
+                                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">Copied</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Copy className="h-3 w-3" />
+                                  <span className="text-[10px]">Copy</span>
+                                </>
+                              )}
+                            </button>
+
+                            {/* 3-dots Menu Popover */}
+                            <div className="relative">
+                              <button
+                                onClick={() => setActiveMessageMenuId(activeMessageMenuId === msg.id ? null : msg.id)}
+                                className={`rounded-md p-1 transition ${activeMessageMenuId === msg.id ? "bg-slate-200 text-slate-800 dark:bg-slate-800 dark:text-white" : "text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-300"}`}
+                                title="More actions"
+                              >
+                                <MoreVertical className="h-3.5 w-3.5" />
+                              </button>
+
+                              {activeMessageMenuId === msg.id && (
+                                <div
+                                  className="absolute right-0 top-full mt-1 z-30 w-48 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-slate-800 dark:bg-slate-900 animate-in fade-in zoom-in-95 duration-100"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <button
+                                    onClick={() => {
+                                      handleDownloadMarkdown(`chat-response-${msg.id.substring(0, 8)}`, msg.content);
+                                      setActiveMessageMenuId(null);
+                                    }}
+                                    className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-indigo-400 transition"
+                                  >
+                                    <FileDown className="h-3.5 w-3.5 text-indigo-500" />
+                                    <span>Download Markdown (.md)</span>
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      handleExportDocx(`chat-response-${msg.id.substring(0, 8)}`, msg.content);
+                                      setActiveMessageMenuId(null);
+                                    }}
+                                    className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 hover:bg-blue-50 hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-blue-400 transition"
+                                  >
+                                    <Share2 className="h-3.5 w-3.5 text-blue-500" />
+                                    <span>Share as Word (.docx)</span>
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
                         )}
                       </div>
                     )}

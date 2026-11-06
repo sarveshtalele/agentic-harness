@@ -302,7 +302,7 @@ async def _ragas(agent_key: str, results: list[dict]) -> dict:
     return out
 
 
-async def run(agent_key: str, *, benchmark: str = "", repeats: int = 1, ragas: bool = False) -> dict:
+async def run(agent_key: str, *, benchmark: str = "", repeats: int = 1, ragas: bool = True) -> dict:
     """Run an agent's eval cases, or a benchmark's cases for it. `repeats` runs the whole set again so the spread can be shown; `ragas` adds the model-graded metrics."""
     path = EVALS_DIR / f"{agent_key}.json"
     if not path.exists():
@@ -329,12 +329,12 @@ async def run(agent_key: str, *, benchmark: str = "", repeats: int = 1, ragas: b
     return {**runs[-1], "batch": batch, "repeats": len(runs), "benchmark": benchmark, "labels_reviewed": reviewed, "tokens_total": sum(r["tokens"] for r in runs)}
 
 
-async def run_all(concurrency: int = 4) -> list[dict]:
+async def run_all(concurrency: int = 4, ragas: bool = True) -> list[dict]:
     gate = asyncio.Semaphore(concurrency)
 
     async def one(agent_key: str) -> dict:
         async with gate:
-            return await run(agent_key)
+            return await run(agent_key, ragas=ragas)
 
     return await asyncio.gather(*(one(a) for a in available()))
 

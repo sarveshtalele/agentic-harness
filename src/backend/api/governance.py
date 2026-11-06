@@ -165,7 +165,7 @@ def agent_settings(agent: str, body: AgentSettingsIn):
 class EvalRunIn(BaseModel):
     benchmark: str = ""
     repeats: int = Field(1, ge=1, le=5)
-    ragas: bool = False  # model-graded metrics cost tokens, so they are asked for
+    ragas: bool = True  # model-graded RAGAS & Specter metrics enabled by default
 
 
 @router.post("/api/agents/{agent}/evals")

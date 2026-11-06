@@ -58,3 +58,4 @@ dist/
 # Personal editor settings
 .vscode/
 scratch/
+*.tsbuildinfo

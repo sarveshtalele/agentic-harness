@@ -11,4 +11,4 @@ describe('TC-TEST-001: Token Generation Logic', () => {
     expect(payload.role).toBe('admin');
     expect(payload.expiresAt - now).toBe(900000);
   });
-};
+});
