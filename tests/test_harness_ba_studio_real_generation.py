@@ -97,3 +97,13 @@ def test_generate_domain_brd_saves_to_database():
     assert doc_record["title"] == title
     assert len(doc_record["sha256"]) == 64
     assert doc_record["kind"] == "brd"
+    assert doc_record["status"] == "approved"
+
+    # Verify that companion Gherkin feature file document was created and approved
+    gherkin_id = meta.get("gherkin_id")
+    assert gherkin_id is not None
+    gherkin_doc = documents.get(gherkin_id)
+    assert gherkin_doc is not None
+    assert gherkin_doc["kind"] == "gherkin"
+    assert gherkin_doc["parent_id"] == meta["doc_id"]
+    assert gherkin_doc["status"] == "approved"
