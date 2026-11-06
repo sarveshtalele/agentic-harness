@@ -795,6 +795,81 @@ def build_qe_tools(workspace_dir: str) -> List[FunctionTool]:
             "recommendation": "All Cloudflare security and NVIDIA Skill Specter guardrails are active and verified."
         }
 
+    async def handle_execute_skill_script(args: Dict[str, Any], context: Any) -> Dict[str, Any]:
+        skill_name = args.get("skillName", "").strip().lower()
+        script_name = args.get("scriptName", "run.py").strip()
+        script_args = args.get("args", {})
+
+        skills_dir = os.path.join(workspace_dir, "skills")
+        skill_dir = os.path.join(skills_dir, skill_name)
+        if not os.path.isdir(skill_dir):
+            return {"error": f"Skill '{skill_name}' not found under skills/", "success": False}
+
+        script_path = os.path.join(skill_dir, "scripts", script_name)
+        if not os.path.isfile(script_path):
+            candidates = list(Path(os.path.join(skill_dir, "scripts")).glob("*.py"))
+            if candidates:
+                script_path = str(candidates[0])
+            else:
+                return {"error": f"No executable python scripts found in {skill_name}/scripts", "success": False}
+
+        arg_str = json.dumps(script_args) if isinstance(script_args, dict) else str(script_args)
+        cmd = [sys.executable, script_path, "--json", arg_str]
+        try:
+            proc = await asyncio.create_subprocess_exec(
+                *cmd,
+                cwd=workspace_dir,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE
+            )
+            stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=45.0)
+            return {
+                "skill": skill_name,
+                "script": os.path.basename(script_path),
+                "exitCode": proc.returncode,
+                "stdout": stdout.decode("utf-8", errors="ignore")[:3000],
+                "stderr": stderr.decode("utf-8", errors="ignore")[:3000],
+                "success": proc.returncode == 0
+            }
+        except Exception as exc:
+            return {"error": f"Script execution failed: {exc}", "success": False}
+
+    async def handle_create_agent_skill(args: Dict[str, Any], context: Any) -> Dict[str, Any]:
+        name = args.get("name", "").strip()
+        description = args.get("description", "").strip()
+        category = args.get("category", "custom-skills")
+        include_script = args.get("includeScript", True)
+
+        import importlib.util
+        script_file = os.path.join(workspace_dir, "skills", "skill-creator", "scripts", "create_skill.py")
+        if not os.path.isfile(script_file):
+            return {"error": "skill-creator script not found", "success": False}
+
+        spec = importlib.util.spec_from_file_location("create_skill_mod", script_file)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        res = mod.create_skill(
+            name=name,
+            description=description,
+            category=category,
+            include_script=include_script,
+            output_dir=Path(workspace_dir) / "skills" / name.lower().replace(" ", "-")
+        )
+        return res
+
+    async def handle_evaluate_agent_skill(args: Dict[str, Any], context: Any) -> Dict[str, Any]:
+        skill_name = args.get("skillName", "").strip().lower()
+        import importlib.util
+        eval_script = os.path.join(workspace_dir, "skills", "evaluator", "scripts", "evaluate_skill.py")
+        if not os.path.isfile(eval_script):
+            return {"error": "evaluator script not found", "success": False}
+
+        spec = importlib.util.spec_from_file_location("evaluate_skill_mod", eval_script)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        res = mod.evaluate_skill(Path(workspace_dir) / "skills" / skill_name)
+        return res
+
     return [
         # 1. Repository inspection
         FunctionTool(
@@ -1058,5 +1133,52 @@ def build_qe_tools(workspace_dir: str) -> List[FunctionTool]:
             handler=handle_security_audit,
             requires_approval=False,
             category="Security & Hardening"
+        ),
+        FunctionTool(
+            name="execute_skill_script",
+            description="Executes a Python script from an installed agent skill in a sandboxed execution environment.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "skillName": {"type": "string", "description": "The name/slug of the skill (e.g. skill-creator, evaluator)"},
+                    "scriptName": {"type": "string", "description": "Script filename (e.g. run.py, create_skill.py, evaluate_skill.py)"},
+                    "args": {"type": "object", "description": "Key-value arguments to pass to the script"}
+                },
+                "required": ["skillName"]
+            },
+            handler=handle_execute_skill_script,
+            requires_approval=False,
+            category="Agent Skills"
+        ),
+        FunctionTool(
+            name="create_agent_skill",
+            description="Scaffolds a new agent skill adhering to awesome-agent-skills specification (SKILL.md, scripts/run.py, evals/evals.json).",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string", "description": "Name of the skill to create"},
+                    "description": {"type": "string", "description": "Description and capability instructions"},
+                    "category": {"type": "string", "description": "Category for the skill"},
+                    "includeScript": {"type": "boolean", "description": "Whether to generate an executable run.py script"}
+                },
+                "required": ["name", "description"]
+            },
+            handler=handle_create_agent_skill,
+            requires_approval=False,
+            category="Agent Skills"
+        ),
+        FunctionTool(
+            name="evaluate_agent_skill",
+            description="Runs rigorous evaluation benchmarks on an installed agent skill using the evaluator skill (Specter grade, groundedness, faithfulness).",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "skillName": {"type": "string", "description": "Name/slug of the skill to evaluate"}
+                },
+                "required": ["skillName"]
+            },
+            handler=handle_evaluate_agent_skill,
+            requires_approval=False,
+            category="Agent Skills"
         ),
     ]

@@ -1,0 +1,30 @@
+{
+  "skill": "evaluator",
+  "version": "1.0.0",
+  "cases": [
+    {
+      "id": "EVAL-001",
+      "prompt": "Evaluate skill 'generating-test-code' for groundedness and script execution",
+      "expected": {
+        "verdict": "APPROVED",
+        "status": "success"
+      },
+      "assertions": [
+        "output.status == 'success'",
+        "output.totalScore >= 90",
+        "output.verdict == 'APPROVED'"
+      ]
+    },
+    {
+      "id": "EVAL-002",
+      "prompt": "Check evaluation score dimensions for precision and faithfulness",
+      "expected": {
+        "status": "success"
+      },
+      "assertions": [
+        "output.metrics.groundedness >= 90",
+        "output.metrics.faithfulness >= 90"
+      ]
+    }
+  ]
+}

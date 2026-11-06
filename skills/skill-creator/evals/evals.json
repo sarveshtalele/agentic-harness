@@ -1,0 +1,30 @@
+{
+  "skill": "skill-creator",
+  "version": "1.0.0",
+  "cases": [
+    {
+      "id": "SKILL-CREATOR-001",
+      "prompt": "Create a new agent skill named 'payment-validator' with python execution scripts",
+      "expected": {
+        "status": "created",
+        "skill": "payment-validator"
+      },
+      "assertions": [
+        "output.status == 'created'",
+        "output.skill == 'payment-validator'",
+        "'SKILL.md' in output.skill_md"
+      ]
+    },
+    {
+      "id": "SKILL-CREATOR-002",
+      "prompt": "Package skill 'payment-validator' into distribution ZIP",
+      "expected": {
+        "status": "packaged"
+      },
+      "assertions": [
+        "output.status == 'packaged'",
+        "output.file_count > 0"
+      ]
+    }
+  ]
+}

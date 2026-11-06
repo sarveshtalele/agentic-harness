@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, BarChart3, BookOpen, ChevronLeft, ChevronRight, Cpu, UsersRound, Bot, Sparkles, CheckSquare, FileText, FolderKanban, Settings, ShieldCheck, Terminal } from "lucide-react";
+import { Activity, BarChart3, BookOpen, ChevronLeft, ChevronRight, Cpu, UsersRound, Bot, Sparkles, CheckSquare, FileText, FolderKanban, Settings, ShieldCheck, Terminal, Wand2 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
@@ -8,26 +8,57 @@ import { api } from "../lib/api";
 import { useAuth, UserMenu } from "./AuthGate";
 import { ThemeToggle } from "./ui";
 
-const nav = [
-  { href: "/", label: "Projects", icon: FolderKanban },
-  { href: "/harness", label: "Autonomous QE Harness", icon: Terminal },
-  { href: "/approvals", label: "Gate Approvals", icon: CheckSquare },
-  { href: "/agents", label: "AI Specialist Roster", icon: Bot },
-  { href: "/skills", label: "Project Skills & Tools", icon: Sparkles },
-  { href: "/mcp", label: "MCP Server Registry", icon: Cpu },
-  { href: "/observability", label: "Observability & Telemetry", icon: Activity },
-  { href: "/templates", label: "Specification Templates", icon: FileText },
-  { href: "/docs", label: "Platform Documentation", icon: BookOpen },
-  { href: "/users", label: "User Access & Accounts", icon: UsersRound, admin: true },
-  { href: "/usage", label: "Token Budget & Usage", icon: BarChart3, admin: true },
-  { href: "/settings", label: "System Configuration", icon: Settings, admin: true },
+interface NavSection {
+  title: string;
+  items: Array<{
+    href: string;
+    label: string;
+    icon: any;
+    admin?: boolean;
+    badge?: boolean;
+  }>;
+}
+
+const navSections: NavSection[] = [
+  {
+    title: "WORKSPACE & AGENTS",
+    items: [
+      { href: "/", label: "Projects", icon: FolderKanban },
+      { href: "/harness", label: "Autonomous QE Harness", icon: Terminal },
+      { href: "/approvals", label: "Gate Approvals", icon: CheckSquare, badge: true },
+      { href: "/agents", label: "AI Specialist Roster", icon: Bot },
+    ],
+  },
+  {
+    title: "STUDIOS & ECOSYSTEM",
+    items: [
+      { href: "/skills/studio", label: "Skill Creator Studio", icon: Wand2 },
+      { href: "/skills", label: "Project Skills & Tools", icon: Sparkles },
+      { href: "/mcp", label: "MCP Server Registry", icon: Cpu },
+      { href: "/templates", label: "Specification Templates", icon: FileText },
+    ],
+  },
+  {
+    title: "GOVERNANCE & INSIGHTS",
+    items: [
+      { href: "/observability", label: "Observability & Telemetry", icon: Activity },
+      { href: "/docs", label: "Platform Documentation", icon: BookOpen },
+    ],
+  },
+  {
+    title: "ENTERPRISE ADMIN",
+    items: [
+      { href: "/users", label: "User Access & Accounts", icon: UsersRound, admin: true },
+      { href: "/usage", label: "Token Budget & Usage", icon: BarChart3, admin: true },
+      { href: "/settings", label: "System Configuration", icon: Settings, admin: true },
+    ],
+  },
 ];
 
 /** Workspace frame for pages outside a project: brand and left navigation with collapsible icon-only mode. */
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { user } = useAuth();
-  const links = nav.filter((item) => !item.admin || user?.role === "admin");
   const [pending, setPending] = useState(0);
   const [collapsed, setCollapsed] = useState(false);
 
@@ -56,28 +87,43 @@ export function AppShell({ children }: { children: ReactNode }) {
             {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
           </button>
         </div>
-        <nav aria-label="Workspace" className="flex-1 space-y-0.5 overflow-y-auto">
-          {links.map((item) => {
-            const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
-            const Icon = item.icon;
+        <nav aria-label="Workspace" className="flex-1 space-y-3 overflow-y-auto pr-1">
+          {navSections.map((sec, secIdx) => {
+            const visibleItems = sec.items.filter((item) => !item.admin || user?.role === "admin");
+            if (visibleItems.length === 0) return null;
             return (
-              <Link
-                key={item.href}
-                href={item.href}
-                title={item.label}
-                aria-current={active ? "page" : undefined}
-                className={`flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-semibold transition ${
-                  active ? "bg-indigo-600 text-white" : "text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-900"
-                } ${collapsed ? "justify-center" : ""}`}
-              >
-                <Icon className="h-4 w-4 shrink-0" />
-                {!collapsed && <span className="flex-1">{item.label}</span>}
-                {!collapsed && item.href === "/approvals" && pending > 0 && (
-                  <span data-testid="approvals-badge" className="rounded-full bg-amber-500 px-1.5 text-[11px] font-bold text-slate-950">
-                    {pending}
-                  </span>
+              <div key={sec.title || secIdx} className="space-y-0.5">
+                {!collapsed && (
+                  <div className="px-2.5 pt-1.5 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                    {sec.title}
+                  </div>
                 )}
-              </Link>
+                {visibleItems.map((item) => {
+                  const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      title={item.label}
+                      aria-current={active ? "page" : undefined}
+                      className={`flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-[13px] font-medium transition ${
+                        active
+                          ? "bg-indigo-600 text-white font-semibold shadow-sm"
+                          : "text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-900"
+                      } ${collapsed ? "justify-center" : ""}`}
+                    >
+                      <Icon className="h-4 w-4 shrink-0" />
+                      {!collapsed && <span className="flex-1 truncate">{item.label}</span>}
+                      {!collapsed && item.badge && pending > 0 && (
+                        <span data-testid="approvals-badge" className="rounded-full bg-amber-500 px-1.5 text-[11px] font-bold text-slate-950">
+                          {pending}
+                        </span>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
             );
           })}
         </nav>

@@ -55,7 +55,7 @@ async def qe_discover(rc: RunContext, state: dict) -> dict:
         review = await review_artifact(rc, "discovery summary", text, evidence)
     if issues:
         rc.log(f"Discovery still has gaps: {issues}", kind="warning")
-    doc = documents.create(rc.project_id, "discovery", "Discovery summary", text, "agent:repo-intelligence-analyst", data=a, prompt_ref=call.prompt_ref, run_id=rc.run_id)
+    doc = documents.create(rc.project_id, "discovery", "Repository AST Architecture & Stack Discovery", text, "agent:repo-intelligence-analyst", data=a, prompt_ref=call.prompt_ref, run_id=rc.run_id)
     rc.log("Discovery saved", {"document_id": doc["id"]}, "artifact")
     return {"discovery_id": doc["id"], "discovery_review": review, "discovery_issues": issues}
 
@@ -94,7 +94,7 @@ async def qe_requirements(rc: RunContext, state: dict) -> dict:
         prompt = f"An independent reviewer scored your requirements {review['score']}. Send the complete corrected set. Issues: {review['issues']}. Requirements dropped for missing evidence: {dropped}."
     body = "| ID | Requirement | Priority | Tier | Evidence |\n|---|---|---|---|---|\n" + "\n".join(
         f"| {r['id']} | {_cell(r['title'])}: {_cell(r['statement'])} | {r['priority']} | {r['tier']} | {('`' + r['file'] + ':' + str(r['line']) + '`') if r['file'] else '-'} |" for r in kept)
-    doc = documents.create(rc.project_id, "requirements", "Requirements", body, "agent:requirements-analyst", data=kept, prompt_ref=call.prompt_ref, run_id=rc.run_id)
+    doc = documents.create(rc.project_id, "requirements", "Functional & Verification Requirements Specification", body, "agent:requirements-analyst", data=kept, prompt_ref=call.prompt_ref, run_id=rc.run_id)
     return {"requirements": kept, "requirements_doc": doc["id"], "requirements_review": review}
 
 
@@ -128,7 +128,7 @@ async def qe_plan(rc: RunContext, state: dict) -> dict:
     rc.log(f"Plan score {score['score']} ({score['verdict']}), independent review {review['score']} ({review['verdict']})", {"deterministic": score, "review": review}, "review")
     body = f"{plan['strategy']}\n\n| Area | Requirements | Risk | Level | Framework | Rationale |\n|---|---|---|---|---|---|\n" + "\n".join(
         f"| {_cell(x['name'])} | {', '.join(x['requirement_ids'])} | {x['risk']} | {x['level']} | {x['framework']} | {_cell(x['rationale'])} |" for x in plan["areas"])
-    doc = documents.create(rc.project_id, "test_plan", "Test plan", body, "agent:principal-test-architect", data={"plan": plan, "score": score, "review": review}, prompt_ref=call.prompt_ref, run_id=rc.run_id)
+    doc = documents.create(rc.project_id, "test_plan", "Comprehensive Quality Strategy & Test Plan", body, "agent:principal-test-architect", data={"plan": plan, "score": score, "review": review}, prompt_ref=call.prompt_ref, run_id=rc.run_id)
     return {"plan": plan, "plan_doc": doc["id"], "plan_score": score, "plan_review": review}
 
 
@@ -280,7 +280,7 @@ async def qe_design(rc: RunContext, state: dict) -> dict:
         body = f"> {case_limit['message']}. Requirements with no case now: {', '.join(case_limit['requirements_without_cases']) or 'none'}\n\n" + body
     if partial:
         body = f"> PARTIAL RESULT. No cases yet for: {', '.join(partial['missing'])}\n\n" + body
-    doc = documents.create(rc.project_id, "test_cases", f"Test cases (PARTIAL, {len(partial['missing'])} requirements missing)" if partial else "Test cases", body, "agent:test-design-architect", data=cases, prompt_ref=call.prompt_ref, run_id=rc.run_id)
+    doc = documents.create(rc.project_id, "test_cases", f"Deterministic Test Cases & Scenario Matrix (PARTIAL, {len(partial['missing'])} requirements missing)" if partial else "Deterministic Test Cases & Scenario Matrix", body, "agent:test-design-architect", data=cases, prompt_ref=call.prompt_ref, run_id=rc.run_id)
     rc.log(f"{len(cases)} cases designed; {len(gaps)} remaining gaps", {"gaps": gaps}, "artifact")
     return {"cases": cases, "cases_doc": doc["id"], "design_gaps": gaps, "case_limit": case_limit, "cases_review": cases_review, "partial": partial}
 
@@ -289,7 +289,7 @@ async def qe_data(rc: RunContext, state: dict) -> dict:
     """Plugin command qe-data (skill generating-test-data). Code builds the datasets, so this stage uses no model tokens. It is part of Gate 3."""
     fixtures = test_data.build_fixtures(state["cases"])
     used = sorted(fixtures["datasets"])
-    doc = documents.create(rc.project_id, "test_data", "Test data", "```json\n" + json.dumps(fixtures, indent=2, ensure_ascii=False) + "\n```", "system", data=fixtures, run_id=rc.run_id)
+    doc = documents.create(rc.project_id, "test_data", "Synthesized Test Fixtures & Data Contracts", "```json\n" + json.dumps(fixtures, indent=2, ensure_ascii=False) + "\n```", "system", data=fixtures, run_id=rc.run_id)
     rc.log(f"Test data built for {len(fixtures['cases'])} cases from {len(used)} shared datasets ({', '.join(used) or 'none needed'}); no model call", {"document_id": doc["id"]}, "artifact")
     return {"fixtures": fixtures, "fixtures_doc": doc["id"]}
 
@@ -549,7 +549,7 @@ async def qe_generate(rc: RunContext, state: dict) -> dict:
     body = "\n\n".join(f"## {f.path}\n\nCases: {', '.join(f.case_ids)}\n\n{flagged_text.get(f.path, '')}```\n{f.content}\n```" for f in suite.files)
     if partial:
         body = f"> PARTIAL RESULT. No tests yet for: {', '.join(partial['missing'])}\n\n" + body
-    doc = documents.create(rc.project_id, "test_code", "Generated tests (PARTIAL)" if partial else "Generated tests", body, "agent:test-automation-engineer", data=tests, prompt_ref=call.prompt_ref, run_id=rc.run_id)
+    doc = documents.create(rc.project_id, "test_code", "Autonomous End-to-End Test Suite (PARTIAL)" if partial else "Autonomous End-to-End Test Suite", body, "agent:test-automation-engineer", data=tests, prompt_ref=call.prompt_ref, run_id=rc.run_id)
     rc.log(f"{len(suite.files)} test files written to {state['branch']}", kind="artifact")
     return {"worktree": state["worktree"], "branch": state["branch"], "tests": tests, "framework": suite.framework, "test_doc": doc["id"], "heal_attempts": state.get("heal_attempts", 0), "tests_review": tests_review, "tests_missing": missing, "emit_unresolved": unresolved, "env_facts": facts, "partial": partial}
 
@@ -695,11 +695,11 @@ async def qe_trace(rc: RunContext, state: dict) -> dict:
         summary |= {"verdict": "INCONCLUSIVE", "reason": "Tests could not run in this environment"}
     summary["failure_classes"] = execution.failure_counts(results)  # reported, never used to turn a failure into a pass
     records = _records(results, state.get("defect_notes", {}), {r["test"].split("::")[-1] for r in state.get("defect_records", []) if r["healed"]})
-    defect_doc = documents.create(rc.project_id, "defect_report", "Defect records", _defect_body(records), "system", data=records, run_id=rc.run_id)
+    defect_doc = documents.create(rc.project_id, "defect_report", "Repository Defect Triaging & Anomaly Report", _defect_body(records), "system", data=records, run_id=rc.run_id)
     lines = ["| Requirement | Priority | Cases | Results | Covered |", "|---|---|---|---|---|"]
     for r in matrix["rows"]:
         lines.append(f"| {r['requirement_id']}: {_cell(r['title'])} | {r['priority']} | {', '.join(c['case_id'] for c in r['cases'])} | {', '.join(c['result'] for c in r['cases'])} | {'yes' if r['covered'] else 'NO'} |")
-    doc = documents.create(rc.project_id, "traceability", "Traceability matrix", "\n".join(lines) + f"\n\nGaps: {matrix['gaps'] or 'none'}\n\nOrphan tests: {matrix['orphan_tests'] or 'none'}",
+    doc = documents.create(rc.project_id, "traceability", "Requirements-to-Test Traceability Matrix", "\n".join(lines) + f"\n\nGaps: {matrix['gaps'] or 'none'}\n\nOrphan tests: {matrix['orphan_tests'] or 'none'}",
                            "system", data={"matrix": matrix, "summary": summary}, run_id=rc.run_id)
     rc.log(f"Verdict {summary['verdict']}: {summary['passed']}/{summary['executed']} passed, {summary['coverage']}% requirement coverage", summary, "artifact")
     # a score given before the tests ran cannot stand once they have: a failed test is capped, and the post-execution summary shows both numbers
@@ -716,7 +716,7 @@ async def qe_sign(rc: RunContext, state: dict) -> dict:
     body = (f"## Verdict: {s['verdict']}\n\n| Metric | Value |\n|---|---|\n| Tests executed | {s['executed']} |\n| Passed | {s['passed']} |\n| Failed | {s['failed']} |\n| Pass rate | {s['pass_rate']}% |\n"
             f"| Requirements covered | {s['requirements_covered']}/{s['requirements']} ({s['coverage']}%) |\n| Application defects | {s['defects']} |\n| Independent review | {review.score} ({review.verdict}) |\n\n"
             f"## Coverage gaps\n\n{', '.join(s['gaps']) or 'None'}\n\n## Review issues\n\n" + ("\n".join(f"- {i}" for i in review.issues) or "None") + "\n\n## Defect records\n\n" + _defect_body(state.get("defect_records", [])) + "\n\n## Execution summary\n\n" + (state.get("execution_summary") or {}).get("text", "No summary.") + "\n\n## Defects\n\n" + ("\n".join(f"- **{d['name']}**: {d['message'][:300]}" for d in state.get("defects", [])) or "None") + f"\n\nBranch with generated tests: `{state.get('branch', '')}`\n")
-    doc = documents.create(rc.project_id, "release", "Release sign-off", body, "agent:confidence-reviewer", data={"summary": s, "review": review.model_dump()}, prompt_ref=call.prompt_ref, run_id=rc.run_id)
+    doc = documents.create(rc.project_id, "release", "Production Release Readiness & Sign-Off", body, "agent:confidence-reviewer", data={"summary": s, "review": review.model_dump()}, prompt_ref=call.prompt_ref, run_id=rc.run_id)
     return {"release_doc": doc["id"], "release_review": review.model_dump()}
 
 

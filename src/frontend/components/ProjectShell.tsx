@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, Bot, Bug, CheckSquare, ChevronLeft, ChevronRight, Code2, Cpu, FileText, Files, FolderGit2, History, Home, Lock, ScrollText, Settings, ShieldCheck, Terminal } from "lucide-react";
+import { Activity, Bot, Bug, CheckSquare, ChevronLeft, ChevronRight, Code2, Cpu, FileText, Files, FolderGit2, History, Home, Lock, ScrollText, Settings, ShieldCheck, Terminal, Wand2 } from "lucide-react";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from "react";
@@ -8,19 +8,45 @@ import { api } from "../lib/api";
 import { useAuth, UserMenu } from "./AuthGate";
 import { ErrorNote, Spinner, ThemeToggle } from "./ui";
 
-const nav = [
-  { href: "", label: "Overview", icon: Home },
-  { href: "/repository", label: "Codebase & AST Discovery", icon: FolderGit2 },
-  { href: "/ba", label: "BA Studio (BRD & Gherkin)", icon: FileText },
-  { href: "/documents", label: "Project Specifications", icon: Files },
-  { href: "/feature", label: "Feature Implementation", icon: Code2 },
-  { href: "/bugs", label: "Defect Scanner & Fixes", icon: Bug },
-  { href: "/qe", label: "Autonomous QE & AI SDLC", icon: ShieldCheck },
-  { href: "/approvals", label: "Gate Approvals", icon: CheckSquare },
-  { href: "/governance", label: "Governance & Policies", icon: Lock },
-  { href: "/runs", label: "Execution Runs & Metrics", icon: History },
-  { href: "/observability", label: "Telemetry & Logs", icon: Activity },
-  { href: "/prompts", label: "Prompt Management", icon: ScrollText },
+interface ProjectNavSection {
+  title: string;
+  items: Array<{
+    href: string;
+    label: string;
+    icon: any;
+    isExternal?: boolean;
+  }>;
+}
+
+const navSections: ProjectNavSection[] = [
+  {
+    title: "CORE REPOSITORY",
+    items: [
+      { href: "", label: "Overview", icon: Home },
+      { href: "/repository", label: "Codebase & AST Discovery", icon: FolderGit2 },
+      { href: "/documents", label: "Project Specifications", icon: Files },
+    ],
+  },
+  {
+    title: "AI SDLC & STUDIOS",
+    items: [
+      { href: "/ba", label: "BA Studio (BRD & Gherkin)", icon: FileText },
+      { href: "/skills-studio", label: "Skill Creator Studio", icon: Wand2 },
+      { href: "/feature", label: "Feature Implementation", icon: Code2 },
+      { href: "/bugs", label: "Defect Scanner & Fixes", icon: Bug },
+      { href: "/qe", label: "Autonomous QE & AI SDLC", icon: ShieldCheck },
+    ],
+  },
+  {
+    title: "GOVERNANCE & TELEMETRY",
+    items: [
+      { href: "/approvals", label: "Quality Gate Approvals", icon: CheckSquare },
+      { href: "/governance", label: "Governance & Policies", icon: Lock },
+      { href: "/runs", label: "Execution Runs & Metrics", icon: History },
+      { href: "/observability", label: "Telemetry & Logs", icon: Activity },
+      { href: "/prompts", label: "Prompt Management", icon: ScrollText },
+    ],
+  },
 ];
 
 const ProjectContext = createContext<{ project: any; gates: any[]; refresh: () => void }>({ project: null, gates: [], refresh: () => {} });
@@ -65,20 +91,42 @@ export function ProjectShell({ children }: { children: ReactNode }) {
           </button>
         </div>
         {!collapsed && <p className="mb-2 truncate px-2 text-sm font-bold text-slate-900 dark:text-white" title={project?.name}>{project?.name || " "}</p>}
-        <nav className="flex-1 space-y-0.5 overflow-y-auto">
-          {nav.map((item) => {
-            const href = base + item.href;
-            const active = item.href ? pathname.startsWith(href) : pathname === base;
-            const Icon = item.icon;
-            return (
-              <Link key={item.label} href={href} title={item.label} aria-current={active ? "page" : undefined}
-                className={`flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-semibold transition ${active ? "bg-indigo-600 text-white" : "text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-900"} ${collapsed ? "justify-center" : ""}`}>
-                <Icon className="h-4 w-4 shrink-0" />
-                {!collapsed && <span className="flex-1">{item.label}</span>}
-                {!collapsed && item.href === "/approvals" && project?.pending > 0 && <span className="rounded-full bg-amber-500 px-1.5 text-[11px] font-bold text-slate-950">{project.pending}</span>}
-              </Link>
-            );
-          })}
+        <nav className="flex-1 space-y-3 overflow-y-auto pr-1">
+          {navSections.map((sec, secIdx) => (
+            <div key={sec.title || secIdx} className="space-y-0.5">
+              {!collapsed && (
+                <div className="px-2.5 pt-1.5 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                  {sec.title}
+                </div>
+              )}
+              {sec.items.map((item) => {
+                const href = item.href === "/skills-studio" ? `/skills/studio?project=${id}` : base + item.href;
+                const active = item.href === "/skills-studio" ? pathname.startsWith("/skills/studio") : (item.href ? pathname.startsWith(href) : pathname === base);
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.label}
+                    href={href}
+                    title={item.label}
+                    aria-current={active ? "page" : undefined}
+                    className={`flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-[13px] font-medium transition ${
+                      active
+                        ? "bg-indigo-600 text-white font-semibold shadow-sm"
+                        : "text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-900"
+                    } ${collapsed ? "justify-center" : ""}`}
+                  >
+                    <Icon className="h-4 w-4 shrink-0" />
+                    {!collapsed && <span className="flex-1 truncate">{item.label}</span>}
+                    {!collapsed && item.href === "/approvals" && project?.pending > 0 && (
+                      <span className="rounded-full bg-amber-500 px-1.5 text-[11px] font-bold text-slate-950">
+                        {project.pending}
+                      </span>
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
         </nav>
         <div className="space-y-1 border-t border-slate-200 pt-2 dark:border-slate-800">
           <Link href="/mcp" title="MCP Servers" className={`flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-semibold text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-900 ${collapsed ? "justify-center" : ""}`}>
