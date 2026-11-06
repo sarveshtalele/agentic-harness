@@ -662,7 +662,7 @@ export function HarnessView({
     }
   };
 
-  // Handle Template Document Upload (.md, .docx, .txt, .pdf)
+  // Handle Direct Document Upload (.md, .docx, .txt, .pdf) & ChromaDB RAG Ingestion
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -670,35 +670,30 @@ export function HarnessView({
     try {
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("name", file.name.replace(/\.[^/.]+$/, ""));
+      formData.append("title", file.name.replace(/\.[^/.]+$/, ""));
       formData.append("kind", "brd");
-      if (selectedProjectId) {
-        formData.append("project_id", selectedProjectId);
-      }
-      const endpoint = selectedProjectId
-        ? `/api/projects/${selectedProjectId}/templates/upload`
-        : `/api/templates/upload`;
+      formData.append("project_id", selectedProjectId || "prj_agentic_qe");
 
-      const res = await fetch(endpoint, {
+      const res = await fetch("/api/harness/upload-document", {
         method: "POST",
         body: formData,
       });
       if (!res.ok) {
         const errText = await res.text();
-        throw new Error(errText || "Template upload failed");
+        throw new Error(errText || "Document upload failed");
       }
       const data = await res.json();
-      const sectionsCount = Array.isArray(data.headings) ? data.headings.length : 1;
+      const chunksCount = data.chunksIndexed || 1;
       const templateInfo = {
-        id: data.id || "tpl_uploaded",
-        name: data.name || file.name,
-        filename: file.name,
-        sectionsCount: Math.max(1, sectionsCount),
+        id: data.doc_id || "doc_uploaded",
+        name: data.title || file.name,
+        filename: data.filename || file.name,
+        sectionsCount: Math.max(1, chunksCount),
       };
       setUploadedTemplate(templateInfo);
 
-      const notice = `Uploaded template: ${file.name} (${templateInfo.sectionsCount} sections). Type your instructions or click 'Generate BRD from Template'.`;
-      toast(`Uploaded template: ${file.name} (${templateInfo.sectionsCount} sections)`);
+      const notice = `📄 **Document Ingested into Project Specifications & ChromaDB RAG Vector Store:**\n\n- **Governance ID:** \`${data.governance_id || 'DOC-001'}\`\n- **Document Title:** **${data.title}**\n- **Project:** \`${selectedProjectId}\`\n- **RAG Chunks Indexed:** **${chunksCount}** semantic vectors in ChromaDB\n\nAsk questions, request analysis, or click below to generate a domain-grounded BRD/Test Suite using RAG.`;
+      toast(`Document added to project & indexed in ChromaDB RAG (${chunksCount} vectors)`);
 
       const sysMsg: ChatMessage = {
         id: `msg_sys_${Date.now()}`,
@@ -2721,6 +2716,20 @@ export function HarnessView({
                         <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400">
                           <span>Agent: <b className="text-slate-700 dark:text-slate-300">{sk.agentName || "Harness Specialist"}</b></span>
                           <span>{new Date(sk.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</span>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 pt-1">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setInputPrompt(`/test_skill ${sk.name}`);
+                              textareaRef.current?.focus();
+                            }}
+                            className="flex items-center gap-1 rounded bg-indigo-50 px-2 py-0.5 text-[10px] font-semibold text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/80 dark:text-indigo-300 transition"
+                          >
+                            <Play className="h-2.5 w-2.5" /> Test Skill Live
+                          </button>
                         </div>
 
                         {sk.args && (

@@ -148,8 +148,16 @@ Autonomous skill for {display_name}.
         t.status = "completed"
         t.completedAt = int(time.time() * 1000)
 
+    # Execute Real NVIDIA Skill Specter AST Security Audit
+    from backend.harness.skill_specter import scan_skill_security
+    target_skill_dir = Path(workspace_dir) / "skills" / skill_slug
+    specter_audit = scan_skill_security(target_skill_dir)
+
     yield AGUIProtocol.thought_chunk(f"Scaffolded skill package into `skills/{skill_slug}`\n")
-    yield AGUIProtocol.thought_chunk("NVIDIA Skill Specter evaluation: Score 98/100 (Grade: A+)\n")
+    yield AGUIProtocol.thought_chunk(
+        f"NVIDIA Skill Specter AST Audit: Risk Score {specter_audit['riskScore']}/100 "
+        f"({specter_audit['readinessStatus']}) · Grade: {specter_audit['grade']}\n"
+    )
     yield AGUIProtocol.thought_chunk("All 5 skill creation lifecycle tasks completed.\n")
 
     # Record tool call in session
@@ -158,7 +166,7 @@ Autonomous skill for {display_name}.
         id=call_id,
         name="create_agent_skill",
         args={"name": display_name, "slug": skill_slug, "category": "custom-skills"},
-        result=res,
+        result={**res, "specterAudit": specter_audit},
         status="completed"
     )
     session.toolsUsed["create_agent_skill"] = session.toolsUsed.get("create_agent_skill", 0) + 1
@@ -170,7 +178,9 @@ Autonomous skill for {display_name}.
         f"- **Skill Identifier:** `{skill_slug}`\n"
         f"- **Filesystem Target:** `skills/{skill_slug}/`\n"
         f"- **Target Engine:** `MAF 2.0 Native / Sandboxed Subprocess Runner`\n"
-        f"- **Governance Grade:** **NVIDIA Skill Specter Score 98/100 (A+)**\n\n"
+        f"- **Security Risk Score:** **{specter_audit['riskScore']}/100** ({specter_audit['readinessStatus']})\n"
+        f"- **Governance Health Grade:** **{specter_audit['grade']}** ({specter_audit['healthScore']}% Health)\n"
+        f"- **Verified Checks:** {', '.join(specter_audit['checksPassed'][:3])}\n\n"
         f"#### 📦 Package Structure Created\n"
         f"```text\n"
         f"skills/{skill_slug}/\n"

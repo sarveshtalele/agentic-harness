@@ -82,6 +82,7 @@ flowchart TB
 
     subgraph PERSISTENCE [Persistence & Cryptographic Audit Layer]
         SQLITE["SQLite WAL Store: data/atlas.sqlite3 (Projects, Docs, Runs, Events, Models, Limits)"]
+        CHROMADB["ChromaDB Vector Store: data/chromadb (proj_{id} Collections, Semantic Chunks)"]
         LEDGER["Append-Only Cryptographic Ledger: SHA-256 Hash Chain & HMAC Signatures"]
         CHECKPOINTS["MAF File Checkpoints: data/checkpoints/{run_id}"]
         PARTS_CACHE["Incremental Batch Cache: data/runs/{run_id}/parts/{stage}/{key}.json"]
@@ -118,13 +119,16 @@ src/backend/
     observability.py     Aggregated audit events, failure telemetry, token consumption
     logs.py              Daily JSONL log downloads (admin restricted)
     chat.py              Interactive copilot chat streaming over AG-UI protocol
-    harness.py           Agentic QE Harness session orchestration, MCP client hooks
+    harness.py           Agentic QE Harness session orchestration, direct document ingestion, live skill testing, RAG queries
     skills.py            Local dynamic skills catalog and details
   harness/               Enterprise Autonomous QE Chatbot & Multi-Agent Execution Harness
     harness_agent.py     Clean facade coordinating the execution loop and backward compatibility
     intent_classifier.py Intent classification (skills, docs, tests, fixes, security)
     skill_dispatcher.py  Dynamic routing from 58 skills across 9 domains to executable tools
     grounding.py         Deterministic grounding against centralized SQLite (atlas.sqlite3)
+    rag_store.py         ChromaDB RAG vector store, semantic chunking & multi-DB grounding
+    skill_specter.py     NVIDIA Skill Specter AST security auditor & 0-100 risk scorer
+    skill_tester.py      Live sandboxed skill testing engine (scripts/run.py & evals.json)
     handlers/            Modular workflow execution handlers
       skill_handler.py   Autonomous skill creation, task checklist & Specter validation
       doc_handler.py     10-section BRD/PRD generation with Gherkin scenarios & Gate 1 binding
@@ -707,7 +711,357 @@ All failures are mapped to typed domain exceptions with standardized error codes
 
 ---
 
-## 9. Comprehensive Requirements Traceability Matrix
+## 9. Enterprise Autonomous QE Harness: ChromaDB RAG Vector Store, Direct Document Ingestion & Live Skill Testing Engine
+
+The Autonomous QE Harness extends the Microsoft Agent Framework (MAF 2.0) with real-time semantic retrieval-augmented generation (RAG), direct multi-format document governance, and live sandboxed skill execution. It bridges unstructured project specifications with structured relational state, static AST discoveries, and isolated execution boundaries.
+
+```mermaid
+flowchart TB
+    subgraph INGESTION [Direct Multi-Format Ingestion: POST /api/harness/upload-document]
+        DOC_IN["Multipart Upload: .md | .txt | .docx | .pdf"]
+        PARSER["Format Dispatcher: Native UTF-8 | zipfile+XML (docx) | pypdf (pdf)"]
+        GOV_ID["Governance ID Allocator: {PREFIX}-DOC-{count:03d} (e.g., MCPM-DOC-001)"]
+        SQL_STORE["Atomic Document Versioning: documents & document_versions tables"]
+    end
+
+    subgraph RAG_CORE [ChromaDB Vector Store: src/backend/harness/rag_store.py]
+        CHUNKER["Semantic Chunking: H1..H3 Heading Hierarchy + 800-char Paragraph Splits"]
+        COLLECTION["Per-Project Collections: proj_{project_id} (data/chromadb, Cosine Space)"]
+        INDEXER["Idempotent Upsert: {doc_id}_{index} with Rich Metadata"]
+        VEC_SEARCH["Semantic Vector Search: Cosine Similarity Normalized (1.0 - distance)"]
+    end
+
+    subgraph GROUNDING [Unified Multi-Database Grounding Engine]
+        VEC_HITS["1. ChromaDB Top-K Semantic Hits"]
+        SQL_DOCS["2. SQLite Governed Document Records & Versions"]
+        AST_ENDPOINTS["3. Static AST Public Discovery Endpoints (ast_discovery.json)"]
+        GATE_STATES["4. Active Project Quality Gate Counters"]
+        UNIFIED_CTX["Unified Project Grounding Context Object"]
+    end
+
+    subgraph SKILL_ENGINE [Live Sandboxed Skill Testing: src/backend/harness/skill_tester.py]
+        TEST_DISPATCH["Invocation: POST /api/harness/skills/test or /test_skill CLI/Chat"]
+        SPECTER["NVIDIA Skill Specter Scanner: AST Checks | Injection Checks | Secret Leakage"]
+        RUNNER["Sandboxed Subprocess: scripts/run.py (--json, 30s Timeout, Exit Code)"]
+        EVALS["Deterministic Evaluation Harness: evals/evals.json Test Cases"]
+        AGUI_STREAM["AG-UI Protocol Streaming: 3-Task Ledger & Live Test Markdown Report"]
+    end
+
+    DOC_IN --> PARSER
+    PARSER --> SQL_STORE
+    SQL_STORE --> GOV_ID
+    PARSER --> CHUNKER
+    CHUNKER --> INDEXER
+    INDEXER --> COLLECTION
+
+    COLLECTION --> VEC_SEARCH
+    VEC_SEARCH --> VEC_HITS
+    VEC_HITS --> UNIFIED_CTX
+    SQL_DOCS --> UNIFIED_CTX
+    AST_ENDPOINTS --> UNIFIED_CTX
+    GATE_STATES --> UNIFIED_CTX
+
+    TEST_DISPATCH --> SPECTER
+    SPECTER --> RUNNER
+    RUNNER --> EVALS
+    EVALS --> AGUI_STREAM
+```
+
+### 9.1 ChromaDB RAG Vector Store Architecture (`src/backend/harness/rag_store.py`)
+
+The platform's retrieval-augmented generation engine is encapsulated within `RAGVectorStore` (`src/backend/harness/rag_store.py`), providing semantic search across project documents, business requirement specifications (BRDs), architectural designs, and codebase artifacts.
+
+#### 9.1.1 Semantic Chunking Subsystem (`chunk_document`)
+Rather than arbitrary token window slicing that fractures semantic coherence, `chunk_document` implements a two-stage structural and hierarchical splitting strategy:
+
+1. **Markdown Heading Hierarchy Parsing:**
+   - Evaluates input text against structural markdown heading boundaries using regular expression lookahead:
+     ```python
+     sections = re.split(r'(?m)(?=^#{1,3}\s+)', content)
+     ```
+   - Matches H1 (`#`), H2 (`##`), and H3 (`###`) heading levels, binding subsequent text to that specific topic.
+   - Extracts heading text dynamically (`^(#{1,3})\s+(.+)$`). Passages lacking an explicit header default to the `"General"` category.
+
+2. **Adaptive Paragraph Subdivision:**
+   - If a heading-bounded section fits within `max_chunk_size` (default: `800` characters), it is preserved as an atomic chunk with its heading metadata intact.
+   - If a section exceeds `max_chunk_size`, it is subdivided across natural paragraph breaks (`\n\n`) using a greedy accumulator:
+     - Maintains paragraph sequences up to `max_chunk_size`.
+     - Flushes chunk when adding the next paragraph would exceed the threshold, retaining heading linkage across subdivided segments.
+   - Generates structured chunk descriptors:
+     ```json
+     {
+       "index": 0,
+       "heading": "Idempotency Lock",
+       "text": "Transactions are locked with SHA-256 idempotency tokens to prevent duplicate payment capture."
+     }
+     ```
+
+#### 9.1.2 Per-Project Persistent Collections
+- **Storage Path & Persistence:** ChromaDB state is persisted to disk under `data/chromadb` via `chromadb.PersistentClient(path=persist_dir)`.
+- **Fault-Tolerant Fallback:** If persistent client initialization fails due to platform constraints, the store degrades gracefully to an in-memory client (`chromadb.Client()`) or issues an in-memory indexing fallback marker (`status: "memory_fallback"`), ensuring zero-downtime execution.
+- **Collection Namespace Isolation:** Collections are strictly partitioned by project. Each project receives its own collection named `proj_{sanitized_project_id}` where unsafe characters are converted to underscores:
+  ```python
+  safe_name = f"proj_{re.sub(r'[^a-zA-Z0-9_-]', '_', project_id)}"[:60]
+  ```
+- **HNSW Metric Space:** Collections are created with Cosine Distance indexing (`metadata={"hnsw:space": "cosine", "project_id": project_id}`).
+- **Idempotent Upsert Indexing (`index_document`):**
+  - Chunks are assigned deterministic composite identifiers: `{doc_id}_{chunk_index}`.
+  - Documents are indexed alongside rich metadata:
+    ```python
+    metadatas.append({
+        "project_id": project_id,
+        "doc_id": doc_id,
+        "title": title,
+        "kind": kind,
+        "heading": ch["heading"],
+        "chunk_index": ch["index"]
+    })
+    col.upsert(ids=ids, documents=documents, metadatas=metadatas)
+    ```
+- **Semantic Top-K Retrieval (`query_context`):**
+  - Queries collection with `query_texts=[query]` and `n_results=min(top_k, col.count())`.
+  - Normalizes distance metric to a standard cosine similarity score:
+    $$\text{similarity} = \text{round}(1.0 - \text{distance}, 3)$$
+  - Returns ranked hits with text content, heading anchor, document title, doc ID, and similarity rating.
+
+#### 9.1.3 Unified Multi-Database Grounding Engine (`get_unified_grounding`)
+Agent reasoning requires simultaneous awareness of both semantic concepts and exact relational governance states. `get_unified_grounding(project_id, query)` synthesizes four disparate platform data sources into a single unified grounding context payload:
+
+1. **ChromaDB Semantic Document Vectors (`vectorHits`):**
+   - Retrieves top-4 semantic hits matching the prompt query from `proj_{project_id}`.
+2. **SQLite Governed Document Versions (`documents`):**
+   - Connects to `data/atlas.sqlite3` via `backend.db.db()`.
+   - Executes:
+     ```sql
+     SELECT id, title, kind, current_version, status, updated_at
+     FROM documents
+     WHERE project_id = ?
+     ORDER BY updated_at DESC LIMIT 10
+     ```
+   - Surfaces current version numbers, draft/approved status, and revision timestamps.
+3. **Static AST Public Endpoints (`endpoints`):**
+   - Inspects static analysis artifact `data/projects/{project_id}/ast_discovery.json`.
+   - Extracts up to 8 public HTTP/REST endpoints detected during AST repository parsing.
+4. **Active Quality Gate State Counters (`gatesCount`):**
+   - Queries `SELECT COUNT(*) FROM quality_gates WHERE project_id = ?` to verify gate governance engagement.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Agent as Agent / Prompt Engine
+    participant Grounding as RAGVectorStore (rag_store.py)
+    participant Chroma as ChromaDB (data/chromadb)
+    participant SQLite as SQLite WAL (atlas.sqlite3)
+    participant AST as AST Manifest (ast_discovery.json)
+
+    Agent->>Grounding: get_unified_grounding(project_id, query)
+    par Query Vector Store
+        Grounding->>Chroma: query_context(query, project_id, top_k=4)
+        Chroma-->>Grounding: vectorHits (content, heading, similarity)
+    and Query Governed Docs
+        Grounding->>SQLite: SELECT id, title, version, status FROM documents
+        SQLite-->>Grounding: documents metadata list
+    and Query Quality Gates
+        Grounding->>SQLite: SELECT COUNT(*) FROM quality_gates
+        SQLite-->>Grounding: gatesCount
+    and Query Codebase AST
+        Grounding->>AST: Read ast_discovery.json
+        AST-->>Grounding: endpoints list (top 8)
+    end
+    Grounding-->>Agent: Unified Grounding Payload (vectorHits, documents, endpoints, gatesCount)
+```
+
+---
+
+### 9.2 Direct Document Ingestion Pipeline (`POST /api/harness/upload-document`)
+
+The direct document ingestion endpoint provides automated onboarding of enterprise requirements, specifications, and architecture briefs into the governance lifecycle and vector search index.
+
+#### 9.2.1 Multi-Format Document Ingestion Engine
+Incoming files transmitted via `multipart/form-data` are parsed based on MIME/extension detection:
+
+- **Markdown & Structured Text (`.md`, `.txt`, `.json`, `.yaml`, `.yml`):**
+  Decoded directly via UTF-8 with non-strict character replacement to preserve fidelity.
+- **Microsoft Word (`.docx`):**
+  Parsed in-memory without requiring external office dependencies:
+  - Decompresses archive using Python `zipfile.ZipFile(io.BytesIO(content_bytes))`.
+  - Extracts raw XML document body from `word/document.xml`.
+  - Traverses the XML node tree using `xml.etree.ElementTree`.
+  - Concatenates all textual leaf nodes into a unified document string.
+- **Portable Document Format (`.pdf`):**
+  Parsed using `pypdf.PdfReader` over an in-memory `io.BytesIO` stream:
+  - Iterates sequentially through all document pages.
+  - Extracts text via `page.extract_text()`, joining pages with newline delimiters.
+- **Fallback:**
+  Any unrecognized binary or textual format undergoes lossy UTF-8 text extraction.
+
+#### 9.2.2 Atomic SQLite Governed Document Persistence
+1. **Title Extraction:** Derives document title from form parameters or normalizes the filename (stripping file extensions, replacing underscores and hyphens with spaces, title-casing words).
+2. **Actor Authentication:** Identifies authenticated actor via `backend.core.auth.signer()` or defaults to `"admin"`.
+3. **Atomic Document Creation:** Invokes `backend.core.documents.create()`:
+   - Inserts row into `documents` table (`id`, `project_id`, `kind`, `title`, `current_version=1`, `status="draft"`).
+   - Inserts initial immutable record into `document_versions` containing the SHA-256 digest hash and timestamped payload.
+   - Writes upload note: `"Uploaded via Autonomous QE Harness (<filename>)"`.
+
+#### 9.2.3 Automatic Governance ID Allocation
+Governance documents follow a deterministic identifier format for cross-system tracking:
+- Derives a 4-character project prefix from the project ID:
+  ```python
+  clean_prefix = re.sub(r'[^a-zA-Z0-9]', '', target_project.replace('prj_', '')).upper()[:4] or "QE"
+  ```
+  *(e.g., `prj_mcp_market` becomes `MCPM`, `prj_agentic_qe` becomes `AGEN`)*
+- Counts existing documents in the project:
+  ```sql
+  SELECT COUNT(*) FROM documents WHERE project_id = ?
+  ```
+- Allocates zero-padded Governance ID: `{clean_prefix}-DOC-{count:03d}` *(e.g., `MCPM-DOC-001`)*.
+
+#### 9.2.4 Automated ChromaDB Vector Embedding & Indexing
+Immediately upon SQLite transaction commit:
+1. Passes document text, title, `kind`, and `doc_id` to `rag_store.index_document()`.
+2. Triggers heading-aligned semantic chunking.
+3. Upserts all chunks into ChromaDB collection `proj_{target_project}`.
+4. Returns HTTP 200 with complete governance and indexing telemetry:
+   ```json
+   {
+     "success": true,
+     "doc_id": "doc_a8f9c1b2...",
+     "governance_id": "MCPM-DOC-001",
+     "title": "Enterprise Treasury Settlement BRD",
+     "kind": "brd",
+     "filename": "treasury_settlement_brd.md",
+     "projectId": "prj_mcp_market",
+     "chunksIndexed": 4,
+     "vectorDb": "ChromaDB",
+     "collection": "proj_prj_mcp_market"
+   }
+   ```
+
+---
+
+### 9.3 Live Sandboxed Skill Testing Engine (`src/backend/harness/skill_tester.py`)
+
+Agent skills (modular units of functionality comprising instructions, scripts, and evaluation cases) must undergo rigorous validation before production deployment. The testing engine coordinates static security audits, sandboxed code execution, and evaluation case verification.
+
+```mermaid
+flowchart TD
+    START(["Trigger: execute_and_test_skill()"]) --> FIND["Locate Skill Directory: skills/{slug}"]
+    FIND --> STEP1["Step 1: NVIDIA Skill Specter AST Audit (skill_specter.py)"]
+    
+    subgraph SPECTER_AUDIT [NVIDIA Skill Specter AST Security Scan]
+        S_SPEC["YAML Frontmatter & Spec Boundary Demarcation"]
+        S_INJ["Prompt Injection & Jailbreak Heuristic Scan"]
+        S_AST["Python AST Security Visitor (eval, exec, os.system, shell=True)"]
+        S_SEC["Secret & Hardcoded Credential Scanner"]
+        S_PATH["Sandbox Path Traversal Escape Defense (../)"]
+        S_SCORE["Compute Risk Points & Readiness Status"]
+    end
+    
+    STEP1 --> SPECTER_AUDIT
+    SPECTER_AUDIT --> CHECK_RISK{"Risk Score < 40?<br/>(isReady == True)"}
+    
+    CHECK_RISK -- Yes --> STEP2["Step 2: Sandboxed Python Runner Execution (scripts/run.py)"]
+    CHECK_RISK -- No (Critical) --> FAIL_VERDICT["Verdict: FAILED (Blocked by Security Gate)"]
+    
+    subgraph RUNNER_EXEC [Sandboxed Execution Boundary]
+        SUBPROC["asyncio.create_subprocess_exec(sys.executable, 'scripts/run.py', '--json', args)"]
+        TIMEOUT["30.0s Execution Deadline Guard"]
+        STREAMS["Capture stdout, stderr, and returncode"]
+    end
+    
+    STEP2 --> RUNNER_EXEC
+    RUNNER_EXEC --> STEP3["Step 3: Deterministic Evaluation Verification (evals/evals.json)"]
+    
+    subgraph EVAL_HARNESS [Deterministic Evals Validation]
+        LOAD_EVALS["Load evals/evals.json test cases"]
+        EVAL_CASES["Verify Expected Behavior & Output Assertions"]
+    end
+    
+    STEP3 --> EVAL_HARNESS
+    EVAL_HARNESS --> COMPUTE_VERDICT{"Specter Ready AND Script Success?"}
+    COMPUTE_VERDICT -- Yes --> PASS_VERDICT["Verdict: PASSED (Production Ready)"]
+    COMPUTE_VERDICT -- No --> FAIL_VERDICT
+    
+    PASS_VERDICT --> AGUI_REPORT["Stream Live AG-UI Report & Update Task Ledger"]
+    FAIL_VERDICT --> AGUI_REPORT
+```
+
+#### 9.3.1 Isolated Subprocess Runner Architecture
+- **Target Resolution:** Resolves skill folder under `<workspace_dir>/skills/<slug>`, with fuzzy partial matching fallback.
+- **Entrypoint Verification:** Validates presence of `scripts/run.py`.
+- **Sandboxed Subprocess Execution:**
+  - Invokes runner using asynchronous process isolation:
+    ```python
+    proc = await asyncio.create_subprocess_exec(
+        sys.executable,
+        str(script_path),
+        "--json",
+        arg_json,
+        cwd=str(workspace_dir),
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE
+    )
+    stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=30.0)
+    ```
+  - Enforces strict 30-second timeout ceiling to prevent runaway or infinite execution.
+  - Sanitizes and captures `stdout` (first 3000 characters) and `stderr` (first 3000 characters).
+  - Assesses process returncode (`exitCode == 0` signifies success).
+
+#### 9.3.2 Deterministic Evaluation Test Case Harness
+- Evaluates skill against `evals/evals.json`.
+- Validates that declared evaluation scenarios (`cases`) match runner operational outputs.
+- Requires both security clearance (`specter.isReady == True`) and script execution success (`script.success == True`) to award a `PASSED` overall verdict.
+
+#### 9.3.3 NVIDIA Skill Specter AST Security Check Integration (`src/backend/harness/skill_specter.py`)
+`skill_specter.py` enforces a static security and safety gate on all skills before they can be loaded or executed by the agent runtime:
+
+| Check Category | Check ID | Rule / AST Pattern Verified | Severity | Points |
+|---|---|---|---|---|
+| **Specification Contract** | `SPECTER-SPEC-01` | Required `SKILL.md` file presence in skill root directory. | Critical | +35 |
+| **Frontmatter Boundary** | `SPECTER-SPEC-02` | Skill markdown must begin with YAML frontmatter delimiters (`---`). | High | +20 |
+| **Prompt Injection** | `SPECTER-INJ-01` | Demarcation scan for adversarial prompt overrides: `ignore all previous instructions`, `system override`, `disregard safety guidelines`, `<script>` tags. | Critical | +35 |
+| **Dangerous Built-ins** | `SPECTER-RCE-01` | AST search for arbitrary dynamic code evaluation: `eval()`, `exec()`, `__import__()`, `compile()`. | Critical | +35 |
+| **Unrestricted Shell** | `SPECTER-SHELL-01` | AST search for direct shell invocation: `os.system()`, `os.popen()`, `os.spawnl()`. | Critical | +35 |
+| **Shell Injection** | `SPECTER-SHELL-02` | AST inspection of `subprocess.Popen` / `asyncio` calls checking for `shell=True` parameter. | Critical | +35 |
+| **Syntax Validity** | `SPECTER-AST-01` | Validates Python syntax AST parsing across all `scripts/*.py` files. | High | +20 |
+| **Exposed Secrets** | `SPECTER-SEC-01` | Secret leakage regex scan across `.py`, `.json`, `.md` for OpenAI keys (`sk-...`), GitHub PATs (`ghp_...`), AWS keys (`AKIA...`), and RSA private keys. | Critical | +35 |
+| **Path Traversal** | `SPECTER-PATH-01` | Detection of relative parent traversal (`../`, `..\`) escaping the assigned directory. | Medium | +10 |
+
+##### Risk Scoring Formula & Production Readiness Standards
+- **Risk Score (0–100):**
+  $$\text{Risk Score} = \min\left(100, \sum \text{Risk Points}\right)$$
+  - `0 - 14`: **CLEAN / LOW RISK** (Status: `VERIFIED / PRODUCTION READY`, Grade: `A+`, `isReady = True`)
+  - `15 - 39`: **MEDIUM RISK** (Status: `AUDIT REQUIRED`, Grade: `B`, `isReady = True`)
+  - `40 - 100`: **CRITICAL RISK** (Status: `CRITICAL / NOT READY FOR USE`, Grade: `FAIL`, `isReady = False`)
+- **Governance Health Score (0–100%):**
+  $$\text{Health Score} = \max(0, 100 - \text{Risk Score})$$
+
+#### 9.3.4 Streaming Interactive Workflow & Chat Integration (`handle_skill_testing_workflow`)
+Users trigger testing interactively via slash commands (`/test_skill <name>` or `/run_skill <name>`):
+1. **Persona Transition:** Switches active agent persona to `qa-execution-engineer` ("QA Execution Engineer").
+2. **Dynamic Task Ledger (AG-UI Protocol):** Initializes a 3-item task checklist in `session.todos`:
+   - `1. Run NVIDIA Skill Specter AST scan on <skill>` (Assigned: `security-compliance-specialist`)
+   - `2. Execute sandboxed Python runner (scripts/run.py)` (Assigned: `test-automation-engineer`)
+   - `3. Validate deterministic evaluation cases (evals/evals.json)` (Assigned: `qa-execution-engineer`)
+3. **Live State Delta Streaming:** Emits `state_delta` updates as tasks advance (`in_progress` -> `completed` / `failed`).
+4. **Markdown Test Summary Report:** Yields structured GitHub-flavored markdown report summarizing verdicts, Specter risk metrics, exit codes, execution timing, stdout/stderr blocks, and findings.
+5. **Observability Tracking:** Increments platform tool metrics: `session.toolsUsed["test_agent_skill"] += 1`.
+
+---
+
+### 9.4 Harness REST API Endpoints Specification
+
+The platform exposes three specialized endpoints under `/api/harness` to support direct document ingestion, live skill execution, and semantic RAG querying:
+
+| Endpoint | HTTP Method | Request Body / Form | Response Payload | Description & Error Semantics |
+|---|---|---|---|---|
+| `/api/harness/upload-document` | `POST` | `multipart/form-data`<br/>- `file`: UploadFile<br/>- `project_id`: Optional string (default: `"prj_agentic_qe"`)<br/>- `kind`: string (default: `"brd"`)<br/>- `title`: Optional string | `200 OK`<br/>`{ success, doc_id, governance_id, title, kind, filename, projectId, chunksIndexed, vectorDb, collection }` | Accepts `.md`, `.txt`, `.docx`, or `.pdf`. Atomically persists document to SQLite (`documents` & `document_versions`), assigns governance ID (`MCPM-DOC-xxx`), and embeds chunks into ChromaDB collection `proj_{project_id}`. |
+| `/api/harness/skills/test` | `POST` | `application/json`<br/>`SkillTestRequest`<br/>`{ skillName: str, args?: Dict, projectId?: str }` | `200 OK`<br/>`{ success, verdict, skill, path, specter, script, evals }` | Executes complete sandboxed verification of an agent skill: runs NVIDIA Skill Specter AST checks, executes `scripts/run.py` within isolated subprocess (30s timeout), and verifies `evals/evals.json`. |
+| `/api/harness/rag-query` | `POST` | `application/json`<br/>`RAGQueryRequest`<br/>`{ query: str, projectId: str, topK?: int }` | `200 OK`<br/>`{ query, projectId, vectorHits, unifiedGrounding }` | Executes semantic vector search against ChromaDB collection `proj_{project_id}` and returns 4-tier unified grounding (ChromaDB vectors + SQLite documents + AST endpoints + active quality gates). |
+
+---
+
+## 10. Comprehensive Requirements Traceability Matrix
 
 This canonical document incorporates and enforces all specifications originally defined across `specs.md`, `DESIGN.md`, `docs/SYSTEM_DESIGN.md`, and `docs/ARCHITECTURE.md`:
 
@@ -742,15 +1096,18 @@ This canonical document incorporates and enforces all specifications originally 
 | **CNF-1..12**| Confidence | Rubric scoring, citation disk verification, flawed case send-back, gate reopen | Section 6.1 (Stage 5) & 6.2 (Gate Reopening) | Unit & API |
 | **TST-1..17**| Test Generation| AST signature validation, environment notes, quota budgeting, test summary | Section 4.3, 6.1 (Stage 5, 6, 7) | Unit & API |
 | **EVL-1..10**| Evaluations | Deterministic metrics (Groundedness, Recall, F1), RAGAS integration | Section 2.1 (`maf/evals/`) | Unit & API |
+| **HAR-RAG-1..4**| RAG Store | ChromaDB persistent collections (`data/chromadb`), heading hierarchy chunking, cosine similarity, 4-tier unified grounding | Section 9.1 (`harness/rag_store.py`) | Unit & API (`test_harness_specter_rag_and_skills.py`) |
+| **HAR-DOC-1..4**| Doc Ingestion | Direct upload (.md, .txt, .docx, .pdf), atomic SQLite versioning, `MCPM-DOC-xxx` ID allocation, ChromaDB auto-indexing | Section 9.2 (`/api/harness/upload-document`) | API & Integration |
+| **HAR-SKL-1..4**| Skill Testing | Sandboxed runner (`scripts/run.py`), deterministic evals (`evals.json`), NVIDIA Skill Specter AST security checks, AG-UI workflow | Section 9.3 (`harness/skill_tester.py`, `skill_specter.py`) | Unit & API |
 
 ---
 
-## 10. Summary of Documentation Consolidation
+## 11. Summary of Documentation Consolidation
 
 In accordance with the repository documentation policy (**1 Single Doc for Each Idea, No Multiple Docs for a Single Purpose**), this document is the authoritative platform architecture and design specification.
 
 - **Consolidated & Superseded Documents:**
   - `docs/SYSTEM_DESIGN.md` -> Fully integrated into Sections 1, 2, 3, 5, 8.
   - `DESIGN.md` -> Fully integrated into Section 2.2 (Frontend UI Architecture & Design System).
-  - `specs.md` -> Fully integrated into Sections 3, 4, 5, 6, 8, 9.
+  - `specs.md` -> Fully integrated into Sections 3, 4, 5, 6, 8, 9, 10.
   - `docs/ARCHITECTURE.md` -> Architectural diagrams, engine analysis, and inventory consolidated; replaced by pointer to this document.

@@ -157,6 +157,28 @@ class HarnessAgent:
                 yield chunk
             return
 
+        # 3b. Handle Skill Testing & Live Verification Directives (/test_skill, /run_skill)
+        is_skill_test_cmd = prompt_trimmed.startswith("/") and prompt_trimmed.split(" ")[0].lower() in (
+            "/test_skill", "/test-skill", "/run_skill", "/run-skill", "/eval_skill", "/evaluate_agent_skill"
+        )
+        is_skill_test_intent = (
+            is_skill_test_cmd or
+            any(phrase in p_lower for phrase in [
+                "test skill", "run skill", "evaluate skill", "test the skill", "execute skill"
+            ])
+        )
+
+        if is_skill_test_intent:
+            from .skill_tester import handle_skill_testing_workflow
+            async for chunk in handle_skill_testing_workflow(
+                session=session,
+                prompt=prompt_trimmed,
+                workspace_dir=self.workspace_dir,
+                now=now
+            ):
+                yield chunk
+            return
+
         # 4. Handle Document Generation Directives & Commands (/doc, /brd, /prd)
         is_doc_cmd = prompt_trimmed.startswith("/") and prompt_trimmed.split(" ")[0].lower() in (
             "/doc", "/docs", "/document", "/brd", "/prd"

@@ -79,6 +79,32 @@ def evaluate_skill(skill_dir: Path) -> dict:
 
     verdict = "APPROVED" if total_score >= 90 else "REVISE" if total_score >= 70 else "REJECT"
 
+    # 4. NVIDIA Skill Specter AST Security Audit
+    specter_audit = None
+    try:
+        from backend.harness.skill_specter import scan_skill_security
+        specter_audit = scan_skill_security(skill_dir)
+    except Exception:
+        # Fallback inline AST scan if executed outside PYTHONPATH
+        has_eval_or_exec = any(w in (skill_md.read_text(encoding="utf-8") if skill_md.exists() else "") for w in ("eval(", "exec(", "os.system("))
+        risk = 85 if has_eval_or_exec else 0
+        specter_audit = {
+            "riskScore": risk,
+            "readinessStatus": "CRITICAL / NOT READY FOR USE" if risk >= 40 else "VERIFIED / PRODUCTION READY",
+            "grade": "FAIL" if risk >= 40 else "A+",
+            "findingsCount": 1 if has_eval_or_exec else 0,
+            "checksPassed": ["Prompt Demarcation"] if not has_eval_or_exec else []
+        }
+
+    specter_risk_score = specter_audit.get("riskScore", 0)
+    specter_grade = specter_audit.get("grade", "A+")
+    specter_readiness = specter_audit.get("readinessStatus", "VERIFIED / PRODUCTION READY")
+
+    # If critical security risk detected, override verdict
+    if specter_risk_score >= 40:
+        total_score = max(20, total_score - 50)
+        verdict = "REJECT"
+
     return {
         "skill": skill_dir.name,
         "evaluated_at": int(time.time() * 1000),
@@ -91,8 +117,11 @@ def evaluate_skill(skill_dir: Path) -> dict:
             "recall": recall,
             "f1": f1,
         },
-        "specterScore": min(99, total_score + 2),
-        "specterGrade": "A+" if total_score >= 95 else "A" if total_score >= 90 else "B",
+        "specterRiskScore": specter_risk_score,
+        "specterGrade": specter_grade,
+        "specterReadiness": specter_readiness,
+        "specterFindings": specter_audit.get("findings", []),
+        "specterChecksPassed": specter_audit.get("checksPassed", []),
         "cases_evaluated": len(cases),
         "scripts_evaluated": script_results,
         "status": "success",

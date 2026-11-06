@@ -26,6 +26,7 @@ async def handle_harness_command(
             "| Command | Description |\n"
             "| :--- | :--- |\n"
             "| `/create_agent_skill <name>` | Synthesize & package a standardized Agent Skill |\n"
+            "| `/test_skill <name>` | Test skill live with sandboxed runner & NVIDIA Skill Specter audit |\n"
             "| `/doc <topic>` | Generate full 10-section BRD/PRD with Gherkin acceptance criteria |\n"
             "| `/skills` | Browse all authentic project and plugin skills |\n"
             "| `/plan [scope]` | Switch to **[PLAN MODE]** and formulate test strategy |\n"

@@ -8,8 +8,10 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import re
+import time
 from typing import Any, Dict, List, Optional
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
 
@@ -282,3 +284,128 @@ async def project_stream_chat(project_id: str, req: ChatRequest):
     req.message = prompt_text
     req.prompt = prompt_text
     return await stream_chat(req)
+
+
+# Direct Document Upload & ChromaDB RAG Ingestion
+@router.post("/api/harness/upload-document")
+async def upload_harness_document(
+    file: UploadFile = File(...),
+    project_id: Optional[str] = Form(None),
+    kind: str = Form("brd"),
+    title: Optional[str] = Form(None)
+):
+    import time
+    target_project = project_id or "prj_agentic_qe"
+    content_bytes = await file.read()
+    filename = file.filename or "uploaded_document.txt"
+    ext = os.path.splitext(filename)[1].lower()
+
+    text = ""
+    if ext in (".md", ".txt", ".json", ".yaml", ".yml"):
+        text = content_bytes.decode("utf-8", errors="ignore")
+    elif ext == ".docx":
+        import io
+        import xml.etree.ElementTree as ET
+        import zipfile
+        try:
+            with zipfile.ZipFile(io.BytesIO(content_bytes)) as docx:
+                xml_content = docx.read("word/document.xml")
+                tree = ET.fromstring(xml_content)
+                text = " ".join([node.text for node in tree.iter() if node.text])
+        except Exception:
+            text = content_bytes.decode("utf-8", errors="ignore")
+    elif ext == ".pdf":
+        try:
+            import io
+            from pypdf import PdfReader
+            reader = PdfReader(io.BytesIO(content_bytes))
+            text = "\n".join([page.extract_text() or "" for page in reader.pages])
+        except Exception:
+            text = content_bytes.decode("utf-8", errors="ignore")
+    else:
+        text = content_bytes.decode("utf-8", errors="ignore")
+
+    doc_title = title or filename.replace(ext, "").replace("-", " ").replace("_", " ").title()
+
+    from backend.db import db
+    from backend.core import documents as docs_core
+    from backend.core import auth
+
+    # Store governed document through standard documents engine
+    author = auth.signer() or "admin"
+    created = docs_core.create(
+        project_id=target_project,
+        kind=kind,
+        title=doc_title,
+        content=text,
+        author=author,
+        note=f"Uploaded via Autonomous QE Harness ({filename})"
+    )
+    doc_id = created["id"]
+
+    with db() as conn:
+        cur = conn.cursor()
+        cur.execute("SELECT COUNT(*) FROM documents WHERE project_id = ?", (target_project,))
+        count = cur.fetchone()[0]
+        clean_prefix = re.sub(r'[^a-zA-Z0-9]', '', target_project.replace('prj_', '')).upper()[:4] or "QE"
+        gov_id = f"{clean_prefix}-DOC-{count:03d}"
+
+    from backend.harness.rag_store import rag_store
+    index_res = rag_store.index_document(
+        project_id=target_project,
+        doc_id=doc_id,
+        title=doc_title,
+        kind=kind,
+        content=text
+    )
+
+    return {
+        "success": True,
+        "doc_id": doc_id,
+        "governance_id": gov_id,
+        "title": doc_title,
+        "kind": kind,
+        "filename": filename,
+        "projectId": target_project,
+        "chunksIndexed": index_res.get("indexed", 0),
+        "vectorDb": "ChromaDB",
+        "collection": index_res.get("collection", f"proj_{target_project}")
+    }
+
+
+class SkillTestRequest(BaseModel):
+    skillName: str
+    args: Optional[Dict[str, Any]] = None
+    projectId: Optional[str] = None
+
+
+@router.post("/api/harness/skills/test")
+async def test_skill_endpoint(req: SkillTestRequest):
+    from backend.harness.skill_tester import execute_and_test_skill
+    workspace = os.getcwd()
+    result = await execute_and_test_skill(
+        skill_name=req.skillName,
+        workspace_dir=workspace,
+        test_args=req.args
+    )
+    return result
+
+
+class RAGQueryRequest(BaseModel):
+    query: str
+    projectId: str
+    topK: Optional[int] = 4
+
+
+@router.post("/api/harness/rag-query")
+async def rag_query_endpoint(req: RAGQueryRequest):
+    from backend.harness.rag_store import rag_store
+    hits = rag_store.query_context(req.query, req.projectId, top_k=req.topK or 4)
+    grounding = rag_store.get_unified_grounding(req.projectId, query=req.query)
+    return {
+        "query": req.query,
+        "projectId": req.projectId,
+        "vectorHits": hits,
+        "unifiedGrounding": grounding
+    }
+
