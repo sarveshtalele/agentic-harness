@@ -2,7 +2,7 @@
 
 Skill text is trusted platform content, unlike repository and document text. A skill MAF cannot load is a startup
 warning and is absent. Workflows never load a skill by tool: `render` returns the text a caller puts in the message
-(measured on the real proxy: tools are unreliable, skill text in the message works; docs/PLUGIN_AND_UI_PLAN.md Part 9).
+(measured on the real proxy: tools are unreliable, skill text in the message works; docs/AGENT_SKILLS_AND_MAF_SPECIFICATION.md Section 5.6).
 """
 from __future__ import annotations
 

@@ -41,6 +41,7 @@ interface StudioDoc {
   current_version: number;
   status: string;
   updated_at: string;
+  content?: string;
 }
 
 interface TestCaseItem {
@@ -236,6 +237,74 @@ export default function SkillCreatorStudioPage() {
     const updated = [...tasks];
     updated[index] = val;
     setTasks(updated);
+  };
+
+  // AI Architect & Contextual Auto-Fill
+  const handleAiAutoFill = () => {
+    let title = "";
+    let content = "";
+    if (sourceMode === "project" && selectedDocId) {
+      const doc = documents.find((d) => d.id === selectedDocId);
+      if (doc) {
+        title = doc.title;
+        content = doc.content || "";
+      }
+    } else if (sourceMode === "upload") {
+      title = uploadedFileName ? uploadedFileName.replace(/\.[^/.]+$/, "") : "Uploaded Specification";
+      content = customText;
+    } else {
+      title = customText.slice(0, 40).split("\n")[0] || "Custom Domain";
+      content = customText;
+    }
+
+    if (!title && !content) {
+      setError("Please select a document, upload a file, or enter prompt text first.");
+      return;
+    }
+
+    setError("");
+    const cleanTitle = title
+      .replace(/Business Requirements Document \(BRD\) - /gi, "")
+      .replace(/Scenarios/gi, "")
+      .replace(/Deterministic Test Cases & Scenario Matrix/gi, "")
+      .replace(/Functional & Verification Requirements Specification/gi, "")
+      .trim() || "Domain Workflow";
+
+    const aiSkillName = `${cleanTitle} Verification Engine`;
+    setSkillName(aiSkillName);
+
+    const lower = (content + " " + title).toLowerCase();
+    let aiCat = "custom-sdlc";
+    if (lower.includes("gherkin") || lower.includes("given") || lower.includes("scenario")) {
+      aiCat = "test-design";
+    } else if (lower.includes("security") || lower.includes("specter") || lower.includes("auth") || lower.includes("injection") || lower.includes("token")) {
+      aiCat = "security-guardrails";
+    } else if (lower.includes("requirement") || lower.includes("brd") || lower.includes("prd")) {
+      aiCat = "requirements-engineering";
+    } else if (lower.includes("ast") || lower.includes("discovery") || lower.includes("stack") || lower.includes("repo")) {
+      aiCat = "ast-intelligence";
+    } else if (lower.includes("heal") || lower.includes("defect") || lower.includes("drift") || lower.includes("diagnos")) {
+      aiCat = "self-healing";
+    } else if (lower.includes("runner") || lower.includes("pytest") || lower.includes("vitest") || lower.includes("execut")) {
+      aiCat = "runtime-execution";
+    } else if (lower.includes("gate") || lower.includes("sign") || lower.includes("governance") || lower.includes("approval")) {
+      aiCat = "quality-governance";
+    } else {
+      aiCat = "test-generation";
+    }
+    setCategory(aiCat);
+
+    setDescription(`Autonomous skill for validating, testing, and verifying ${cleanTitle}. Use when processing ${cleanTitle.toLowerCase()} business requirements, testing execution contracts, or verifying state invariants.`);
+
+    const aiTasks = [
+      `1. Ingest input payload and validate schema constraints for ${cleanTitle}`,
+      `2. Verify precondition state and system readiness against specification rules`,
+      `3. Execute core ${cleanTitle.toLowerCase()} transactional operations and state transitions`,
+      `4. Validate postcondition assertions, error boundaries, and exception handling`,
+      `5. Emit cryptographically signed execution trace and sync quality gate status`,
+    ];
+    setTasks(aiTasks);
+    setSuccessMsg(`AI Auto-filled architecture for "${aiSkillName}" (${aiCat}) with ${aiTasks.length} tasks!`);
   };
 
   // Trigger Scaffolding
@@ -630,6 +699,15 @@ export default function SkillCreatorStudioPage() {
                     />
                   </div>
                 )}
+                {/* AI Context Auto-Fill Button */}
+                <button
+                  type="button"
+                  onClick={handleAiAutoFill}
+                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 py-2.5 px-3 text-xs font-bold text-white shadow-md hover:from-indigo-500 hover:to-purple-600 transition-all active:scale-[0.99]"
+                >
+                  <Sparkles className="h-4 w-4 animate-pulse text-amber-300" />
+                  <span>AI Architect & Auto-Fill Skill Specifications</span>
+                </button>
               </div>
             </Card>
 
@@ -651,7 +729,7 @@ export default function SkillCreatorStudioPage() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                      Category
+                      AI SDLC Category
                     </label>
                     <select
                       aria-label="Skill category"
@@ -659,11 +737,15 @@ export default function SkillCreatorStudioPage() {
                       onChange={(e) => setCategory(e.target.value)}
                       className={inputClass}
                     >
-                      <option value="custom-skills">Custom Skills</option>
-                      <option value="testing">Quality Engineering</option>
-                      <option value="financial-engineering">Financial Engineering</option>
-                      <option value="security">Security & Compliance</option>
-                      <option value="devops">DevOps & Cloud</option>
+                      <option value="requirements-engineering">Requirements Engineering & Specs</option>
+                      <option value="ast-intelligence">AST Codebase & Architecture</option>
+                      <option value="test-design">Deterministic Test Design Matrix</option>
+                      <option value="test-generation">Autonomous Test Synthesis</option>
+                      <option value="runtime-execution">Runner Execution & Diagnostics</option>
+                      <option value="self-healing">Defect Diagnostics & Self-Healing</option>
+                      <option value="quality-governance">Quality Gates & Governance</option>
+                      <option value="security-guardrails">Zero-Trust Guardrails & Security</option>
+                      <option value="custom-sdlc">Custom SDLC Engineering</option>
                     </select>
                   </div>
                   <div>

@@ -51,7 +51,7 @@ This audit reviewed all frontend React/Next.js components, API routers, Microsof
 ## 4. Architectural Tasks & Verification Checklist
 
 - [x] **Task 1: Universal Modal Consolidation:** Eliminate all native `confirm()` and `prompt()` dialogs in favor of `ConfirmModal.tsx`.
-- [x] **Task 2: Eliminate Duplicate Markdown Documentation:** Removed redundant `AZURE_DEPLOY.md`, `AZURE_SYSTEM_DESIGN.md`, and `PROJECT_STRUCTURE.md`. Consolidated all deployment, pricing, and sandbox architecture into `AZURE_DEPLOYMENT_GUIDE.md`.
+- [x] **Task 2: Eliminate Duplicate Markdown Documentation:** Removed redundant `AZURE_DEPLOY.md`, `AZURE_SYSTEM_DESIGN.md`, `AZURE_DEPLOYMENT_GUIDE.md`, and `PROJECT_STRUCTURE.md`. Consolidated all deployment, pricing, and sandbox architecture into single canonical guide `AZURE_ENTERPRISE_DEPLOYMENT_GUIDE.md`.
 - [x] **Task 3: Grounded AST Import Grounding:** Multi-root discovery enabled for `backend/`, `modules/`, and `core/` to prevent false import rejections.
 - [x] **Task 4: Test Syntax Error Quarantine:** Auto-strip markdown fences and quarantine malformed files rather than throwing fatal `AQE-INT-001` crashes.
 - [x] **Task 5: Guardrail Flags Explanatory Table:** Added interactive threat mitigation matrix with info hover icons to `/agents`.

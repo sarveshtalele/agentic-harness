@@ -100,7 +100,11 @@ class HarnessAgent:
 
     def _resolve_skill_tool(self, skill_name: str, display_name: str) -> tuple[str, Dict[str, Any]]:
         target = skill_name.lower()
-        if "tree" in target:
+        if "skill-creator" in target or "creator" in target or "scaffold" in target:
+            return "create_agent_skill", {"name": display_name or "Custom Quality Skill", "description": "Autonomous skill for domain workflow"}
+        elif "evaluat" in target or "eval" in target:
+            return "evaluate_agent_skill", {"skillName": display_name or "skill-creator"}
+        elif "tree" in target:
             return "view_tree", {"maxDepth": 3}
         elif "read_file" in target:
             return "read_file", {"filePath": "package.json"}
@@ -119,7 +123,7 @@ class HarnessAgent:
         elif "generate" in target or "code" in target:
             return "qe_generate_code", {"caseId": "TC-SKILL-001", "runner": "vitest"}
         elif "run" in target or "execut" in target or "sandbox" in target:
-            return "run_sandbox_command", {"command": "npx --no-install vitest run"}
+            return "execute_skill_script", {"skillName": skill_name, "script": "run.py", "args": {}}
         elif "heal" in target or "doctor" in target:
             return "heal_test_drift", {"failedTestFile": "tests/test_harness_backend.py", "errorTrace": "Automated skill heal"}
         elif "defect" in target or "bug" in target or "finding" in target:
@@ -136,11 +140,11 @@ class HarnessAgent:
             return "get_error_summary", {}
         elif "mcp" in target:
             return "list_mcp_servers", {}
-        elif "audit" in target or "security" in target:
+        elif "audit" in target or "security" in target or "specter" in target:
             return "qe_security_audit", {}
         elif "trace" in target or "sign" in target or "review" in target:
             return "qe_confidence_review", {"artifactType": "skill_review"}
-        return "inspect_repo", {}
+        return "execute_skill_script", {"skillName": skill_name, "script": "run.py", "args": {}}
 
     def _ground_from_centralized_db(self, session: SessionState, user_prompt: str) -> Optional[Dict[str, Any]]:
         """
@@ -1183,8 +1187,74 @@ class HarnessAgent:
                 ))
                 yield AGUIProtocol.tool_call_result(tool_call_id, None, str(e))
 
-        # 8. Produce Final Structured Response if LLM didn't emit text
-        if not full_content:
+        # 8. Append Live Execution Summary to the chat stream if tools were run, or generate structured summary
+        summary_chunks = []
+        if executed_records:
+            summary_chunks.append("\n\n### ⚡ Live Tool & Skill Execution Summary\n")
+            summary_chunks.append("| Tool / Skill | Status | Gate | Details |")
+            summary_chunks.append("| :--- | :--- | :--- | :--- |")
+            for rec in executed_records:
+                st = "✅ Completed" if rec.status == "completed" else "❌ Failed"
+                gate_str = f"Gate {rec.gateNumber}" if rec.gateNumber else "Direct"
+                detail_text = ""
+                if rec.status == "failed":
+                    detail_text = (rec.error or "Error during execution").replace("\n", " ")[:90]
+                elif isinstance(rec.result, dict):
+                    if "skill_name" in rec.result:
+                        detail_text = f"Skill: `{rec.result['skill_name']}` ({rec.result.get('status', 'ready')})"
+                    elif "findings" in rec.result:
+                        detail_text = f"Total findings: {len(rec.result['findings'])}"
+                    elif "passed" in rec.result and "failed" in rec.result:
+                        detail_text = f"Passed: {rec.result['passed']}, Failed: {rec.result['failed']}"
+                    elif "files_created" in rec.result:
+                        detail_text = f"Created {len(rec.result['files_created'])} files"
+                    elif "summary" in rec.result:
+                        detail_text = str(rec.result["summary"])[:90]
+                    elif "message" in rec.result:
+                        detail_text = str(rec.result["message"])[:90]
+                    else:
+                        detail_text = f"Result keys: {', '.join(list(rec.result.keys())[:3])}"
+                elif rec.result:
+                    detail_text = str(rec.result).replace("\n", " ")[:90]
+                else:
+                    detail_text = "Executed successfully"
+                summary_chunks.append(f"| `{rec.name}` | {st} | {gate_str} | {detail_text} |")
+
+            for rec in executed_records:
+                if isinstance(rec.result, dict) and rec.result.get("files_created"):
+                    files = rec.result["files_created"]
+                    summary_chunks.append(f"\n**Files Created for `{rec.name}`:**")
+                    for f in files[:6]:
+                        summary_chunks.append(f"- `{f}`")
+                if isinstance(rec.result, dict) and rec.result.get("stdout"):
+                    stdout_snippet = rec.result["stdout"][:400].strip()
+                    if stdout_snippet:
+                        summary_chunks.append(f"\n```text\n{stdout_snippet}\n```")
+
+        if summary_chunks:
+            tool_summary_str = "\n".join(summary_chunks)
+            if not full_content:
+                full_content = (
+                    f"### 🛡️ Quality Engineering Workflow Summary\n\n"
+                    f"**Specialist:** `{persona.name}` (`{persona.role}`)\n"
+                    f"**Harness Mode:** `[{session.mode.upper()}]`\n"
+                    f"{tool_summary_str}"
+                )
+                for word in full_content.split(" "):
+                    if abort_event and abort_event.is_set():
+                        yield AGUIProtocol.aborted()
+                        return
+                    yield AGUIProtocol.text_chunk(f"{word} ")
+                    await asyncio.sleep(0.015)
+            else:
+                for chunk in tool_summary_str.split("\n"):
+                    if abort_event and abort_event.is_set():
+                        yield AGUIProtocol.aborted()
+                        return
+                    yield AGUIProtocol.text_chunk(f"\n{chunk}")
+                    await asyncio.sleep(0.01)
+                full_content = full_content + "\n" + tool_summary_str
+        elif not full_content:
             response_text = (
                 f"### 🛡️ Quality Engineering Workflow Summary\n\n"
                 f"**Specialist:** `{persona.name}` (`{persona.role}`)\n"

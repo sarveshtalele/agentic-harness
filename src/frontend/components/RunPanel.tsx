@@ -9,22 +9,51 @@ import { Badge, Button, Card, ErrorNote, Field, inputClass, useToast } from "./u
 
 const verdictTone = (v: string) => (v === "APPROVED" ? "emerald" : v === "REVISE" ? "amber" : v === "REJECT" ? "rose" : "slate");
 
+function cleanTestName(name: string): string {
+  if (!name) return "";
+  let clean = name;
+  if (clean.includes("tests.agentic_qe.")) {
+    clean = clean.split("tests.agentic_qe.").pop() || clean;
+  } else if (clean.includes("tests/agentic_qe/")) {
+    clean = clean.split("tests/agentic_qe/").pop() || clean;
+  }
+  clean = clean.replace(/^[.:]+/, "");
+  return clean;
+}
+
 /** One row per case, as code judged it: the total is the sum of the scores and the verdict follows the rule, whatever the reviewer wrote. */
 function CaseTable({ records }: { records: any[] }) {
   return (
     <div className="max-h-96 overflow-auto rounded-lg border border-slate-200 dark:border-slate-700" data-testid="case-table">
-      <table className="w-full text-left text-xs">
-        <thead className="sticky top-0 bg-slate-100 dark:bg-slate-800"><tr><th className="p-1.5">Case</th><th className="p-1.5">Total</th><th className="p-1.5">Verdict</th><th className="p-1.5">Evidence</th><th className="p-1.5">Low</th><th className="p-1.5">Flaws, with file, line and fix</th></tr></thead>
+      <table className="w-full text-left text-xs table-fixed">
+        <thead className="sticky top-0 bg-slate-100 dark:bg-slate-800">
+          <tr>
+            <th className="p-2 w-28 font-semibold">Case</th>
+            <th className="p-2 w-20 font-semibold">Total</th>
+            <th className="p-2 w-24 font-semibold">Verdict</th>
+            <th className="p-2 w-36 font-semibold">Evidence</th>
+            <th className="p-2 w-16 font-semibold">Low</th>
+            <th className="p-2 min-w-[240px] font-semibold">Flaws, with file, line and fix</th>
+          </tr>
+        </thead>
         <tbody>
           {records.map((r: any) => (
-            <tr key={r.tc_id} className="border-t border-slate-200 align-top dark:border-slate-700" data-testid="case-row" data-verdict={r.verdict}>
-              <td className="mono p-1.5">{r.tc_id}{r.round === 2 && <span className="ml-1 text-[10px] text-slate-500">revised once</span>}</td>
-              <td className="p-1.5">{r.total === null || r.total === undefined ? "not run" : <>{r.total}{r.capped && <span className="ml-1 text-[10px] text-rose-500">capped from {r.total_before}</span>}</>}</td>
-              <td className="p-1.5"><Badge tone={verdictTone(r.verdict)}>{r.verdict}</Badge></td>
-              <td className="p-1.5">{r.evidence}</td>
-              <td className="p-1.5" title={r.low_reason}>{r.low ? "low" : ""}</td>
-              <td className="p-1.5">
-                {(r.flaws || []).map((f: any, i: number) => <div key={i}><span className="mono">{f.file ? `${f.file}${f.line ? `:${f.line}` : ""}` : f.evidence}</span>: {f.dimension ? `${f.dimension}. ` : ""}Fix: {f.fix}</div>)}
+            <tr key={r.tc_id} className="border-t border-slate-200 align-top dark:border-slate-700 hover:bg-slate-50/50 dark:hover:bg-slate-800/40" data-testid="case-row" data-verdict={r.verdict}>
+              <td className="mono p-2 truncate" title={r.tc_id}>{r.tc_id}{r.round === 2 && <span className="ml-1 text-[10px] text-slate-500">revised</span>}</td>
+              <td className="p-2">{r.total === null || r.total === undefined ? "not run" : <>{r.total}{r.capped && <span className="ml-1 text-[10px] text-rose-500">capped</span>}</>}</td>
+              <td className="p-2"><Badge tone={verdictTone(r.verdict)}>{r.verdict}</Badge></td>
+              <td className="p-2 truncate mono text-[11px] text-slate-600 dark:text-slate-400" title={r.evidence}>{cleanTestName(r.evidence)}</td>
+              <td className="p-2" title={r.low_reason}>{r.low ? "low" : ""}</td>
+              <td className="p-2 break-words">
+                {(r.flaws || []).map((f: any, i: number) => (
+                  <div key={i} className="mb-1 text-slate-700 dark:text-slate-300">
+                    <span className="mono font-medium text-slate-900 dark:text-slate-100">
+                      {f.file ? `${cleanTestName(f.file)}${f.line ? `:${f.line}` : ""}` : cleanTestName(f.evidence)}
+                    </span>
+                    {f.dimension ? `: ${f.dimension}. ` : ": "}
+                    <span className="text-slate-600 dark:text-slate-400">Fix: {f.fix}</span>
+                  </div>
+                ))}
                 {(r.problems || []).map((p: string, i: number) => <div key={`p${i}`} className="text-slate-500">{p}</div>)}
               </td>
             </tr>
@@ -216,10 +245,42 @@ export function ApprovalCard({ approval, projectId, onDecided }: { approval: any
       {payload.emit_unresolved?.length > 0 && <div role="alert" className="rounded-lg border border-amber-500/50 p-2 text-sm" data-testid="emit-unresolved"><b>{payload.emit_unresolved.length} tests still fail the static checks:</b>{payload.emit_unresolved.map((u: any) => <div key={u.path} className="mono text-xs">{u.path}: {u.findings[0]}</div>)}</div>}
       {payload.execution_summary && <p className="text-sm" data-testid="execution-summary">{payload.execution_summary.text} <span className="text-xs">({payload.execution_summary.source === "agent" ? "written by the qa-execution-engineer and checked against the JUnit counts" : "written by code"})</span></p>}
       {payload.defect_records?.length > 0 && (
-        <table className="w-full text-left text-xs" data-testid="defect-records">
-          <thead><tr><th>Test</th><th>Class</th><th>Cause</th><th>Fix</th></tr></thead>
-          <tbody>{payload.defect_records.map((r: any) => <tr key={r.test}><td className="mono">{r.test}</td><td>{r.classification}</td><td>{r.cause}</td><td>{r.fix}</td></tr>)}</tbody>
-        </table>
+        <div className="space-y-2 rounded-xl border border-slate-200 bg-white/80 p-3 shadow-sm dark:border-slate-800 dark:bg-[#070d1f]">
+          <div className="flex items-center justify-between pb-1.5 border-b border-slate-100 dark:border-slate-800">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200">
+              Defect Diagnostics & Root Causes ({payload.defect_records.length} items)
+            </span>
+            <span className="text-[11px] text-slate-500">Deterministic code classification</span>
+          </div>
+          <div className="max-h-72 overflow-y-auto rounded-lg border border-slate-100 dark:border-slate-800/80">
+            <table className="w-full text-left text-xs table-fixed" data-testid="defect-records">
+              <thead className="sticky top-0 bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400">
+                <tr>
+                  <th className="p-2 w-48 font-semibold">Test Case</th>
+                  <th className="p-2 w-28 font-semibold">Classification</th>
+                  <th className="p-2 min-w-[200px] font-semibold">Root Cause</th>
+                  <th className="p-2 min-w-[200px] font-semibold">Recommended Fix</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                {payload.defect_records.map((r: any, idx: number) => (
+                  <tr key={idx} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                    <td className="mono p-2 truncate font-medium text-slate-900 dark:text-slate-100" title={r.test}>
+                      {cleanTestName(r.test)}
+                    </td>
+                    <td className="p-2">
+                      <Badge tone={r.classification === "application" ? "rose" : r.classification === "drift" ? "amber" : "slate"}>
+                        {r.classification}
+                      </Badge>
+                    </td>
+                    <td className="p-2 break-words text-slate-600 dark:text-slate-300">{r.cause}</td>
+                    <td className="p-2 break-words text-slate-600 dark:text-slate-300">{r.fix}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       )}
       {payload.review && <p className="text-sm">Reviewer score <b>{payload.review.score}</b>: {payload.review.issues?.join("; ") || "no issues"}</p>}
       {payload.verification && (

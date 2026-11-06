@@ -50,7 +50,7 @@ The harness implements all 13 core chapters from Ashish Patel's handbook:
 - **Dynamic Proxy (2.03) & Rule Engine (1.17):** Plan Mode safety guardrails and Human-in-the-Loop Quality Gate intercept.
 - **Repository (3.01) & DAO (3.02):** Strongly-typed SQLite WAL database access.
 
-See complete architectural documentation in [`HARNESS_PATTERNS.md`](file:///Users/sarveshtalele/Downloads/agentic-harness/HARNESS_PATTERNS.md).
+See complete architectural documentation in [`AGENT_SKILLS_AND_MAF_SPECIFICATION.md`](file:///Users/sarveshtalele/Downloads/agentic-harness/docs/AGENT_SKILLS_AND_MAF_SPECIFICATION.md).
 
 ---
 
@@ -131,7 +131,7 @@ flowchart LR
   A --> D[(SQLite, ledger, documents)]
 ```
 
-Each agent, tool, workflow, and API area has its own file. To add an agent or workflow, add a file. See `docs/SYSTEM_DESIGN.md`.
+Each agent, tool, workflow, and API area has its own file. To add an agent or workflow, add a file. See [`docs/SYSTEM_ARCHITECTURE_AND_DESIGN.md`](docs/SYSTEM_ARCHITECTURE_AND_DESIGN.md).
 
 ## Project layout
 
@@ -180,11 +180,11 @@ python scripts/dev.py e2e
 
 CI status for this commit: not yet confirmed.
 
-The end-to-end suite checks that the platform runs every stage. It does not mean the generated tests all pass. The 48 failures stay reported as failures. Generated tests vary a lot between runs, so these numbers move. Improving them is phase 5 of `docs/PLUGIN_AND_UI_PLAN.md`.
+The end-to-end suite checks that the platform runs every stage. It does not mean the generated tests all pass. The 48 failures stay reported as failures. Generated tests vary a lot between runs, so these numbers move. Improving them is detailed in [`docs/AGENT_SKILLS_AND_MAF_SPECIFICATION.md`](file:///Users/sarveshtalele/Downloads/agentic-harness/docs/AGENT_SKILLS_AND_MAF_SPECIFICATION.md).
 
 ## Roadmap
 
-Phases 1 to 6 of `docs/PLUGIN_AND_UI_PLAN.md` are done: names and integrity, errors and logs, models, limits, and access, skills, accuracy, and evaluations. Phase 7, repository-aware changes and tested ZIP delivery, is next. Everything below is planned, and not built.
+The core quality architecture, error handling, models, token limits, agent skills, and MAF 2.0 conformance are consolidated and specified in [`docs/AGENT_SKILLS_AND_MAF_SPECIFICATION.md`](file:///Users/sarveshtalele/Downloads/agentic-harness/docs/AGENT_SKILLS_AND_MAF_SPECIFICATION.md). Repository-aware changes and tested ZIP delivery are next. Everything below is planned, and not built.
 
 | Item | Purpose |
 |---|---|
@@ -206,20 +206,17 @@ Azure has not been deployed for real yet. This makes separate backend and fronte
 
 | File | Contents |
 |---|---|
-| `docs/SYSTEM_DESIGN.md` | End-to-end design, and how to add agents, tools, and workflows |
-| `docs/PROJECT_STRUCTURE.md` | Every file, its purpose, and how it connects |
-| `docs/AZURE_DEPLOY.md` | Azure deployment with the portal and ZIPs |
-| `docs/AZURE_SYSTEM_DESIGN.md` | Multi-user Azure design: storage, sandboxes, and costs in East US 2 |
-| `docs/ARCHITECTURE.md` | Plugin mapping and workflow details |
-| `docs/PLUGIN_AND_UI_PLAN.md` | Approved plan. Phases 1 to 6 are built, and the rest is not built yet |
-| `maf-guide.md` | MAF features used, by file |
-| `plan.md`, `specs.md`, `tasks.md` | Decisions, requirements, status |
-| `Design.md` | UI design rules |
+| [`docs/SYSTEM_ARCHITECTURE_AND_DESIGN.md`](docs/SYSTEM_ARCHITECTURE_AND_DESIGN.md) | Canonical architecture, Next.js/FastAPI design, MAF 2.0 orchestration, AST code packs, sandboxing, G0–G5 QE lifecycle, and specifications |
+| [`docs/AZURE_ENTERPRISE_DEPLOYMENT_GUIDE.md`](docs/AZURE_ENTERPRISE_DEPLOYMENT_GUIDE.md) | Enterprise Azure deployment guide, costs, container sandboxes, and App Service setup |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Architecture pointer and inventory index |
+| [`docs/PROJECT_STRUCTURE.md`](docs/PROJECT_STRUCTURE.md) | Every file, its purpose, and how it connects |
+| [`docs/AGENT_SKILLS_AND_MAF_SPECIFICATION.md`](docs/AGENT_SKILLS_AND_MAF_SPECIFICATION.md) | Master canonical guide: MAF 2.0 conformance, Progressive Disclosure, Harness Patterns, Skill Studio, and 13 skills inventory |
+| `plan.md`, `tasks.md` | Strategic decisions, roadmap, and tasks status |
 | `CLAUDE.md` | Rules for changing this project |
 | `progress.md` | Timestamped activity log |
 
 ## Security limits
 
 - Everyone signs in. Passwords are salted hashes, and logs mask login details. Use HTTPS outside your own machine, and keep the backend private with an access restriction, as the Azure guide describes.
-- A project sandbox isolates by folder and environment, and is not an operating system container, so it is not safe for untrusted users yet. `docs/AZURE_SYSTEM_DESIGN.md` has the design that is. Tick **Install repository dependencies** only for repositories you trust, because that runs their install scripts.
+- A project sandbox isolates by folder and environment, and is not an operating system container, so it is not safe for untrusted users yet. [`docs/AZURE_ENTERPRISE_DEPLOYMENT_GUIDE.md`](docs/AZURE_ENTERPRISE_DEPLOYMENT_GUIDE.md) has the multi-user sandbox architecture design. Tick **Install repository dependencies** only for repositories you trust, because that runs their install scripts.
 - Keys are encrypted at rest and redacted from logs. Keep `data/` private.

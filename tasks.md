@@ -1,6 +1,6 @@
 # Tasks
 
-`[x]` means done and checked by the test named in `specs.md`. `[ ]` means not done or not verified.
+`[x]` means done and checked by the test named in `docs/SYSTEM_ARCHITECTURE_AND_DESIGN.md`. `[ ]` means not done or not verified.
 
 ## Foundation
 
@@ -57,7 +57,7 @@
 - [x] Reviewer stricter, with deterministic checks (`core/doc_checks.py`)
 - [x] Guardrails, evals, and governance for every agent (`maf/governance.py`, `maf/evals.py`, `evals/`)
 - [x] Agent observability in the UI (`/agents`)
-- [x] Refresh `tasks.md`, `maf-guide.md`, and other docs from final code
+- [x] Refresh `tasks.md`, `docs/AGENT_SKILLS_AND_MAF_SPECIFICATION.md`, and other docs from final code
 - [ ] `/advisor`: not available in this environment. Nothing to build
 
 ## Modular architecture and Azure
@@ -108,7 +108,7 @@
 
 ## Next, after your approval
 
-- [ ] `docs/PLUGIN_AND_UI_PLAN.md`: 15 phases, approved 2026-11-01. Phases 1 to 6 done, phase 7 next
+- [ ] Consolidated in `docs/AGENT_SKILLS_AND_MAF_SPECIFICATION.md`: 15 phases, approved 2026-11-01. Phases 1 to 6 done, phase 7 next
 - [x] Phase 1, agent names: agents use the plugin's hyphenated keys; `doc_reviewer` merged into `confidence-reviewer` and `gherkin_author` into `business-analyst`; migration `006_agent_plugin_names.sql` moves stored history (checked by `test_migration_006_*`)
 - [ ] Phase 1, agent names: live evals of the merged prompts on the real model not yet run
 - [ ] Phase 1, `qa-execution-engineer` arrives with phase 5
@@ -170,7 +170,7 @@
 
 ## Phase 4: plugin skills on MAF (PLG), 2026-11-02
 
-- [x] specs.md PLG-1 to PLG-11, `maf-guide.md` updated first
+- [x] specs.md PLG-1 to PLG-11, `docs/AGENT_SKILLS_AND_MAF_SPECIFICATION.md` updated first
 - [x] `core/skills.py`, `skills` field on every policy, `ATLAS_SKILLS_DIR`
 - [x] `AgentCall` skill injection, `skill` events, `agent_calls.skills`, `prompt_ref` with skill hash (migration 011)
 - [x] Chat skill pick (one call per user message) and `SkillsProvider` on models that pass the tool check
@@ -223,7 +223,7 @@
 
 ## Phase 6: evaluation metrics (EVL), 2026-11-02
 
-- [x] specs.md EVL-1 to EVL-10, tasks.md, maf-guide.md written first
+- [x] specs.md EVL-1 to EVL-10, tasks.md, `docs/AGENT_SKILLS_AND_MAF_SPECIFICATION.md` written first
 - [x] `git mv maf/evals.py maf/evals/__init__.py` (approved)
 - [x] `maf/evals/metrics.py`, `store.py`, `grader.py`, `ragas_evaluator.py`; migration 012; `requirements-evals.txt`; CI job `evals-install` (allowed to fail)
 - [x] Benchmarks `shop` (repo, labels, 4 case files) and `finance` (labels only); labels marked `reviewed: false`

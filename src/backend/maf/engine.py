@@ -280,6 +280,14 @@ def compile_workflow(definition: Definition, run_id: str, project_id: str, stora
 
 
 REGISTRY: dict[str, Callable[[], Definition]] = {}
+
+
+def _ensure_workflows() -> None:
+    if not REGISTRY:
+        try:
+            import backend.maf.workflows  # noqa: F401
+        except Exception as exc:
+            logging.getLogger("aqe.engine").warning("Failed to dynamically import workflows: %s", exc)
 _tasks: set[asyncio.Task] = set()
 _active: dict[str, asyncio.Task] = {}
 
@@ -379,6 +387,7 @@ class RunActive(ValueError):
 
 
 async def start(project_id: str, workflow: str, payload: dict, model: str = "") -> dict:
+    _ensure_workflows()
     if workflow not in REGISTRY:
         raise ValueError(f"Unknown workflow {workflow}. Use one of: {', '.join(sorted(REGISTRY))}")
     llm_check = agent_module.llm.client  # fails early with a clear message when no model is configured
@@ -405,6 +414,7 @@ async def start(project_id: str, workflow: str, payload: dict, model: str = "") 
 
 
 async def decide(approval_id: str, approved: bool, by: str, feedback: str = "", extra: dict | None = None) -> dict:
+    _ensure_workflows()
     if not by.strip():
         raise ValueError("A named human signer is required")
     with db() as con:
@@ -462,6 +472,7 @@ async def retry(run_id: str) -> dict:
 
 
 async def _rerun(run: dict):
+    _ensure_workflows()
     storage = _storage(run["id"])
     workflow = compile_workflow(REGISTRY[run["workflow"]](), run["id"], run["project_id"], storage)
     latest = await storage.get_latest(workflow_name=workflow.name)
@@ -474,6 +485,7 @@ async def _rerun(run: dict):
 
 
 async def _resume(run: dict, approval_id: str, response: str):
+    _ensure_workflows()
     storage = _storage(run["id"])
     workflow = compile_workflow(REGISTRY[run["workflow"]](), run["id"], run["project_id"], storage)
     latest = await storage.get_latest(workflow_name=workflow.name)

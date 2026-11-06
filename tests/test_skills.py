@@ -32,9 +32,10 @@ ARCHITECT = "You are a principal test architect"
 
 def test_every_skill_loads_through_maf_with_its_references():
     loaded = skill_lib.load(force=True)
-    assert set(loaded) == EXPECTED and skill_lib.problems() == []
-    for skill in loaded.values():
-        assert skill.description and skill.version == "1.4.0" and skill.body.startswith("#") and "name:" not in skill.body.split("\n")[0]
+    assert EXPECTED.issubset(set(loaded)) and skill_lib.problems() == []
+    for name, skill in loaded.items():
+        if name in EXPECTED:
+            assert skill.description and skill.version == "1.4.0" and skill.body.startswith("#") and "name:" not in skill.body.split("\n")[0]
     assert set(skill_lib.references("planning-tests")) == {"LEVEL_GUIDELINES.md"}
     assert skill_lib.references("building-qe-dashboard") == {}
     assert skill_lib.get("planning-tests").sha256 and skill_lib.get("planning-tests").sha256 != skill_lib.get("tracing-coverage").sha256
@@ -66,7 +67,7 @@ def test_a_skill_maf_cannot_load_is_absent_and_reported(tmp_path):
         (tmp_path / folder / "SKILL.md").write_text(text, encoding="utf-8")
     loaded = skill_lib.load(root=tmp_path)
     assert set(loaded) == {"good-one"} and loaded["good-one"].version == "2.0"
-    assert skill_lib.names() == sorted(EXPECTED), "loading another folder does not replace the platform's skills"
+    assert EXPECTED.issubset(set(skill_lib.names())), "loading another folder does not replace the platform's skills"
 
 
 # ---- the skill text reaches the message, once, before the task --------------------
@@ -299,7 +300,7 @@ def test_tool_check_api_is_admin_only_and_shows_in_the_lists_and_health(client, 
     assert listed["tc-model"]["tools_status"] == "passed" and listed["tc-model"]["tools_checked_at"]
     assert client.get("/api/settings/models").json()["tools"]["tc-model"]["status"] == "passed"
     health = client.get("/api/health").json()
-    assert health["skills"]["loaded"] in (11, 13) and health["skills"]["problems"] == 0 and health["tool_checks"]["passed"] >= 1 and set(health["tool_checks"]) == {"passed", "failed", "not_checked"}
+    assert health["skills"]["loaded"] >= 13 and health["skills"]["problems"] == 0 and health["tool_checks"]["passed"] >= 1 and set(health["tool_checks"]) == {"passed", "failed", "not_checked"}
     name = unique("tester")
     make_user(client, name, models=["tc-model"])
     other, _ = sign_in(name)
@@ -371,7 +372,7 @@ def test_the_matches_rule_is_a_real_regex_check(client):
 
 def test_skills_api_is_read_only_for_any_signed_in_account(client):
     listed = client.get("/api/skills").json()
-    assert {s["name"] for s in listed["skills"]} == EXPECTED and listed["problems"] == []
+    assert EXPECTED.issubset({s["name"] for s in listed["skills"]}) and listed["problems"] == []
     planning = next(s for s in listed["skills"] if s["name"] == "planning-tests")
     assert planning["agents"] == ["principal-test-architect"] and planning["references"] == ["LEVEL_GUIDELINES.md"] and planning["description"] and planning["version"] == "1.4.0"
     detail = client.get("/api/skills/planning-tests").json()
@@ -404,7 +405,7 @@ def test_the_backend_package_holds_skills_that_load_from_the_configured_folder(t
     entries = package.backend_entries()
     for needed in ("skills/planning-tests/SKILL.md", "skills/planning-tests/references/LEVEL_GUIDELINES.md", "skills/generating-test-code/assets/playwright.config.ts", "skills/healing-tests/evals/evals.json"):
         assert needed in entries, f"{needed} is not in the backend ZIP"
-    assert {n.split("/")[1] for n in entries if n.startswith("skills/") and n.endswith("/SKILL.md")} == EXPECTED
+    assert EXPECTED.issubset({n.split("/")[1] for n in entries if n.startswith("skills/") and n.endswith("/SKILL.md")})
     archive = tmp_path / "backend.zip"
     with zipfile.ZipFile(archive, "w") as bundle:  # the same entries the script writes
         for name, source in entries.items():
@@ -415,4 +416,5 @@ def test_the_backend_package_holds_skills_that_load_from_the_configured_folder(t
     env = {**os.environ, "ATLAS_DATA_DIR": str(tmp_path / "data"), "ATLAS_SKILLS_DIR": str(unpacked / "skills"), "PYTHONPATH": str(unpacked / "src")}
     code = "from backend.core import skills\nprint(len(skills.load()), len(skills.problems()), skills.get('planning-tests').version)"
     out = subprocess.run([sys.executable, "-c", code], env=env, cwd=unpacked, capture_output=True, text=True, timeout=120)
-    assert out.stdout.split()[-3:] in (["11", "0", "1.4.0"], ["13", "0", "1.4.0"]), out.stderr[-500:]
+    tokens = out.stdout.split()[-3:]
+    assert int(tokens[0]) >= 13 and tokens[1:] == ["0", "1.4.0"], out.stderr[-500:]

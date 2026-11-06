@@ -12,9 +12,9 @@ Agentic QE Platform is a Python and Next.js workspace for BAs and developers, bu
 ## Order of work
 
 1. Read the code a change touches, plus the agentic-qe plugin where relevant.
-2. Update `plan.md`, `specs.md`, and `tasks.md` first.
+2. Update `plan.md`, `docs/SYSTEM_ARCHITECTURE_AND_DESIGN.md`, and `tasks.md` first.
 3. Make the smallest change that works, extending existing modules.
-4. Run the tests and report the real output. Update `maf-guide.md` when MAF usage changes.
+4. Run the tests and report the real output. Update `docs/AGENT_SKILLS_AND_MAF_SPECIFICATION.md` when MAF usage changes.
 
 ## No fabricated data
 
@@ -52,7 +52,7 @@ Every change must work on Windows, macOS, and Linux. Use `pathlib`, `shutil.whic
 ## Style
 
 - Ponytail ladder: skip it if it is not needed, then reuse what exists, then the standard library, then an installed dependency, and only then write new code. Mark deliberate limits with a `ponytail:` comment.
-- Match surrounding code. Use MAF primitives where they exist instead of hand-rolling them. See `maf-guide.md`.
+- Match surrounding code. Use MAF primitives where they exist instead of hand-rolling them. See `docs/AGENT_SKILLS_AND_MAF_SPECIFICATION.md`.
 - Next.js in `src/frontend` differs from training data. Read `node_modules/next/dist/docs/` before using an unfamiliar API.
 
 ## Layout

@@ -10,7 +10,7 @@ These 11 skills come from agentic-qe v1.4.0, commit `bf2452a`. They are copied t
 
 ## Python port of each script
 
-Mapping from `docs/PLUGIN_AND_UI_PLAN.md`, Part 1, "Skills". Status is checked against the files in `src/backend` on 2 November 2026.
+Mapping from [`docs/AGENT_SKILLS_AND_MAF_SPECIFICATION.md`](file:///Users/sarveshtalele/Downloads/agentic-harness/docs/AGENT_SKILLS_AND_MAF_SPECIFICATION.md). Status is checked against the files in `src/backend` on 2 November 2026.
 
 | Skill | Used by agent | Python port of its script | Status |
 |---|---|---|---|
