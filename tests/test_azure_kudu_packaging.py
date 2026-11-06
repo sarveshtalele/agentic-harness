@@ -77,6 +77,18 @@ def test_create_and_verify_archive(tmp_path):
     leaked_meta = create_archive(leaked_zip, entries)
     assert verify_archive(leaked_meta, ["startup.sh"]) is False
 
+    # Test allowed_dirs in standalone mode
+    sa_entries = {
+        "startup.sh": startup_sh,
+        "node_modules/fake-dep/index.js": dummy_file,
+    }
+    sa_zip = tmp_path / "standalone_package.zip"
+    sa_meta = create_archive(sa_zip, sa_entries)
+    # Without allowed_dirs, node_modules is flagged
+    assert verify_archive(sa_meta, ["startup.sh"]) is False
+    # With allowed_dirs={"node_modules"}, it passes
+    assert verify_archive(sa_meta, ["startup.sh"], allowed_dirs={"node_modules"}) is True
+
 
 def test_generate_setup_script():
     """Verify 1-time setup script generator contains expected Azure CLI commands."""

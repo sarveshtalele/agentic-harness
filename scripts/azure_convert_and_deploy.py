@@ -298,9 +298,14 @@ def create_archive(zip_path: Path, entries: Dict[str, Path]) -> Dict[str, Any]:
     }
 
 
-def verify_archive(meta: Dict[str, Any], required_files: List[str]) -> bool:
+def verify_archive(
+    meta: Dict[str, Any],
+    required_files: List[str],
+    allowed_dirs: Optional[Set[str]] = None,
+) -> bool:
     zip_path: Path = meta["path"]
     valid = True
+    effective_skip = SKIP_DIRS - (allowed_dirs or set())
 
     try:
         with zipfile.ZipFile(zip_path, "r") as zf:
@@ -317,7 +322,7 @@ def verify_archive(meta: Dict[str, Any], required_files: List[str]) -> bool:
 
             for name in names:
                 parts = Path(name).parts
-                if any(p in SKIP_DIRS for p in parts):
+                if any(p in effective_skip for p in parts):
                     error(f"  Forbidden directory leaked into {zip_path.name}: {name}")
                     valid = False
                 if Path(name).name in SKIP_FILES:
@@ -345,8 +350,14 @@ def build_frontend_standalone() -> bool:
     }
 
     try:
+        # Auto-install frontend dependencies in src/frontend if missing
+        if not (fe_dir / "node_modules").is_dir():
+            log("  Installing frontend dependencies in src/frontend...")
+            install_cmd = ["npm", "ci"] if (fe_dir / "package-lock.json").is_file() else ["npm", "install"]
+            subprocess.run(install_cmd, cwd=fe_dir, check=True)
+
         log("  Running Next.js build...")
-        subprocess.run(["npx", "next", "build"], cwd=fe_dir, env=env, check=True)
+        subprocess.run(["npm", "run", "build"], cwd=fe_dir, env=env, check=True)
         log("  Next.js standalone build completed successfully.")
         return True
     except subprocess.CalledProcessError as exc:
@@ -593,7 +604,8 @@ def main() -> int:
     frontend_meta = create_archive(DIST / "azure_frontend.zip", frontend_entries)
 
     frontend_reqs = ["startup.sh", "startup.js", ".deployment", "web.config", "package.json", "next.config.ts"]
-    if not verify_archive(frontend_meta, frontend_reqs):
+    allowed_fe_dirs = {"node_modules", ".next"} if args.build_frontend else None
+    if not verify_archive(frontend_meta, frontend_reqs, allowed_dirs=allowed_fe_dirs):
         error("Frontend archive verification failed!")
         return 1
     shutil.copy2(DIST / "azure_frontend.zip", DIST / "agentic-qe-frontend.zip")
