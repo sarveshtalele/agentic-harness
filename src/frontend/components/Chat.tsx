@@ -5,7 +5,7 @@ import { Brain, ExternalLink, Loader2, MessageSquarePlus, Pencil, Send, Trash2, 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api, when } from "../lib/api";
 import { ModelPicker } from "./ModelPicker";
-import { Button, Empty, ErrorNote, inputClass, Markdown, Spinner, useToast } from "./ui";
+import { Button, ConfirmModal, Empty, ErrorNote, inputClass, Markdown, Spinner, useToast } from "./ui";
 
 /** Headless CopilotKit over AG-UI: the UI waits until the agent is ready, so a send is never lost. */
 function Conversation({ thread, onReplied }: { thread: any; onReplied: () => void }) {
@@ -113,6 +113,8 @@ export function Chat({ projectId, standalone = false }: { projectId: string; sta
     return () => clearInterval(timer);
   }, [thread, loadThreads]);
 
+  const [chatToDelete, setChatToDelete] = useState<string | null>(null);
+
   const open = async (id: string) => setThread(await api(`/chats/${id}`));
   const create = async (agent = "project-copilot") => {
     setThread(null);  // the old chat closes at once, so nothing typed can land in it
@@ -120,11 +122,16 @@ export function Chat({ projectId, standalone = false }: { projectId: string; sta
     await loadThreads();
     setThread({ ...created, messages: [] });
   };
-  const remove = async (id: string) => {
-    if (!confirm("Delete this chat?")) return;
+  const remove = (id: string) => {
+    setChatToDelete(id);
+  };
+  const confirmRemove = async () => {
+    if (!chatToDelete) return;
+    const id = chatToDelete;
     await api(`/chats/${id}`, { method: "DELETE" });
     if (thread?.id === id) setThread(null);
     loadThreads();
+    setChatToDelete(null);
   };
   const rename = async (t: any) => {
     const title = prompt("Chat title", t.title);
@@ -189,6 +196,16 @@ export function Chat({ projectId, standalone = false }: { projectId: string; sta
           <div className="m-auto max-w-md p-6"><Empty title="Start or open a chat">Each agent reads this project&apos;s real documents and code. Chats and memory are saved.</Empty></div>
         ) : <Spinner />}
       </div>
+
+      <ConfirmModal
+        open={!!chatToDelete}
+        title="Delete Chat Conversation"
+        message="Are you sure you want to delete this conversation thread? This action cannot be undone."
+        confirmLabel="Delete Chat"
+        variant="danger"
+        onConfirm={confirmRemove}
+        onCancel={() => setChatToDelete(null)}
+      />
     </div>
   );
 }

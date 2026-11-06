@@ -461,6 +461,34 @@ if __name__ == "__main__":
 
     evals_json = json.dumps({"cases": eval_cases}, indent=2)
 
+    # Automatically persist to disk and register in MAF 2.0
+    target_dir = SKILLS_DIR / slug
+    target_dir.mkdir(parents=True, exist_ok=True)
+    (target_dir / "SKILL.md").write_text(skill_md, encoding="utf-8")
+
+    if req.includeScript:
+        scripts_dir = target_dir / "scripts"
+        scripts_dir.mkdir(exist_ok=True)
+        script_file = scripts_dir / "run.py"
+        script_file.write_text(script_py, encoding="utf-8")
+        try:
+            os.chmod(script_file, 0o755)
+        except Exception:
+            pass
+
+    evals_dir = target_dir / "evals"
+    evals_dir.mkdir(exist_ok=True)
+    (evals_dir / "evals.json").write_text(evals_json, encoding="utf-8")
+
+    refs_dir = target_dir / "references"
+    refs_dir.mkdir(exist_ok=True)
+
+    # Hot reload MAF skills
+    try:
+        skills.load(force=True)
+    except Exception as exc:
+        log.warning("Skills reload after scaffold encountered warning: %s", exc)
+
     return {
         "slug": slug,
         "name": name,
@@ -470,6 +498,7 @@ if __name__ == "__main__":
         "script_py": script_py if req.includeScript else "",
         "evals_json": evals_json,
         "test_cases": test_cases,
+        "installed": True,
     }
 
 

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api, when } from "../lib/api";
 import { useAuth } from "./AuthGate";
-import { Badge, Button, Card, ErrorNote, Field, inputClass, useToast } from "./ui";
+import { Badge, Button, Card, ConfirmModal, ErrorNote, Field, inputClass, useToast } from "./ui";
 
 const verdictTone = (v: string) => (v === "APPROVED" ? "emerald" : v === "REVISE" ? "amber" : v === "REJECT" ? "rose" : "slate");
 
@@ -407,6 +407,14 @@ export function RunPanel({ runId, projectId, onFinished }: { runId: string; proj
     await follow();
   };
   const [retrying, setRetrying] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    title: string;
+    message: string;
+    confirmLabel?: string;
+    variant?: "danger" | "primary";
+    onConfirm: () => Promise<void>;
+  } | null>(null);
   const retry = async () => {
     setRetrying(true);
     try {
@@ -422,14 +430,23 @@ export function RunPanel({ runId, projectId, onFinished }: { runId: string; proj
 
   if (!run) return null;
   const open = (Array.isArray(run.approvals) ? run.approvals : []).filter((a: any) => a?.status === "pending");
-  const cancel = async () => {
-    if (!confirm("Stop this run?")) return;
-    try {
-      await api(`/runs/${runId}/cancel`, { method: "POST" });
-      await load();
-    } catch (e: any) {
-      toast(e.message, "error");
-    }
+  const cancel = () => {
+    setConfirmDialog({
+      open: true,
+      title: "Stop Autonomous Run?",
+      message: "Are you sure you want to stop and cancel this run?",
+      confirmLabel: "Stop Run",
+      variant: "danger",
+      onConfirm: async () => {
+        try {
+          await api(`/runs/${runId}/cancel`, { method: "POST" });
+          await load();
+          toast("Run cancelled");
+        } catch (e: any) {
+          toast(e.message, "error");
+        }
+      },
+    });
   };
   const stages = buildStages(events, run.status);
   const toolCalls = events.filter((e) => e.type === "tool").length;
@@ -466,7 +483,24 @@ export function RunPanel({ runId, projectId, onFinished }: { runId: string; proj
             {state.worktree && <a className="text-indigo-500 underline" href={`/api/runs/${run.id}/changes.zip`}>Download changed files</a>}
             {state.patch_doc && <a className="text-indigo-500 underline" href={`/api/documents/${state.patch_doc}/export/patch`}>Download patch</a>}
             {state.pull_request && <a className="text-indigo-500 underline" target="_blank" rel="noreferrer" href={state.pull_request.url}>Pull request #{state.pull_request.number}</a>}
-            {state.pull_request && <Button variant="secondary" className="!px-2 !py-1 !text-xs" onClick={async () => { if (confirm("Squash-merge this pull request on GitHub?")) { try { await api(`/runs/${run.id}/merge-pr`, { method: "POST" }); toast("Pull request merged"); } catch (e: any) { toast(e.message, "error"); } } }}>Merge</Button>}
+            {state.pull_request && <Button variant="secondary" className="!px-2 !py-1 !text-xs" onClick={() => {
+              setConfirmDialog({
+                open: true,
+                title: "Squash-Merge Pull Request?",
+                message: "Squash-merge this pull request on GitHub into the repository branch?",
+                confirmLabel: "Merge Pull Request",
+                variant: "primary",
+                onConfirm: async () => {
+                  try {
+                    await api(`/runs/${run.id}/merge-pr`, { method: "POST" });
+                    toast("Pull request merged");
+                    await load();
+                  } catch (e: any) {
+                    toast(e.message, "error");
+                  }
+                },
+              });
+            }}>Merge</Button>}
           </div>
         )}
         {state.source_files !== undefined && <p className="text-sm" data-testid="scan-coverage">Reviewed <b>{state.reviewed_files?.length || 0}</b> of <b>{state.source_files}</b> source files{state.unreviewed_files?.length ? `. Not reviewed: ${state.unreviewed_files.join(", ")}` : ""}</p>}
@@ -491,6 +525,21 @@ export function RunPanel({ runId, projectId, onFinished }: { runId: string; proj
           ))}
         </div>
       </div>
+
+      {confirmDialog && (
+        <ConfirmModal
+          open={confirmDialog.open}
+          title={confirmDialog.title}
+          message={confirmDialog.message}
+          confirmLabel={confirmDialog.confirmLabel}
+          variant={confirmDialog.variant}
+          onConfirm={async () => {
+            await confirmDialog.onConfirm();
+            setConfirmDialog(null);
+          }}
+          onCancel={() => setConfirmDialog(null)}
+        />
+      )}
     </Card>
   );
 }

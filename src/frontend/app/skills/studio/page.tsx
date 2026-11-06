@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AppShell } from "../../../components/AppShell";
 import { Badge, Button, Card, ErrorNote, Markdown, PageTitle, Spinner, inputClass } from "../../../components/ui";
 import { api } from "../../../lib/api";
@@ -59,6 +59,7 @@ interface TestCaseItem {
 }
 
 export default function SkillCreatorStudioPage() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const initialProjectId = searchParams.get("project") || "";
 
@@ -376,7 +377,8 @@ export default function SkillCreatorStudioPage() {
       setEvalsJson(res.evals_json || "");
       setTestCases(res.test_cases || []);
       setActiveTab("skill_md");
-      setSuccessMsg(`Skill package scaffolded successfully for slug: '${res.slug}' with ${res.test_cases?.length || 0} deterministic test cases.`);
+      setIsSaved(true);
+      setSuccessMsg(`Skill-Creator Agent executed in background: scaffolded & installed '${res.slug}' in MAF 2.0 with ${res.test_cases?.length || 0} deterministic test cases.`);
     } catch (err: any) {
       setError(err.message || "Failed to scaffold skill");
     } finally {
@@ -453,7 +455,11 @@ export default function SkillCreatorStudioPage() {
       });
 
       setAttachedQeResult(res);
-      setSuccessMsg(res.message || "Successfully attached test cases to project QE workflow!");
+      setSuccessMsg(res.message || "Successfully attached test cases to project QE workflow! Opening QE Studio...");
+      const targetUrl = res.qeUrl || `/projects/${targetProjectId}/qe`;
+      setTimeout(() => {
+        router.push(targetUrl);
+      }, 500);
     } catch (err: any) {
       setError(err.message || "Failed to attach to QE workflow");
     } finally {
@@ -912,7 +918,7 @@ export default function SkillCreatorStudioPage() {
                     className="w-full !py-2.5 shadow-sm font-semibold"
                   >
                     <Wand2 className="h-4 w-4" />
-                    <span>Scaffold Agent Skill & Test Cases</span>
+                    <span>{scaffolding ? "⚡ Executing Skill-Creator Agent in background..." : "Scaffold Agent Skill & Test Cases"}</span>
                   </Button>
                 </div>
               </div>
@@ -1110,7 +1116,7 @@ export default function SkillCreatorStudioPage() {
                     className="!bg-emerald-600 hover:!bg-emerald-500 font-semibold !px-4 !py-2 text-xs shadow-sm shrink-0"
                   >
                     <CheckCircle2 className="h-4 w-4" />
-                    <span>Attach to QE Workflow End-to-End</span>
+                    <span>{attachingQe ? "Attaching & Opening QE Studio..." : "Attach to QE Workflow End-to-End"}</span>
                   </Button>
                 </div>
               </Card>

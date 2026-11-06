@@ -812,7 +812,7 @@ def build_qe_tools(workspace_dir: str) -> List[FunctionTool]:
                 stderr=asyncio.subprocess.PIPE
             )
             stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=45.0)
-            return {
+            out_dict = {
                 "skill": skill_name,
                 "script": os.path.basename(script_path),
                 "exitCode": proc.returncode,
@@ -820,6 +820,10 @@ def build_qe_tools(workspace_dir: str) -> List[FunctionTool]:
                 "stderr": stderr.decode("utf-8", errors="ignore")[:3000],
                 "success": proc.returncode == 0
             }
+            if script_args.get("documentTitle") or script_args.get("documentId"):
+                out_dict["document"] = script_args.get("documentTitle") or script_args.get("documentId")
+                out_dict["documentId"] = script_args.get("documentId")
+            return out_dict
         except Exception as exc:
             return {"error": f"Script execution failed: {exc}", "success": False}
 

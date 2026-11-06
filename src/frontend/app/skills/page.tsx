@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { AppShell } from "../../components/AppShell";
-import { Badge, Button, Empty, ErrorNote, Markdown, PageTitle, Spinner } from "../../components/ui";
+import { Badge, Button, ConfirmModal, Empty, ErrorNote, Markdown, PageTitle, Spinner, useToast } from "../../components/ui";
 import { api } from "../../lib/api";
 import { 
   ShieldCheck, 
@@ -42,6 +42,10 @@ export default function SkillsPage() {
       .catch((e) => setError(e.message));
   }, []);
 
+  const toast = useToast();
+  const [confirmDeleteSkill, setConfirmDeleteSkill] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
   const openSkillModal = async (skill: SkillItem) => {
     setSelectedSkill(skill);
     setLoadingDetail(true);
@@ -61,19 +65,35 @@ export default function SkillsPage() {
     setDetail(null);
   };
 
-  const handleDeleteSkill = async (skillName: string, e?: React.MouseEvent) => {
+  const handleDeleteSkill = (skillName: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    if (!confirm(`Are you sure you want to delete skill '${skillName}'? This will permanently remove its files from the workspace.`)) {
-      return;
-    }
+    setConfirmDeleteSkill(skillName);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!confirmDeleteSkill) return;
+    const skillName = confirmDeleteSkill;
+    setDeleting(true);
     try {
       await api(`/skills/studio/${encodeURIComponent(skillName)}`, { method: "DELETE" });
       setData((prev) => prev ? { ...prev, skills: prev.skills.filter(s => s.name !== skillName) } : null);
       if (selectedSkill?.name === skillName) {
         closeModal();
       }
+      try {
+        const stored = JSON.parse(localStorage.getItem("aqe_deleted_skills") || "[]");
+        if (!stored.includes(skillName)) {
+          stored.push(skillName);
+          localStorage.setItem("aqe_deleted_skills", JSON.stringify(stored));
+        }
+        window.dispatchEvent(new CustomEvent("aqe:skill_deleted", { detail: { slug: skillName } }));
+      } catch {}
+      toast(`Skill '${skillName}' permanently deleted`, "ok");
     } catch (err: any) {
-      alert(`Failed to delete skill: ${err.message}`);
+      toast(`Failed to delete skill: ${err.message}`, "error");
+    } finally {
+      setDeleting(false);
+      setConfirmDeleteSkill(null);
     }
   };
 
@@ -403,6 +423,19 @@ export default function SkillsPage() {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        open={!!confirmDeleteSkill}
+        title="Delete Agent Skill"
+        message={`Are you sure you want to delete skill '${confirmDeleteSkill}'? This will permanently remove its files and implementation from the workspace.`}
+        confirmLabel="Delete Skill"
+        variant="danger"
+        busy={deleting}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => {
+          if (!deleting) setConfirmDeleteSkill(null);
+        }}
+      />
     </AppShell>
   );
 }

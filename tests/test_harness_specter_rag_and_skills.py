@@ -6,6 +6,7 @@ Unit & Integration Tests for:
 4. Direct Document Upload & Governed Spec Ingestion
 """
 
+import json
 import os
 import tempfile
 import pytest
@@ -167,3 +168,62 @@ def test_harness_rag_query_endpoint(client):
     assert data["projectId"] == "prj_mcp_market"
     assert "vectorHits" in data
     assert "unifiedGrounding" in data
+
+
+def test_scaffold_auto_installs_and_executes_with_document_grounding(client, tmp_path):
+    """Verify that scaffolding automatically installs to skills/ and registers in MAF."""
+    test_skill_name = "Invoice Parser Engine"
+    slug = "invoice-parser-engine"
+    skill_dir = Path("skills") / slug
+
+    try:
+        # 1. Call scaffold
+        resp = client.post(
+            "/api/skills/studio/scaffold",
+            json={
+                "name": test_skill_name,
+                "description": "Parse invoices and emit structured ledger lines.",
+                "category": "custom-sdlc",
+                "includeScript": True,
+                "tasks": [
+                    "Validate PDF or image byte payload",
+                    "Extract vendor metadata and tax amounts",
+                    "Emit verified ledger entry"
+                ]
+            }
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["installed"] is True
+        assert data["slug"] == slug
+        assert skill_dir.is_dir()
+        assert (skill_dir / "SKILL.md").is_file()
+        assert (skill_dir / "scripts" / "run.py").is_file()
+
+        # 2. Test live execution with document grounding args
+        run_res = client.post(
+            "/api/skills/studio/execute-script",
+            json={
+                "skillSlug": slug,
+                "inputArgs": {
+                    "action": "run",
+                    "documentId": "doc_test_123",
+                    "documentTitle": "Vendor Invoice BRD v1",
+                    "payload": {"directive": "Parse sample vendor invoice"}
+                }
+            }
+        )
+        assert run_res.status_code == 200
+        run_data = run_res.json()
+        assert run_data["success"] is True
+        assert run_data["exitCode"] == 0
+
+        # 3. Clean up via DELETE endpoint
+        del_res = client.delete(f"/api/skills/studio/{slug}")
+        assert del_res.status_code == 200
+        assert not skill_dir.exists()
+    finally:
+        if skill_dir.exists():
+            import shutil
+            shutil.rmtree(skill_dir, ignore_errors=True)
+

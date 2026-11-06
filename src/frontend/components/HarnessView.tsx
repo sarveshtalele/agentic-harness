@@ -57,7 +57,7 @@ import {
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Badge, Button, ErrorNote, Field, Markdown, inputClass, useToast } from "./ui";
+import { Badge, Button, ConfirmModal, ErrorNote, Field, Markdown, inputClass, useToast } from "./ui";
 import { api } from "../lib/api";
 
 export interface SkillItem {
@@ -467,7 +467,40 @@ export function HarnessView({
   const [activeTab, setActiveTab] = useState<"gates" | "evals" | "todos" | "ledger" | "skills">("skills");
   const [inspectorOpen, setInspectorOpen] = useState(true);
   const [error, setError] = useState("");
-  const [deletedSkillNames, setDeletedSkillNames] = useState<string[]>([]);
+  const [deletedSkillNames, setDeletedSkillNames] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      return JSON.parse(localStorage.getItem("aqe_deleted_skills") || "[]");
+    } catch {
+      return [];
+    }
+  });
+  const [confirmDeleteSkill, setConfirmDeleteSkill] = useState<string | null>(null);
+  const [deletingSkill, setDeletingSkill] = useState(false);
+
+  // Skills & NVIDIA Skill Specter state
+  const [skillsCatalog, setSkillsCatalog] = useState<SkillItem[]>([]);
+  const [skillSearchQuery, setSkillSearchQuery] = useState("");
+  const [previewSkill, setPreviewSkill] = useState<SkillItem | null>(null);
+
+  // Cross-tab and cross-page synchronization for deleted skills
+  useEffect(() => {
+    const handleSkillDeleted = (e: any) => {
+      const slug = e.detail?.slug;
+      if (slug) {
+        setDeletedSkillNames((prev) => Array.from(new Set([...prev, slug, `/${slug}`])));
+        api("/harness/skills")
+          .then((data) => {
+            if (data && Array.isArray(data.skills)) {
+              setSkillsCatalog(data.skills);
+            }
+          })
+          .catch(() => {});
+      }
+    };
+    window.addEventListener("aqe:skill_deleted", handleSkillDeleted);
+    return () => window.removeEventListener("aqe:skill_deleted", handleSkillDeleted);
+  }, []);
 
   // Dynamically compute skills loaded in this session with execution metadata
   const sessionLoadedSkills = useMemo(() => {
@@ -527,15 +560,23 @@ export function HarnessView({
       });
     }
 
-    return list.filter(
-      (s) => !deletedSkillNames.includes(s.name) && !deletedSkillNames.includes(s.name.replace(/^\//, ""))
-    );
-  }, [currentSession, deletedSkillNames]);
+    const activeCatalogSlugs = new Set(skillsCatalog.map((s) => s.name.toLowerCase()));
+    const BUILTIN_SLASH_COMMANDS = new Set([
+      "qe-discover", "qe-plan", "doc", "sec-audit", "gate", "todos", "eval", "evaluator", "skill-creator"
+    ]);
 
-  // Skills & NVIDIA Skill Specter state
-  const [skillsCatalog, setSkillsCatalog] = useState<SkillItem[]>([]);
-  const [skillSearchQuery, setSkillSearchQuery] = useState("");
-  const [previewSkill, setPreviewSkill] = useState<SkillItem | null>(null);
+    return list.filter((s) => {
+      const clean = s.name.replace(/^\//, "").toLowerCase();
+      if (deletedSkillNames.some((d) => d.replace(/^\//, "").toLowerCase() === clean)) {
+        return false;
+      }
+      // If skills catalog is loaded, suppress any custom skill that is not present on the filesystem
+      if (skillsCatalog.length > 0 && !activeCatalogSlugs.has(clean) && !BUILTIN_SLASH_COMMANDS.has(clean)) {
+        return false;
+      }
+      return true;
+    });
+  }, [currentSession, deletedSkillNames, skillsCatalog]);
 
   // Agent Evaluations (RAGAS, Faithfulness, Groundedness, Recall@K)
   const [evaluations, setEvaluations] = useState<AgentEvaluationItem[]>([]);
@@ -962,6 +1003,40 @@ export function HarnessView({
       }
     } catch (e: any) {
       toast(`Failed to delete session: ${e.message}`, "error");
+    }
+  };
+
+  const handleConfirmDeleteSkill = async () => {
+    if (!confirmDeleteSkill) return;
+    const cleanName = confirmDeleteSkill.replace(/^\//, "");
+    setDeletingSkill(true);
+    try {
+      try {
+        await api(`/skills/studio/${encodeURIComponent(cleanName)}`, { method: "DELETE" });
+      } catch (err: any) {
+        console.warn("Skill deletion API note:", err.message);
+      }
+
+      const updated = Array.from(new Set([...deletedSkillNames, cleanName, `/${cleanName}`]));
+      setDeletedSkillNames(updated);
+      try {
+        localStorage.setItem("aqe_deleted_skills", JSON.stringify(updated));
+        window.dispatchEvent(new CustomEvent("aqe:skill_deleted", { detail: { slug: cleanName } }));
+      } catch {}
+
+      try {
+        const data = await api("/harness/skills");
+        if (data && Array.isArray(data.skills)) {
+          setSkillsCatalog(data.skills);
+        }
+      } catch {}
+
+      toast(`Skill '${cleanName}' removed from harness workspace`, "ok");
+    } catch (e: any) {
+      toast(`Failed to remove skill: ${e.message}`, "error");
+    } finally {
+      setDeletingSkill(false);
+      setConfirmDeleteSkill(null);
     }
   };
 
@@ -2735,17 +2810,10 @@ export function HarnessView({
                           </button>
                           <button
                             type="button"
-                            onClick={async (e) => {
+                            onClick={(e) => {
                               e.stopPropagation();
                               const cleanName = sk.name.replace(/^\//, "");
-                              if (confirm(`Are you sure you want to delete skill '${cleanName}'? This will permanently remove its files from the workspace.`)) {
-                                try {
-                                  await api(`/skills/studio/${encodeURIComponent(cleanName)}`, { method: "DELETE" });
-                                  setDeletedSkillNames((prev) => [...prev, cleanName, sk.name]);
-                                } catch (err: any) {
-                                  alert(`Failed to delete skill: ${err.message}`);
-                                }
-                              }
+                              setConfirmDeleteSkill(cleanName);
                             }}
                             className="flex items-center gap-1 rounded bg-rose-50 px-2 py-0.5 text-[10px] font-semibold text-rose-700 hover:bg-rose-100 dark:bg-rose-950/80 dark:text-rose-300 transition cursor-pointer"
                             title="Delete skill from workspace"
@@ -3040,6 +3108,19 @@ export function HarnessView({
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        open={!!confirmDeleteSkill}
+        title="Delete Agent Skill"
+        message={`Are you sure you want to delete skill '${confirmDeleteSkill}'? This will permanently remove its files from the workspace.`}
+        confirmLabel="Delete Skill"
+        variant="danger"
+        busy={deletingSkill}
+        onConfirm={handleConfirmDeleteSkill}
+        onCancel={() => {
+          if (!deletingSkill) setConfirmDeleteSkill(null);
+        }}
+      />
     </div>
   );
 }

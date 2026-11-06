@@ -249,8 +249,59 @@ class HarnessAgent:
                 self.todo_provider.todos_add(session, [f"Execute skill: {sk.name} ({sk.displayName})"], agent_id=sk.assignedAgent)
                 yield AGUIProtocol.agent_switch(sk.assignedAgent, sk.assignedAgent)
                 tool_name, tool_args = self._resolve_skill_tool(sk.name, sk.displayName)
+
+                # Ground skill execution on active project documents and user directive
+                doc_context_info = None
+                target_prj = session.projectId or "p1"
+                try:
+                    from backend.db import db
+                    with db() as con:
+                        latest_doc = con.execute(
+                            "SELECT id, title, kind, content FROM documents WHERE project_id=? ORDER BY updated_at DESC LIMIT 1",
+                            (target_prj,)
+                        ).fetchone()
+                        if latest_doc:
+                            doc_context_info = {
+                                "id": latest_doc[0],
+                                "title": latest_doc[1],
+                                "kind": latest_doc[2],
+                                "content": (latest_doc[3] or "")[:3500]
+                            }
+                except Exception:
+                    pass
+
+                if tool_name == "execute_skill_script":
+                    inner_args = tool_args.get("args", {})
+                    if not isinstance(inner_args, dict):
+                        inner_args = {}
+                    if doc_context_info:
+                        inner_args["documentId"] = doc_context_info["id"]
+                        inner_args["documentTitle"] = doc_context_info["title"]
+                        inner_args["documentKind"] = doc_context_info["kind"]
+                        inner_args["payload"] = {
+                            "documentId": doc_context_info["id"],
+                            "documentTitle": doc_context_info["title"],
+                            "content": doc_context_info["content"][:2000],
+                            "directive": arg or f"Process document '{doc_context_info['title']}' using {sk.name}",
+                            "action": "run"
+                        }
+                    else:
+                        inner_args["payload"] = {
+                            "directive": arg or f"Execute {sk.name}",
+                            "action": "run"
+                        }
+                    tool_args["args"] = inner_args
+
                 skill_tool_override = {"name": tool_name, "args": tool_args}
-                user_prompt = f"Execute skill {sk.name} ({sk.displayName}): {sk.description}\n\nTask instructions:\n{sk.content[:1000]}"
+                if doc_context_info:
+                    user_prompt = (
+                        f"Execute skill {sk.name} ({sk.displayName}) taking project document '{doc_context_info['title']}' ({doc_context_info['id']}):\n"
+                        f"{sk.description}\n\n"
+                        f"Document content:\n{doc_context_info['content'][:1500]}\n\n"
+                        f"Directive: {arg or 'Process document according to skill specifications and return structured output'}"
+                    )
+                else:
+                    user_prompt = f"Execute skill {sk.name} ({sk.displayName}): {sk.description}\n\nTask instructions:\n{sk.content[:1000]}"
 
         # 6. Stream Execution Engine (LLM, Tools, HITL Approvals, State Delta)
         async for chunk in execute_agent_stream(
