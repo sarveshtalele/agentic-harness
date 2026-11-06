@@ -25,7 +25,7 @@ class AgentEvaluation(BaseModel):
 
 
 class AgentEvaluationEngine:
-    """Computes and serves evaluation scorecards for the MAF 2.0 multi-agent harness."""
+    """Computes and serves evaluation scorecards for the multi-agent harness."""
 
     def __init__(self):
         self._benchmarks: Dict[str, AgentEvaluation] = {

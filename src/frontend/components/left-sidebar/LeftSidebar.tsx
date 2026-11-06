@@ -113,7 +113,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
               Claude Code Desktop
             </h1>
             <span className="text-[10px] text-[var(--text-muted)] block">
-              MAF 2.0 · {currentModel}
+              Enterprise QE · {currentModel}
             </span>
           </div>
         </div>
@@ -285,8 +285,8 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
                 { name: "qe_diagnose_and_heal", desc: "Assertion preservation (Gate 6)" },
                 { name: "qe_confidence_review", desc: "Citation verification (Gate 8)" },
                 { name: "qe_security_audit", desc: "Cloudflare Security Audit" },
-                { name: "todos_add", desc: "MAF Todo item creation" },
-                { name: "todos_complete", desc: "MAF Todo milestone cleared" },
+                { name: "todos_add", desc: "Todo item creation" },
+                { name: "todos_complete", desc: "Todo milestone cleared" },
               ].map((tool) => {
                 const count = toolsUsed[tool.name] || 0;
                 return (

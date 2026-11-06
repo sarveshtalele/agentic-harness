@@ -2,7 +2,7 @@
 
 import { Hammer } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useProject } from "../../../../components/ProjectShell";
 import { RunDocuments, RunList, RunPanel } from "../../../../components/RunPanel";
 import { ModelPicker } from "../../../../components/ModelPicker";
@@ -15,9 +15,40 @@ export default function FeaturePage() {
   const [spec, setSpec] = useState("");
   const [install, setInstall] = useState(false);
   const [model, setModel] = useState("");
-  const [runId, setRunId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+
+  const RUN_STORAGE_KEY = `project_${project.id}_feature_runId`;
+  const [runId, setRunIdState] = useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem(RUN_STORAGE_KEY) || null;
+    }
+    return null;
+  });
+
+  const setRunId = (id: string | null) => {
+    setRunIdState(id);
+    if (typeof window !== "undefined") {
+      if (id) sessionStorage.setItem(RUN_STORAGE_KEY, id);
+      else sessionStorage.removeItem(RUN_STORAGE_KEY);
+    }
+  };
+
+  useEffect(() => {
+    api(`/projects/${project.id}/runs`)
+      .then((runs) => {
+        if (Array.isArray(runs)) {
+          const active = runs.find(
+            (r: any) =>
+              r?.workflow === "change" &&
+              r?.input?.kind === "feature" &&
+              ["running", "waiting_approval"].includes(r?.status)
+          );
+          if (active) setRunId(active.id);
+        }
+      })
+      .catch(() => {});
+  }, [project.id]);
   if (!project?.repo) return <Empty title="Feature Builder needs code"><Link className="text-indigo-500 underline" href={`/projects/${project?.id || ""}/repository`}>Connect a repository or upload a ZIP</Link></Empty>;
   const start = async () => {
     setBusy(true);

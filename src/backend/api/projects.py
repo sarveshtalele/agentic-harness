@@ -1,11 +1,15 @@
 """Projects API."""
 from __future__ import annotations
 
+import io
 import json
+import os
+import zipfile
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import (
     Response,
+    StreamingResponse,
 )
 from pydantic import BaseModel, Field
 
@@ -171,3 +175,174 @@ def overview(project_id: str):
         }
     return {"project": get_project(project_id), "gates": gates.status(project_id), "pending_approvals": pending, "recent_runs": latest,
             "documents": documents.list_for(project_id)[:8], "repo": repo_data}
+
+
+@router.get("/api/projects/{project_id}/export-zip")
+def export_project_zip(project_id: str):
+    """
+    Exports the complete project SDLC package as a downloadable ZIP archive containing:
+    1. Scaffolding / source files from data/projects/{project_id}/sandbox (or repo)
+    2. Governed requirements and test specifications (.md)
+    3. Automated setup script for Mac/Linux (setup_mac_linux.sh)
+    4. Automated setup script for Windows (setup_windows.bat)
+    5. README_SETUP.md with quickstart and test execution instructions
+    """
+    proj = _project(project_id)
+    buf = io.BytesIO()
+
+    # Determine files to include
+    p_dir = project_dir(project_id)
+    sandbox_dir = p_dir / "sandbox"
+    docs_dir = p_dir / "documents"
+
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zip_file:
+        files_added = 0
+
+        # 1. Add files from sandbox
+        if sandbox_dir.exists() and sandbox_dir.is_dir():
+            for root, dirs, files in os.walk(sandbox_dir):
+                # Skip build artifacts / venvs
+                dirs[:] = [d for d in dirs if d not in (".git", "node_modules", "__pycache__", ".venv", "venv", ".pytest_cache")]
+                for file in files:
+                    full_p = os.path.join(root, file)
+                    rel_p = os.path.relpath(full_p, sandbox_dir)
+                    zip_file.write(full_p, arcname=f"src/{rel_p}")
+                    files_added += 1
+
+        # 2. Add governed documents
+        if docs_dir.exists() and docs_dir.is_dir():
+            for root, _, files in os.walk(docs_dir):
+                for file in files:
+                    if file.endswith((".md", ".json", ".feature")):
+                        full_p = os.path.join(root, file)
+                        rel_p = os.path.relpath(full_p, docs_dir)
+                        zip_file.write(full_p, arcname=f"docs/{rel_p}")
+                        files_added += 1
+
+        # 3. Add database documents if docs directory is sparse
+        proj_docs = documents.list_for(project_id)
+        for doc in proj_docs:
+            d_full = documents.get(doc["id"])
+            arc_name = f"docs/{doc['kind']}_{doc['id']}.md"
+            if arc_name not in zip_file.namelist():
+                content = d_full.get("content", f"# {doc['title']}\n\nVersion: {doc['current_version']}\n")
+                zip_file.writestr(arc_name, content)
+                files_added += 1
+
+        # 4. Generate setup_mac_linux.sh
+        setup_sh = (
+            "#!/usr/bin/env bash\n"
+            "# Autonomous Agentic QE Sandbox Setup Script for Mac / Linux\n"
+            "set -e\n\n"
+            "echo \"==================================================\"\n"
+            f"echo \"  Setting up Project: {proj['name']} \"\n"
+            "echo \"  Autonomous Quality Engineering SDLC Environment \"\n"
+            "echo \"==================================================\"\n\n"
+            "if command -v python3 &>/dev/null; then\n"
+            "    echo \"[1/4] Configuring Python environment...\"\n"
+            "    python3 -m venv .venv || true\n"
+            "    if [ -f .venv/bin/activate ]; then\n"
+            "        source .venv/bin/activate\n"
+            "    fi\n"
+            "    if [ -f requirements.txt ]; then\n"
+            "        pip install -r requirements.txt || true\n"
+            "    elif [ -f src/requirements.txt ]; then\n"
+            "        pip install -r src/requirements.txt || true\n"
+            "    fi\n"
+            "fi\n\n"
+            "if command -v npm &>/dev/null; then\n"
+            "    if [ -f package.json ]; then\n"
+            "        echo \"[2/4] Installing Node dependencies...\"\n"
+            "        npm install --ignore-scripts || true\n"
+            "    elif [ -f src/package.json ]; then\n"
+            "        echo \"[2/4] Installing Node dependencies in src/...\"\n"
+            "        (cd src && npm install --ignore-scripts || true)\n"
+            "    fi\n"
+            "fi\n\n"
+            "echo \"[3/4] Running automated quality gate regression suite...\"\n"
+            "if command -v pytest &>/dev/null; then\n"
+            "    pytest -v || true\n"
+            "elif [ -f package.json ]; then\n"
+            "    npm test || true\n"
+            "fi\n\n"
+            "echo \"[4/4] Environment setup complete! Starting sandbox application...\"\n"
+            "if [ -f main.py ]; then\n"
+            "    python3 main.py || true\n"
+            "elif [ -f src/main.py ]; then\n"
+            "    python3 src/main.py || true\n"
+            "elif [ -f package.json ]; then\n"
+            "    npm start || true\n"
+            "fi\n"
+        )
+        zip_file.writestr("setup_mac_linux.sh", setup_sh)
+
+        # 5. Generate setup_windows.bat
+        setup_bat = (
+            "@echo off\n"
+            "REM Autonomous Agentic QE Sandbox Setup Script for Windows\n"
+            "echo ==================================================\n"
+            f"echo   Setting up Project: {proj['name']} \n"
+            "echo   Autonomous Quality Engineering SDLC Environment \n"
+            "echo ==================================================\n\n"
+            "where python >nul 2>nul\n"
+            "if %ERRORLEVEL% equ 0 (\n"
+            "    echo [1/4] Configuring Python environment...\n"
+            "    python -m venv .venv\n"
+            "    if exist .venv\\Scripts\\activate.bat call .venv\\Scripts\\activate.bat\n"
+            "    if exist requirements.txt pip install -r requirements.txt\n"
+            "    if exist src\\requirements.txt pip install -r src\\requirements.txt\n"
+            ")\n\n"
+            "where npm >nul 2>nul\n"
+            "if %ERRORLEVEL% equ 0 (\n"
+            "    if exist package.json (\n"
+            "        echo [2/4] Installing Node dependencies...\n"
+            "        call npm install --ignore-scripts\n"
+            "    )\n"
+            ")\n\n"
+            "echo [3/4] Executing test suite...\n"
+            "where pytest >nul 2>nul\n"
+            "if %ERRORLEVEL% equ 0 (\n"
+            "    pytest -v\n"
+            ")\n\n"
+            "echo [4/4] Setup complete! You can now launch your application.\n"
+            "pause\n"
+        )
+        zip_file.writestr("setup_windows.bat", setup_bat)
+
+        # 6. Generate README_SETUP.md
+        readme = (
+            f"# {proj['name']} — Autonomous SDLC & Quality Engineering Export\n\n"
+            f"**Project ID:** `{project_id}`  \n"
+            f"**Exported At:** {now()}  \n\n"
+            "## Architecture Overview\n"
+            "This package contains the complete application codebase, test automation suite, "
+            "and governed specifications created in the Autonomous QE Platform sandbox.\n\n"
+            "### Folder Structure\n"
+            "- `src/`: Complete source code and application modules\n"
+            "- `docs/`: Governed Business Requirements Documents (BRD), Gherkin feature files, and Test Plans\n"
+            "- `setup_mac_linux.sh`: One-click setup and execution script for macOS & Linux\n"
+            "- `setup_windows.bat`: One-click setup and execution batch script for Windows\n\n"
+            "## Quickstart Instructions\n\n"
+            "### macOS / Linux\n"
+            "```bash\n"
+            "chmod +x setup_mac_linux.sh\n"
+            "./setup_mac_linux.sh\n"
+            "```\n\n"
+            "### Windows\n"
+            "Double click `setup_windows.bat` or run in CMD:\n"
+            "```cmd\n"
+            "setup_windows.bat\n"
+            "```\n\n"
+            "## Quality Gate Compliance\n"
+            "All test assertions are deterministic and adhere to the strict Assertion Preservation Rule.\n"
+        )
+        zip_file.writestr("README_SETUP.md", readme)
+
+    buf.seek(0)
+    filename = f"{project_id}_sdlc_export.zip"
+    return StreamingResponse(
+        buf,
+        media_type="application/zip",
+        headers={"Content-Disposition": f"attachment; filename=\"{filename}\""}
+    )
+

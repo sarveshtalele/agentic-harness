@@ -87,7 +87,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Link href="/harness" className="flex items-center gap-1.5 rounded-lg border border-indigo-500/30 bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:text-indigo-300">
             <Terminal className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
             <span>QE Harness</span>
-            <span className="rounded bg-indigo-600/20 px-1 py-0.2 text-[10px] font-mono">MAF 2.0</span>
+            <span className="rounded bg-indigo-600/20 px-1 py-0.2 text-[10px] font-mono">Enterprise QE</span>
           </Link>
           <div className="flex items-center gap-3">
             <UserMenu />

@@ -155,7 +155,6 @@ const CORE_COMMANDS = [
   { cmd: "/doc", desc: "Generate test engineering documentation and sync to project", icon: FileText },
   { cmd: "/security-audit", desc: "Execute Cloudflare & NVIDIA Skill Specter security audit", icon: Shield },
   { cmd: "/gates", desc: "Evaluate all 8 Quality Engineering Gates", icon: ShieldCheck },
-  { cmd: "/skills", desc: "Browse 59 discovered local machine skills", icon: Zap },
 ];
 
 const HARNESS_GOALS = [
@@ -409,6 +408,7 @@ export function HarnessView({
   const toast = useToast();
   const searchParams = useSearchParams();
   const urlProject = searchParams?.get("project") || undefined;
+  const urlSkill = searchParams?.get("skill") || undefined;
 
   const [projects, setProjects] = useState<any[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<string>(initialProjectId || urlProject || "");
@@ -560,6 +560,14 @@ export function HarnessView({
       setSelectedProjectId(target);
     }
   }, [initialProjectId, urlProject, selectedProjectId]);
+
+  // Sync skill query param to load skill into chat input without auto-sending
+  useEffect(() => {
+    if (urlSkill) {
+      setInputPrompt(`/${urlSkill} `);
+      setTimeout(() => textareaRef.current?.focus(), 150);
+    }
+  }, [urlSkill]);
 
   // 2. Load Projects List & Centralized LLM Config
   const loadProjects = useCallback(async () => {
@@ -1236,11 +1244,13 @@ export function HarnessView({
     }
   };
 
-  // Select Slash Command from Palette
+  // Select Slash Command from Palette: load command into chat input window without auto-sending
   const handleSelectSlashCommand = (cmdStr: string) => {
     setShowSlashPalette(false);
-    setInputPrompt("");
-    handleSendMessage(cmdStr);
+    setInputPrompt(`${cmdStr} `);
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+    }
   };
 
   // Send message with SSE streaming
@@ -1471,7 +1481,7 @@ export function HarnessView({
               <div className="flex items-center gap-2">
                 <h1 className="text-base font-bold text-slate-900 dark:text-white">QE Harness</h1>
                 <span className="rounded-full bg-indigo-500/10 px-2 py-0.5 text-[11px] font-semibold text-indigo-600 dark:text-indigo-400">
-                  MAF 2.0
+                  Enterprise QE
                 </span>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -1792,7 +1802,7 @@ export function HarnessView({
                   Autonomous QE Harness Active · {targetProject?.name || "Project"}
                 </h3>
                 <p className="max-w-lg text-xs text-slate-500 mt-1">
-                  Select a core Quality Engineering goal below, or type your instructions. The harness automatically routes tasks to specialized MAF agents.
+                  Select a core Quality Engineering goal below, or type your instructions. The harness automatically routes tasks to specialized engineering skills.
                 </p>
 
                 {/* Rich Goal Cards Grid */}
@@ -1851,7 +1861,7 @@ export function HarnessView({
                 >
                   {!isUser && (
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400">
-                      <agentInfo.icon className="h-4 w-4" />
+                      <Terminal className="h-4 w-4" />
                     </div>
                   )}
 
@@ -1859,7 +1869,7 @@ export function HarnessView({
                     {/* Header info */}
                     <div className={`flex items-center gap-2 text-[11px] text-slate-400 ${isUser ? "justify-end" : "justify-start"}`}>
                       <span className="font-semibold text-slate-700 dark:text-slate-300">
-                        {isUser ? "You" : agentInfo.name}
+                        {isUser ? "You" : "QE Platform"}
                       </span>
                       <span>·</span>
                       <span>{new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
@@ -1870,7 +1880,7 @@ export function HarnessView({
                       <details className="rounded-xl border border-indigo-100 bg-indigo-50/50 p-2 text-xs dark:border-indigo-950/50 dark:bg-indigo-950/20">
                         <summary className="cursor-pointer font-mono font-semibold text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">
                           <Brain className="h-3.5 w-3.5 animate-pulse" />
-                          <span>Specialist Thinking & Reasoning</span>
+                          <span>Engine Thinking & Execution Plan</span>
                         </summary>
                         <div className="mt-2 font-mono text-[11px] whitespace-pre-wrap text-slate-600 dark:text-slate-300 pl-2 border-l-2 border-indigo-400">
                           {msg.thinking}
@@ -2651,7 +2661,14 @@ export function HarnessView({
                     {sessionLoadedSkills.map((sk, idx) => (
                       <div
                         key={`${sk.name}-${idx}`}
-                        className="rounded-xl border border-slate-200 bg-white p-2.5 shadow-xs dark:border-slate-800 dark:bg-slate-900/60 transition space-y-1.5"
+                        onClick={() => {
+                          setInputPrompt(`/${sk.name} `);
+                          if (textareaRef.current) {
+                            textareaRef.current.focus();
+                          }
+                        }}
+                        className="rounded-xl border border-slate-200 bg-white p-2.5 shadow-xs dark:border-slate-800 dark:bg-slate-900/60 transition space-y-1.5 cursor-pointer hover:border-indigo-400 hover:shadow-sm"
+                        title="Click to load skill command into chat"
                       >
                         <div className="flex items-center justify-between">
                           <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400 text-xs">
@@ -2799,14 +2816,17 @@ export function HarnessView({
                 </Button>
                 <Button
                   onClick={() => {
-                    const cmd = `/${previewSkill.name}`;
+                    const cmd = `/${previewSkill.name} `;
                     setPreviewSkill(null);
-                    handleSendMessage(cmd);
+                    setInputPrompt(cmd);
+                    if (textareaRef.current) {
+                      textareaRef.current.focus();
+                    }
                   }}
                   className="flex items-center gap-1.5"
                 >
                   <Zap className="h-3.5 w-3.5" />
-                  <span>Execute in Harness</span>
+                  <span>Load Command in Chat</span>
                 </Button>
               </div>
             </div>

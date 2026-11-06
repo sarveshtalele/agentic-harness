@@ -76,7 +76,7 @@ def seed_database():
         # Projects
         con.execute(
             "INSERT INTO projects (id, name, description, created_at, updated_at, archived, owner_id) VALUES (?, ?, ?, ?, ?, 0, 'admin')",
-            (p1_id, "Agentic QE Platform & Framework", "Full test engineering lifecycle harness with 8 quality gates, 58 local skills, and autonomous MAF agents.", ts, ts)
+            (p1_id, "Agentic QE Platform & Framework", "Full test engineering lifecycle harness with 8 quality gates, 58 local skills, and autonomous engineering agents.", ts, ts)
         )
         con.execute(
             "INSERT INTO projects (id, name, description, created_at, updated_at, archived, owner_id) VALUES (?, ?, ?, ?, ?, 0, 'admin')",
@@ -192,7 +192,7 @@ def seed_database():
         d1_body = """# Agentic QE System Architecture & Gate Guardrails
 
 ## 1. System Objectives
-Autonomous quality engineering platform combining Microsoft Agent Framework (MAF 2.0),
+Autonomous quality engineering platform combining multi-agent architecture,
 58 local machine skills, and strict 8-stage quality gate verification.
 
 ## 2. Quality Gates Model
@@ -292,7 +292,7 @@ Autonomous quality engineering platform combining Microsoft Agent Framework (MAF
 
         # Memories
         con.execute(
-            "INSERT INTO memories (id, project_id, content, source, created_at) VALUES ('mem_001', ?, 'Platform uses Microsoft Agent Framework (MAF 2.0) with AG-UI and CopilotKit protocol streaming.', 'Harness Architect', ?)",
+            "INSERT INTO memories (id, project_id, content, source, created_at) VALUES ('mem_001', ?, 'Platform uses Enterprise Agentic QE Engine with AG-UI and CopilotKit protocol streaming.', 'Harness Architect', ?)",
             (p1_id, ts)
         )
         con.execute(

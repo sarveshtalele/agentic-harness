@@ -1,5 +1,5 @@
 """Command Line Interface (CLI) for Agentic QE Harness.
-Allows running the complete MAF 2.0 Harness directly from terminal/headless environments
+Allows running the complete Enterprise QE Harness directly from terminal/headless environments
 without requiring the Web UI.
 
 Usage:
@@ -51,7 +51,7 @@ RESET = "\033[0m"
 
 def print_banner():
     print(f"{CYAN}{BOLD}╔═══════════════════════════════════════════════════════════════════╗{RESET}")
-    print(f"{CYAN}{BOLD}║         ⚡ AGENTIC QE HARNESS — MAF 2.0 TERMINAL COMMAND CENTER     ║{RESET}")
+    print(f"{CYAN}{BOLD}║         ⚡ AGENTIC QE HARNESS — TERMINAL COMMAND CENTER             ║{RESET}")
     print(f"{CYAN}{BOLD}╚═══════════════════════════════════════════════════════════════════╝{RESET}")
     print(f"{DIM}Autonomous Quality Engineering · 58 Local Skills · SQLite WAL Knowledge Base{RESET}\n")
 

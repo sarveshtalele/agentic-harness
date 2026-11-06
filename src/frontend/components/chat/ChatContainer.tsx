@@ -188,7 +188,7 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
                 Claude Code Desktop QE Harness
               </h3>
               <p className="text-xs text-[var(--text-secondary)] max-w-md mx-auto leading-relaxed">
-                Powered by Python Microsoft Agent Framework (MAF 2.0). Connected to live model:{" "}
+                Powered by Autonomous Agentic QE Engine. Connected to live model:{" "}
                 <strong className="text-indigo-400">{currentModel}</strong>.
               </p>
             </div>

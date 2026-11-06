@@ -170,7 +170,7 @@ export const PromptInput: React.FC<PromptInputProps> = ({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Instruct MAF harness, run test analysis, or enter / for skills..."
+              placeholder="Instruct QE harness, run test analysis, or enter / for skills..."
               disabled={isLoading}
               className="w-full bg-transparent text-[var(--text-primary)] placeholder-[var(--text-muted)] text-sm focus:outline-none resize-none font-sans max-h-44 py-1 px-2"
             />

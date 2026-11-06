@@ -99,7 +99,7 @@ export default function SkillsPage() {
     <AppShell>
       <PageTitle 
         title="Skills & Tool Catalog" 
-        subtitle="59+ specialized engineering skills validated with NVIDIA Skill Specter security scoring, static AST analysis, and MAF 2.0 policy bindings."
+        subtitle="59+ specialized engineering skills validated with NVIDIA Skill Specter security scoring, static AST analysis, and enterprise policy bindings."
       />
       <ErrorNote message={error} />
 
@@ -348,11 +348,22 @@ export default function SkillsPage() {
             {/* Modal Footer */}
             <div className="flex items-center justify-between border-t border-slate-100 p-4 dark:border-slate-800">
               <span className="text-xs text-slate-400">
-                Loaded into MAF 2.0 multi-agent instruction pipeline
+                Loaded into multi-agent instruction pipeline
               </span>
-              <Button variant="secondary" onClick={closeModal}>
-                Close
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button variant="secondary" onClick={closeModal}>
+                  Close
+                </Button>
+                <Button
+                  onClick={() => {
+                    window.location.href = `/harness?skill=${encodeURIComponent(selectedSkill.name)}`;
+                  }}
+                  className="flex items-center gap-1.5"
+                >
+                  <Terminal className="h-3.5 w-3.5" />
+                  <span>Load into Harness</span>
+                </Button>
+              </div>
             </div>
           </div>
         </div>

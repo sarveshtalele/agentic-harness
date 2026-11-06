@@ -1,4 +1,4 @@
-"""MAF 2.0 Harness API Router.
+"""Enterprise QE Harness API Router.
 Exposes streaming SSE chat, persistent session management,
 58 local machine skills discovery, and MCP tool server integration,
 using the centralized platform credentials and project permissions.

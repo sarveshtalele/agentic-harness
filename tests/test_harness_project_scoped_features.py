@@ -173,3 +173,131 @@ def test_agent_metrics_all_measured_without_ragas_error():
                 assert m["state"] == "measured", f"Metric {m['metric']} on {agent} is not measured: {m}"
                 assert m["value"] >= 0.85
                 assert "ragas-specter-v1" in m.get("judge_model", "")
+
+def test_project_sdlc_export_zip_package():
+    import io
+    import zipfile
+    from fastapi.testclient import TestClient
+    from backend.app import app
+
+    with TestClient(app) as client:
+        admin_user = os.environ.get("ATLAS_ADMIN_USERNAME", "qa-admin")
+        admin_pass = os.environ.get("ATLAS_ADMIN_PASSWORD", "")
+        login_res = client.post(
+            "/api/auth/login",
+            json={"username": admin_user, "password": admin_pass},
+        )
+        assert login_res.status_code == 200, f"Login failed: {login_res.text}"
+
+        res = client.get("/api/projects/prj_mcp_market/export-zip")
+        assert res.status_code == 200
+        assert res.headers["content-type"] == "application/zip"
+        assert "prj_mcp_market_sdlc_export.zip" in res.headers["content-disposition"]
+
+        zf = zipfile.ZipFile(io.BytesIO(res.content))
+        names = zf.namelist()
+        assert "setup_mac_linux.sh" in names
+        assert "setup_windows.bat" in names
+        assert "README_SETUP.md" in names
+
+        sh_content = zf.read("setup_mac_linux.sh").decode("utf-8")
+        assert "python3 -m venv" in sh_content
+        assert "pytest" in sh_content
+
+        bat_content = zf.read("setup_windows.bat").decode("utf-8")
+        assert "call .venv\\Scripts\\activate.bat" in bat_content
+
+        readme_content = zf.read("README_SETUP.md").decode("utf-8")
+        assert "Architecture Overview" in readme_content
+
+@pytest.mark.asyncio
+async def test_harness_bug_fixes_query_grounded_in_centralized_db():
+    from backend.harness.harness_agent import HarnessAgent
+    from backend.harness.llm_config import LLMConfig
+    from backend.db import db
+
+    with db() as con:
+        expected_count = con.execute("SELECT COUNT(*) as c FROM findings WHERE project_id='prj_mcp_market'").fetchone()["c"]
+
+    harness = HarnessAgent()
+    now_ms = int(time.time() * 1000)
+    session = SessionState(
+        id="sess_test_bugs_grounding",
+        name="Bug Grounding Test",
+        workingDir=os.getcwd(),
+        projectId="prj_mcp_market",
+        createdAt=now_ms,
+        updatedAt=now_ms
+    )
+    config = LLMConfig(api_key="", base_url="https://api.openai.com/v1")
+    chunks = []
+    async for c in harness.run(session, "How many bug fixes are listed for this application", config):
+        chunks.append(c)
+    full_output = "".join(chunks)
+
+    # Verify grounding facts from atlas.sqlite3
+    assert "Centralized Database Grounding" in full_output
+    assert f"{expected_count} defect findings" in full_output
+    assert "scan_defects" in full_output
+    assert "| Bug ID | Severity | Location | Defect Description / Title | Rule | Status |" in full_output
+
+@pytest.mark.asyncio
+async def test_harness_documents_query_grounded_in_centralized_db():
+    from backend.harness.harness_agent import HarnessAgent
+    from backend.harness.llm_config import LLMConfig
+    from backend.db import db
+
+    with db() as con:
+        docs_count = con.execute("SELECT COUNT(*) as c FROM documents WHERE project_id='prj_mcp_market'").fetchone()["c"]
+
+    harness = HarnessAgent()
+    now_ms = int(time.time() * 1000)
+    session = SessionState(
+        id="sess_test_docs_grounding",
+        name="Docs Grounding Test",
+        workingDir=os.getcwd(),
+        projectId="prj_mcp_market",
+        createdAt=now_ms,
+        updatedAt=now_ms
+    )
+    config = LLMConfig(api_key="", base_url="https://api.openai.com/v1")
+    chunks = []
+    async for c in harness.run(session, "how many documents are created for this project", config):
+        chunks.append(c)
+    full_output = "".join(chunks)
+
+    assert "Centralized Database Grounding" in full_output
+    assert f"{docs_count} governed documents" in full_output
+    assert "read_document" in full_output
+
+@pytest.mark.asyncio
+async def test_harness_quality_gates_query_grounded_in_centralized_db():
+    from backend.harness.harness_agent import HarnessAgent
+    from backend.harness.llm_config import LLMConfig
+    from backend.db import db
+
+    with db() as con:
+        gates_count = con.execute("SELECT COUNT(*) as c FROM gates WHERE project_id='prj_mcp_market'").fetchone()["c"]
+        approved = con.execute("SELECT COUNT(*) as c FROM gates WHERE project_id='prj_mcp_market' AND status='approved'").fetchone()["c"]
+
+    harness = HarnessAgent()
+    now_ms = int(time.time() * 1000)
+    session = SessionState(
+        id="sess_test_gates_grounding",
+        name="Gates Grounding Test",
+        workingDir=os.getcwd(),
+        projectId="prj_mcp_market",
+        createdAt=now_ms,
+        updatedAt=now_ms
+    )
+    config = LLMConfig(api_key="", base_url="https://api.openai.com/v1")
+    chunks = []
+    async for c in harness.run(session, "show quality gates status", config):
+        chunks.append(c)
+    full_output = "".join(chunks)
+
+    assert "Centralized Database Grounding" in full_output
+    assert "Quality Engineering Gates Scorecard" in full_output
+    assert f"{approved}/{gates_count} Gates Approved" in full_output
+    assert "check_gates" in full_output
+

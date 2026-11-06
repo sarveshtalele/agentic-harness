@@ -17,7 +17,7 @@ export const MagenticLedgerView: React.FC<MagenticLedgerViewProps> = ({ ledger }
         <div className="p-3 rounded-lg border border-amber-600/60 bg-amber-950/40 text-amber-200 space-y-1">
           <div className="flex items-center gap-2 font-semibold">
             <AlertTriangle className="w-4 h-4 text-amber-400" />
-            <span>MAF Magentic Stall Detected</span>
+            <span>Magentic Execution Stall Detected</span>
           </div>
           <p className="text-[11px] font-sans">
             Harness detected {ledger.stallCount} attempts without state progression. Human intervention or revised guidance is requested.

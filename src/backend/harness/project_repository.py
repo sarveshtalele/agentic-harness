@@ -1,6 +1,6 @@
 """Harness Project Knowledge Repository & Data Access Object (DAO).
 Implements Pattern 3.01 (Repository) and Pattern 3.02 (DAO) from Ashish Patel's
-Agent Harness Engineering Patterns, connecting the MAF 2.0 Harness directly to
+Agent Harness Engineering Patterns, connecting the Enterprise QE Harness directly to
 the SQLite Write-Ahead Log (WAL) database (atlas.sqlite3).
 """
 from __future__ import annotations

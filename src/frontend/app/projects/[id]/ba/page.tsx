@@ -146,7 +146,7 @@ export default function BAPage() {
         <div className="mb-2 flex items-center justify-between text-xs font-semibold text-indigo-900 dark:text-indigo-200">
           <span className="flex items-center gap-1.5">
             <Sparkles className="h-3.5 w-3.5 text-indigo-500" />
-            Autonomous BA Lifecycle Pipeline (MAF 2.0)
+            Autonomous BA Lifecycle Pipeline
           </span>
           <span className="font-mono text-[11px] text-indigo-600 dark:text-indigo-400">Gate 0 ➔ Gate 1 Continuous Verification</span>
         </div>

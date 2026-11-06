@@ -46,58 +46,27 @@ class LocalSkillDiscovery:
     def get_search_paths(self) -> List[tuple[str, str, str]]:
         """
         Returns list of tuples: (directory_path, source_label, category_label)
+        Only authentic project skills and plugin skills are scanned.
         """
         home = os.path.expanduser("~")
         paths = [
-            # 1. agentic-qe repository skills
+            # 1. Local workspace skills
+            (
+                os.path.join(self.workspace_root, "skills"),
+                "Workspace Skills",
+                "Quality Engineering"
+            ),
+            # 2. agentic-qe repository skills
             (
                 os.path.join(home, "Downloads", "agentic-qe", "skills"),
                 "agentic-qe (Plugin)",
                 "Quality Engineering"
             ),
-            # 2. Local workspace skills and plugins
-            (
-                os.path.join(self.workspace_root, "skills"),
-                "Workspace Skills",
-                "Project Specific"
-            ),
-            (
-                os.path.join(self.workspace_root, ".skills"),
-                "Workspace Hidden Skills",
-                "Project Specific"
-            ),
+            # 3. Workspace Plugins
             (
                 os.path.join(self.workspace_root, "plugins", "agentic-qe", "skills"),
                 "Agentic QE Plugin",
                 "Quality Engineering"
-            ),
-            (
-                os.path.join(self.workspace_root, "plugins"),
-                "Workspace Plugins",
-                "Security & Extensions"
-            ),
-            # 3. Claude Code local skills
-            (
-                os.path.join(home, ".claude", "skills"),
-                "Claude Code Desktop",
-                "Productivity & Code"
-            ),
-            # 4. Agent Skills
-            (
-                os.path.join(home, ".agents", "skills"),
-                "Agentic Framework",
-                "Autonomous Agents"
-            ),
-            # 5. Antigravity Builtin & Global Skills
-            (
-                os.path.join(home, ".gemini", "antigravity", "skills"),
-                "Antigravity User Skills",
-                "Modernization & Workflows"
-            ),
-            (
-                os.path.join(home, ".gemini", "antigravity", "builtin", "skills"),
-                "Antigravity Built-in",
-                "System & Core"
             ),
         ]
         return [(p, s, c) for p, s, c in paths if os.path.exists(p)]

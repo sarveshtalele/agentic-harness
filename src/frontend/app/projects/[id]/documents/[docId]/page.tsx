@@ -12,6 +12,13 @@ import { api, when } from "../../../../../lib/api";
 
 const reopenText = (gates: number[]) => (gates.length > 1 ? `Gates G${gates[0]} to G${gates[gates.length - 1]}` : `Gate G${gates[0]}`);
 
+function getGovernanceId(doc: any, project: any): string {
+  if (doc?.governance_id) return doc.governance_id;
+  const rawPrefix = (project?.id || "PRJ").replace(/^prj_/, "").replace(/[^a-zA-Z0-9]/g, "").slice(0, 4).toUpperCase();
+  const prefix = rawPrefix || "QE";
+  return `${prefix}-DOC-${(doc?.id || "001").slice(-3).toUpperCase()}`;
+}
+
 export default function DocumentPage() {
   const { project } = useProject();
   const { docId } = useParams<{ docId: string }>();
@@ -116,7 +123,12 @@ export default function DocumentPage() {
       <Link href={`/projects/${project.id}/documents`} className="mb-2 inline-flex items-center gap-1 text-xs text-slate-500 hover:text-indigo-500"><ArrowLeft className="h-3 w-3" /> Documents</Link>
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h1 className="text-xl font-bold">{doc.title}</h1>
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 dark:bg-indigo-950/60 dark:border-indigo-800/60 dark:text-indigo-300 px-2 py-0.5 rounded">
+              {getGovernanceId(doc, project)}
+            </span>
+            <h1 className="text-xl font-bold">{doc.title}</h1>
+          </div>
           <p className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-slate-500">
             <Badge tone="indigo">{doc.kind}</Badge> <span data-testid="doc-version">v{doc.version ?? doc.current_version ?? 1}</span> <Badge>{doc.status}</Badge> by {doc.author_name}
             {doc.prompt_ref && <span className="mono">{doc.prompt_ref}</span>}

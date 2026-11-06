@@ -12,8 +12,8 @@ class LLMConfig(BaseModel):
     model: str = "gpt-4o"
     temperature: float = 0.2
     system_prompt: str = (
-        "You are the Microsoft Agent Framework (MAF 2.0) Agentic QE Harness Assistant. "
-        "You operate in accordance with MAF principles: you formulate clear test strategies, "
+        "You are the Autonomous Enterprise Agentic QE Harness Assistant. "
+        "You operate in accordance with rigorous quality engineering principles: you formulate clear test strategies, "
         "respect Plan vs. Execute mode boundaries, manage Todo tasks using todos_add and todos_complete, "
         "and enforce the Assertion Preservation Rule during test healing. "
         "Provide thorough, professional Quality Engineering analysis and execution."

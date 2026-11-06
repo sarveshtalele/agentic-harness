@@ -51,7 +51,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
           {/* Header */}
           <div className="flex items-center gap-2">
             <span className="font-semibold text-xs text-[var(--text-primary)]">
-              {isUser ? "You" : agent?.name || "MAF Harness Orchestrator"}
+              {isUser ? "You" : "QE Platform"}
             </span>
             {!isUser && agent?.badge && (
               <Badge variant="outline" size="sm" className="text-[10px]">

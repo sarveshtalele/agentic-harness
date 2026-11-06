@@ -177,7 +177,7 @@ def build_generic_domain_brd(topic: str, project_id: str, title: str) -> str:
 **Target Project:** `{project_id}`  
 **Authoring Skill:** `authoring-user-stories v1.4.0`  
 **Status:** Validated & Grounded · Quality Gate 1 Ready  
-**Architecture Standard:** Microsoft Agent Framework (MAF 2.0) / Enterprise Tier  
+**Architecture Standard:** Enterprise Tier Architecture / Microservices  
 
 ---
 

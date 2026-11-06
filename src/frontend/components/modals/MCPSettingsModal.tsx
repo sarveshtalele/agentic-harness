@@ -88,7 +88,7 @@ export const MCPSettingsModal: React.FC<MCPSettingsModalProps> = ({ isOpen, onCl
             </div>
             <div>
               <h3 className="font-semibold text-zinc-100 text-sm">Model Context Protocol (MCP) Hub</h3>
-              <p className="text-[11px] text-zinc-500 font-mono">Connect stdio & SSE tools to MAF agents</p>
+              <p className="text-[11px] text-zinc-500 font-mono">Connect stdio & SSE tools to QE agents</p>
             </div>
           </div>
 

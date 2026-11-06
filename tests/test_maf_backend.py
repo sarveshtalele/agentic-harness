@@ -320,6 +320,6 @@ def test_harness_slash_commands_streaming():
         return "".join(chunks)
 
     res_gates = asyncio.run(run_gates())
-    assert "MAF 8 Quality Engineering Gates Status" in res_gates
+    assert "8 Quality Engineering Gates Status" in res_gates
     assert "Gate 1" in res_gates
     assert "Gate 8" in res_gates
