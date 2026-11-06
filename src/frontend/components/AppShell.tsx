@@ -88,44 +88,51 @@ export function AppShell({ children }: { children: ReactNode }) {
           </button>
         </div>
         <nav aria-label="Workspace" className="flex-1 space-y-3 overflow-y-auto pr-1">
-          {navSections.map((sec, secIdx) => {
-            const visibleItems = sec.items.filter((item) => !item.admin || user?.role === "admin");
-            if (visibleItems.length === 0) return null;
-            return (
-              <div key={sec.title || secIdx} className="space-y-0.5">
-                {!collapsed && (
-                  <div className="px-2.5 pt-1.5 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                    {sec.title}
-                  </div>
-                )}
-                {visibleItems.map((item) => {
-                  const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
-                  const Icon = item.icon;
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      title={item.label}
-                      aria-current={active ? "page" : undefined}
-                      className={`flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-[13px] font-medium transition ${
-                        active
-                          ? "bg-indigo-600 text-white font-semibold shadow-sm"
-                          : "text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-900"
-                      } ${collapsed ? "justify-center" : ""}`}
-                    >
-                      <Icon className="h-4 w-4 shrink-0" />
-                      {!collapsed && <span className="flex-1 truncate">{item.label}</span>}
-                      {!collapsed && item.badge && pending > 0 && (
-                        <span data-testid="approvals-badge" className="rounded-full bg-amber-500 px-1.5 text-[11px] font-bold text-slate-950">
-                          {pending}
-                        </span>
-                      )}
-                    </Link>
-                  );
-                })}
-              </div>
-            );
-          })}
+          {(() => {
+            const allHrefs = navSections.flatMap((s) => s.items.map((i) => i.href));
+            const activeHref = allHrefs
+              .filter((h) => (h === "/" ? pathname === "/" : pathname === h || pathname.startsWith(h + "/")))
+              .sort((a, b) => b.length - a.length)[0] || (pathname === "/" ? "/" : "");
+
+            return navSections.map((sec, secIdx) => {
+              const visibleItems = sec.items.filter((item) => !item.admin || user?.role === "admin");
+              if (visibleItems.length === 0) return null;
+              return (
+                <div key={sec.title || secIdx} className="space-y-0.5">
+                  {!collapsed && (
+                    <div className="px-2.5 pt-1.5 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                      {sec.title}
+                    </div>
+                  )}
+                  {visibleItems.map((item) => {
+                    const active = item.href === activeHref;
+                    const Icon = item.icon;
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        title={item.label}
+                        aria-current={active ? "page" : undefined}
+                        className={`flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-[13px] font-medium transition ${
+                          active
+                            ? "bg-indigo-600 text-white font-semibold shadow-sm"
+                            : "text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-900"
+                        } ${collapsed ? "justify-center" : ""}`}
+                      >
+                        <Icon className="h-4 w-4 shrink-0" />
+                        {!collapsed && <span className="flex-1 truncate">{item.label}</span>}
+                        {!collapsed && item.badge && pending > 0 && (
+                          <span data-testid="approvals-badge" className="rounded-full bg-amber-500 px-1.5 text-[11px] font-bold text-slate-950">
+                            {pending}
+                          </span>
+                        )}
+                      </Link>
+                    );
+                  })}
+                </div>
+              );
+            });
+          })()}
         </nav>
       </aside>
       <div className="min-w-0 flex-1">

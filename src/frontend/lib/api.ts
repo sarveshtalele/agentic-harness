@@ -5,10 +5,22 @@ export class ApiError extends Error {
 }
 
 export async function api<T = any>(path: string, init: RequestInit & { json?: unknown } = {}): Promise<T> {
-  const { json, ...rest } = init;
+  const { json, headers: customHeaders, ...rest } = init;
+  const headers = new Headers(customHeaders || {});
+  let body = rest.body;
+  let method = rest.method;
+  if (json !== undefined) {
+    headers.set("Content-Type", "application/json");
+    body = JSON.stringify(json);
+    method = method || "POST";
+  } else if (typeof body === "string" && (body.trim().startsWith("{") || body.trim().startsWith("[")) && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
   const response = await fetch(`/api${path}`, {
     ...rest,
-    ...(json !== undefined ? { method: rest.method || "POST", body: JSON.stringify(json), headers: { "Content-Type": "application/json" } } : {}),
+    method,
+    headers,
+    body,
   });
   if (response.status === 401 && !path.startsWith("/auth/") && typeof window !== "undefined") {
     window.location.href = "/login";

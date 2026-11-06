@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { AppShell } from "../../../components/AppShell";
@@ -26,6 +26,10 @@ import {
   Save,
   Check,
   Copy,
+  Plus,
+  Trash2,
+  ListChecks,
+  ExternalLink,
 } from "lucide-react";
 
 interface StudioDoc {
@@ -37,6 +41,20 @@ interface StudioDoc {
   current_version: number;
   status: string;
   updated_at: string;
+}
+
+interface TestCaseItem {
+  id: string;
+  requirement_id: string;
+  scenario: string;
+  type: string;
+  level: string;
+  precondition: string;
+  test_data: string;
+  steps: string[];
+  expected_result: string;
+  oracle: string;
+  priority: string;
 }
 
 export default function SkillCreatorStudioPage() {
@@ -52,11 +70,22 @@ export default function SkillCreatorStudioPage() {
   // Form Inputs
   const [sourceMode, setSourceMode] = useState<"project" | "upload" | "custom">("project");
   const [selectedDocId, setSelectedDocId] = useState("");
+  const [targetProjectId, setTargetProjectId] = useState(initialProjectId);
   const [uploadedFileName, setUploadedFileName] = useState("");
   const [customText, setCustomText] = useState("");
+
+  // Section 2: Skill Architecture & Step-by-Step Tasks
   const [skillName, setSkillName] = useState("");
   const [category, setCategory] = useState("custom-skills");
   const [description, setDescription] = useState("");
+  const [tasks, setTasks] = useState<string[]>([
+    "Ingest input parameters & validate schema boundaries",
+    "Ground execution rules against specification requirements and data contracts",
+    "Execute core domain business logic and state transitions",
+    "Assert invariants, boundary limits, and error handling",
+    "Emit verifiable execution trace, audit evidence, and gate status",
+  ]);
+  const [newTaskInput, setNewTaskInput] = useState("");
   const [includeScript, setIncludeScript] = useState(true);
 
   // Scaffolding outputs
@@ -65,7 +94,8 @@ export default function SkillCreatorStudioPage() {
   const [skillMd, setSkillMd] = useState("");
   const [scriptPy, setScriptPy] = useState("");
   const [evalsJson, setEvalsJson] = useState("");
-  const [activeTab, setActiveTab] = useState<"skill_md" | "script_py" | "evals_json">("skill_md");
+  const [testCases, setTestCases] = useState<TestCaseItem[]>([]);
+  const [activeTab, setActiveTab] = useState<"skill_md" | "script_py" | "evals_json" | "test_cases">("skill_md");
 
   // Live Script Execution State
   const [scriptArgs, setScriptArgs] = useState('{\n  "action": "run",\n  "payload": { "sample": "verification" }\n}');
@@ -81,6 +111,10 @@ export default function SkillCreatorStudioPage() {
   const [isSaved, setIsSaved] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  // QE Workflow Attachment State
+  const [attachingQe, setAttachingQe] = useState(false);
+  const [attachedQeResult, setAttachedQeResult] = useState<any>(null);
+
   // Load project documents
   useEffect(() => {
     api("/skills/studio/documents")
@@ -90,9 +124,7 @@ export default function SkillCreatorStudioPage() {
         if (initialProjectId) {
           const match = docs.find((d: StudioDoc) => d.project_id === initialProjectId);
           if (match) {
-            setSelectedDocId(match.id);
-            setSkillName(`${match.title} Verification Skill`);
-            setDescription(`Automated verification and domain processing for ${match.title}.`);
+            handleSelectDoc(match.id, docs);
           }
         }
       })
@@ -100,18 +132,69 @@ export default function SkillCreatorStudioPage() {
       .finally(() => setLoadingDocs(false));
   }, [initialProjectId]);
 
+  // Generate step-by-step tasks based on document metadata & title
+  const generateTasksForDoc = (docTitle: string, docKind: string) => {
+    const cleanTitle = docTitle
+      .replace(/Business Requirements Document \(BRD\) - /gi, "")
+      .replace(/Scenarios/gi, "")
+      .replace(/Deterministic Test Cases & Scenario Matrix/gi, "")
+      .trim();
+
+    if (docKind === "gherkin") {
+      return [
+        `Parse Given-When-Then scenarios & contract tables for ${cleanTitle}`,
+        `Verify system state preconditions prior to scenario execution`,
+        `Execute target behavior according to When action contracts`,
+        `Assert postconditions against deterministic Then expectations`,
+        `Record test assertion results & Gherkin oracle evidence`,
+      ];
+    } else if (docKind === "test_cases" || docKind === "test_plan") {
+      return [
+        `Ingest test scenario matrix & priority classifications (P0-P2) for ${cleanTitle}`,
+        `Synthesize deterministic test fixtures & synthetic datasets`,
+        `Execute test cases in bounded sandbox worktree`,
+        `Collect pass/fail execution logs and stack traces`,
+        `Compute gate pass rate and trace coverage matrix`,
+      ];
+    } else {
+      return [
+        `Ingest business requirements & parse functional constraints for ${cleanTitle}`,
+        `Validate input data contracts & precondition checks`,
+        `Execute deterministic workflow calculations & state transitions`,
+        `Enforce SLA, audit, and quality gate boundaries`,
+        `Generate verifiable execution trace & audit evidence for release sign-off`,
+      ];
+    }
+  };
+
   // Handle document selection change
-  const handleSelectDoc = (docId: string) => {
+  const handleSelectDoc = (docId: string, docList = documents) => {
     setSelectedDocId(docId);
-    const doc = documents.find((d) => d.id === docId);
+    const doc = docList.find((d) => d.id === docId);
     if (doc) {
-      if (!skillName) {
-        const cleanTitle = doc.title.replace(/Business Requirements Document \(BRD\) - /gi, "").replace(/Scenarios/gi, "").trim();
-        setSkillName(`${cleanTitle} Agent Skill`);
-      }
-      if (!description) {
-        setDescription(`Automated specification enforcement and testing operations grounded on ${doc.title} (v${doc.current_version}).`);
-      }
+      setTargetProjectId(doc.project_id);
+      const cleanTitle = doc.title
+        .replace(/Business Requirements Document \(BRD\) - /gi, "")
+        .replace(/Scenarios/gi, "")
+        .replace(/Deterministic Test Cases & Scenario Matrix/gi, "")
+        .trim();
+
+      const calculatedName = `${cleanTitle} Agent Skill`;
+      setSkillName(calculatedName);
+      setDescription(`Automated specification enforcement and verification operations grounded on ${doc.title} (v${doc.current_version}).`);
+      
+      const categoryMap: Record<string, string> = {
+        brd: "business-analysis",
+        gherkin: "testing",
+        test_cases: "testing",
+        test_plan: "quality-engineering",
+        discovery: "codebase-intelligence",
+      };
+      setCategory(categoryMap[doc.kind] || "custom-skills");
+
+      // Auto-outline checklist of step-by-step tasks
+      const outlinedTasks = generateTasksForDoc(doc.title, doc.kind);
+      setTasks(outlinedTasks);
     }
   };
 
@@ -124,15 +207,35 @@ export default function SkillCreatorStudioPage() {
     reader.onload = (event) => {
       const content = event.target?.result as string;
       setCustomText(content);
-      if (!skillName) {
-        const baseName = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
-        setSkillName(`${baseName} Skill`);
-      }
-      if (!description) {
-        setDescription(`Skill synthesized from ${file.name} document specification.`);
-      }
+      const baseName = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
+      setSkillName(`${baseName} Skill`);
+      setDescription(`Skill synthesized from ${file.name} document specification.`);
+      setTasks([
+        `Ingest specification requirements from ${file.name}`,
+        `Validate parameter constraints and input boundaries`,
+        `Execute core operations according to uploaded requirements`,
+        `Assert expected deterministic outputs and error recovery`,
+        `Emit audit logs and structured execution evidence`,
+      ]);
     };
     reader.readAsText(file);
+  };
+
+  // Task list management
+  const handleAddTask = () => {
+    if (!newTaskInput.trim()) return;
+    setTasks([...tasks, newTaskInput.trim()]);
+    setNewTaskInput("");
+  };
+
+  const handleDeleteTask = (index: number) => {
+    setTasks(tasks.filter((_, i) => i !== index));
+  };
+
+  const handleUpdateTask = (index: number, val: string) => {
+    const updated = [...tasks];
+    updated[index] = val;
+    setTasks(updated);
   };
 
   // Trigger Scaffolding
@@ -147,26 +250,30 @@ export default function SkillCreatorStudioPage() {
     setExecutionResult(null);
     setEvalResult(null);
     setIsSaved(false);
+    setAttachedQeResult(null);
 
     try {
+      // Send valid JSON payload via { json: { ... } }
       const res = await api("/skills/studio/scaffold", {
-        method: "POST",
-        body: JSON.stringify({
+        json: {
           name: skillName,
           description: description || `Domain skill for ${skillName}.`,
           category,
           includeScript,
+          tasks,
+          projectId: targetProjectId || undefined,
           documentId: sourceMode === "project" ? selectedDocId || undefined : undefined,
           documentContent: sourceMode !== "project" ? customText || undefined : undefined,
-        }),
+        },
       });
 
       setGeneratedSlug(res.slug);
       setSkillMd(res.skill_md);
       setScriptPy(res.script_py || "");
       setEvalsJson(res.evals_json || "");
+      setTestCases(res.test_cases || []);
       setActiveTab("skill_md");
-      setSuccessMsg(`Skill package scaffolded successfully for slug: '${res.slug}'`);
+      setSuccessMsg(`Skill package scaffolded successfully for slug: '${res.slug}' with ${res.test_cases?.length || 0} deterministic test cases.`);
     } catch (err: any) {
       setError(err.message || "Failed to scaffold skill");
     } finally {
@@ -185,14 +292,13 @@ export default function SkillCreatorStudioPage() {
 
     try {
       const res = await api("/skills/studio/save", {
-        method: "POST",
-        body: JSON.stringify({
+        json: {
           slug: generatedSlug,
           name: skillName,
           skill_md: skillMd,
           script_py: scriptPy,
           evals_json: evalsJson,
-        }),
+        },
       });
       setIsSaved(true);
       setSuccessMsg(res.message || `Skill '${generatedSlug}' installed successfully!`);
@@ -200,6 +306,55 @@ export default function SkillCreatorStudioPage() {
       setError(err.message || "Failed to save skill to platform");
     } finally {
       setSaving(false);
+    }
+  };
+
+  // Attach Directly to QE Workflow End-to-End
+  const handleAttachToQe = async () => {
+    if (!targetProjectId) {
+      setError("Please select or specify a project to attach the test cases to.");
+      return;
+    }
+    if (!generatedSlug || testCases.length === 0) {
+      setError("Scaffold the skill first to generate deterministic test cases.");
+      return;
+    }
+
+    setError("");
+    setAttachingQe(true);
+
+    try {
+      // Ensure skill is saved to disk first
+      if (!isSaved) {
+        await api("/skills/studio/save", {
+          json: {
+            slug: generatedSlug,
+            name: skillName,
+            skill_md: skillMd,
+            script_py: scriptPy,
+            evals_json: evalsJson,
+          },
+        });
+        setIsSaved(true);
+      }
+
+      const res = await api("/skills/studio/attach-to-qe", {
+        json: {
+          projectId: targetProjectId,
+          skillSlug: generatedSlug,
+          skillName: skillName,
+          documentTitle: `Deterministic Test Cases & Scenario Matrix - ${skillName}`,
+          testCases: testCases,
+          tasks: tasks,
+        },
+      });
+
+      setAttachedQeResult(res);
+      setSuccessMsg(res.message || "Successfully attached test cases to project QE workflow!");
+    } catch (err: any) {
+      setError(err.message || "Failed to attach to QE workflow");
+    } finally {
+      setAttachingQe(false);
     }
   };
 
@@ -220,28 +375,25 @@ export default function SkillCreatorStudioPage() {
     }
 
     try {
-      // If not yet saved to disk, save first automatically
       if (!isSaved) {
         await api("/skills/studio/save", {
-          method: "POST",
-          body: JSON.stringify({
+          json: {
             slug: generatedSlug,
             name: skillName,
             skill_md: skillMd,
             script_py: scriptPy,
             evals_json: evalsJson,
-          }),
+          },
         });
         setIsSaved(true);
       }
 
       const res = await api("/skills/studio/execute-script", {
-        method: "POST",
-        body: JSON.stringify({
+        json: {
           skillSlug: generatedSlug,
           scriptName: "run.py",
           inputArgs: parsedArgs,
-        }),
+        },
       });
       setExecutionResult(res);
     } catch (err: any) {
@@ -263,21 +415,19 @@ export default function SkillCreatorStudioPage() {
     try {
       if (!isSaved) {
         await api("/skills/studio/save", {
-          method: "POST",
-          body: JSON.stringify({
+          json: {
             slug: generatedSlug,
             name: skillName,
             skill_md: skillMd,
             script_py: scriptPy,
             evals_json: evalsJson,
-          }),
+          },
         });
         setIsSaved(true);
       }
 
       const res = await api("/skills/studio/evaluate", {
-        method: "POST",
-        body: JSON.stringify({ skillSlug: generatedSlug }),
+        json: { skillSlug: generatedSlug },
       });
       setEvalResult(res.evaluation);
     } catch (err: any) {
@@ -288,7 +438,14 @@ export default function SkillCreatorStudioPage() {
   };
 
   const handleCopyCode = () => {
-    const textToCopy = activeTab === "skill_md" ? skillMd : activeTab === "script_py" ? scriptPy : evalsJson;
+    const textToCopy =
+      activeTab === "skill_md"
+        ? skillMd
+        : activeTab === "script_py"
+        ? scriptPy
+        : activeTab === "evals_json"
+        ? evalsJson
+        : JSON.stringify(testCases, null, 2);
     navigator.clipboard.writeText(textToCopy);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -298,8 +455,8 @@ export default function SkillCreatorStudioPage() {
     <AppShell>
       <div className="space-y-6">
         <PageTitle
-          title="Autonomous Skill Creator & Evaluator Studio"
-          subtitle="Grounded Agent Skill synthesis from BRDs, user stories, and specs compliant with awesome-agent-skills standards."
+          title="Skill Creator Studio"
+          subtitle="Synthesize agent skills, task checklists, and deterministic test cases grounded directly in requirements specifications."
           actions={
             <div className="flex items-center gap-2">
               <Link href="/skills">
@@ -316,26 +473,6 @@ export default function SkillCreatorStudioPage() {
           }
         />
 
-        {/* Studio Capabilities Header Ribbon */}
-        <div className="flex flex-wrap items-center gap-3 rounded-xl border border-indigo-200/60 bg-gradient-to-r from-indigo-50/80 via-white to-purple-50/80 p-3.5 text-xs text-slate-700 dark:border-indigo-900/60 dark:from-indigo-950/40 dark:via-[#090f24] dark:to-purple-950/30 dark:text-slate-300 shadow-sm">
-          <span className="flex items-center gap-1 font-semibold text-indigo-700 dark:text-indigo-300">
-            <ShieldCheck className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
-            Standards Enforcement:
-          </span>
-          <span className="rounded bg-indigo-100/80 px-2 py-0.5 font-mono text-[11px] font-bold text-indigo-800 dark:bg-indigo-900/60 dark:text-indigo-200">
-            awesome-agent-skills
-          </span>
-          <span className="rounded bg-emerald-100/80 px-2 py-0.5 font-mono text-[11px] font-bold text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200">
-            NVIDIA Skill Specter A+
-          </span>
-          <span className="rounded bg-amber-100/80 px-2 py-0.5 font-mono text-[11px] font-bold text-amber-800 dark:bg-amber-900/60 dark:text-amber-200">
-            Sandboxed Subprocess Runner
-          </span>
-          <span className="rounded bg-purple-100/80 px-2 py-0.5 font-mono text-[11px] font-bold text-purple-800 dark:bg-purple-900/60 dark:text-purple-200">
-            MAF 2.0 Native
-          </span>
-        </div>
-
         {error && <ErrorNote message={error} />}
         {successMsg && (
           <div className="flex items-center gap-2 rounded-lg border border-emerald-300 bg-emerald-50 px-3.5 py-2.5 text-sm text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-200">
@@ -344,8 +481,37 @@ export default function SkillCreatorStudioPage() {
           </div>
         )}
 
+        {/* QE Attachment Banner */}
+        {attachedQeResult && (
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-emerald-300 bg-gradient-to-r from-emerald-50 via-white to-teal-50 p-4 dark:border-emerald-800 dark:from-emerald-950/50 dark:via-[#08151f] dark:to-teal-950/40">
+            <div>
+              <h4 className="text-sm font-bold text-emerald-900 dark:text-emerald-200 flex items-center gap-1.5">
+                <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                Attached Directly to Project QE Workflow!
+              </h4>
+              <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+                Created specification <span className="font-semibold text-slate-800 dark:text-slate-200">{attachedQeResult.documentTitle}</span> with {attachedQeResult.testCasesCount} deterministic test cases.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Link href={attachedQeResult.qeUrl}>
+                <Button className="!bg-emerald-600 hover:!bg-emerald-500 font-semibold !text-xs !py-1.5 shadow-sm">
+                  <span>Go to Autonomous QE Workflow</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Button>
+              </Link>
+              <Link href={attachedQeResult.harnessUrl}>
+                <Button variant="secondary" className="!text-xs !py-1.5">
+                  <Terminal className="h-3.5 w-3.5" />
+                  <span>Execute in Harness</span>
+                </Button>
+              </Link>
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-          {/* Left Column: Skill Configuration & Grounding Source */}
+          {/* Left Column: Skill Configuration, Metadata & Tasks Checklist */}
           <div className="space-y-5 lg:col-span-5">
             <Card title="1. Grounding Specification Source">
               <div className="space-y-3">
@@ -404,14 +570,14 @@ export default function SkillCreatorStudioPage() {
                         <option value="">-- Choose a Grounding Document --</option>
                         {documents.map((d) => (
                           <option key={d.id} value={d.id}>
-                            [{d.project_name}] {d.title} (v{d.current_version} • {d.kind.toUpperCase()})
+                            {d.title} (v{d.current_version} • {d.kind.toUpperCase()})
                           </option>
                         ))}
                       </select>
                     )}
                     {selectedDocId && (
                       <p className="mt-1 text-[11px] text-slate-500">
-                        Skill logic and boundaries will be strictly grounded on the chosen specification.
+                        Skill logic and task checklist automatically grounded on the selected specification.
                       </p>
                     )}
                   </div>
@@ -455,7 +621,12 @@ export default function SkillCreatorStudioPage() {
                       className={inputClass}
                       placeholder="Paste requirement sections, API contracts, business rules, or test constraints here..."
                       value={customText}
-                      onChange={(e) => setCustomText(e.target.value)}
+                      onChange={(e) => {
+                        setCustomText(e.target.value);
+                        if (!skillName && e.target.value.length > 5) {
+                          setSkillName("Domain Verification Skill");
+                        }
+                      }}
                     />
                   </div>
                 )}
@@ -463,7 +634,7 @@ export default function SkillCreatorStudioPage() {
             </Card>
 
             <Card title="2. Skill Architecture & Metadata">
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <div>
                   <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
                     Skill Display Name <span className="text-rose-500">*</span>
@@ -497,12 +668,12 @@ export default function SkillCreatorStudioPage() {
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                      Target Engine
+                      Target Project
                     </label>
                     <input
                       disabled
-                      value="MAF 2.0 / Subprocess"
-                      className={`${inputClass} bg-slate-100 text-slate-500 dark:bg-slate-800`}
+                      value={targetProjectId || "prj_mcp_market"}
+                      className={`${inputClass} bg-slate-100 text-slate-500 dark:bg-slate-800 font-mono text-xs`}
                     />
                   </div>
                 </div>
@@ -513,7 +684,7 @@ export default function SkillCreatorStudioPage() {
                   </label>
                   <textarea
                     aria-label="Capability description"
-                    rows={3}
+                    rows={2}
                     placeholder="Describe what the skill does and when an agent or developer should invoke it."
                     className={inputClass}
                     value={description}
@@ -521,7 +692,66 @@ export default function SkillCreatorStudioPage() {
                   />
                 </div>
 
-                <div className="flex items-center gap-2 pt-1">
+                {/* Step-by-Step Guide Checklist as Tasks */}
+                <div className="rounded-lg border border-indigo-200/80 bg-indigo-50/40 p-3 dark:border-indigo-900/60 dark:bg-indigo-950/30">
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-bold text-indigo-950 dark:text-indigo-200 flex items-center gap-1.5">
+                      <ListChecks className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                      <span>Step-by-Step Task Checklist</span>
+                    </label>
+                    <span className="text-[11px] font-medium text-indigo-600 dark:text-indigo-400">
+                      {tasks.length} tasks defined
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 mb-2.5">
+                    These tasks guide the skill operational workflow, execution functions, and deterministic test cases.
+                  </p>
+
+                  <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                    {tasks.map((task, idx) => (
+                      <div key={idx} className="flex items-center gap-2 group">
+                        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded bg-indigo-100 text-[10px] font-mono font-bold text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">
+                          {idx + 1}
+                        </span>
+                        <input
+                          aria-label={`Task ${idx + 1}`}
+                          className={`${inputClass} !py-1 text-xs`}
+                          value={task}
+                          onChange={(e) => handleUpdateTask(idx, e.target.value)}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteTask(idx)}
+                          className="p-1 text-slate-400 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition"
+                          title="Remove task"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-2.5 flex items-center gap-2">
+                    <input
+                      aria-label="Add new step task"
+                      placeholder="Add another step task..."
+                      className={`${inputClass} !py-1 text-xs`}
+                      value={newTaskInput}
+                      onChange={(e) => setNewTaskInput(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddTask())}
+                    />
+                    <Button
+                      variant="secondary"
+                      onClick={handleAddTask}
+                      disabled={!newTaskInput.trim()}
+                      className="!px-2.5 !py-1 !text-xs shrink-0"
+                    >
+                      <Plus className="h-3.5 w-3.5" /> Add
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 pt-0.5">
                   <input
                     id="include-script"
                     type="checkbox"
@@ -534,24 +764,24 @@ export default function SkillCreatorStudioPage() {
                   </label>
                 </div>
 
-                <div className="pt-2">
+                <div className="pt-1">
                   <Button
                     onClick={handleScaffold}
                     busy={scaffolding}
-                    disabled={!skillName.trim()}
-                    className="w-full !py-2.5 shadow-sm"
+                    disabled={!skillName.trim() || tasks.length === 0}
+                    className="w-full !py-2.5 shadow-sm font-semibold"
                   >
                     <Wand2 className="h-4 w-4" />
-                    <span>Scaffold Agent Skill Package</span>
+                    <span>Scaffold Agent Skill & Test Cases</span>
                   </Button>
                 </div>
               </div>
             </Card>
           </div>
 
-          {/* Right Column: Code Preview, Live Sandbox Runner, & Benchmark */}
+          {/* Right Column: Code Preview, Test Cases, Live Runner, & QE Workflow Attachment */}
           <div className="space-y-5 lg:col-span-7">
-            {/* Artifact Code Tabs */}
+            {/* Artifact Code & Test Cases Tabs */}
             <Card
               title={
                 <div className="flex items-center gap-2">
@@ -587,7 +817,7 @@ export default function SkillCreatorStudioPage() {
               {generatedSlug ? (
                 <div className="space-y-3">
                   {/* Tab Selector */}
-                  <div className="flex items-center gap-2 border-b border-slate-200 pb-2 dark:border-slate-800">
+                  <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-2 dark:border-slate-800">
                     <button
                       type="button"
                       onClick={() => setActiveTab("skill_md")}
@@ -624,7 +854,19 @@ export default function SkillCreatorStudioPage() {
                       }`}
                     >
                       <ShieldCheck className="h-3.5 w-3.5" />
-                      <span>evals/evals.json</span>
+                      <span>evals.json</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("test_cases")}
+                      className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition ${
+                        activeTab === "test_cases"
+                          ? "bg-indigo-600 text-white"
+                          : "text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+                      }`}
+                    >
+                      <ListChecks className="h-3.5 w-3.5" />
+                      <span>Test Cases Matrix ({testCases.length})</span>
                     </button>
                   </div>
 
@@ -657,6 +899,38 @@ export default function SkillCreatorStudioPage() {
                         onChange={(e) => setEvalsJson(e.target.value)}
                       />
                     )}
+                    {activeTab === "test_cases" && (
+                      <div className="overflow-x-auto max-h-80 rounded-lg border border-slate-200 dark:border-slate-800">
+                        <table className="w-full text-left text-xs">
+                          <thead className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 font-semibold text-slate-500 uppercase">
+                            <tr>
+                              <th className="px-3 py-2">TC ID</th>
+                              <th className="px-3 py-2">Scenario</th>
+                              <th className="px-3 py-2">Type</th>
+                              <th className="px-3 py-2">Oracle</th>
+                              <th className="px-3 py-2">Priority</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-mono">
+                            {testCases.map((tc, idx) => (
+                              <tr key={tc.id || idx} className="hover:bg-slate-50/60 dark:hover:bg-slate-900/40">
+                                <td className="px-3 py-2 font-bold text-indigo-600 dark:text-indigo-400">{tc.id}</td>
+                                <td className="px-3 py-2 font-sans font-medium text-slate-800 dark:text-slate-200">{tc.scenario}</td>
+                                <td className="px-3 py-2">
+                                  <Badge tone={tc.type === "Positive" ? "emerald" : tc.type === "Negative" ? "rose" : "slate"}>
+                                    {tc.type}
+                                  </Badge>
+                                </td>
+                                <td className="px-3 py-2 text-slate-500 truncate max-w-[150px]">{tc.oracle}</td>
+                                <td className="px-3 py-2">
+                                  <span className="font-bold text-slate-700 dark:text-slate-300">{tc.priority}</span>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
                   </div>
                 </div>
               ) : (
@@ -668,11 +942,39 @@ export default function SkillCreatorStudioPage() {
                     No Skill Package Scaffolded Yet
                   </h3>
                   <p className="mt-1 max-w-sm text-xs text-slate-500">
-                    Select a project specification or brief on the left, then click "Scaffold Agent Skill Package" to generate compliant files.
+                    Select a specification on the left, review the step-by-step task checklist, then click "Scaffold Agent Skill & Test Cases".
                   </p>
                 </div>
               )}
             </Card>
+
+            {/* Direct End-to-End QE Workflow Attachment Card */}
+            {generatedSlug && testCases.length > 0 && (
+              <Card
+                title={
+                  <div className="flex items-center gap-2">
+                    <Layers className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                    <span>Attach Test Cases Directly to QE Workflow End-to-End</span>
+                  </div>
+                }
+              >
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs text-slate-600 dark:text-slate-300">
+                      Creates <code className="font-mono text-indigo-600 dark:text-indigo-400">Deterministic Test Cases & Scenario Matrix</code> in project <span className="font-semibold">{targetProjectId || "prj_mcp_market"}</span> and binds the {testCases.length} test cases to the Autonomous Quality Engineering lifecycle.
+                    </p>
+                  </div>
+                  <Button
+                    onClick={handleAttachToQe}
+                    busy={attachingQe}
+                    className="!bg-emerald-600 hover:!bg-emerald-500 font-semibold !px-4 !py-2 text-xs shadow-sm shrink-0"
+                  >
+                    <CheckCircle2 className="h-4 w-4" />
+                    <span>Attach to QE Workflow End-to-End</span>
+                  </Button>
+                </div>
+              </Card>
+            )}
 
             {/* Live Script Sandbox Runner */}
             {generatedSlug && includeScript && (
@@ -738,7 +1040,7 @@ export default function SkillCreatorStudioPage() {
                 title={
                   <div className="flex items-center gap-2">
                     <ShieldCheck className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
-                    <span>Skill Quality & Security Benchmark (Evaluator Skill)</span>
+                    <span>Skill Quality & Security Benchmark</span>
                   </div>
                 }
                 actions={
@@ -757,7 +1059,7 @@ export default function SkillCreatorStudioPage() {
                   <div className="space-y-3">
                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                       <div className="rounded-lg border border-slate-200 bg-slate-50 p-2.5 text-center dark:border-slate-800 dark:bg-slate-900">
-                        <div className="text-[10px] font-bold uppercase text-slate-500">Specter Score</div>
+                        <div className="text-[10px] font-bold uppercase text-slate-500">Score</div>
                         <div className="mt-0.5 text-xl font-extrabold text-indigo-600 dark:text-indigo-400">
                           {evalResult.totalScore ?? 95}
                           <span className="text-xs font-semibold text-slate-400">/100</span>
