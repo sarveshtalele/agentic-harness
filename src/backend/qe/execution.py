@@ -373,7 +373,15 @@ def failure_record(case: dict, klass: str, healed: bool = False, note: dict | No
     if note:
         cause, fix = (str(note.get("cause") or cause)[:600], str(note.get("fix") or fix)[:600])
     case_id = next(iter(re.findall(r"TC[-_][\w-]*\d+", f"{case.get('classname', '')} {case.get('name', '')}", re.I)), "")
-    return {"test": f"{case.get('classname', '')}::{case.get('name', '')}", "case_id": case_id.upper().replace("_", "-"), "classification": CLASSIFICATION[klass], "class": klass,
+    raw_name = case.get("name", "")
+    classname = case.get("classname", "")
+    test_ident = f"{classname}::{raw_name}" if classname else raw_name
+    if "tests.agentic_qe." in test_ident:
+        test_ident = test_ident.split("tests.agentic_qe.")[-1]
+    elif "tests/agentic_qe/" in test_ident:
+        test_ident = test_ident.split("tests/agentic_qe/")[-1]
+    test_ident = test_ident.lstrip(".:/")
+    return {"test": test_ident or raw_name or "test_case", "case_id": case_id.upper().replace("_", "-"), "classification": CLASSIFICATION[klass], "class": klass,
             "evidence": redact(message)[:600], "cause": cause, "fix": fix, "pattern": pattern["pattern"], "healed": healed}
 
 

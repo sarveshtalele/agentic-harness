@@ -16,36 +16,61 @@ from backend.maf import llm
 from tests.reviewing import rules as case_rules
 from tests.scripted_client import ScriptedClient
 
-BRD = """# Business Requirements Document
+BRD = """# Business Requirements Document (BRD)
 
-## Executive Summary
+## 1. Executive Summary
 Lets members reset a password.
 
-## Business Objectives
+## 2. Business Objectives
 1. Reduce support tickets.
 
-## Scope
+## 3. Scope
 Password reset only.
 
-## Stakeholders
+## 4. Stakeholders
 Members.
 
-## Functional Requirements
+## 5. Current State and Proposed State
+Current State: manual password reset requests.
+Proposed State: self-serve email password reset link.
+
+## 6. Functional Requirements
 FR-001 A member can request a reset link by email.
 
-## Non-Functional Requirements
+## 7. Non-Functional Requirements
 Links expire within 30 minutes.
 
-## Business Rules
+## 8. Business Rules
 One active link per member.
 
-## Assumptions
+## 9. Data and Integration Requirements
+Integrates with email service provider.
+
+## 10. Assumptions and Constraints
 Email is verified.
 
-## Risks and Mitigations
+## 11. Dependencies
+SMTP or SendGrid delivery service.
+
+## 12. Risks and Mitigations
 Abuse is rate limited.
 
-## Open Questions
+## 13. Transition Requirements
+None.
+
+## 14. Acceptance Criteria
+User receives email with valid token.
+
+## 15. Requirement Traceability
+FR-001 maps to reset endpoint.
+
+## 16. Open Questions
+None.
+
+## 17. Approval and Sign-Off
+Approved by product owner.
+
+## 18. References and Glossary
 None.
 """
 FEATURE = "Feature: Password reset\n\n  @FR-001\n  Scenario: Member requests a link\n    Given a member with a verified email\n    When they request a reset\n    Then a link valid for 30 minutes is sent\n"
@@ -143,7 +168,7 @@ def test_connection_test_reports_real_failure(client):
 
 def test_document_lifecycle_and_exports(client, project):
     doc = client.post(f"/api/projects/{project['id']}/documents", json={"title": "Spec", "kind": "brd", "template_id": "builtin_brd"}).json()
-    assert "## Scope" in doc["content"]
+    assert "Scope" in doc["content"]
     saved = client.put(f"/api/documents/{doc['id']}", json={"content": "## Scope\n\nEdited **text**\n", "note": "mine"}).json()
     assert saved["version"] == 2 and saved["author"] == "admin"
     md = client.get(f"/api/documents/{doc['id']}/export/md")

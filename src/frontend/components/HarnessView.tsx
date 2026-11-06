@@ -1812,7 +1812,7 @@ export function HarnessView({
           {/* Messages Stream */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {(!currentSession?.messages || currentSession.messages.length === 0) && (
-              <div className="flex h-full flex-col items-center justify-center text-center p-6 text-slate-500">
+              <div className="flex min-h-full flex-col items-center justify-start py-6 px-4 text-center text-slate-500 my-auto">
                 <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400">
                   <Terminal className="h-6 w-6" />
                 </div>
@@ -2804,7 +2804,7 @@ export function HarnessView({
                     </span>
                   </div>
                   <span className="rounded-full bg-emerald-600 px-2.5 py-0.5 font-mono text-xs font-bold text-white shadow-sm">
-                    {previewSkill.specterScore || 98}/100 Grade {previewSkill.specterGrade || "A+"} · PASSED
+                    Risk: 0/100 · Health: {previewSkill.specterScore || 98}% ({previewSkill.specterGrade || "A+"}) · {previewSkill.specterStatus || "PASSED"}
                   </span>
                 </div>
 

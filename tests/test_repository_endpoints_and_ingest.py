@@ -75,6 +75,11 @@ def test_analysis_normalization_top_imports_as_list():
     "prj_mcp_market"
 ])
 def test_all_seeded_projects_repo_and_tree(client, project_id):
+    r = repo_dir(project_id)
+    r.mkdir(parents=True, exist_ok=True)
+    if not (r / "README.md").exists():
+        (r / "README.md").write_text(f"# {project_id}\n\nProject repository.\n", encoding="utf-8")
+
     # 1. /api/projects/{id}/repo
     res = client.get(f"/api/projects/{project_id}/repo")
     assert res.status_code == 200

@@ -19,12 +19,11 @@ code, pre, textarea.mono, .mono {
 .prose-atlas code { background: rgba(100, 116, 139, 0.2); border-radius: 4px; padding: 0 0.25rem; font-size: 0.8rem; }
 .prose-atlas pre { background: #070d1f; color: #e2e8f0; padding: 0.75rem; border-radius: 8px; overflow-x: auto; margin: 0.5rem 0; }
 .prose-atlas pre code { background: none; padding: 0; }
-.prose-atlas table { border-collapse: collapse; width: 100%; font-size: 0.8125rem; margin: 0.6rem 0; display: block; overflow-x: auto; }
-.prose-atlas th, .prose-atlas td { border: 1px solid rgba(100, 116, 139, 0.35); padding: 0.45rem 0.65rem; text-align: left; vertical-align: top; overflow-wrap: normal; word-break: normal; }
+.prose-atlas table { border-collapse: collapse; width: 100%; font-size: 0.8125rem; margin: 0.6rem 0; display: table; max-width: 100%; table-layout: auto; }
+.prose-atlas th, .prose-atlas td { border: 1px solid rgba(100, 116, 139, 0.35); padding: 0.45rem 0.65rem; text-align: left; vertical-align: top; overflow-wrap: break-word; word-break: break-word; }
 .prose-atlas th { font-weight: 700; white-space: nowrap; background: rgb(99 102 241 / 0.1); }
-.prose-atlas td:first-child,
+.prose-atlas td:first-child { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.75rem; max-width: 260px; overflow-wrap: break-word; word-break: break-all; }
 .prose-atlas td:nth-child(2),
-.prose-atlas td:nth-child(5),
 .prose-atlas td:nth-child(6) { white-space: nowrap; }
 .prose-atlas a { color: #6366f1; text-decoration: underline; }
 

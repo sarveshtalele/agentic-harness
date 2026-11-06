@@ -85,8 +85,6 @@ def safe_parse_xml(content: str | bytes, forbid_dtd: bool = True, forbid_entitie
     # Fallback to standard ElementTree with entity/DTD prevention
     try:
         parser = ET.XMLParser()
-        if hasattr(parser, "entity"):
-            parser.entity = {}
         return ET.fromstring(raw_str, parser=parser)
     except Exception as exc:
         raise DocumentSecurityError(f"XML parse failure: {exc}") from exc

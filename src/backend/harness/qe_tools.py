@@ -53,19 +53,8 @@ def build_qe_tools(workspace_dir: str) -> List[FunctionTool]:
 
         project_root = os.path.join(workspace_dir, "data", "projects", project_id)
         sandbox_dir = os.path.join(project_root, "sandbox")
-        repo_dir = os.path.join(project_root, "repo")
-
-        if os.path.exists(sandbox_dir) and os.listdir(sandbox_dir):
-            return project_id, sandbox_dir
-        elif os.path.exists(repo_dir) and os.listdir(repo_dir):
-            return project_id, repo_dir
-        elif os.path.exists(sandbox_dir):
-            return project_id, sandbox_dir
-        elif os.path.exists(project_root):
-            os.makedirs(sandbox_dir, exist_ok=True)
-            return project_id, sandbox_dir
-
-        return project_id, workspace_dir
+        os.makedirs(sandbox_dir, exist_ok=True)
+        return project_id, sandbox_dir
 
     # ==========================================
     # 1. Repository Inspection

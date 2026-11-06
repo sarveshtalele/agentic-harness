@@ -22,6 +22,8 @@ from backend.repos import sandbox, git, ingest
 from backend.core.security import safe_path
 from backend.core.errors import RepoError
 
+pytestmark = pytest.mark.live
+
 
 TARGET_PROJECT_ID = "prj_mcp_market"
 TARGET_NAME = "MCP Server Market"

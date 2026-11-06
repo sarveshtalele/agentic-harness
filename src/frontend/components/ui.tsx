@@ -90,7 +90,21 @@ function SafeImage({ src, alt }: { src?: unknown; alt?: string }) {
 export function Markdown({ children }: { children: string }) {
   return (
     <div className="prose-atlas">
-      <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ img: SafeImage }}>{children}</ReactMarkdown>
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+          img: SafeImage,
+          table: ({ children, ...props }) => (
+            <div className="my-3 w-full max-w-full overflow-x-auto rounded-lg border border-slate-200 shadow-xs dark:border-slate-800">
+              <table className="w-full text-left text-xs border-collapse" {...props}>
+                {children}
+              </table>
+            </div>
+          ),
+        }}
+      >
+        {children}
+      </ReactMarkdown>
     </div>
   );
 }
