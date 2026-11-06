@@ -649,28 +649,35 @@ The project has 543 files, not counting screenshots.
 | `skills/tracing-coverage/scripts/check-gate.ts` | Asset of the tracing-coverage skill: check-gate.ts |  |  |
 | `src/backend/__init__.py` | Marks the backend package |  | `api/common.py`, `app.py`, `cli.py`, `core/logs.py`, `tests/conftest.py`, `tests/test_access.py`, `tests/test_core.py`, `tests/test_errors.py`, and 3 more |
 | `src/backend/cli.py` | Command Line Interface (CLI) for Agentic QE Harness. | `__init__.py`, `config.py`, `core/seed_data.py`, `db.py`, `harness/discovery.py`, `harness/harness_agent.py`, `harness/llm_config.py`, `harness/project_repository.py`, and 1 more |  |
-| `src/backend/harness/__init__.py` |  |  |  |
+| `src/backend/harness/__init__.py` | Marks the harness package |  |  |
 | `src/backend/harness/agent_evals.py` | Agent Evaluation Framework: RAGAS, Faithfulness, Groundedness, Recall@K. |  | `api/harness.py` |
-| `src/backend/harness/agui_protocol.py` |  |  |  |
-| `src/backend/harness/approval_manager.py` |  |  | `api/governance.py`, `api/runs.py`, `harness/qe_tools.py`, `tests/test_harness_universal_hitl.py` |
+| `src/backend/harness/agui_protocol.py` | AG-UI SSE protocol encoder for CopilotKit streaming. |  | `harness/handlers/stream_engine.py`, `harness/handlers/skill_handler.py`, `harness/handlers/doc_handler.py` |
+| `src/backend/harness/approval_manager.py` | Tool approval manager and Human-in-the-Loop decision handler. |  | `api/governance.py`, `api/runs.py`, `harness/qe_tools.py`, `tests/test_harness_universal_hitl.py` |
 | `src/backend/harness/cache.py` | Harness Semantic & Prompt Caching Mechanism. |  | `api/harness.py`, `harness/harness_agent.py`, `tests/test_stress_and_concurrency.py` |
-| `src/backend/harness/discovery.py` |  |  | `api/harness.py`, `cli.py`, `harness/harness_agent.py` |
-| `src/backend/harness/domain_brd_generator.py` | Domain-grounded BRD and PRD generator for Agentic QE Harness. | `core/documents.py`, `core/files.py`, `core/gherkin.py`, `db.py` | `harness/harness_agent.py`, `harness/qe_tools.py`, `tests/test_harness_ba_studio_real_generation.py` |
-| `src/backend/harness/function_tool.py` |  |  | `harness/qe_tools.py` |
-| `src/backend/harness/handoff.py` |  | `harness/session.py` | `tests/test_e2e_full_scenarios.py`, `tests/test_stress_and_concurrency.py` |
-| `src/backend/harness/harness_agent.py` |  | `db.py`, `harness/cache.py`, `harness/discovery.py`, `harness/domain_brd_generator.py`, `harness/qe_agents.py`, `harness/qe_tools.py`, `repos/sandbox.py`, `repos/static_analysis.py` | `api/harness.py`, `cli.py`, `tests/test_e2e_full_scenarios.py`, `tests/test_harness_project_scoped_features.py`, `tests/test_harness_universal_hitl.py`, `tests/test_maf_backend.py` |
-| `src/backend/harness/llm_client.py` |  |  | `tests/test_maf_backend.py` |
-| `src/backend/harness/llm_config.py` |  |  | `api/harness.py`, `cli.py`, `tests/test_e2e_full_scenarios.py`, `tests/test_harness_project_scoped_features.py`, `tests/test_maf_backend.py` |
-| `src/backend/harness/magentic.py` |  | `harness/session.py` |  |
-| `src/backend/harness/mcp_manager.py` |  |  | `api/harness.py`, `harness/qe_tools.py` |
-| `src/backend/harness/memory_provider.py` |  |  | `harness/qe_tools.py`, `tests/test_maf_backend.py` |
-| `src/backend/harness/mode_provider.py` |  |  | `tests/test_maf_backend.py` |
-| `src/backend/harness/patterns.py` | Ashish Patel's Agent Harness Engineering Patterns. |  |  |
+| `src/backend/harness/discovery.py` | Local and plugin skill discovery mechanism. |  | `api/harness.py`, `cli.py`, `harness/harness_agent.py` |
+| `src/backend/harness/domain_brd_generator.py` | Domain-grounded BRD and PRD generator for Agentic QE Harness. | `core/documents.py`, `core/files.py`, `core/gherkin.py`, `db.py` | `harness/handlers/doc_handler.py`, `harness/qe_tools.py`, `tests/test_harness_ba_studio_real_generation.py` |
+| `src/backend/harness/function_tool.py` | FunctionTool abstraction for schema generation and execution. |  | `harness/qe_tools.py` |
+| `src/backend/harness/grounding.py` | Deterministic grounding against centralized SQLite database (data/atlas.sqlite3). | `db.py`, `repos/static_analysis.py` | `harness/harness_agent.py` |
+| `src/backend/harness/handoff.py` | Agent handoff and multi-agent coordination. | `harness/session.py` | `tests/test_e2e_full_scenarios.py`, `tests/test_stress_and_concurrency.py` |
+| `src/backend/harness/harness_agent.py` | Modularized HarnessAgent facade: intent classification, grounding, workflow routing. | `harness/intent_classifier.py`, `harness/skill_dispatcher.py`, `harness/grounding.py`, `harness/handlers/*` | `api/harness.py`, `cli.py`, `tests/test_e2e_full_scenarios.py`, `tests/test_harness_project_scoped_features.py`, `tests/test_harness_universal_hitl.py`, `tests/test_maf_backend.py` |
+| `src/backend/harness/intent_classifier.py` | Natural language and slash-command intent classifier. |  | `harness/harness_agent.py` |
+| `src/backend/harness/llm_client.py` | Unified LLM client with fallback provider orchestration. |  | `tests/test_maf_backend.py` |
+| `src/backend/harness/llm_config.py` | Pydantic configuration for LLM providers and models. |  | `api/harness.py`, `cli.py`, `tests/test_e2e_full_scenarios.py`, `tests/test_harness_project_scoped_features.py`, `tests/test_maf_backend.py` |
+| `src/backend/harness/magentic.py` | Magentic-one multi-agent ledger and task loop orchestrator. | `harness/session.py` |  |
+| `src/backend/harness/mcp_manager.py` | Client manager for external and sandboxed MCP servers. |  | `api/harness.py`, `harness/qe_tools.py` |
+| `src/backend/harness/memory_provider.py` | File memory and environment manifest scanner. |  | `harness/qe_tools.py`, `tests/test_maf_backend.py` |
+| `src/backend/harness/mode_provider.py` | Agent Mode provider (plan vs execute mode enforcement). |  | `tests/test_maf_backend.py` |
 | `src/backend/harness/project_repository.py` | Harness Project Knowledge Repository & Data Access Object (DAO). | `db.py` | `api/harness.py`, `cli.py` |
-| `src/backend/harness/qe_agents.py` |  |  | `harness/harness_agent.py`, `tests/test_maf_backend.py` |
-| `src/backend/harness/qe_guardrails.py` |  |  | `harness/qe_tools.py`, `tests/test_e2e_full_scenarios.py`, `tests/test_maf_backend.py`, `tests/test_stress_and_concurrency.py` |
-| `src/backend/harness/qe_tools.py` |  | `core/auth.py`, `core/documents.py`, `core/gates.py`, `core/ledger.py`, `db.py`, `harness/approval_manager.py`, `harness/domain_brd_generator.py`, `harness/function_tool.py`, and 5 more | `api/harness.py`, `harness/harness_agent.py`, `tests/test_harness_project_scoped_features.py`, `tests/test_harness_universal_hitl.py`, `tests/test_maf_backend.py` |
-| `src/backend/harness/session.py` |  |  | `api/harness.py`, `cli.py`, `harness/handoff.py`, `harness/magentic.py`, `tests/test_e2e_full_scenarios.py`, `tests/test_harness_project_scoped_features.py`, `tests/test_harness_universal_hitl.py`, `tests/test_maf_backend.py`, and 1 more |
-| `src/backend/harness/todo_provider.py` |  |  | `tests/test_maf_backend.py` |
+| `src/backend/harness/qe_agents.py` | Registry of 8 core QE agent personas, system prompts, and tool policies. |  | `harness/harness_agent.py`, `tests/test_maf_backend.py` |
+| `src/backend/harness/qe_guardrails.py` | Zero-trust path traversal, command injection, and assertion guards. |  | `harness/qe_tools.py`, `tests/test_e2e_full_scenarios.py`, `tests/test_maf_backend.py`, `tests/test_stress_and_concurrency.py` |
+| `src/backend/harness/qe_tools.py` | Real executable QE tools across all 9 platform feature domains. | `core/auth.py`, `core/documents.py`, `core/gates.py`, `core/ledger.py`, `db.py`, `harness/approval_manager.py`, `harness/function_tool.py` | `api/harness.py`, `harness/harness_agent.py`, `tests/test_harness_project_scoped_features.py`, `tests/test_harness_universal_hitl.py`, `tests/test_maf_backend.py` |
+| `src/backend/harness/session.py` | SessionState, ChatMessage, ToolCallRecord, TodoItem, GateApprovalInfo domain models. |  | `api/harness.py`, `cli.py`, `harness/handoff.py`, `harness/magentic.py`, `tests/test_e2e_full_scenarios.py`, `tests/test_harness_project_scoped_features.py`, `tests/test_harness_universal_hitl.py`, `tests/test_maf_backend.py`, and 1 more |
+| `src/backend/harness/skill_dispatcher.py` | Routes activated skills to deterministic executable tools across 9 feature domains. |  | `harness/harness_agent.py` |
+| `src/backend/harness/todo_provider.py` | Task and checklist provider with Magentic ledger synchronization. |  | `tests/test_maf_backend.py` |
+| `src/backend/harness/handlers/__init__.py` | Modular workflow handlers package. |  | `harness/harness_agent.py` |
+| `src/backend/harness/handlers/command_handler.py` | Slash commands handler (/help, /mode, /todos, /gates, /plugin). |  | `harness/harness_agent.py` |
+| `src/backend/harness/handlers/doc_handler.py` | Multi-section BRD/PRD authoring workflow with Gherkin acceptance criteria. |  | `harness/harness_agent.py` |
+| `src/backend/harness/handlers/skill_handler.py` | Autonomous skill generation workflow with 5-task checklist and Specter validation. |  | `harness/harness_agent.py` |
+| `src/backend/harness/handlers/stream_engine.py` | Execution engine: thoughts, tool calls, HITL gates, and SSE AG-UI streaming. |  | `harness/harness_agent.py` |
 | `tasks.md` | Status of all work |  |  |
 | `tsconfig.json` |  |  |  |

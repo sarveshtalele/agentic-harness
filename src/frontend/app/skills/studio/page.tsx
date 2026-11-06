@@ -797,7 +797,7 @@ export default function SkillCreatorStudioPage() {
                         </span>
                         <input
                           aria-label={`Task ${idx + 1}`}
-                          className={`${inputClass} !py-1 text-xs`}
+                          className={`${inputClass} !py-1 text-xs flex-1 min-w-0`}
                           value={task}
                           onChange={(e) => handleUpdateTask(idx, e.target.value)}
                         />
@@ -817,7 +817,7 @@ export default function SkillCreatorStudioPage() {
                     <input
                       aria-label="Add new step task"
                       placeholder="Add another step task..."
-                      className={`${inputClass} !py-1 text-xs`}
+                      className={`${inputClass} !py-1 text-xs flex-1 min-w-0`}
                       value={newTaskInput}
                       onChange={(e) => setNewTaskInput(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddTask())}

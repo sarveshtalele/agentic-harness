@@ -120,6 +120,16 @@ src/backend/
     chat.py              Interactive copilot chat streaming over AG-UI protocol
     harness.py           Agentic QE Harness session orchestration, MCP client hooks
     skills.py            Local dynamic skills catalog and details
+  harness/               Enterprise Autonomous QE Chatbot & Multi-Agent Execution Harness
+    harness_agent.py     Clean facade coordinating the execution loop and backward compatibility
+    intent_classifier.py Intent classification (skills, docs, tests, fixes, security)
+    skill_dispatcher.py  Dynamic routing from 58 skills across 9 domains to executable tools
+    grounding.py         Deterministic grounding against centralized SQLite (atlas.sqlite3)
+    handlers/            Modular workflow execution handlers
+      skill_handler.py   Autonomous skill creation, task checklist & Specter validation
+      doc_handler.py     10-section BRD/PRD generation with Gherkin scenarios & Gate 1 binding
+      command_handler.py Slash commands interpreter (/help, /mode, /todos, /gates, /plugin)
+      stream_engine.py   AG-UI SSE streaming engine (thoughts, tools, HITL gates, ledger)
   maf/                   Microsoft Agent Framework integration
     engine.py            WorkflowBuilder orchestration, stage dispatch, request_info HITL, checkpoints
     runtime.py           AgentCall wrapper, JSON repair, token enforcement, session memory

@@ -16,8 +16,11 @@ function cleanTestName(name: string): string {
     clean = clean.split("tests.agentic_qe.").pop() || clean;
   } else if (clean.includes("tests/agentic_qe/")) {
     clean = clean.split("tests/agentic_qe/").pop() || clean;
+  } else if (clean.includes("worktrees")) {
+    const parts = clean.split(".");
+    clean = parts[parts.length - 1] || clean;
   }
-  clean = clean.replace(/^[.:]+/, "");
+  clean = clean.replace(/^[.:/]+/, "");
   return clean;
 }
 
@@ -242,7 +245,21 @@ export function ApprovalCard({ approval, projectId, onDecided }: { approval: any
       <ConfidenceNote review={payload.confidence || payload.verification?.confidence} />
       {payload.case_limit && <p className="text-sm" data-testid="case-limit">{payload.case_limit.message}{payload.case_limit.left_out_count ? `: ${payload.case_limit.left_out.join(", ")}` : ""}</p>}
       {payload.estimate && <p className="text-xs text-slate-600 dark:text-slate-400" data-testid="token-estimate">Tokens used so far {payload.estimate.used_so_far}. Next: {payload.estimate.next_step}. {payload.estimate.estimated_tokens === null ? payload.estimate.basis : `Estimate about ${payload.estimate.estimated_tokens} tokens (${payload.estimate.expected_calls} calls at ${payload.estimate.average_tokens_per_call}). ${payload.estimate.basis}.`}</p>}
-      {payload.emit_unresolved?.length > 0 && <div role="alert" className="rounded-lg border border-amber-500/50 p-2 text-sm" data-testid="emit-unresolved"><b>{payload.emit_unresolved.length} tests still fail the static checks:</b>{payload.emit_unresolved.map((u: any) => <div key={u.path} className="mono text-xs">{u.path}: {u.findings[0]}</div>)}</div>}
+      {payload.emit_unresolved?.length > 0 && (
+        <div role="alert" className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm max-h-64 overflow-y-auto space-y-2" data-testid="emit-unresolved">
+          <b className="text-amber-900 dark:text-amber-200 block text-xs uppercase tracking-wider">
+            {payload.emit_unresolved.length} tests pending static validation checks:
+          </b>
+          <div className="space-y-1">
+            {payload.emit_unresolved.map((u: any, idx: number) => (
+              <div key={idx} className="font-mono text-[11px] text-slate-700 dark:text-slate-300 break-all bg-white/60 dark:bg-slate-900/60 p-2 rounded-lg border border-amber-200/60 dark:border-amber-900/40">
+                <span className="font-semibold text-amber-700 dark:text-amber-400">{cleanTestName(u.path)}</span>
+                {u.findings?.[0] && <span className="ml-1 text-slate-600 dark:text-slate-400">: {u.findings[0]}</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       {payload.execution_summary && <p className="text-sm" data-testid="execution-summary">{payload.execution_summary.text} <span className="text-xs">({payload.execution_summary.source === "agent" ? "written by the qa-execution-engineer and checked against the JUnit counts" : "written by code"})</span></p>}
       {payload.defect_records?.length > 0 && (
         <div className="space-y-2 rounded-xl border border-slate-200 bg-white/80 p-3 shadow-sm dark:border-slate-800 dark:bg-[#070d1f]">

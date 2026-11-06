@@ -121,7 +121,7 @@ export interface HarnessSession {
   createdAt: number;
   updatedAt: number;
   messages: ChatMessage[];
-  todos?: Array<{ id: string; text: string; completed: boolean; agentId?: string }>;
+  todos?: Array<{ id: string; text?: string; title?: string; completed?: boolean; status?: string; agentId?: string }>;
   ledger?: Array<{ type: string; title: string; detail: string; timestamp: number }>;
 }
 
@@ -213,6 +213,14 @@ const HARNESS_GOALS = [
     prompt: "Connect and scan repository: inspect AST dependencies, package manifests, and generate test strategy.",
     icon: FolderGit2,
     badge: "Intake Scan"
+  },
+  {
+    id: "create_skill",
+    title: "Create Agent Skill",
+    desc: "Synthesize, test, and package an autonomous agent skill conforming to MAF 2.0 standards",
+    prompt: "/create_agent_skill Markdown To Docx Engine",
+    icon: Sparkles,
+    badge: "Agent Skill"
   }
 ];
 
@@ -1486,23 +1494,13 @@ export function HarnessView({
     <div className="flex flex-col h-[calc(100vh-6.5rem)] -mt-2">
       {/* 1. Top Control Bar: "Project in Harness" Clean Hierarchy */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-3 pt-1 dark:border-slate-800">
-        <div className="flex items-center gap-3">
-          {/* Harness Logo & Title */}
+        <div className="flex items-center gap-2.5">
           <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm">
-              <Terminal className="h-5 w-5" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-base font-bold text-slate-900 dark:text-white">QE Harness</h1>
-                <span className="rounded-full bg-indigo-500/10 px-2 py-0.5 text-[11px] font-semibold text-indigo-600 dark:text-indigo-400">
-                  Enterprise QE
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Autonomous Test Engineering & Multi-Agent Loops
-              </p>
-            </div>
+            <span className="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Autonomous Multi-Agent Loops</span>
+            <span className="rounded-md border border-slate-200 bg-slate-100 px-2 py-0.5 text-[10px] font-mono text-slate-600 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-300">
+              Plan &amp; Execute Engine
+            </span>
           </div>
         </div>
 
@@ -1830,8 +1828,8 @@ export function HarnessView({
                   Select a core Quality Engineering goal below, or type your instructions. The harness automatically routes tasks to specialized engineering skills.
                 </p>
 
-                {/* Rich Goal Cards Grid */}
-                <div className="mt-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 max-w-3xl text-left">
+                {/* Rich Goal Cards Grid: 2 Columns for Generous Width */}
+                <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-2xl text-left">
                   {HARNESS_GOALS.map((g) => {
                     const Icon = g.icon;
                     return (
@@ -1842,19 +1840,19 @@ export function HarnessView({
                           setInputPrompt(g.prompt);
                           textareaRef.current?.focus();
                         }}
-                        className="group flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-3 shadow-xs hover:border-indigo-500 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/60 transition text-left cursor-pointer"
+                        className="group flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-3.5 shadow-xs hover:border-indigo-500 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/60 transition text-left cursor-pointer min-h-[110px]"
                       >
-                        <div className="space-y-1.5">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <div className="rounded-lg bg-indigo-50 p-1.5 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400 group-hover:scale-105 transition">
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <div className="rounded-lg bg-indigo-50 p-1.5 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400 group-hover:scale-105 transition shrink-0">
                                 <Icon className="h-4 w-4" />
                               </div>
-                              <span className="text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition">
+                              <span className="text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition truncate">
                                 {g.title}
                               </span>
                             </div>
-                            <span className="rounded bg-indigo-50 px-1.5 py-0.5 text-[9px] font-bold text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400">
+                            <span className="shrink-0 rounded bg-indigo-50 px-2 py-0.5 text-[10px] font-bold text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400">
                               {g.badge}
                             </span>
                           </div>
@@ -1862,8 +1860,8 @@ export function HarnessView({
                             {g.desc}
                           </p>
                         </div>
-                        <div className="mt-2.5 flex items-center gap-1 text-[10px] font-semibold text-indigo-500 group-hover:translate-x-0.5 transition">
-                          <span>Customize & Send</span>
+                        <div className="mt-2.5 flex items-center gap-1 text-[11px] font-semibold text-indigo-500 group-hover:translate-x-0.5 transition">
+                          <span>Customize &amp; Send</span>
                           <ArrowRight className="h-3 w-3" />
                         </div>
                       </button>
@@ -1890,7 +1888,7 @@ export function HarnessView({
                     </div>
                   )}
 
-                  <div className={`max-w-[85%] space-y-2 ${isUser ? "items-end" : "items-start"}`}>
+                  <div className={`space-y-2 ${isUser ? "max-w-[85%] items-end ml-auto" : "min-w-0 flex-1 max-w-full items-start"}`}>
                     {/* Header info */}
                     <div className={`flex items-center gap-2 text-[11px] text-slate-400 ${isUser ? "justify-end" : "justify-start"}`}>
                       <span className="font-semibold text-slate-700 dark:text-slate-300">
@@ -2609,32 +2607,48 @@ export function HarnessView({
               <div className="flex-1 overflow-y-auto p-3 space-y-2 text-xs">
                 <div className="flex items-center justify-between pb-1">
                   <span className="font-bold text-slate-700 dark:text-slate-300">Active Task Ledger</span>
-                  <span className="text-[11px] text-slate-400">
-                    {currentSession?.todos?.filter((t) => t.completed).length || 0}/
+                  <span className="text-[11px] font-medium text-slate-400">
+                    {currentSession?.todos?.filter((t) => t.completed || t.status === "completed").length || 0}/
                     {currentSession?.todos?.length || 0}
                   </span>
                 </div>
                 {currentSession?.todos && currentSession.todos.length > 0 ? (
-                  currentSession.todos.map((todo) => (
-                    <div
-                      key={todo.id}
-                      className="flex items-start gap-2 rounded-lg border border-slate-200 p-2 dark:border-slate-800"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={todo.completed}
-                        readOnly
-                        className="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span
-                        className={`flex-1 text-slate-700 dark:text-slate-300 ${
-                          todo.completed ? "line-through opacity-60" : ""
+                  currentSession.todos.map((todo) => {
+                    const isDone = Boolean(todo.completed || todo.status === "completed");
+                    const rawTitle = typeof todo === "string" ? todo : (todo.title || todo.text || (todo as any).task || (todo as any).description || (todo as any).name || "");
+                    const taskTitle = rawTitle.trim() || "Active Workflow Task";
+                    return (
+                      <div
+                        key={todo.id}
+                        className={`flex items-start gap-2.5 rounded-lg border p-2.5 transition ${
+                          isDone
+                            ? "border-emerald-200 bg-emerald-50/40 dark:border-emerald-950 dark:bg-emerald-950/20"
+                            : "border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900/60"
                         }`}
                       >
-                        {todo.text}
-                      </span>
-                    </div>
-                  ))
+                        <input
+                          type="checkbox"
+                          checked={isDone}
+                          readOnly
+                          className="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <span
+                            className={`block font-medium text-slate-800 dark:text-slate-200 leading-snug ${
+                              isDone ? "line-through text-slate-400 dark:text-slate-500" : ""
+                            }`}
+                          >
+                            {taskTitle}
+                          </span>
+                          {todo.agentId && (
+                            <span className="inline-block mt-1 font-mono text-[10px] text-slate-400 dark:text-slate-500">
+                              Agent: {todo.agentId}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })
                 ) : (
                   <p className="text-center py-6 text-slate-400">No active tasks in this session.</p>
                 )}

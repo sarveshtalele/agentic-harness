@@ -8,7 +8,7 @@
     "build": "npm --prefix src/frontend run build",
     "start": "npm --prefix src/frontend run start",
     "lint": "npm --prefix src/frontend run lint",
-    "test:unit": "python3 -m pytest tests/test_harness_backend.py tests/test_maf_backend.py -v",
+    "test:unit": "python3 -m pytest tests/test_maf_backend.py tests/test_harness_universal_hitl.py tests/test_harness_project_scoped_features.py -v",
     "test:e2e": "playwright test",
     "test": "npm run test:unit && npm run test:e2e"
   },

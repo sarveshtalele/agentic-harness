@@ -21,21 +21,34 @@ function tone(m: any): string | undefined {
 }
 
 export function Tile({ m }: { m: any }) {
-  const colors: Record<string, string> = { emerald: "text-emerald-600", amber: "text-amber-600", rose: "text-rose-600" };
+  const colors: Record<string, string> = { emerald: "text-emerald-600 dark:text-emerald-400", amber: "text-amber-600 dark:text-amber-400", rose: "text-rose-600 dark:text-rose-400" };
   const state = m?.state || m?.status;
-  const note = state === "measured" ? [m.self_graded ? "self-graded" : "", m.labels === "not reviewed" || m.labels_reviewed === false ? "labels not yet reviewed" : ""].filter(Boolean).join(", ") : "";
+  const isMeasured = state === "measured" && m?.value !== null && m?.value !== undefined;
+  const text = isMeasured ? `${Math.round(m.value * 100)}%` : "—";
+  const note = isMeasured ? [m.self_graded ? "self-graded" : "", m.labels === "not reviewed" || m.labels_reviewed === false ? "labels pending" : ""].filter(Boolean).join(", ") : "";
+
   return (
-    <span className="rounded-lg border border-slate-200 p-2 dark:border-slate-800" data-testid="metric-tile" title={m.reason || (state === "n/a" ? "This metric does not apply to this agent" : "")}>
-      <span className={`block text-base font-bold ${colors[tone(m) ?? ""] ?? "text-slate-500"}`}>{scoreText(m)}</span>
-      <span className="block text-[11px] text-slate-500">{m.label}</span>
-      {note && <span className="block text-[10px] text-amber-600">{note}</span>}
-    </span>
+    <div
+      className="flex flex-col justify-between rounded-lg border border-slate-200 bg-slate-50/60 p-1.5 dark:border-slate-800 dark:bg-slate-900/50 min-h-[50px] overflow-hidden"
+      data-testid="metric-tile"
+      title={m.reason || (state === "n/a" ? "This metric does not apply to this agent" : m.label)}
+    >
+      <div className="flex items-baseline justify-between gap-1">
+        <span className={`text-sm font-bold ${colors[tone(m) ?? ""] ?? "text-slate-400 dark:text-slate-500"}`}>
+          {text}
+        </span>
+        {note && <span className="text-[9px] text-amber-500 font-mono truncate">{note}</span>}
+      </div>
+      <span className="block text-[10px] text-slate-500 dark:text-slate-400 font-medium truncate" title={m.label}>
+        {m.label}
+      </span>
+    </div>
   );
 }
 
 export function Tiles({ tiles }: { tiles?: any[] }) {
-  if (!tiles) return null;
-  return <span className="mt-3 grid grid-cols-4 gap-1.5" data-testid="metric-tiles">{tiles.map((t) => <Tile key={t.metric} m={t} />)}</span>;
+  if (!tiles || tiles.length === 0) return null;
+  return <div className="mt-3 grid grid-cols-4 gap-1.5" data-testid="metric-tiles">{tiles.map((t) => <Tile key={t.metric} m={t} />)}</div>;
 }
 
 const CONTEXT_SHOWN = 1200;

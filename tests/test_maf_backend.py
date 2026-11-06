@@ -124,7 +124,7 @@ def test_real_qe_tools_execution():
     # 4. qe_generate_code
     code_res = asyncio.run(tools["qe_generate_code"].execute({"caseId": "TC-TEST-001", "runner": "vitest"}, None))
     assert code_res["caseId"] == "TC-TEST-001"
-    assert os.path.exists(os.path.join(WORKSPACE_DIR, code_res["filePath"]))
+    assert os.path.exists(code_res.get("fullPath") or os.path.join(WORKSPACE_DIR, code_res["filePath"]))
 
     # 5. qe_security_audit (Cloudflare Audit Skill & NVIDIA Skill Specter)
     sec_audit = asyncio.run(tools["qe_security_audit"].execute({}, None))

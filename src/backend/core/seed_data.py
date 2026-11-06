@@ -54,13 +54,13 @@ def seed_evaluation_metrics():
         log.warning("Could not seed evaluation metrics: %s", e)
 
 
-def seed_database():
-    """Seeds projects, repository sources, documents, findings, and gates if database is empty."""
+def seed_database(force: bool = False):
+    """Seeds projects, repository sources, documents, findings, and gates if database is empty or unseeded."""
     seed_evaluation_metrics()
     with db() as con:
-        count = con.execute("SELECT COUNT(*) FROM projects").fetchone()[0]
-        if count > 0:
-            log.info("Database already contains %d projects; skipping seed.", count)
+        count = con.execute("SELECT COUNT(*) FROM projects WHERE id='prj_mcp_market'").fetchone()[0]
+        if count > 0 and not force:
+            log.info("Database already contains enterprise projects; skipping seed.")
             return
 
     log.info("Database is empty. Seeding initial enterprise QE projects and harness knowledge...")
@@ -75,19 +75,19 @@ def seed_database():
     with db() as con:
         # Projects
         con.execute(
-            "INSERT INTO projects (id, name, description, created_at, updated_at, archived, owner_id) VALUES (?, ?, ?, ?, ?, 0, 'admin')",
+            "INSERT OR IGNORE INTO projects (id, name, description, created_at, updated_at, archived, owner_id) VALUES (?, ?, ?, ?, ?, 0, 'admin')",
             (p1_id, "Agentic QE Platform & Framework", "Full test engineering lifecycle harness with 8 quality gates, 58 local skills, and autonomous engineering agents.", ts, ts)
         )
         con.execute(
-            "INSERT INTO projects (id, name, description, created_at, updated_at, archived, owner_id) VALUES (?, ?, ?, ?, ?, 0, 'admin')",
+            "INSERT OR IGNORE INTO projects (id, name, description, created_at, updated_at, archived, owner_id) VALUES (?, ?, ?, ?, ?, 0, 'admin')",
             (p2_id, "Zero-Trust Financial Gateway", "High-throughput payment orchestration and tokenization engine with PCI-DSS compliance.", ts, ts)
         )
         con.execute(
-            "INSERT INTO projects (id, name, description, created_at, updated_at, archived, owner_id) VALUES (?, ?, ?, ?, ?, 0, 'admin')",
+            "INSERT OR IGNORE INTO projects (id, name, description, created_at, updated_at, archived, owner_id) VALUES (?, ?, ?, ?, ?, 0, 'admin')",
             (p3_id, "Enterprise Cloud Checkout", "Global distributed cart, inventory lock, and multi-currency checkout service.", ts, ts)
         )
         con.execute(
-            "INSERT INTO projects (id, name, description, created_at, updated_at, archived, owner_id) VALUES (?, ?, ?, ?, ?, 0, 'admin')",
+            "INSERT OR IGNORE INTO projects (id, name, description, created_at, updated_at, archived, owner_id) VALUES (?, ?, ?, ?, ?, 0, 'admin')",
             (p4_id, "MCP Server Market", "Enterprise MCP Server Market with control room and financial calculations", ts, ts)
         )
 
@@ -183,7 +183,7 @@ def seed_database():
                 commit = commit_fallback
 
             con.execute(
-                "INSERT INTO repo_sources (project_id, kind, url, ref, commit_sha, analysis, scanned_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                "INSERT OR IGNORE INTO repo_sources (project_id, kind, url, ref, commit_sha, analysis, scanned_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
                 (pid, "git", git_url, "main", commit, json.dumps(analysis), ts)
             )
 
@@ -206,11 +206,11 @@ Autonomous quality engineering platform combining multi-agent architecture,
 - Gate 7: Traceability Matrix & Sign-off
 """
         con.execute(
-            "INSERT INTO documents (id, project_id, kind, title, status, current_version, created_at, updated_at) VALUES (?, ?, 'prd', ?, 'approved', 1, ?, ?)",
+            "INSERT OR IGNORE INTO documents (id, project_id, kind, title, status, current_version, created_at, updated_at) VALUES (?, ?, 'prd', ?, 'approved', 1, ?, ?)",
             (d1_id, p1_id, "Agentic QE PRD & Architecture Spec", ts, ts)
         )
         con.execute(
-            "INSERT INTO document_versions (document_id, version, content, sha256, author, note, created_at) VALUES (?, 1, ?, ?, 'Principal Test Architect', 'Initial version', ?)",
+            "INSERT OR IGNORE INTO document_versions (document_id, version, content, sha256, author, note, created_at) VALUES (?, 1, ?, ?, 'Principal Test Architect', 'Initial version', ?)",
             (d1_id, d1_body, sha256(d1_body), ts)
         )
 
@@ -233,18 +233,18 @@ Autonomous quality engineering platform combining multi-agent architecture,
     And the execution pauses until explicit signoff
 """
         con.execute(
-            "INSERT INTO documents (id, project_id, kind, title, status, current_version, created_at, updated_at) VALUES (?, ?, 'gherkin', ?, 'approved', 1, ?, ?)",
+            "INSERT OR IGNORE INTO documents (id, project_id, kind, title, status, current_version, created_at, updated_at) VALUES (?, ?, 'gherkin', ?, 'approved', 1, ?, ?)",
             (d2_id, p1_id, "Quality Gate Guardrails Specification", ts, ts)
         )
         con.execute(
-            "INSERT INTO document_versions (document_id, version, content, sha256, author, note, created_at) VALUES (?, 1, ?, ?, 'Test Design Architect', 'Gherkin specification for quality gates', ?)",
+            "INSERT OR IGNORE INTO document_versions (document_id, version, content, sha256, author, note, created_at) VALUES (?, 1, ?, ?, 'Test Design Architect', 'Gherkin specification for quality gates', ?)",
             (d2_id, d2_body, sha256(d2_body), ts)
         )
 
         # Findings for prj_agentic_qe
         f1_id = "fnd_cors_dev"
         con.execute(
-            """INSERT INTO findings 
+            """INSERT OR IGNORE INTO findings 
             (id, project_id, source, rule, severity, title, file, line, evidence, explanation, status, fingerprint, created_at)
             VALUES (?, ?, 'security_audit', 'CORS_POLICY', 'high', 'CORS Wildcard Configuration in Local Dev', 'backend/main.py', 32, 'allow_origins=[\"*\"]', 'Wildcard CORS allows arbitrary origins to interact with local harness API.', 'closed', 'fp_cors_001', ?)""",
             (f1_id, p1_id, ts)
@@ -252,7 +252,7 @@ Autonomous quality engineering platform combining multi-agent architecture,
 
         f2_id = "fnd_flaky_browser"
         con.execute(
-            """INSERT INTO findings 
+            """INSERT OR IGNORE INTO findings 
             (id, project_id, source, rule, severity, title, file, line, evidence, explanation, status, fingerprint, created_at)
             VALUES (?, ?, 'qe_execution', 'TEST_STABILITY', 'medium', 'Flaky browser teardown in Playwright CI runner', 'tests/e2e/test_ui.py', 45, 'browser.close() timeout on headless linux', 'Chromium zombie processes when runners abort prematurely.', 'open', 'fp_flaky_002', ?)""",
             (f2_id, p1_id, ts)
@@ -270,14 +270,14 @@ Autonomous quality engineering platform combining multi-agent architecture,
             (7, "draft", "Pending final sign-off"),
         ]:
             con.execute(
-                "INSERT INTO gates (project_id, gate, status, decided_by, reason, signature, decided_at) VALUES (?, ?, ?, 'admin', ?, 'sig_harness_001', ?)",
+                "INSERT OR IGNORE INTO gates (project_id, gate, status, decided_by, reason, signature, decided_at) VALUES (?, ?, ?, 'admin', ?, 'sig_harness_001', ?)",
                 (p1_id, g, st, reason, ts)
             )
 
         # Runs (inserted before approvals due to foreign key)
         run_id = "run_init_001"
         con.execute(
-            """INSERT INTO runs (id, project_id, workflow, status, input, state, error, tokens_in, tokens_out, started_at, ended_at)
+            """INSERT OR IGNORE INTO runs (id, project_id, workflow, status, input, state, error, tokens_in, tokens_out, started_at, ended_at)
             VALUES (?, ?, 'qe_full_cycle', 'success', 'Automated test discovery and case design', '{}', '', 14200, 3180, ?, ?)""",
             (run_id, p1_id, ts, ts)
         )
@@ -285,18 +285,18 @@ Autonomous quality engineering platform combining multi-agent architecture,
         # Approvals
         appr_id = "appr_gate4_data"
         con.execute(
-            """INSERT INTO approvals (id, run_id, project_id, gate, title, summary, payload, status, decided_by, created_at)
+            """INSERT OR IGNORE INTO approvals (id, run_id, project_id, gate, title, summary, payload, status, decided_by, created_at)
             VALUES (?, 'run_init_001', ?, 4, 'Gate 4: Synthetic Test Data Approval', 'Approve synthetic payment cards and user mock payloads for automated execution.', '{}', 'pending', NULL, ?)""",
             (appr_id, p1_id, ts)
         )
 
         # Memories
         con.execute(
-            "INSERT INTO memories (id, project_id, content, source, created_at) VALUES ('mem_001', ?, 'Platform uses Enterprise Agentic QE Engine with AG-UI and CopilotKit protocol streaming.', 'Harness Architect', ?)",
+            "INSERT OR IGNORE INTO memories (id, project_id, content, source, created_at) VALUES ('mem_001', ?, 'Platform uses Enterprise Agentic QE Engine with AG-UI and CopilotKit protocol streaming.', 'Harness Architect', ?)",
             (p1_id, ts)
         )
         con.execute(
-            "INSERT INTO memories (id, project_id, content, source, created_at) VALUES ('mem_002', ?, 'Local skills catalog loaded 58 active skills including cloudflare security-audit and all agentic-qe lifecycle capabilities.', 'Skill Discovery Engine', ?)",
+            "INSERT OR IGNORE INTO memories (id, project_id, content, source, created_at) VALUES ('mem_002', ?, 'Local skills catalog loaded 58 active skills including cloudflare security-audit and all agentic-qe lifecycle capabilities.', 'Skill Discovery Engine', ?)",
             (p1_id, ts)
         )
 
@@ -313,15 +313,15 @@ Autonomous quality engineering platform combining multi-agent architecture,
              "fnd_mcp_auth", "API_AUTH_POLICY", "Standardize token auth headers across proxy nodes"),
         ]:
             con.execute(
-                "INSERT INTO documents (id, project_id, kind, title, status, current_version, created_at, updated_at) VALUES (?, ?, 'prd', ?, 'approved', 1, ?, ?)",
+                "INSERT OR IGNORE INTO documents (id, project_id, kind, title, status, current_version, created_at, updated_at) VALUES (?, ?, 'prd', ?, 'approved', 1, ?, ?)",
                 (doc_id, pid, doc_title, ts, ts)
             )
             con.execute(
-                "INSERT INTO document_versions (document_id, version, content, sha256, author, note, created_at) VALUES (?, 1, ?, ?, 'Principal Architect', 'Initial baseline spec', ?)",
+                "INSERT OR IGNORE INTO document_versions (document_id, version, content, sha256, author, note, created_at) VALUES (?, 1, ?, ?, 'Principal Architect', 'Initial baseline spec', ?)",
                 (doc_id, doc_content, sha256(doc_content), ts)
             )
             con.execute(
-                """INSERT INTO findings 
+                """INSERT OR IGNORE INTO findings 
                 (id, project_id, source, rule, severity, title, file, line, evidence, explanation, status, fingerprint, created_at)
                 VALUES (?, ?, 'security_audit', ?, 'medium', ?, 'src/main.py', 1, 'compliance review', 'Verified against enterprise security baseline.', 'open', ?, ?)""",
                 (fnd_id, pid, fnd_rule, fnd_title, f"fp_{fnd_id}", ts)
@@ -335,7 +335,7 @@ Autonomous quality engineering platform combining multi-agent architecture,
                 (5, "draft", "Pending final release sign-off"),
             ]:
                 con.execute(
-                    "INSERT INTO gates (project_id, gate, status, decided_by, reason, signature, decided_at) VALUES (?, ?, ?, 'admin', ?, 'sig_harness_001', ?)",
+                    "INSERT OR IGNORE INTO gates (project_id, gate, status, decided_by, reason, signature, decided_at) VALUES (?, ?, ?, 'admin', ?, 'sig_harness_001', ?)",
                     (pid, g, st, reason, ts)
                 )
 
