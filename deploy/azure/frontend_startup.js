@@ -40,7 +40,16 @@ function build(wanted) {
   fs.rmSync(output, { recursive: true, force: true });
   fs.cpSync(path.join(work, ".next", "standalone"), output, { recursive: true });
   fs.cpSync(path.join(work, ".next", "static"), path.join(output, ".next", "static"), { recursive: true });
-  if (fs.existsSync(path.join(work, "public"))) fs.cpSync(path.join(work, "public"), path.join(output, "public"), { recursive: true });
+  if (fs.existsSync(path.join(output, "src", "frontend"))) {
+    fs.mkdirSync(path.join(output, "src", "frontend", ".next"), { recursive: true });
+    fs.cpSync(path.join(work, ".next", "static"), path.join(output, "src", "frontend", ".next", "static"), { recursive: true });
+  }
+  if (fs.existsSync(path.join(work, "public"))) {
+    fs.cpSync(path.join(work, "public"), path.join(output, "public"), { recursive: true });
+    if (fs.existsSync(path.join(output, "src", "frontend"))) {
+      fs.cpSync(path.join(work, "public"), path.join(output, "src", "frontend", "public"), { recursive: true });
+    }
+  }
   fs.writeFileSync(stampFile, wanted);
   fs.rmSync(work, { recursive: true, force: true });
   log("Build finished");
@@ -51,6 +60,15 @@ if (fs.existsSync(stampFile) && fs.readFileSync(stampFile, "utf8") === wanted) l
 else build(wanted);
 
 log(`Starting UI on port ${process.env.PORT || 3000}`);
-const server = spawn(process.execPath, [path.join(output, "server.js")], { cwd: output, stdio: "inherit", env: { ...process.env, HOSTNAME: "0.0.0.0", PORT: process.env.PORT || "3000", NODE_ENV: "production" } });
+let serverScript = path.join(output, "server.js");
+let serverCwd = output;
+if (!fs.existsSync(serverScript)) {
+  const nested = path.join(output, "src", "frontend", "server.js");
+  if (fs.existsSync(nested)) {
+    serverScript = nested;
+    serverCwd = path.join(output, "src", "frontend");
+  }
+}
+const server = spawn(process.execPath, [serverScript], { cwd: serverCwd, stdio: "inherit", env: { ...process.env, HOSTNAME: "0.0.0.0", PORT: process.env.PORT || "3000", NODE_ENV: "production" } });
 server.on("exit", (code) => process.exit(code ?? 1));
 for (const signal of ["SIGTERM", "SIGINT"]) process.on(signal, () => server.kill(signal));

@@ -28,8 +28,16 @@ if [ -f "startup.js" ]; then
     exec node startup.js
 elif [ -d ".next/standalone" ]; then
     echo "[frontend] Starting pre-built standalone server..."
-    cd .next/standalone
-    exec node server.js
+    if [ -f ".next/standalone/server.js" ]; then
+        cd .next/standalone
+        exec node server.js
+    elif [ -f ".next/standalone/src/frontend/server.js" ]; then
+        cd .next/standalone/src/frontend
+        exec node server.js
+    else
+        echo "[frontend WARNING] server.js not found in standard standalone paths; starting Next.js directly..."
+        exec npx next start -p "$LISTEN_PORT" -H 0.0.0.0
+    fi
 elif [ -d ".next" ]; then
     echo "[frontend] Starting Next.js production server..."
     exec npx next start -p "$LISTEN_PORT" -H 0.0.0.0

@@ -41,7 +41,7 @@ def build() -> None:
 def main() -> None:
     build()
     # the venv goes first on PATH so the app finds ruff and other tools installed there
-    env = {**os.environ, "PYTHONPATH": str(APP / "src"), "PATH": f"{PYTHON.parent}{os.pathsep}{os.environ.get('PATH', '')}"}
+    env = {**os.environ, "PYTHONPATH": f"{APP / 'src'}{os.pathsep}{APP}", "PATH": f"{PYTHON.parent}{os.pathsep}{os.environ.get('PATH', '')}"}
     # Persistent storage in /home: SQLite WAL provides non-blocking concurrent reads across multi-agent workflows
     env.setdefault("ATLAS_DATA_DIR", str(HOME / "data"))
     env.setdefault("ATLAS_SQLITE_JOURNAL", os.environ.get("ATLAS_SQLITE_JOURNAL", "WAL"))

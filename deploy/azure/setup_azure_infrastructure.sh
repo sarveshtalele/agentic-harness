@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# 1-TIME AZURE INFRASTRUCTURE SETUP SCRIPT FOR AGENTIC QE PLATFORM
+# Region: eastus2 | Tier: Basic B1 | OS: Linux
+# ==============================================================================
+set -euo pipefail
+
+RESOURCE_GROUP="rg-agentic-harness-eastus2"
+LOCATION="eastus2"
+APP_PLAN="asp-agentic-harness-b1"
+BACKEND_APP="agentic-backend"
+FRONTEND_APP="agentic-frontend"
+SKU="B1"
+
+echo "=================================================================="
+echo " 1-Time Azure Infrastructure Setup"
+echo " Resource Group: $RESOURCE_GROUP"
+echo " Location:       $LOCATION"
+echo " Plan:           $APP_PLAN (Linux $SKU)"
+echo " Backend App:    $BACKEND_APP (Python 3.12)"
+echo " Frontend App:   $FRONTEND_APP (Node.js 20)"
+echo "=================================================================="
+
+# 1. Create Resource Group
+echo "\n[1/6] Creating Resource Group..."
+az group create --name "$RESOURCE_GROUP" --location "$LOCATION"
+
+# 2. Create Shared Linux App Service Plan (Hosts both Backend & Frontend)
+echo "\n[2/6] Creating App Service Plan ($SKU Linux)..."
+az appservice plan create \
+  --name "$APP_PLAN" \
+  --resource-group "$RESOURCE_GROUP" \
+  --location "$LOCATION" \
+  --is-linux \
+  --sku "$SKU"
+
+# 3. Create Backend WebApp (Python 3.12)
+echo "\n[3/6] Creating Backend WebApp..."
+az webapp create \
+  --name "$BACKEND_APP" \
+  --resource-group "$RESOURCE_GROUP" \
+  --plan "$APP_PLAN" \
+  --runtime "PYTHON:3.12" \
+  --startup-file "/home/site/wwwroot/startup.sh"
+
+# 4. Configure Backend App Settings & Persistent Storage
+echo "\n[4/6] Configuring Backend Environment & Persistent Storage..."
+az webapp config appsettings set \
+  --name "$BACKEND_APP" \
+  --resource-group "$RESOURCE_GROUP" \
+  --settings \
+    WEBSITES_PORT="8000" \
+    PORT="8000" \
+    WEBSITES_ENABLE_APP_SERVICE_STORAGE="true" \
+    ATLAS_HOME="/home/atlas" \
+    ATLAS_DATA_DIR="/home/atlas/data" \
+    ATLAS_SQLITE_JOURNAL="WAL" \
+    SCM_DO_BUILD_DURING_DEPLOYMENT="true" \
+    ENABLE_ORYX_BUILD="true"
+
+# 5. Create Frontend WebApp (Node 20)
+echo "\n[5/6] Creating Frontend WebApp..."
+az webapp create \
+  --name "$FRONTEND_APP" \
+  --resource-group "$RESOURCE_GROUP" \
+  --plan "$APP_PLAN" \
+  --runtime "NODE:20-lts" \
+  --startup-file "/home/site/wwwroot/startup.sh"
+
+# 6. Configure Frontend App Settings & Backend Proxy Binding
+echo "\n[6/6] Binding Frontend to Backend URL..."
+az webapp config appsettings set \
+  --name "$FRONTEND_APP" \
+  --resource-group "$RESOURCE_GROUP" \
+  --settings \
+    WEBSITES_PORT="3000" \
+    PORT="3000" \
+    WEBSITES_ENABLE_APP_SERVICE_STORAGE="true" \
+    ATLAS_BACKEND_URL="https://$BACKEND_APP.azurewebsites.net" \
+    NEXT_TELEMETRY_DISABLED="1" \
+    SCM_DO_BUILD_DURING_DEPLOYMENT="true"
+
+# Enable CORS on Backend for Frontend Origin
+az webapp cors add \
+  --name "$BACKEND_APP" \
+  --resource-group "$RESOURCE_GROUP" \
+  --allowed-origins "https://$FRONTEND_APP.azurewebsites.net"
+
+echo "\n=================================================================="
+echo " 1-Time Azure Setup Complete!"
+echo " Backend URL:  https://$BACKEND_APP.azurewebsites.net"
+echo " Frontend URL: https://$FRONTEND_APP.azurewebsites.net"
+echo " Next Step: Run python scripts/azure_convert_and_deploy.py --convert"
+echo "=================================================================="

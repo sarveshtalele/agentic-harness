@@ -153,14 +153,63 @@ Querying the official [Azure Retail Prices API](https://prices.azure.com/api/ret
 
 ## 3. Deployment Models & Packaging Pipelines
 
-The repository features zero-dependency, automated packaging tools specifically engineered for environments lacking direct GitHub Actions runners or public CI/CD access:
-- `scripts/package_azure_kudu.py`: Production packager with bytecode compilation, static file filtering, and zip integrity verification.
-- `scripts/package_azure_kudu.sh`: Executable bash wrapper.
+The repository features zero-dependency, automated conversion and deployment tools:
+- `scripts/azure_convert_and_deploy.sh` (and `.py`): Comprehensive 1-click conversion and packaging script that converts repository source into clean Azure App Service Kudu deployable bundles (`dist/azure_backend.zip` and `dist/azure_frontend.zip`), with optional `--build-frontend` pre-compilation for instant B1 startup, and direct `--deploy` execution.
+- `deploy/azure/setup_azure_infrastructure.sh` (and `.ps1`): 1-time automated infrastructure provisioning script for App Service Plan, WebApps, SQLite WAL / PostgreSQL DB, and CORS.
+- `.github/workflows/azure-deploy.yml`: Production GitHub Actions CI/CD pipeline deploying both services via Kudu ZipDeploy or Publish Profiles.
 - `deploy/azure/azure-pipelines.yml`: Azure DevOps CI/CD pipeline definition for automated multi-stage builds.
 
-### 3.1 Deployment Bundle Structure in `dist/`
+### 3.0 Rapid 3-Step "Clone -> Zip -> Deploy to Kudu" Workflow
 
-Running `./scripts/package_azure_kudu.sh` generates two deterministic zip bundles:
+After the 1-time infrastructure setup has been executed (Section 3.1), deployment requires just 3 commands:
+
+```bash
+# 1. Clone repository
+git clone https://github.com/sarveshtalele/agentic-harness.git
+cd agentic-harness
+
+# 2. Convert and package into deployable Kudu ZIP archives (with prebuilt frontend for instant boot)
+./scripts/azure_convert_and_deploy.sh --convert --build-frontend
+
+# 3. Deploy directly to Azure Kudu (via Azure CLI or Kudu REST API)
+./scripts/azure_convert_and_deploy.sh --deploy \
+  --resource-group rg-agentic-harness-eastus2 \
+  --backend-app agentic-harness-backend-prod \
+  --frontend-app agentic-harness-frontend-prod
+```
+
+Or deploy manually via browser drag-and-drop:
+1. Open Kudu UI for Backend: `https://<backend-app>.scm.azurewebsites.net/ZipDeploy` -> Drag & drop `dist/azure_backend.zip`.
+2. Open Kudu UI for Frontend: `https://<frontend-app>.scm.azurewebsites.net/ZipDeploy` -> Drag & drop `dist/azure_frontend.zip`.
+
+---
+
+### 3.1 1-Time Azure Infrastructure Setup Automation
+
+To prepare your Azure environment before deploying, run the 1-time setup script:
+
+```bash
+# Linux / macOS
+chmod +x deploy/azure/setup_azure_infrastructure.sh
+./deploy/azure/setup_azure_infrastructure.sh
+
+# Windows (PowerShell)
+.\deploy\azure\setup_azure_infrastructure.ps1 -ResourceGroup "rg-agentic-harness-eastus2" -Sku "B1"
+```
+
+The script automatically executes:
+1. **Resource Group Creation:** `rg-agentic-harness-eastus2` in `eastus2`.
+2. **Shared App Service Plan:** `asp-agentic-harness-b1` (Linux B1 tier, ~$12.41/mo, hosts both services).
+3. **Backend WebApp:** Configured for Python 3.12, port `8000`, startup command `/home/site/wwwroot/startup.sh`, and persistent storage enabled (`WEBSITES_ENABLE_APP_SERVICE_STORAGE=true`).
+4. **Frontend WebApp:** Configured for Node.js 20, port `3000`, startup command `/home/site/wwwroot/startup.sh`, and proxy bound to backend URL (`ATLAS_BACKEND_URL`).
+5. **CORS Configuration:** Enables secure cross-origin communication between Frontend and Backend.
+6. **Database Persistence:** Provisions persistent SQLite WAL storage at `/home/atlas/data/atlas.sqlite3`. (Alternatively, if utilizing Azure Database for PostgreSQL Flexible Server, configure `DATABASE_URL` in backend App Settings).
+
+---
+
+### 3.2 Deployment Bundle Structure in `dist/`
+
+Running `./scripts/azure_convert_and_deploy.sh --convert` generates two deterministic zip bundles:
 
 #### 1. `dist/azure_backend.zip` (~0.72 MB compressed / ~2.09 MB uncompressed)
 - **Source Trees:** `src/backend/` and root alias `backend/` for direct, resilient Python imports.

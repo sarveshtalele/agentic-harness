@@ -1,0 +1,195 @@
+name: Azure Kudu Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      deploy_backend:
+        description: "Deploy Backend to Azure App Service"
+        type: boolean
+        default: true
+      deploy_frontend:
+        description: "Deploy Frontend to Azure App Service"
+        type: boolean
+        default: true
+      build_frontend_standalone:
+        description: "Pre-build Next.js standalone bundle (recommended for B1 plans)"
+        type: boolean
+        default: true
+  push:
+    branches:
+      - main
+      - feature/azure-kudu-deployment
+    paths:
+      - "src/**"
+      - "deploy/azure/**"
+      - "scripts/azure_convert_and_deploy.*"
+      - "requirements.txt"
+      - ".github/workflows/azure-deploy.yml"
+
+concurrency:
+  group: azure-deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-package:
+    name: Build & Package Azure Bundles
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+          cache-dependency-path: "package-lock.json"
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools
+          pip install -r requirements.txt
+
+      - name: Install Frontend Dependencies
+        run: npm ci
+
+      - name: Convert & Package for Azure Kudu
+        run: |
+          chmod +x scripts/azure_convert_and_deploy.sh
+          if [ "${{ github.event.inputs.build_frontend_standalone }}" = "false" ]; then
+            ./scripts/azure_convert_and_deploy.sh --convert
+          else
+            ./scripts/azure_convert_and_deploy.sh --convert --build-frontend
+          fi
+
+      - name: Upload Deployment Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: azure-kudu-bundles
+          path: |
+            dist/azure_backend.zip
+            dist/azure_frontend.zip
+          retention-days: 7
+
+  deploy-backend:
+    name: Deploy Backend to Azure Kudu
+    needs: build-and-package
+    if: ${{ (github.ref_name == 'main' || github.event_name == 'workflow_dispatch') && (github.event_name == 'push' || github.event.inputs.deploy_backend != 'false') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Deployment Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: azure-kudu-bundles
+          path: dist
+
+      - name: Deploy Backend via Azure WebApp Deploy
+        uses: azure/webapps-deploy@v3
+        if: ${{ env.AZURE_BACKEND_PUBLISH_PROFILE != '' }}
+        env:
+          AZURE_BACKEND_PUBLISH_PROFILE: ${{ secrets.AZURE_BACKEND_PUBLISH_PROFILE }}
+        with:
+          app-name: ${{ vars.AZURE_BACKEND_APP_NAME || 'agentic-backend' }}
+          publish-profile: ${{ secrets.AZURE_BACKEND_PUBLISH_PROFILE }}
+          package: ./dist/azure_backend.zip
+
+      - name: Deploy Backend via Azure Login (Fallback)
+        if: ${{ env.AZURE_BACKEND_PUBLISH_PROFILE == '' && env.AZURE_CREDENTIALS != '' }}
+        env:
+          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+          AZURE_BACKEND_PUBLISH_PROFILE: ${{ secrets.AZURE_BACKEND_PUBLISH_PROFILE }}
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Azure CLI ZipDeploy Backend
+        if: ${{ env.AZURE_BACKEND_PUBLISH_PROFILE == '' && env.AZURE_CREDENTIALS != '' }}
+        env:
+          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+          AZURE_BACKEND_PUBLISH_PROFILE: ${{ secrets.AZURE_BACKEND_PUBLISH_PROFILE }}
+        run: |
+          az webapp deploy \
+            --resource-group "${{ vars.AZURE_RESOURCE_GROUP || 'rg-agentic-harness-eastus2' }}" \
+            --name "${{ vars.AZURE_BACKEND_APP_NAME || 'agentic-backend' }}" \
+            --src-path ./dist/azure_backend.zip \
+            --type zip \
+            --async false
+
+  deploy-frontend:
+    name: Deploy Frontend to Azure Kudu
+    needs: build-and-package
+    if: ${{ (github.ref_name == 'main' || github.event_name == 'workflow_dispatch') && (github.event_name == 'push' || github.event.inputs.deploy_frontend != 'false') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Deployment Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: azure-kudu-bundles
+          path: dist
+
+      - name: Deploy Frontend via Azure WebApp Deploy
+        uses: azure/webapps-deploy@v3
+        if: ${{ env.AZURE_FRONTEND_PUBLISH_PROFILE != '' }}
+        env:
+          AZURE_FRONTEND_PUBLISH_PROFILE: ${{ secrets.AZURE_FRONTEND_PUBLISH_PROFILE }}
+        with:
+          app-name: ${{ vars.AZURE_FRONTEND_APP_NAME || 'agentic-frontend' }}
+          publish-profile: ${{ secrets.AZURE_FRONTEND_PUBLISH_PROFILE }}
+          package: ./dist/azure_frontend.zip
+
+      - name: Deploy Frontend via Azure Login (Fallback)
+        if: ${{ env.AZURE_FRONTEND_PUBLISH_PROFILE == '' && env.AZURE_CREDENTIALS != '' }}
+        env:
+          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+          AZURE_FRONTEND_PUBLISH_PROFILE: ${{ secrets.AZURE_FRONTEND_PUBLISH_PROFILE }}
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Azure CLI ZipDeploy Frontend
+        if: ${{ env.AZURE_FRONTEND_PUBLISH_PROFILE == '' && env.AZURE_CREDENTIALS != '' }}
+        env:
+          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+          AZURE_FRONTEND_PUBLISH_PROFILE: ${{ secrets.AZURE_FRONTEND_PUBLISH_PROFILE }}
+        run: |
+          az webapp deploy \
+            --resource-group "${{ vars.AZURE_RESOURCE_GROUP || 'rg-agentic-harness-eastus2' }}" \
+            --name "${{ vars.AZURE_FRONTEND_APP_NAME || 'agentic-frontend' }}" \
+            --src-path ./dist/azure_frontend.zip \
+            --type zip \
+            --async false
+
+  verify-health:
+    name: Post-Deployment Smoke Verification
+    needs: [deploy-backend, deploy-frontend]
+    if: always() && (needs.deploy-backend.result == 'success' || needs.deploy-frontend.result == 'success')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe Backend Health
+        if: needs.deploy-backend.result == 'success' && vars.AZURE_BACKEND_APP_NAME != ''
+        run: |
+          echo "Probing Backend: https://${{ vars.AZURE_BACKEND_APP_NAME }}.azurewebsites.net/health"
+          curl -f -s --retry 5 --retry-delay 10 --max-time 30 \
+            "https://${{ vars.AZURE_BACKEND_APP_NAME }}.azurewebsites.net/health" || echo "Backend probe returned non-200, check App Insights"
+
+      - name: Probe Frontend Home
+        if: needs.deploy-frontend.result == 'success' && vars.AZURE_FRONTEND_APP_NAME != ''
+        run: |
+          echo "Probing Frontend: https://${{ vars.AZURE_FRONTEND_APP_NAME }}.azurewebsites.net/"
+          curl -f -s --retry 5 --retry-delay 10 --max-time 30 \
+            "https://${{ vars.AZURE_FRONTEND_APP_NAME }}.azurewebsites.net/" || echo "Frontend probe returned non-200, check Kudu logs"
+
+      - name: Report Summary
+        run: |
+          echo "### 🚀 Azure App Service Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Component | Status | Target URL |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Backend API** | ${{ needs.deploy-backend.result }} | https://${{ vars.AZURE_BACKEND_APP_NAME || 'agentic-backend' }}.azurewebsites.net |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Frontend UI** | ${{ needs.deploy-frontend.result }} | https://${{ vars.AZURE_FRONTEND_APP_NAME || 'agentic-frontend' }}.azurewebsites.net |" >> $GITHUB_STEP_SUMMARY

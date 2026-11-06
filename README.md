@@ -280,6 +280,35 @@ cd src/frontend && npx eslint . && npm run build
 
 ---
 
+## ☁️ Azure App Service & Kudu Production Deployment
+
+Deploy to Azure App Service (Linux B1 plan, ~$12.41/mo) with our 1-click conversion and deployment tooling:
+
+### 1. One-Time Azure Infrastructure Setup
+```bash
+# Run 1-time setup for Resource Group, B1 App Service Plan, WebApps, and persistent DB storage
+chmod +x deploy/azure/setup_azure_infrastructure.sh
+./deploy/azure/setup_azure_infrastructure.sh
+```
+*(On Windows, run `.\deploy\azure\setup_azure_infrastructure.ps1`)*
+
+### 2. Clone -> Zip -> Deploy to Azure Kudu
+```bash
+# 1. Package repository into ready-to-deploy Azure Kudu ZIP bundles
+./scripts/azure_convert_and_deploy.sh --convert --build-frontend
+
+# 2. Deploy directly to Azure App Service via Azure CLI or Kudu REST API
+./scripts/azure_convert_and_deploy.sh --deploy \
+  --resource-group rg-agentic-harness-eastus2 \
+  --backend-app agentic-harness-backend-prod \
+  --frontend-app agentic-harness-frontend-prod
+```
+Or upload `dist/azure_backend.zip` and `dist/azure_frontend.zip` directly via Kudu Web UI at `https://<app-name>.scm.azurewebsites.net/ZipDeploy`.
+
+For full step-by-step instructions, environment configuration, and GitHub Actions CI/CD setup, see [`docs/AZURE_ENTERPRISE_DEPLOYMENT_GUIDE.md`](docs/AZURE_ENTERPRISE_DEPLOYMENT_GUIDE.md).
+
+---
+
 ## 📚 Canonical Documentation Library
 
 In accordance with the project's **1 Single Document for Each Architectural Purpose** policy, refer to the authoritative specifications:
