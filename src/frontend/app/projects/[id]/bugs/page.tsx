@@ -79,11 +79,11 @@ export default function BugsPage() {
   const [selectedBugGuide, setSelectedBugGuide] = useState<any | null>(null);
   const [copiedCode, setCopiedCode] = useState(false);
 
-  // 1. Session Storage Memory Key: Persist active runId across tab switches
+  // 1. Persistent Storage Memory Key: Persist active or latest runId across tab switches
   const RUN_STORAGE_KEY = `project_${project.id}_bugs_runId`;
   const [runId, setRunIdState] = useState<string | null>(() => {
     if (typeof window !== "undefined") {
-      return sessionStorage.getItem(RUN_STORAGE_KEY) || null;
+      return localStorage.getItem(RUN_STORAGE_KEY) || sessionStorage.getItem(RUN_STORAGE_KEY) || null;
     }
     return null;
   });
@@ -92,8 +92,10 @@ export default function BugsPage() {
     setRunIdState(id);
     if (typeof window !== "undefined") {
       if (id) {
+        localStorage.setItem(RUN_STORAGE_KEY, id);
         sessionStorage.setItem(RUN_STORAGE_KEY, id);
       } else {
+        localStorage.removeItem(RUN_STORAGE_KEY);
         sessionStorage.removeItem(RUN_STORAGE_KEY);
       }
     }
@@ -118,6 +120,11 @@ export default function BugsPage() {
           );
           if (active) {
             setRunId(active.id);
+          } else if (!runId) {
+            const latest = runs.find((r: any) => ["bug_scan", "change"].includes(r?.workflow));
+            if (latest) {
+              setRunId(latest.id);
+            }
           }
         }
       })

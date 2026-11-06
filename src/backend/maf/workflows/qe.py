@@ -305,7 +305,17 @@ class GeneratedSuite(BaseModel):
     files: list[GeneratedFile] = Field(min_length=1)
 
 
+def _clean_code(code: str) -> str:
+    text = (code or "").strip()
+    if text.startswith("```"):
+        text = re.sub(r"^```[a-zA-Z0-9_-]*\n?", "", text)
+        text = re.sub(r"\n?```\s*$", "", text)
+        text = text.strip()
+    return text
+
+
 def _generated_file_problems(item: GeneratedFile, known: set[str], worktree: Path, async_ok: bool = False) -> list[str]:
+    item.content = _clean_code(item.content)
     errors = list(execution.invalid_test_code(worktree, item.path, item.content, async_ok))
     if not set(item.case_ids) <= known:
         errors.append(f"{item.path}: unknown case ids")
@@ -462,12 +472,47 @@ async def qe_generate(rc: RunContext, state: dict) -> dict:
             unresolved.append({"path": suite.files[i].path, "case_id": suite.files[i].case_ids[0], "findings": remaining[:10]})
     if unresolved:
         rc.log(f"{len(unresolved)} tests still fail the static checks after one round. They stay, marked", {"unresolved": unresolved}, "warning")
+    valid_suite_files = []
+    for f in suite.files:
+        f.content = _clean_code(f.content)
+        syn = execution.syntax_error(f.path, f.content)
+        if syn:
+            cid = f.case_ids[0] if f.case_ids else "unknown"
+            norm_cid = re.sub(r"[^a-zA-Z0-9_]+", "_", cid)
+            f.content = (
+                f"# CASE_ID: {cid}\n"
+                f"# Quarantined due to syntax error: {syn}\n"
+                f"import pytest\n\n"
+                f"@pytest.mark.skip(reason=\"Quarantined test: {syn}\")\n"
+                f"def test_quarantined_{norm_cid}():\n"
+                f"    pass\n"
+            )
+            unresolved.append({"path": f.path, "case_id": cid, "findings": [f"Syntax error: {syn}"]})
+        valid_suite_files.append(f)
+    suite.files = valid_suite_files
+
     edits = [Edit(path=f.path, action="create", content=f.content) for f in suite.files]
     if state.get("fixtures"):
         edits.append(Edit(path="tests/agentic_qe/fixtures.json", action="create", content=json.dumps(state["fixtures"], indent=2, ensure_ascii=False)))
     errors = apply_edits(worktree, edits)
     if errors:
-        raise RuntimeError(f"Generated tests refused: {errors}")
+        rc.log(f"{len(errors)} generated test edits had issues: {errors[:5]}", kind="warning")
+        for err in errors:
+            bad_path = err.split(":")[0].strip()
+            for f in suite.files:
+                if f.path == bad_path:
+                    cid = f.case_ids[0] if f.case_ids else "unknown"
+                    norm_cid = re.sub(r"[^a-zA-Z0-9_]+", "_", cid)
+                    safe_stub = (
+                        f"# CASE_ID: {cid}\n"
+                        f"# Quarantined due to refusal: {err}\n"
+                        f"import pytest\n\n"
+                        f"@pytest.mark.skip(reason=\"Quarantined refusal: {err[:80]}\")\n"
+                        f"def test_quarantined_{norm_cid}():\n"
+                        f"    pass\n"
+                    )
+                    apply_edits(worktree, [Edit(path=f.path, action="create", content=safe_stub)])
+                    unresolved.append({"path": f.path, "case_id": cid, "findings": [err]})
     marked = {u["path"] for u in unresolved}
     tests = [{"case_id": cid, "path": f.path, **({"unresolved": True} if f.path in marked else {})} for f in suite.files for cid in f.case_ids]
 

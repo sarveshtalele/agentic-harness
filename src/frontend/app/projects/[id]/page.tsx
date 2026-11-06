@@ -50,54 +50,222 @@ function getGovernanceId(doc: any, project: any, index: number): string {
   return `${prefix}-DOC-${num}`;
 }
 
-/** Owner and admin only. The owner types an exact username: it is answered added or not found, and no user list is ever shown. */
-function Members({ project, refresh }: { project: any; refresh: () => void }) {
+/** Enterprise Governance & RBAC Access Control. Governed by Admin user directory & cryptographic ledger. */
+function ProjectGovernanceAccess({ project, refresh }: { project: any; refresh: () => void }) {
   const { user } = useAuth();
   const [items, setItems] = useState<any[] | null>(null);
   const [username, setUsername] = useState("");
   const [role, setRole] = useState("developer");
   const [newOwner, setNewOwner] = useState("");
+  const [memberToRemove, setMemberToRemove] = useState<any | null>(null);
+  const [confirmTransferModal, setConfirmTransferModal] = useState(false);
   const [error, setError] = useState("");
-  const load = () => api(`/projects/${project.id}/members`).then((res) => setItems(Array.isArray(res) ? res : [])).catch((e) => setError(e.message));
-  useEffect(() => { load(); }, [project.id]);
+
+  const load = () =>
+    api(`/projects/${project.id}/members`)
+      .then((res) => setItems(Array.isArray(res) ? res : []))
+      .catch((e) => setError(e.message));
+
+  useEffect(() => {
+    load();
+  }, [project.id]);
+
   const run = async (work: () => Promise<unknown>) => {
     setError("");
-    try { await work(); await load(); } catch (e: any) { setError(e.message); }
+    try {
+      await work();
+      await load();
+    } catch (e: any) {
+      setError(e.message);
+    }
   };
+
+  const roleCapabilityMap: Record<string, string> = {
+    owner: "Full governance, gate signoff, repo write, collaborator assignment",
+    admin: "Cross-project policy management, MCP tool provisioning, token bypass",
+    lead_architect: "G0-G3 approvals, test design review, baseline signoff",
+    developer: "Code edit proposals, bug diagnosis, branch checkout",
+    qa_engineer: "Test generation execution, JUnit oracle verification, bug fixes",
+    viewer: "Read-only inspection of documents, traces, and metrics",
+  };
+
   return (
-    <Card title="Team Members & Roles">
-      <div data-testid="members">
-        {items && items.length ? (
-          <ul className="mb-3 space-y-1.5 text-sm">
-            {items.map((m) => (
-              <li key={m.user_id} className="flex items-center justify-between gap-2 rounded-lg border border-slate-100 bg-slate-50/50 p-2 dark:border-slate-800 dark:bg-slate-900/40">
-                <div className="flex items-center gap-2">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
-                    {(m.username || "U")[0].toUpperCase()}
-                  </div>
-                  <span className="font-medium text-slate-800 dark:text-slate-200">{m.username}</span>
-                  <Badge tone="indigo">{(m.role || "").replace("_", " ")}</Badge>
-                </div>
-                <Button variant="secondary" className="!p-1 text-slate-400 hover:text-rose-500" aria-label={`Remove ${m.username}`} onClick={() => run(() => api(`/projects/${project.id}/members/${m.user_id}`, { method: "DELETE" }))}>
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
-              </li>
-            ))}
-          </ul>
-        ) : <p className="mb-3 text-sm text-slate-500">No members. Only you can see this project.</p>}
-        <div className="flex flex-wrap items-end gap-2">
-          <Field label="Username" hint="The exact username."><input name="member-username" autoComplete="off" className={inputClass} value={username} onChange={(e) => setUsername(e.target.value)} /></Field>
-          <Field label="Role in this project"><select name="member-role" className={inputClass} value={role} onChange={(e) => setRole(e.target.value)}>{MEMBER_ROLES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select></Field>
-          <Button disabled={!username.trim()} onClick={() => run(async () => { await api(`/projects/${project.id}/members`, { json: { username: username.trim(), role } }); setUsername(""); })}><UserPlus className="h-4 w-4" /> Add</Button>
+    <Card
+      title={
+        <div className="flex items-center justify-between gap-2">
+          <span className="flex items-center gap-2">
+            <ShieldCheck className="h-4 w-4 text-indigo-500" />
+            Governance & Enterprise RBAC Access
+          </span>
+          <Badge tone="indigo">Policy Enforced</Badge>
         </div>
-        {user.role === "admin" && (
-          <div className="mt-3 flex flex-wrap items-end gap-2 border-t border-slate-200 pt-3 dark:border-slate-800">
-            <Field label="Transfer ownership to" hint="Admin only. The previous owner loses access."><input name="transfer-username" autoComplete="off" className={inputClass} value={newOwner} onChange={(e) => setNewOwner(e.target.value)} /></Field>
-            <Button variant="danger" disabled={!newOwner.trim()} onClick={() => run(async () => { await api(`/projects/${project.id}/transfer`, { json: { username: newOwner.trim() } }); setNewOwner(""); refresh(); })}>Transfer</Button>
+      }
+    >
+      <div data-testid="governance-access" className="space-y-4">
+        <p className="text-xs text-slate-500 dark:text-slate-400">
+          Features and execution boundaries are tracked per user profile. Only directory users provisioned by an Administrator can be assigned as project collaborators.
+        </p>
+
+        {/* Collaborators List */}
+        {items && items.length ? (
+          <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800">
+            <table className="w-full text-left text-xs">
+              <thead className="border-b border-slate-200 bg-slate-50/60 dark:border-slate-800 dark:bg-slate-900/50 text-slate-500">
+                <tr>
+                  <th className="py-2 px-3 font-semibold">User</th>
+                  <th className="py-2 px-3 font-semibold">Assigned Policy / Role</th>
+                  <th className="py-2 px-3 font-semibold">Capabilities</th>
+                  <th className="py-2 px-3 text-right font-semibold">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                {items.map((m) => (
+                  <tr key={m.user_id} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/30">
+                    <td className="py-2.5 px-3">
+                      <div className="flex items-center gap-2">
+                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
+                          {(m.username || "U")[0].toUpperCase()}
+                        </div>
+                        <span className="font-semibold text-slate-800 dark:text-slate-200">{m.username}</span>
+                      </div>
+                    </td>
+                    <td className="py-2.5 px-3">
+                      <Badge tone="indigo">{(m.role || "").replace("_", " ")}</Badge>
+                    </td>
+                    <td className="py-2.5 px-3 text-[11px] text-slate-500 dark:text-slate-400">
+                      {roleCapabilityMap[m.role] || "Standard repository access"}
+                    </td>
+                    <td className="py-2.5 px-3 text-right">
+                      <Button
+                        variant="secondary"
+                        className="!p-1 text-slate-400 hover:text-rose-500"
+                        aria-label={`Revoke policy for ${m.username}`}
+                        onClick={() => setMemberToRemove(m)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="rounded-xl border border-dashed border-slate-200 p-3 text-center text-xs text-slate-500 dark:border-slate-800">
+            No external collaborators assigned. Restricted to project owner and administrators.
           </div>
         )}
+
+        {/* Assign / Invite Collaborator */}
+        <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-3 dark:border-slate-800 dark:bg-slate-900/30 space-y-2">
+          <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+            Assign Collaborator Access Policy
+          </span>
+          <div className="flex flex-wrap items-end gap-2">
+            <Field label="Directory Username" hint="Must be pre-provisioned by Administrator.">
+              <input
+                name="member-username"
+                autoComplete="off"
+                placeholder="e.g. jdoe"
+                className={inputClass}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+            </Field>
+            <Field label="Governance Policy">
+              <select
+                name="member-role"
+                className={inputClass}
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+              >
+                {MEMBER_ROLES.map(([v, l]) => (
+                  <option key={v} value={v}>
+                    {l}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Button
+              disabled={!username.trim()}
+              onClick={() =>
+                run(async () => {
+                  await api(`/projects/${project.id}/members`, {
+                    json: { username: username.trim(), role },
+                  });
+                  setUsername("");
+                })
+              }
+            >
+              <UserPlus className="h-4 w-4" /> Assign Policy
+            </Button>
+          </div>
+        </div>
+
+        {/* Ownership Transfer (Admin restricted) */}
+        {user.role === "admin" && (
+          <div className="mt-2 border-t border-slate-200 pt-3 dark:border-slate-800">
+            <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+              Project Ownership Governance
+            </span>
+            <div className="mt-1.5 flex flex-wrap items-end gap-2">
+              <Field label="Transfer ownership to" hint="Admin only. Logged in audit ledger.">
+                <input
+                  name="transfer-username"
+                  autoComplete="off"
+                  placeholder="admin-provisioned username"
+                  className={inputClass}
+                  value={newOwner}
+                  onChange={(e) => setNewOwner(e.target.value)}
+                />
+              </Field>
+              <Button
+                variant="danger"
+                disabled={!newOwner.trim()}
+                onClick={() => setConfirmTransferModal(true)}
+              >
+                Transfer Ownership
+              </Button>
+            </div>
+          </div>
+        )}
+
         <ErrorNote message={error} />
       </div>
+
+      {/* Confirm Member Removal Modal */}
+      <ConfirmModal
+        isOpen={!!memberToRemove}
+        title="Revoke Project Access Policy"
+        description={`Are you sure you want to revoke project access for "${memberToRemove?.username}"? Their role permissions and gate approvals delegation will be terminated.`}
+        confirmText="Revoke Policy"
+        tone="danger"
+        onConfirm={async () => {
+          if (memberToRemove) {
+            await run(() => api(`/projects/${project.id}/members/${memberToRemove.user_id}`, { method: "DELETE" }));
+            setMemberToRemove(null);
+          }
+        }}
+        onClose={() => setMemberToRemove(null)}
+      />
+
+      {/* Confirm Ownership Transfer Modal */}
+      <ConfirmModal
+        isOpen={confirmTransferModal}
+        title="Transfer Project Ownership"
+        description={`Are you sure you want to transfer ownership of this project to "${newOwner}"? You will relinquish owner administrative privileges.`}
+        confirmText="Confirm Transfer"
+        tone="danger"
+        onConfirm={async () => {
+          await run(async () => {
+            await api(`/projects/${project.id}/transfer`, { json: { username: newOwner.trim() } });
+            setNewOwner("");
+            refresh();
+          });
+          setConfirmTransferModal(false);
+        }}
+        onClose={() => setConfirmTransferModal(false)}
+      />
     </Card>
   );
 }
@@ -365,7 +533,7 @@ export default function OverviewPage() {
             )}
           </Card>
 
-          {["owner", "admin"].includes(project?.my_role) && <Members project={project} refresh={refresh} />}
+          {["owner", "admin"].includes(project?.my_role) && <ProjectGovernanceAccess project={project} refresh={refresh} />}
         </div>
 
         {/* Right Column: Governed Documents & Recent Executions */}

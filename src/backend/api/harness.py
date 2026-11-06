@@ -101,6 +101,12 @@ async def update_session(session_id: str, data: Dict[str, Any]):
     return {"session": session.model_dump()}
 
 
+@router.delete("/api/harness/sessions")
+async def delete_all_sessions(project_id: Optional[str] = None):
+    count = session_manager.delete_all_sessions(project_id)
+    return {"success": True, "deleted": count}
+
+
 @router.delete("/api/harness/sessions/{session_id}")
 async def delete_session(session_id: str):
     deleted = session_manager.delete_session(session_id)

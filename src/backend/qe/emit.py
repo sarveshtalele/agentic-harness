@@ -194,10 +194,15 @@ def _parsed(path: Path) -> ast.Module | None:
 
 
 class Project:
-    """Where local modules live: the repository root, `src/`, and the folder of the test itself (pytest puts that on the path)."""
+    """Where local modules live: the repository root, `src/`, `backend/`, and the folder of the test itself (pytest puts that on the path)."""
 
     def __init__(self, worktree: Path, test_dir: Path):
-        self.roots = [worktree, worktree / "src", test_dir]
+        roots = [worktree, worktree / "src", test_dir]
+        for sub in ("backend", "server", "app", "lib", "packages", "modules", "core"):
+            cand = worktree / sub
+            if cand.is_dir() and cand not in roots:
+                roots.append(cand)
+        self.roots = roots
 
     @staticmethod
     def locate(base: Path) -> Path | None:
@@ -211,6 +216,9 @@ class Project:
         for root in self.roots:
             if found := self.locate(root.joinpath(*dotted.split("."))):
                 return found
+        # Common alias fallback: backend.main -> backend.app.main
+        if dotted == "backend.main":
+            return self.module("backend.app.main")
         return None
 
     def is_local(self, top: str) -> bool:

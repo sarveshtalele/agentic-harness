@@ -539,6 +539,7 @@ export function HarnessView({
 
   // Session Delete & Rename Custom Popups
   const [deleteSessionModal, setDeleteSessionModal] = useState<{ id: string; name: string } | null>(null);
+  const [clearAllModal, setClearAllModal] = useState(false);
   const [renameSessionModal, setRenameSessionModal] = useState<{ id: string; name: string } | null>(null);
   const [renameInputVal, setRenameInputVal] = useState("");
 
@@ -955,6 +956,20 @@ export function HarnessView({
       }
     } catch (e: any) {
       toast(`Failed to delete session: ${e.message}`, "error");
+    }
+  };
+
+  const handleConfirmClearAll = async () => {
+    try {
+      await api("/harness/sessions", {
+        method: "DELETE",
+      });
+      setAllSessions([]);
+      toast("All conversations cleared");
+      setClearAllModal(false);
+      handleCreateSession();
+    } catch (e: any) {
+      toast(`Failed to clear conversations: ${e.message}`, "error");
     }
   };
 
@@ -1602,15 +1617,25 @@ export function HarnessView({
               </button>
             </div>
 
-            {/* + New Session Button */}
-            <div className="p-2.5 border-b border-slate-200/60 dark:border-slate-800/60">
+            {/* + New Session & Clear All Buttons */}
+            <div className="p-2.5 border-b border-slate-200/60 dark:border-slate-800/60 flex items-center gap-1.5">
               <button
                 onClick={handleCreateSession}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 transition"
+                className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 transition"
               >
                 <Plus className="h-3.5 w-3.5" />
                 <span>New Conversation</span>
               </button>
+              {allSessions.length > 0 && (
+                <button
+                  onClick={() => setClearAllModal(true)}
+                  className="flex items-center justify-center gap-1 rounded-xl border border-rose-200 bg-rose-50 px-2.5 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-100 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-400 dark:hover:bg-rose-900/60 transition"
+                  title="Clear all conversation history"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  <span>Clear All</span>
+                </button>
+              )}
             </div>
 
             {/* Projects Header & Filter Action */}
@@ -2899,6 +2924,31 @@ export function HarnessView({
               </Button>
               <Button type="button" variant="danger" onClick={handleConfirmDelete}>
                 Delete
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 5b. Clear All Sessions Confirmation Modal */}
+      {clearAllModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl dark:border-slate-800 dark:bg-[#0b1329] space-y-3">
+            <div className="flex items-center gap-2.5 text-rose-600 dark:text-rose-400">
+              <div className="rounded-xl bg-rose-100 p-2 dark:bg-rose-950/60">
+                <Trash2 className="h-5 w-5" />
+              </div>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Clear All Conversations</h3>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Are you sure you want to delete all <span className="font-semibold text-slate-800 dark:text-slate-200">{allSessions.length} conversations</span>? All chat threads, tasks, and session context will be reset.
+            </p>
+            <div className="pt-2 flex justify-end gap-2">
+              <Button type="button" variant="secondary" onClick={() => setClearAllModal(false)}>
+                Cancel
+              </Button>
+              <Button type="button" variant="danger" onClick={handleConfirmClearAll}>
+                Clear All
               </Button>
             </div>
           </div>

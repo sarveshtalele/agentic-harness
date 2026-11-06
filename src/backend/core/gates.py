@@ -71,6 +71,12 @@ def decide(project_id: str, gate: int, approved: bool, by: str, reason: str = ""
         )
         if not approved:  # later approvals rested on this gate, so they no longer hold
             con.execute("DELETE FROM gates WHERE project_id=? AND gate>?", (project_id, gate))
+        else:
+            # Synchronize corresponding documents for this project
+            gate_doc_kinds = {0: ["discovery"], 1: ["brd", "requirements"], 2: ["test_plan"], 3: ["test_cases", "gherkin"]}.get(gate, [])
+            if gate_doc_kinds:
+                placeholders = ",".join("?" for _ in gate_doc_kinds)
+                con.execute(f"UPDATE documents SET status='approved', updated_at=? WHERE project_id=? AND kind IN ({placeholders}) AND status!='approved'", (stamp, project_id, *gate_doc_kinds))
     ledger.append(project_id, by, f"gate.{state}", f"G{gate}", {"reason": reason, "run_id": run_id})
 
 

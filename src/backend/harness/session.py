@@ -185,3 +185,16 @@ class AgentSessionManager:
             except Exception:
                 return False
         return False
+
+    def delete_all_sessions(self, project_id: Optional[str] = None) -> int:
+        deleted = 0
+        for entry in self.list_sessions():
+            sid = entry.get("id")
+            pid = entry.get("projectId")
+            if not sid:
+                continue
+            if project_id and pid != project_id:
+                continue
+            if self.delete_session(sid):
+                deleted += 1
+        return deleted

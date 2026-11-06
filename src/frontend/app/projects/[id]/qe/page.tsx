@@ -29,11 +29,11 @@ export default function QEPage() {
   const [docs, setDocs] = useState<any[]>([]);
   const [error, setError] = useState("");
 
-  // 1. Session Storage Memory Key: Persist active run across tab switches
+  // 1. Persistent Storage Memory Key: Persist active or latest run across tab switches
   const RUN_STORAGE_KEY = `project_${project.id}_qe_runId`;
   const [runId, setRunIdState] = useState<string | null>(() => {
     if (typeof window !== "undefined") {
-      return sessionStorage.getItem(RUN_STORAGE_KEY) || null;
+      return localStorage.getItem(RUN_STORAGE_KEY) || sessionStorage.getItem(RUN_STORAGE_KEY) || null;
     }
     return null;
   });
@@ -41,8 +41,13 @@ export default function QEPage() {
   const setRunId = (id: string | null) => {
     setRunIdState(id);
     if (typeof window !== "undefined") {
-      if (id) sessionStorage.setItem(RUN_STORAGE_KEY, id);
-      else sessionStorage.removeItem(RUN_STORAGE_KEY);
+      if (id) {
+        localStorage.setItem(RUN_STORAGE_KEY, id);
+        sessionStorage.setItem(RUN_STORAGE_KEY, id);
+      } else {
+        localStorage.removeItem(RUN_STORAGE_KEY);
+        sessionStorage.removeItem(RUN_STORAGE_KEY);
+      }
     }
   };
 
@@ -65,7 +70,12 @@ export default function QEPage() {
               r?.workflow === "qe" &&
               ["running", "waiting_approval"].includes(r?.status)
           );
-          if (active) setRunId(active.id);
+          if (active) {
+            setRunId(active.id);
+          } else if (!runId) {
+            const latest = runs.find((r: any) => r?.workflow === "qe");
+            if (latest) setRunId(latest.id);
+          }
         }
       })
       .catch(() => {});

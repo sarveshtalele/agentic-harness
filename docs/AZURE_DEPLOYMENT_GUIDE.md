@@ -133,9 +133,9 @@ Querying the official [Azure Retail Prices API](https://prices.azure.com/api/ret
 
 ---
 
-## 3. Centralized Database Architecture (`atlas.sqlite3`)
+## 3. Centralized Database Architecture & Azure Storage Scale-Out
 
-The platform implements a **Centralized Database Grounding** model. Rather than relying on ephemeral files, scattered JSON state, or mock responses, all platform entities are consolidated into a single centralized SQLite database: `data/atlas.sqlite3`.
+The platform implements a **Centralized Database Grounding** model. Rather than relying on ephemeral files, scattered JSON state, or mock responses, all platform entities are consolidated into a single centralized database: `data/atlas.sqlite3` with Write-Ahead Logging (WAL) for single-node deployments, or **Azure Database for PostgreSQL Flexible Server** with **Azure Blob Storage** for high-concurrency multi-tenant scale-out.
 
 ### 3.1 Single Source of Truth
 The centralized database stores:
@@ -146,6 +146,98 @@ The centralized database stores:
 - **Human-in-the-Loop Gates:** Gate states (G0–G7), approval statuses, sign-off notes, and HMAC signatures (`gates` table).
 - **User Accounts & RBAC:** Users, argon2/PBKDF2 salted hashes, session tokens, per-user token quotas, and model entitlements (`users`, `sessions`, `auth_events` tables).
 - **NVIDIA Skill Specter & Cloudflare Security Scorecards:** Security checks, attack-surface coverage ledgers, and compliance audit results (`scorecards` table).
+
+### 3.2 Dual-Tier Storage Architecture: Small Records vs Large Blobs
+The fundamental enterprise rule: **Relational DB holds records you search, join, and transact. Azure Blob Storage holds files and snapshots. Azure Key Vault holds secrets.**
+
+| Entity Type | Store | Why |
+|---|---|---|
+| **Users, Sessions, Auth Events** (`users`, `sessions`, `auth_events`) | SQLite / PostgreSQL | Looked up on every request, ACID transactions required |
+| **Projects, Runs, Run Events, Quality Gates** | SQLite / PostgreSQL | Joined, filtered, and aggregated constantly across dashboard views |
+| **Cryptographic Audit Ledger** | SQLite / PostgreSQL | Sequential commit order with SHA-256 chain hashes |
+| **Defect Findings & Guardrail Events** | SQLite / PostgreSQL | Observability metrics, severity classification, and status tracking |
+| **Document Index (Metadata, SHA-256, Status)** | SQLite / PostgreSQL | Instant search, filtering, and governance listing |
+| **Document Content per Version** | Blob Storage (`projects/{id}/documents/{doc}/v{n}`) | Immutable text; avoids database bloat on large specs |
+| **Target Repository Snapshots** | Blob Storage (`projects/{id}/repo.bundle`) | Single Git bundle holds full commit history; eliminates slow small-file network I/O |
+| **Ephemeral Test Results & JUnit XML** | Blob Storage (`projects/{id}/runs/{run}/junit.xml`) | Comprehensive raw evidence preserved; metadata summarized in DB |
+| **Model API Keys, Secrets & Signing Keys** | Azure Key Vault | Key rotation without app redeployment; access audit logging |
+| **Application Logs & Security Traces** | Azure Log Analytics / App Insights | Real-time threat detection, alerts, and 5 GB/month free ingestion |
+
+---
+
+## 4. Azure Sandboxing Architecture: Ephemeral Isolation & Secure Execution Pools
+
+A critical challenge in running autonomous agents is safely handling **untrusted repository code**: code scanned, generated, and executed by agents must never compromise platform credentials, access other tenants' data, or escape runtime confinement.
+
+### 4.1 The Core Boundary Principle
+> [!IMPORTANT]
+> **Zero-Trust Repository Boundary:** Repository source code, generated test suites, and third-party dependencies **NEVER** run inside the orchestration agent's execution process. They run exclusively in bounded sandboxes with scrubbed environments and locked egress.
+
+### 4.2 Sandboxing Models on Azure
+
+```mermaid
+flowchart TD
+    subgraph Orchestrator["Azure App Service (FastAPI / MAF 2.0)"]
+        API["FastAPI Orchestrator (Port 8000)"]
+        Guard["Security Subsystem: clean_env() + safe_path()"]
+        Queue["Azure Storage Queue (sandbox-tasks)"]
+    end
+
+    subgraph ModelA["Model A: Local Subprocess Sandbox (Basic B1 Tier)"]
+        Worktree["/home/data/projects/{id}/worktrees/run_{id}"]
+        PytestSubprocess["Isolated Pytest/Vitest Subprocess (Non-Root)"]
+        ScrubbedEnv["Scrubbed Env: Zero Platform Secrets"]
+    end
+
+    subgraph ModelB["Model B: Azure Container Apps Jobs (Enterprise Tier)"]
+        ACAJob["Azure Container Apps Job (Ephemeral MicroVM)"]
+        TmpVolume["Ephemeral tmpfs / Git Bundle"]
+        IsolatedContainer["Docker Container: No Egress / Blocked Network"]
+        JUnitBlob["JUnit XML & Evidence Output -> Azure Blob"]
+    end
+
+    API -->|Small Teams / Low Cost| ModelA
+    Guard --> ScrubbedEnv
+    ScrubbedEnv --> PytestSubprocess
+    PytestSubprocess --> Worktree
+
+    API -->|Multi-Tenant / Production| Queue
+    Queue --> ACAJob
+    ACAJob --> TmpVolume
+    TmpVolume --> IsolatedContainer
+    IsolatedContainer --> JUnitBlob
+```
+
+#### Model A: Local Subprocess Sandbox (App Service Basic B1 — ₹1,036/month)
+For single-instance or small team deployments, the sandbox runs directly on the Linux App Service worker:
+1. **Worktree Confinement**: A dedicated Git worktree branch (`atlas/qe-<run_id>`) is created under `/home/data/projects/<id>/worktrees/<run_id>`. File paths outside this root are rejected by `safe_path()`, preventing directory traversal.
+2. **Scrubbed Environment (`clean_env`)**: The subprocess receives an environment dictionary purged of any key matching `(?i)key|token|secret|password|credential|auth|cookie`. The test code can never read `ATLAS_SECRET_KEY`, `OPENAI_API_KEY`, or `DATABASE_URL`.
+3. **Bounded Resources & Timeout**: Execution timeout is enforced via `subprocess.run(timeout=300)`. If test suites loop infinitely, the process is killed automatically.
+4. **Non-Root Execution**: Runs under the App Service non-privileged application user context.
+
+#### Model B: Ephemeral Azure Container Apps (ACA) Jobs (Multi-Tenant Enterprise)
+For strict multi-tenant environments where tenant code must have physical virtualization isolation:
+1. **Queue Trigger**: When a run reaches Gate 4 (Execution), the FastAPI orchestrator enqueues a task in `Azure Storage Queue`.
+2. **Ephemeral MicroVM Spawning**: Azure Container Apps spins up an isolated container job running `Dockerfile.backend` with 1 vCPU and 2 GiB RAM. Container Apps scales to zero when idle ($0 idle cost).
+3. **Read-Only SAS Fetch**: The container receives a short-lived, read-only Shared Access Signature (SAS) URL granting access solely to that project's Git bundle in Azure Blob Storage.
+4. **Egress-Blocked Test Execution**: Network egress is completely blocked during test execution to prevent data exfiltration. Only standard Python stdlib and pre-cached repository dependencies are used.
+5. **Telemetry & Teardown**: Upon completion, the container writes its `junit.xml` report and stdout/stderr logs to Blob Storage, notifies the orchestrator via message queue, and is immediately terminated and destroyed.
+
+---
+
+## 5. Azure Enterprise Feature Governance & RBAC Policy Matrix
+
+In enterprise environments, features must not be exposed as ad-hoc switches. Instead, **every feature is mapped to an Azure infrastructure mechanism, governed by tenant administrators, and bound to role-based access control (RBAC)**:
+
+| Feature Name | Azure Infrastructure Mechanism | Admin Provisioning & Governance Rule | Role-Based Capabilities (RBAC) | Security, Audit & Policy Enforcement |
+|---|---|---|---|---|
+| **MCP Server Management** | Docker containers / Azure Container Apps with managed identity; Azure Key Vault for API keys | **Admin Only**: MCP servers (Playwright, GitHub, Postgres) can ONLY be registered or configured by Tenant Admin. Regular users cannot bind external servers. | • **Admin**: Register/delete MCP servers, configure environment credentials.<br>• **Lead Architect**: Browse & bind approved servers to projects.<br>• **QA Engineer / Dev**: Invoke approved tools in Harness chat.<br>• **Viewer**: Read-only tool execution inspection. | Server definitions stored in `mcp_servers` table with soft-delete tombstones; credentials encrypted in Key Vault; every tool call logged in `tool_calls` table with latency & status. |
+| **Project Collaborators & Invites** | Microsoft Entra ID (Azure AD) & `project_members` RBAC policy table | **Strict Directory Pre-Provisioning**: Users can ONLY invite collaborators who already exist in Microsoft Entra ID / Admin-provisioned user directory. Users cannot create arbitrary accounts. | • **Project Owner**: Submit invite request for pre-provisioned user; assign project role.<br>• **Admin**: Provision user accounts; approve cross-tenant access.<br>• **Invited User**: Access restricted to assigned project policies. | Ownership transfers and collaborator additions generate immutable entries in the cryptographic `ledger` table with signer identity. |
+| **Quality Gates (G0–G7)** | FastAPI State Machine, HMAC-SHA256 signature vault, `gates` table | **Sequential Human-in-the-Loop Signoff**: Automated verification gates require explicit human approval. Bypassing gates is blocked by cryptographic order verification (`GateOrderError`). | • **Lead Architect / QA Lead**: Approve Gate G0 (Scope), G1 (Requirements), G2 (Plan), G3 (Design).<br>• **Release Manager**: Approve Gate G7 (Release).<br>• **Developer / QA**: Run workflows and submit for review. | Every approval records signer username, timestamp, and HMAC-SHA256 signature calculated with `ATLAS_SECRET_KEY`. Editing an upstream doc automatically reopens downstream gates. |
+| **Autonomous QE Studio (Greenfield vs Brownfield)** | Ephemeral Git worktrees / ACA Jobs; AST syntax parsing engine | **Policy-Bounded Generation**: Greenfield generates from BRD in a fresh repo; Brownfield strictly enforces real AST symbol verification against cloned repository files. | • **QA Lead / Architect**: Configure lifecycle strategy (Greenfield vs Brownfield) & dependency installation.<br>• **QA Engineer**: Trigger QE lifecycle runs, inspect JUnit test matrices. | Static checks verify generated test imports against real repo symbols. Failing files are auto-quarantined to prevent collection errors. Zero tautological asserts allowed. |
+| **Business Analyst (BA) Studio** | Azure OpenAI / DeepSeek LLM endpoints, Azure Blob Storage (immutability policy) | **Domain-Grounded Requirements**: Enforces 10-section standardized BRD structure. Spec versions are saved with SHA-256 hashes and cannot be overwritten. | • **BA / Product Owner**: Ingest briefs, generate requirements documents, edit Gherkin scenarios.<br>• **Reviewer**: Score testability, completeness, and consistency. | Document versions stored in `document_versions` table with author and note; document approval triggers bidirectional synchronization with Quality Gate G1. |
+| **Bug Scan & Remediation** | Static analysis scanners (Ruff, Semgrep), Git branch isolation (`atlas/bugfix-...`) | **Verification Gate**: Bug fixes must pass the `bug-fix-reviewer` agent persona verification with a confidence score threshold (>= 80%) before PR merge. | • **QA Engineer**: Run scans, inspect defect cards, trigger automated fixes.<br>• **Developer**: View step-by-step remediation guide and code diffs.<br>• **Lead**: Approve Git branch merge to GitHub repository. | Findings verified against source code line quotes; dismissed findings tracked with user attribution in SQLite `findings` table. |
+| **Security Guardrails & Zero-Trust** | Subprocess sanitizer (`clean_env`), Regex jailbreak heuristics, Application Insights | **Continuous Threat Demarcation**: System prompt injections and leaked secrets are intercepted at API boundary before reaching model context or disk. | • **Admin**: View Guardrail Flags & Threat Mitigation Matrix, review raw intercepted payloads.<br>• **All Users**: Benefit from automatic redactions and policy enforcements. | Intercepted events logged to `guardrail_events` table; prompt injection attempts scrubbed (`REMOVED`); credential leaks masked (`REDACTED`). |
 
 ### 3.2 Deterministic Grounding Against `atlas.sqlite3`
 To completely eliminate model hallucinations, the autonomous harness coordinator (`HarnessAgent`) and specialized agents perform **deterministic grounding queries** directly against `atlas.sqlite3`.

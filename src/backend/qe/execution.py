@@ -74,6 +74,13 @@ def _node_tool(name: str, *args: str) -> list[str] | None:
 def build_command(runner: str, worktree: Path, target: str, junit: Path, extra: tuple[str, ...] = ()) -> tuple[list[str] | None, dict]:
     env: dict = {}
     if runner == "pytest":
+        pypaths = [str(worktree)]
+        for sub in ("backend", "src", "server", "app"):
+            cand = worktree / sub
+            if cand.is_dir():
+                pypaths.append(str(cand))
+        existing_pp = os.environ.get("PYTHONPATH", "")
+        env["PYTHONPATH"] = os.pathsep.join(pypaths) + (os.pathsep + existing_pp if existing_pp else "")
         return _pytest(worktree, target, junit, extra), env
     if runner == "vitest":
         return _node_tool("vitest", "run", target, "--reporter=junit", f"--outputFile={junit}"), env
@@ -255,9 +262,20 @@ def invalid_test_code(worktree: Path, path: str, code: str, async_ok: bool = Fal
         base = worktree.joinpath(*node.module.split("."))
         module = base.with_suffix(".py") if base.with_suffix(".py").is_file() else base / "__init__.py"
         if not module.is_file():
-            if (worktree / node.module.split(".")[0]).exists():
-                issues.append(f"{path}: module {node.module} does not exist")
-            continue
+            # Check if module exists in known subroots like backend, src, app, modules
+            for sub in ("backend", "src", "server", "app"):
+                cand = (worktree / sub).joinpath(*node.module.split("."))
+                cand_mod = cand.with_suffix(".py") if cand.with_suffix(".py").is_file() else cand / "__init__.py"
+                if cand_mod.is_file():
+                    base = cand
+                    module = cand_mod
+                    break
+            else:
+                top = node.module.split(".")[0]
+                has_top = (worktree / top).exists() or any((worktree / sub / top).exists() for sub in ("backend", "src", "server", "app"))
+                if has_top:
+                    issues.append(f"{path}: module {node.module} does not exist")
+                continue
         available = _module_names(module)
         submodules = {p.stem for p in base.glob("*.py")} | {p.name for p in base.iterdir() if p.is_dir()} if base.is_dir() else set()
         missing = [a.name for a in node.names if available is not None and a.name != "*" and a.name not in available and a.name not in submodules]

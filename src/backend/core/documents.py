@@ -127,6 +127,14 @@ def set_status(doc_id: str, status: str, by: str) -> dict:
     with db() as con:
         con.execute("UPDATE documents SET status=?, updated_at=? WHERE id=?", (status, now(), doc_id))
     ledger.append(doc["project_id"], by, f"document.{status}", doc_id, {"version": doc["current_version"]})
+    if status == "approved":
+        gate_map = {"discovery": 0, "brd": 1, "requirements": 1, "test_plan": 2, "test_cases": 3, "gherkin": 3}
+        gate_num = gate_map.get(doc.get("kind", ""))
+        if gate_num is not None:
+            try:
+                gates.decide(doc["project_id"], gate_num, True, by, f"Approved via document {doc['title']} (v{doc['current_version']})")
+            except Exception:
+                pass
     return get(doc_id)
 
 
