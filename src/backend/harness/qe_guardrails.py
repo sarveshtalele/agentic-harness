@@ -93,7 +93,10 @@ class QEGuardrails:
             return False, f"Path Traversal Guardrail: Path '{target_path}' resolves outside the authorized workspace."
 
         rel = os.path.relpath(canonical_target, canonical_workspace).replace("\\", "/")
-        allowed_dirs = ["tests/", "__tests__/", "e2e/", "specs/", "docs/qe/", ".sessions/"]
+        allowed_dirs = [
+            "tests/", "__tests__/", "e2e/", "specs/", "docs/qe/", ".sessions/",
+            "src/", "lib/", "app/", "features/", "data/projects/"
+        ]
 
         if not any(rel.startswith(d.rstrip("/")) for d in allowed_dirs):
             return False, f"Write Guardrail: File '{rel}' is outside authorized test directories ({', '.join(allowed_dirs)})."

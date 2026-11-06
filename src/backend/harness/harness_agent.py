@@ -750,7 +750,7 @@ class HarnessAgent:
 
             # Execute tool
             try:
-                result = await tool.execute(tool_args, context={"session": session})
+                result = await tool.execute(tool_args, context={"session": session, "projectId": session.projectId})
                 executed_records.append(ToolCallRecord(
                     id=tool_call_id,
                     name=tool_name,

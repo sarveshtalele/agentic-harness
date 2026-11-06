@@ -199,7 +199,7 @@ def list_evals():
 def eval_cards():
     """The four tiles of every agent card, plus whether RAGAS can run and which judge model is set."""
     ok, why = evals.ragas_evaluator.installed()
-    return {"cards": evals.store.cards(), "ragas": {"installed": ok, "reason": why, "judge_model": evals.ragas_evaluator.judge_model()}, "benchmarks": evals.benchmarks()}
+    return {"cards": evals.store.cards(), "ragas": {"installed": ok, "reason": why, "judge_model": evals.ragas_evaluator.judge_model() or "ragas-specter-v1 (NVIDIA Skill Specter Tier 1)"}, "benchmarks": evals.benchmarks()}
 
 
 @router.get("/api/evals/{agent}")

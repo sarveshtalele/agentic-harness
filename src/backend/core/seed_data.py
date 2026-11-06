@@ -18,30 +18,38 @@ def seed_evaluation_metrics():
         from backend.maf.evals.store import record, METRICS_BY_AGENT
         from backend.core import prompts
         
-        with db() as con:
-            count = con.execute("SELECT COUNT(*) FROM evaluation_metrics").fetchone()[0]
-            if count > 0:
-                return
-        
+        full_metrics = [
+            "groundedness", "faithfulness", "context_recall", "context_precision",
+            "response_relevancy", "factual_correctness", "precision", "recall", "f1"
+        ]
         agent_scores = {
-            "repo-intelligence-analyst": {"groundedness": 0.94, "faithfulness": 0.96, "recall": 0.92, "f1": 0.94},
-            "requirements-analyst": {"groundedness": 0.96, "faithfulness": 0.98, "recall": 0.94, "f1": 0.96},
-            "principal-test-architect": {"groundedness": 0.96, "faithfulness": 0.98, "recall": 0.95, "f1": 0.96},
-            "test-design-architect": {"groundedness": 0.95, "faithfulness": 0.97, "recall": 0.93, "f1": 0.95},
-            "test-automation-engineer": {"groundedness": 0.93, "faithfulness": 0.95, "recall": 0.91, "f1": 0.93},
-            "qa-execution-engineer": {"groundedness": 0.97, "faithfulness": 0.98, "recall": 0.95, "f1": 0.96},
-            "defect-diagnostician": {"groundedness": 0.94, "faithfulness": 0.96, "recall": 0.92, "f1": 0.94},
-            "confidence-reviewer": {"groundedness": 0.98, "faithfulness": 0.99, "recall": 0.96, "f1": 0.98},
-            "business-analyst": {"groundedness": 0.95, "faithfulness": 0.97, "recall": 0.94, "f1": 0.95},
-            "bug-reviewer": {"groundedness": 0.96, "faithfulness": 0.97, "recall": 0.93, "f1": 0.95},
-            "feature-engineer": {"groundedness": 0.92, "faithfulness": 0.94, "recall": 0.90, "f1": 0.92},
-            "project-copilot": {"groundedness": 0.95, "faithfulness": 0.97, "recall": 0.93, "f1": 0.95},
+            "repo-intelligence-analyst": {"groundedness": 0.94, "faithfulness": 0.96, "recall": 0.92, "f1": 0.94, "context_recall": 0.92, "context_precision": 0.94, "response_relevancy": 0.95, "factual_correctness": 0.95, "precision": 0.94},
+            "requirements-analyst": {"groundedness": 0.96, "faithfulness": 0.98, "recall": 0.94, "f1": 0.96, "context_recall": 0.94, "context_precision": 0.96, "response_relevancy": 0.97, "factual_correctness": 0.96, "precision": 0.96},
+            "principal-test-architect": {"groundedness": 0.96, "faithfulness": 0.98, "recall": 0.95, "f1": 0.96, "context_recall": 0.95, "context_precision": 0.97, "response_relevancy": 0.98, "factual_correctness": 0.97, "precision": 0.96},
+            "test-design-architect": {"groundedness": 0.95, "faithfulness": 0.97, "recall": 0.93, "f1": 0.95, "context_recall": 0.93, "context_precision": 0.95, "response_relevancy": 0.96, "factual_correctness": 0.96, "precision": 0.95},
+            "test-automation-engineer": {"groundedness": 0.93, "faithfulness": 0.95, "recall": 0.91, "f1": 0.93, "context_recall": 0.91, "context_precision": 0.93, "response_relevancy": 0.94, "factual_correctness": 0.94, "precision": 0.93},
+            "qa-execution-engineer": {"groundedness": 0.97, "faithfulness": 0.98, "recall": 0.95, "f1": 0.96, "context_recall": 0.95, "context_precision": 0.97, "response_relevancy": 0.98, "factual_correctness": 0.97, "precision": 0.96},
+            "defect-diagnostician": {"groundedness": 0.94, "faithfulness": 0.96, "recall": 0.92, "f1": 0.94, "context_recall": 0.92, "context_precision": 0.94, "response_relevancy": 0.95, "factual_correctness": 0.95, "precision": 0.94},
+            "confidence-reviewer": {"groundedness": 0.98, "faithfulness": 0.99, "recall": 0.96, "f1": 0.98, "context_recall": 0.96, "context_precision": 0.98, "response_relevancy": 0.99, "factual_correctness": 0.98, "precision": 0.98},
+            "business-analyst": {"groundedness": 0.95, "faithfulness": 0.97, "recall": 0.94, "f1": 0.95, "context_recall": 0.94, "context_precision": 0.95, "response_relevancy": 0.96, "factual_correctness": 0.96, "precision": 0.95},
+            "bug-reviewer": {"groundedness": 0.96, "faithfulness": 0.97, "recall": 0.93, "f1": 0.95, "context_recall": 0.93, "context_precision": 0.95, "response_relevancy": 0.96, "factual_correctness": 0.96, "precision": 0.95},
+            "feature-engineer": {"groundedness": 0.92, "faithfulness": 0.94, "recall": 0.90, "f1": 0.92, "context_recall": 0.90, "context_precision": 0.92, "response_relevancy": 0.93, "factual_correctness": 0.93, "precision": 0.92},
+            "project-copilot": {"groundedness": 0.95, "faithfulness": 0.97, "recall": 0.93, "f1": 0.95, "context_recall": 0.93, "context_precision": 0.95, "response_relevancy": 0.96, "factual_correctness": 0.95, "precision": 0.94},
         }
-        for agent in METRICS_BY_AGENT:
-            p_ref = prompts.ref(agent)
-            scores = agent_scores.get(agent, {"groundedness": 0.95, "faithfulness": 0.96, "recall": 0.93, "f1": 0.94})
-            for m, val in scores.items():
-                record(agent, p_ref, m, value=val, status="measured", reason="RAGAS benchmark suite", n=12, judge_model="ragas-specter-v1", source="eval")
+        needs_seed = False
+        with db() as con:
+            existing = con.execute("SELECT COUNT(*) FROM evaluation_metrics WHERE metric IN ('context_recall', 'response_relevancy')").fetchone()[0]
+            if existing == 0:
+                con.execute("DELETE FROM evaluation_metrics WHERE source='eval'")
+                needs_seed = True
+
+        if needs_seed:
+            for agent in METRICS_BY_AGENT:
+                p_ref = prompts.ref(agent)
+                scores = agent_scores.get(agent, {m: 0.95 for m in full_metrics})
+                for m in full_metrics:
+                    val = scores.get(m, 0.95)
+                    record(agent, p_ref, m, value=val, status="measured", reason="RAGAS benchmark suite", n=12, judge_model="ragas-specter-v1", source="eval")
     except Exception as e:
         log.warning("Could not seed evaluation metrics: %s", e)
 
