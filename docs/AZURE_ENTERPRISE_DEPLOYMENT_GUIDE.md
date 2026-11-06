@@ -699,3 +699,204 @@ In the event of database corruption or hardware failure:
 3. Remove stale WAL files: `rm -f /home/site/wwwroot/data/atlas.sqlite3-wal /home/site/wwwroot/data/atlas.sqlite3-shm`.
 4. Restore `.secret.key`.
 5. Restart the Web App: `az webapp start --name <backend-app> --resource-group <rg>`.
+
+---
+
+## 13. Current Azure Architecture: ChromaDB RAG, Real Specter AST, and Isolated Sandboxes
+
+The production platform integrates **ChromaDB Persistent Vector Store**, **Real NVIDIA Skill Specter AST Security Auditing**, and **Sandboxed Execution Runtimes** into Azure App Service and Azure Container Apps.
+
+```mermaid
+flowchart TD
+    subgraph AzureAppService["Azure App Service Linux (B1 / P1v3)"]
+        subgraph FastAPI["FastAPI + MAF 2.0 Backend Core"]
+            UploadEndpoint["POST /api/harness/upload-document"]
+            SpecterAuditor["NVIDIA Skill Specter AST Visitor (CWE-94, CWE-78, OWASP LLM01)"]
+            LiveTester["Skill Subprocess Tester (asyncio.create_subprocess_exec)"]
+            MultiDBGrounder["4-Tier Grounding Engine (ChromaDB + SQLite + AST + Gates)"]
+        end
+
+        subgraph PersistentStorage["Azure Files Mount: /data"]
+            SQLiteDB[("atlas.sqlite3 (WAL Mode)\nDocuments & Versions")]
+            ChromaDBStore[("ChromaDB Vector Store\nCollections: proj_{id}")]
+            Sandboxes["Sandboxed Worktrees: /data/projects/{id}/sandbox"]
+        end
+    end
+
+    UploadEndpoint -->|1. Insert Spec| SQLiteDB
+    UploadEndpoint -->|2. Heading Chunk & Embed| ChromaDBStore
+    LiveTester -->|3. AST Scan & Risk Score| SpecterAuditor
+    LiveTester -->|4. Isolated Exec (30s timeout)| Sandboxes
+    MultiDBGrounder -->|Semantic Similarity| ChromaDBStore
+    MultiDBGrounder -->|Specs & Findings| SQLiteDB
+```
+
+### 13.1 ChromaDB Persistent Storage on Azure Files
+In Azure App Service Linux, ephemeral container instances recycle their root disk (`/`) upon restart. To persist vector embeddings and project documents across deployments:
+1. **Mount Azure Files Share:** An Azure Storage Account File Share is mounted to `/data` (or `/home/site/wwwroot/data`).
+2. **Persistent Directory Structure:**
+   * `/data/atlas.sqlite3` — SQLite relational database with WAL journal.
+   * `/data/chromadb/` — Persistent ChromaDB vector database with ONNX embedding cache.
+   * `/data/projects/{project_id}/` — Target repository sandboxes and worktrees.
+3. **ChromaDB Fallback Resilience:** If disk latency or CIFS locks encounter transient delays, `RAGVectorStore` seamlessly initializes an in-memory client for immediate query processing while logging an audit event.
+
+### 13.2 Real NVIDIA Skill Specter AST Scanning in Azure
+Every skill uploaded or tested in the Azure environment is statically analyzed by `PythonASTSecurityVisitor` before any subprocess is spawned:
+* **Risk Score $\ge 40$:** Immediately rejected with HTTP 400 and logged to the Azure Application Insights audit ledger.
+* **Risk Score $< 15$:** Approved as `VERIFIED / PRODUCTION READY (Grade A+)`.
+* **Execution Boundary:** Subprocesses execute strictly with `shell=False`, clean environment variables (`clean_sandbox_env()`), and a 30-second execution timeout guard (`asyncio.wait_for`).
+
+---
+
+## 14. Enterprise Feature Handling, Role-Based Governance, & Access Control in Azure
+
+Rather than managing user permissions and tool access through static UI toggles, the enterprise deployment enforces strict **Role-Based Access Control (RBAC)**, **Admin-Gated Tool Provisioning**, and **Cryptographic Policy Logging**:
+
+| Feature / Capability | How It Is Handled in Azure | Admin Provisioning & Governance Policy | Audit & Compliance Traceability |
+|---|---|---|---|
+| **MCP Server Registry & Tools** | MCP servers run either as local subprocesses inside the App Service sandbox or as private microservices in Azure Container Apps (ACA) connected via Virtual Network (VNet). | **Admin Approval Required:** Only users with the `admin` role can register, configure, or activate MCP servers. Tools are categorized by risk (Read-Only, Actionable, Code Modification). Admin assigns specific tool permissions to user profiles (`qe_lead`, `ba`, `developer`). | Every MCP tool invocation is intercepted by `ApprovalManager`, signed with HMAC SHA-256, and appended to the immutable `ledger` table with user identity and timestamp. |
+| **Collaborator Invitation & Access** | Project sharing is strictly bound to authorized enterprise identities synchronized via Microsoft Entra ID (Azure AD) or the centralized SQLite `users` directory. | **Admin-Authorized Pool:** A project owner or developer can only add collaborators if an **Admin has first provisioned them** as active users with an assigned role. Unauthorized external emails are strictly rejected. | Collaborator addition requests trigger a governance review event. Changes to project membership are recorded in the audit trail with inviter identity, role, and approval timestamp. |
+| **Direct Document Ingestion (BRD/Specs)** | Multi-format upload endpoint (`POST /api/harness/upload-document`) parses `.md`, `.txt`, `.docx`, and `.pdf` files into structured text. | Documents are classified by kind (`brd`, `prd`, `test_plan`, `test_cases`). File size limits are enforced by Azure App Gateway (max 200MB). Content is scrubbed for credentials via `redact()`. | Automatically assigned a zero-padded Governance ID (e.g. `MCPM-DOC-001`). Indexed in SQLite version history with author SHA-256 signature and indexed in ChromaDB for RAG grounding. |
+| **Skill Creator Studio & Live Testing** | Synthesizes standard Agent Skills (`SKILL.md`, `scripts/run.py`, `evals/evals.json`) and runs live test matrices. | Dynamic code generation enforces strict AST security screening via NVIDIA Skill Specter. Admin can disable the Skill Creator Studio via `SKILL_CREATION_ENABLED=false` app setting. | Scaffolding events, test execution stdout/stderr logs, and Specter security findings are recorded in `run_failures` and the telemetry stream. |
+| **8 Human-in-the-Loop Quality Gates (G0–G7)** | Gate approval actions require cryptographic authorization from designated role holders (`admin`, `qe_lead`, `ba`). | Gates G0–G7 require explicit approval from authorized roles before workflow advancement. Rejections require mandatory textual feedback (`reason`). | Every gate approval generates an HMAC SHA-256 signature chained to the previous ledger entry, creating an immutable cryptographic audit trail. |
+| **Model Registry & Token Quotas** | Centralized LLM orchestration via Azure OpenAI Service or OpenAI-compatible endpoints with streaming SSE. | Admin defines daily, weekly, and monthly token budgets per user profile. Quotas automatically reset based on Azure region timezone. | Usage metrics (`prompt_tokens`, `completion_tokens`, latency ms) are recorded per call in `model_calls` and reported in the Observability dashboard. |
+
+---
+
+## 15. Complete Step-by-Step Azure Deployment Guide (Azure CLI Runbook)
+
+Follow this deterministic guide to deploy the entire Agentic QE Platform to Azure from scratch using the Azure CLI (`az`).
+
+### Step 1: Login & Resource Group Creation
+```bash
+# 1. Login to Azure
+az login
+
+# 2. Set active subscription
+az account set --subscription "<your-subscription-id>"
+
+# 3. Create Resource Group in eastus2
+az group create --name rg-agentic-qe-prod --location eastus2
+```
+
+### Step 2: Storage Account & Azure Files Share Creation (Persistent Data)
+```bash
+# 1. Create Azure Storage Account (Standard LRS)
+az storage account create \
+  --name stagentharnessprod \
+  --resource-group rg-agentic-qe-prod \
+  --location eastus2 \
+  --sku Standard_LRS \
+  --kind StorageV2
+
+# 2. Create Azure File Share for database, ChromaDB, and sandboxes
+az storage share create \
+  --account-name stagentharnessprod \
+  --name qe-persistent-data \
+  --quota 50
+```
+
+### Step 3: Create App Service Plan (Linux B1)
+```bash
+# Create Basic B1 Linux plan (~$12.41/month)
+az appservice plan create \
+  --name plan-agentic-qe-prod \
+  --resource-group rg-agentic-qe-prod \
+  --location eastus2 \
+  --is-linux \
+  --sku B1
+```
+
+### Step 4: Create & Configure Backend App Service
+```bash
+# 1. Create Python 3.12 Web App
+az webapp create \
+  --name app-agentic-qe-api-prod \
+  --resource-group rg-agentic-qe-prod \
+  --plan plan-agentic-qe-prod \
+  --runtime "PYTHON:3.12"
+
+# 2. Mount Azure File Share to /data
+STORAGE_KEY=$(az storage account keys list --account-name stagentharnessprod --resource-group rg-agentic-qe-prod --query "[0].value" -o tsv)
+
+az webapp config storage-account add \
+  --resource-group rg-agentic-qe-prod \
+  --name app-agentic-qe-api-prod \
+  --custom-id QEPersistentData \
+  --storage-type AzureFiles \
+  --account-name stagentharnessprod \
+  --share-name qe-persistent-data \
+  --access-key "$STORAGE_KEY" \
+  --mount-path /data
+
+# 3. Set Backend Environment Settings
+az webapp config appsettings set \
+  --resource-group rg-agentic-qe-prod \
+  --name app-agentic-qe-api-prod \
+  --settings \
+    WEBSITES_PORT=8000 \
+    WEBSITES_CONTAINER_START_TIME_LIMIT=1800 \
+    ATLAS_DATA_DIR=/data \
+    ATLAS_SQLITE_JOURNAL=wal \
+    ATLAS_SECRET_KEY="generate-a-secure-64-char-random-string" \
+    ATLAS_ADMIN_USERNAME="enterprise-admin" \
+    ATLAS_ADMIN_PASSWORD="Choose-A-Strong-Master-Password-123!" \
+    ATLAS_ALLOWED_ORIGINS="https://app-agentic-qe-ui-prod.azurewebsites.net" \
+    OPENAI_API_KEY="your-azure-openai-key" \
+    OPENAI_BASE_URL="https://your-resource.openai.azure.com/v1" \
+    DEFAULT_MODEL="gpt-4o"
+```
+
+### Step 5: Create & Configure Frontend Web App
+```bash
+# 1. Create Node.js 22 Web App
+az webapp create \
+  --name app-agentic-qe-ui-prod \
+  --resource-group rg-agentic-qe-prod \
+  --plan plan-agentic-qe-prod \
+  --runtime "NODE:22-lts"
+
+# 2. Set Frontend Environment Settings
+az webapp config appsettings set \
+  --resource-group rg-agentic-qe-prod \
+  --name app-agentic-qe-ui-prod \
+  --settings \
+    PORT=3000 \
+    WEBSITES_PORT=3000 \
+    ATLAS_BACKEND_URL="https://app-agentic-qe-api-prod.azurewebsites.net" \
+    NODE_OPTIONS="--max-old-space-size=1024"
+```
+
+### Step 6: Deploy Application Packages via Kudu Zip Deploy
+```bash
+# 1. Generate deployment packages locally
+python3 scripts/package_azure_kudu.py
+
+# 2. Deploy Backend package
+az webapp deployment source config-zip \
+  --resource-group rg-agentic-qe-prod \
+  --name app-agentic-qe-api-prod \
+  --src dist/azure/backend-package.zip
+
+# 3. Deploy Frontend package
+az webapp deployment source config-zip \
+  --resource-group rg-agentic-qe-prod \
+  --name app-agentic-qe-ui-prod \
+  --src dist/azure/frontend-package.zip
+```
+
+### Step 7: Verify Production Health
+```bash
+# 1. Test backend health endpoint
+curl -i https://app-agentic-qe-api-prod.azurewebsites.net/api/health
+
+# 2. Test ChromaDB vector query endpoint
+curl -i https://app-agentic-qe-api-prod.azurewebsites.net/api/harness/rag-query \
+  -H "Content-Type: application/json" \
+  -d '{"query": "system architecture", "projectId": "prj_mcp_market"}'
+
+# 3. Stream live container logs
+az webapp log tail \
+  --resource-group rg-agentic-qe-prod \
+  --name app-agentic-qe-api-prod
+```

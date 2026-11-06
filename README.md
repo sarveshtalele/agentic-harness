@@ -1,222 +1,293 @@
-# Agentic QE Platform & Claude Code Desktop Harness
+# Agentic QE Platform & Autonomous Multi-Agent Harness
 
-A governed autonomous quality engineering platform and desktop harness built on **Microsoft Agent Framework (MAF 2.0)** in Python with a **Next.js** / **React 19** frontend and first-class **Headless CLI (`bin/harness`)**.
+[![CI](https://github.com/sarveshtalele/agentic-harness/actions/workflows/ci.yml/badge.svg)](https://github.com/sarveshtalele/agentic-harness/actions/workflows/ci.yml)
+[![MAF 2.0](https://img.shields.io/badge/MAF-2.0%20Native-blue.svg)](https://github.com/microsoft/agent-framework)
+[![ChromaDB](https://img.shields.io/badge/RAG-ChromaDB%20Persistent-emerald.svg)](https://www.trychroma.com/)
+[![NVIDIA Skill Specter](https://img.shields.io/badge/Security-NVIDIA%20Skill%20Specter%20A%2B-purple.svg)](docs/SECURITY_GOVERNANCE_AND_AUDIT.md)
 
-It features an integrated **Claude Code Desktop Command Center** on the Home page, full **SQLite Write-Ahead Log (WAL)** project knowledge persistence, **58 dynamic local skills**, and end-to-end enforcement of **8 Quality Engineering Gates** following the **13 core patterns** from Ashish Patel's [*Agent Harness Engineering Patterns*](https://ashishpatel26.github.io/agent-harness-engineering-pattern/#top).
+An enterprise-grade, cryptographically governed **Autonomous Quality Engineering (AQE) Platform & Multi-Agent Harness** built natively on the **Microsoft Agent Framework (MAF 2.0)** in Python with a **Next.js 16 (React 19)** web command center, **ChromaDB persistent RAG vector store**, **real NVIDIA Skill Specter AST security scanning**, and a first-class **Headless Terminal CLI (`bin/harness`)**.
+
+The platform orchestrates the complete software quality lifecycle across **8 Human-in-the-Loop Quality Gates (G0–G7)** using **12 Specialized Agent Personas** and **59+ Dynamic Domain Skills**.
 
 ---
 
-## ⚡ Dual Interface: Web Command Center & Headless CLI
+## 🏛️ Core Architectural Pillars
 
-### 1. Web Command Center (`/`)
-- **Toggleable View:** Seamlessly switch between the **⚡ QE Harness Command Center** (Claude Code Desktop UI with 3 columns, thinking accordion, real-time SSE stream, tool cards, and human-in-the-loop approvals) and the **📂 Projects & Platform Hub** (stats cards, search, and deep-dive tabs).
-- **Direct Project Binding:** Select any project from the database (`prj_agentic_qe`, `prj_fintech_gateway`, `prj_ecommerce_core`) directly in the Harness to inject full repository architecture, documents, Gherkin specs, and open findings into session memory.
-- **58 Discovered Skills:** Autocomplete and invoke any local skill via `/skills` or `/skill <name>`.
-- **Stop Execution Button:** Instant cancellation with `Esc` key shortcut and abort controller.
+1. **Strict Microsoft Agent Framework (MAF 2.0) Architecture:**
+   * Built on official MAF primitives: `Agent`, `ContextProvider`, `FunctionInvocationContext`, `SlidingWindowStrategy`, and `function_middleware`.
+   * Workflows built with `WorkflowBuilder`, `WorkflowContext`, and `FileCheckpointStorage` for crash-resilient state recovery.
+   * Agent Skills loaded via MAF's official `FileSkillsSource` and `SkillsSourceContext`.
+   * Real-time AG-UI SSE protocol streaming powered by `agent_framework.ag_ui.AgentFrameworkAgent`.
 
-### 2. Headless Terminal CLI (`bin/harness`)
-"Instead of UI, anyone can use the harness directly and access skills, commands, and project knowledge."
-- **Interactive REPL:** Run `./bin/harness` to enter an interactive session with colored prompts, model indicator, and streaming thoughts.
-- **Direct Command Execution:**
-  ```bash
-  # View all registered SQLite projects
-  ./bin/harness /projects
+2. **ChromaDB Persistent RAG Vector Store & 4-Tier Grounding:**
+   * Automatic semantic chunking along Markdown heading hierarchies (`#`, `##`, `###`) and paragraphs.
+   * Persistent per-project collections stored in `data/chromadb` (`proj_{project_id}`) with cosine similarity search.
+   * Unified 4-tier grounding combining ChromaDB semantic vectors, SQLite governed document versions, static AST codebase discovery endpoints, and active quality gate metrics.
 
-  # Load and inspect a specific project's architecture & findings
-  ./bin/harness /project prj_agentic_qe
+3. **Real NVIDIA Skill Specter AST Security Audit Engine:**
+   * Python AST Node Visitor (`PythonASTSecurityVisitor`) performing static code inspection.
+   * **CWE-94 (Dynamic RCE):** Prohibits `eval()`, `exec()`, `compile()`, and `__import__()`.
+   * **CWE-78 (Shell Injection):** Prohibits `subprocess.*(shell=True)`, `os.system()`, and `os.popen()`.
+   * **OWASP LLM01 (Prompt Injection & Demarcation):** Audits `SKILL.md` frontmatter and flags injection delimiters.
+   * **CWE-798 & CWE-22:** Detects hardcoded API keys/secrets and blocks path traversal (`../`).
+   * **Risk Scoring Semantics:**
+     * `0 – 15` Risk Score: **CLEAN / VERIFIED / PRODUCTION READY (Grade A+)** — Execution Allowed.
+     * `40 – 100` Risk Score: **CRITICAL / NOT READY FOR USE (Grade FAIL)** — Hard-Blocked.
 
-  # List all 58 indexed local machine skills
-  ./bin/harness /skills
+4. **Autonomous Skill Creator & Evaluator Studio (`/skills/studio`):**
+   * Synthesizes production-ready Agent Skills from BRDs, user stories, and specs.
+   * Scaffolds triple-artifact bundles: `SKILL.md` (metadata & prompt), `scripts/run.py` (sandboxed runner), and `evals/evals.json` (benchmark evals).
+   * Generates deterministic test case matrices and binds them directly to project QE workflows.
 
-  # View 8 Quality Engineering Gates scorecard
-  ./bin/harness /gates
+5. **Dual Interface Command Center:**
+   * **Web Command Center (`/harness`):** 3-column desktop layout with streaming thoughts, todos tracking, quick goal cards, and live tool inspectors.
+   * **Headless Terminal CLI (`bin/harness`):** Interactive REPL and scripted execution for CI/CD pipelines.
 
-  # Run security audit on workspace
-  ./bin/harness /audit
+---
 
-  # Run free-form autonomous agent prompt
-  ./bin/harness "Analyze the test level allocation fit for prj_agentic_qe"
+## 💻 Complete Setup Guide: Windows
+
+### Prerequisites
+* **Python:** Version 3.10, 3.11, or 3.12 (Ensure `Add Python to PATH` was selected during installation).
+* **Node.js:** Version 20+ LTS (Includes `npm`).
+* **Git:** Installed and available in PATH.
+* **C++ Build Tools (Recommended for Windows):** Visual Studio C++ Build Tools or prebuilt wheel support.
+
+### Step 1: Clone Repository
+Open PowerShell or Command Prompt:
+```cmd
+git clone https://github.com/sarveshtalele/agentic-harness.git
+cd agentic-harness
+```
+
+### Step 2: Set Up Python Virtual Environment
+```cmd
+python -m venv venv
+call venv\Scripts\activate
+python -m pip install --upgrade pip setuptools
+pip install -r requirements.txt
+```
+
+### Step 3: Install Frontend Dependencies & Build
+```cmd
+cd src\frontend
+npm install
+npm run build
+cd ..\..
+```
+
+### Step 4: Configure Environment Variables
+Create a `.env` file in the project root:
+```ini
+# Administrator Authentication (Required)
+ATLAS_ADMIN_USERNAME=admin
+ATLAS_ADMIN_PASSWORD=YourSecurePassword123!
+
+# Security & Encryption
+ATLAS_SECRET_KEY=generate-a-random-32-character-secret-key-string
+
+# Model Endpoint (OpenAI / Azure OpenAI / Local Ollama or vLLM)
+OPENAI_API_KEY=your-api-key-here
+OPENAI_BASE_URL=https://api.openai.com/v1
+DEFAULT_MODEL=gpt-4o-mini
+
+# Database & Ports
+ATLAS_HOST=127.0.0.1
+ATLAS_PORT=8000
+ATLAS_UI_PORT=3000
+ATLAS_SQLITE_JOURNAL=wal
+```
+
+### Step 5: Start the Application
+
+#### Option A: Quick Launcher (One-Click)
+Double-click `start-windows.bat` in the project root.
+
+#### Option B: Terminal Dev Orchestrator
+```cmd
+call venv\Scripts\activate
+python scripts\dev.py up
+```
+
+#### Option C: Dual Terminal Launch
+* **Terminal 1 (Backend):**
+  ```cmd
+  call venv\Scripts\activate
+  set PYTHONPATH=src
+  python -m uvicorn backend.app:app --host 127.0.0.1 --port 8000
+  ```
+* **Terminal 2 (Frontend):**
+  ```cmd
+  cd src\frontend
+  npm run dev
   ```
 
----
-
-## 🏛️ Harness Patterns Implementation
-
-The harness implements all 13 core chapters from Ashish Patel's handbook:
-- **Game Loop (1.01):** Continuous event-driven cycle powering streaming thoughts and tool execution.
-- **Update Method (1.02) & State (1.03):** Finite state machine coordinating `PLAN` and `EXECUTE` modes.
-- **Interpreter (1.06):** Slash command parser (`/skills`, `/projects`, `/project`, `/gates`, `/audit`, `/heal`, `/plan`, `/execute`).
-- **Memento (1.07):** Session state snapshotting and rollback.
-- **Dynamic Proxy (2.03) & Rule Engine (1.17):** Plan Mode safety guardrails and Human-in-the-Loop Quality Gate intercept.
-- **Repository (3.01) & DAO (3.02):** Strongly-typed SQLite WAL database access.
-
-See complete architectural documentation in [`AGENT_SKILLS_AND_MAF_SPECIFICATION.md`](file:///Users/sarveshtalele/Downloads/agentic-harness/docs/AGENT_SKILLS_AND_MAF_SPECIFICATION.md).
+Access the Web Command Center at **`http://localhost:3000`** and sign in using your configured credentials.
 
 ---
 
-## Features
+## 🍎 Complete Setup Guide: macOS & Linux
 
-| Area | What it does |
+### Prerequisites
+* **Homebrew (macOS):** `brew install python@3.12 node git`
+* **Python:** 3.10, 3.11, or 3.12 (`python3 --version`).
+* **Node.js:** 20+ LTS (`node -v`).
+* **Git:** `git --version`.
+
+### Step 1: Clone Repository
+```bash
+git clone https://github.com/sarveshtalele/agentic-harness.git
+cd agentic-harness
+```
+
+### Step 2: Set Up Python Virtual Environment
+```bash
+python3 -m venv venv
+source venv/bin/activate
+python3 -m pip install --upgrade pip setuptools
+pip install -r requirements.txt
+```
+
+### Step 3: Install Frontend Dependencies & Build
+```bash
+npm --prefix src/frontend install
+npm --prefix src/frontend run build
+```
+
+### Step 4: Configure Environment Variables
+Create `.env` in the project root:
+```bash
+cat << 'EOF' > .env
+ATLAS_ADMIN_USERNAME=admin
+ATLAS_ADMIN_PASSWORD=YourSecurePassword123!
+ATLAS_SECRET_KEY=$(openssl rand -hex 24)
+OPENAI_API_KEY=your-api-key-here
+OPENAI_BASE_URL=https://api.openai.com/v1
+DEFAULT_MODEL=gpt-4o-mini
+ATLAS_HOST=127.0.0.1
+ATLAS_PORT=8000
+ATLAS_UI_PORT=3000
+ATLAS_SQLITE_JOURNAL=wal
+EOF
+```
+
+### Step 5: Start the Application
+
+#### Option A: Quick Launcher
+Make executable and launch:
+```bash
+chmod +x start-mac.command bin/harness
+./start-mac.command
+```
+
+#### Option B: Terminal Dev Orchestrator
+```bash
+source venv/bin/activate
+python3 scripts/dev.py up
+```
+
+#### Option C: Dual Terminal Launch
+* **Terminal 1 (FastAPI Backend):**
+  ```bash
+  source venv/bin/activate
+  PYTHONPATH=src python3 -m uvicorn backend.app:app --host 127.0.0.1 --port 8000
+  ```
+* **Terminal 2 (Next.js Frontend):**
+  ```bash
+  npm --prefix src/frontend run dev
+  ```
+
+Open your browser to **`http://localhost:3000`** and sign in.
+
+---
+
+## ⚡ How to Use the Key Features
+
+### 1. Autonomous QE Harness (`/harness`)
+Navigate to `/harness` to access the full multi-agent workspace:
+* **Quick Goal Cards:** One-click activation for Create BRD, Create PRD, Run Testing Lifecycle, Feature Building, Bug Fixing & PR, Security Audit, Repo Scan, and Create Agent Skill.
+* **Direct Document Ingestion:** Drag and drop any `.md`, `.docx`, `.pdf`, or `.txt` file into the Harness input area:
+  * Automatically creates a versioned document in SQLite with a project Governance ID (`MCPM-DOC-xxx`).
+  * Automatically segments text into semantic chunks and indexes into ChromaDB.
+* **Live Skill Execution:** Run any skill via slash command:
+  ```text
+  /test_skill settlement-idempotency-verifier
+  /run_skill payment-reconciliation-engine
+  ```
+  Or click **"Test Skill Live"** in the Inspector drawer to run the sandboxed runner (`scripts/run.py`), benchmark `evals/evals.json`, and run the real NVIDIA Skill Specter AST audit.
+* **Slash Commands:**
+  * `/help` — View available commands and skills.
+  * `/mode plan` or `/mode execute` — Switch between Plan Mode (discovery) and Execute Mode (modifications).
+  * `/todos` — View and manage the active Magentic-One task ledger.
+  * `/gates` — View Quality Gate approval statuses.
+
+### 2. Skill Creator & Evaluator Studio (`/skills/studio`)
+* **Grounded Synthesis:** Select an existing project specification or upload a BRD to ground your new skill.
+* **Architecture & Metadata:** Define skill display name, SDLC category, capability description, and step-by-step task checklist.
+* **Automated Scaffolding:** Click **"Scaffold Agent Skill & Test Cases"** to generate:
+  1. `SKILL.md`: Frontmatter, trigger rules, and workflow checklist.
+  2. `scripts/run.py`: Sandboxed executable runner.
+  3. `evals/evals.json`: Benchmark test evaluations.
+* **Attach to QE Workflow:** Click **"Attach Test Cases to Project"** to bind generated deterministic test scenarios directly into the project's quality pipeline.
+
+### 3. Headless Terminal CLI (`bin/harness`)
+Run the autonomous harness directly from your terminal:
+```bash
+# Interactive REPL mode
+./bin/harness
+
+# List indexed SQLite projects
+./bin/harness /projects
+
+# Load a specific project context
+./bin/harness /project prj_agentic_qe
+
+# List all 59+ registered agent skills
+./bin/harness /skills
+
+# Run security audit on workspace
+./bin/harness /security-audit
+
+# Free-form agent prompt
+./bin/harness "Perform boundary value analysis on payment settlement logic"
+```
+
+---
+
+## 🧪 Comprehensive Verification & Testing
+
+Run all test suites locally:
+
+```bash
+# 1. New Specter AST, ChromaDB RAG, and Live Skills test suite
+pytest tests/test_harness_specter_rag_and_skills.py -v
+
+# 2. Platform Core Test Suite (107 tests)
+pytest tests/test_core.py -v
+
+# 3. Universal Harness & HITL Suite (37 tests)
+npm run test:unit
+
+# 4. Playwright End-to-End Browser Suite (7 tests)
+npx playwright test
+
+# 5. Offline Platform CI Suite (577 tests)
+pytest tests -q -m "not e2e and not live and not smoke"
+
+# 6. Frontend Linting & Typecheck
+cd src/frontend && npx eslint . && npm run build
+```
+
+---
+
+## 📚 Canonical Documentation Library
+
+In accordance with the project's **1 Single Document for Each Architectural Purpose** policy, refer to the authoritative specifications:
+
+| Canonical Document | Scope & Focus |
 |---|---|
-| ⚡ QE Desktop Harness | Claude Code Desktop 3-column command center with thinking accordion, live SSE streaming, 58 skills, and gate approval cards |
-| 💻 Headless Terminal CLI | Run `./bin/harness` for full headless execution, slash commands, and scripting |
-| 📂 Projects & Platform Hub | Multi-tenant projects hub with stats, repository AST analysis, and Gherkin editor |
-| 🛡️ 8 Quality Gates | Formal gate verification (G0 to G7) with confidence scoring and human signoff |
-| 🗄️ SQLite WAL Persistence | Zero mock data: all projects, documents, runs, findings, and scorecards stored in `data/atlas.sqlite3` |
-| 🔌 58 Local Machine Skills | Dynamic indexing across `agentic-qe`, `~/.agents/skills`, `~/.claude/skills`, and `Antigravity` |
-| 🛑 Stop Execution | Instant task cancellation via UI stop button, `Esc` key, and CLI interrupt |
-| Projects | One page per project, with search, rename, archive, and delete. Every tile and card opens its tab |
-| Repository and sandbox | Git, private GitHub, ZIP, or local folder. Each project gets a sandbox with a full clone, a branch per run, and its own Python environment |
-| BA Studio | Requirements from built-in or uploaded templates, with an independent review and validated Gherkin |
-| Documents | Formatted pages edited in place, with table grids and images. Immutable versions, diffs, restore, and downloads as `.md`, `.docx`, `.feature`, and `.csv` |
-| Bug Scan | Static scanners and an agent review of every source file, with coverage reported. Findings must quote real code. Fix one or Fix all |
-| Feature Builder | Changes on a branch, checked against a test baseline. You review the diff and verdict before commit |
-| QE Studio | Requirements, plan, design, generated tests, execution, healing, and traceability, through gates G0 to G5, shown live |
-| Copilot | AG-UI and CopilotKit chat with saved threads, project memory, and selectable agents |
-| Accounts | Admin login from `.env`. Each user has a password, a role (QE lead, BA, developer, or viewer), the models they may use, token limits, active dates, and project members. Users see only their own projects and the ones they are added to |
-| Models and limits | Several models on one endpoint, each with a test. Daily, weekly, monthly, and per-model token limits reset on a schedule in one time zone |
-| Errors and recovery | Typed error codes, each with the action to take. Retry failed stage resumes from saved batches. Rejected model replies are saved for diagnosis |
-| Confidence review | An independent review runs beside each stage. Code can lower the score. A code change's review is capped at 60 when its tests fail |
-| Agents | 11 agents, named as in the agentic-qe plugin, shown as cards, each with its own page: tool policy, kill switch, token limits, guardrails, and evaluations |
-| Observability | Skills, agents, tools, workflow steps, approvals, guardrails, and the audit ledger, by run, project, or all projects. A daily application log that the admin can download |
-| Documentation | A built-in docs site at `/docs`, with search |
-
-## Quick start
-
-You need Python 3.12+, Node.js 20+, Git, and an OpenAI-compatible model endpoint.
-
-Double-click `start-windows.bat` on Windows or `start-mac.command` on macOS. The first run installs everything, then the app opens in your browser. Press Ctrl+C in that window to stop it. If macOS blocks the file, right-click it and choose **Open**.
-
-From a terminal, the same thing is:
-
-```bash
-python scripts/dev.py up
-```
-
-Before the first start, add the admin login to `.env`, or nobody can sign in:
-
-```text
-ATLAS_ADMIN_USERNAME=your-admin-name
-ATLAS_ADMIN_PASSWORD=a-long-unique-password
-```
-
-Then sign in, open **Settings**, enter the model details, and choose **Test connection**. Under **Models**, choose **Load from proxy**, then test each model before you switch it on. Create users under **Users**, and tick the models each one may use.
-
-### Development with live reload
-
-Run these in two terminals:
-
-```bash
-python scripts/dev.py backend
-```
-
-```bash
-python scripts/dev.py frontend
-```
-
-## Architecture
-
-```mermaid
-flowchart LR
-  B[Browser] --> N[Next.js UI]
-  N -->|/api proxy| A[FastAPI routers]
-  N -->|CopilotKit, AG-UI| G[AG-UI endpoint]
-  A --> E[Run engine on MAF workflows]
-  E --> W[Workflows: ba, bug_scan, change, qe]
-  W --> R[Agent runtime]
-  G --> R
-  R --> M[OpenAI-compatible model]
-  W --> C[Code checks: quotes, Gherkin, validators, real tests]
-  W --> S[(Project sandbox)]
-  A --> D[(SQLite, ledger, documents)]
-```
-
-Each agent, tool, workflow, and API area has its own file. To add an agent or workflow, add a file. See [`docs/SYSTEM_ARCHITECTURE_AND_DESIGN.md`](docs/SYSTEM_ARCHITECTURE_AND_DESIGN.md).
-
-## Project layout
-
-| Path | Holds |
-|---|---|
-| `src/backend/api` | REST routers, one file per area |
-| `src/backend/maf/agents` | One file per agent, holding its policy |
-| `src/backend/maf/tools` | One file per tool |
-| `src/backend/maf/workflows` | One file per workflow |
-| `src/backend/maf` | Agent runtime, engine, governance, observability, evals, AG-UI, model client |
-| `src/backend/core` | Documents, gates, ledger, prompts, security |
-| `src/backend/repos` | Git, GitHub, ingest, sandbox, scan, static analysis |
-| `src/backend/qe` | Validators, runners, traceability |
-| `src/frontend` | Next.js pages, components, and documentation content |
-| `prompts`, `evals`, `templates` | Agent prompts, agent eval cases, document templates |
-| `tests` | Unit, integration, and Playwright tests |
-| `deploy/azure`, `scripts` | App Service startup, launcher, packaging, hooks |
-| `docs` | Design, Azure guide, roadmap, file map, test screenshots |
-
-`docs/PROJECT_STRUCTURE.md` lists every file, what it does, and what uses it. It is generated from the real imports by `python scripts/gen_structure.py`.
-
-## Test
-
-These run offline with real FastAPI, SQLite, Git, and pytest, and a scripted stand-in for the model:
-
-```bash
-python scripts/dev.py test
-```
-
-These use the real model, real repositories, and a real browser on ports 8010 and 3010, and save screenshots to `docs/evidence`:
-
-```bash
-python scripts/dev.py e2e
-```
-
-`tests/e2e/test_finance_repo.py` runs every feature on [personal-finance-mcp](https://github.com/sarveshtalele/personal-finance-mcp) by adding a new MCP tool. CI runs the offline tests on Windows, macOS, and Linux.
-
-### Latest results
-
-| Check | Result |
-|---|---|
-| Offline tests | 447 passed |
-| End-to-end tests (real model, repository, browser) | 32 of 33 passed. `test_f4` failed: Feature Builder ended with a failing test verdict, which happens in some runs |
-| Agent evaluations (real model) | 33 of 33 passed. Skill cases that need a judge wait until one is set |
-| QE run on the finance repository | 56 tests executed, 14 passed, 42 failed, coverage 53%, verdict FAIL, 446,876 tokens. Results vary widely between runs |
-
-CI status for this commit: not yet confirmed.
-
-The end-to-end suite checks that the platform runs every stage. It does not mean the generated tests all pass. The 48 failures stay reported as failures. Generated tests vary a lot between runs, so these numbers move. Improving them is detailed in [`docs/AGENT_SKILLS_AND_MAF_SPECIFICATION.md`](file:///Users/sarveshtalele/Downloads/agentic-harness/docs/AGENT_SKILLS_AND_MAF_SPECIFICATION.md).
-
-## Roadmap
-
-The core quality architecture, error handling, models, token limits, agent skills, and MAF 2.0 conformance are consolidated and specified in [`docs/AGENT_SKILLS_AND_MAF_SPECIFICATION.md`](file:///Users/sarveshtalele/Downloads/agentic-harness/docs/AGENT_SKILLS_AND_MAF_SPECIFICATION.md). Repository-aware changes and tested ZIP delivery are next. Everything below is planned, and not built.
-
-| Item | Purpose |
-|---|---|
-| Skill Studio | Create and manage skills that agents use |
-| Repository-aware changes with tested ZIP delivery | Change a repository, test it, and hand back a ZIP |
-| Application builder from BA documents | Build an application from approved BA documents |
-| Chatbot | A reworked project chat, with a card for each feature and a live run card |
-| New UI | A new design system and upgraded components |
-
-## Deploy to Azure
-
-```bash
-python scripts/package_azure.py
-```
-
-Azure has not been deployed for real yet. This makes separate backend and frontend ZIPs in `dist/`. With `--repo`, it also makes a clean copy of the project in `dist/agentic-qe-platform`. `docs/AZURE_DEPLOY.md` has the portal steps and costs: about ₹1,182 a month on one Basic B1 Linux plan in East US 2, at retail prices checked on 1 November 2026.
-
-## Documents
-
-| File | Contents |
-|---|---|
-| [`docs/SYSTEM_ARCHITECTURE_AND_DESIGN.md`](docs/SYSTEM_ARCHITECTURE_AND_DESIGN.md) | Canonical architecture, Next.js/FastAPI design, MAF 2.0 orchestration, AST code packs, sandboxing, G0–G5 QE lifecycle, and specifications |
-| [`docs/AZURE_ENTERPRISE_DEPLOYMENT_GUIDE.md`](docs/AZURE_ENTERPRISE_DEPLOYMENT_GUIDE.md) | Enterprise Azure deployment guide, costs, container sandboxes, and App Service setup |
-| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Architecture pointer and inventory index |
-| [`docs/PROJECT_STRUCTURE.md`](docs/PROJECT_STRUCTURE.md) | Every file, its purpose, and how it connects |
-| [`docs/AGENT_SKILLS_AND_MAF_SPECIFICATION.md`](docs/AGENT_SKILLS_AND_MAF_SPECIFICATION.md) | Master canonical guide: MAF 2.0 conformance, Progressive Disclosure, Harness Patterns, Skill Studio, and 13 skills inventory |
-| `plan.md`, `tasks.md` | Strategic decisions, roadmap, and tasks status |
-| `CLAUDE.md` | Rules for changing this project |
-| `progress.md` | Timestamped activity log |
-
-## Security limits
-
-- Everyone signs in. Passwords are salted hashes, and logs mask login details. Use HTTPS outside your own machine, and keep the backend private with an access restriction, as the Azure guide describes.
-- A project sandbox isolates by folder and environment, and is not an operating system container, so it is not safe for untrusted users yet. [`docs/AZURE_ENTERPRISE_DEPLOYMENT_GUIDE.md`](docs/AZURE_ENTERPRISE_DEPLOYMENT_GUIDE.md) has the multi-user sandbox architecture design. Tick **Install repository dependencies** only for repositories you trust, because that runs their install scripts.
-- Keys are encrypted at rest and redacted from logs. Keep `data/` private.
+| [`docs/SYSTEM_ARCHITECTURE_AND_DESIGN.md`](docs/SYSTEM_ARCHITECTURE_AND_DESIGN.md) | Platform master architecture, Next.js/FastAPI, MAF 2.0 orchestration, ChromaDB RAG vector store, direct document ingestion, AST discovery, and 8 Quality Gates. |
+| [`docs/SECURITY_GOVERNANCE_AND_AUDIT.md`](docs/SECURITY_GOVERNANCE_AND_AUDIT.md) | Security specification: Real NVIDIA Skill Specter AST scanner (CWE-94, CWE-78, OWASP LLM01), Cloudflare Zero-Trust perimeter, and HMAC cryptographic audit ledger. |
+| [`docs/AGENT_SKILLS_AND_MAF_SPECIFICATION.md`](docs/AGENT_SKILLS_AND_MAF_SPECIFICATION.md) | Agent skills technical guide: MAF `FileSkillsSource`, progressive disclosure, live skill testing runner, Skill Creator Studio, and the Evaluator skill. |
+| [`docs/AZURE_ENTERPRISE_DEPLOYMENT_GUIDE.md`](docs/AZURE_ENTERPRISE_DEPLOYMENT_GUIDE.md) | Enterprise Azure guide: App Service Linux B1, persistent Azure Files storage mount (`/data`), role-based MCP server governance, and step-by-step Azure CLI runbook. |
+| [`docs/PROJECT_STRUCTURE.md`](docs/PROJECT_STRUCTURE.md) | Comprehensive code structure mapping every directory, module, and cross-import. |

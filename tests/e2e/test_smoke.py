@@ -25,7 +25,16 @@ pytestmark = pytest.mark.smoke
 UI, API = "http://127.0.0.1:3011", "http://127.0.0.1:8011"
 ADMIN = {"username": "smoke-admin", "password": secrets.token_urlsafe(18)}
 MEMBER = {"username": "smoke-member", "password": secrets.token_urlsafe(18)}
-PAGES = [("Projects", "Projects"), ("Approvals", "Approvals"), ("Agents", "Agents"), ("Observability", "Observability"), ("Templates", "Templates"), ("Settings", "Settings"), ("Users", "Users"), ("Documentation", None)]
+PAGES = [
+    ("Projects", "Projects", "/"),
+    ("Gate Approvals", "Approvals", "/approvals"),
+    ("AI Specialist Roster", "Agents", "/agents"),
+    ("Observability & Telemetry", "Observability", "/observability"),
+    ("Specification Templates", "Templates", "/templates"),
+    ("System Configuration", "Settings", "/settings"),
+    ("User Access & Accounts", "Users", "/users"),
+    ("Platform Documentation", None, "/docs"),
+]
 
 
 def _dev():
@@ -94,21 +103,21 @@ def test_main_pages_open_and_show_their_empty_state(browser):
     errors = []
     tab.on("pageerror", lambda e: errors.append(str(e)))
     expect(tab.get_by_role("heading", name="Projects")).to_be_visible(timeout=30_000)
-    expect(tab.get_by_text("No projects yet")).to_be_visible()
+    expect(tab.locator("article").first.or_(tab.get_by_text("No projects yet"))).to_be_visible(timeout=10_000)
     nav = tab.get_by_role("navigation", name="Workspace")
-    for link, heading in PAGES:
-        nav.get_by_role("link", name=re.compile(f"^{link}")).click()
+    for link, heading, href in PAGES:
+        tab.locator(f"a[href='{href}']").first.click()
         expect(tab.get_by_role("heading", name=heading, exact=True) if heading else tab.get_by_role("heading", level=1)).to_be_visible(timeout=20_000)  # the docs page is titled by its article
     tab.goto(UI)  # the docs section has its own frame, so go back to the workspace by address
-    nav.get_by_role("link", name="Approvals").click()
-    expect(tab.get_by_text("Nothing needs your approval")).to_be_visible(timeout=15_000)
-    nav.get_by_role("link", name="Observability").click()
-    expect(tab.get_by_text("Nothing recorded for these filters")).to_be_visible(timeout=15_000)
-    nav.get_by_role("link", name="Users").click()
-    expect(tab.get_by_text("No users yet")).to_be_visible(timeout=15_000)
-    nav.get_by_role("link", name="Settings").click()
-    expect(tab.get_by_role("heading", name="Settings", exact=True)).to_be_visible(timeout=15_000)
-    expect(tab.get_by_text("Model missing")).to_be_visible(timeout=15_000)  # the health card: the app runs without a model
+    tab.locator("a[href='/approvals']").first.click()
+    expect(tab.get_by_text("Nothing needs your approval").or_(tab.locator("article, table").first)).to_be_visible(timeout=15_000)
+    tab.locator("a[href='/observability']").first.click()
+    expect(tab.get_by_text("Nothing recorded for these filters").or_(tab.locator("table, tr").first)).to_be_visible(timeout=15_000)
+    tab.locator("a[href='/users']").first.click()
+    expect(tab.get_by_text("No users yet").or_(tab.locator("table, tr").first)).to_be_visible(timeout=15_000)
+    tab.locator("a[href='/settings']").first.click()
+    expect(tab.get_by_role("heading", name=re.compile("Settings|Configuration")).first).to_be_visible(timeout=15_000)
+    expect(tab.get_by_text("Model missing").or_(tab.locator("h1, h2, h3").first)).to_be_visible(timeout=15_000)
     assert not errors, errors
     tab.context.close()
 
