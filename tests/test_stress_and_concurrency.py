@@ -37,9 +37,9 @@ def test_stress_semantic_cache_1000_operations():
     assert elapsed < 1.0, f"Cache stress test took too long: {elapsed}s"
 
 
-def test_stress_concurrent_session_creation():
+def test_stress_concurrent_session_creation(tmp_path):
     """Verify thread-safe concurrent creation and retrieval of 30 distinct harness sessions."""
-    manager = AgentSessionManager()
+    manager = AgentSessionManager(base_dir=str(tmp_path / ".sessions"))
     session_ids = []
     
     def create_worker(idx):
@@ -86,9 +86,9 @@ def test_stress_qe_guardrails_command_validation_throughput():
     assert elapsed < 0.5, f"Guardrail command check throughput too slow: {elapsed}s"
 
 
-def test_stress_handoff_executor_delegation():
+def test_stress_handoff_executor_delegation(tmp_path):
     """Verify multi-agent handoff execution handles rapid delegation chains."""
-    manager = AgentSessionManager()
+    manager = AgentSessionManager(base_dir=str(tmp_path / ".sessions"))
     session = manager.create_session(name="Handoff Stress Session", project_id="prj_agentic_qe")
     
     handoff_targets = [

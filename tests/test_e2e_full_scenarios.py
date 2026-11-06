@@ -30,10 +30,10 @@ def setup_test_project():
 
 
 @pytest.mark.asyncio
-async def test_e2e_brd_python_calculator_generation():
+async def test_e2e_brd_python_calculator_generation(tmp_path):
     """Verify natural language request generates complete structured BRD with all 8 quality gates."""
     agent = HarnessAgent()
-    manager = AgentSessionManager()
+    manager = AgentSessionManager(base_dir=str(tmp_path / ".sessions"))
     session = manager.create_session("BRD Gen Test", mode="plan", project_id="prj_agentic_qe")
     llm_config = LLMConfig(provider="mock", model="mock-claude")
     prompt = "create a docuement for python clacuatlro react based application as BRD docuement"
@@ -70,9 +70,9 @@ async def test_e2e_brd_python_calculator_generation():
 
 
 @pytest.mark.asyncio
-async def test_e2e_multi_agent_handoff_delegation():
+async def test_e2e_multi_agent_handoff_delegation(tmp_path):
     """Verify handoff executor transitions context cleanly between personas."""
-    manager = AgentSessionManager()
+    manager = AgentSessionManager(base_dir=str(tmp_path / ".sessions"))
     session = manager.create_session("Handoff Test Session", mode="plan", project_id="prj_agentic_qe")
     handoff_exec = QEHandoffExecutor()
     

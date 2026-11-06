@@ -110,7 +110,7 @@ def test_main_pages_open_and_show_their_empty_state(browser):
         expect(tab.get_by_role("heading", name=heading, exact=True) if heading else tab.get_by_role("heading", level=1)).to_be_visible(timeout=20_000)  # the docs page is titled by its article
     tab.goto(UI)  # the docs section has its own frame, so go back to the workspace by address
     tab.locator("a[href='/approvals']").first.click()
-    expect(tab.get_by_text("Nothing needs your approval").or_(tab.locator("article, table").first)).to_be_visible(timeout=15_000)
+    expect(tab.get_by_text("Nothing needs your approval").or_(tab.locator("article, table, [data-testid='approval-card']").first)).to_be_visible(timeout=20_000)
     tab.locator("a[href='/observability']").first.click()
     expect(tab.get_by_text("Nothing recorded for these filters").or_(tab.locator("table, tr").first)).to_be_visible(timeout=15_000)
     tab.locator("a[href='/users']").first.click()

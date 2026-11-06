@@ -279,10 +279,17 @@ export default function SkillCreatorStudioPage() {
         setSkillName(res.name);
         setCategory(res.category || "custom-sdlc");
         setDescription(res.description || "");
-        if (Array.isArray(res.tasks) && res.tasks.length > 0) {
-          setTasks(res.tasks);
-        }
-        setSuccessMsg(`AI Auto-filled architecture for "${res.name}" (${res.category}) with ${res.tasks.length} tasks!`);
+        const resolvedTasks = (Array.isArray(res.tasks) && res.tasks.length > 0)
+          ? res.tasks
+          : [
+              `Ingest input payload and validate schema constraints for ${res.name}`,
+              `Verify precondition state and system readiness against specification rules`,
+              `Execute core ${res.name.toLowerCase()} operations and state transitions`,
+              `Validate postcondition assertions, error boundaries, and exception handling`,
+              `Emit cryptographically signed execution trace and sync quality gate status`,
+            ];
+        setTasks(resolvedTasks);
+        setSuccessMsg(`AI Auto-filled architecture for "${res.name}" (${res.category}) with ${resolvedTasks.length} tasks!`);
       }
     } catch (e: any) {
       // Robust local fallback
@@ -326,6 +333,17 @@ export default function SkillCreatorStudioPage() {
     setAttachedQeResult(null);
 
     try {
+      const finalTasks = tasks.length > 0 ? tasks : [
+        `Ingest input payload and validate schema constraints for ${skillName}`,
+        `Verify precondition state and system readiness against specification rules`,
+        `Execute core ${skillName.toLowerCase()} operations and state transitions`,
+        `Validate postcondition assertions, error boundaries, and exception handling`,
+        `Emit cryptographically signed execution trace and sync quality gate status`,
+      ];
+      if (tasks.length === 0) {
+        setTasks(finalTasks);
+      }
+
       // Send valid JSON payload via { json: { ... } }
       const res = await api("/skills/studio/scaffold", {
         json: {
@@ -333,7 +351,7 @@ export default function SkillCreatorStudioPage() {
           description: description || `Domain skill for ${skillName}.`,
           category,
           includeScript,
-          tasks,
+          tasks: finalTasks,
           projectId: targetProjectId || undefined,
           documentId: sourceMode === "project" ? selectedDocId || undefined : undefined,
           documentContent: sourceMode !== "project" ? customText || undefined : undefined,
@@ -790,27 +808,46 @@ export default function SkillCreatorStudioPage() {
                   </p>
 
                   <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
-                    {tasks.map((task, idx) => (
-                      <div key={idx} className="flex items-center gap-2 group">
-                        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded bg-indigo-100 text-[10px] font-mono font-bold text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">
-                          {idx + 1}
-                        </span>
-                        <input
-                          aria-label={`Task ${idx + 1}`}
-                          className={`${inputClass} !py-1 text-xs flex-1 min-w-0`}
-                          value={task}
-                          onChange={(e) => handleUpdateTask(idx, e.target.value)}
-                        />
+                    {tasks.length === 0 ? (
+                      <div className="py-2.5 px-3 rounded-lg border border-dashed border-indigo-300 dark:border-indigo-800 text-center bg-white/50 dark:bg-slate-900/40">
+                        <p className="text-[11px] text-slate-500 mb-2">No tasks defined yet. Add custom tasks below or insert a standard 5-step operational workflow.</p>
                         <button
                           type="button"
-                          onClick={() => handleDeleteTask(idx)}
-                          className="p-1 text-slate-400 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition"
-                          title="Remove task"
+                          onClick={() => setTasks([
+                            `Ingest input payload and validate schema constraints for ${skillName || "target domain"}`,
+                            `Verify precondition state and system readiness against specification rules`,
+                            `Execute core ${(skillName || "domain").toLowerCase()} operations and state transitions`,
+                            `Validate postcondition assertions, error boundaries, and exception handling`,
+                            `Emit cryptographically signed execution trace and sync quality gate status`,
+                          ])}
+                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
                         >
-                          <Trash2 className="h-3.5 w-3.5" />
+                          <Plus className="h-3 w-3" /> Insert Standard 5-Step Execution Workflow
                         </button>
                       </div>
-                    ))}
+                    ) : (
+                      tasks.map((task, idx) => (
+                        <div key={idx} className="flex items-center gap-2 group">
+                          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded bg-indigo-100 text-[10px] font-mono font-bold text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">
+                            {idx + 1}
+                          </span>
+                          <input
+                            aria-label={`Task ${idx + 1}`}
+                            className={`${inputClass} !py-1 text-xs flex-1 min-w-0`}
+                            value={task}
+                            onChange={(e) => handleUpdateTask(idx, e.target.value)}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteTask(idx)}
+                            className="p-1 text-slate-400 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition"
+                            title="Remove task"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      ))
+                    )}
                   </div>
 
                   <div className="mt-2.5 flex items-center gap-2">

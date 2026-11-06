@@ -2608,13 +2608,13 @@ export function HarnessView({
                   </span>
                 </div>
                 {currentSession?.todos && currentSession.todos.length > 0 ? (
-                  currentSession.todos.map((todo) => {
+                  currentSession.todos.map((todo, idx) => {
                     const isDone = Boolean(todo.completed || todo.status === "completed");
                     const rawTitle = typeof todo === "string" ? todo : (todo.title || todo.text || (todo as any).task || (todo as any).description || (todo as any).name || "");
-                    const taskTitle = rawTitle.trim() || "Active Workflow Task";
+                    const taskTitle = rawTitle.trim() || `Execution Task #${idx + 1}`;
                     return (
                       <div
-                        key={todo.id}
+                        key={todo.id || idx}
                         className={`flex items-start gap-2.5 rounded-lg border p-2.5 transition ${
                           isDone
                             ? "border-emerald-200 bg-emerald-50/40 dark:border-emerald-950 dark:bg-emerald-950/20"

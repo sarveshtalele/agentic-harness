@@ -228,7 +228,7 @@ export function ApprovalCard({ approval, projectId, onDecided }: { approval: any
     }
   };
   return (
-    <div className="space-y-3 rounded-xl border border-amber-500/50 bg-amber-500/5 p-4" data-testid="approval-card">
+    <article className="space-y-3 rounded-xl border border-amber-500/50 bg-amber-500/5 p-4" data-testid="approval-card">
       <div className="flex items-center gap-2">
         <Badge tone="amber">Approval needed</Badge>
         <h3 className="text-sm font-bold">{approval.title}</h3>
@@ -326,7 +326,7 @@ export function ApprovalCard({ approval, projectId, onDecided }: { approval: any
         <Button variant="success" busy={busy} disabled={!!payload.partial || !allowed || (rejects.length > 0 && !feedback.trim())} onClick={() => decide(true)}>Approve</Button>
         <Button variant="danger" busy={busy} disabled={!feedback.trim() || !allowed} onClick={() => decide(false)}>Send back</Button>
       </div>
-    </div>
+    </article>
   );
 }
 

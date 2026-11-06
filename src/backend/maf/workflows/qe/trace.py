@@ -8,11 +8,17 @@ from backend.maf.workflows.qe.heal import _records
 from backend.qe import confidence, execution, trace
 
 
+import re
+
 def _defect_body(records: list[dict]) -> str:
     if not records:
         return "No failed tests."
-    rows = "\n".join(f"| {_cell(r['test'])} | {r['classification']} | {_cell(r['evidence'][:200])} | {_cell(r['cause'])} | {_cell(r['fix'])} | {'yes' if r['healed'] else 'no'} |" for r in records)
-    return "| Test | Classification | Evidence | Cause | Fix | Healed |\n|---|---|---|---|---|---|\n" + rows
+    rows = []
+    for r in records:
+        raw_test = r.get("test", "")
+        test_name = re.sub(r"^.*?tests[./\\]+", "", raw_test).lstrip(".:/") or raw_test
+        rows.append(f"| {_cell(test_name)} | {r['classification']} | {_cell(r['evidence'][:200])} | {_cell(r['cause'])} | {_cell(r['fix'])} | {'yes' if r['healed'] else 'no'} |")
+    return "| Test | Classification | Evidence | Cause | Fix | Healed |\n|---|---|---|---|---|---|\n" + "\n".join(rows)
 
 
 async def qe_trace(rc: RunContext, state: dict) -> dict:
