@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { useProject } from "../../../../components/ProjectShell";
 import { Badge, Button, Card, ErrorNote, Field, inputClass, PageTitle, Spinner, useToast } from "../../../../components/ui";
+import { ConfirmModal } from "../../../../components/ConfirmModal";
 import { api, upload, when } from "../../../../lib/api";
 
 export default function RepositoryPage() {
@@ -130,6 +131,7 @@ function Details({ repo, project, busy, act, setRepo, refresh }: any) {
   const [path, setPath] = useState("");
   const [content, setContent] = useState("");
   const [filter, setFilter] = useState("");
+  const [showDisconnectModal, setShowDisconnectModal] = useState(false);
   useEffect(() => {
     api(`/projects/${project.id}/repo/tree`)
       .then((d) => setTree(Array.isArray(d?.files) ? d.files : []))
@@ -145,7 +147,6 @@ function Details({ repo, project, busy, act, setRepo, refresh }: any) {
     }
   };
   const disconnect = async () => {
-    if (!confirm("Remove the local copy of this repository from the project? The remote repository is not affected.")) return;
     await api(`/projects/${project.id}/repo`, { method: "DELETE" });
     setRepo(null);
     refresh();
@@ -159,7 +160,7 @@ function Details({ repo, project, busy, act, setRepo, refresh }: any) {
       <Card title={<span className="truncate">{repo?.url || "Repository"}</span>} actions={
         <div className="flex gap-2">
           {repo?.kind === "git" && <Button variant="secondary" busy={busy === "sync"} onClick={() => act("sync", () => api(`/projects/${project.id}/repo/resync`, { method: "POST" }))}><RefreshCw className="h-4 w-4" /> Re-sync</Button>}
-          <Button variant="danger" onClick={disconnect}><Unplug className="h-4 w-4" /> Disconnect</Button>
+          <Button variant="danger" onClick={() => setShowDisconnectModal(true)}><Unplug className="h-4 w-4" /> Disconnect</Button>
         </div>
       }>
         <p className="text-xs text-slate-500">
@@ -239,6 +240,17 @@ function Details({ repo, project, busy, act, setRepo, refresh }: any) {
       {log.length > 0 && (
         <Card title="Recent commits"><ul className="space-y-0.5 text-xs">{log.map((c: any) => <li key={c.sha || c.subject}><span className="mono text-slate-500">{(c.sha || "").slice(0, 10)}</span> {c.subject} <span className="text-slate-500">({c.author}, {c.date})</span></li>)}</ul></Card>
       )}
+
+      {/* Confirmation Modal for Disconnecting Repository */}
+      <ConfirmModal
+        isOpen={showDisconnectModal}
+        title="Disconnect Repository"
+        description="Remove the local copy of this repository from the project? The remote repository is not affected."
+        tone="danger"
+        confirmText="Disconnect"
+        onConfirm={disconnect}
+        onClose={() => setShowDisconnectModal(false)}
+      />
     </div>
   );
 }

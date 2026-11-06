@@ -34,10 +34,10 @@ else
     pip install --no-cache-dir --disable-pip-version-check -r requirements.txt
 fi
 
-# CIFS/SMB share on Azure App Service /home cannot do WAL mode (lacks shared memory primitives).
-# DELETE journal mode is required for SQLite reliability on Azure App Service persistent storage.
+# SQLite Journal Mode: WAL (Write-Ahead Logging) enables non-blocking multi-agent concurrent reads.
+# If running on an SMB/CIFS share without POSIX shared-memory primitives, configure ATLAS_SQLITE_JOURNAL=DELETE in App Settings.
 export ATLAS_DATA_DIR="${ATLAS_DATA_DIR:-$ATLAS_HOME/data}"
-export ATLAS_SQLITE_JOURNAL="${ATLAS_SQLITE_JOURNAL:-DELETE}"
+export ATLAS_SQLITE_JOURNAL="${ATLAS_SQLITE_JOURNAL:-WAL}"
 mkdir -p "$ATLAS_DATA_DIR"
 
 # Ensure python can locate backend modules

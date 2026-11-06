@@ -9,28 +9,55 @@ import { ModelPicker } from "../../../../components/ModelPicker";
 import { Badge, Button, Card, ErrorNote, Field, inputClass, PageTitle, useToast } from "../../../../components/ui";
 import { api, upload } from "../../../../lib/api";
 
-const DOMAIN_PRESETS = [
-  {
-    name: "ATM Machine",
-    title: "ATM Cash Dispenser & Switch System Specification",
-    brief: "Author an enterprise-grade Business Requirements Document (BRD) for an Automated Teller Machine (ATM) system with EMV chip card reader, encrypted PIN pad (3DES/AES), cash dispenser (multi-denomination cassettes), ISO-8583 banking switch messaging, offline failover, and strict cash retraction timeout.",
-  },
-  {
-    name: "Payment Gateway",
-    title: "Fintech Core Gateway & Settlement Engine",
-    brief: "Author a comprehensive Business Requirements Document (BRD) for a PCI-DSS Level 1 compliant online payment gateway with idempotent checkout, double-entry ledger bookkeeping, 3D Secure 2.0 authentication, webhooks, and automated refund reconciliation.",
-  },
-  {
-    name: "Calculator",
-    title: "Python Calculator Full-Stack Application",
-    brief: "Author a complete Business Requirements Document (BRD) for a high-precision Calculator application combining a React 18 frontend keypad with a Python AST backend supporting arbitrary decimal precision, history ledger, and zero eval() execution.",
-  },
-  {
-    name: "Cloud Checkout",
-    title: "Global E-Commerce Omnichannel Checkout",
-    brief: "Author a Business Requirements Document (BRD) for an omnichannel shopping cart and checkout platform with real-time inventory reservation, multi-currency conversion, tax calculation, and fraud prevention scoring.",
-  },
-];
+function getDomainPresets(projectName: string, repoUrl: string) {
+  const isMcp = projectName.toLowerCase().includes("mcp") || repoUrl.toLowerCase().includes("mcp");
+  if (isMcp) {
+    return [
+      {
+        name: "MCP Gateway & Registry",
+        title: "Model Context Protocol (MCP) Server Gateway & Discovered Tools Specification",
+        brief: "Author an enterprise-grade Business Requirements Document (BRD) for a Model Context Protocol (MCP) Gateway and Server Registry. Must specify dynamic STDIO and SSE transports, automated tool authorization flags, AST schema validation for tool input/output, rate limiting, and cryptographic execution logs.",
+      },
+      {
+        name: "Remote SSE Client",
+        title: "Enterprise MCP Remote SSE Streaming & Proxy Client Specification",
+        brief: "Author a comprehensive Business Requirements Document (BRD) for an enterprise Remote MCP SSE Proxy and Client. Includes HTTP/HTTPS token authentication, streaming event-source keep-alives, automatic reconnect with exponential backoff, and sandboxed isolated tool execution.",
+      },
+      {
+        name: "Tool Sandbox Isolation",
+        title: "Zero-Trust Subprocess Sandbox & MCP Security Policy Specification",
+        brief: "Author a complete Business Requirements Document (BRD) for an isolated subprocess execution sandbox running local NPX and Node MCP servers. Enforces strict env isolation, forbidden shell pattern detection, and token budget ceilings.",
+      },
+      {
+        name: "Traceability & Coverage",
+        title: "MCP End-to-End Traceability Matrix & Test Strategy Specification",
+        brief: "Author a formal Business Requirements Document (BRD) for full test traceability and contract verification covering Playwright browser automation tools, SQLite query engines, and GitHub Copilot endpoints.",
+      },
+    ];
+  }
+  return [
+    {
+      name: "Core Service & API",
+      title: `${projectName} Core Service & REST/GraphQL API Specification`,
+      brief: `Author an enterprise-grade Business Requirements Document (BRD) for ${projectName} defining core domain workflows, RESTful and streaming endpoints, payload validation schemas, idempotent transaction processing, and observability hooks.`,
+    },
+    {
+      name: "Auth & Access Control",
+      title: `${projectName} Role-Based Access Control (RBAC) & Security Policy`,
+      brief: `Author a comprehensive Business Requirements Document (BRD) for ${projectName} defining user authentication, cryptographic session cookies, permission matrices (Developer, Reviewer, Admin), and audit ledger trails.`,
+    },
+    {
+      name: "Data Model & Ledger",
+      title: `${projectName} Immutable Audit Ledger & Persistence Architecture`,
+      brief: `Author a complete Business Requirements Document (BRD) for ${projectName} specifying database schema, migration pipelines, append-only event logging, deterministic test assertions, and disaster recovery.`,
+    },
+    {
+      name: "E2E Quality & Oracles",
+      title: `${projectName} Deterministic Testing Lifecycle & Quality Gate Criteria`,
+      brief: `Author a complete Business Requirements Document (BRD) for ${projectName} establishing quality gate criteria (G0 to G5), Gherkin executable specifications, JUnit reporting, and automated healing workflows.`,
+    },
+  ];
+}
 
 export default function BAPage() {
   const { project, refresh } = useProject();
@@ -93,6 +120,7 @@ export default function BAPage() {
   );
   
   const template = safeTemplates.find((t) => t?.id === templateId);
+  const presets = getDomainPresets(project.name || "Project", project.repo?.url || "");
   
   const start = async () => {
     setBusy(true);
@@ -185,9 +213,9 @@ export default function BAPage() {
               <div>
                 <div className="mb-1.5 flex flex-wrap items-center justify-between gap-1 text-xs">
                   <span className="font-semibold text-slate-700 dark:text-slate-300">Project Brief</span>
-                  <div className="flex flex-wrap items-center gap-1">
-                    <span className="text-[10px] text-slate-400">Quick Presets:</span>
-                    {DOMAIN_PRESETS.map((p) => (
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className="text-[11px] font-semibold text-slate-400">Project Presets:</span>
+                    {presets.map((p) => (
                       <button
                         key={p.name}
                         type="button"
@@ -195,8 +223,9 @@ export default function BAPage() {
                           setBrief(p.brief);
                           setTitle(p.title);
                         }}
-                        className="rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-medium text-slate-700 hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition"
+                        className="inline-flex items-center gap-1 rounded-lg border border-indigo-200/80 bg-indigo-50/70 px-2 py-0.5 text-[11px] font-medium text-indigo-700 hover:border-indigo-400 hover:bg-indigo-100 dark:border-indigo-800/60 dark:bg-indigo-950/50 dark:text-indigo-300 dark:hover:bg-indigo-900/60 transition shadow-2xs"
                       >
+                        <Sparkles className="h-3 w-3 text-indigo-500" />
                         {p.name}
                       </button>
                     ))}
@@ -219,7 +248,7 @@ export default function BAPage() {
                     className={inputClass}
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    placeholder={template?.name || "e.g., ATM Machine Business Requirements Document"}
+                    placeholder={template?.name || `e.g., ${project.name || "System"} Business Requirements Document`}
                   />
                 </Field>
                 <Field label="Template format">

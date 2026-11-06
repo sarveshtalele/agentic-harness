@@ -1,6 +1,6 @@
 "use client";
 
-import { Play, Download, Sparkles, FolderArchive, Terminal, ArrowRight, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { Play, Download, Sparkles, FolderArchive, Terminal, ArrowRight, ShieldCheck, CheckCircle2, Sprout, Building2 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useProject } from "../../../../components/ProjectShell";
@@ -11,18 +11,19 @@ import { api } from "../../../../lib/api";
 
 const STAGES = [
   ["Intake", "G0", "intake"],
-  ["Discovery", "", "discovery"],
+  ["Discovery", "AST", "discovery"],
   ["Requirements", "G1", "requirements"],
   ["Test plan", "G2", "test_plan"],
   ["Test design", "G3", "test_cases"],
   ["Generate", "G4", "test_code"],
-  ["Execute & Heal", "", ""],
-  ["Traceability", "", "traceability"],
+  ["Execute & Heal", "G5-Exec", ""],
+  ["Traceability", "Matrix", "traceability"],
   ["Release", "G5", "release"],
 ];
 
 export default function QEPage() {
   const { project, gates, refresh } = useProject();
+  const [projectMode, setProjectMode] = useState<"brownfield" | "greenfield">("brownfield");
   const [install, setInstall] = useState(false);
   const [model, setModel] = useState("");
   const [docs, setDocs] = useState<any[]>([]);
@@ -74,7 +75,7 @@ export default function QEPage() {
     setError("");
     try {
       const res = await api(`/projects/${project.id}/runs`, {
-        json: { workflow: "qe", model, input: { install_deps: install } },
+        json: { workflow: "qe", model, input: { install_deps: install, mode: projectMode } },
       });
       if (res?.id) setRunId(res.id);
     } catch (e: any) {
@@ -88,7 +89,7 @@ export default function QEPage() {
   return (
     <div className="space-y-6">
       <PageTitle
-        title="QE Studio & Autonomous AI SDLC"
+        title="Autonomous QE & AI SDLC Lifecycle"
         subtitle="End-to-end quality engineering lifecycle from BRD intake to automated sandbox build, test generation, and setup ZIP package export."
         actions={
           <div className="flex items-center gap-2">
@@ -104,14 +105,55 @@ export default function QEPage() {
         }
       />
 
+      {/* Project Mode Selector (Greenfield vs Brownfield) */}
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-3.5 shadow-xs dark:border-slate-800 dark:bg-[#0b1329]">
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+            Lifecycle Strategy:
+          </span>
+          <div className="flex rounded-xl bg-slate-100 p-1 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+            <button
+              type="button"
+              onClick={() => setProjectMode("brownfield")}
+              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                projectMode === "brownfield"
+                  ? "bg-white text-indigo-700 shadow-sm dark:bg-indigo-950 dark:text-indigo-300 border border-slate-200 dark:border-indigo-800"
+                  : "text-slate-500 hover:text-slate-900 dark:hover:text-slate-300"
+              }`}
+            >
+              <Building2 className="h-3.5 w-3.5" />
+              <span>Brownfield (Scan Existing Codebase & Evolve)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setProjectMode("greenfield")}
+              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                projectMode === "greenfield"
+                  ? "bg-white text-emerald-700 shadow-sm dark:bg-emerald-950 dark:text-emerald-300 border border-slate-200 dark:border-emerald-800"
+                  : "text-slate-500 hover:text-slate-900 dark:hover:text-slate-300"
+              }`}
+            >
+              <Sprout className="h-3.5 w-3.5" />
+              <span>Greenfield (Generate Complete App from BRD & Scratch)</span>
+            </button>
+          </div>
+        </div>
+        <span className="text-xs text-slate-500 font-medium">
+          {projectMode === "brownfield" ? "AST & static analysis scans active repository sandbox" : "AI SDLC generates complete application modules, suites, and runners"}
+        </span>
+      </div>
+
       {/* 1. Autonomous AI SDLC Lifecycle Stage Tracker */}
       <Card title="Autonomous AI SDLC & Quality Gate Pipeline" className="mb-4">
         <ol className="flex flex-wrap gap-2">
           {STAGES.map(([name, gate, kind]) => {
-            const doc = safeDocs.find((d) => d?.kind === kind);
+            const matchingDocs = safeDocs.filter((d) => d?.kind === kind);
+            const doc = matchingDocs.find((d) => d?.status === "approved") || matchingDocs[0];
             const record = safeGates.find((g) => `G${g?.gate}` === gate);
-            const isApproved = record?.status === "approved";
-            const isPending = record?.status === "pending";
+            const isDocApproved = doc?.status === "approved";
+            const isApproved = record?.status === "approved" || (kind === "discovery" && isDocApproved) || isDocApproved;
+            const isPending = !isApproved && (record?.status === "pending" || doc?.status === "draft");
+            const statusLabel = isApproved ? "approved" : (isPending ? "pending" : (record?.status || (doc ? doc.status : "pending")));
 
             const body = (
               <span
@@ -127,7 +169,7 @@ export default function QEPage() {
                   <span>{name}</span>
                   {gate && (
                     <Badge tone={isApproved ? "emerald" : isPending ? "amber" : "slate"}>
-                      {record?.status || "pending"}
+                      {statusLabel}
                     </Badge>
                   )}
                 </div>

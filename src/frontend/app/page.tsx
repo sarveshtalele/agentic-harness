@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { AppShell } from "../components/AppShell";
 import { Badge, Button, Empty, ErrorNote, Field, inputClass, Spinner, useToast } from "../components/ui";
+import { ConfirmModal } from "../components/ConfirmModal";
 import { api, upload, when } from "../lib/api";
 
 export default function ProjectsPage() {
@@ -14,6 +15,8 @@ export default function ProjectsPage() {
   const [query, setQuery] = useState("");
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState("");
+  const [projectToRename, setProjectToRename] = useState<any>(null);
+  const [projectToRemove, setProjectToRemove] = useState<any>(null);
   const toast = useToast();
 
   const load = useCallback(() => {
@@ -35,24 +38,12 @@ export default function ProjectsPage() {
     load();
   };
 
-  const rename = async (p: any) => {
-    const name = prompt("Project name", p.name)?.trim();
-    if (!name || name === p.name) return;
-    await api(`/projects/${p.id}`, { method: "PATCH", json: { name } });
-    toast("Project renamed");
-    load();
+  const rename = (p: any) => {
+    setProjectToRename(p);
   };
 
-  const remove = async (p: any) => {
-    if (
-      prompt(
-        `This permanently deletes "${p.name}", its repository copy, documents, and audit ledger.\nType the project name to confirm.`
-      ) !== p.name
-    )
-      return;
-    await api(`/projects/${p.id}`, { method: "DELETE" });
-    toast("Project deleted");
-    load();
+  const remove = (p: any) => {
+    setProjectToRemove(p);
   };
 
   const all = projects || [];
@@ -229,6 +220,46 @@ export default function ProjectsPage() {
       </div>
 
       {creating && <NewProject onClose={() => setCreating(false)} onCreated={load} />}
+
+      {/* Confirmation Modal for Renaming Project */}
+      <ConfirmModal
+        isOpen={!!projectToRename}
+        title="Rename Project"
+        description="Update the display name of this project."
+        confirmText="Save Name"
+        requirePromptInput
+        promptPlaceholder="Enter new project name"
+        promptDefaultValue={projectToRename?.name || ""}
+        onConfirm={async (newName) => {
+          if (newName?.trim() && newName.trim() !== projectToRename?.name) {
+            await api(`/projects/${projectToRename.id}`, { method: "PATCH", json: { name: newName.trim() } });
+            toast("Project renamed");
+            load();
+          }
+        }}
+        onClose={() => setProjectToRename(null)}
+      />
+
+      {/* Confirmation Modal for Deleting Project */}
+      <ConfirmModal
+        isOpen={!!projectToRemove}
+        title="Delete Project Permanently"
+        description={`This permanently deletes "${projectToRemove?.name}", its repository copy, documents, and audit ledger. To confirm, type "${projectToRemove?.name}" below.`}
+        tone="danger"
+        confirmText="Delete Project"
+        requirePromptInput
+        promptPlaceholder={`Type ${projectToRemove?.name} to confirm`}
+        onConfirm={async (typed) => {
+          if (typed?.trim() === projectToRemove?.name) {
+            await api(`/projects/${projectToRemove.id}`, { method: "DELETE" });
+            toast("Project deleted");
+            load();
+          } else {
+            toast("Project name did not match", "error");
+          }
+        }}
+        onClose={() => setProjectToRemove(null)}
+      />
     </AppShell>
   );
 }

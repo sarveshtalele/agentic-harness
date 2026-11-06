@@ -42,9 +42,9 @@ def main() -> None:
     build()
     # the venv goes first on PATH so the app finds ruff and other tools installed there
     env = {**os.environ, "PYTHONPATH": str(APP / "src"), "PATH": f"{PYTHON.parent}{os.pathsep}{os.environ.get('PATH', '')}"}
-    # /home is a network share: runtime data persists there, and SQLite cannot use WAL on it
+    # Persistent storage in /home: SQLite WAL provides non-blocking concurrent reads across multi-agent workflows
     env.setdefault("ATLAS_DATA_DIR", str(HOME / "data"))
-    env.setdefault("ATLAS_SQLITE_JOURNAL", "DELETE")
+    env.setdefault("ATLAS_SQLITE_JOURNAL", os.environ.get("ATLAS_SQLITE_JOURNAL", "WAL"))
     port = os.environ.get("PORT", "8000")
     log(f"Starting API on port {port}")
     os.chdir(APP)

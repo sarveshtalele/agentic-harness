@@ -24,6 +24,7 @@ import { useEffect, useState } from "react";
 import { useProject } from "../../../components/ProjectShell";
 import { useAuth } from "../../../components/AuthGate";
 import { Badge, Button, Card, Empty, ErrorNote, Field, inputClass, PageTitle, Spinner } from "../../../components/ui";
+import { ConfirmModal } from "../../../components/ConfirmModal";
 import { api, when } from "../../../lib/api";
 
 function nextStep(data: any, base: string): { label: string; href: string } {
@@ -104,6 +105,7 @@ function Members({ project, refresh }: { project: any; refresh: () => void }) {
 export default function OverviewPage() {
   const { project, refresh } = useProject();
   const [data, setData] = useState<any>(null);
+  const [showRenameModal, setShowRenameModal] = useState(false);
 
   useEffect(() => {
     api(`/projects/${project.id}/overview`).then(setData).catch(() => setData({}));
@@ -138,13 +140,7 @@ export default function OverviewPage() {
             </Link>
             <Button
               variant="secondary"
-              onClick={async () => {
-                const name = prompt("Project name", project?.name)?.trim();
-                if (name && name !== project?.name) {
-                  await api(`/projects/${project.id}`, { method: "PATCH", json: { name } });
-                  refresh();
-                }
-              }}
+              onClick={() => setShowRenameModal(true)}
             >
               <Pencil className="h-4 w-4" /> Rename
             </Button>
@@ -455,6 +451,24 @@ export default function OverviewPage() {
           </Card>
         </div>
       </div>
+
+      {/* Confirmation Modal for Project Renaming */}
+      <ConfirmModal
+        isOpen={showRenameModal}
+        title="Rename Project"
+        description="Update the display name of this project across all modules."
+        confirmText="Save Name"
+        requirePromptInput
+        promptPlaceholder="Enter new project name"
+        promptDefaultValue={project?.name || ""}
+        onConfirm={async (newName) => {
+          if (newName?.trim() && newName.trim() !== project?.name) {
+            await api(`/projects/${project.id}`, { method: "PATCH", json: { name: newName.trim() } });
+            refresh();
+          }
+        }}
+        onClose={() => setShowRenameModal(false)}
+      />
     </div>
   );
 }

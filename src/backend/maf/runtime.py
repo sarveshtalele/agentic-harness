@@ -236,9 +236,12 @@ class AgentCall:
 
     def _check_run_limit(self) -> None:
         """Stops the run at its token limit. Checked again once a call has its turn at the model gate: calls queued behind the concurrency limit were otherwise all admitted before the first one had spent anything."""
+        if RUN_TOKEN_LIMIT <= 0:
+            return
         if self.run_id:
             with db() as con:
-                used = con.execute("SELECT tokens_in+tokens_out FROM runs WHERE id=?", (self.run_id,)).fetchone()[0]
+                row_val = con.execute("SELECT tokens_in+tokens_out FROM runs WHERE id=?", (self.run_id,)).fetchone()
+                used = row_val[0] if row_val else 0
             if used >= RUN_TOKEN_LIMIT:
                 raise AllowanceError(f"Run stopped: it used {used} tokens, over the limit of {RUN_TOKEN_LIMIT}.", action="Raise ATLAS_RUN_TOKEN_LIMIT, or ask your administrator, then retry the stage.", agent=self.key)
 

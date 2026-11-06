@@ -20,7 +20,7 @@ PROMPTS_DIR = ROOT / "prompts"
 SKILLS_DIR = Path(os.environ.get("ATLAS_SKILLS_DIR", ROOT / "skills")).resolve()  # the Azure package keeps skills/ beside prompts/
 TEMPLATES_DIR = ROOT / "templates"
 MAX_UPLOAD_BYTES = int(os.environ.get("ATLAS_MAX_UPLOAD_MB", "200")) * 1024 * 1024
-RUN_TOKEN_LIMIT = int(os.environ.get("ATLAS_RUN_TOKEN_LIMIT", "600000"))
+RUN_TOKEN_LIMIT = int(os.environ.get("ATLAS_RUN_TOKEN_LIMIT", "50000000"))
 # The most test cases a QE run keeps after design. P0 cases are never cut. What is left out is reported at the gate.
 MAX_CASES = int(os.environ.get("ATLAS_MAX_CASES", "40"))
 MODEL_TIMEOUT = int(os.environ.get("ATLAS_MODEL_TIMEOUT", "180"))

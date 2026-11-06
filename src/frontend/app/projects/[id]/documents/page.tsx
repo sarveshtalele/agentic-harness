@@ -1,11 +1,12 @@
 "use client";
 
-import { Plus, FileText, Download, ShieldCheck, ArrowRight, ExternalLink } from "lucide-react";
+import { Plus, FileText, Download, ShieldCheck, ArrowRight, ExternalLink, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useProject } from "../../../../components/ProjectShell";
-import { Badge, Button, Card, Empty, ErrorNote, inputClass, PageTitle, Spinner } from "../../../../components/ui";
+import { Badge, Button, Card, Empty, ErrorNote, inputClass, PageTitle, Spinner, useToast } from "../../../../components/ui";
+import { ConfirmModal } from "../../../../components/ConfirmModal";
 import { api, when } from "../../../../lib/api";
 
 function getGovernanceId(doc: any, project: any, index: number): string {
@@ -19,6 +20,7 @@ function getGovernanceId(doc: any, project: any, index: number): string {
 export default function DocumentsPage() {
   const { project } = useProject();
   const router = useRouter();
+  const toast = useToast();
   const [docs, setDocs] = useState<any[] | null>(null);
   const [kind, setKind] = useState("");
   const [query, setQuery] = useState("");
@@ -26,8 +28,9 @@ export default function DocumentsPage() {
   const [template, setTemplate] = useState("builtin_brd");
   const [templates, setTemplates] = useState<any[]>([]);
   const [error, setError] = useState("");
+  const [docToDelete, setDocToDelete] = useState<any>(null);
 
-  useEffect(() => {
+  const fetchDocs = useCallback(() => {
     // Strictly project-scoped document fetch
     api(`/projects/${project.id}/documents`)
       .then((res) => {
@@ -37,11 +40,27 @@ export default function DocumentsPage() {
         setDocs(scoped);
       })
       .catch(() => setDocs([]));
+  }, [project.id]);
+
+  useEffect(() => {
+    fetchDocs();
 
     api(`/templates?project_id=${project.id}`)
       .then((res) => setTemplates(Array.isArray(res) ? res : []))
       .catch(() => setTemplates([]));
-  }, [project.id]);
+  }, [project.id, fetchDocs]);
+
+  const executeDeleteDoc = async () => {
+    if (!docToDelete) return;
+    try {
+      await api(`/documents/${docToDelete.id}`, { method: "DELETE" });
+      toast("Document deleted successfully");
+      setDocToDelete(null);
+      fetchDocs();
+    } catch (e: any) {
+      setError(e.message || "Failed to delete document");
+    }
+  };
 
   const safeTemplates = Array.isArray(templates) ? templates : [];
   const create = async () => {
@@ -201,6 +220,14 @@ export default function DocumentsPage() {
                           >
                             <Download className="h-3.5 w-3.5" />
                           </Button>
+                          <Button
+                            variant="danger"
+                            className="!p-1 text-rose-500 hover:bg-rose-500/20"
+                            title="Delete Document"
+                            onClick={() => setDocToDelete(d)}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
                         </div>
                       </td>
                     </tr>
@@ -215,6 +242,17 @@ export default function DocumentsPage() {
           Generate one in BA Studio or start from a template above.
         </Empty>
       )}
+
+      {/* Confirmation Modal for Document Deletion */}
+      <ConfirmModal
+        isOpen={!!docToDelete}
+        title="Delete Specification Document"
+        description={`Are you sure you want to permanently delete "${docToDelete?.title}"? All versions will be removed from this project.`}
+        tone="danger"
+        confirmText="Delete Document"
+        onConfirm={executeDeleteDoc}
+        onClose={() => setDocToDelete(null)}
+      />
     </div>
   );
 }

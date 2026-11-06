@@ -10,17 +10,17 @@ import { ThemeToggle } from "./ui";
 
 const nav = [
   { href: "/", label: "Projects", icon: FolderKanban },
-  { href: "/harness", label: "QE Harness", icon: Terminal },
-  { href: "/approvals", label: "Approvals", icon: CheckSquare },
-  { href: "/agents", label: "Agents", icon: Bot },
-  { href: "/skills", label: "Skills", icon: Sparkles },
-  { href: "/mcp", label: "MCP Servers", icon: Cpu },
-  { href: "/observability", label: "Observability", icon: Activity },
-  { href: "/templates", label: "Templates", icon: FileText },
-  { href: "/docs", label: "Documentation", icon: BookOpen },
-  { href: "/users", label: "Users", icon: UsersRound, admin: true },
-  { href: "/usage", label: "Usage", icon: BarChart3, admin: true },
-  { href: "/settings", label: "Settings", icon: Settings, admin: true },
+  { href: "/harness", label: "Autonomous QE Harness", icon: Terminal },
+  { href: "/approvals", label: "Gate Approvals", icon: CheckSquare },
+  { href: "/agents", label: "AI Specialist Roster", icon: Bot },
+  { href: "/skills", label: "Project Skills & Tools", icon: Sparkles },
+  { href: "/mcp", label: "MCP Server Registry", icon: Cpu },
+  { href: "/observability", label: "Observability & Telemetry", icon: Activity },
+  { href: "/templates", label: "Specification Templates", icon: FileText },
+  { href: "/docs", label: "Platform Documentation", icon: BookOpen },
+  { href: "/users", label: "User Access & Accounts", icon: UsersRound, admin: true },
+  { href: "/usage", label: "Token Budget & Usage", icon: BarChart3, admin: true },
+  { href: "/settings", label: "System Configuration", icon: Settings, admin: true },
 ];
 
 /** Workspace frame for pages outside a project: brand and left navigation with collapsible icon-only mode. */

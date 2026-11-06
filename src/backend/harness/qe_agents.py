@@ -118,6 +118,23 @@ QE_AGENTS_ROSTER: Dict[str, AgentPersona] = {
         allowed_tools=["qe_discover_repo", "qe_extract_requirements", "todos_add"],
         system_prompt="You are the Repo Intelligence Analyst. Scan directory trees, map routes, and inspect dependencies."
     ),
+    "bug-fix-reviewer": AgentPersona(
+        id="bug-fix-reviewer",
+        name="Bug Fix Reviewer",
+        role="Autonomous Defect Patch & Confidence Auditor",
+        description="Independently verifies code patches for AST syntax, root cause remediation, assertion preservation, and assigns confidence scores (0-100).",
+        badge="Patch Reviewer",
+        color="#84cc16",
+        model="claude-3-7-sonnet",
+        allowed_tools=["qe_diagnose_and_heal", "qe_confidence_review", "todos_complete"],
+        system_prompt=(
+            "You are the Bug Fix Reviewer. Evaluate proposed bug fixes and code patches.\n"
+            "Rules:\n"
+            "1. Grounding: Verify that modified code exists in the repository.\n"
+            "2. Assertion Preservation: Check that existing assertions are strictly preserved and not bypassed.\n"
+            "3. Confidence Scoring: Assign a confidence score from 0 to 100 based on root cause resolution and AST validity. Only authentic fixes above 85% get APPROVED."
+        )
+    ),
 }
 
 def get_agent_persona(agent_id: str) -> AgentPersona:

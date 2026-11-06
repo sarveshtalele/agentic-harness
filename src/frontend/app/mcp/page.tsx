@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { AppShell } from "../../components/AppShell";
 import { Badge, Button, Empty, ErrorNote, PageTitle, Spinner } from "../../components/ui";
+import { ConfirmModal } from "../../components/ConfirmModal";
 import { api } from "../../lib/api";
 import {
   Cpu,
@@ -78,6 +79,7 @@ export default function MCPPage() {
 
   // Tool search inside modal
   const [toolSearch, setToolSearch] = useState("");
+  const [serverToDelete, setServerToDelete] = useState<MCPServer | null>(null);
 
   const loadServers = useCallback(async () => {
     try {
@@ -134,11 +136,16 @@ export default function MCPPage() {
     }
   };
 
-  const handleDeleteServer = async (server: MCPServer) => {
-    if (!confirm(`Are you sure you want to delete MCP server "${server.name}"?`)) return;
+  const handleDeleteServer = (server: MCPServer) => {
+    setServerToDelete(server);
+  };
+
+  const executeDeleteServer = async () => {
+    if (!serverToDelete) return;
     try {
-      await api(`/mcp/servers/${server.id}`, { method: "DELETE" });
-      if (selectedServer?.id === server.id) setSelectedServer(null);
+      await api(`/mcp/servers/${serverToDelete.id}`, { method: "DELETE" });
+      if (selectedServer?.id === serverToDelete.id) setSelectedServer(null);
+      setServerToDelete(null);
       loadServers();
     } catch (e: any) {
       setError(e.message);
@@ -779,6 +786,16 @@ export default function MCPPage() {
           </div>
         </div>
       )}
+      {/* Confirmation Modal for Server Deletion */}
+      <ConfirmModal
+        isOpen={!!serverToDelete}
+        title="Delete MCP Server"
+        description={`Are you sure you want to permanently delete MCP server "${serverToDelete?.name}"? All discovered tools will be disconnected.`}
+        tone="danger"
+        confirmText="Delete Server"
+        onConfirm={executeDeleteServer}
+        onClose={() => setServerToDelete(null)}
+      />
     </AppShell>
   );
 }

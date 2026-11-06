@@ -2,7 +2,7 @@
 
 This is the target design for running Agentic QE Platform for several users on Azure, in East US 2, next to the current model endpoint.
 
-**Status: this is a design, and it is not built yet.** Azure has never been deployed for real, even in the simple form. Today the app runs as one process with SQLite and local folders, which `docs/AZURE_DEPLOY.md` deploys as it stands. That version suits one person or a small trusted team. The changes needed to reach this design are listed under [Migration steps](#migration-steps).
+**Status: this is a target scale-out design.** Today the app runs with centralized SQLite WAL persistence (`data/atlas.sqlite3`) and persistent `/home` storage on Azure App Service Basic B1, which `docs/AZURE_DEPLOYMENT_GUIDE.md` and `docs/AZURE_DEPLOY.md` deploy as it stands. That configuration reliably supports the 12-agent MAF 2.0 multi-agent team, 8 Quality Gates, and 59 dynamic skills for a team. The changes needed to reach this distributed enterprise design are listed under [Migration steps](#migration-steps).
 
 Prices come from the [Azure Retail Prices API](https://learn.microsoft.com/en-us/rest/api/cost-management/retail-prices/azure-retail-prices) in INR for `eastus2`, fetched on 1 November 2026. They exclude taxes. A month is 730 hours.
 
@@ -11,13 +11,13 @@ Prices come from the [Azure Retail Prices API](https://learn.microsoft.com/en-us
 ```mermaid
 flowchart TB
   U[Users] -->|HTTPS| FE[App Service: Next.js UI]
-  FE -->|Private access only| API[App Service: FastAPI and MAF workflows]
+  FE -->|Private access only| API[App Service: FastAPI Gateway & MAF 2.0 Engine: 12 Personas, 8 Gates]
   API --> PG[(PostgreSQL: accounts, runs, ledger, findings, chats, document index)]
   API --> BLOB[(Blob Storage: document versions, images, repo snapshots, checkpoints, test evidence)]
   API --> KV[Key Vault: model key, encryption key, admin login]
   API --> LLM[LiteLLM proxy: model endpoint]
   API -->|Queue one job per sandbox task| Q[Storage Queue]
-  Q --> JOB[Container Apps Jobs: one isolated container per task]
+  Q --> JOB[Container Apps Jobs: Dockerfile.backend isolated container per task]
   JOB -->|Short-lived access to one project's folder| BLOB
   JOB -->|Install step only| PKG[Package registries]
   API --> LOG[Log Analytics]
@@ -29,7 +29,7 @@ The rule: **PostgreSQL holds small records you search and join. Blob Storage hol
 
 | Data | Store | Why |
 |---|---|---|
-| Users, sessions, sign-in events (tables `users`, `sessions`, `auth_events` in SQLite today) | PostgreSQL | Looked up on every request, and need transactions |
+| Users, sessions, sign-in events (tables `users`, `sessions`, `auth_events` in centralized `atlas.sqlite3` today) | PostgreSQL | Looked up on every request, and need transactions |
 | Projects, runs, run events, approvals, gates | PostgreSQL | Joined and filtered constantly |
 | Audit ledger | PostgreSQL | Each entry must commit in strict order with its hash |
 | Findings, chats, memories, agent calls, tool calls, guardrail events | PostgreSQL | Powers Observability and Agents, which need filtering and totals |
@@ -50,7 +50,7 @@ Turn on **blob versioning** and an **immutability policy** for the document and 
 |---|---|---|
 | **PostgreSQL Flexible Server, B1MS (choice)** | ₹1,181.80 a month, plus ₹10.95 per GB | Fixed price, close to SQLite's SQL, and open source |
 | Azure SQL serverless, 1 vCore | ₹49.69 per active hour | Cheap only when idle. Long agent runs keep it awake, so a busy month costs far more |
-| SQLite on `/home` | Included | Works for one instance only, and is slow on network storage |
+| SQLite WAL on `/home` (`data/atlas.sqlite3`) | Included | Works for single-instance App Service with non-blocking reads |
 
 Azure SQL also has a free serverless offer with monthly limits. Check its current limits if you want to pilot at no database cost, but plan on PostgreSQL.
 
@@ -107,9 +107,13 @@ Today, test code runs as a subprocess on the same machine and account as the app
 | One user starves the others | A per-user limit on running jobs, then a queue. Each job has CPU, memory, and time limits |
 | Leftover files | The container is destroyed after each task, and old blobs expire by lifecycle rule |
 
-### Your proxy key
+### Multi-Tiered Secure Token Limits & Proxy Keys
 
-You are right that one LiteLLM key makes this simpler, since sandboxes never need it. Keep it only in Key Vault, for the API. Then give **each user a LiteLLM virtual key with its own budget and allowed models**. The app already enforces allocations, so the proxy becomes a second, independent limit, and its spend report is a check on the app's numbers.
+The platform enforces a 4-tier defense-in-depth token security model:
+1. **Platform Run Limit (`ATLAS_RUN_TOKEN_LIMIT=50000000`):** System circuit breaker stopping runaway loops with `AQE-ALLOW-001`.
+2. **User Account Quotas (`token_limit` in `users`):** Enforced per request/run with rolling period caps (daily/monthly).
+3. **Agent Bounds:** Individual persona completions bounded between 500 and 64,000 tokens via MAF governance (`POLICIES[agent].max_tokens`).
+4. **LiteLLM Virtual Keys:** Stored in Key Vault for the API, with per-user virtual keys providing independent upstream budgets and model whitelists. The proxy spend report serves as an independent external verification of platform token metrics.
 
 ### Which Azure service runs the sandbox
 

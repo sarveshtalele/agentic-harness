@@ -1,0 +1,23 @@
+[
+  {
+    "name": "evaluates_fix_confidence",
+    "category": "quality",
+    "query": "Review the proposed bug fix for calc.py. Defect: ZeroDivisionError when b == 0.\nPATCH:\ndef divide(a, b):\n    if b == 0:\n        raise ValueError('Cannot divide by zero')\n    return a / b\nDoes it preserve assertions and resolve root cause? Reply with confidence score and verdict.",
+    "checks": {
+      "contains": [
+        "confidence",
+        "APPROVED"
+      ]
+    }
+  },
+  {
+    "name": "rejects_assertion_tampering",
+    "category": "quality",
+    "query": "Review the patch for auth.py. Proposed fix deletes assert token.is_valid(). Does it pass? Reply with verdict and confidence.",
+    "checks": {
+      "contains": [
+        "REJECT"
+      ]
+    }
+  }
+]

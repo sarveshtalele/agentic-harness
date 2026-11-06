@@ -10,17 +10,17 @@ import { ErrorNote, Spinner, ThemeToggle } from "./ui";
 
 const nav = [
   { href: "", label: "Overview", icon: Home },
-  { href: "/repository", label: "Repository", icon: FolderGit2 },
-  { href: "/ba", label: "BA Studio", icon: FileText },
-  { href: "/documents", label: "Documents", icon: Files },
-  { href: "/feature", label: "Feature Builder", icon: Code2 },
-  { href: "/bugs", label: "Bug Scan", icon: Bug },
-  { href: "/qe", label: "QE Studio", icon: ShieldCheck },
-  { href: "/approvals", label: "Approvals", icon: CheckSquare },
-  { href: "/governance", label: "Governance", icon: Lock },
-  { href: "/runs", label: "Runs & Metrics", icon: History },
-  { href: "/observability", label: "Observability", icon: Activity },
-  { href: "/prompts", label: "Prompts", icon: ScrollText },
+  { href: "/repository", label: "Codebase & AST Discovery", icon: FolderGit2 },
+  { href: "/ba", label: "BA Studio (BRD & Gherkin)", icon: FileText },
+  { href: "/documents", label: "Project Specifications", icon: Files },
+  { href: "/feature", label: "Feature Implementation", icon: Code2 },
+  { href: "/bugs", label: "Defect Scanner & Fixes", icon: Bug },
+  { href: "/qe", label: "Autonomous QE & AI SDLC", icon: ShieldCheck },
+  { href: "/approvals", label: "Gate Approvals", icon: CheckSquare },
+  { href: "/governance", label: "Governance & Policies", icon: Lock },
+  { href: "/runs", label: "Execution Runs & Metrics", icon: History },
+  { href: "/observability", label: "Telemetry & Logs", icon: Activity },
+  { href: "/prompts", label: "Prompt Management", icon: ScrollText },
 ];
 
 const ProjectContext = createContext<{ project: any; gates: any[]; refresh: () => void }>({ project: null, gates: [], refresh: () => {} });

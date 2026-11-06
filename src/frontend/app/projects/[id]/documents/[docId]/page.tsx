@@ -1,12 +1,14 @@
 "use client";
 
-import { ArrowLeft, Check, Download, RotateCcw, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, Check, Download, RotateCcw, Save, Trash2, FileText, Sparkles, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useProject } from "../../../../../components/ProjectShell";
 import { useAuth } from "../../../../../components/AuthGate";
 import { DocumentEditor } from "../../../../../components/DocumentEditor";
+import { GherkinVisualizer } from "../../../../../components/GherkinVisualizer";
+import { ConfirmModal } from "../../../../../components/ConfirmModal";
 import { Badge, Button, Card, ErrorNote, inputClass, Spinner, useToast } from "../../../../../components/ui";
 import { api, when } from "../../../../../lib/api";
 
@@ -28,7 +30,8 @@ export default function DocumentPage() {
   const [doc, setDoc] = useState<any>(null);
   const [draft, setDraft] = useState("");
   const [note, setNote] = useState("");
-  const [tab, setTab] = useState<"document" | "source" | "history">("document");
+  const [tab, setTab] = useState<"document" | "scenarios" | "source" | "history">("document");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [versions, setVersions] = useState<any[]>([]);
   const [viewing, setViewing] = useState<any>(null);
   const [diff, setDiff] = useState("");
@@ -86,11 +89,15 @@ export default function DocumentPage() {
     toast(`Restored v${version} as a new version`);
   };
   const remove = async () => {
-    if (!confirm(`Delete "${doc.title}" and all ${doc.current_version} versions? The ledger keeps a record of the deletion.`)) return;
-    await api(`/documents/${docId}`, { method: "DELETE" });
-    router.push(`/projects/${project.id}/documents`);
+    try {
+      await api(`/documents/${docId}`, { method: "DELETE" });
+      router.push(`/projects/${project.id}/documents`);
+    } catch (e: any) {
+      setError(e.message || "Failed to delete document");
+    }
   };
   const isGherkin = doc.kind === "gherkin";
+  const hasGherkin = isGherkin || /^(Feature:|Scenario:)/m.test(draft);
   const formats = isGherkin ? ["feature", "md", "docx"] : doc.kind === "patch" ? ["patch"] : doc.kind === "test_cases" ? ["md", "docx", "csv", "jira"] : ["md", "docx"];
   const agentEditable = ["brd", "prd", "stories", "gherkin"].includes(doc.kind);
   const review = async () => {
@@ -124,27 +131,27 @@ export default function DocumentPage() {
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <div>
           <div className="flex items-center gap-2">
-            <span className="font-mono text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 dark:bg-indigo-950/60 dark:border-indigo-800/60 dark:text-indigo-300 px-2 py-0.5 rounded">
+            <span className="font-mono text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 dark:bg-indigo-950/60 dark:border-indigo-800/60 dark:text-indigo-300 px-2.5 py-1 rounded-lg">
               {getGovernanceId(doc, project)}
             </span>
             <h1 className="text-xl font-bold">{doc.title}</h1>
           </div>
-          <p className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-slate-500">
-            <Badge tone="indigo">{doc.kind}</Badge> <span data-testid="doc-version">v{doc.version ?? doc.current_version ?? 1}</span> <Badge>{doc.status}</Badge> by {doc.author_name}
+          <p className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+            <Badge tone="indigo">{doc.kind}</Badge> <span data-testid="doc-version">v{doc.version ?? doc.current_version ?? 1}</span> <Badge tone={doc.status === "approved" ? "emerald" : "amber"}>{doc.status}</Badge> by {doc.author_name}
             {doc.prompt_ref && <span className="mono">{doc.prompt_ref}</span>}
-            <span className="mono" title={doc.sha256}>sha256 {(doc.sha256 || "").slice(0, 12)}</span>
+            <span className="mono text-[11px]" title={doc.sha256}>sha256 {(doc.sha256 || "").slice(0, 12)}</span>
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {formats.map((f) => <a key={f} href={`/api/documents/${docId}/export/${f}`} className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800"><Download className="h-4 w-4" /> .{f}</a>)}
+          {formats.map((f) => <a key={f} href={`/api/documents/${docId}/export/${f}`} className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-1.5 text-xs sm:text-sm font-semibold hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800"><Download className="h-4 w-4" /> .{f}</a>)}
           {doc.status !== "approved" && <Button variant="success" onClick={approve}><Check className="h-4 w-4" /> Approve</Button>}
-          <Button variant="danger" aria-label="Delete document" onClick={remove}><Trash2 className="h-4 w-4" /></Button>
+          <Button variant="danger" aria-label="Delete document" onClick={() => setShowDeleteModal(true)}><Trash2 className="h-4 w-4" /></Button>
         </div>
       </div>
       {isGherkin && doc.gherkin && <p className="mb-2 text-xs" data-testid="gherkin-status">{doc.gherkin.valid ? <Badge tone="emerald">{`Valid Gherkin: ${doc.gherkin.scenarios} scenarios, ${doc.gherkin.steps} steps`}</Badge> : <Badge tone="rose">Invalid Gherkin</Badge>}</p>}
       <div role="tablist" className="mb-3 flex gap-1 border-b border-slate-200 dark:border-slate-800">
-        {(["document", "source", "history"] as const).map((t) => (
-          <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)} className={`border-b-2 px-3 py-1.5 text-sm font-semibold capitalize ${tab === t ? "border-indigo-500 text-indigo-500" : "border-transparent text-slate-500"}`}>{t}{t === "history" ? ` (${versions.length})` : ""}</button>
+        {(["document", ...(hasGherkin ? ["scenarios"] : []), "source", "history"] as const).map((t) => (
+          <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t as any)} className={`border-b-2 px-3 py-1.5 text-sm font-semibold capitalize ${tab === t ? "border-indigo-500 text-indigo-500" : "border-transparent text-slate-500 hover:text-slate-300"}`}>{t === "scenarios" ? "Gherkin Scenarios" : t}{t === "history" ? ` (${versions.length})` : ""}</button>
         ))}
       </div>
       <ErrorNote message={error} />
@@ -162,6 +169,11 @@ export default function DocumentPage() {
             ? <pre className="mono overflow-auto text-xs">{draft}</pre>
             : <DocumentEditor documentId={docId} value={draft} gherkin={isGherkin} onChange={setDraft} onError={setError} />}
         </Card>
+      )}
+      {tab === "scenarios" && (
+        <div className="space-y-4">
+          <GherkinVisualizer content={draft} />
+        </div>
       )}
       {tab === "source" && (
         <div className="grid gap-4 lg:grid-cols-2 [&>*]:min-w-0">
@@ -202,6 +214,17 @@ export default function DocumentPage() {
           </Card>
         </div>
       )}
+
+      {/* Confirmation Modal for Document Deletion */}
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        title="Delete Specification Document"
+        description={`Are you sure you want to permanently delete "${doc.title}" and all ${doc.current_version ?? 1} versions? This deletion will be recorded in the audit ledger.`}
+        tone="danger"
+        confirmText="Delete Document"
+        onConfirm={remove}
+        onClose={() => setShowDeleteModal(false)}
+      />
     </>
   );
 }

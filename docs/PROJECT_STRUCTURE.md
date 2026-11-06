@@ -565,11 +565,21 @@ The plan from 2026-10-26 outlined explicit architectural decisions:
 | `.github/workflows/ci.yml` | Repository asset | `ACTIVE` |
 | `.gitignore` | Root environment and dependency configuration: .gitignore | `ACTIVE` |
 | `.mcp.json` | Root environment and dependency configuration: .mcp.json | `ACTIVE` |
+| `azure-pipelines.yml` | Azure DevOps CI/CD pipeline definition for automated packaging and App Service deployment | `ACTIVE` |
 | `bin/harness` | CLI Harness cross-platform launcher: harness | `ACTIVE` |
 | `bin/harness.bat` | CLI Harness cross-platform launcher: harness.bat | `ACTIVE` |
 | `bin/harness.ps1` | CLI Harness cross-platform launcher: harness.ps1 | `ACTIVE` |
+| `deploy/azure/azure-pipelines.yml` | Azure DevOps multi-stage CI/CD pipeline definition | `ACTIVE` |
 | `deploy/azure/backend_startup.py` | Azure App Service startup orchestration script: backend_startup.py | `ACTIVE` |
+| `deploy/azure/backend_startup.sh` | Azure App Service / Kudu production bash entrypoint with WAL mode support | `ACTIVE` |
+| `deploy/azure/backend_web.config` | IIS / httpPlatformHandler configuration bridging App Service router to Uvicorn | `ACTIVE` |
+| `deploy/azure/Dockerfile.backend` | Production Dockerfile for Azure App Service Linux Custom Container / ACA | `ACTIVE` |
+| `deploy/azure/Dockerfile.frontend` | Production Dockerfile for Next.js standalone container deployment | `ACTIVE` |
 | `deploy/azure/frontend_startup.js` | Azure App Service startup orchestration script: frontend_startup.js | `ACTIVE` |
+| `deploy/azure/frontend_startup.sh` | Azure App Service frontend bash entrypoint with memory optimization | `ACTIVE` |
+| `deploy/azure/frontend_web.config` | IIS / iisnode rewrite configuration for Next.js frontend | `ACTIVE` |
+| `deploy/azure/kudu.deployment` | Kudu Oryx deployment configuration hook (SCM_DO_BUILD_DURING_DEPLOYMENT) | `ACTIVE` |
+| `deploy/azure/staticwebapp.config.json` | Azure Static Web Apps routing and security header configuration | `ACTIVE` |
 | `harness` | Root launcher script for dual-server FastAPI + Next.js orchestration | `ACTIVE` |
 | `harness.bat` | Root launcher script for dual-server FastAPI + Next.js orchestration | `ACTIVE` |
 | `package-lock.json` | Root environment and dependency configuration: package-lock.json | `ACTIVE` |
@@ -586,6 +596,8 @@ The plan from 2026-10-26 outlined explicit architectural decisions:
 | `scripts/gen_structure.py` | Platform engineering / verification script: gen_structure.py | `ACTIVE` |
 | `scripts/hooks/activity_log.py` | Platform engineering / verification script: activity_log.py | `ACTIVE` |
 | `scripts/package_azure.py` | Platform engineering / verification script: package_azure.py | `ACTIVE` |
+| `scripts/package_azure_kudu.py` | Azure App Service & Kudu ZipDeploy packaging automation with preflight verification | `ACTIVE` |
+| `scripts/package_azure_kudu.sh` | Shell wrapper executing Kudu packaging automation | `ACTIVE` |
 | `scripts/verify_harness_enhancements.js` | Platform engineering / verification script: verify_harness_enhancements.js | `ACTIVE` |
 | `scripts/verify_latest_fixes.js` | Platform engineering / verification script: verify_latest_fixes.js | `ACTIVE` |
 | `start-mac.command` | Root launcher script for dual-server FastAPI + Next.js orchestration | `ACTIVE` |

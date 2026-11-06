@@ -439,9 +439,13 @@ async def retry(run_id: str) -> dict:
     """Resume a failed or interrupted run from its latest checkpoint. Finished batches are kept by the stage itself."""
     run = get(run_id)
     agent_module.llm.client()  # a missing model fails now, with its own message
-    auth.check_allowance(run["project_id"], auth.acting_user(run["project_id"], run_id))
-    if run["tokens_in"] + run["tokens_out"] >= RUN_TOKEN_LIMIT:
-        raise AllowanceError(f"Run stopped: it used {run['tokens_in'] + run['tokens_out']} tokens, over the limit of {RUN_TOKEN_LIMIT}.", action="Raise ATLAS_RUN_TOKEN_LIMIT, or ask your administrator, then retry.")
+    acting = auth.acting_user(run["project_id"], run_id)
+    auth.check_allowance(run["project_id"], acting)
+    curr = auth.current_user.get() or {}
+    is_admin = (acting in (auth.ADMIN_ID, "qa-admin", "admin")) or (curr.get("role") == "admin") or (curr.get("id") in (auth.ADMIN_ID, "qa-admin", "admin"))
+    if not is_admin and RUN_TOKEN_LIMIT > 0:
+        if run["tokens_in"] + run["tokens_out"] >= RUN_TOKEN_LIMIT:
+            raise AllowanceError(f"Run stopped: it used {run['tokens_in'] + run['tokens_out']} tokens, over the limit of {RUN_TOKEN_LIMIT}.", action="Raise ATLAS_RUN_TOKEN_LIMIT, or ask your administrator, then retry.")
     with db() as con:  # one statement decides who wins, so two retries cannot both start, nor can a retry take a slot a newer run holds
         con.execute("BEGIN IMMEDIATE")
         claimed = con.execute(

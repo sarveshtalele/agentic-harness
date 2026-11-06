@@ -375,21 +375,26 @@ def sync_playwright_tools() -> None:
     """Ensure srv_playwright and any existing Playwright server in SQLite database has all 70+ tools inserted if they were missing."""
     try:
         with db() as con:
+            con.execute("CREATE TABLE IF NOT EXISTS deleted_mcp_servers (id TEXT PRIMARY KEY, deleted_at TEXT)")
+            deleted_ids = {r["id"] for r in rows(con.execute("SELECT id FROM deleted_mcp_servers"))}
             ts = now()
-            # Ensure srv_playwright server exists
-            con.execute(
-                "INSERT OR IGNORE INTO mcp_servers (id, name, type, transport, command, url, status, error_message, created_at, updated_at) "
-                "VALUES ('srv_playwright', 'Playwright Browser Automation', 'local_npx', 'stdio', 'npx -y @playwright/mcp@latest', NULL, 'connected', '', ?, ?)",
-                (ts, ts)
-            )
+            # Only ensure srv_playwright server exists if user hasn't explicitly deleted it
+            if "srv_playwright" not in deleted_ids:
+                con.execute(
+                    "INSERT OR IGNORE INTO mcp_servers (id, name, type, transport, command, url, status, error_message, created_at, updated_at) "
+                    "VALUES ('srv_playwright', 'Playwright Browser Automation', 'local_npx', 'stdio', 'npx -y @playwright/mcp@latest', NULL, 'connected', '', ?, ?)",
+                    (ts, ts)
+                )
 
-            # Query all Playwright servers (by id, name, or command)
+            # Query all existing Playwright servers in database
             playwright_servers = rows(con.execute(
                 "SELECT id, command, name FROM mcp_servers WHERE id='srv_playwright' OR LOWER(name) LIKE '%playwright%' OR LOWER(command) LIKE '%playwright%'"
             ))
 
             for srv in playwright_servers:
                 srv_id = srv["id"]
+                if srv_id in deleted_ids:
+                    continue
                 existing_tools = {r["name"] for r in rows(con.execute("SELECT name FROM mcp_tools WHERE server_id=?", (srv_id,)))}
                 for t in PLAYWRIGHT_MCP_TOOLS:
                     if t["name"] not in existing_tools:
@@ -408,10 +413,12 @@ def seed_mcp_servers() -> None:
     """Pre-seed standard MCP servers and discovered tools if table is empty or missing defaults."""
     try:
         with db() as con:
+            con.execute("CREATE TABLE IF NOT EXISTS deleted_mcp_servers (id TEXT PRIMARY KEY, deleted_at TEXT)")
+            deleted_ids = {r["id"] for r in rows(con.execute("SELECT id FROM deleted_mcp_servers"))}
             existing_srv_ids = {r["id"] for r in rows(con.execute("SELECT id FROM mcp_servers"))}
             ts = now()
             for s in DEFAULT_MCP_SERVERS:
-                if s["id"] not in existing_srv_ids:
+                if s["id"] not in existing_srv_ids and s["id"] not in deleted_ids:
                     con.execute(
                         "INSERT INTO mcp_servers (id, name, type, transport, command, url, status, error_message, created_at, updated_at) "
                         "VALUES (?, ?, ?, ?, ?, ?, ?, '', ?, ?)",
@@ -552,6 +559,13 @@ def add_server(req: CreateServerRequest):
     ts = now()
 
     with db() as con:
+        con.execute("CREATE TABLE IF NOT EXISTS deleted_mcp_servers (id TEXT PRIMARY KEY, deleted_at TEXT)")
+        # If user explicitly adds this server, remove any tombstone record for matching IDs
+        con.execute("DELETE FROM deleted_mcp_servers WHERE id=?", (server_id,))
+        for ds in DEFAULT_MCP_SERVERS:
+            if (command and ds.get("command") == command) or (url and ds.get("url") == url) or ds.get("name") == name:
+                con.execute("DELETE FROM deleted_mcp_servers WHERE id=?", (ds["id"],))
+
         con.execute(
             "INSERT INTO mcp_servers (id, name, type, transport, command, url, status, error_message, created_at, updated_at) "
             "VALUES (?, ?, ?, ?, ?, ?, 'connected', '', ?, ?)",
@@ -597,14 +611,15 @@ def add_server(req: CreateServerRequest):
 
 @router.delete("/servers/{server_id}")
 def delete_server(server_id: str):
-    """Delete an MCP server and its discovered tools."""
-    seed_mcp_servers()
+    """Delete an MCP server and its discovered tools permanently."""
     with db() as con:
+        con.execute("CREATE TABLE IF NOT EXISTS deleted_mcp_servers (id TEXT PRIMARY KEY, deleted_at TEXT)")
         found = row(con.execute("SELECT id FROM mcp_servers WHERE id=?", (server_id,)))
         if not found:
             raise HTTPException(status_code=404, detail=f"MCP server '{server_id}' not found")
         con.execute("DELETE FROM mcp_tools WHERE server_id=?", (server_id,))
         con.execute("DELETE FROM mcp_servers WHERE id=?", (server_id,))
+        con.execute("INSERT OR REPLACE INTO deleted_mcp_servers (id, deleted_at) VALUES (?, ?)", (server_id, now()))
 
     return {"status": "ok", "deleted": True, "id": server_id}
 

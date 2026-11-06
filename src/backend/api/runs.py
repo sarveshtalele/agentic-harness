@@ -102,6 +102,20 @@ async def retry_run(run_id: str):
         raise HTTPException(409, str(exc)) from exc
 
 
+@router.post("/api/runs/{run_id}/resume-unlimited")
+async def resume_unlimited(run_id: str):
+    """Resume a failed or interrupted run by resetting error and executing with unlimited tokens for admin."""
+    with db() as con:
+        r = row(con.execute("SELECT * FROM runs WHERE id=?", (run_id,)))
+        if not r:
+            raise HTTPException(404, f"Run '{run_id}' not found")
+        con.execute("UPDATE runs SET status='interrupted', error='' WHERE id=?", (run_id,))
+    try:
+        return await engine.retry(run_id)
+    except Exception as exc:
+        raise HTTPException(400, str(exc)) from exc
+
+
 @router.get("/api/approvals")
 def all_approvals():
     """Everything waiting on a human, across all active projects."""

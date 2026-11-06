@@ -38,13 +38,20 @@ Your model provider bills separately and is not included.
 
 ## 1. Make the ZIP files
 
-From the project folder:
+From the project folder, run the automated packaging script:
+
+```bash
+# Production Kudu ZipDeploy packaging (with bytecode pre-flight check):
+python3 scripts/package_azure_kudu.py
+```
+
+Or using the standard script:
 
 ```bash
 python scripts/package_azure.py
 ```
 
-This creates `dist/agentic-qe-backend.zip` and `dist/agentic-qe-frontend.zip`. They exclude tests, `.env`, runtime data, and `node_modules`.
+This creates `dist/azure_backend.zip` (and `dist/agentic-qe-backend.zip`) and `dist/azure_frontend.zip` (and `dist/agentic-qe-frontend.zip`). They bundle the multi-agent engine, 12 specialized agent personas, 8 Quality Gates, 59 dynamic skills, prompt templates, and Kudu deployment hooks while strictly excluding tests, `.env`, runtime data, and `node_modules`.
 
 ## 2. Create the backend app
 
@@ -78,16 +85,21 @@ Open each app, then **Settings > Environment variables**. Add these, choose **Ap
 
 **Backend**
 
-| Name | Value |
-|---|---|
-| `ATLAS_ALLOWED_HOSTS` | Backend default domain |
-| `ATLAS_ALLOWED_ORIGINS` | `https://` + frontend default domain |
-| `ATLAS_ADMIN_USERNAME` | The admin's username. Required for anyone to sign in |
-| `ATLAS_ADMIN_PASSWORD` | A long, unique password. Azure encrypts this setting at rest |
-| `WEBSITES_CONTAINER_START_TIME_LIMIT` | `1800` |
-| `SCM_DO_BUILD_DURING_DEPLOYMENT` | `false` |
-| `ATLAS_SESSION_IDLE_MINUTES` | Optional. Minutes without activity before a session ends. Default 480 |
-| `ATLAS_LOG_RETENTION_DAYS` | Optional. Days of daily log files to keep. Default 30 |
+| Name | Value | Description |
+|---|---|---|
+| `ATLAS_ALLOWED_HOSTS` | Backend default domain | Host-header injection prevention |
+| `ATLAS_ALLOWED_ORIGINS` | `https://` + frontend default domain | Strict CORS whitelist |
+| `ATLAS_ADMIN_USERNAME` | The admin's username | Required for anyone to sign in |
+| `ATLAS_ADMIN_PASSWORD` | A long, unique password | Encrypted at rest as salted PBKDF2/Argon2 hash in `atlas.sqlite3` |
+| `ATLAS_SECRET_KEY` | 32-character random string | HMAC audit ledger signing and Fernet token encryption |
+| `ATLAS_DATA_DIR` | `/home/atlas/data` | Centralized SQLite database (`data/atlas.sqlite3`), logs, and workspaces |
+| `ATLAS_SQLITE_JOURNAL` | `WAL` | Enables SQLite Write-Ahead Logging for high concurrency across multi-agent workflows |
+| `ATLAS_RUN_TOKEN_LIMIT` | `50000000` | Secure token circuit breaker per run (raises `AQE-ALLOW-001` on breach) |
+| `WEBSITES_PORT` | `8000` | Informs Azure router that FastAPI listens on port 8000 |
+| `WEBSITES_CONTAINER_START_TIME_LIMIT` | `1800` | Allows 30 minutes for initial Python dependencies installation |
+| `SCM_DO_BUILD_DURING_DEPLOYMENT` | `false` | When using pre-packaged or startup script venv builds (set `true` for Oryx) |
+| `ATLAS_SESSION_IDLE_MINUTES` | `480` | Optional. Minutes without activity before a session ends. Default 480 |
+| `ATLAS_LOG_RETENTION_DAYS` | `30` | Optional. Days of daily log files to keep in `data/logs`. Default 30 |
 
 **Frontend**
 
@@ -196,14 +208,14 @@ To roll back, upload your previous ZIP files, so keep them.
 
 ## Backup
 
-All state is in `/home/atlas/data`, including `.secret.key`, which decrypts stored keys, and the daily logs in `/home/atlas/data/logs`. Download it from Kudu's File Manager, or use **Settings > Backups** on higher tiers. Basic has no automated backup. Keep the backup private.
+All state is in `/home/atlas/data` (or `/home/site/wwwroot/data`), including the centralized database `atlas.sqlite3`, the WAL journal `atlas.sqlite3-wal`, `.secret.key` which decrypts stored keys, and the daily logs in `logs/`. Download it from Kudu's File Manager, or use **Settings > Backups** on higher tiers. Basic has no automated backup. Keep the backup private.
 
 ## Known limits
 
 | Limit | Effect | Fix when it matters |
 |---|---|---|
 | One instance, one worker | Workflows run inside the API process, and a restart marks running ones as interrupted. Choose Retry failed stage on each one | Move runs to a queue before scaling out |
-| SQLite on the `/home` network share | Works for one user. It is slower than a local disk | Move to Azure SQL or PostgreSQL for several users |
-| Azure closes requests after about 230 seconds with no response | A very long clone or chat reply can fail. Run progress uses a stream with keep-alives | Use smaller repositories. A higher tier does not change this limit |
-| Repository install scripts run on this server | A hostile repository could reach your data | Tick install dependencies only for repositories you trust |
+| SQLite WAL on persistent `/home` | WAL mode enables non-blocking concurrent reads across multi-agent workflows and UI clients. On legacy SMB/CIFS mounts lacking shared memory (`-shm`) primitives, switch to `ATLAS_SQLITE_JOURNAL=DELETE` | Move to Azure Database for PostgreSQL Flexible Server for large enterprise multi-instance scale |
+| Azure closes requests after about 230 seconds with no response | A very long clone or chat reply can fail. Run progress uses AG-UI SSE stream with keep-alives | Use smaller repositories. A higher tier does not change this limit |
+| Repository install scripts run on this server | A hostile repository could reach your data | Tick install dependencies only for repositories you trust, or use isolated Container Apps Jobs |
 | 10 GB of storage on Basic | Large repositories and worktrees use it up | Delete old projects, or scale up |

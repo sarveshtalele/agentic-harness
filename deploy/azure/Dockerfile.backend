@@ -1,0 +1,48 @@
+# ==============================================================================
+# Agentic QE Platform & Harness - Multi-Agent Backend Container
+# Target: Azure App Service Linux Custom Container / Azure Container Apps (ACA)
+# ==============================================================================
+FROM python:3.12-slim-bookworm AS base
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    ATLAS_HOME=/home/atlas \
+    ATLAS_DATA_DIR=/home/atlas/data \
+    ATLAS_SQLITE_JOURNAL=WAL \
+    ATLAS_RUN_TOKEN_LIMIT=50000000 \
+    PORT=8000
+
+WORKDIR /app
+
+# Install OS utilities (git, curl, build essentials for C-extensions/Ruff)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    git \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python requirements
+COPY requirements.txt .
+RUN pip install --upgrade pip && \
+    pip install -r requirements.txt
+
+# Copy source code and platform assets
+COPY src/ /app/src/
+COPY prompts/ /app/prompts/
+COPY templates/ /app/templates/
+COPY skills/ /app/skills/
+COPY evals/ /app/evals/
+COPY deploy/azure/backend_startup.sh /app/startup.sh
+
+RUN chmod +x /app/startup.sh && \
+    mkdir -p /home/atlas/data
+
+ENV PYTHONPATH="/app/src:/app:$PYTHONPATH"
+
+EXPOSE 8000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+    CMD curl -f http://localhost:8000/api/health || exit 1
+
+ENTRYPOINT ["/app/startup.sh"]
