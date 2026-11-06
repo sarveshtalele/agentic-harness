@@ -446,15 +446,6 @@ def attach_to_qe_workflow(req: AttachToQeRequest):
         "message": f"Successfully attached {len(req.testCases)} deterministic test cases to project '{p_row[1]}' QE workflow!"
     }
 
-    return {
-        "slug": slug,
-        "name": name,
-        "category": req.category,
-        "skill_md": skill_md,
-        "script_py": script_py if req.includeScript else "",
-        "evals_json": evals_json,
-    }
-
 
 class SaveSkillRequest(BaseModel):
     slug: str
