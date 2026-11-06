@@ -282,6 +282,13 @@ cd src/frontend && npx eslint . && npm run build
 
 ## ☁️ Azure App Service & Kudu Production Deployment
 
+> [!CAUTION]
+> **ISOLATED DEPLOYMENT BRANCH POLICY:**
+> The dedicated branch **`feature/azure-kudu-deployment`** is an immutable, isolated deployment branch for Azure App Service & Kudu.
+> **Strict Policy:** This branch **CANNOT be merged into `main` or other branches.**
+> For branch details and standalone operations, see [`BRANCH_README.md`](BRANCH_README.md) and [`.github/BRANCH_PROTECTION.md`](.github/BRANCH_PROTECTION.md).
+> To verify branch isolation locally: `./scripts/verify_branch_isolation.sh <target-branch>`
+
 Deploy to Azure App Service (Linux B1 plan, ~$12.41/mo) with our 1-click conversion and deployment tooling:
 
 ### 1. One-Time Azure Infrastructure Setup
@@ -305,7 +312,7 @@ chmod +x deploy/azure/setup_azure_infrastructure.sh
 ```
 Or upload `dist/azure_backend.zip` and `dist/azure_frontend.zip` directly via Kudu Web UI at `https://<app-name>.scm.azurewebsites.net/ZipDeploy`.
 
-For full step-by-step instructions, environment configuration, and GitHub Actions CI/CD setup, see [`docs/AZURE_ENTERPRISE_DEPLOYMENT_GUIDE.md`](docs/AZURE_ENTERPRISE_DEPLOYMENT_GUIDE.md).
+For full step-by-step instructions, environment configuration, and GitHub Actions CI/CD setup, see [`docs/AZURE_ENTERPRISE_DEPLOYMENT_GUIDE.md`](docs/AZURE_ENTERPRISE_DEPLOYMENT_GUIDE.md) and [`docs/UI_GUIDE_AND_COSTING.md`](docs/UI_GUIDE_AND_COSTING.md).
 
 ---
 
@@ -315,6 +322,9 @@ In accordance with the project's **1 Single Document for Each Architectural Purp
 
 | Canonical Document | Scope & Focus |
 |---|---|
+| [`docs/UI_GUIDE_AND_COSTING.md`](docs/UI_GUIDE_AND_COSTING.md) | Complete step-by-step UI operational walkthrough for every screen/workflow and comprehensive enterprise cloud costing & token pricing breakdown. |
+| [`BRANCH_README.md`](BRANCH_README.md) | Dedicated manual for the isolated `feature/azure-kudu-deployment` branch, tooling manifest, and Kudu runbook. |
+| [`.github/BRANCH_PROTECTION.md`](.github/BRANCH_PROTECTION.md) | Architectural governance and CI/CD rules enforcing strict branch isolation (no merging into main). |
 | [`docs/SYSTEM_ARCHITECTURE_AND_DESIGN.md`](docs/SYSTEM_ARCHITECTURE_AND_DESIGN.md) | Platform master architecture, Next.js/FastAPI, MAF 2.0 orchestration, ChromaDB RAG vector store, direct document ingestion, AST discovery, and 8 Quality Gates. |
 | [`docs/SECURITY_GOVERNANCE_AND_AUDIT.md`](docs/SECURITY_GOVERNANCE_AND_AUDIT.md) | Security specification: Real NVIDIA Skill Specter AST scanner (CWE-94, CWE-78, OWASP LLM01), Cloudflare Zero-Trust perimeter, and HMAC cryptographic audit ledger. |
 | [`docs/AGENT_SKILLS_AND_MAF_SPECIFICATION.md`](docs/AGENT_SKILLS_AND_MAF_SPECIFICATION.md) | Agent skills technical guide: MAF `FileSkillsSource`, progressive disclosure, live skill testing runner, Skill Creator Studio, and the Evaluator skill. |

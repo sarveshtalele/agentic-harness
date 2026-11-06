@@ -1,5 +1,7 @@
 """Tests for Azure App Service & Kudu packaging and conversion script."""
+import os
 from pathlib import Path
+import subprocess
 import zipfile
 import pytest
 
@@ -115,3 +117,21 @@ def test_generate_setup_script():
     assert 'WEBSITES_PORT="3000"' in script
     assert 'ATLAS_BACKEND_URL="https://$BACKEND_APP.azurewebsites.net"' in script
     assert "az webapp cors add" in script
+
+
+def test_branch_isolation_policy():
+    """Verify that branch isolation script correctly blocks merging feature/azure-kudu-deployment into main."""
+    verify_script = ROOT / "scripts/verify_branch_isolation.sh"
+    assert verify_script.is_file()
+    assert os.access(verify_script, os.X_OK)
+
+    # Calling with current branch feature/azure-kudu-deployment targeting main must fail with exit code 1
+    res = subprocess.run([str(verify_script), "main"], capture_output=True, text=True)
+    assert res.returncode == 1
+    assert "strictly protected" in res.stderr
+    assert "cannot merge" in res.stderr
+
+    # Calling targeting itself must succeed
+    res_self = subprocess.run([str(verify_script), "feature/azure-kudu-deployment"], capture_output=True, text=True)
+    assert res_self.returncode == 0
+

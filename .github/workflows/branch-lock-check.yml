@@ -1,0 +1,43 @@
+name: Branch Isolation & Merge Lock Policy
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+    branches:
+      - "**"
+
+jobs:
+  verify-branch-isolation:
+    name: Enforce Strict Branch Isolation Rule
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate Source and Target Branches
+        run: |
+          echo "=================================================================="
+          echo " Branch Protection & Merge Lock Policy Check"
+          echo " Source (Head) Branch: ${{ github.head_ref }}"
+          echo " Target (Base) Branch: ${{ github.base_ref }}"
+          echo "=================================================================="
+
+          LOCKED_BRANCH="feature/azure-kudu-deployment"
+
+          # Rule 1: Prevent merging feature/azure-kudu-deployment into main or any other branch
+          if [ "${{ github.head_ref }}" = "$LOCKED_BRANCH" ]; then
+            echo "::error title=Strict Branch Merge Forbidden::Branch '$LOCKED_BRANCH' is strictly isolated for standalone Azure Kudu packaging and deployment."
+            echo "::error title=Policy Violation::Per architectural governance, this branch CANNOT be merged into '${{ github.base_ref }}' or any other branch."
+            echo ""
+            echo "CRITICAL POLICY ERROR:"
+            echo "The branch '$LOCKED_BRANCH' contains specialized deployment scripts and standalone build configurations."
+            echo "Merging this branch into main or other branches will destabilize trunk configurations."
+            echo "To use this branch, check it out directly: git checkout $LOCKED_BRANCH"
+            exit 1
+          fi
+
+          # Rule 2: Prevent merging any branch into feature/azure-kudu-deployment
+          if [ "${{ github.base_ref }}" = "$LOCKED_BRANCH" ]; then
+            echo "::error title=Target Branch Locked::Branch '$LOCKED_BRANCH' cannot accept incoming merges from '${{ github.head_ref }}'."
+            echo "This branch is frozen and isolated for verified Azure Kudu deployments."
+            exit 1
+          fi
+
+          echo "Branch isolation policy verified. Merge permissible under standard CI/CD rules."
