@@ -22,6 +22,20 @@ def classify_prompt_intent(prompt: str) -> dict:
     without exposing internal persona roles to the UI.
     """
     p = prompt.lower().strip()
+    if any(k in p for k in ["create skill", "build skill", "new skill", "scaffold skill", "make a skill", "skill creator", "skill-creator", "create a skill"]):
+        return {
+            "intent": "Agent Skill Synthesis & Packaging",
+            "skill": "skill-creator",
+            "agent_id": "test-design-architect",
+            "subgoal": "Agent Skill Generation & Packaging",
+        }
+    if any(k in p for k in ["evaluate skill", "eval skill", "test skill", "benchmark skill", "evaluator"]):
+        return {
+            "intent": "Agent Skill Deterministic Evaluation",
+            "skill": "evaluator",
+            "agent_id": "confidence-reviewer",
+            "subgoal": "Skill Benchmark Scoring",
+        }
     if any(k in p for k in ["brd", "business requirement", "user stor", "acceptance criteria", "gherkin", "spec", "prd"]):
         return {
             "intent": "Requirements & Specifications Baseline",
@@ -189,15 +203,7 @@ class HarnessAgent:
         if is_bug_query:
             with db() as con:
                 proj = row(con.execute("SELECT id, name, description FROM projects WHERE id=?", (target_proj,)))
-                if not proj:
-                    first = row(con.execute("SELECT id, name, description FROM projects LIMIT 1"))
-                    if first:
-                        proj = first
-                        target_proj = first["id"]
-                    else:
-                        proj = {"id": target_proj, "name": target_proj, "description": ""}
-
-                proj_name = proj["name"]
+                proj_name = proj["name"] if proj else target_proj.replace("prj_", "").replace("_", " ").title()
 
                 # Check runs table for bug_scan
                 scan_run = row(con.execute(
@@ -287,7 +293,7 @@ class HarnessAgent:
             else:
                 content = (
                     f"### 🐛 Defect Scan Grounding · {proj_name} (`{target_proj}`)\n\n"
-                    f"🔍 **Database Check (`atlas.sqlite3`):** 0 open findings registered.\n"
+                    f"🔍 **Database Check (`atlas.sqlite3`):** 0 defect findings registered.\n"
                     f"- **Active Project:** **{proj_name}** (`{target_proj}`)\n"
                     f"- **Scan Status:** Codebase has been inspected with 0 static security violations.\n"
                     f"You can launch a full multi-agent code review scan from the [Bug Scan Page](/projects/{target_proj}/bugs) or by requesting `/security-audit`."

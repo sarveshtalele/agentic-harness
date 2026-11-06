@@ -38,13 +38,13 @@ def self_graded(agent_model: str) -> bool:
 
 
 def installed() -> tuple[bool, str]:
-    if importlib.util.find_spec("ragas") is not None:
-        try:
-            import ragas  # noqa: F401
-            return True, "Official RAGAS library installed"
-        except Exception:
-            pass
-    return True, "Built-in RAGAS Specter Evaluator active (Groundedness, Faithfulness, Recall, F1)"
+    if importlib.util.find_spec("ragas") is None:
+        return False, NOT_INSTALLED
+    try:
+        import ragas  # noqa: F401
+    except Exception as exc:  # a broken install (such as a langchain mismatch) is not a number either
+        return False, f"Not measured: RAGAS is installed but cannot be imported ({type(exc).__name__}: {str(exc)[:160]})"
+    return True, ""
 
 
 def chunks(context: str) -> list[str]:
@@ -83,6 +83,9 @@ class RagasEvaluator:
         return client
 
     async def evaluate(self, items: Sequence[EvalItem], *, eval_name: str = "Eval") -> EvalResults:
+        ok, why = installed()
+        if not ok:
+            return EvalResults(provider=self.name, status="not_measured", error=why)
         try:
             from ragas.llms import llm_factory
             from ragas.metrics import collections as rm

@@ -57,6 +57,141 @@ def list_studio_documents():
     return {"documents": doc_rows}
 
 
+class SuggestSkillRequest(BaseModel):
+    documentId: Optional[str] = None
+    documentContent: Optional[str] = None
+    prompt: Optional[str] = None
+
+
+@router.post("/api/skills/studio/suggest")
+async def suggest_skill_architecture(req: SuggestSkillRequest):
+    """
+    Intelligently derives a clean, professional skill display name,
+    category, description, and concrete 5-step task checklist from grounding context or prompt.
+    """
+    raw_text = (req.prompt or "").strip()
+    doc_title = ""
+    doc_content = ""
+    if req.documentId:
+        try:
+            doc_data = documents.get(req.documentId)
+            doc_title = doc_data.get("title", "")
+            doc_content = doc_data.get("content", "")
+        except Exception:
+            pass
+    elif req.documentContent:
+        doc_content = req.documentContent
+
+    combined = f"{raw_text} {doc_title} {doc_content}".strip()
+    if not combined:
+        raise HTTPException(400, "No prompt, document, or content provided")
+
+    # Clean candidate text
+    candidate = raw_text or doc_title or doc_content[:80]
+    clean = re.sub(r"^(?:please\s+)?(?:create|build|generate|make|develop|implement|add)\s+(?:an?\s+)?(?:agent\s+)?(?:skill\s+)?(?:that\s+|which\s+|to\s+)?(?:will\s+)?", "", candidate, flags=re.IGNORECASE)
+    clean = re.sub(r"^(?:a\s+)?(?:skill\s+)?(?:to\s+|which\s+|that\s+)?", "", clean, flags=re.IGNORECASE)
+    clean = re.sub(r"[\r\n]+", " ", clean).strip()
+    clean = re.sub(r"\.\s+.*$", "", clean).strip()
+    clean = re.sub(r"[!?]+$", "", clean).strip()
+    if clean.endswith("."):
+        clean = clean[:-1].strip()
+
+    lower_c = clean.lower()
+    if "convert" in lower_c and ("md" in lower_c or "markdown" in lower_c) and ("docx" in lower_c or "doc" in lower_c or "word" in lower_c):
+        skill_name = "Markdown to DOCX Document Converter"
+        category = "custom-sdlc"
+        tasks = [
+            "Ingest markdown source file and validate formatting syntax",
+            "Parse markdown AST into headings, block elements, and paragraphs",
+            "Map styling, typography, and code blocks to OpenXML/DOCX specifications",
+            "Format embedded tables, images, hyperlinks, and metadata",
+            "Serialize to .docx binary, calculate checksum, and emit conversion trace",
+        ]
+    elif "atm" in lower_c or "cash" in lower_c or "withdraw" in lower_c:
+        skill_name = "ATM Cash Withdrawal & Dispense Engine"
+        category = "custom-sdlc"
+        tasks = [
+            "Validate debit card chip authentication and encrypted PIN token",
+            "Query core ledger for account balance and daily withdrawal limits",
+            "Execute atomic cash dispense transaction and deduct account ledger",
+            "Trigger physical cash tray actuator and record sensor confirmation",
+            "Print receipt, emit HMAC audit trace, and eject debit card safely",
+        ]
+    elif "payment" in lower_c or "settle" in lower_c or "checkout" in lower_c:
+        skill_name = "Payment Gateway Settlement Engine"
+        category = "custom-sdlc"
+        tasks = [
+            "Validate transaction payload against ISO 8583 payment schema constraints",
+            "Perform real-time fraud scoring and 3D-Secure authentication check",
+            "Dispatch settlement authorization to acquirer network with idempotency key",
+            "Process settlement capture and record double-entry general ledger",
+            "Emit cryptographic payment receipt and trigger webhook notification",
+        ]
+    elif "security" in lower_c or "specter" in lower_c or "injection" in lower_c or "vulnerab" in lower_c:
+        skill_name = "Zero-Trust Security & Specter Auditor"
+        category = "security-guardrails"
+        tasks = [
+            "Scan input stream for prompt injection and adversarial delimiter jailbreaks",
+            "Verify environment credential scrubbing and secret mask enforcement",
+            "Analyze AST for dangerous dynamic eval() and unauthorized subprocess calls",
+            "Audit outbound network endpoints against zero-trust policy allowlists",
+            "Emit signed security compliance report with CVE remediation steps",
+        ]
+    elif "gherkin" in lower_c or "bdd" in lower_c or "scenario" in lower_c:
+        skill_name = "Gherkin BDD Scenario Matrix Designer"
+        category = "test-design"
+        tasks = [
+            "Extract business requirements and acceptance criteria from source brief",
+            "Synthesize Given-When-Then behavioral specification scenarios",
+            "Validate scenario syntax with official Cucumber/Gherkin parser",
+            "Generate equivalence partition and boundary value test fixtures",
+            "Bind Gherkin oracle steps to automated Playwright/Vitest assertions",
+        ]
+    elif "pytest" in lower_c or "runner" in lower_c or "execut" in lower_c:
+        skill_name = "Automated Test Runner & Diagnostics Engine"
+        category = "runtime-execution"
+        tasks = [
+            "Verify isolated sandbox worktree and scrub ambient host secrets",
+            "Discover test suites and configure pytest-asyncio runner flags",
+            "Execute test execution with timeout bounds and capture JUnit XML report",
+            "Classify test outcomes across application defects, test drift, and environment",
+            "Emit execution summary, failure diagnostics, and gate verification evidence",
+        ]
+    elif "heal" in lower_c or "drift" in lower_c or "diagnos" in lower_c:
+        skill_name = "Assertion-Preserving Self-Healing Engine"
+        category = "self-healing"
+        tasks = [
+            "Analyze failed test execution traceback and identify broken selectors",
+            "Inspect target application AST to locate relocated DOM elements or functions",
+            "Synthesize repaired fixture or selector update in isolated worktree",
+            "Enforce assertion-preservation guardrail: reject test weakening or skips",
+            "Re-run test suite and commit verified repair to active branch",
+        ]
+    else:
+        words = clean.split()
+        if len(words) > 6:
+            clean = " ".join(words[:5])
+        skill_name = clean.title()
+        if not any(w.lower() in skill_name.lower() for w in ["engine", "converter", "generator", "analyzer", "manager", "auditor", "runner"]):
+            skill_name = f"{skill_name} Engine"
+        category = "custom-sdlc"
+        tasks = [
+            f"Ingest input parameters and validate schema boundaries for {clean}",
+            f"Verify precondition state and system readiness against specification rules",
+            f"Execute core {clean.lower()} transactional operations and state transitions",
+            f"Validate postcondition assertions, error boundaries, and exception handling",
+            f"Emit cryptographically signed execution trace and sync quality gate status",
+        ]
+
+    desc = f"Autonomous skill for validating, executing, and verifying {skill_name}. Use when processing {skill_name.lower()} requirements, executing domain contracts, or verifying state invariants."
+    return {
+        "name": skill_name,
+        "category": category,
+        "description": desc,
+        "tasks": tasks
+    }
+
+
 class ScaffoldSkillRequest(BaseModel):
     name: str
     description: str

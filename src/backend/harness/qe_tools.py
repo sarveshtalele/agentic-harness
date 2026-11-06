@@ -41,15 +41,11 @@ def build_qe_tools(workspace_dir: str) -> List[FunctionTool]:
         with db() as con:
             proj = con.execute("SELECT id FROM projects WHERE id=?", (project_id,)).fetchone()
             if not proj:
-                first = con.execute("SELECT id FROM projects LIMIT 1").fetchone()
-                if first:
-                    project_id = first["id"]
-                else:
-                    con.execute(
-                        "INSERT OR IGNORE INTO projects (id, name, description, created_at, updated_at, archived, owner_id) "
-                        "VALUES (?, ?, ?, ?, ?, 0, 'admin')",
-                        (project_id, "Agentic QE Platform & Framework", "Baseline Quality Platform", now(), now())
-                    )
+                con.execute(
+                    "INSERT OR IGNORE INTO projects (id, name, description, created_at, updated_at, archived, owner_id) "
+                    "VALUES (?, ?, ?, ?, ?, 0, 'admin')",
+                    (project_id, project_id.replace("prj_", "").replace("_", " ").title(), "Project Workspace", now(), now())
+                )
 
         project_root = os.path.join(workspace_dir, "data", "projects", project_id)
         sandbox_dir = os.path.join(project_root, "sandbox")

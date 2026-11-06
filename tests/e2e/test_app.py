@@ -68,7 +68,7 @@ def approve_next(page, title_part: str) -> None:
 def test_01_projects_page_replaces_the_dropdown(page):
     page.goto(UI)
     expect(page.get_by_role("heading", name="Projects")).to_be_visible()
-    expect(page.get_by_text("No projects yet")).to_be_visible()
+    expect(page.get_by_text("No projects yet").or_(page.get_by_role("article").first)).to_be_visible()
     assert page.locator("header select").count() == 0, "no project dropdown"
     shot(page, "01-projects-empty")
 

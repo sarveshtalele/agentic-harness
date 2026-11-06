@@ -240,7 +240,9 @@ export default function SkillCreatorStudioPage() {
   };
 
   // AI Architect & Contextual Auto-Fill
-  const handleAiAutoFill = () => {
+  const [isSuggesting, setIsSuggesting] = useState(false);
+
+  const handleAiAutoFill = async () => {
     let title = "";
     let content = "";
     if (sourceMode === "project" && selectedDocId) {
@@ -263,48 +265,50 @@ export default function SkillCreatorStudioPage() {
     }
 
     setError("");
-    const cleanTitle = title
-      .replace(/Business Requirements Document \(BRD\) - /gi, "")
-      .replace(/Scenarios/gi, "")
-      .replace(/Deterministic Test Cases & Scenario Matrix/gi, "")
-      .replace(/Functional & Verification Requirements Specification/gi, "")
-      .trim() || "Domain Workflow";
+    setIsSuggesting(true);
+    try {
+      const res = await api("/skills/studio/suggest", {
+        json: {
+          prompt: customText || undefined,
+          documentId: sourceMode === "project" ? selectedDocId || undefined : undefined,
+          documentContent: sourceMode !== "project" ? (customText || content) : undefined,
+        },
+      });
 
-    const aiSkillName = `${cleanTitle} Verification Engine`;
-    setSkillName(aiSkillName);
+      if (res?.name) {
+        setSkillName(res.name);
+        setCategory(res.category || "custom-sdlc");
+        setDescription(res.description || "");
+        if (Array.isArray(res.tasks) && res.tasks.length > 0) {
+          setTasks(res.tasks);
+        }
+        setSuccessMsg(`AI Auto-filled architecture for "${res.name}" (${res.category}) with ${res.tasks.length} tasks!`);
+      }
+    } catch (e: any) {
+      // Robust local fallback
+      const cleanTitle = title
+        .replace(/Business Requirements Document \(BRD\) - /gi, "")
+        .replace(/Scenarios/gi, "")
+        .replace(/Deterministic Test Cases & Scenario Matrix/gi, "")
+        .replace(/Functional & Verification Requirements Specification/gi, "")
+        .replace(/^(?:please\s+)?(?:create|build|generate|make|develop|implement|add)\s+(?:an?\s+)?(?:agent\s+)?(?:skill\s+)?(?:that\s+|which\s+|to\s+)?(?:will\s+)?/gi, "")
+        .trim() || "Domain Workflow";
 
-    const lower = (content + " " + title).toLowerCase();
-    let aiCat = "custom-sdlc";
-    if (lower.includes("gherkin") || lower.includes("given") || lower.includes("scenario")) {
-      aiCat = "test-design";
-    } else if (lower.includes("security") || lower.includes("specter") || lower.includes("auth") || lower.includes("injection") || lower.includes("token")) {
-      aiCat = "security-guardrails";
-    } else if (lower.includes("requirement") || lower.includes("brd") || lower.includes("prd")) {
-      aiCat = "requirements-engineering";
-    } else if (lower.includes("ast") || lower.includes("discovery") || lower.includes("stack") || lower.includes("repo")) {
-      aiCat = "ast-intelligence";
-    } else if (lower.includes("heal") || lower.includes("defect") || lower.includes("drift") || lower.includes("diagnos")) {
-      aiCat = "self-healing";
-    } else if (lower.includes("runner") || lower.includes("pytest") || lower.includes("vitest") || lower.includes("execut")) {
-      aiCat = "runtime-execution";
-    } else if (lower.includes("gate") || lower.includes("sign") || lower.includes("governance") || lower.includes("approval")) {
-      aiCat = "quality-governance";
-    } else {
-      aiCat = "test-generation";
+      const aiSkillName = cleanTitle.length > 30 ? `${cleanTitle.slice(0, 25).trim()} Engine` : `${cleanTitle} Engine`;
+      setSkillName(aiSkillName);
+
+      const aiTasks = [
+        `Ingest input payload and validate schema constraints for ${cleanTitle}`,
+        `Verify precondition state and system readiness against specification rules`,
+        `Execute core ${cleanTitle.toLowerCase()} transactional operations and state transitions`,
+        `Validate postcondition assertions, error boundaries, and exception handling`,
+        `Emit cryptographically signed execution trace and sync quality gate status`,
+      ];
+      setTasks(aiTasks);
+      setSuccessMsg(`Auto-filled architecture for "${aiSkillName}" with ${aiTasks.length} tasks.`);
+    } finally {
+      setIsSuggesting(false);
     }
-    setCategory(aiCat);
-
-    setDescription(`Autonomous skill for validating, testing, and verifying ${cleanTitle}. Use when processing ${cleanTitle.toLowerCase()} business requirements, testing execution contracts, or verifying state invariants.`);
-
-    const aiTasks = [
-      `1. Ingest input payload and validate schema constraints for ${cleanTitle}`,
-      `2. Verify precondition state and system readiness against specification rules`,
-      `3. Execute core ${cleanTitle.toLowerCase()} transactional operations and state transitions`,
-      `4. Validate postcondition assertions, error boundaries, and exception handling`,
-      `5. Emit cryptographically signed execution trace and sync quality gate status`,
-    ];
-    setTasks(aiTasks);
-    setSuccessMsg(`AI Auto-filled architecture for "${aiSkillName}" (${aiCat}) with ${aiTasks.length} tasks!`);
   };
 
   // Trigger Scaffolding
@@ -690,12 +694,7 @@ export default function SkillCreatorStudioPage() {
                       className={inputClass}
                       placeholder="Paste requirement sections, API contracts, business rules, or test constraints here..."
                       value={customText}
-                      onChange={(e) => {
-                        setCustomText(e.target.value);
-                        if (!skillName && e.target.value.length > 5) {
-                          setSkillName("Domain Verification Skill");
-                        }
-                      }}
+                      onChange={(e) => setCustomText(e.target.value)}
                     />
                   </div>
                 )}
@@ -703,10 +702,11 @@ export default function SkillCreatorStudioPage() {
                 <button
                   type="button"
                   onClick={handleAiAutoFill}
-                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 py-2.5 px-3 text-xs font-bold text-white shadow-md hover:from-indigo-500 hover:to-purple-600 transition-all active:scale-[0.99]"
+                  disabled={isSuggesting}
+                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 py-2.5 px-3 text-xs font-bold text-white shadow-md hover:from-indigo-500 hover:to-purple-600 transition-all active:scale-[0.99] disabled:opacity-60"
                 >
-                  <Sparkles className="h-4 w-4 animate-pulse text-amber-300" />
-                  <span>AI Architect & Auto-Fill Skill Specifications</span>
+                  <Sparkles className={`h-4 w-4 text-amber-300 ${isSuggesting ? "animate-spin" : "animate-pulse"}`} />
+                  <span>{isSuggesting ? "Architecting Skill Specifications..." : "AI Architect & Auto-Fill Skill Specifications"}</span>
                 </button>
               </div>
             </Card>

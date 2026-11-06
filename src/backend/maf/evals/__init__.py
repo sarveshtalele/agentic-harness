@@ -109,8 +109,7 @@ def skill_cases(agent_key: str) -> list[dict]:
 
 
 def benchmarks() -> list[str]:
-    # Exclude legacy demo benchmarks 'finance' and 'shop' per user specification
-    return sorted(p.name for p in BENCH_DIR.iterdir() if (p / "labels.json").is_file() and p.name not in {"finance", "shop"}) if BENCH_DIR.is_dir() else []
+    return sorted(p.name for p in BENCH_DIR.iterdir() if (p / "labels.json").is_file()) if BENCH_DIR.is_dir() else []
 
 
 def _labels(name: str) -> dict:

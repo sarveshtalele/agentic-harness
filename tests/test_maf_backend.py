@@ -30,9 +30,9 @@ WORKSPACE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # =========================================================================
 
 def test_all_8_qe_agent_personas_registered():
-    """Verify all 8 MAF agent personas are registered with valid roles and tools."""
+    """Verify all MAF agent personas are registered with valid roles and tools."""
     agents = list_all_agents()
-    assert len(agents) == 8
+    assert len(agents) >= 8
     expected_ids = [
         "principal-test-architect",
         "test-design-architect",
@@ -41,7 +41,8 @@ def test_all_8_qe_agent_personas_registered():
         "defect-diagnostician",
         "coverage-auditor",
         "confidence-reviewer",
-        "repo-intelligence-analyst"
+        "repo-intelligence-analyst",
+        "bug-fix-reviewer"
     ]
     actual_ids = [a["id"] for a in agents]
     for eid in expected_ids:

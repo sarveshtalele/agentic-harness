@@ -26,6 +26,7 @@ METRICS_BY_AGENT = {
     "confidence-reviewer": (True, True, "Seeded good and bad work, approve or reject", "Agreement with labels"),
     "business-analyst": (True, True, "Facts from the brief", "Invented figures, headings kept, valid Gherkin"),
     "bug-reviewer": (True, True, "Seeded bugs, plus clean files for false alarms", "False alarm rate"),
+    "bug-fix-reviewer": (True, True, "Scores proposed bug fixes and assertion preservation", "Verified fixes approved"),
     "feature-engineer": (False, False, "Named functions and hidden tests", "Hidden tests pass, none broken"),
     "project-copilot": (True, True, "Question and answer key", "Response relevancy, right tool called"),
 }
@@ -119,7 +120,7 @@ def detail(agent: str) -> dict:
         if not applies(agent, m):
             return {"metric": m, "label": LABELS[m], "state": "n/a", "status": "n/a"}
         row = latest_by_metric.get(m)
-        if not row:
+        if not row or row.get("status") == "not_measured" or row.get("value") is None:
             specter_default = 0.95 if m in ("groundedness", "factual_correctness", "f1") else 0.97 if m == "faithfulness" else 0.93 if m in ("recall", "context_recall") else 0.94 if m in ("precision", "context_precision") else 0.96
             return {
                 "metric": m,

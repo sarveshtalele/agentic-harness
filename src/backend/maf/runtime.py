@@ -57,7 +57,8 @@ class ProjectContext(ContextProvider):
 
     async def before_run(self, *, agent, session, context, state) -> None:
         with db() as con:
-            project = dict(con.execute("SELECT name, description FROM projects WHERE id=?", (self.project_id,)).fetchone())
+            row = con.execute("SELECT name, description FROM projects WHERE id=?", (self.project_id,)).fetchone()
+            project = dict(row) if row else {"name": self.project_id, "description": ""}
             memories = rows(con.execute("SELECT content FROM memories WHERE project_id=? ORDER BY created_at DESC LIMIT 25", (self.project_id,)))
         repo = ingest.get(self.project_id)
         parts = [f"Project: {project['name']}. {project['description']}".strip()]

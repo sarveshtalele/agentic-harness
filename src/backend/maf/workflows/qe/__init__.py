@@ -1,6 +1,7 @@
 """Modular Autonomous Quality Engineering (QE) Lifecycle Workflow package."""
 from __future__ import annotations
 
+from backend.config import MAX_CASES, project_dir, repo_dir
 from backend.maf.workflows.qe.common import (
     CODE_REVIEW_BATCH,
     DESIGN_BATCH,

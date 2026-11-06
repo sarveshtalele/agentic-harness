@@ -8,6 +8,12 @@ from backend.config import repo_dir, sandbox_dir
 from backend.repos import ingest
 
 
+@pytest.fixture(autouse=True, scope="module")
+def ensure_seed():
+    from backend.core.seed_data import seed_database
+    seed_database()
+
+
 @pytest.fixture
 def client():
     with TestClient(app) as c:

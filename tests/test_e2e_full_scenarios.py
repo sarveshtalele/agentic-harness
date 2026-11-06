@@ -46,7 +46,7 @@ async def test_e2e_brd_python_calculator_generation():
             if line.startswith("data: ") and "DOCUMENT_CREATED" in line:
                 try:
                     payload = json.loads(line[6:])
-                    if payload.get("type") == "DOCUMENT_CREATED":
+                    if payload.get("type") == "DOCUMENT_CREATED" and payload.get("document", {}).get("content"):
                         created_doc_payload = payload.get("document")
                 except Exception:
                     pass

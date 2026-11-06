@@ -111,7 +111,7 @@ async def resume_unlimited(run_id: str):
             raise HTTPException(404, f"Run '{run_id}' not found")
         con.execute("UPDATE runs SET status='interrupted', error='' WHERE id=?", (run_id,))
     try:
-        return await engine.retry(run_id)
+        return await engine.retry(run_id, allow_unlimited=True)
     except Exception as exc:
         raise HTTPException(400, str(exc)) from exc
 

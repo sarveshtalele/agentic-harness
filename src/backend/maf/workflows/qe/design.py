@@ -16,16 +16,18 @@ from backend.maf.workflows.qe.common import (
     _number_cases,
     settle,
 )
-from backend.maf.workflows.shared import review_with_send_back
+from backend.maf.workflows.shared import review_cases, review_with_send_back
 from backend.qe import confidence, model
 
 
 async def qe_design(rc: RunContext, state: dict) -> dict:
+    import backend.maf.workflows.qe as qe_mod
+    effective_max_cases = getattr(qe_mod, "MAX_CASES", MAX_CASES)
     call = AgentCall(rc.run_id, rc.project_id, "test-design-architect", skills=("designing-test-cases",))
     feedback = f"\nFEEDBACK:\n{state['feedback']}" if state.get("feedback") else ""
     root = repo_dir(rc.project_id)
     source = root if root.exists() else None
-    budget = model.case_quota(state["requirements"], MAX_CASES)
+    budget = model.case_quota(state["requirements"], effective_max_cases)
     quota = budget["quota"]
     dropped: list[dict] = []
     rc.log(budget["message"], budget, "warning" if budget["left_out_requirements"] or budget["p0_over_limit"] else "log")
@@ -83,26 +85,43 @@ async def qe_design(rc: RunContext, state: dict) -> dict:
     dropped += [c for _, _, _, over in done for c in over]
     tokens = {k: sum(t.get(k, 0) for _, _, t, _ in done) for k in ("review", "revise", "total")}
     cases = [case for case, _ in pairs]
+    # batches number their cases separately, so ids are assigned here
     _number_cases(cases)
     gaps, dupes = model.coverage_gaps(state["requirements"], cases), model.duplicate_scenarios(cases)
     if gaps or dupes:
         rc.log(f"Design checks found gaps {gaps} and duplicates {dupes}; revising", kind="warning")
-        fix_prompt = f"Design cases to close these gaps: {gaps}. Deduplicate these scenarios: {dupes}.\nREQUIREMENTS:\n{json.dumps(state['requirements'])}\nEXISTING CASES:\n{json.dumps(cases)}"
-        try:
-            extra = await call.typed(fix_prompt, model.CaseSet, attempts=2)
-            cases, _ = model.apply_quota(cases + [c.model_dump() for c in extra.cases], quota)
-            _number_cases(cases)
-        except Exception as exc:
-            rc.log(f"Could not revise design gaps: {str(exc)[:200]}", kind="warning")
-    cases_review = confidence.summarise([record for _, record in pairs], tokens)
-    rc.log(f"Design review: {cases_review['counts']}, {cases_review['tokens']['total']} tokens")
-    gaps = model.coverage_gaps(state["requirements"], cases)
-    if dropped:
-        rc.log(f"{len(dropped)} cases over quota were dropped before review: {', '.join(d.get('title', '') for d in dropped[:6])}")
-    body = "| ID | Requirement | Scenario | Type | Level | Priority |\n|---|---|---|---|---|---|\n" + "\n".join(
-        f"| {c['id']} | {c['requirement_id']} | {_cell(c['scenario'])} | {c['type']} | {c['level']} | {c['priority']} |" for c in cases)
+        affected = {g.split(":")[0] for g in gaps} | {c["requirement_id"] for c in cases if c["id"] in dupes}
+        missing = set(partial["missing"]) if partial else set()  # a partial result is not designed again here
+        wanted = [r for r in designed if r["id"] in affected - missing] or ([] if partial else designed)
+        if wanted:
+            revised, over = model.apply_quota(await design(wanted, f"\n\nThese cases failed checks. Gaps: {gaps}. Duplicates: {dupes}. Return a full corrected set for these requirements, within the case quota."), quota)
+            dropped += over
+            fresh, spent = await review_cases(rc, "design", "design cases", [(f"C{n}", json.dumps(c)) for n, c in enumerate(revised, 1)], lambda keys: _design_evidence(rc, wanted, [revised[int(k[1:]) - 1] for k in keys]), source, DESIGN_REVIEW_BATCH)
+            tokens["review"] += spent
+            tokens["total"] += spent
+            pairs = [p for p in pairs if p[0]["requirement_id"] not in {r["id"] for r in wanted}] + list(zip(revised, fresh))
+            cases = [case for case, _ in pairs]
+        gaps = model.coverage_gaps(state["requirements"], cases)
+    _number_cases(cases)
+    records = {case["id"]: {**record, "tc_id": case["id"]} for case, record in pairs}
+    # final safety check: after the quota nothing should be cut here, and if something is, it is reported
+    cases, cut = model.limit_cases(cases, state["requirements"], max(effective_max_cases, budget["planned"]))
+    case_limit = {**cut, "limit": effective_max_cases, "quota": quota, "planned": budget["planned"], "left_out_requirements": budget["left_out_requirements"], "p0_over_limit": budget["p0_over_limit"],
+                  "dropped_over_quota": [{k: c.get(k) for k in ("requirement_id", "type", "scenario")} for c in dropped]}
+    case_limit["requirements_without_cases"] = [r["id"] for r in state["requirements"] if r["id"] not in {c["requirement_id"] for c in cases}]
+    case_limit["left_out_count"] = cut["left_out_count"] + len(dropped)
+    case_limit["message"] = budget["message"] + (f"; {len(dropped)} excess cases dropped before review" if dropped else "") + (f"; {cut['left_out_count']} more cut by the final check" if cut["left_out_count"] else "")
+    case_limit["notice"] = bool(case_limit["left_out_count"] or budget["left_out_requirements"] or budget["p0_over_limit"])
+    if case_limit["notice"]:
+        rc.log(case_limit["message"], case_limit, "warning")
+    cases_review = confidence.summarise([records[c["id"]] for c in cases], tokens)
+    rc.log(f"Design review: {cases_review['counts']}, {tokens['total']} tokens", {"tokens": tokens}, "review")
+    columns = "| TC ID | Requirement | Scenario | Type | Level | Precondition | Test Data | Steps | Expected Result | Oracle | Priority |\n|---|---|---|---|---|---|---|---|---|---|---|\n"
+    body = columns + "\n".join(f"| {c['id']} | {c['requirement_id']} | {_cell(c['scenario'])} | {c['type']} | {c['level']} | {_cell(c['precondition'])} | {_cell(c['test_data'])} | {_cell(' '.join(f'{i + 1}. {s}' for i, s in enumerate(c['steps'])))} | {_cell(c['expected_result'])} | {c['oracle']} | {c['priority']} |" for c in cases)
+    if case_limit["notice"]:
+        body = f"> {case_limit['message']}. Requirements with no case now: {', '.join(case_limit['requirements_without_cases']) or 'none'}\n\n" + body
     if partial:
         body = f"> PARTIAL RESULT. No cases yet for: {', '.join(partial['missing'])}\n\n" + body
-    doc = documents.create(rc.project_id, "test_cases", "Deterministic Test Cases & Scenario Matrix (PARTIAL)" if partial else "Deterministic Test Cases & Scenario Matrix", body, "agent:test-design-architect", data=cases, prompt_ref=call.prompt_ref, run_id=rc.run_id)
-    rc.log(f"{len(cases)} cases designed; {len(gaps)} remaining gaps", kind="artifact")
-    return {"cases": cases, "cases_doc": doc["id"], "design_gaps": gaps, "case_limit": budget, "cases_review": cases_review, "partial": partial}
+    doc = documents.create(rc.project_id, "test_cases", f"Deterministic Test Cases & Scenario Matrix (PARTIAL, {len(partial['missing'])} requirements missing)" if partial else "Deterministic Test Cases & Scenario Matrix", body, "agent:test-design-architect", data=cases, prompt_ref=call.prompt_ref, run_id=rc.run_id)
+    rc.log(f"{len(cases)} cases designed; {len(gaps)} remaining gaps", {"gaps": gaps}, "artifact")
+    return {"cases": cases, "cases_doc": doc["id"], "design_gaps": gaps, "case_limit": case_limit, "cases_review": cases_review, "partial": partial}
