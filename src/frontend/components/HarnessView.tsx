@@ -467,6 +467,7 @@ export function HarnessView({
   const [activeTab, setActiveTab] = useState<"gates" | "evals" | "todos" | "ledger" | "skills">("skills");
   const [inspectorOpen, setInspectorOpen] = useState(true);
   const [error, setError] = useState("");
+  const [deletedSkillNames, setDeletedSkillNames] = useState<string[]>([]);
 
   // Dynamically compute skills loaded in this session with execution metadata
   const sessionLoadedSkills = useMemo(() => {
@@ -526,8 +527,10 @@ export function HarnessView({
       });
     }
 
-    return list;
-  }, [currentSession]);
+    return list.filter(
+      (s) => !deletedSkillNames.includes(s.name) && !deletedSkillNames.includes(s.name.replace(/^\//, ""))
+    );
+  }, [currentSession, deletedSkillNames]);
 
   // Skills & NVIDIA Skill Specter state
   const [skillsCatalog, setSkillsCatalog] = useState<SkillItem[]>([]);
@@ -2729,6 +2732,25 @@ export function HarnessView({
                             className="flex items-center gap-1 rounded bg-indigo-50 px-2 py-0.5 text-[10px] font-semibold text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/80 dark:text-indigo-300 transition"
                           >
                             <Play className="h-2.5 w-2.5" /> Test Skill Live
+                          </button>
+                          <button
+                            type="button"
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              const cleanName = sk.name.replace(/^\//, "");
+                              if (confirm(`Are you sure you want to delete skill '${cleanName}'? This will permanently remove its files from the workspace.`)) {
+                                try {
+                                  await api(`/skills/studio/${encodeURIComponent(cleanName)}`, { method: "DELETE" });
+                                  setDeletedSkillNames((prev) => [...prev, cleanName, sk.name]);
+                                } catch (err: any) {
+                                  alert(`Failed to delete skill: ${err.message}`);
+                                }
+                              }
+                            }}
+                            className="flex items-center gap-1 rounded bg-rose-50 px-2 py-0.5 text-[10px] font-semibold text-rose-700 hover:bg-rose-100 dark:bg-rose-950/80 dark:text-rose-300 transition cursor-pointer"
+                            title="Delete skill from workspace"
+                          >
+                            <Trash2 className="h-2.5 w-2.5" /> Delete Skill
                           </button>
                         </div>
 

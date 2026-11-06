@@ -6,20 +6,26 @@ from __future__ import annotations
 import asyncio
 import importlib.util
 import json
+import logging
 import os
 import re
+import shutil
 import subprocess
 import sys
 import time
 from pathlib import Path
 from typing import Any, Dict, Optional
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from backend.config import ROOT, SKILLS_DIR
 from backend.core import auth, documents, skills
 from backend.db import db, rows
+from backend.maf import llm
+
+log = logging.getLogger("aqe.api.skills")
 
 router = APIRouter()
 
@@ -61,13 +67,81 @@ class SuggestSkillRequest(BaseModel):
     documentId: Optional[str] = None
     documentContent: Optional[str] = None
     prompt: Optional[str] = None
+    projectId: Optional[str] = None
+
+
+async def _run_skill_creator_llm(raw_text: str, doc_context: str) -> Optional[dict]:
+    """Invokes the configured MAF LLM with the skill-creator agent persona to synthesize a skill architecture."""
+    try:
+        cfg = llm.current()
+        if not cfg.get("api_key") or not cfg.get("base_url"):
+            return None
+
+        system_prompt = (
+            "You are the autonomous Skill Creator agent for the Agentic QE Platform and Microsoft Agent Framework (MAF 2.0).\n"
+            "Your role is to analyze software requirements, specifications, or user prompts and synthesize a production-grade Agent Skill architecture.\n\n"
+            "Strict Guidelines:\n"
+            "1. Name: Extract an intelligent, professional, title-cased display name without redundant prefixes (e.g. 'DOCX to PPT Converter with Infographics', 'Markdown to DOCX Document Converter', 'ATM Cash Withdrawal Engine').\n"
+            "2. Category: Select the best match among: 'custom-sdlc', 'testing', 'quality-engineering', 'codebase-intelligence', 'security-guardrails'.\n"
+            "3. Description: Author a concise paragraph starting with 'Autonomous skill for...' stating explicit capabilities and activation triggers ('Use when...').\n"
+            "4. Tasks: Synthesize a concrete, ordered 5-step task checklist covering parameter validation, AST/content parsing, core execution/transformation, invariant verification, and audit trace emission.\n\n"
+            "Respond ONLY with a valid JSON object matching this schema:\n"
+            "{\n"
+            '  "name": "Skill Display Name",\n'
+            '  "category": "custom-sdlc",\n'
+            '  "description": "Autonomous skill for... Use when...",\n'
+            '  "tasks": [\n'
+            '    "Task 1 description",\n'
+            '    "Task 2 description",\n'
+            '    "Task 3 description",\n'
+            '    "Task 4 description",\n'
+            '    "Task 5 description"\n'
+            "  ]\n"
+            "}"
+        )
+
+        user_content = f"Synthesize a standard Agent Skill for this requirement/specification:\n{raw_text}\n"
+        if doc_context:
+            user_content += f"\nGrounding Context / Specification:\n{doc_context[:3000]}"
+
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_content}
+        ]
+
+        async with httpx.AsyncClient(timeout=45) as http:
+            resp = await http.post(
+                f"{cfg['base_url'].rstrip('/')}/chat/completions",
+                headers={"Authorization": f"Bearer {cfg['api_key']}"},
+                json={
+                    "model": cfg.get("model") or "deepseek-v4-flash-global",
+                    "messages": messages,
+                    "temperature": 0.2,
+                    "response_format": {"type": "json_object"}
+                }
+            )
+            if resp.status_code == 200:
+                body = resp.json()
+                choice = (body.get("choices") or [{}])[0]
+                content = (choice.get("message") or {}).get("content") or ""
+                data = json.loads(content)
+                if data.get("name") and isinstance(data.get("tasks"), list) and len(data["tasks"]) > 0:
+                    return {
+                        "name": str(data["name"]).strip(),
+                        "category": str(data.get("category") or "custom-sdlc").strip(),
+                        "description": str(data.get("description") or f"Autonomous skill for {data['name']}.").strip(),
+                        "tasks": [str(t).strip() for t in data["tasks"][:7]]
+                    }
+    except Exception as exc:
+        log.warning("Skill Creator LLM invocation failed, falling back to deterministic heuristic: %s", exc)
+    return None
 
 
 @router.post("/api/skills/studio/suggest")
 async def suggest_skill_architecture(req: SuggestSkillRequest):
     """
     Intelligently derives a clean, professional skill display name,
-    category, description, and concrete 5-step task checklist from grounding context or prompt.
+    category, description, and concrete 5-step task checklist by executing the skill-creator agent with LLM.
     """
     raw_text = (req.prompt or "").strip()
     doc_title = ""
@@ -86,9 +160,19 @@ async def suggest_skill_architecture(req: SuggestSkillRequest):
     if not combined:
         raise HTTPException(400, "No prompt, document, or content provided")
 
-    # Clean candidate text
+    # 1. Primary: Execute real Skill Creator Agent via LLM
+    llm_result = await _run_skill_creator_llm(raw_text or doc_title, doc_content or combined)
+    if llm_result:
+        return llm_result
+
+    # 2. Fallback: High-precision semantic heuristic
     candidate = raw_text or doc_title or doc_content[:80]
-    clean = re.sub(r"^(?:please\s+)?(?:create|build|generate|make|develop|implement|add)\s+(?:an?\s+)?(?:agent\s+)?(?:skill\s+)?(?:that\s+|which\s+|to\s+)?(?:will\s+)?", "", candidate, flags=re.IGNORECASE)
+    clean = re.sub(
+        r"^(?:please\s+)?(?:create|build|generate|make|develop|implement|add|author|scaffold)\s+(?:an?\s+)?(?:agent\s+)?(?:skill\s+)?(?:for\s+|which\s+|that\s+|to\s+)?(?:a\s+|an\s+)?(?:will\s+)?",
+        "",
+        candidate,
+        flags=re.IGNORECASE
+    )
     clean = re.sub(r"^(?:a\s+)?(?:skill\s+)?(?:to\s+|which\s+|that\s+)?", "", clean, flags=re.IGNORECASE)
     clean = re.sub(r"[\r\n]+", " ", clean).strip()
     clean = re.sub(r"\.\s+.*$", "", clean).strip()
@@ -97,7 +181,18 @@ async def suggest_skill_architecture(req: SuggestSkillRequest):
         clean = clean[:-1].strip()
 
     lower_c = clean.lower()
-    if "convert" in lower_c and ("md" in lower_c or "markdown" in lower_c) and ("docx" in lower_c or "doc" in lower_c or "word" in lower_c):
+    if ("docx" in lower_c or "doc" in lower_c or "word" in lower_c) and ("ppt" in lower_c or "powerpoint" in lower_c or "presentation" in lower_c):
+        has_infographics = "infographic" in lower_c or "visual" in lower_c or "chart" in lower_c
+        skill_name = "DOCX to PPT Converter with Infographics" if has_infographics else "DOCX to PPT Presentation Converter"
+        category = "custom-sdlc"
+        tasks = [
+            "Parse DOCX source document to extract textual hierarchy, headings, tables, and images",
+            "Analyze semantic structures to identify key concepts and infographic candidate blocks",
+            "Generate PowerPoint presentation layout with master slide templates and typography",
+            "Synthesize vector infographic diagrams, stat callouts, and visual elements",
+            "Serialize to PPTX presentation format, verify slide fidelity, and emit audit trace",
+        ]
+    elif "convert" in lower_c and ("md" in lower_c or "markdown" in lower_c) and ("docx" in lower_c or "doc" in lower_c or "word" in lower_c):
         skill_name = "Markdown to DOCX Document Converter"
         category = "custom-sdlc"
         tasks = [
@@ -169,8 +264,8 @@ async def suggest_skill_architecture(req: SuggestSkillRequest):
         ]
     else:
         words = clean.split()
-        if len(words) > 6:
-            clean = " ".join(words[:5])
+        if len(words) > 7:
+            clean = " ".join(words[:6])
         skill_name = clean.title()
         if not any(w.lower() in skill_name.lower() for w in ["engine", "converter", "generator", "analyzer", "manager", "auditor", "runner"]):
             skill_name = f"{skill_name} Engine"
@@ -604,4 +699,60 @@ def get_skill(name: str):
     except KeyError:
         raise HTTPException(404, f"Skill not found: {name}")
     return {**_summary(skill), "body": skill.body, "reference_text": skill.references}
+
+
+CORE_SYSTEM_SKILLS = {
+    "analyzing-repositories",
+    "authoring-user-stories",
+    "building-qe-dashboard",
+    "designing-test-cases",
+    "evaluator",
+    "executing-tests",
+    "extracting-requirements",
+    "generating-test-code",
+    "generating-test-data",
+    "healing-tests",
+    "planning-tests",
+    "tracing-coverage",
+    "skill-creator",
+}
+
+
+@router.delete("/api/skills/studio/{name}")
+@router.post("/api/skills/studio/delete")
+def delete_skill(name: str):
+    """Deletes a custom skill directory from skills/ and refreshes the active skills catalog."""
+    slug = re.sub(r"[^a-zA-Z0-9_-]+", "-", name.strip().lower()).strip("-")
+    if not slug:
+        raise HTTPException(400, "Invalid skill name")
+
+    if slug in CORE_SYSTEM_SKILLS:
+        raise HTTPException(400, f"Cannot delete core platform skill: '{slug}'. Only custom generated skills can be deleted.")
+
+    target_dir = SKILLS_DIR / slug
+    if not target_dir.is_dir():
+        # Check alternative folder matches
+        matches = [p for p in SKILLS_DIR.iterdir() if p.is_dir() and p.name.lower() == slug]
+        if matches:
+            target_dir = matches[0]
+        else:
+            raise HTTPException(404, f"Skill '{name}' not found in {SKILLS_DIR}")
+
+    try:
+        shutil.rmtree(target_dir)
+    except Exception as exc:
+        raise HTTPException(500, f"Failed to delete skill directory: {exc}")
+
+    # Trigger skills cache reload
+    try:
+        skills.load(force=True)
+    except Exception as exc:
+        log.warning("Skills reload after deletion encountered warning: %s", exc)
+
+    return {
+        "success": True,
+        "slug": slug,
+        "message": f"Skill '{slug}' successfully deleted from filesystem."
+    }
+
 

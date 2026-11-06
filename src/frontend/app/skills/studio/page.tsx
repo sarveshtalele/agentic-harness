@@ -64,6 +64,7 @@ export default function SkillCreatorStudioPage() {
 
   // Data fetching state
   const [documents, setDocuments] = useState<StudioDoc[]>([]);
+  const [projects, setProjects] = useState<Array<{ id: string; name: string }>>([]);
   const [loadingDocs, setLoadingDocs] = useState(true);
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
@@ -116,8 +117,18 @@ export default function SkillCreatorStudioPage() {
   const [attachingQe, setAttachingQe] = useState(false);
   const [attachedQeResult, setAttachedQeResult] = useState<any>(null);
 
-  // Load project documents
+  // Load project list and documents
   useEffect(() => {
+    api("/projects")
+      .then((res) => {
+        const items = Array.isArray(res) ? res : (res?.projects || res?.items || []);
+        setProjects(items);
+        if (!targetProjectId && items.length > 0) {
+          setTargetProjectId(items[0].id);
+        }
+      })
+      .catch((err) => console.error("Failed loading projects:", err));
+
     api("/skills/studio/documents")
       .then((res) => {
         const docs = res.documents || [];
@@ -269,9 +280,10 @@ export default function SkillCreatorStudioPage() {
     try {
       const res = await api("/skills/studio/suggest", {
         json: {
-          prompt: customText || undefined,
+          prompt: customText || content || title || undefined,
           documentId: sourceMode === "project" ? selectedDocId || undefined : undefined,
           documentContent: sourceMode !== "project" ? (customText || content) : undefined,
+          projectId: targetProjectId || undefined,
         },
       });
 
@@ -289,7 +301,7 @@ export default function SkillCreatorStudioPage() {
               `Emit cryptographically signed execution trace and sync quality gate status`,
             ];
         setTasks(resolvedTasks);
-        setSuccessMsg(`AI Auto-filled architecture for "${res.name}" (${res.category}) with ${resolvedTasks.length} tasks!`);
+        setSuccessMsg(`Skill-Creator Agent synthesized architecture for "${res.name}" with ${resolvedTasks.length} tasks!`);
       }
     } catch (e: any) {
       // Robust local fallback
@@ -721,10 +733,10 @@ export default function SkillCreatorStudioPage() {
                   type="button"
                   onClick={handleAiAutoFill}
                   disabled={isSuggesting}
-                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 py-2.5 px-3 text-xs font-bold text-white shadow-md hover:from-indigo-500 hover:to-purple-600 transition-all active:scale-[0.99] disabled:opacity-60"
+                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 py-2.5 px-3 text-xs font-bold text-white shadow-md hover:from-indigo-500 hover:to-purple-600 transition-all active:scale-[0.99] disabled:opacity-60 cursor-pointer"
                 >
                   <Sparkles className={`h-4 w-4 text-amber-300 ${isSuggesting ? "animate-spin" : "animate-pulse"}`} />
-                  <span>{isSuggesting ? "Architecting Skill Specifications..." : "AI Architect & Auto-Fill Skill Specifications"}</span>
+                  <span>{isSuggesting ? "⚡ Running Skill-Creator Agent via MAF 2.0..." : "✨ AI Architect & Auto-Fill Skill Specifications"}</span>
                 </button>
               </div>
             </Card>
@@ -764,17 +776,26 @@ export default function SkillCreatorStudioPage() {
                       <option value="quality-governance">Quality Gates & Governance</option>
                       <option value="security-guardrails">Zero-Trust Guardrails & Security</option>
                       <option value="custom-sdlc">Custom SDLC Engineering</option>
+                      <option value="custom-skills">Custom Agent Skills</option>
                     </select>
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
                       Target Project
                     </label>
-                    <input
-                      disabled
-                      value={targetProjectId || "prj_mcp_market"}
-                      className={`${inputClass} bg-slate-100 text-slate-500 dark:bg-slate-800 font-mono text-xs`}
-                    />
+                    <select
+                      aria-label="Target project"
+                      value={targetProjectId}
+                      onChange={(e) => setTargetProjectId(e.target.value)}
+                      className={`${inputClass} font-mono text-xs`}
+                    >
+                      <option value="">Global / Workspace (All Projects)</option>
+                      {projects.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name} ({p.id})
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 

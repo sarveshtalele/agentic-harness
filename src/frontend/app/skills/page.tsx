@@ -14,7 +14,8 @@ import {
   X, 
   FileText,
   Sliders,
-  Cpu
+  Cpu,
+  Trash2
 } from "lucide-react";
 
 interface SkillItem {
@@ -58,6 +59,22 @@ export default function SkillsPage() {
   const closeModal = () => {
     setSelectedSkill(null);
     setDetail(null);
+  };
+
+  const handleDeleteSkill = async (skillName: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (!confirm(`Are you sure you want to delete skill '${skillName}'? This will permanently remove its files from the workspace.`)) {
+      return;
+    }
+    try {
+      await api(`/skills/studio/${encodeURIComponent(skillName)}`, { method: "DELETE" });
+      setData((prev) => prev ? { ...prev, skills: prev.skills.filter(s => s.name !== skillName) } : null);
+      if (selectedSkill?.name === skillName) {
+        closeModal();
+      }
+    } catch (err: any) {
+      alert(`Failed to delete skill: ${err.message}`);
+    }
   };
 
   // Deterministic NVIDIA Specter score generator per skill name
@@ -234,9 +251,19 @@ export default function SkillsPage() {
                           <span className="text-slate-400">Universal skill</span>
                         )}
                       </div>
-                      <span className="text-slate-400 font-mono text-[10px]">
-                        {s.chars.toLocaleString()} chars
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-slate-400 font-mono text-[10px]">
+                          {s.chars.toLocaleString()} chars
+                        </span>
+                        <button
+                          type="button"
+                          onClick={(e) => handleDeleteSkill(s.name, e)}
+                          className="opacity-0 group-hover:opacity-100 p-1 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition cursor-pointer"
+                          title={`Delete ${s.name}`}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );
@@ -351,6 +378,14 @@ export default function SkillsPage() {
                 Loaded into multi-agent instruction pipeline
               </span>
               <div className="flex items-center gap-2">
+                <Button 
+                  variant="danger" 
+                  onClick={() => handleDeleteSkill(selectedSkill.name)}
+                  className="flex items-center gap-1.5 text-rose-600 hover:text-white hover:bg-rose-600 border-rose-200 dark:border-rose-900"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  <span>Delete Skill</span>
+                </Button>
                 <Button variant="secondary" onClick={closeModal}>
                   Close
                 </Button>

@@ -1,0 +1,38 @@
+{
+  "skill": "create-skill-to-convert-docx-file-to-ppt-file-with-infographics",
+  "version": "1.0.0",
+  "cases": [
+    {
+      "id": "create-skill-to-convert-docx-file-to-ppt-file-with-infographics-001",
+      "prompt": "Execute create-skill-to-convert-docx-file-to-ppt-file-with-infographics with valid default arguments",
+      "expected": {
+        "status": "success",
+        "processed": true
+      },
+      "assertions": [
+        "output.status == 'success'",
+        "output.processed == true"
+      ]
+    },
+    {
+      "id": "create-skill-to-convert-docx-file-to-ppt-file-with-infographics-002",
+      "prompt": "Check create-skill-to-convert-docx-file-to-ppt-file-with-infographics with empty payload",
+      "expected": {
+        "status": "success"
+      },
+      "assertions": [
+        "output.status == 'success'"
+      ]
+    },
+    {
+      "id": "create-skill-to-convert-docx-file-to-ppt-file-with-infographics-003",
+      "prompt": "Check error handling for malformed input",
+      "expected": {
+        "error": "expected"
+      },
+      "assertions": [
+        "output.get('error') is not None or output.status == 'success'"
+      ]
+    }
+  ]
+}

@@ -418,3 +418,33 @@ def test_the_backend_package_holds_skills_that_load_from_the_configured_folder(t
     out = subprocess.run([sys.executable, "-c", code], env=env, cwd=unpacked, capture_output=True, text=True, timeout=120)
     tokens = out.stdout.split()[-3:]
     assert int(tokens[0]) >= 13 and tokens[1:] == ["0", "1.4.0"], out.stderr[-500:]
+
+
+def test_delete_skill_studio_endpoint(client, tmp_path):
+    # Core system skill cannot be deleted
+    resp = client.delete("/api/skills/studio/evaluator")
+    assert resp.status_code == 400
+    assert "core platform skill" in resp.json()["detail"].lower()
+
+    # Create temporary custom skill
+    custom_dir = ROOT / "skills" / "test-dummy-custom-skill"
+    custom_dir.mkdir(parents=True, exist_ok=True)
+    (custom_dir / "SKILL.md").write_text("---\nname: test-dummy-custom-skill\ndescription: Temporary skill for delete test\n---\n# Test Dummy\n", encoding="utf-8")
+
+    try:
+        # Reload skills
+        skill_lib.load(force=True)
+        assert "test-dummy-custom-skill" in skill_lib.load()
+
+        # Call DELETE /api/skills/studio/{name}
+        del_resp = client.delete("/api/skills/studio/test-dummy-custom-skill")
+        assert del_resp.status_code == 200
+        assert del_resp.json()["success"] is True
+        assert not custom_dir.exists()
+        assert "test-dummy-custom-skill" not in skill_lib.load()
+    finally:
+        if custom_dir.exists():
+            import shutil
+            shutil.rmtree(custom_dir, ignore_errors=True)
+        skill_lib.load(force=True)
+
