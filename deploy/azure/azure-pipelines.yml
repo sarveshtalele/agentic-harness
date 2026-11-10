@@ -148,8 +148,8 @@ stages:
                     deploymentMethod: 'zipDeploy'
                     appSettings: |
                       -WEBSITES_PORT 8000
-                      -ATLAS_DATA_DIR /home/site/wwwroot/data
-                      -ATLAS_SQLITE_JOURNAL WAL
+                      -ATLAS_DATA_DIR /home/atlas/data
+                      -ATLAS_SQLITE_JOURNAL DELETE
                       -ATLAS_RUN_TOKEN_LIMIT 50000000
                       -SCM_DO_BUILD_DURING_DEPLOYMENT true
 

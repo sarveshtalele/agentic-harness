@@ -94,6 +94,22 @@ def build_command(runner: str, worktree: Path, target: str, junit: Path, extra: 
 REGISTERED = ("pytest", "vitest", "jest", "playwright")
 
 
+def pick_runner(framework: str, tests: list[str]) -> tuple[str, str]:
+    """The runner for the generated tests, decided by code. The model's framework label counts only when it names a
+    registered runner; otherwise the files decide (a model once wrote "python", so nothing ran and the verdict was
+    INCONCLUSIVE). Returns (runner, note), where note says when the label was not used.
+
+    ponytail: JavaScript files with an unknown label stay unresolved, since vitest and jest both read *.test.ts.
+    """
+    label = (framework or "").lower()
+    named = next((r for r in REGISTERED if r in label), "")
+    if named:
+        return named, ""
+    if tests and all(t.endswith(".py") for t in tests):
+        return "pytest", f"Framework label {framework!r} names no runner; the generated files are Python, so pytest runs them"
+    return label, f"Framework label {framework!r} names no runner and the generated files do not decide one"
+
+
 def run_suite(runner: str, worktree: Path, target: str, results_dir: Path, timeout: int = 300, extra: tuple[str, ...] = ()) -> dict:
     """`extra` is added to the pytest command line only, so the setup step can set options for generated tests without editing the repository's config."""
     if runner not in REGISTERED:

@@ -1,0 +1,101 @@
+{
+  "generated_at": "2026-11-10T12:17:44+00:00",
+  "git": "c6a8cfd-dirty",
+  "model": "deepseek-v4-flash-global",
+  "levels": {
+    "unit-integration": {
+      "verdict": "PASS",
+      "source": "/Users/sarveshtalele/Downloads/agentic-harness/data/evidence/unit-integration.xml",
+      "tests": 606,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "time": 121.113,
+      "executed": 606,
+      "passed": 606,
+      "failing": []
+    },
+    "smoke": {
+      "verdict": "PASS",
+      "source": "/Users/sarveshtalele/Downloads/agentic-harness/data/evidence/smoke.xml",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "time": 8.849,
+      "executed": 3,
+      "passed": 3,
+      "failing": []
+    },
+    "live-harness": {
+      "verdict": "PASS",
+      "source": "/Users/sarveshtalele/Downloads/agentic-harness/data/evidence/live-harness.xml",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "time": 7.98,
+      "executed": 1,
+      "passed": 1,
+      "failing": []
+    },
+    "e2e-real-model": {
+      "verdict": "FAIL",
+      "source": "/Users/sarveshtalele/Downloads/agentic-harness/data/evidence/e2e-run5.xml",
+      "tests": 33,
+      "failures": 3,
+      "errors": 0,
+      "skipped": 0,
+      "time": 1818.289,
+      "executed": 33,
+      "passed": 30,
+      "failing": [
+        {
+          "case": "tests.e2e.test_app::test_11_qe_lifecycle_real_model_real_pytest",
+          "message": "AssertionError: Timed out waiting for Gate 3"
+        },
+        {
+          "case": "tests.e2e.test_finance_repo::test_f4_feature_builder_adds_the_tool",
+          "message": "AssertionError: Approval needed\n  Review change: Add savings goal tool\n  \n  Test verdict FAIL. Fix: update tests to import calculate_savings_goal_tool from the register function and fix the total tool count in integration test\n  \n  Independent confidence review\n  60 of 100\n  REVISE\n  Tests fail with"
+        },
+        {
+          "case": "tests.e2e.test_finance_repo::test_f8_record_token_use",
+          "message": "AssertionError: [{'workflow': 'qe', 'status': 'completed', 'tokens_in': 576625, 'tokens_out': 122737, ...}, {'workflow': 'change', 'status': 'completed', 'tokens_in': 41851, 'tokens_out': 6494, ...}, {'workflow': 'change', 'status': 'completed', 'tokens_in': 13195, 'tokens_out': 431, ...}, {'workflo"
+        }
+      ]
+    }
+  },
+  "overall": "FAIL",
+  "screenshots": [
+    "docs/evidence/runs/2026-11-10-azure-package-tour/account.png",
+    "docs/evidence/runs/2026-11-10-azure-package-tour/agents.png",
+    "docs/evidence/runs/2026-11-10-azure-package-tour/approvals.png",
+    "docs/evidence/runs/2026-11-10-azure-package-tour/docs.png",
+    "docs/evidence/runs/2026-11-10-azure-package-tour/documents.png",
+    "docs/evidence/runs/2026-11-10-azure-package-tour/findings.png",
+    "docs/evidence/runs/2026-11-10-azure-package-tour/harness.png",
+    "docs/evidence/runs/2026-11-10-azure-package-tour/harness_chat.png",
+    "docs/evidence/runs/2026-11-10-azure-package-tour/home.png",
+    "docs/evidence/runs/2026-11-10-azure-package-tour/mcp.png",
+    "docs/evidence/runs/2026-11-10-azure-package-tour/observability.png",
+    "docs/evidence/runs/2026-11-10-azure-package-tour/projects_project.png",
+    "docs/evidence/runs/2026-11-10-azure-package-tour/projects_project_approvals.png",
+    "docs/evidence/runs/2026-11-10-azure-package-tour/projects_project_ba.png",
+    "docs/evidence/runs/2026-11-10-azure-package-tour/projects_project_bugs.png",
+    "docs/evidence/runs/2026-11-10-azure-package-tour/projects_project_documents.png",
+    "docs/evidence/runs/2026-11-10-azure-package-tour/projects_project_feature.png",
+    "docs/evidence/runs/2026-11-10-azure-package-tour/projects_project_governance.png",
+    "docs/evidence/runs/2026-11-10-azure-package-tour/projects_project_observability.png",
+    "docs/evidence/runs/2026-11-10-azure-package-tour/projects_project_prompts.png",
+    "docs/evidence/runs/2026-11-10-azure-package-tour/projects_project_qe.png",
+    "docs/evidence/runs/2026-11-10-azure-package-tour/projects_project_repository.png",
+    "docs/evidence/runs/2026-11-10-azure-package-tour/projects_project_runs.png",
+    "docs/evidence/runs/2026-11-10-azure-package-tour/settings.png",
+    "docs/evidence/runs/2026-11-10-azure-package-tour/skills.png",
+    "docs/evidence/runs/2026-11-10-azure-package-tour/skills_studio.png",
+    "docs/evidence/runs/2026-11-10-azure-package-tour/templates.png",
+    "docs/evidence/runs/2026-11-10-azure-package-tour/usage.png",
+    "docs/evidence/runs/2026-11-10-azure-package-tour/users.png"
+  ],
+  "not_verified": []
+}

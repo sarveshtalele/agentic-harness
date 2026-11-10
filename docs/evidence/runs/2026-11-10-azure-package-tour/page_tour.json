@@ -1,0 +1,237 @@
+{
+  "project_created": true,
+  "pages": [
+    {
+      "path": "/",
+      "status": 200,
+      "screenshot": "home.png",
+      "errors": [],
+      "error_boundary": false,
+      "fake_claims": []
+    },
+    {
+      "path": "/harness",
+      "status": 200,
+      "screenshot": "harness.png",
+      "errors": [],
+      "error_boundary": false,
+      "fake_claims": [
+        "Specter",
+        "Cloudflare"
+      ]
+    },
+    {
+      "path": "/skills",
+      "status": 200,
+      "screenshot": "skills.png",
+      "errors": [],
+      "error_boundary": false,
+      "fake_claims": [
+        "Specter",
+        "A+"
+      ]
+    },
+    {
+      "path": "/skills/studio",
+      "status": 200,
+      "screenshot": "skills_studio.png",
+      "errors": [],
+      "error_boundary": false,
+      "fake_claims": []
+    },
+    {
+      "path": "/mcp",
+      "status": 200,
+      "screenshot": "mcp.png",
+      "errors": [],
+      "error_boundary": false,
+      "fake_claims": []
+    },
+    {
+      "path": "/agents",
+      "status": 200,
+      "screenshot": "agents.png",
+      "errors": [],
+      "error_boundary": false,
+      "fake_claims": []
+    },
+    {
+      "path": "/observability",
+      "status": 200,
+      "screenshot": "observability.png",
+      "errors": [],
+      "error_boundary": false,
+      "fake_claims": []
+    },
+    {
+      "path": "/approvals",
+      "status": 200,
+      "screenshot": "approvals.png",
+      "errors": [],
+      "error_boundary": false,
+      "fake_claims": []
+    },
+    {
+      "path": "/documents",
+      "status": 200,
+      "screenshot": "documents.png",
+      "errors": [],
+      "error_boundary": false,
+      "fake_claims": []
+    },
+    {
+      "path": "/findings",
+      "status": 200,
+      "screenshot": "findings.png",
+      "errors": [],
+      "error_boundary": false,
+      "fake_claims": []
+    },
+    {
+      "path": "/settings",
+      "status": 200,
+      "screenshot": "settings.png",
+      "errors": [],
+      "error_boundary": false,
+      "fake_claims": []
+    },
+    {
+      "path": "/templates",
+      "status": 200,
+      "screenshot": "templates.png",
+      "errors": [],
+      "error_boundary": false,
+      "fake_claims": []
+    },
+    {
+      "path": "/usage",
+      "status": 200,
+      "screenshot": "usage.png",
+      "errors": [],
+      "error_boundary": false,
+      "fake_claims": []
+    },
+    {
+      "path": "/users",
+      "status": 200,
+      "screenshot": "users.png",
+      "errors": [],
+      "error_boundary": false,
+      "fake_claims": []
+    },
+    {
+      "path": "/account",
+      "status": 200,
+      "screenshot": "account.png",
+      "errors": [],
+      "error_boundary": false,
+      "fake_claims": []
+    },
+    {
+      "path": "/docs",
+      "status": 200,
+      "screenshot": "docs.png",
+      "errors": [],
+      "error_boundary": false,
+      "fake_claims": []
+    },
+    {
+      "path": "/projects/{project}",
+      "status": 200,
+      "screenshot": "projects_project.png",
+      "errors": [],
+      "error_boundary": false,
+      "fake_claims": [
+        "connected"
+      ]
+    },
+    {
+      "path": "/projects/{project}/repository",
+      "status": 200,
+      "screenshot": "projects_project_repository.png",
+      "errors": [],
+      "error_boundary": false,
+      "fake_claims": []
+    },
+    {
+      "path": "/projects/{project}/ba",
+      "status": 200,
+      "screenshot": "projects_project_ba.png",
+      "errors": [],
+      "error_boundary": false,
+      "fake_claims": []
+    },
+    {
+      "path": "/projects/{project}/qe",
+      "status": 200,
+      "screenshot": "projects_project_qe.png",
+      "errors": [],
+      "error_boundary": false,
+      "fake_claims": []
+    },
+    {
+      "path": "/projects/{project}/bugs",
+      "status": 200,
+      "screenshot": "projects_project_bugs.png",
+      "errors": [],
+      "error_boundary": false,
+      "fake_claims": []
+    },
+    {
+      "path": "/projects/{project}/feature",
+      "status": 200,
+      "screenshot": "projects_project_feature.png",
+      "errors": [],
+      "error_boundary": false,
+      "fake_claims": []
+    },
+    {
+      "path": "/projects/{project}/governance",
+      "status": 200,
+      "screenshot": "projects_project_governance.png",
+      "errors": [],
+      "error_boundary": false,
+      "fake_claims": []
+    },
+    {
+      "path": "/projects/{project}/documents",
+      "status": 200,
+      "screenshot": "projects_project_documents.png",
+      "errors": [],
+      "error_boundary": false,
+      "fake_claims": []
+    },
+    {
+      "path": "/projects/{project}/runs",
+      "status": 200,
+      "screenshot": "projects_project_runs.png",
+      "errors": [],
+      "error_boundary": false,
+      "fake_claims": []
+    },
+    {
+      "path": "/projects/{project}/prompts",
+      "status": 200,
+      "screenshot": "projects_project_prompts.png",
+      "errors": [],
+      "error_boundary": false,
+      "fake_claims": []
+    },
+    {
+      "path": "/projects/{project}/observability",
+      "status": 200,
+      "screenshot": "projects_project_observability.png",
+      "errors": [],
+      "error_boundary": false,
+      "fake_claims": []
+    },
+    {
+      "path": "/projects/{project}/approvals",
+      "status": 200,
+      "screenshot": "projects_project_approvals.png",
+      "errors": [],
+      "error_boundary": false,
+      "fake_claims": []
+    }
+  ]
+}

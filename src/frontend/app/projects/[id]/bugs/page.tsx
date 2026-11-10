@@ -246,6 +246,7 @@ export default function BugsPage() {
                   return (
                     <div
                       key={f.id}
+                      data-testid="finding"
                       className={`group rounded-2xl border p-4 shadow-2xs transition-all hover:border-indigo-400/80 hover:shadow-md ${tone}`}
                     >
                       {/* Card Header */}

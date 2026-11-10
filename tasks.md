@@ -255,6 +255,16 @@
   - legacy `/api/harness/chat` unchanged; `HarnessView` switches engines in P7 (`ATLAS_HARNESS_ENGINE` arrives with that switch)
   - deferred: background agents (experimental in MAF 1.24) and `agents/*.md` adapter go to P3b, MCP to P4, admin skill filter to P5
 - [x] Found while running P2 and fixed: telemetry missed streamed harness calls (`governance.telemetry` uses `with_result_hook`); CopilotKit route's hardcoded agent list crashed `harness` and `bug-fix-reviewer` chats (now read from `/api/chat/agents`); eval check keys guarded (`tests/test_eval_check_keys.py`)
+- [x] Full test pass 2026-11-10 (owner: "test everything accurately"):
+  - smoke 3/3 via Browser-pane launch (the sandbox blocks the Turbopack build from opening a port, the pane does not)
+  - E2E real model: run 1 2/33 and run 2 18/33; regressions from earlier commits fixed (project create did not open the project, `364e868`; in-project chat redirected to the legacy harness, `0a80268`); drifted selectors updated for the owner's redesign (rename modal, BA button label, finding cards, QE install checkbox, next-step banner); `ConfirmModal` given `role="dialog"`
+  - Azure Kudu package: `config.ROOT` found no prompts or skills inside the package (fixed, `tests/test_azure_package_runs.py`); WAL replaced by DELETE on the `/home` share in every Azure path; setup scripts now set `ATLAS_ALLOWED_HOSTS`, `ATLAS_ALLOWED_ORIGINS` and prompt for the admin; packager ships git-tracked files only; guide corrected (WAL, PostgreSQL claim, Linux drag-and-drop)
+  - `.env` login works on a backend started from `.env`; the Browser-pane preview servers use their own throwaway admin from `.claude/launch.json`
+  - E2E run 3 20/33. Found and fixed a real QE defect: the runner came from the model's free-text framework label, a model wrote "python", nothing ran and the verdict was INCONCLUSIVE. Code now picks the runner (`qe/execution.pick_runner`, `tests/test_pick_runner.py`)
+  - Packaged UI (`startup.js`) left Turbopack's external-package symlinks pointing into the deleted build folder, so `/api/copilotkit` failed with "Cannot find module 'pino-<hash>'"; links are now replaced by real copies. Deployed-style run of both zips through the real `startup.py` and `startup.js`: 28 pages HTTP 200, 0 console errors, harness chat reaches MAF
+  - Chat now ends a turn with `AQE-MODEL-TOOL-TEXT` when the model writes its tool call as text (E2E run 4, `test_13`), instead of showing and storing the markup
+  - Final evidence `docs/evidence/runs/2026-11-10-1747-c6a8cfd-dirty/`: offline 606/606, smoke 3/3, live harness 1/1, E2E run 4 32/33 and run 5 30/33. The run 5 failures are traced in NOTES.md: model endpoint outage during design, Feature Builder change failing the repo tests (verdict FAIL is correct), QE tokens 699k over the 600k budget
+- [ ] E2E stability on the real model: `test_11` timing, `test_f4` Feature Builder quality, `test_f8` token budget vary between runs
 - [ ] P3 Plugin manifests and discovery; `SkillsProvider` with admin filter
 - [ ] P4 Real MCP through `MCPStdioTool` / `MCPStreamableHTTPTool`
 - [ ] P5 Admin governance for plugins, skills, MCP; admin-only writes

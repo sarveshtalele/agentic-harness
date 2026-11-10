@@ -68,7 +68,7 @@ export function ConfirmModal({
       />
 
       {/* Modal Dialog */}
-      <div className="relative w-full max-w-md overflow-hidden rounded-2xl border border-slate-700/60 bg-gradient-to-b from-[#111a33] to-[#0a1122] p-6 text-slate-100 shadow-2xl shadow-indigo-950/50 transition-all animate-in zoom-in-95 duration-200">
+      <div role="dialog" aria-modal="true" aria-label={title} className="relative w-full max-w-md overflow-hidden rounded-2xl border border-slate-700/60 bg-gradient-to-b from-[#111a33] to-[#0a1122] p-6 text-slate-100 shadow-2xl shadow-indigo-950/50 transition-all animate-in zoom-in-95 duration-200">
         {/* Accent Glow Header */}
         <div className={`absolute top-0 left-0 right-0 h-1 ${isDanger ? 'bg-gradient-to-r from-rose-500 via-red-500 to-amber-500' : isWarning ? 'bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-500' : 'bg-gradient-to-r from-indigo-500 via-purple-500 to-blue-500'}`} />
 

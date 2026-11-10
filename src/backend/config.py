@@ -6,7 +6,10 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-ROOT = Path(__file__).resolve().parents[2]
+_HERE = Path(__file__).resolve()
+# The folder that holds prompts/, skills/ and templates/: two levels up in the repo (src/backend/config.py), one level
+# up in the Azure package's top-level backend/ copy, which `python -m uvicorn` imports first from wwwroot.
+ROOT = next((p for p in _HERE.parents if (p / "prompts").is_dir()), _HERE.parents[2])
 load_dotenv(ROOT / ".env")
 
 DATA_DIR = Path(os.environ.get("ATLAS_DATA_DIR", ROOT / "data")).resolve()

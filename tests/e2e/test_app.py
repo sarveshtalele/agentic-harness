@@ -87,7 +87,7 @@ def test_02_create_project_with_zip_upload(page, tmp_path):
     page.wait_for_url(re.compile(r"/projects/prj_"), timeout=60_000)
     state["base"] = page.url
     state["id"] = page.url.rsplit("/", 1)[-1]
-    expect(page.get_by_text("Next:")).to_be_visible()
+    expect(page.get_by_text("Recommended Action")).to_be_visible()  # the next-step banner
     expect(page.get_by_text("shop.zip")).to_be_visible()
     shot(page, "02-project-overview")
 
@@ -123,8 +123,10 @@ def test_04_real_public_github_clone(page):
 def test_04b_rename_project_docs_and_brand(page):
     page.goto(UI)
     expect(page.get_by_text("Governed requirements, code changes, and test engineering for BAs and developers.")).to_have_count(0)
-    page.once("dialog", lambda d: d.accept("Agentic QE repository"))
-    page.get_by_role("button", name="Rename Agentic QE plugin").click()
+    page.get_by_role("button", name="Rename Agentic QE plugin").click()  # opens the in-app rename modal
+    modal = page.get_by_role("dialog")
+    modal.get_by_placeholder("Enter new project name").fill("Agentic QE repository")
+    modal.get_by_role("button", name="Save Name").click()
     expect(page.get_by_role("heading", name="Agentic QE repository")).to_be_visible()
     page.get_by_role("link", name="Documentation").click()
     expect(page).to_have_url(re.compile("/docs/introduction"))
@@ -162,11 +164,11 @@ def test_06_ba_workflow_with_template_gherkin_and_gates(page):
     page.goto(f"{state['base']}/ba")
     page.locator('textarea[name="brief"]').fill("Warehouse staff need to reserve and restock inventory. Reservations must never exceed available stock. Quantities must be positive. Managers want an audit of every stock change.")
     page.locator('input[name="doc-title"]').fill("Inventory BRD")
-    page.get_by_role("button", name="Generate document").click()
+    page.get_by_role("button", name="Generate Requirements Document").click()
     wait_card(page, "Gate 0")
     page.goto(UI)
     expect(page.get_by_test_id("stat-need-approval")).to_contain_text("1")
-    page.get_by_role("link", name=re.compile("^Approvals")).click()
+    page.get_by_role("link", name=re.compile("Gate Approvals")).click()
     expect(page.get_by_test_id("approvals-summary")).to_contain_text("1 project needs your approval")
     shot(page, "06b-approvals-page")
     approve_next(page, "Gate 0")
@@ -319,7 +321,7 @@ def test_10_feature_builder_runs_real_tests_on_a_branch(page):
 
 def test_10b_fix_a_finding_on_a_branch(page):
     page.goto(f"{state['base']}/bugs")
-    row = page.get_by_test_id("findings").locator("li").filter(has_text="admin.py").first
+    row = page.get_by_test_id("findings").get_by_test_id("finding").filter(has_text="admin.py").first
     row.get_by_role("button", name="Fix on a branch").click()
     card = wait_card(page, "Review change")
     expect(card).to_contain_text("diff --git a/admin.py")
@@ -428,7 +430,7 @@ def test_15_prompt_version_and_real_eval(page):
 def test_15b_agents_page_evals_kill_switch_and_real_numbers(page):
     page.goto(f"{UI}/agents")
     cards = page.get_by_test_id("agent-card")
-    expect(cards).to_have_count(12)  # the plugin's 8 agents and 4 platform agents
+    expect(cards).to_have_count(14)  # the plugin's 8 agents, 5 platform agents (incl. bug-fix-reviewer), and the MAF project harness (P2)
     expect(page.get_by_test_id("risk-legend")).to_contain_text("can change code")
     page.get_by_role("button", name="Run all evaluations").click()
     expect(page.get_by_role("button", name="Running evaluations")).to_be_visible()

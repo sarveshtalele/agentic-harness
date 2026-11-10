@@ -108,3 +108,17 @@ def test_harness_state_never_lands_in_the_process_cwd(client, project, tmp_path,
     thread = client.post(f"/api/projects/{project['id']}/chats", json={"agent": "harness"}).json()
     _turn(client, thread["id"], "hello", "m1")
     assert not (tmp_path / "agent-file-memory").exists()
+
+
+def test_tool_call_written_as_text_ends_the_turn_with_an_error(client, project):
+    """Live E2E caught the model replying with its tool-call syntax as text; the chat must not show or store it."""
+    markup = 'Let me check.<｜DSML｜tool_calls> <｜DSML｜invoke name="list_files"> </｜DSML｜invoke> </｜DSML｜tool_calls>'
+    llm.set_client_override(ScriptedClient([("You are the Agentic QE Platform project copilot", markup)]))
+    thread = client.post(f"/api/projects/{project['id']}/chats", json={"agent": "project-copilot"}).json()
+    body = {"threadId": thread["id"], "runId": "r1", "messages": [{"id": "m1", "role": "user", "content": "hi"}],
+            "state": {}, "tools": [], "context": [], "forwardedProps": {}}
+    with client.stream("POST", "/agui/project-copilot", json=body) as response:
+        text = "".join(response.iter_text())
+    assert "DSML" not in text and "AQE-MODEL-TOOL-TEXT" in text and "RUN_FINISHED" not in text
+    saved = client.get(f"/api/chats/{thread['id']}").json()["messages"]
+    assert saved[-1]["role"] == "assistant" and saved[-1]["content"] == "Let me check."

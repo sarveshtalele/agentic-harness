@@ -131,9 +131,13 @@ def build(agent_key: str, project_id: str, tool_list=None, *, root=None, chat: b
     )
 
 
+TOOL_MARKUP = re.compile(r"<[｜|]DSML[｜|]")  # DeepSeek's native tool-call syntax, written as text instead of a real call
+
+
 def _strip_tool_markup(text: str) -> str:
     """Some models write tool syntax as text when tools are switched off for the final answer."""
-    return re.sub(r"<[｜|]DSML[｜|].*", "", text, flags=re.S).strip()
+    found = TOOL_MARKUP.search(text)
+    return (text[:found.start()] if found else text).strip()
 
 
 _LENIENT = json.JSONDecoder(strict=False)  # models put raw line breaks inside strings
@@ -354,4 +358,4 @@ def memory_add(project_id: str, content: str, source: str) -> dict:
     return memory
 
 
-__all__ = ["AgentCall", "CHAT_AGENTS", "build", "extract_json", "memory_add", "set_emitter", "Path"]
+__all__ = ["AgentCall", "CHAT_AGENTS", "TOOL_MARKUP", "build", "extract_json", "memory_add", "set_emitter", "Path"]

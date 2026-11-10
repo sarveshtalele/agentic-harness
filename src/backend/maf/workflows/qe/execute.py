@@ -31,8 +31,9 @@ async def _explain(rc: RunContext, result: dict) -> dict:
 
 async def qe_execute(rc: RunContext, state: dict) -> dict:
     worktree = Path(state["worktree"])
-    framework = state["framework"].lower()
-    runner = next((r for r in execution.REGISTERED if r in framework), framework)
+    runner, note = execution.pick_runner(state["framework"], list(state.get("tests") or []))
+    if note:
+        rc.log(note, kind="warning")
     rc.log(f"[TEST_EXECUTION_STARTED] Launching runner '{runner}' in sandbox worktree {worktree}...")
     result = await asyncio.to_thread(execution.run_suite, runner, worktree, "tests/agentic_qe", worktree.parent / f"{rc.run_id}-results", int(state.get("timeout", 300)), tuple(state.get("pytest_args", [])))
     rc.log(f"[TEST_EXECUTION_COMPLETED] {runner}: {result['verdict']}. {result['passed']} passed, {result['failed']} failed, {result['skipped']} skipped", {"exit_code": result["exit_code"], "reason": result["reason"], "output": result["output"][-1500:]}, "test")

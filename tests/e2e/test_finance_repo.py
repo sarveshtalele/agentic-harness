@@ -43,7 +43,7 @@ def test_f2_ba_writes_requirements_for_the_new_tool(page):
     page.goto(f"{run['base']}/ba")
     page.locator('textarea[name="brief"]').fill(TOOL_SPEC)
     page.locator('input[name="doc-title"]').fill("Savings goal tool BRD")
-    page.get_by_role("button", name="Generate document").click()
+    page.get_by_role("button", name="Generate Requirements Document").click()
     approve_next(page, "Gate 0")
     card = wait_card(page, "Gate 1")
     expect(page.get_by_test_id("document-card").first).to_be_visible(timeout=15_000)
@@ -53,7 +53,7 @@ def test_f2_ba_writes_requirements_for_the_new_tool(page):
     approve_next(page, "Gate 1")
     expect(page.get_by_test_id("run-status")).to_contain_text("completed", timeout=60_000)
     page.goto(UI + links[0])
-    expect(page.locator(".prose-atlas h2", has_text=re.compile("^Functional Requirements"))).to_be_visible()
+    expect(page.locator(".prose-atlas h2", has_text=re.compile(r"^(\d+\.\s*)?Functional Requirements"))).to_be_visible()
     expect(page.get_by_test_id("document-page")).to_be_visible()
     shot(page, "f2-finance-brd-formatted")
     page.goto(UI + links[1])
@@ -98,7 +98,7 @@ def test_f5_fix_a_real_finding(page):
         pytest.skip("The scan found nothing to fix in this repository")
     target = findings[0]
     page.goto(f"{run['base']}/bugs")
-    row = page.get_by_test_id("findings").locator("li").filter(has_text=f"{target['file']}:{target['line']}").first
+    row = page.get_by_test_id("findings").get_by_test_id("finding").filter(has_text=f"{target['file']}:{target['line']}").first
     row.get_by_role("button", name="Fix on a branch").click()
     card = wait_card(page, "Review change")
     expect(card).to_contain_text(f"diff --git a/{target['file']}")
@@ -125,7 +125,7 @@ def test_f5b_fix_all_open_findings(page):
 
 def test_f6_qe_lifecycle_live(page):
     page.goto(f"{run['base']}/qe")
-    page.get_by_label(re.compile("Install repository dependencies")).check()
+    page.get_by_label(re.compile("Install sandbox repository dependencies")).check()
     page.get_by_role("button", name="Start QE lifecycle").click()
     expect(page.get_by_test_id("run-stages")).to_be_visible(timeout=30_000)
     for gate in range(1, 5):

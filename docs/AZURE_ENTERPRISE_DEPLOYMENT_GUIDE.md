@@ -203,7 +203,7 @@ The script automatically executes:
 3. **Backend WebApp:** Configured for Python 3.12, port `8000`, startup command `/home/site/wwwroot/startup.sh`, and persistent storage enabled (`WEBSITES_ENABLE_APP_SERVICE_STORAGE=true`).
 4. **Frontend WebApp:** Configured for Node.js 20, port `3000`, startup command `/home/site/wwwroot/startup.sh`, and proxy bound to backend URL (`ATLAS_BACKEND_URL`).
 5. **CORS Configuration:** Enables secure cross-origin communication between Frontend and Backend.
-6. **Database Persistence:** Provisions persistent SQLite WAL storage at `/home/atlas/data/atlas.sqlite3`. (Alternatively, if utilizing Azure Database for PostgreSQL Flexible Server, configure `DATABASE_URL` in backend App Settings).
+6. **Database Persistence:** Provisions persistent SQLite storage at `/home/atlas/data/atlas.sqlite3` with `ATLAS_SQLITE_JOURNAL=DELETE` (the `/home` share has no shared memory for WAL). PostgreSQL is not supported yet; there is no `DATABASE_URL` setting.
 
 ---
 
@@ -308,7 +308,7 @@ The platform includes two redundant startup mechanisms designed to prevent cold-
 1. **`backend_startup.sh` (Shell Entrypoint):**
    - Detects existing Oryx virtualenvs at `/antenv`, `$APP_ROOT/antenv`, or `/home/atlas/venv`.
    - If missing, provisions `/home/atlas/venv` and installs dependencies.
-   - Sets environment variables: `ATLAS_DATA_DIR=/home/site/wwwroot/data`, `ATLAS_SQLITE_JOURNAL=WAL`, `PYTHONPATH=$APP_ROOT/src:$APP_ROOT:$PYTHONPATH`.
+   - Sets environment variables: `ATLAS_DATA_DIR=/home/atlas/data`, `ATLAS_SQLITE_JOURNAL=DELETE`, `PYTHONPATH=$APP_ROOT/src:$APP_ROOT:$PYTHONPATH`.
    - Inspects `$PORT` (defaulting to 8000) and executes:
      ```bash
      exec uvicorn backend.app:app --host 0.0.0.0 --port "$LISTEN_PORT" --workers 1 --proxy-headers
@@ -541,12 +541,13 @@ The fundamental enterprise rule: **Relational DB holds records you search, join,
 | **API Keys, Signing Keys, Secrets** | Azure Key Vault | Key rotation without app redeployment; access audit logging. |
 | **Application Telemetry & Trace Logs** | Azure Log Analytics / App Insights | Real-time threat detection, alerts, and 5 GB/month free ingestion. |
 
-### 8.2 SQLite Write-Ahead Log (WAL) on Azure App Service
-On Azure App Service Linux, the persistent storage volume is mounted at `/home`. The platform configures:
+### 8.2 SQLite journal mode on Azure App Service
+On Azure App Service Linux, the persistent storage volume is mounted at `/home`, a network share without the shared memory that WAL needs. The startup scripts therefore set:
 ```bash
-ATLAS_DATA_DIR=/home/site/wwwroot/data
-ATLAS_SQLITE_JOURNAL=WAL
+ATLAS_DATA_DIR=/home/atlas/data
+ATLAS_SQLITE_JOURNAL=DELETE
 ```
+Local runs keep WAL (the default in `config.py`). The notes below describe WAL for local disks only.
 
 #### Why WAL Mode is Essential:
 1. **Readers Never Block Writers:** Concurrently executing agents (e.g. Coverage Auditor and Repo Intelligence Analyst) read SQLite pages without locking the database.
@@ -602,12 +603,13 @@ az webapp config appsettings set \
     WEBSITES_PORT=8000 \
     PORT=8000 \
     ATLAS_DATA_DIR=/home/site/wwwroot/data \
-    ATLAS_SQLITE_JOURNAL=WAL \
+    ATLAS_SQLITE_JOURNAL=DELETE \
     ATLAS_RUN_TOKEN_LIMIT=50000000 \
     ATLAS_ADMIN_USERNAME=admin \
     ATLAS_ADMIN_PASSWORD="$ADMIN_PASSWORD" \
     ATLAS_SECRET_KEY="$SECRET_KEY" \
     ATLAS_ALLOWED_ORIGINS="https://$FRONTEND_APP.azurewebsites.net" \
+    ATLAS_ALLOWED_HOSTS="$BACKEND_APP.azurewebsites.net" \
     SCM_DO_BUILD_DURING_DEPLOYMENT=true \
     WEBSITES_CONTAINER_START_TIME_LIMIT=1800
 
@@ -886,11 +888,12 @@ az webapp config appsettings set \
     WEBSITES_PORT=8000 \
     WEBSITES_CONTAINER_START_TIME_LIMIT=1800 \
     ATLAS_DATA_DIR=/data \
-    ATLAS_SQLITE_JOURNAL=wal \
+    ATLAS_SQLITE_JOURNAL=DELETE \
     ATLAS_SECRET_KEY="generate-a-secure-64-char-random-string" \
     ATLAS_ADMIN_USERNAME="enterprise-admin" \
     ATLAS_ADMIN_PASSWORD="Choose-A-Strong-Master-Password-123!" \
     ATLAS_ALLOWED_ORIGINS="https://app-agentic-qe-ui-prod.azurewebsites.net" \
+    ATLAS_ALLOWED_HOSTS="app-agentic-qe-api-prod.azurewebsites.net" \
     OPENAI_API_KEY="your-azure-openai-key" \
     OPENAI_BASE_URL="https://your-resource.openai.azure.com/v1" \
     DEFAULT_MODEL="gpt-4o"

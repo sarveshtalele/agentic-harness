@@ -54,9 +54,20 @@ az webapp config appsettings set \
     WEBSITES_ENABLE_APP_SERVICE_STORAGE="true" \
     ATLAS_HOME="/home/atlas" \
     ATLAS_DATA_DIR="/home/atlas/data" \
-    ATLAS_SQLITE_JOURNAL="WAL" \
+    ATLAS_SQLITE_JOURNAL="DELETE" \
+    ATLAS_ALLOWED_HOSTS="$BACKEND_APP.azurewebsites.net" \
+    ATLAS_ALLOWED_ORIGINS="https://$FRONTEND_APP.azurewebsites.net" \
     SCM_DO_BUILD_DURING_DEPLOYMENT="true" \
     ENABLE_ORYX_BUILD="true"
+
+# Sign-in: the admin account lives in App Settings (the package never ships .env). Asked once, sent from a private
+# temp file so the password is never on a command line.
+read -r -p "Platform admin username: " ADMIN_USER
+read -r -s -p "Platform admin password: " ADMIN_PASS; echo
+SETTINGS_FILE="$(umask 077; mktemp)"
+ADMIN_USER="$ADMIN_USER" ADMIN_PASS="$ADMIN_PASS" python3 -c 'import json, os, sys; json.dump([{"name": "ATLAS_ADMIN_USERNAME", "value": os.environ["ADMIN_USER"], "slotSetting": False}, {"name": "ATLAS_ADMIN_PASSWORD", "value": os.environ["ADMIN_PASS"], "slotSetting": False}], open(sys.argv[1], "w"))' "$SETTINGS_FILE"
+az webapp config appsettings set --name "$BACKEND_APP" --resource-group "$RESOURCE_GROUP" --settings "@$SETTINGS_FILE" > /dev/null
+rm -f "$SETTINGS_FILE"; unset ADMIN_PASS
 
 # 5. Create Frontend WebApp (Node 20)
 echo "\n[5/6] Creating Frontend WebApp..."

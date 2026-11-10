@@ -17,6 +17,7 @@ import json
 import os
 import py_compile
 import shutil
+import subprocess
 import sys
 import zipfile
 from pathlib import Path
@@ -152,9 +153,25 @@ def should_skip(path: Path, base_dir: Path) -> bool:
     return False
 
 
+def _git_tracked() -> set[Path] | None:
+    """Files git tracks, so a package holds exactly what is committed (no stray local files). None outside a checkout."""
+    git = shutil.which("git")
+    if not git or not (ROOT / ".git").exists():
+        return None
+    result = subprocess.run([git, "ls-files", "-z"], cwd=ROOT, capture_output=True, timeout=60, check=False)
+    if result.returncode != 0:
+        return None
+    return {(ROOT / name).resolve() for name in result.stdout.decode("utf-8", "replace").split("\0") if name}
+
+
+TRACKED = _git_tracked()
+
+
 def collect_folder_files(folder: Path, base_dir: Path) -> dict[str, Path]:
     entries: dict[str, Path] = {}
     for path in sorted(folder.rglob("*")):
+        if TRACKED is not None and path.resolve() not in TRACKED:
+            continue  # untracked or ignored locally: never shipped
         if path.is_file() and not path.is_symlink() and not should_skip(path, base_dir):
             rel_name = path.relative_to(base_dir).as_posix()
             entries[rel_name] = path
@@ -372,7 +389,7 @@ def main() -> int:
     log("\nKudu ZipDeploy Instructions:")
     log("  Backend deploy URL:  https://<backend-app-name>.scm.azurewebsites.net/api/zipdeploy")
     log("  Frontend deploy URL: https://<frontend-app-name>.scm.azurewebsites.net/api/zipdeploy")
-    log("  Or drag & drop zip files into Kudu Zip Deploy UI: https://<app-name>.scm.azurewebsites.net/ZipDeploy")
+    log("  (Linux apps: use the zipdeploy API above or `az webapp deploy --type zip`; Microsoft documents the Kudu drag-and-drop ZipDeploy page as not working on Linux.)")
 
     return 0
 

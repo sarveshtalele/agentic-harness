@@ -56,9 +56,20 @@ az webapp config appsettings set `
     WEBSITES_ENABLE_APP_SERVICE_STORAGE="true" `
     ATLAS_HOME="/home/atlas" `
     ATLAS_DATA_DIR="/home/atlas/data" `
-    ATLAS_SQLITE_JOURNAL="WAL" `
+    ATLAS_SQLITE_JOURNAL="DELETE" `
+    ATLAS_ALLOWED_HOSTS="$BackendApp.azurewebsites.net" `
+    ATLAS_ALLOWED_ORIGINS="https://$FrontendApp.azurewebsites.net" `
     SCM_DO_BUILD_DURING_DEPLOYMENT="true" `
     ENABLE_ORYX_BUILD="true"
+
+# Sign-in: the admin account lives in App Settings (the package never ships .env). The password is sent from a
+# private temp file, never on a command line.
+$AdminUser = Read-Host "Platform admin username"
+$AdminPass = [System.Net.NetworkCredential]::new("", (Read-Host "Platform admin password" -AsSecureString)).Password
+$SettingsFile = New-TemporaryFile
+@(@{ name = "ATLAS_ADMIN_USERNAME"; value = $AdminUser; slotSetting = $false }, @{ name = "ATLAS_ADMIN_PASSWORD"; value = $AdminPass; slotSetting = $false }) | ConvertTo-Json | Set-Content -Path $SettingsFile -Encoding utf8
+az webapp config appsettings set --name $BackendApp --resource-group $ResourceGroup --settings "@$SettingsFile" | Out-Null
+Remove-Item $SettingsFile; Remove-Variable AdminPass
 
 # 5. Create Frontend WebApp (Node 20)
 Write-Host "`n[5/6] Creating Frontend WebApp..." -ForegroundColor Yellow

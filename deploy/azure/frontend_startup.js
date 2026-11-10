@@ -28,6 +28,23 @@ function digest(dir, hash) {
   return hash;
 }
 
+// Turbopack links external packages (pino, shiki, express) from .next/node_modules as symlinks into the temporary build
+// folder, which build() removes. Copying the links verbatim left /api/copilotkit failing with "Cannot find module
+// 'pino-<hash>'", so each link is replaced by a real copy of the package it points to.
+function materializeExternals(standalone, output) {
+  for (const dir of [path.join(output, ".next", "node_modules"), path.join(output, "src", "frontend", ".next", "node_modules")]) {
+    if (!fs.existsSync(dir)) continue;
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (!entry.isSymbolicLink()) continue;
+      const link = path.join(dir, entry.name);
+      const target = path.resolve(dir, fs.readlinkSync(link));
+      const real = target.startsWith(standalone) ? path.join(output, path.relative(standalone, target)) : target;
+      fs.rmSync(link, { force: true });
+      fs.cpSync(real, link, { recursive: true, dereference: true });
+    }
+  }
+}
+
 function build(wanted) {
   // the build runs on fast local disk; only its output goes to the persistent /home share
   const work = fs.mkdtempSync(path.join(os.tmpdir(), "atlas-build-"));
@@ -39,6 +56,7 @@ function build(wanted) {
   execFileSync(npm, ["run", "build"], { cwd: work, env: { ...env, NODE_ENV: "production" }, stdio: "inherit", shell: process.platform === "win32" });
   fs.rmSync(output, { recursive: true, force: true });
   fs.cpSync(path.join(work, ".next", "standalone"), output, { recursive: true });
+  materializeExternals(fs.realpathSync(path.join(work, ".next", "standalone")), output);
   fs.cpSync(path.join(work, ".next", "static"), path.join(output, ".next", "static"), { recursive: true });
   if (fs.existsSync(path.join(output, "src", "frontend"))) {
     fs.mkdirSync(path.join(output, "src", "frontend", ".next"), { recursive: true });

@@ -292,6 +292,7 @@ function NewProject({ onClose, onCreated }: { onClose: () => void; onCreated: ()
       }
       onCreated();
       onClose();
+      router.push(`/projects/${project.id}`); // open the new project, as its overview shows the next step
     } catch (err: any) {
       setError(err.message);
       setBusy(false);

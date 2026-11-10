@@ -106,13 +106,27 @@ async def agui(agent_key: str, request: Request):
             payload = {"messages": incoming, "thread_id": thread_id, "run_id": body.get("runId") or new_id("rn"),
                        "state": body.get("state") or {}, "tools": body.get("tools") or [], "context": body.get("context") or [],
                        "forwarded_props": body.get("forwardedProps") or {}}
+            markup = False  # the model wrote a tool call as text: nothing ran, so the turn ends with an error, not that text
             async for event in wrapped.run(payload):
-                kind = getattr(event, "type", "")
-                if str(getattr(kind, "value", kind)) == "TEXT_MESSAGE_CONTENT":
+                kind = str(getattr(getattr(event, "type", ""), "value", getattr(event, "type", "")))
+                if kind == "TEXT_MESSAGE_CONTENT":
+                    if markup:
+                        continue
+                    found = agents.TOOL_MARKUP.search("".join(answer) + event.delta)
+                    if found:  # ponytail: markup split across two deltas leaves its first characters on screen
+                        markup = True
+                        event.delta = event.delta[: max(0, found.start() - sum(map(len, answer)))]
+                        if not event.delta:
+                            continue
                     answer.append(event.delta)
+                if markup and kind in ("MESSAGES_SNAPSHOT", "RUN_FINISHED"):
+                    continue
                 # every event type is redacted, including the final message snapshot
                 # ponytail: a secret split across two deltas passes in the live stream; the snapshot and stored copy are clean
                 yield redact(encoder.encode(event))
+            if markup:
+                yield encoder.encode(RunErrorEvent(message="The model wrote a tool call as text instead of calling the tool, so nothing ran. "
+                                                           "Ask again, or pick a model that passed the tool check on the Agents page.", code="AQE-MODEL-TOOL-TEXT"))
         except llm.LLMNotConfigured as exc:
             yield encoder.encode(RunErrorEvent(message=str(exc), code="LLM_NOT_CONFIGURED"))
         except Exception as exc:  # recorded in the log with an id, and the user sees the failure in chat instead of a dead stream
