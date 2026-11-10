@@ -1367,7 +1367,7 @@ When modifying platform architecture or adding new skills:
 
 ## 12. The project harness on MAF `create_harness_agent` (plan P2, 2026-11-10)
 
-`src/backend/maf/harness.py` builds the `harness` agent (`maf/agents/harness.py`, `prompts/harness.md`, `evals/harness.json`) with MAF 1.24's `create_harness_agent`. It is served by the existing `/agui/{agent}` route and the Chat window (`/chat/<project>`). The legacy `src/backend/harness/` engine behind `/api/harness/chat` is unchanged.
+`src/backend/maf/harness.py` builds the `harness` agent (`maf/agents/harness.py`, `prompts/harness.md`, `evals/harness.json`) with MAF 1.24's `create_harness_agent`. It is served by the existing `/agui/{agent}` route and the Chat window (`/chat/<project>`). Since 2026-11-10 `/harness` renders this harness (MAF Chat preset to `harness`, plus the thread's MAF todos from `GET /api/chats/{thread}/todos`); the legacy engine stays at `/harness?engine=legacy`. The legacy `src/backend/harness/` engine behind `/api/harness/chat` is unchanged.
 
 | Harness capability | MAF primitive | Platform wiring |
 |---|---|---|
@@ -1375,7 +1375,8 @@ When modifying platform architecture or adding new skills:
 | Todos | `TodoProvider(store=TodoFileStore)` | `data/harness/<project>/todos/`, one file per chat thread, persists across turns |
 | Plan / execute modes | `AgentModeProvider` (default) | Mode resets each AG-UI request (no snapshot store yet) |
 | File memory | `FileMemoryProvider` over `FileSystemAgentFileStore` | `data/harness/<project>/memory/<user>/`, never the process cwd |
-| Skills, progressive disclosure | `SkillsProvider(FileSkillsSource([skills/]))` | Only names and descriptions in the first request; `load_skill` and `read_skill_resource` need no pause (trusted platform content); no script runner yet |
+| Skills, progressive disclosure | `SkillsProvider(DeduplicatingSkillsSource(FilteringSkillsSource(FileSkillsSource(plugins.skill_paths()))))` | Skill folders from every discovered plugin (`core/plugins.py`: `skills/` as `local-skills`, then `plugins/*/` with `plugin.json` or `.claude-plugin/plugin.json`), re-read each turn. Command skills (`disable-model-invocation: true`, such as agentic-qe `qe-*`) are filtered out of the model's list. Only names and descriptions go in the first request; `load_skill` and `read_skill_resource` need no pause (trusted platform content); no script runner yet |
+| Sandbox and scan | Function tools `run_tests`, `scan_repository`, `sandbox_status` (`maf/tools/`) | `run_tests` runs the repository's registered runner through `qe/execution.run_suite` in the project sandbox clone, with counts from JUnit. `scan_repository` runs `static_analysis.run_all` and saves nothing. Each refuses with a clear reason when the project has no repository. There is no general shell tool |
 | History | `FileHistoryProvider(load_messages=False)` | Keeps what the model saw and said per call under `data/harness/<project>/history/`; AG-UI still sends the thread |
 | Compaction | `before_compaction_strategy=SlidingWindowStrategy(keep_last_groups=30)` | Same window as the other agents; no invented context size |
 | Observability | `runtime.tool_audit` (function middleware) and `governance.telemetry` (chat middleware) | `tool_calls` and `agent_calls` rows for every call |

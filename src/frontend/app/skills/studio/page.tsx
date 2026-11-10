@@ -378,7 +378,7 @@ export default function SkillCreatorStudioPage() {
       setTestCases(res.test_cases || []);
       setActiveTab("skill_md");
       setIsSaved(true);
-      setSuccessMsg(`Skill-Creator Agent executed in background: scaffolded & installed '${res.slug}' in MAF 2.0 with ${res.test_cases?.length || 0} deterministic test cases.`);
+      setSuccessMsg(`Skill-Creator Agent executed in background: scaffolded & installed '${res.slug}' in MAF with ${res.test_cases?.length || 0} deterministic test cases.`);
     } catch (err: any) {
       setError(err.message || "Failed to scaffold skill");
     } finally {
@@ -742,7 +742,7 @@ export default function SkillCreatorStudioPage() {
                   className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 py-2.5 px-3 text-xs font-bold text-white shadow-md hover:from-indigo-500 hover:to-purple-600 transition-all active:scale-[0.99] disabled:opacity-60 cursor-pointer"
                 >
                   <Sparkles className={`h-4 w-4 text-amber-300 ${isSuggesting ? "animate-spin" : "animate-pulse"}`} />
-                  <span>{isSuggesting ? "⚡ Running Skill-Creator Agent via MAF 2.0..." : "✨ AI Architect & Auto-Fill Skill Specifications"}</span>
+                  <span>{isSuggesting ? "⚡ Running Skill-Creator Agent via MAF..." : "✨ AI Architect & Auto-Fill Skill Specifications"}</span>
                 </button>
               </div>
             </Card>

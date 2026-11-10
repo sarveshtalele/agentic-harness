@@ -12,7 +12,7 @@ Faithfulness
 Recall
 —
 F1
-6 calls · 9,609 tokens · 0 errors
+6 calls · 10,542 tokens · 0 errors
 Bug fix reviewer
 med risk
 Scores proposed bug fixes, evaluates assertion preservation, and outputs a confidence score for authentic fixes
@@ -27,7 +27,7 @@ Faithfulness
 Recall
 —
 F1
-2 calls · 889 tokens · 0 errors
+2 calls · 1,315 tokens · 0 errors
 Bug reviewer
 med risk
 Finds defects in code it is given
@@ -42,7 +42,7 @@ Faithfulness
 Recall
 —
 F1
-5 calls · 2,895 tokens · 0 errors
+5 calls · 2,856 tokens · 0 errors
 Business analyst
 low risk
 Writes requirements documents from a brief and sources, and converts them to validated Gherkin
@@ -57,13 +57,13 @@ Faithfulness
 Recall
 —
 F1
-14 calls · 23,650 tokens · 0 errors
+15 calls · 32,383 tokens · 0 errors
 Confidence reviewer
 low risk
 Scores requirements documents, plans, and releases from evidence
 enabled
 v1
-evals 6/6
+evals 5/6
 100%
 Groundedness
 —
@@ -72,7 +72,7 @@ Faithfulness
 Recall
 —
 F1
-18 calls · 59,589 tokens · 0 errors
+26 calls · 99,422 tokens · 0 errors
 Defect diagnostician
 changes code
 Fixes defects and test drift on a branch
@@ -87,7 +87,7 @@ Faithfulness
 Recall
 —
 F1
-3 calls · 1,780 tokens · 0 errors
+8 calls · 18,947 tokens · 0 errors
 Feature engineer
 changes code
 Implements features on a branch
@@ -102,9 +102,9 @@ Faithfulness
 Recall
 —
 F1
-2 calls · 1,617 tokens · 0 errors
+2 calls · 1,609 tokens · 0 errors
 Project harness
-med risk
+changes code
 Plans and works through multi-step project tasks with todos, modes, memory, and skills
 enabled
 v1
@@ -117,7 +117,7 @@ Faithfulness
 Recall
 —
 F1
-3 calls · 1,069 tokens · 0 errors
+7 calls · 34,654 tokens · 0 errors
 Test architect
 low risk
 Plans tests by risk and level
@@ -132,7 +132,7 @@ Faithfulness
 Recall
 —
 F1
-6 calls · 7,426 tokens · 0 errors
+6 calls · 7,606 tokens · 0 errors
 QA execution engineer
 low risk
 Explains test results from the recorded evidence
@@ -147,7 +147,7 @@ Faithfulness
 Recall
 —
 F1
-2 calls · 848 tokens · 0 errors
+3 calls · 3,649 tokens · 0 errors
 Repository analyst
 med risk
 Summarizes a repository from scan facts and code
@@ -162,7 +162,7 @@ Faithfulness
 Recall
 —
 F1
-3 calls · 3,648 tokens · 0 errors
+4 calls · 7,776 tokens · 0 errors
 Requirements analyst
 med risk
 Derives testable requirements with quoted evidence
@@ -177,7 +177,7 @@ Faithfulness
 Recall
 —
 F1
-4 calls · 7,691 tokens · 0 errors
+4 calls · 8,039 tokens · 0 errors
 Test automation
 med risk
 Generates executable tests for approved cases
@@ -192,7 +192,7 @@ Faithfulness
 Recall
 —
 F1
-2 calls · 2,571 tokens · 0 errors
+4 calls · 14,095 tokens · 0 errors
 Test designer
 low risk
 Designs test cases with oracles
@@ -207,4 +207,4 @@ Faithfulness
 Recall
 —
 F1
-7 calls · 16,737 tokens · 1 errors
+5 calls · 17,584 tokens · 0 errors

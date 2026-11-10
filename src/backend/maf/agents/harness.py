@@ -15,6 +15,7 @@ HARNESS_PROVIDER_TOOLS = frozenset({
 POLICY = AgentPolicy(
     "Project harness",
     "Plans and works through multi-step project tasks with todos, modes, memory, and skills",
-    "medium",
-    chat_tools=frozenset(CHAT_READ | {"save_document", "project_status", "list_findings", "verify_ledger", "start_workflow"} | HARNESS_PROVIDER_TOOLS),
+    "high",  # runs the repository's own tests in its sandbox copy
+    chat_tools=frozenset(CHAT_READ | {"save_document", "project_status", "list_findings", "verify_ledger", "start_workflow",
+                                      "run_tests", "scan_repository", "sandbox_status"} | HARNESS_PROVIDER_TOOLS),
 )

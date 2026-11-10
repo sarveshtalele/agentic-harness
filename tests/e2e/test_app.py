@@ -400,6 +400,22 @@ def test_13_chat_memory_new_window_and_specialist_agent(page):
     window.close()
 
 
+def test_13b_harness_page_plans_scans_and_shows_todos(page):
+    """/harness runs MAF's create_harness_agent: a real todo appears in the panel and the real scan result reaches the reply."""
+    page.goto(f"{UI}/harness?project={state['id']}")
+    expect(page.get_by_label("Agent for new chat")).to_have_value("harness", timeout=15_000)
+    page.get_by_role("button", name="New chat").click()
+    pane = page.get_by_test_id("chat-pane")
+    box = pane.locator("textarea")
+    expect(box).to_be_enabled(timeout=30_000)
+    box.fill("Add exactly one todo titled 'Scan the repository'. Then call scan_repository. Then mark that todo complete. "
+             "Then reply with the number of findings it returned.")
+    box.press("Enter")
+    expect(page.get_by_test_id("harness-todo").first).to_contain_text("Scan the repository", timeout=LLM_TIMEOUT)
+    expect(pane.locator('[data-role="assistant"]').last).to_contain_text(re.compile(r"\d"), timeout=LLM_TIMEOUT)
+    shot(page, "13b-harness-page")
+
+
 def test_14_governance_ledger_and_metrics_are_real(page):
     page.goto(f"{state['base']}/governance")
     expect(page.get_by_test_id("ledger-valid")).to_contain_text("Chain valid")

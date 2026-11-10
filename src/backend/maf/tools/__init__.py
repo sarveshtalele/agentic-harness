@@ -14,7 +14,10 @@ from backend.maf.tools import (
     read_document,
     read_file,
     remember,
+    run_tests,
+    sandbox_status,
     save_document,
+    scan_repository,
     search_documents,
     start_workflow,
     verify_ledger,
@@ -32,3 +35,8 @@ def document_tools(project_id: str) -> list:
 
 def chat_tools(project_id: str, thread_id: str, start_run) -> list:
     return [remember.build(project_id, thread_id, start_run), project_status.build(project_id, thread_id, start_run), list_findings.build(project_id, thread_id, start_run), verify_ledger.build(project_id, thread_id, start_run), start_workflow.build(project_id, thread_id, start_run)]
+
+
+def harness_tools(project_id: str, thread_id: str, start_run) -> list:
+    """Sandbox and scan tools for the project harness: the repository's own tests and the static analyzers, nothing else."""
+    return [run_tests.build(project_id, thread_id, start_run), scan_repository.build(project_id, thread_id, start_run), sandbox_status.build(project_id, thread_id, start_run)]

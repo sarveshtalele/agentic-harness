@@ -11,9 +11,11 @@ import json
 
 from agent_framework import (
     Agent,
+    DeduplicatingSkillsSource,
     FileHistoryProvider,
     FileSkillsSource,
     FileSystemAgentFileStore,
+    FilteringSkillsSource,
     SkillsProvider,
     SlidingWindowStrategy,
     TodoFileStore,
@@ -21,8 +23,8 @@ from agent_framework import (
     create_harness_agent,
 )
 
-from backend.config import DATA_DIR, SKILLS_DIR
-from backend.core import auth, prompts
+from backend.config import DATA_DIR
+from backend.core import auth, plugins, prompts
 from backend.maf import governance, llm, tools
 from backend.maf.runtime import ProjectContext, tool_audit
 
@@ -31,11 +33,17 @@ HARNESS_DIR = DATA_DIR / "harness"
 
 
 def _skills() -> SkillsProvider:
-    """Platform skills under skills/ are trusted content, so reading one needs no pause; there is no script runner yet.
+    """Skills from every discovered plugin (plus skills/ as local-skills), read fresh each turn so a new plugin folder
+    shows up without a restart. Command skills (disable-model-invocation: true, like agentic-qe's qe-*) are user
+    commands, so the model never sees them. Platform skills are trusted content: reading one needs no pause, and there
+    is no script runner yet.
 
-    ponytail: every platform skill is offered; the per-user allowlist arrives with admin grants (plan P5).
+    ponytail: every plugin skill is offered to everyone; the per-user allowlist arrives with admin grants (plan P5).
     """
-    return SkillsProvider(FileSkillsSource([SKILLS_DIR]), disable_load_skill_approval=True, disable_read_skill_resource_approval=True)
+    paths = plugins.skill_paths()
+    commands = set().union(*(plugins.command_skill_names(path) for path in paths))
+    source = DeduplicatingSkillsSource(FilteringSkillsSource(FileSkillsSource(paths), lambda skill, _ctx: skill.frontmatter.name not in commands))
+    return SkillsProvider(source, disable_load_skill_approval=True, disable_read_skill_resource_approval=True)
 
 
 def state_dirs(project_id: str, user_id: str) -> dict:
@@ -53,7 +61,7 @@ def build(project_id: str, thread_id: str, start_run, *, user_id: str | None = N
     user_id = user_id or auth.acting_user(project_id)
     model = auth.model_for(project_id, AGENT, None, user_id, model)
     auth.check_allowance(project_id, user_id, model)
-    allowed = governance.allowed(AGENT, tools.repo_tools(project_id) + tools.document_tools(project_id) + tools.chat_tools(project_id, thread_id, start_run), True)
+    allowed = governance.allowed(AGENT, tools.repo_tools(project_id) + tools.document_tools(project_id) + tools.chat_tools(project_id, thread_id, start_run) + tools.harness_tools(project_id, thread_id, start_run), True)
     ref = prompts.ref(AGENT)
     dirs = state_dirs(project_id, user_id)
     return create_harness_agent(

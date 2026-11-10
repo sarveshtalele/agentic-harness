@@ -1,6 +1,7 @@
 """Chat API."""
 from __future__ import annotations
 
+from agent_framework import AgentSession, TodoFileStore
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import (
     Response,
@@ -10,7 +11,7 @@ from pydantic import BaseModel, Field
 from backend.api.common import _project
 from backend.core import auth
 from backend.db import db, row, rows
-from backend.maf import agui, engine, evals, governance, llm, workflows  # noqa: F401 - workflows registers definitions
+from backend.maf import agui, engine, evals, governance, harness, llm, workflows  # noqa: F401 - workflows registers definitions
 from backend.maf import runtime as agents
 
 router = APIRouter()
@@ -60,6 +61,19 @@ def get_chat(thread_id: str):
     if not thread:
         raise HTTPException(404, f"Chat thread not found: {thread_id}")
     return {**thread, "messages": agui.thread_messages(thread_id)}
+
+
+@router.get("/api/chats/{thread_id}/todos")
+async def chat_todos(thread_id: str):
+    """The harness's own MAF todo list for this chat thread, read through MAF's TodoFileStore. Empty means no todos yet."""
+    with db() as con:
+        thread = row(con.execute("SELECT project_id, agent FROM chat_threads WHERE id=?", (thread_id,)))
+    if not thread:
+        raise HTTPException(404, f"Chat thread not found: {thread_id}")
+    if thread["agent"] != harness.AGENT:
+        return {"todos": [], "note": "Only the project harness keeps a todo list"}
+    items, _ = await TodoFileStore(harness.HARNESS_DIR / thread["project_id"] / "todos").load_state(AgentSession(session_id=thread_id), source_id="todo")
+    return {"todos": [{"id": t.id, "title": t.title, "description": t.description, "done": t.is_complete} for t in items]}
 
 
 @router.patch("/api/chats/{thread_id}")

@@ -265,6 +265,10 @@
   - Chat now ends a turn with `AQE-MODEL-TOOL-TEXT` when the model writes its tool call as text (E2E run 4, `test_13`), instead of showing and storing the markup
   - Final evidence `docs/evidence/runs/2026-11-10-1747-c6a8cfd-dirty/`: offline 606/606, smoke 3/3, live harness 1/1, E2E run 4 32/33 and run 5 30/33. The run 5 failures are traced in NOTES.md: model endpoint outage during design, Feature Builder change failing the repo tests (verdict FAIL is correct), QE tokens 699k over the 600k budget
 - [ ] E2E stability on the real model: `test_11` timing, `test_f4` Feature Builder quality, `test_f8` token budget vary between runs
+- [x] Harness page on MAF (P7 pulled forward, owner 2026-11-10 "start with both"):
+  - `/harness` renders the MAF Chat with the `harness` agent and a panel of the thread's real MAF todos; the legacy view stays at `/harness?engine=legacy`
+  - new harness tools: `run_tests` (registered runner chosen by code, run through `qe/execution.run_suite` in the project sandbox clone, verdict from JUnit), `scan_repository` (`static_analysis.run_all`, read-only), `sandbox_status` (`sandbox.info`); refused when the project has no real repository; arbitrary shell stays off
+- [x] P3 first slice: plugin discovery (with the harness page, same day). Real repo: `local-skills` 20 skills, `agentic-qe` 15 commands (no manifest), `security-audit` 0 skills (its `SKILL.md` is at the folder root, no `skills/`). Left for P3: write routes, marketplace sidecar validation, undoable registration, hook/agent/command adapters (P3b): `core/plugins.py` discovers `plugins/*/plugin.json` and Claude-format `.claude-plugin/plugin.json`, plus `skills/` as the implicit `local-skills` plugin; `GET /api/plugins`; harness skills come from discovered plugins, with command skills (`disable-model-invocation: true`) kept out of the model's list
 - [ ] P3 Plugin manifests and discovery; `SkillsProvider` with admin filter
 - [ ] P4 Real MCP through `MCPStdioTool` / `MCPStreamableHTTPTool`
 - [ ] P5 Admin governance for plugins, skills, MCP; admin-only writes

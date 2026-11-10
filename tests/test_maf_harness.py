@@ -10,6 +10,8 @@ import pytest
 from fastapi.testclient import TestClient
 
 from backend.app import app
+from backend.config import SKILLS_DIR
+from backend.core import plugins
 from backend.db import db
 from backend.maf import harness, llm
 from tests.scripted_client import ScriptedClient
@@ -57,12 +59,15 @@ def test_harness_streams_and_offers_skills_by_name_only(client, project):
     assert "RUN_STARTED" in text and "Plan ready." in text and "RUN_FINISHED" in text
     first = scripted.calls[0]
     assert "planning-tests" in first and "decomposing requirements across Unit" in first  # name and description advertised
+    assert "qe-start" not in first  # agentic-qe's qe-* skills are user commands (disable-model-invocation), not model skills
+    qe_dir = next(path for path in plugins.skill_paths() if path.parent.name == "agentic-qe")
+    assert "qe-start" in plugins.command_skill_names(qe_dir)  # the folder is searched, so only the command filter keeps it out
     saved = client.get(f"/api/chats/{thread['id']}").json()
     assert [m["role"] for m in saved["messages"]] == ["user", "assistant"]
 
 
 def test_load_skill_returns_the_real_skill_body_and_is_recorded(client, project):
-    skill_text = (harness.SKILLS_DIR / "planning-tests" / "SKILL.md").read_text(encoding="utf-8")
+    skill_text = (SKILLS_DIR / "planning-tests" / "SKILL.md").read_text(encoding="utf-8")
     body_marker = next(line for line in skill_text.split("---", 2)[2].splitlines() if line.strip().startswith("#"))
     scripted = ScriptedClient([(NEEDLE, _tool_then_text("load_skill", {"skill_name": "planning-tests"}, "Loaded."))])
     llm.set_client_override(scripted)

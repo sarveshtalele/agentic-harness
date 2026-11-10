@@ -716,7 +716,7 @@ A stage that keeps failing after its retries can end with a partial result. The 
         summary: "Production architecture: 6-gate state machine, micro-agent roster, AST parsing, and zero-trust sandbox execution.",
         body: `## Canonical Architecture & System Design
 
-The **Agentic Quality Engineering (QE) Platform** is an enterprise-grade autonomous testing and verification ecosystem built on **Microsoft Agent Framework (MAF 2.0)**, **Next.js 16 App Router**, and **FastAPI**. It transforms raw repository code, specifications, or business requirements into comprehensive, level-allocated, deterministic, and self-healing test suites with complete cryptographic traceability.
+The **Agentic Quality Engineering (QE) Platform** is an enterprise-grade autonomous testing and verification ecosystem built on **Microsoft Agent Framework (MAF)**, **Next.js 16 App Router**, and **FastAPI**. It transforms raw repository code, specifications, or business requirements into comprehensive, level-allocated, deterministic, and self-healing test suites with complete cryptographic traceability.
 
 ### Core Architectural Tenets
 
@@ -740,7 +740,7 @@ This canonical specification provides an exhaustive, production-grade deployment
 ### Architectural Deployment Topology
 
 - **Web Tier (Frontend):** Azure App Service (Linux, Node.js 20 LTS) serving Next.js 16 App Router.
-- **API & Orchestration Tier (Backend):** Azure App Service (Linux, Python 3.12 LTS) serving FastAPI and Microsoft Agent Framework (MAF 2.0).
+- **API & Orchestration Tier (Backend):** Azure App Service (Linux, Python 3.12 LTS) serving FastAPI and Microsoft Agent Framework (MAF).
 - **Relational Data Tier:** Azure Database for PostgreSQL Flexible Server (Zone-Redundant HA, Private Endpoint).
 - **Blob & Artifact Tier:** Azure Blob Storage with immutability policies, lifecycle archiving, and customer-managed keys (CMK).
 - **Secrets & Configuration:** Azure Key Vault with Managed Identities and Azure App Configuration.
@@ -784,11 +784,11 @@ See the complete audit and remediation details in \`docs/SECURITY_GOVERNANCE_AND
       },
       {
         slug: "agent-skills-maf-specification",
-        title: "Agent Skills & MAF 2.0 Specification",
+        title: "Agent Skills & MAF Specification",
         summary: "Progressive disclosure standard, SKILL.md schema, sandboxed execution, and offline deterministic evaluation criteria.",
-        body: `## Agent Skills & MAF 2.0 Specification
+        body: `## Agent Skills & MAF Specification
 
-This canonical document establishes the architectural standard and runtime specification for **Agent Skills** and **Microsoft Agent Framework (MAF 2.0)** integration within the platform.
+This canonical document establishes the architectural standard and runtime specification for **Agent Skills** and **Microsoft Agent Framework (MAF)** integration within the platform.
 
 ### Core Skill Tenets & Standards
 
@@ -799,7 +799,7 @@ This canonical document establishes the architectural standard and runtime speci
    - Optional \`scripts/\` directory containing executable Python or shell runners.
    - Optional \`resources/\` directory containing deterministic reference data, templates, or schemas.
 3. **Sandboxed Subprocess Execution:** Skill scripts execute strictly inside isolated environments with scrubbed credentials and execution timeouts.
-4. **MAF 2.0 Native Integration:** Seamlessly bridges to MAF \`ChatAgent\`, \`WorkflowEngine\`, and \`TodoProvider\`.
+4. **MAF Native Integration:** Seamlessly bridges to MAF \`ChatAgent\`, \`WorkflowEngine\`, and \`TodoProvider\`.
 
 See the complete specification and guidelines in \`docs/AGENT_SKILLS_AND_MAF_SPECIFICATION.md\`.`,
       },

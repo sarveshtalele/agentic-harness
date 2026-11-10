@@ -12,13 +12,13 @@ test.describe("Production Screens and Multi-Agent Harness E2E", () => {
   });
 
   test("01: Harness renders unified header and 8 goal cards with zero leaks", async ({ page }) => {
-    await page.goto("/harness");
+    await page.goto("/harness?engine=legacy");  // the legacy view; /harness now serves the MAF harness
     await page.waitForLoadState("networkidle");
 
     // Verify AppShell header breadcrumb
     await expect(page.locator("header").first()).toBeVisible();
     await expect(page.locator("text=Autonomous QE Harness").first()).toBeVisible();
-    await expect(page.locator("text=MAF 2.0 Engine").first()).toBeVisible();
+    await expect(page.locator("text=Microsoft Agent Framework").first()).toBeVisible();
 
     // Verify Harness status bar
     await expect(page.locator("text=Autonomous Multi-Agent Loops")).toBeVisible();

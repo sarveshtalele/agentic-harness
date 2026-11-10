@@ -217,7 +217,7 @@ const HARNESS_GOALS = [
   {
     id: "create_skill",
     title: "Create Agent Skill",
-    desc: "Synthesize, test, and package an autonomous agent skill conforming to MAF 2.0 standards",
+    desc: "Synthesize, test, and package an autonomous agent skill conforming to MAF standards",
     prompt: "/create_agent_skill Markdown To Docx Engine",
     icon: Sparkles,
     badge: "Agent Skill"

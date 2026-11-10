@@ -144,7 +144,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               </span>
               <span className="font-bold text-slate-800 dark:text-slate-100">Autonomous QE Harness</span>
               <span className="hidden sm:inline-block rounded-md bg-indigo-500/10 px-1.5 py-0.5 text-[10px] font-mono font-semibold text-indigo-600 dark:text-indigo-400">
-                MAF 2.0 Engine
+                Microsoft Agent Framework
               </span>
             </div>
           ) : (
