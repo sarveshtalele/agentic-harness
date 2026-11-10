@@ -2,6 +2,7 @@
 import os
 from pathlib import Path
 import subprocess
+import tempfile
 import zipfile
 import pytest
 
@@ -125,13 +126,20 @@ def test_branch_isolation_policy():
     assert verify_script.is_file()
     assert os.access(verify_script, os.X_OK)
 
-    # Calling with current branch feature/azure-kudu-deployment targeting main must fail with exit code 1
-    res = subprocess.run([str(verify_script), "main"], capture_output=True, text=True)
+    # The script reads the current branch, so run it in a scratch repository checked out at the locked branch;
+    # otherwise the result depends on whichever branch this checkout happens to be on.
+    scratch = Path(tempfile.mkdtemp())
+    git = ["git", "-c", "user.email=t@example.invalid", "-c", "user.name=test"]
+    subprocess.run(git + ["init", "-q", "-b", "feature/azure-kudu-deployment"], cwd=scratch, check=True, timeout=30)
+    subprocess.run(git + ["commit", "-q", "--allow-empty", "-m", "init"], cwd=scratch, check=True, timeout=30)
+
+    # Locked branch targeting main must fail with exit code 1
+    res = subprocess.run([str(verify_script), "main"], capture_output=True, text=True, cwd=scratch, timeout=30)
     assert res.returncode == 1
     assert "strictly protected" in res.stderr
     assert "cannot merge" in res.stderr
 
     # Calling targeting itself must succeed
-    res_self = subprocess.run([str(verify_script), "feature/azure-kudu-deployment"], capture_output=True, text=True)
+    res_self = subprocess.run([str(verify_script), "feature/azure-kudu-deployment"], capture_output=True, text=True, cwd=scratch, timeout=30)
     assert res_self.returncode == 0
 

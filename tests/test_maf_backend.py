@@ -102,35 +102,49 @@ def test_real_qe_tools_execution():
     """Verify real QE tools execute against filesystem and return structured data."""
     tools = {t.name: t for t in build_qe_tools(WORKSPACE_DIR)}
     assert len(tools) >= 8
+    # Tools need a real project since P1 (plan D-19); this test creates its own.
+    from backend.db import db, now
+    with db() as con:
+        con.execute("INSERT OR IGNORE INTO projects (id, name, description, created_at, updated_at, archived, owner_id) "
+                    "VALUES ('prj_qe_tools_test', 'QE tools test', '', ?, ?, 0, 'admin')", (now(), now()))
+    ctx = {"projectId": "prj_qe_tools_test"}
+    # The tools act on the project's real repository (config.repo_dir); this test plants a small one, with a fake AWS key line.
+    from backend import config
+    repo = config.repo_dir("prj_qe_tools_test")
+    (repo / "src").mkdir(parents=True, exist_ok=True)
+    (repo / "package.json").write_text('{"name": "qe-tools-test", "scripts": {"test": "vitest run"}}', encoding="utf-8")
+    (repo / "src" / "app.py").write_text('AWS_KEY = "AKIA' + 'QZXWVUTSRQ234567' + '"\n', encoding="utf-8")
 
     # 1. qe_discover_repo
-    disc = asyncio.run(tools["qe_discover_repo"].execute({}, None))
+    disc = asyncio.run(tools["qe_discover_repo"].execute({}, ctx))
     assert disc["repository"] is not None
     assert disc["sourceFilesCount"] > 0
     assert "discoveredRoutes" in disc
 
     # 2. qe_plan_strategy
-    plan = asyncio.run(tools["qe_plan_strategy"].execute({"scope": "Auth & Core"}, None))
+    plan = asyncio.run(tools["qe_plan_strategy"].execute({"scope": "Auth & Core"}, ctx))
     assert plan["confidenceScore"] >= 90
     assert "unit" in plan["levelAllocation"]
     assert "api" in plan["levelAllocation"]
     assert "e2e" in plan["levelAllocation"]
 
     # 3. qe_design_cases
-    cases_res = asyncio.run(tools["qe_design_cases"].execute({"area": "Authentication"}, None))
+    cases_res = asyncio.run(tools["qe_design_cases"].execute({"area": "Authentication"}, ctx))
     assert cases_res["area"] == "Authentication"
     assert len(cases_res["cases"]) >= 2
 
     # 4. qe_generate_code
-    code_res = asyncio.run(tools["qe_generate_code"].execute({"caseId": "TC-TEST-001", "runner": "vitest"}, None))
+    code_res = asyncio.run(tools["qe_generate_code"].execute({"caseId": "TC-TEST-001", "runner": "vitest"}, ctx))
     assert code_res["caseId"] == "TC-TEST-001"
     assert os.path.exists(code_res.get("fullPath") or os.path.join(WORKSPACE_DIR, code_res["filePath"]))
 
-    # 5. qe_security_audit (Cloudflare Audit Skill & NVIDIA Skill Specter)
-    sec_audit = asyncio.run(tools["qe_security_audit"].execute({}, None))
-    assert "Cloudflare Security" in sec_audit["auditStandard"]
-    assert sec_audit["status"] == "PASSED"
-    assert len(sec_audit["checks"]) >= 5
+    # 5. qe_security_audit: real static analysis findings, no invented score or brand claims (plan D-02)
+    sec_audit = asyncio.run(tools["qe_security_audit"].execute({}, ctx))
+    assert sec_audit["status"] in ("Analyzed", "Partial")
+    assert sec_audit["findingCount"] == sum(sec_audit["bySeverity"].values())
+    assert any(f["rule"] == "SEC001" and f["file"] == "src/app.py" for f in sec_audit["findings"]), sec_audit["findings"]
+    assert "secrets" in sec_audit["analyzersRan"]
+    assert "specterScore" not in sec_audit and "auditStandard" not in sec_audit
 
 # =========================================================================
 # 2. POSITIVE FASTAPI API ENDPOINTS & SEPARATION OF CONCERNS

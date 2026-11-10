@@ -122,3 +122,9 @@ The page reads existing stores, with one new table.
 | Audit | Hash-chained `ledger` |
 
 Agentic QE Platform connects to no MCP server, so the MCP count is zero and the page says that. The `kind` column is there for when one is added.
+
+## MAF harness rebuild (owner request, 2026-11-10). Awaiting approval
+
+Full plan, mappings, and phase table: `docs/HARNESS_REBUILD_PLAN.md`. In short: the chat "harness" in `src/backend/harness/` does not use MAF and holds most of the fabricated data. MAF 1.24 ships `create_harness_agent` (todos, modes, compaction, file memory, skills, tool approval, background agents, looping), so the rebuild composes that and keeps the old engine behind `ATLAS_HARNESS_ENGINE=legacy` until the new one passes. Nothing is deleted.
+
+Revision 2 (2026-11-10): the plugin format follows the owner's skills marketplace (`SKILL.md` + `marketplace.yaml`); Skill Studio runs the marketplace `skill-creator` 10-phase lifecycle with the task-list approval enforced in code; security scanning uses the real NVIDIA SkillSpector; plugins and profiles follow DeepSeek Harness; desktop is Electron if approved; Rieseberg's altitude, depth, and range become four CI-checked targets. See `docs/HARNESS_REBUILD_PLAN.md`.

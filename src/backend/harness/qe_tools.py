@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import os
 import sys
 import time
@@ -11,58 +12,66 @@ from typing import Dict, Any, List, Optional
 from backend.harness.function_tool import FunctionTool
 from backend.harness.qe_guardrails import QEGuardrails
 from backend.harness.memory_provider import FileMemoryProvider
+from backend import config
+from backend.core.security import safe_path, PathEscape
 from backend.db import db, rows, row, now, new_id
 from backend.core import documents, ledger
 from backend.harness.approval_manager import global_approval_manager
 from backend.harness.mcp_manager import MCPClientManager
 
+log = logging.getLogger(__name__)
+
 def build_qe_tools(workspace_dir: str) -> List[FunctionTool]:
     """
     Constructs real executable Quality Engineering and Platform tools acting safely on the real filesystem.
-    Hardened against Cloudflare Security Audit vulnerabilities.
+    File tools stay inside the project's own repository (backend.config.repo_dir).
     Exposes universal tools across all 9 platform feature domains:
     1. Repository inspection (inspect_repo, view_tree, read_file)
     2. BA Studio (create_user_stories, generate_gherkin)
     3. Documents Hub (create_document, read_document, update_document)
     4. Feature Builder (run_sandbox_command, implement_feature)
     5. Bug Scan & Healing (scan_defects, heal_test_drift)
-    6. Quality Engineering (run_quality_lifecycle, check_gates, qe_*)
-    7. Governance & Approvals (list_pending_approvals, decide_approval)
+    6. Quality Engineering (check_gates, qe_*)
+    7. Governance & Approvals (list_pending_approvals; decisions are made by a human in Governance)
     8. Observability (query_system_logs, get_error_summary)
     9. MCP Servers (list_mcp_servers, execute_mcp_tool)
     """
     memory_provider = FileMemoryProvider(workspace_dir)
 
-    def resolve_project_workspace(context: Any) -> tuple[str, str]:
-        """
-        Resolves (project_id, active_workspace_dir).
-        Targets data/projects/{project_id}/sandbox (creating it if needed),
-        or data/projects/{project_id}/repo, or workspace_dir.
-        """
+    def resolve_project_id(context: Any) -> str:
         session = getattr(context, "session", None) or (context.get("session") if isinstance(context, dict) else None)
-        project_id = (context.get("projectId") if isinstance(context, dict) else None) or (session.projectId if session else None) or "prj_agentic_qe"
+        project_id = (context.get("projectId") if isinstance(context, dict) else None) or (session.projectId if session else None)
+        if not project_id:
+            raise ValueError("projectId is required: select a project before running this tool")
 
         with db() as con:
             proj = con.execute("SELECT id FROM projects WHERE id=?", (project_id,)).fetchone()
-            if not proj:
-                con.execute(
-                    "INSERT OR IGNORE INTO projects (id, name, description, created_at, updated_at, archived, owner_id) "
-                    "VALUES (?, ?, ?, ?, ?, 0, 'admin')",
-                    (project_id, project_id.replace("prj_", "").replace("_", " ").title(), "Project Workspace", now(), now())
-                )
+        if not proj:
+            # A tool never invents a project row (plan D-19); projects are created by a person on the Projects page.
+            raise ValueError(f"Project '{project_id}' does not exist: create it on the Projects page first")
+        return project_id
 
-        project_root = os.path.join(workspace_dir, "data", "projects", project_id)
-        sandbox_dir = os.path.join(project_root, "sandbox")
-        os.makedirs(sandbox_dir, exist_ok=True)
-        return project_id, sandbox_dir
+    def resolve_project_workspace(context: Any) -> tuple[str, str]:
+        """Resolves (project_id, the project's real repository folder, config.repo_dir). Never creates it and never falls back to the platform's own folder."""
+        project_id = resolve_project_id(context)
+        repo = config.repo_dir(project_id)
+        if not repo.is_dir():
+            raise ValueError(f"Project '{project_id}' has no repository: attach one on the Repositories page first")
+        return project_id, str(repo)
+
+    def confined(active_dir: str, relative: str, **kw) -> Path:
+        try:
+            return safe_path(Path(active_dir), relative, **kw)
+        except PathEscape as exc:
+            raise ValueError(str(exc)) from exc
 
     # ==========================================
     # 1. Repository Inspection
     # ==========================================
     async def handle_inspect_repo(args: Dict[str, Any], context: Any) -> Dict[str, Any]:
         project_id, active_dir = resolve_project_workspace(context)
-        target_dir = args.get("targetDir") or active_dir
-        env_info = memory_provider.scan_environment()
+        target_dir = str(confined(active_dir, args.get("targetDir") or "."))
+        env_info = FileMemoryProvider(target_dir).scan_environment()
 
         discovered_routes = []
         app_dir = os.path.join(target_dir, "src", "app")
@@ -77,11 +86,11 @@ def build_qe_tools(workspace_dir: str) -> List[FunctionTool]:
             "projectId": project_id,
             "repository": env_info.get("projectName", f"Project {project_id}"),
             "path": target_dir,
-            "framework": env_info.get("framework", "Next.js / Python"),
-            "detectedRunners": env_info.get("runners", ["vitest", "pytest"]),
+            "framework": env_info.get("framework"),
+            "detectedRunners": env_info.get("runners", []),
             "sourceFilesCount": env_info.get("filesSummary", {}).get("totalFiles", 0),
             "existingTestFiles": env_info.get("filesSummary", {}).get("testFiles", 0),
-            "discoveredRoutes": discovered_routes or ["/", "/api/chat", "/api/config"],
+            "discoveredRoutes": discovered_routes,
             "npmScripts": env_info.get("scripts", {}),
             "status": "Inspected",
         }
@@ -91,11 +100,9 @@ def build_qe_tools(workspace_dir: str) -> List[FunctionTool]:
         project_id, active_dir = resolve_project_workspace(context)
         sub_path = args.get("path", "")
         max_depth = int(args.get("maxDepth", 3))
-        root_dir = os.path.realpath(os.path.abspath(os.path.join(active_dir, sub_path)))
-        if not os.path.exists(root_dir) or not os.listdir(root_dir):
-            root_dir = os.path.realpath(os.path.abspath(os.path.join(workspace_dir, sub_path)))
-        if not root_dir.startswith(os.path.realpath(active_dir)) and not root_dir.startswith(os.path.realpath(workspace_dir)):
-            raise ValueError(f"Path traversal detected: {sub_path}")
+        root_dir = str(confined(active_dir, sub_path))
+        if not os.path.isdir(root_dir):
+            raise FileNotFoundError(f"Directory not found in the project repository: {sub_path or '.'}")
 
         tree_nodes = []
         ignore_dirs = {".git", "node_modules", ".next", "__pycache__", ".pytest_cache", ".venv", "venv", "dist", "build"}
@@ -132,12 +139,7 @@ def build_qe_tools(workspace_dir: str) -> List[FunctionTool]:
         if not file_path:
             raise ValueError("filePath is required")
 
-        candidate = os.path.realpath(os.path.abspath(os.path.join(active_dir, file_path)))
-        if not os.path.exists(candidate):
-            candidate = os.path.realpath(os.path.abspath(os.path.join(workspace_dir, file_path)))
-
-        if not candidate.startswith(os.path.realpath(active_dir)) and not candidate.startswith(os.path.realpath(workspace_dir)):
-            raise ValueError(f"Path traversal detected: {file_path}")
+        candidate = str(confined(active_dir, file_path))
         if not os.path.exists(candidate):
             raise FileNotFoundError(f"File not found: {file_path}")
         if os.path.isdir(candidate):
@@ -159,7 +161,7 @@ def build_qe_tools(workspace_dir: str) -> List[FunctionTool]:
     # 2. BA Studio
     # ==========================================
     async def handle_create_user_stories(args: Dict[str, Any], context: Any) -> Dict[str, Any]:
-        project_id, _ = resolve_project_workspace(context)
+        project_id = resolve_project_id(context)
         feature = args.get("feature", "Core Authentication & Test Flow")
         ctx = args.get("context", "")
         stories = [
@@ -212,7 +214,7 @@ def build_qe_tools(workspace_dir: str) -> List[FunctionTool]:
         }
 
     async def handle_generate_gherkin(args: Dict[str, Any], context: Any) -> Dict[str, Any]:
-        project_id, _ = resolve_project_workspace(context)
+        project_id = resolve_project_id(context)
         story_id = args.get("userStoryId", "US-001")
         title = args.get("featureTitle", "Core System Feature")
         gherkin_content = (
@@ -256,39 +258,38 @@ def build_qe_tools(workspace_dir: str) -> List[FunctionTool]:
     # 3. Documents Hub
     # ==========================================
     async def handle_create_document(args: Dict[str, Any], context: Any) -> Dict[str, Any]:
-        project_id, _ = resolve_project_workspace(context)
+        project_id = resolve_project_id(context)
         kind = args.get("kind", "brd")
         title = args.get("title") or f"{kind.upper()} - QE System Architecture"
         content = args.get("content")
 
         if not content:
             from backend.harness.domain_brd_generator import generate_domain_brd
-            title, content, _ = generate_domain_brd(title, project_id)
-            with db() as con:
-                row_doc = con.execute("SELECT id, current_version, sha256 FROM documents WHERE project_id=? ORDER BY created_at DESC LIMIT 1").fetchone()
-            doc_id = row_doc[0] if row_doc else "doc_new"
-            version = row_doc[1] if row_doc else 1
-            sha = row_doc[2] if row_doc else ""
+            title, content, meta = generate_domain_brd(title, project_id)
+            saved = documents.get(meta["doc_id"])
         else:
-            created_doc = documents.create(
+            saved = documents.create(
                 project_id=project_id,
                 kind=kind,
                 title=title,
                 content=content,
                 author="Agentic QE Harness"
             )
-            doc_id = created_doc.get("id")
-            version = created_doc.get("current_version", 1)
-            sha = created_doc.get("sha256", "")
+        doc_id = saved.get("id")
+        if not doc_id:
+            raise ValueError("The document store returned no document id; nothing was recorded")
+        version = saved.get("current_version") or saved.get("version")
+        sha = saved.get("sha256", "")
 
-        # Write copy to data/projects/{project_id}/documents/{doc_id}.md
-        doc_dir = os.path.join(workspace_dir, "data", "projects", project_id, "documents")
-        os.makedirs(doc_dir, exist_ok=True)
+        # Plain-file copy next to the project's data. A failure is reported, not hidden.
+        copy_error = None
         try:
-            with open(os.path.join(doc_dir, f"{doc_id}.md"), "w", encoding="utf-8") as f:
-                f.write(content)
-        except Exception:
-            pass
+            doc_dir = config.project_dir(project_id) / "documents"
+            doc_dir.mkdir(parents=True, exist_ok=True)
+            (doc_dir / f"{doc_id}.md").write_text(content, encoding="utf-8")
+        except OSError as exc:
+            log.warning("document copy for %s failed: %s", doc_id, exc)
+            copy_error = str(exc)
 
         return {
             "documentId": doc_id,
@@ -297,23 +298,7 @@ def build_qe_tools(workspace_dir: str) -> List[FunctionTool]:
             "title": title,
             "version": version,
             "sha256": sha,
-            "status": "Created"
-        }
-
-        created_doc = documents.create(
-            project_id=project_id,
-            kind=kind,
-            title=title,
-            content=content,
-            author="Agentic QE Harness"
-        )
-        return {
-            "documentId": created_doc.get("id"),
-            "projectId": project_id,
-            "kind": kind,
-            "title": title,
-            "version": created_doc.get("current_version", 1),
-            "sha256": created_doc.get("sha256", ""),
+            "fileCopyError": copy_error,
             "status": "Created"
         }
 
@@ -361,12 +346,14 @@ def build_qe_tools(workspace_dir: str) -> List[FunctionTool]:
         if not is_allowed:
             raise ValueError(reason)
 
-        try:
-            cmd_args = shlex.split(command)
-            binary = cmd_args[0]
-            if binary not in QEGuardrails.ALLOWED_BINARIES:
-                raise ValueError(f"Unauthorized binary in sandbox: {binary}")
+        cmd_args = shlex.split(command)
+        if not cmd_args:
+            raise ValueError("command is empty")
+        binary = cmd_args[0]
+        if binary not in QEGuardrails.ALLOWED_BINARIES:
+            raise ValueError(f"Unauthorized binary in sandbox: {binary}")
 
+        try:
             proc = await asyncio.create_subprocess_exec(
                 *cmd_args,
                 cwd=active_dir,
@@ -386,9 +373,10 @@ def build_qe_tools(workspace_dir: str) -> List[FunctionTool]:
                 "success": exit_code == 0
             }
         except asyncio.TimeoutError:
-            return {"projectId": project_id, "command": command, "error": f"Execution timed out after {timeout_val} seconds", "exitCode": -1}
+            return {"projectId": project_id, "command": command, "error": f"Execution timed out after {timeout_val} seconds", "exitCode": -1, "success": False}
         except Exception as e:
-            return {"projectId": project_id, "command": command, "exitCode": 0, "summary": f"Completed: {str(e)}", "success": True}
+            log.warning("sandbox command %r failed: %s", command, e)
+            return {"projectId": project_id, "command": command, "error": str(e), "exitCode": None, "success": False}
 
     async def handle_implement_feature(args: Dict[str, Any], context: Any) -> Dict[str, Any]:
         project_id, active_dir = resolve_project_workspace(context)
@@ -400,12 +388,8 @@ def build_qe_tools(workspace_dir: str) -> List[FunctionTool]:
 
         valid_path, err = QEGuardrails.validate_write_path(active_dir, file_path)
         if not valid_path:
-            valid_path, err = QEGuardrails.validate_write_path(workspace_dir, file_path)
-            if not valid_path:
-                raise ValueError(err)
-            full_path = os.path.realpath(os.path.abspath(os.path.join(workspace_dir, file_path)))
-        else:
-            full_path = os.path.realpath(os.path.abspath(os.path.join(active_dir, file_path)))
+            raise ValueError(err)
+        full_path = str(confined(active_dir, file_path, for_write=True))
 
         os.makedirs(os.path.dirname(full_path), exist_ok=True)
         with open(full_path, "w", encoding="utf-8") as f:
@@ -470,39 +454,6 @@ def build_qe_tools(workspace_dir: str) -> List[FunctionTool]:
     # ==========================================
     # 6. Quality Engineering Lifecycle
     # ==========================================
-    async def handle_run_quality_lifecycle(args: Dict[str, Any], context: Any) -> Dict[str, Any]:
-        project_id, _ = resolve_project_workspace(context)
-        scope = args.get("scope", "Full QE Lifecycle")
-        starting_gate = int(args.get("startingGate", 1))
-
-        # Approve gates in SQLite database for the target project
-        from backend.core import gates
-        for g in range(0, 6):
-            try:
-                gates.decide(project_id, g, True, "qa-admin", f"Approved in Autonomous QE Lifecycle for {scope}")
-            except Exception:
-                pass
-
-        gate_results = [
-            {"gate": 1, "name": "Requirements Verification", "status": "approved", "score": 96},
-            {"gate": 2, "name": "Test Strategy & Risk Allocation", "status": "approved", "score": 94},
-            {"gate": 3, "name": "Deterministic Design", "status": "approved", "score": 98},
-            {"gate": 4, "name": "Synthetic Test Data & Generation", "status": "approved", "score": 95},
-            {"gate": 5, "name": "Sandboxed Execution", "status": "approved", "score": 97},
-            {"gate": 6, "name": "Autonomous Healing & Drift", "status": "approved", "score": 94},
-            {"gate": 7, "name": "Coverage Audit & Traceability", "status": "approved", "score": 99},
-            {"gate": 8, "name": "Production Release Confidence", "status": "approved", "score": 96},
-        ]
-        return {
-            "projectId": project_id,
-            "scope": scope,
-            "startingGate": starting_gate,
-            "totalGates": len(gate_results),
-            "allGatesPassed": True,
-            "results": gate_results,
-            "status": "Completed"
-        }
-
     async def handle_check_gates(args: Dict[str, Any], context: Any) -> Dict[str, Any]:
         session = getattr(context, "session", None) or (context.get("session") if isinstance(context, dict) else None)
         project_id = args.get("projectId") or (session.projectId if session else None)
@@ -538,48 +489,6 @@ def build_qe_tools(workspace_dir: str) -> List[FunctionTool]:
             "status": "Listed"
         }
 
-    async def handle_decide_approval(args: Dict[str, Any], context: Any) -> Dict[str, Any]:
-        approval_id = args.get("approvalId", "")
-        approved = bool(args.get("approved", True))
-        feedback = args.get("feedback", "")
-        session = getattr(context, "session", None) or (context.get("session") if isinstance(context, dict) else None)
-        project_id = args.get("projectId") or (session.projectId if session else None) or "prj_agentic_qe"
-
-        if not approval_id:
-            raise ValueError("approvalId is required")
-
-        action = "approve" if approved else "reject"
-        resolved_in_memory = global_approval_manager.resolve_approval(approval_id, action, feedback)
-
-        with db() as con:
-            appr = row(con.execute("SELECT * FROM approvals WHERE id=?", (approval_id,)))
-
-        if appr:
-            from backend.maf import engine
-            from backend.core import auth
-            signer = "Agentic QE Harness"
-            try:
-                signer = auth.signer()
-            except Exception:
-                pass
-            await engine.decide(approval_id, approved, signer, feedback, {})
-        else:
-            from backend.core import auth
-            signer = "Agentic QE Harness"
-            try:
-                signer = auth.signer()
-            except Exception:
-                pass
-            ledger.append(project_id, signer, "approval." + ("approved" if approved else "rejected"), f"Approval {approval_id}", {"feedback": feedback})
-
-        return {
-            "approvalId": approval_id,
-            "approved": approved,
-            "feedback": feedback,
-            "resolvedInMemory": resolved_in_memory,
-            "status": "Decided"
-        }
-
     # ==========================================
     # 8. Observability
     # ==========================================
@@ -591,10 +500,9 @@ def build_qe_tools(workspace_dir: str) -> List[FunctionTool]:
         try:
             records = observability.query(limit=limit, kind=kind, q=q)
             return {"records": records[:limit], "count": len(records), "status": "Queried"}
-        except Exception:
-            with db() as con:
-                records = rows(con.execute("SELECT * FROM ledger ORDER BY created_at DESC LIMIT ?", (limit,)))
-            return {"records": [dict(r) for r in records], "count": len(records), "status": "Queried"}
+        except Exception as exc:
+            log.warning("observability query failed: %s", exc)
+            return {"records": [], "count": 0, "status": "Error", "error": f"Log query failed: {exc}"}
 
     async def handle_get_error_summary(args: Dict[str, Any], context: Any) -> Dict[str, Any]:
         session = getattr(context, "session", None) or (context.get("session") if isinstance(context, dict) else None)
@@ -635,15 +543,12 @@ def build_qe_tools(workspace_dir: str) -> List[FunctionTool]:
         }
 
     async def handle_execute_mcp_tool(args: Dict[str, Any], context: Any) -> Dict[str, Any]:
-        server_id = args.get("serverId", "mcp-playwright")
-        tool_name = args.get("toolName", "navigate")
-        mcp_args = args.get("arguments", {})
+        # The harness has no MCP client, so nothing is executed and no result is invented. Calls go through the MCP page (/api/mcp/execute).
         return {
-            "serverId": server_id,
-            "toolName": tool_name,
-            "arguments": mcp_args,
-            "executionStatus": "SUCCESS",
-            "result": f"Executed MCP tool '{tool_name}' on server '{server_id}' successfully."
+            "serverId": args.get("serverId"),
+            "toolName": args.get("toolName"),
+            "executionStatus": "NOT_EXECUTED",
+            "error": "The harness cannot call MCP tools; use the MCP page, which runs them and records the result."
         }
 
     # ==========================================
@@ -735,53 +640,61 @@ def build_qe_tools(workspace_dir: str) -> List[FunctionTool]:
         }
 
     async def handle_security_audit(args: Dict[str, Any], context: Any) -> Dict[str, Any]:
-        project_id, active_dir = resolve_project_workspace(context)
-        audit_id = f"fnd_sec_{int(time.time()*1000)}"
-        with db() as con:
-            proj = con.execute("SELECT id FROM projects WHERE id=?", (project_id,)).fetchone()
-            if not proj:
-                first_proj = con.execute("SELECT id FROM projects LIMIT 1").fetchone()
-                if first_proj:
-                    project_id = first_proj["id"]
-                    proj = first_proj
-            if proj:
-                try:
-                    con.execute(
-                        "INSERT INTO findings (id, project_id, source, rule, severity, title, file, line, evidence, explanation, status, fingerprint, created_at) "
-                        "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                        (audit_id, project_id, "security-specter", "SPECTER-SEC-01", "low",
-                         "Cloudflare & NVIDIA Skill Specter Verification Passed",
-                         "src/", 1, "Demarcated execution boundaries, zero path escapes, and AST schema integrity verified.",
-                         "NVIDIA Skill Specter Tier 1 and Cloudflare Security Verified.",
-                         "open", f"fp_{audit_id}", now())
-                    )
-                except Exception:
-                    pass
-        from backend.core import gates
-        for g in range(0, 6):
-            if not gates.is_approved(project_id, g):
-                try:
-                    gates.decide(project_id, g, True, "security-specter", "Passed Cloudflare & NVIDIA Specter Audit")
-                except Exception:
-                    pass
+        project_id = resolve_project_id(context)
+        root = config.repo_dir(project_id)
+        if not root.is_dir():
+            return {
+                "projectId": project_id,
+                "status": "NotScanned",
+                "reason": "The project has no repository to scan: attach one on the Repositories page.",
+                "findingCount": 0,
+                "findings": [],
+            }
+        from backend.repos import static_analysis
+        analyzers = {
+            "ruff": static_analysis.run_ruff,
+            "secrets": static_analysis.run_secrets,
+            "js_rules": static_analysis.run_js_rules,
+            "manifests": static_analysis.run_manifests,
+        }
+        import importlib.util, shutil
+        ruff_available = bool(shutil.which("ruff") or importlib.util.find_spec("ruff"))
+        findings: List[Dict[str, Any]] = []
+        produced: Dict[str, int] = {}
+        failed: Dict[str, str] = {}
+        for name, run in analyzers.items():
+            try:
+                out = run(root)
+                produced[name] = len(out)
+                findings.extend(out)
+            except Exception as exc:
+                log.warning("analyzer %s failed on %s: %s", name, root, exc)
+                failed[name] = str(exc)
+        by_severity: Dict[str, int] = {}
+        for f in findings:
+            sev = str(f.get("severity", "unknown"))
+            by_severity[sev] = by_severity.get(sev, 0) + 1
+        limit = int(args.get("limit", 25))
+        if not ruff_available:
+            produced.pop("ruff", None)
+            failed["ruff"] = "ruff is not installed"
+        if len(failed) == len(analyzers):
+            status = "NotScanned"
+        elif failed:
+            status = "Partial"
+        else:
+            status = "Analyzed" if findings else "NoFindings"
         return {
             "projectId": project_id,
-            "findingId": audit_id,
-            "auditStandard": "Cloudflare Security & NVIDIA Skill Specter Dual Audit",
-            "status": "PASSED",
-            "specterScore": 98,
-            "specterGrade": "A+",
-            "checks": [
-                {"check": "NVIDIA Specter: Sandbox Containment", "status": "VERIFIED", "detail": "Strict subprocess boundary; isolated execution context"},
-                {"check": "NVIDIA Specter: Prompt Injection Demarcation", "status": "VERIFIED", "detail": "Demarcated instructions with Pydantic contract validation"},
-                {"check": "NVIDIA Specter: Path Traversal Defense", "status": "VERIFIED", "detail": "Canonical path resolution strictly bounded inside workspace"},
-                {"check": "NVIDIA Specter: Deterministic Tool Binding", "status": "VERIFIED", "detail": "100% schema alignment across all specialist tools"},
-                {"check": "Cloudflare: CORS Policy", "status": "SECURE", "detail": "Restricted to authorized localhost origins"},
-                {"check": "Cloudflare: Subprocess Execution", "status": "SECURE", "detail": "Subprocess exec without shell expansion; runner allowlisting"},
-                {"check": "Cloudflare: Assertion Preservation Guard", "status": "SECURE", "detail": "100% assertion contract enforcement during healing"},
-            ],
-            "vulnerabilitiesFound": 0,
-            "recommendation": "All Cloudflare security and NVIDIA Skill Specter guardrails are active and verified."
+            "workspace": str(root),
+            "analyzersRan": produced,
+            "analyzersFailed": failed,
+            # ponytail: run_ruff returns [] for both a clean repository and a ruff failure, so availability is checked here.
+            "ruffAvailable": ruff_available,
+            "findingCount": len(findings),
+            "bySeverity": by_severity,
+            "findings": findings[:limit],
+            "status": status,
         }
 
     async def handle_execute_skill_script(args: Dict[str, Any], context: Any) -> Dict[str, Any]:
@@ -976,14 +889,6 @@ def build_qe_tools(workspace_dir: str) -> List[FunctionTool]:
 
         # 6. Quality Engineering
         FunctionTool(
-            name="run_quality_lifecycle",
-            description="Executes the complete Quality Engineering testing lifecycle across all 8 quality gates.",
-            parameters={"type": "object", "properties": {"scope": {"type": "string"}, "startingGate": {"type": "integer"}}},
-            handler=handle_run_quality_lifecycle,
-            requires_approval=True,
-            category="Quality Engineering"
-        ),
-        FunctionTool(
             name="check_gates",
             description="Checks real-time status and confidence scores of all Quality Engineering Gates.",
             parameters={"type": "object", "properties": {"projectId": {"type": "string"}}},
@@ -998,14 +903,6 @@ def build_qe_tools(workspace_dir: str) -> List[FunctionTool]:
             description="Lists all pending quality gate decisions and tool execution approvals awaiting sign-off.",
             parameters={"type": "object", "properties": {"projectId": {"type": "string"}}},
             handler=handle_list_pending_approvals,
-            requires_approval=False,
-            category="Governance & Approvals"
-        ),
-        FunctionTool(
-            name="decide_approval",
-            description="Submits human-in-the-loop approval or rejection decision on a pending gate or tool.",
-            parameters={"type": "object", "properties": {"approvalId": {"type": "string"}, "approved": {"type": "boolean"}, "feedback": {"type": "string"}, "projectId": {"type": "string"}}, "required": ["approvalId", "approved"]},
-            handler=handle_decide_approval,
             requires_approval=False,
             category="Governance & Approvals"
         ),
@@ -1121,7 +1018,7 @@ def build_qe_tools(workspace_dir: str) -> List[FunctionTool]:
         ),
         FunctionTool(
             name="qe_security_audit",
-            description="Performs Cloudflare Security Audit on the codebase across CORS, IPC, and injection vectors.",
+            description="Runs the static analyzers (ruff, secrets, JS rules, manifests) on the project repository.",
             parameters={"type": "object", "properties": {}},
             handler=handle_security_audit,
             requires_approval=False,

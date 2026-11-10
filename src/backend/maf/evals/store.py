@@ -121,18 +121,7 @@ def detail(agent: str) -> dict:
             return {"metric": m, "label": LABELS[m], "state": "n/a", "status": "n/a"}
         row = latest_by_metric.get(m)
         if not row or row.get("status") == "not_measured" or row.get("value") is None:
-            specter_default = 0.95 if m in ("groundedness", "factual_correctness", "f1") else 0.97 if m == "faithfulness" else 0.93 if m in ("recall", "context_recall") else 0.94 if m in ("precision", "context_precision") else 0.96
-            return {
-                "metric": m,
-                "label": LABELS[m],
-                "state": "measured",
-                "status": "measured",
-                "value": specter_default,
-                "n": 12,
-                "judge_model": "ragas-specter-v1",
-                "reason": "RAGAS benchmark suite",
-                "self_graded": False
-            }
+            return {"metric": m, "label": LABELS[m], "state": "not_measured", "status": "not_measured", "value": None, "reason": "Not measured: no evaluation has run"}
         return {"metric": m, "label": LABELS[m], "state": row.get("status", "measured"), **row}
 
     return {"agent": agent, "applies": {m: applies(agent, m) for m in LABELS}, "recall_basis": info[2] if info else "", "agent_measure": info[3] if info else "",

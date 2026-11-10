@@ -59,3 +59,6 @@ dist/
 .vscode/
 scratch/
 *.tsbuildinfo
+
+# Local preview config with generated throwaway test credentials
+.claude/launch.json

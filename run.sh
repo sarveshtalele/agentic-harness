@@ -15,9 +15,9 @@ echo "=========================================================="
 lsof -ti:8000 | xargs kill -9 2>/dev/null || true
 lsof -ti:3000 | xargs kill -9 2>/dev/null || true
 
-# Ensure database is migrated and seeded
+# Ensure database is migrated; startup seeding removed, it wrote fabricated data (see src/backend/app.py)
 export PYTHONPATH="$DIR/src:$DIR:$PYTHONPATH"
-python3 -c "from backend import db; from backend.core.seed_data import seed_database; db.migrate(); seed_database()"
+python3 -c "from backend import db; db.migrate()"
 
 # Start Python backend
 echo "Starting Python FastAPI backend on port 8000..."

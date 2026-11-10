@@ -224,7 +224,7 @@ class HarnessAgent:
 
             elif cmd in ("/audit", "/security-audit"):
                 skill_tool_override = {"name": "qe_security_audit", "args": {}}
-                user_prompt = "Run complete Cloudflare Security Audit on the codebase."
+                user_prompt = "Run a static security audit on the project repository."
             elif cmd in ("/qe-start", "/discover"):
                 skill_tool_override = {"name": "qe_discover_repo", "args": {}}
                 user_prompt = "Discover repository structure, detect test frameworks, and initialize test strategy."
@@ -252,7 +252,7 @@ class HarnessAgent:
 
                 # Ground skill execution on active project documents and user directive
                 doc_context_info = None
-                target_prj = session.projectId or "p1"
+                target_prj = session.projectId  # no project bound: the query below matches nothing
                 try:
                     from backend.db import db
                     with db() as con:

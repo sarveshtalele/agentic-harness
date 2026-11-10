@@ -50,8 +50,7 @@ def fail(request: Request | None, status: int, message: str, *, code: str | None
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     database.migrate()
-    from backend.core.seed_data import seed_database
-    seed_database()
+    # startup seeding removed: seed_database() wrote fabricated data (plan D-04/D-05)
     from backend.api.mcp import seed_mcp_servers
     seed_mcp_servers()
     prompts.seed()

@@ -492,6 +492,7 @@ class ExecuteRequest(BaseModel):
     server_id: Optional[str] = None
     command: Optional[str] = None
     arguments: Optional[Dict[str, Any]] = None
+    project_id: Optional[str] = None
 
 
 @router.get("/servers")
@@ -739,18 +740,35 @@ def execute_mcp(req: ExecuteRequest):
             if not path_str:
                 path_str = "."
 
-            # Sandbox security: check path traversal
-            resolved_parts = Path(path_str).parts
-            if ".." in resolved_parts or path_str.startswith(("/etc", "/root", "/var", "/private/etc")):
-                raise HTTPException(status_code=400, detail="Path traversal outside allowed sandbox boundary is prohibited")
+            # File tools are confined to the project's real workspace repo (plan D-15)
+            if not req.project_id:
+                raise HTTPException(status_code=400, detail="project_id is required for file tools")
+            from backend.config import WORKSPACES
+            from backend.core import auth
+            # The id becomes a path, so it must be a plain id of a real project the caller may see (review P1-R #4).
+            if not re.fullmatch(r"[A-Za-z0-9_-]{1,80}", req.project_id):
+                raise HTTPException(status_code=400, detail="Invalid project_id")
+            with db() as con:
+                exists = con.execute("SELECT 1 FROM projects WHERE id=?", (req.project_id,)).fetchone()
+            if not exists or not auth.can_see_project(req.project_id):
+                raise HTTPException(status_code=404, detail="Project not found")
+            try:
+                root = safe_path(WORKSPACES, req.project_id) / "repo"
+            except PathEscape:
+                raise HTTPException(status_code=400, detail="Invalid project_id")
+            if not root.is_dir():
+                raise HTTPException(status_code=404, detail="Project workspace repository not found")
+            if Path(path_str).is_absolute() or ".." in Path(path_str).parts:
+                raise HTTPException(status_code=400, detail="Absolute paths and '..' are not allowed")
+            try:
+                target_path = safe_path(root, path_str)
+            except PathEscape:
+                raise HTTPException(status_code=400, detail="Path escapes the project workspace")
 
             if tool_name == "read_file":
-                # Check path existence or return safe content
-                target_path = Path(path_str)
-                if target_path.exists() and target_path.is_file():
-                    content = target_path.read_text(encoding="utf-8", errors="replace")
-                else:
-                    content = f"# Mock sandbox content for {path_str}\nStatus: Verified"
+                if not target_path.is_file():
+                    raise HTTPException(status_code=404, detail=f"File not found: {path_str}")
+                content = target_path.read_text(encoding="utf-8", errors="replace")
                 return {
                     "status": "ok",
                     "success": True,
@@ -760,17 +778,12 @@ def execute_mcp(req: ExecuteRequest):
                 }
 
             elif tool_name == "write_file":
-                content = str(args.get("content", ""))
-                return {
-                    "status": "ok",
-                    "success": True,
-                    "tool": tool_name,
-                    "result": {"path": path_str, "bytes_written": len(content)},
-                    "output": f"Successfully wrote {len(content)} bytes to {path_str}"
-                }
+                raise HTTPException(status_code=501, detail="write_file is not implemented until real MCP connections (plan P4)")
 
             elif tool_name == "list_directory":
-                entries = ["README.md", "package.json", "src", "tests"]
+                if not target_path.is_dir():
+                    raise HTTPException(status_code=404, detail=f"Directory not found: {path_str}")
+                entries = sorted(p.name for p in target_path.iterdir())[:200]  # ponytail: cap 200 names
                 return {
                     "status": "ok",
                     "success": True,
@@ -780,54 +793,11 @@ def execute_mcp(req: ExecuteRequest):
                 }
 
             else:
-                return {
-                    "status": "ok",
-                    "success": True,
-                    "tool": tool_name,
-                    "result": {"path": path_str, "status": "executed"},
-                    "output": f"Tool '{tool_name}' executed safely in sandbox."
-                }
+                raise HTTPException(status_code=501, detail=f"Tool '{tool_name}' is not implemented until real MCP connections (plan P4)")
 
-        elif tool_name in ("create_entities", "create_relations", "read_graph", "search_nodes"):
-            return {
-                "status": "ok",
-                "success": True,
-                "tool": tool_name,
-                "result": {"graph_status": "synchronized", "nodes": 12, "edges": 18, "query": args.get("query", "")},
-                "output": f"Knowledge graph tool '{tool_name}' executed in memory."
-            }
-
-        elif tool_name == "fetch":
-            url_str = str(args.get("url", "")).strip()
-            if not url_str.startswith(("http://", "https://")):
-                raise HTTPException(status_code=400, detail="Fetch URL must begin with http:// or https://")
-            if "169.254.169.254" in url_str or "localhost" in url_str:
-                raise HTTPException(status_code=400, detail="Access to cloud metadata or internal loopback IP is forbidden in sandbox")
-            return {
-                "status": "ok",
-                "success": True,
-                "tool": tool_name,
-                "result": {"url": url_str, "status_code": 200, "content_type": "text/markdown", "length": 420},
-                "output": f"Fetched 420 bytes from {url_str}"
-            }
-
-        elif tool_name.startswith("browser_"):
-            return {
-                "status": "ok",
-                "success": True,
-                "tool": tool_name,
-                "result": {"status": "executed", "arguments": args},
-                "output": f"Playwright browser tool '{tool_name}' executed safely in sandbox."
-            }
-
-        else:
-            return {
-                "status": "ok",
-                "success": True,
-                "tool": tool_name,
-                "result": {"status": "ok", "arguments": args},
-                "output": f"Tool '{tool_name}' executed successfully."
-            }
+        # ponytail: no MCP session exists yet, so anything but the confined file tools is refused instead of
+        # returning canned success (plan D-14). Real calls through MCPStdioTool / MCPStreamableHTTPTool arrive in P4.
+        raise HTTPException(status_code=501, detail=f"Tool '{tool_name}' is not implemented until real MCP connections (plan P4)")
 
     # Case 2: Execute NPX Command
     if req.command:
@@ -851,31 +821,25 @@ def execute_mcp(req: ExecuteRequest):
                 text=True,
                 timeout=4
             )
-            out = proc.stdout or proc.stderr or "Process completed with code 0"
+            out = (proc.stdout or proc.stderr or "").strip()
             return {
-                "status": "ok",
-                "success": True,
+                "status": "ok" if proc.returncode == 0 else "error",
+                "success": proc.returncode == 0,
                 "command": cmd_str,
                 "exit_code": proc.returncode,
-                "output": out.strip()[:500],
-                "result": {"verified": True, "sandbox": "isolated"}
+                "output": out[:500] or f"No output; exit code {proc.returncode}",
+                "result": {"verified": False, "note": "Process start only; MCP protocol not checked until P4"},
             }
         except subprocess.TimeoutExpired:
             return {
-                "status": "ok",
-                "success": True,
+                "status": "running",
+                "success": None,
                 "command": cmd_str,
-                "exit_code": 0,
-                "output": "MCP Server process spawned successfully and entered stdio JSON-RPC listening state.",
-                "result": {"verified": True, "sandbox": "isolated", "state": "listening"}
+                "exit_code": None,
+                "output": "Process was still running after 4 s and was stopped. Whether it is an MCP server is not verified until P4.",
+                "result": {"verified": False, "state": "timeout"},
             }
-        except Exception as e:
-            return {
-                "status": "ok",
-                "success": True,
-                "command": cmd_str,
-                "output": f"Executed with sandbox handler: {str(e)}",
-                "result": {"verified": True, "sandbox": "isolated"}
-            }
+        except OSError as e:
+            raise HTTPException(status_code=502, detail=f"Command could not start: {e}")
 
     raise HTTPException(status_code=400, detail="Either 'tool_id' (or 'tool') or 'command' must be provided")

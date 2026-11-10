@@ -206,16 +206,27 @@ def test_execute_tool_authorized_vs_disabled(auth_client):
     # Ensure tool is authorized
     auth_client.post(f"/api/mcp/tools/{tool_id}/toggle", json={"authorized": True})
 
+    from backend.config import repo_dir
+    pid = "prj_mcp_exec_test"
+    from backend.db import db, now
+    with db() as con:  # a real project row: file tools refuse ids that are not projects (review P1-R #4)
+        con.execute("INSERT OR IGNORE INTO projects (id, name, description, created_at, updated_at, archived, owner_id) "
+                    "VALUES ('prj_mcp_exec_test', 'MCP exec test', '', ?, ?, 0, 'admin')", (now(), now()))
+    (repo_dir(pid)).mkdir(parents=True, exist_ok=True)
+    (repo_dir(pid) / "README.md").write_text("# real file\n", encoding="utf-8")
+
     # Execute authorized tool
     exec_res = auth_client.post("/api/mcp/execute", json={
         "tool_id": tool_id,
-        "arguments": {"path": "README.md"}
+        "arguments": {"path": "README.md"},
+        "project_id": pid,
     })
     assert exec_res.status_code == 200
     exec_data = exec_res.json()
     assert exec_data["status"] == "ok"
     assert exec_data["success"] is True
     assert "README.md" in exec_data["result"]["path"]
+    assert exec_data["result"]["content"] == "# real file\n"
 
     # Now disable the tool
     auth_client.post(f"/api/mcp/tools/{tool_id}/toggle", json={"authorized": False})
@@ -223,7 +234,8 @@ def test_execute_tool_authorized_vs_disabled(auth_client):
     # Execute disabled tool -> MUST return 403 Forbidden
     blocked_res = auth_client.post("/api/mcp/execute", json={
         "tool_id": tool_id,
-        "arguments": {"path": "README.md"}
+        "arguments": {"path": "README.md"},
+        "project_id": pid,
     })
     assert blocked_res.status_code == 403
     assert "not authorized" in blocked_res.json().get("detail", "").lower() or "not authorized" in blocked_res.json().get("message", "").lower()
@@ -233,17 +245,38 @@ def test_execute_tool_authorized_vs_disabled(auth_client):
 
 
 def test_execute_sandbox_security_traversal_blocked(auth_client):
-    """Verify path traversal outside sandbox boundary is blocked with 400 Bad Request."""
+    """Path escapes, absolute paths, missing project id, missing files and fake writes are all refused."""
+    from backend.config import repo_dir
+    pid = "prj_mcp_exec_test"
+    from backend.db import db, now
+    with db() as con:  # a real project row: file tools refuse ids that are not projects (review P1-R #4)
+        con.execute("INSERT OR IGNORE INTO projects (id, name, description, created_at, updated_at, archived, owner_id) "
+                    "VALUES ('prj_mcp_exec_test', 'MCP exec test', '', ?, ?, 0, 'admin')", (now(), now()))
+    repo_dir(pid).mkdir(parents=True, exist_ok=True)
     srv_res = auth_client.get("/api/mcp/servers")
     fs_srv = [s for s in srv_res.json()["servers"] if s["id"] == "mcp-filesystem"][0]
-    read_tool = [t for t in fs_srv["tools"] if t["name"] == "read_file"][0]
+    tools = {t["name"]: t for t in fs_srv["tools"]}
+    for t in ("read_file", "write_file", "list_directory"):
+        auth_client.post(f"/api/mcp/tools/{tools[t]['id']}/toggle", json={"authorized": True})
 
-    res = auth_client.post("/api/mcp/execute", json={
-        "tool_id": read_tool["id"],
-        "arguments": {"path": "../../../etc/shadow"}
-    })
-    assert res.status_code == 400
-    assert "traversal" in res.json().get("detail", "").lower() or "traversal" in res.json().get("message", "").lower()
+    def run(tool, path, project_id=pid, **extra):
+        body = {"tool_id": tools[tool]["id"], "arguments": {"path": path, **extra}}
+        if project_id:
+            body["project_id"] = project_id
+        return auth_client.post("/api/mcp/execute", json=body)
+
+    assert run("read_file", "../../../etc/shadow").status_code == 400  # needs the project row above
+    assert run("read_file", "/etc/hosts").status_code == 400
+    assert run("read_file", "README.md", project_id=None).status_code == 400
+    assert run("read_file", "no-such-file.txt").status_code == 404
+    assert run("write_file", "x.txt", content="hi").status_code == 501
+    assert not (repo_dir(pid) / "x.txt").exists()
+    (repo_dir(pid) / "b.txt").write_text("b", encoding="utf-8")
+    (repo_dir(pid) / "a.txt").write_text("a", encoding="utf-8")
+    listing = run("list_directory", ".")
+    assert listing.status_code == 200
+    assert listing.json()["result"]["entries"] == sorted(listing.json()["result"]["entries"])
+    assert {"a.txt", "b.txt"} <= set(listing.json()["result"]["entries"])
 
 
 def test_execute_npx_command_in_sandbox(auth_client):
@@ -254,8 +287,12 @@ def test_execute_npx_command_in_sandbox(auth_client):
     })
     assert exec_res.status_code == 200
     data = exec_res.json()
-    assert data["status"] == "ok"
-    assert data["success"] is True
+    # The result must match what really happened: no claim of a verified MCP server before P4.
+    assert data["result"]["verified"] is False
+    if data["exit_code"] is None:
+        assert data["status"] == "running" and data["success"] is None
+    else:
+        assert data["success"] is (data["exit_code"] == 0)
 
     # 2. Command with unsafe chaining operator -> 400 Bad Request
     bad_res = auth_client.post("/api/mcp/execute", json={

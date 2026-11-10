@@ -713,6 +713,12 @@ All failures are mapped to typed domain exceptions with standardized error codes
 
 ## 9. Enterprise Autonomous QE Harness: ChromaDB RAG Vector Store, Direct Document Ingestion & Live Skill Testing Engine
 
+> **Status correction (2026-11-10, `docs/HARNESS_REBUILD_PLAN.md`).**
+>
+> - **Not built on MAF.** The code in `src/backend/harness/` does not import `agent_framework`. It is a hand-written httpx loop with its own copies of todos, modes, memory, handoff, approvals, and MCP. The installed framework is `agent-framework` **1.24.0** (`requirements.txt` pins `<2`); "MAF 2.0" in this document means that 1.x line.
+> - **Fabricated results.** Several harness tools returned fabricated results, and some approved gates. Phase P1 stops that: tools no longer approve gates or approvals, the security audit returns real `static_analysis` findings without a score, and no project id is invented.
+> - **Target.** The harness is rebuilt on MAF's own `create_harness_agent` behind `ATLAS_HARNESS_ENGINE`, with plugins (skills, commands, agents, hooks, MCP) governed by admin grants. This section describes the legacy engine until then.
+
 The Autonomous QE Harness extends the Microsoft Agent Framework (MAF 2.0) with real-time semantic retrieval-augmented generation (RAG), direct multi-format document governance, and live sandboxed skill execution. It bridges unstructured project specifications with structured relational state, static AST discoveries, and isolated execution boundaries.
 
 ```mermaid

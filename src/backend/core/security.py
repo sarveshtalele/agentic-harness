@@ -137,7 +137,12 @@ def install_log_mask() -> None:
 
     def masked(*args, **kwargs):
         record = make_record(*args, **kwargs)
-        record.msg, record.args = redact(record.getMessage()), ()
+        message = record.getMessage()
+        masked_message = redact(message)
+        # Keep msg/args when nothing was secret: formatters such as uvicorn's access log unpack record.args, and an
+        # unchanged message proves the args hold no secret. Anything redacted loses its args so it cannot be re-formatted.
+        if masked_message != message:
+            record.msg, record.args = masked_message, ()
         return record
 
     logging.setLogRecordFactory(masked)

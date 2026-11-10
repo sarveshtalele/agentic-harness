@@ -41,9 +41,7 @@ def resolve_skill_tool(skill_name: str, display_name: str) -> Tuple[str, Dict[st
         return "heal_test_drift", {"failedTestFile": "tests/test_harness_backend.py", "errorTrace": "Automated skill heal"}
     elif "defect" in target or "bug" in target or "finding" in target:
         return "scan_defects", {}
-    elif "lifecycle" in target:
-        return "run_quality_lifecycle", {"scope": display_name}
-    elif "gate" in target:
+    elif "lifecycle" in target or "gate" in target:
         return "check_gates", {}
     elif "approval" in target:
         return "list_pending_approvals", {}

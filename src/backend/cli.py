@@ -29,7 +29,6 @@ if ROOT_DIR not in sys.path:
     sys.path.insert(0, ROOT_DIR)
 
 from backend import config, db
-from backend.core.seed_data import seed_database
 from backend.harness.discovery import LocalSkillDiscovery
 from backend.harness.harness_agent import HarnessAgent
 from backend.harness.llm_config import LLMConfig, load_llm_config
@@ -134,9 +133,8 @@ def main():
     parser.add_argument("--model", help="LLM model override")
     args = parser.parse_args()
 
-    # Ensure DB is migrated and seeded
+    # Ensure DB is migrated; seeding removed because it wrote fabricated data (plan D-04/D-05)
     db.migrate()
-    seed_database()
 
     llm_conf = load_llm_config()
     if args.model:

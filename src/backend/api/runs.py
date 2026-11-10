@@ -80,7 +80,7 @@ async def stream_events(run_id: str, request: Request, after: int = 0):
             idle = 0 if items else idle + 1
             if idle and idle % 30 == 0:
                 yield ": keepalive\n\n"
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(0.5)  # fabrication-ok: poll interval for new run events, not simulated latency
 
     return StreamingResponse(generator(), media_type="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
@@ -176,7 +176,7 @@ async def decide(approval_id: str, body: DecisionIn):
     with db() as con:
         appr_row = row(con.execute("SELECT * FROM approvals WHERE id=?", (approval_id,)))
     if not appr_row:
-        return {"status": "ok", "approval_id": approval_id, "approved": body.approved, "feedback": body.feedback}
+        raise HTTPException(404, f"Approval not found: {approval_id}")
 
     try:
         return await engine.decide(approval_id, body.approved, auth.signer(), body.feedback, {"open_pr": body.open_pr})

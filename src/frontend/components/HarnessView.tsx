@@ -710,13 +710,17 @@ export function HarnessView({
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (!selectedProjectId) {
+      toast("Select a project before uploading a document", "error");
+      return;
+    }
     setUploadingTemplate(true);
     try {
       const formData = new FormData();
       formData.append("file", file);
       formData.append("title", file.name.replace(/\.[^/.]+$/, ""));
       formData.append("kind", "brd");
-      formData.append("project_id", selectedProjectId || "prj_agentic_qe");
+      formData.append("project_id", selectedProjectId);
 
       const res = await fetch("/api/harness/upload-document", {
         method: "POST",
@@ -727,16 +731,17 @@ export function HarnessView({
         throw new Error(errText || "Document upload failed");
       }
       const data = await res.json();
-      const chunksCount = data.chunksIndexed || 1;
+      if (!data.doc_id) throw new Error("The server did not return a document id");
+      const chunksCount: number = Number(data.chunksIndexed ?? 0);
       const templateInfo = {
-        id: data.doc_id || "doc_uploaded",
+        id: data.doc_id,
         name: data.title || file.name,
         filename: data.filename || file.name,
-        sectionsCount: Math.max(1, chunksCount),
+        sectionsCount: chunksCount,
       };
       setUploadedTemplate(templateInfo);
 
-      const notice = `📄 **Document Ingested into Project Specifications & ChromaDB RAG Vector Store:**\n\n- **Governance ID:** \`${data.governance_id || 'DOC-001'}\`\n- **Document Title:** **${data.title}**\n- **Project:** \`${selectedProjectId}\`\n- **RAG Chunks Indexed:** **${chunksCount}** semantic vectors in ChromaDB\n\nAsk questions, request analysis, or click below to generate a domain-grounded BRD/Test Suite using RAG.`;
+      const notice = `📄 **Document Ingested into Project Specifications & ChromaDB RAG Vector Store:**\n\n- **Governance ID:** \`${data.governance_id ?? '—'}\`\n- **Document Title:** **${data.title}**\n- **Project:** \`${selectedProjectId}\`\n- **RAG Chunks Indexed:** **${chunksCount}** semantic vectors in ChromaDB\n\nAsk questions, request analysis, or click below to generate a domain-grounded BRD/Test Suite using RAG.`;
       toast(`Document added to project & indexed in ChromaDB RAG (${chunksCount} vectors)`);
 
       const sysMsg: ChatMessage = {

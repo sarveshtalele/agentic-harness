@@ -19,10 +19,12 @@ async def handle_doc_generation_workflow(
     1. Sets up 6 BA Studio tasks in session.todos
     2. Streams multi-agent workflow thought reasoning
     3. Saves generated specification and companion Gherkin to project
-    4. Updates Gate 1 (Requirements) to approved
+    4. Leaves Gate 1 (Requirements) for a named human to approve in Governance
     5. Emits DOCUMENT_CREATED SSE event and rich markdown summary
     """
-    target_proj = session.projectId or "prj_agentic_qe"
+    target_proj = session.projectId
+    if not target_proj:
+        raise ValueError("projectId is required: select a project before generating a document")
     doc_title, doc_content, doc_meta = generate_domain_brd(prompt, target_proj)
     doc_kind = doc_meta["kind"]
     doc_id = doc_meta["doc_id"]
@@ -31,17 +33,13 @@ async def handle_doc_generation_workflow(
 
     # Stream multi-agent BA Studio workflow logs step-by-step
     yield AGUIProtocol.thought_chunk("Started Intake\n")
-    yield AGUIProtocol.thought_chunk(f"Mode brownfield: scanning project `{target_proj}`\nFinished Intake\nGate 0: confirm intake scope\nApproved by qa-admin\n")
+    yield AGUIProtocol.thought_chunk(f"Mode brownfield: scanning project `{target_proj}`\nFinished Intake\nGate 0: confirm intake scope\nAwaiting approval by a named human\n")
     yield AGUIProtocol.thought_chunk("Started Load template and sources\nTemplate Business Requirements Document with 10 sections; 0 source documents\nFinished Load template and sources\n")
     yield AGUIProtocol.thought_chunk(f"Started Draft document\nbusiness-analyst is working, waiting for the model\nSkill authoring-user-stories v1.4.0 is in use by business-analyst\nbusiness-analyst replied (2502 tokens)\nSaved {doc_title} v1\nFinished Draft document\n")
     yield AGUIProtocol.thought_chunk(f"Started Independent review\nconfidence-reviewer is working, waiting for the model\nconfidence-reviewer replied (4428 tokens)\nReview score {doc_meta['review_score']} (model {doc_meta['review_score']}): {doc_meta['verdict']}\nFinished Independent review\n")
-    yield AGUIProtocol.thought_chunk(f"Started Author Gherkin\nbusiness-analyst is working, waiting for the model\nSkill authoring-user-stories v1.4.0 is in use by business-analyst\nbusiness-analyst replied (3972 tokens)\nGherkin valid: {doc_meta['scenarios']} scenarios, {doc_meta['steps']} steps\nFinished Author Gherkin\nGate 1: approve requirements document\nApproved by qa-admin\nCompleted\n")
+    yield AGUIProtocol.thought_chunk(f"Started Author Gherkin\nbusiness-analyst is working, waiting for the model\nSkill authoring-user-stories v1.4.0 is in use by business-analyst\nbusiness-analyst replied (3972 tokens)\nGherkin valid: {doc_meta['scenarios']} scenarios, {doc_meta['steps']} steps\nFinished Author Gherkin\nGate 1: approve requirements document\nAwaiting approval by a named human\nCompleted\n")
 
-    # Update Quality Gate 1 in Session
-    if "1" in session.gates:
-        session.gates["1"].status = "approved"
-        session.gates["1"].score = doc_meta["review_score"]
-        session.gates["1"].updatedAt = now
+    # Gate 1 is left for a named human to approve (CLAUDE.md governance); the agent never changes gate state.
 
     # Populate Tasks in Session
     session.todos = [
@@ -50,7 +48,7 @@ async def handle_doc_generation_workflow(
         TodoItem(id=f"td_draft_{now}", title=f"Draft 10-section {doc_kind.upper()} for {topic}", status="completed", agentId="business-analyst", createdAt=now, updatedAt=now),
         TodoItem(id=f"td_review_{now}", title=f"Independent review with confidence-reviewer (Score: {doc_meta['review_score']}, {doc_meta['verdict']})", status="completed", agentId="confidence-reviewer", createdAt=now, updatedAt=now),
         TodoItem(id=f"td_gherkin_{now}", title=f"Author validated Gherkin acceptance criteria ({doc_meta['scenarios']} scenarios)", status="completed", agentId="business-analyst", createdAt=now, updatedAt=now),
-        TodoItem(id=f"td_gate1_{now}", title="Gate 1: Approve requirements document", status="completed", agentId="principal-test-architect", createdAt=now, updatedAt=now),
+        TodoItem(id=f"td_gate1_{now}", title="Gate 1: Approve requirements document (a named human, in Governance)", status="pending", agentId=None, createdAt=now, updatedAt=now),
     ]
 
     doc_notice = (
@@ -61,7 +59,7 @@ async def handle_doc_generation_workflow(
         f"- **Kind:** `{doc_kind.upper()}` · 10 Sections · Immutable SHA-256 Hashed\n"
         f"- **Review Score:** `{doc_meta['review_score']}/100` (`confidence-reviewer: {doc_meta['verdict']}`)\n"
         f"- **Child Artifact:** `{doc_title} Scenarios` (`gherkin`, ID: `{gherkin_id}`)\n"
-        f"- **Quality Gate:** `Gate 1 (Requirements)` Verified & Approved\n\n"
+        f"- **Quality Gate:** `Gate 1 (Requirements)` awaits a named human in Governance\n\n"
         f"---\n\n"
         f"{doc_content}\n\n"
         f"---\n\n"

@@ -235,3 +235,26 @@
 - [ ] Not verified: the browser UI, the Windows install of requirements-evals.txt (CI job reports it), e2e
 - [ ] Not done: labels reviewed by a person; `finance` cases run on the pinned commit; trend line on cards; Skill Studio agents; skill evals started by a user (no such feature yet)
 - [x] Reviews stop first when tokens run low, cases a batch leaves out get one more try, and the default case limit is 40
+
+## MAF harness rebuild (plan: `docs/HARNESS_REBUILD_PLAN.md`), awaiting approval
+
+- [x] Audit: 23 fabricated-data and weak-handling items mapped (D-01 to D-23); harness mapping table; baseline 585 offline tests pass
+- [x] Owner approved implementation on 2026-11-10 ("start Implementation"); open decisions keep their defaults (plan Section 10)
+- [x] Playwright MCP added (`claude mcp add playwright npx @playwright/mcp@latest`, local scope, connected); Playwright 1.64.1 and Chromium already installed
+- [x] Testing strategy and evidence report design (plan 8e); `scripts/evidence_report.py`, `python scripts/dev.py evidence`
+- [x] P0 Branch `feature/maf-harness-platform`; architecture doc status correction (Section 9)
+- [x] P1 Stop fabricated data (2026-11-10): D-01..D-05, D-10..D-12, D-15, D-19, D-22, plus review findings. Harness tools no longer approve gates or documents or mark session gates approved; `run_quality_lifecycle` and `decide_approval` unregistered; startup seeding removed from `app.py`, `cli.py`, `run.sh`, `run.bat`; security audit scans the real repo (`NotScanned` when none); MCP file tools confined to a real, visible project via `safe_path`, other canned MCP results now 501; `evals/store.py` no longer invents "measured" scores; log mask keeps uvicorn access lines working. Evidence: `docs/evidence/runs/2026-11-10-1213-8477250-dirty/`
+- [x] CI gate 1 (`tests/test_no_fabrication.py`, ratchet 76 cases / 18 files) and gate 4 (`tests/test_agents_approve_nothing.py`, static + behavioural)
+- [ ] P1 left for later phases: canned plan, design, generate, confidence, heal, stories and gherkin tool output (D-06..D-09, P2); `doc_handler` invented thought text (P2); `skill_dispatcher.py` sample paths (P2); session gates shown from `gates.status` (P2); D-24..D-29 wording (P3c); smoke and E2E not run here (port binding blocked)
+- [ ] Owner decision: `feature/maf-harness-platform` was cut from `feature/azure-kudu-deployment`, which `scripts/verify_branch_isolation.sh` says must not be merged elsewhere. Rebase onto `main` before any PR?
+- [ ] P2 `maf/harness` factory on `create_harness_agent`, behind `ATLAS_HARNESS_ENGINE`
+- [ ] P3 Plugin manifests and discovery; `SkillsProvider` with admin filter
+- [ ] P4 Real MCP through `MCPStdioTool` / `MCPStreamableHTTPTool`
+- [ ] P5 Admin governance for plugins, skills, MCP; admin-only writes
+- [ ] P6 Skill Studio: task list, edit, approve, generate, evaluate; zip upload
+- [ ] P7 UI split and real-data panels
+- [ ] P8 Durable loops (skill health, suite green) with code predicates and human gates
+- [ ] P9 Electron desktop app (`apps/desktop`), DeepSeek Harness host pattern
+- [ ] P10 Live E2E evidence and docs
+- [ ] 200-line splits for touched files; docstring fixes (runs alongside P3-P7)
+- [x] Revision 2 of the plan: marketplace skill format and 10-phase skill-creator lifecycle, real NVIDIA SkillSpector (D-17 corrected), DeepSeek plugin profiles, ambition lens with CI gates

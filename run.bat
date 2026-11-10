@@ -11,13 +11,13 @@ echo  Frontend: Next.js ^& React (port 3000)
 echo  Protocol: Microsoft Agent Framework (MAF 2.0) ^& AG-UI
 echo ==========================================================
 
-rem Ensure database is migrated and seeded
+rem Ensure database is migrated; startup seeding removed, it wrote fabricated data (see src/backend/app.py)
 set "PYTHONPATH=%~dp0src;%~dp0;%PYTHONPATH%"
 where py >nul 2>nul
 if %errorlevel%==0 (
-    py -3 -c "from backend import db; from backend.core.seed_data import seed_database; db.migrate(); seed_database()"
+    py -3 -c "from backend import db; db.migrate()"
 ) else (
-    python -c "from backend import db; from backend.core.seed_data import seed_database; db.migrate(); seed_database()"
+    python -c "from backend import db; db.migrate()"
 )
 
 rem Start Python FastAPI backend in a new window

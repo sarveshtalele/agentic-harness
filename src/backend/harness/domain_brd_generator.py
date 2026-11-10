@@ -416,9 +416,7 @@ def generate_domain_brd(prompt: str, project_id: str) -> Tuple[str, str, Dict[st
         note=f"Validated Gherkin: {scenarios_count} scenarios, {steps_count} steps",
     )
 
-    # 3. Mark both documents as approved (Gate 1 sign-off)
-    documents.set_status(created_doc["id"], "approved", "qa-admin")
-    documents.set_status(gherkin_doc["id"], "approved", "qa-admin")
+    # 3. Documents stay in draft: only a signed-in human approves (/api/documents/{id}/approve)
 
     meta = {
         "doc_id": created_doc["id"],

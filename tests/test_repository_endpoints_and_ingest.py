@@ -79,6 +79,10 @@ def test_all_seeded_projects_repo_and_tree(client, project_id):
     r.mkdir(parents=True, exist_ok=True)
     if not (r / "README.md").exists():
         (r / "README.md").write_text(f"# {project_id}\n\nProject repository.\n", encoding="utf-8")
+    # real source file so the real scan finds a language; startup no longer seeds fabricated analysis (plan D-04/D-05)
+    (r / "app.py").write_text("print('hello')\n", encoding="utf-8")
+    from backend.core.seed_data import seed_database
+    seed_database(force=True)  # explicit fixture seeding is allowed in tests only
 
     # 1. /api/projects/{id}/repo
     res = client.get(f"/api/projects/{project_id}/repo")

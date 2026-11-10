@@ -192,7 +192,8 @@ def cap_for_failed_tests(confidence: dict, verdict: str) -> dict:
     """The review runs before the tests finish, so code keeps a high score from sitting beside a failing verdict."""
     if verdict != "FAIL" or confidence["score"] is None or confidence["score"] <= 60:
         return confidence
-    return {**confidence, "score": 60, "verdict": "REVISE", "model_score": confidence["score"], "issues": ["Tests fail with this change", *confidence.get("issues", [])]}
+    return {**confidence, "score": 60, "verdict": "REVISE",  # fabrication-ok: documented cap beside a failing test verdict
+            "model_score": confidence["score"], "issues": ["Tests fail with this change", *confidence.get("issues", [])]}
 
 
 async def change_verify(rc: RunContext, state: dict) -> dict:

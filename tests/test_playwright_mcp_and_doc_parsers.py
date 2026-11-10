@@ -126,13 +126,14 @@ def test_playwright_tool_authorization_and_execution(auth_client):
     assert re_toggle.status_code == 200
     assert re_toggle.json()["authorized"] is True
 
-    # 4. Execution should now succeed safely in sandbox
+    # 4. Authorized now, so it passes the 403 check, and is honestly refused (501) instead of reporting a browser
+    #    action that never ran: real MCP sessions arrive in plan P4 (D-14).
     exec_ok = auth_client.post("/api/mcp/execute", json={
         "tool_id": tool_id,
         "arguments": {"url": "https://example.com"}
     })
-    assert exec_ok.status_code == 200
-    assert exec_ok.json()["success"] is True
+    assert exec_ok.status_code == 501
+    assert "P4" in exec_ok.json()["detail"]
 
     # 5. Toggle all tools off
     toggle_all_off = auth_client.post("/api/mcp/servers/srv_playwright/toggle-all", json={"authorized": False})

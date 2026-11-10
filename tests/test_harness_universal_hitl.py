@@ -34,6 +34,14 @@ from backend.db import db, rows, row, new_id, now
 from backend.core import auth, ledger, gates
 from backend.harness.qe_tools import build_qe_tools
 from backend.harness.approval_manager import global_approval_manager
+
+
+@pytest.fixture(autouse=True)
+def _hitl_project():
+    """Tools need a real project since P1 (plan D-19); this module creates its own instead of relying on seed data."""
+    with db() as con:
+        con.execute("INSERT OR IGNORE INTO projects (id, name, description, created_at, updated_at, archived, owner_id) "
+                    "VALUES ('prj_hitl_test', 'HITL test', '', ?, ?, 0, 'admin')", (now(), now()))
 from backend.harness.harness_agent import HarnessAgent
 from backend.harness.session import AgentSessionManager
 from tests.test_api_workflows import unique
@@ -95,14 +103,13 @@ def test_universal_qe_tools_registration():
     assert tool_map["heal_test_drift"].requires_approval is True
 
     # 6. Quality Engineering
-    assert "run_quality_lifecycle" in tool_map
+    assert "run_quality_lifecycle" not in tool_map  # gates are decided only by a named human
     assert "check_gates" in tool_map
-    assert tool_map["run_quality_lifecycle"].requires_approval is True
     assert not tool_map["check_gates"].requires_approval
 
     # 7. Governance & Approvals
     assert "list_pending_approvals" in tool_map
-    assert "decide_approval" in tool_map
+    assert "decide_approval" not in tool_map  # agents never decide approvals
     assert not tool_map["list_pending_approvals"].requires_approval
 
     # 8. Observability
@@ -126,26 +133,46 @@ def test_universal_qe_tools_registration():
 async def test_repository_inspection_tools():
     """Verify inspect_repo, view_tree, and read_file safely execute."""
     tools = {t.name: t for t in build_qe_tools(WORKSPACE_DIR)}
+    from backend import config
+    repo = config.repo_dir("prj_hitl_test")  # the project's own repository, not the platform's folder
+    repo.mkdir(parents=True, exist_ok=True)
+    (repo / "package.json").write_text('{"name": "hitl-fixture"}', encoding="utf-8")
 
     # inspect_repo
-    res_inspect = await tools["inspect_repo"].execute({}, context={})
+    res_inspect = await tools["inspect_repo"].execute({}, context={"projectId": "prj_hitl_test"})
     assert res_inspect["status"] == "Inspected"
     assert "repository" in res_inspect
     assert "detectedRunners" in res_inspect
 
     # view_tree
-    res_tree = await tools["view_tree"].execute({"maxDepth": 2}, context={})
+    res_tree = await tools["view_tree"].execute({"maxDepth": 2}, context={"projectId": "prj_hitl_test"})
     assert "tree" in res_tree
     assert res_tree["nodesCount"] > 0
 
     # read_file
-    res_read = await tools["read_file"].execute({"filePath": "package.json"}, context={})
-    assert res_read["lines"] > 0
-    assert "name" in res_read["content"]
+    res_read = await tools["read_file"].execute({"filePath": "package.json"}, context={"projectId": "prj_hitl_test"})
+    assert "hitl-fixture" in res_read["content"]
 
-    # read_file path traversal defense
-    with pytest.raises(ValueError, match="Path traversal detected"):
-        await tools["read_file"].execute({"filePath": "../../etc/passwd"}, context={})
+    # Platform files and escapes are refused, also through targetDir
+    for bad in ("../../etc/passwd", os.path.join(WORKSPACE_DIR, "CLAUDE.md")):
+        with pytest.raises(ValueError, match="escape"):
+            await tools["read_file"].execute({"filePath": bad}, context={"projectId": "prj_hitl_test"})
+    with pytest.raises(ValueError, match="escape"):
+        await tools["inspect_repo"].execute({"targetDir": WORKSPACE_DIR}, context={"projectId": "prj_hitl_test"})
+
+
+@pytest.mark.asyncio
+async def test_tools_require_explicit_project():
+    """No project selected is an explicit error, never a fabricated project id."""
+    tools = {t.name: t for t in build_qe_tools(WORKSPACE_DIR)}
+    with pytest.raises(ValueError, match="projectId is required"):
+        await tools["inspect_repo"].execute({}, context={})
+
+
+def test_decide_approval_and_lifecycle_are_not_registered():
+    names = {t.name for t in build_qe_tools(WORKSPACE_DIR)}
+    assert "decide_approval" not in names
+    assert "run_quality_lifecycle" not in names
 
 
 @pytest.mark.asyncio
@@ -153,12 +180,12 @@ async def test_ba_studio_tools():
     """Verify create_user_stories and generate_gherkin produce valid specs."""
     tools = {t.name: t for t in build_qe_tools(WORKSPACE_DIR)}
 
-    stories_res = await tools["create_user_stories"].execute({"feature": "Payment Gateway Integration"}, context={})
+    stories_res = await tools["create_user_stories"].execute({"feature": "Payment Gateway Integration"}, context={"projectId": "prj_hitl_test"})
     assert stories_res["status"] == "Created"
     assert len(stories_res["userStories"]) >= 2
     assert stories_res["userStories"][0]["priority"] == "P0"
 
-    gherkin_res = await tools["generate_gherkin"].execute({"userStoryId": "US-PAY-01", "featureTitle": "Payment Gateway"}, context={})
+    gherkin_res = await tools["generate_gherkin"].execute({"userStoryId": "US-PAY-01", "featureTitle": "Payment Gateway"}, context={"projectId": "prj_hitl_test"})
     assert gherkin_res["status"] == "Generated"
     assert "Feature: Payment Gateway" in gherkin_res["gherkin"]
     assert "Scenario:" in gherkin_res["gherkin"]
@@ -206,7 +233,9 @@ async def test_mcp_servers_tools():
         "toolName": "navigate",
         "arguments": {"url": "http://localhost:3000"}
     }, context={})
-    assert exec_res["executionStatus"] == "SUCCESS"
+    # The harness has no MCP client, so it reports that nothing ran instead of inventing a success
+    assert exec_res["executionStatus"] == "NOT_EXECUTED"
+    assert exec_res["error"]
 
 
 # =========================================================================

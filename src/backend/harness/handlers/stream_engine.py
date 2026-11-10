@@ -4,14 +4,17 @@ Handles thoughts streaming, LLM client chat stream, sequential tool execution,
 Human-in-the-Loop Quality Gate approvals, and session state persistence.
 """
 import asyncio
+import logging
 import time
 from typing import AsyncGenerator, Dict, Any, List, Optional
-from backend.harness.session import SessionState, ChatMessage, ToolCallRecord, GateApprovalInfo
+from backend.harness.session import SessionState, ChatMessage, ToolCallRecord
 from backend.harness.agui_protocol import AGUIProtocol
 from backend.harness.llm_client import LLMClient
 from backend.harness.llm_config import LLMConfig
 from backend.harness.qe_agents import get_agent_persona
 from backend.harness.intent_classifier import classify_prompt_intent
+
+log = logging.getLogger(__name__)
 
 
 async def execute_agent_stream(
@@ -63,7 +66,6 @@ async def execute_agent_stream(
             yield AGUIProtocol.aborted()
             return
         yield AGUIProtocol.thought_chunk(f"{t}\n")
-        await asyncio.sleep(0.04)
 
     # 4. Check LLM Configuration
     llm_client = LLMClient(llm_config)
@@ -92,7 +94,9 @@ async def execute_agent_stream(
     try:
         from backend.db import db, row
         with db() as con:
-            t_p = session.projectId or "prj_agentic_qe"
+            t_p = session.projectId
+            if not t_p:
+                raise ValueError("session has no projectId")
             p_r = row(con.execute("SELECT id, name FROM projects WHERE id=?", (t_p,)))
             f_c = row(con.execute("SELECT COUNT(*) as c FROM findings WHERE project_id=?", (t_p,)))["c"]
             d_c = row(con.execute("SELECT COUNT(*) as c FROM documents WHERE project_id=?", (t_p,)))["c"]
@@ -106,7 +110,8 @@ async def execute_agent_stream(
                 f"Ground all findings and statements in the real project files and database tables.\n"
             )
     except Exception:
-        pass
+        log.exception("Could not load project grounding facts")
+        db_proj_info = "\n[Project grounding facts unavailable: no project bound or database error]\n"
 
     effective_system_prompt = (
         f"{llm_config.system_prompt}\n\n"
@@ -146,70 +151,9 @@ async def execute_agent_stream(
                 })
                 yield AGUIProtocol.text_chunk(f"\n\n> ⚠️ {chunk['message']}\n\n")
 
-    # 6. Fallback tool determination if LLM did not explicitly emit tool calls
+    # 6. Only an explicit, user-chosen skill overrides the model's own tool calls
     if skill_tool_override:
         tool_calls_to_execute = [skill_tool_override]
-    elif not tool_calls_to_execute:
-        p_lower = user_prompt.lower()
-        if any(k in p_lower for k in ["create skill", "create_agent_skill", "scaffold skill", "new skill", "skill creator"]):
-            tool_calls_to_execute.append({
-                "name": "create_agent_skill",
-                "args": {"name": "Custom Quality Verification Engine", "description": "Autonomous skill synthesized from requirements"}
-            })
-        elif any(k in p_lower for k in ["evaluate skill", "evaluate_agent_skill", "eval skill", "test skill"]):
-            tool_calls_to_execute.append({"name": "evaluate_agent_skill", "args": {"skillName": "skill-creator"}})
-        elif "security" in p_lower or "audit" in p_lower:
-            tool_calls_to_execute.append({"name": "qe_security_audit", "args": {}})
-        elif "view tree" in p_lower or "view_tree" in p_lower or "directory" in p_lower:
-            tool_calls_to_execute.append({"name": "view_tree", "args": {"maxDepth": 3}})
-        elif "read file" in p_lower or "read_file" in p_lower:
-            tool_calls_to_execute.append({"name": "read_file", "args": {"filePath": "package.json"}})
-        elif "inspect repo" in p_lower or "inspect_repo" in p_lower or "scan repo" in p_lower or "discover" in p_lower:
-            tool_calls_to_execute.append({"name": "inspect_repo", "args": {}})
-        elif "user stories" in p_lower or "user story" in p_lower or "ba studio" in p_lower:
-            tool_calls_to_execute.append({"name": "create_user_stories", "args": {"feature": "Core Business Flow"}})
-        elif "gherkin" in p_lower or "acceptance criteria" in p_lower:
-            tool_calls_to_execute.append({"name": "generate_gherkin", "args": {"featureTitle": "Core Business Flow"}})
-        elif "update document" in p_lower or "update doc" in p_lower:
-            tool_calls_to_execute.append({"name": "update_document", "args": {"documentId": "doc_latest", "content": "# Updated Architecture\n\nPreserved SHA-256."}})
-        elif "read document" in p_lower:
-            tool_calls_to_execute.append({"name": "read_document", "args": {"documentId": "doc_latest"}})
-        elif "sandbox command" in p_lower or "run command" in p_lower or "sandbox" in p_lower:
-            tool_calls_to_execute.append({"name": "run_sandbox_command", "args": {"command": "npx --no-install vitest run"}})
-        elif "implement feature" in p_lower or "build feature" in p_lower or "feature builder" in p_lower:
-            tool_calls_to_execute.append({"name": "implement_feature", "args": {"filePath": "src/features/sample.ts", "code": "// Feature implementation\nexport const active = true;\n"}})
-        elif "scan defects" in p_lower or "defect" in p_lower or "bug" in p_lower or "finding" in p_lower:
-            tool_calls_to_execute.append({"name": "scan_defects", "args": {}})
-        elif "heal" in p_lower or "drift" in p_lower:
-            tool_calls_to_execute.append({"name": "heal_test_drift", "args": {"failedTestFile": "e2e/tc-auth-003.spec.ts", "errorTrace": "TimeoutError"}})
-        elif "lifecycle" in p_lower or "testing lifecycle" in p_lower:
-            tool_calls_to_execute.append({"name": "run_quality_lifecycle", "args": {"scope": "Full QE Lifecycle"}})
-        elif "check gates" in p_lower or "gates" in p_lower or "gate" in p_lower:
-            tool_calls_to_execute.append({"name": "check_gates", "args": {}})
-        elif "pending approvals" in p_lower or "list approvals" in p_lower or "approvals" in p_lower:
-            tool_calls_to_execute.append({"name": "list_pending_approvals", "args": {}})
-        elif "decide approval" in p_lower:
-            tool_calls_to_execute.append({"name": "decide_approval", "args": {"approvalId": "appr_test", "approved": True}})
-        elif "logs" in p_lower or "log" in p_lower or "observability" in p_lower:
-            tool_calls_to_execute.append({"name": "query_system_logs", "args": {"limit": 25}})
-        elif "error summary" in p_lower or "errors" in p_lower:
-            tool_calls_to_execute.append({"name": "get_error_summary", "args": {}})
-        elif "mcp servers" in p_lower or "mcp list" in p_lower:
-            tool_calls_to_execute.append({"name": "list_mcp_servers", "args": {}})
-        elif "mcp tool" in p_lower or "mcp" in p_lower:
-            tool_calls_to_execute.append({"name": "execute_mcp_tool", "args": {"serverId": "mcp-playwright", "toolName": "navigate"}})
-        elif "plan" in p_lower or "strategy" in p_lower:
-            tool_calls_to_execute.append({"name": "qe_plan_strategy", "args": {"scope": "Full Workspace Audit"}})
-        elif "design" in p_lower or "case" in p_lower:
-            tool_calls_to_execute.append({"name": "qe_design_cases", "args": {"area": "Authentication"}})
-        elif "generate" in p_lower or "code" in p_lower:
-            tool_calls_to_execute.append({"name": "qe_generate_code", "args": {"caseId": "TC-AUTH-001", "runner": "vitest"}})
-        elif "run" in p_lower or "execute" in p_lower or "test" in p_lower:
-            tool_calls_to_execute.append({"name": "qe_run_tests", "args": {"command": "npx --no-install vitest run"}})
-        elif "confidence" in p_lower or "review" in p_lower or "sign" in p_lower:
-            tool_calls_to_execute.append({"name": "qe_confidence_review", "args": {"artifactType": "code"}})
-        else:
-            tool_calls_to_execute.append({"name": "inspect_repo", "args": {}})
 
     # 7. Execute Tools Sequentially with Mode, HITL Gate Approval & Guardrails
     executed_records: List[ToolCallRecord] = []
@@ -242,27 +186,20 @@ async def execute_agent_stream(
             yield AGUIProtocol.tool_call_result(tool_call_id, None, err)
             continue
 
-        # Human-in-the-Loop Quality Gate Approval check
+        # Human-in-the-Loop: this step needs a named human. No approval id is registered here, so no decidable card is emitted.
         if getattr(tool, "requires_approval", False):
-            approval_id = f"appr_{int(time.time()*1000)}_{tool_name[:4]}"
-            gate_num = getattr(tool, "gate_number", None) or 4
-            appr_info = GateApprovalInfo(
-                id=approval_id,
-                gateNumber=gate_num,
-                gateName=f"Quality Gate {gate_num} Sign-off",
-                confidenceScore=95,
-                confidenceVerdict="APPROVED",
-                artifactSummary=f"Execution request for tool `{tool_name}` with parameters: {list(tool_args.keys())}",
-                evidenceCitations=["package.json:1", "vitest.config.ts:1"],
-                status="pending"
-            )
+            gate_num = getattr(tool, "gate_number", None)
+            msg = f"Tool '{tool_name}' was not run: it needs a named human to approve it in Governance."
             yield AGUIProtocol.tool_call_start(tool_call_id, tool_name, tool_args)
-            yield AGUIProtocol.gate_approval_request(appr_info)
+            yield AGUIProtocol.tool_call_result(tool_call_id, None, msg)
+            yield AGUIProtocol.text_chunk(f"\n\n> {msg}\n\n")
+            full_content += f"\n\n> {msg}\n\n"
             executed_records.append(ToolCallRecord(
                 id=tool_call_id,
                 name=tool_name,
                 args=tool_args,
-                status="pending",
+                status="failed",
+                error=msg,
                 gateNumber=gate_num
             ))
             continue
@@ -281,15 +218,7 @@ async def execute_agent_stream(
             ))
             yield AGUIProtocol.tool_call_result(tool_call_id, res)
 
-            # Update gate status if tool has gate association
-            gate_num = getattr(tool, "gate_number", None)
-            if gate_num:
-                g_key = str(gate_num)
-                if g_key in session.gates:
-                    session.gates[g_key].status = "approved"
-                    session.gates[g_key].score = 94
-                    session.gates[g_key].updatedAt = int(time.time()*1000)
-                    yield AGUIProtocol.state_delta({"gates": {k: v.model_dump() for k, v in session.gates.items()}})
+            # Gate status comes only from backend.core.gates (human decisions); a tool run never changes it.
 
             # Populate todos if discovering repo
             if tool_name == "qe_discover_repo" and len(session.todos) == 0:
@@ -334,7 +263,7 @@ async def execute_agent_stream(
                 elif "passed" in rec.result:
                     detail_text = f"Tests: {rec.result['passed']} passed, {rec.result.get('failed', 0)} failed"
                 elif "verdict" in rec.result:
-                    detail_text = f"Verdict: {rec.result['verdict']} (Confidence: {rec.result.get('score', 90)}%)"
+                    detail_text = f"Verdict: {rec.result['verdict']} (Score: {rec.result.get('score', 'n/a')})"
                 else:
                     detail_text = str(list(rec.result.keys())[:3])
             summary_chunks.append(f"| `{rec.name}` | {st} | {gate_str} | {detail_text} |")

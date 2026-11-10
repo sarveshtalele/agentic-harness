@@ -2,9 +2,12 @@
 Centralized Database Grounding for Agentic QE Harness.
 Queries data/atlas.sqlite3 deterministically for bugs, defects, documents, gates, and static analysis.
 """
+import logging
 import time
 from typing import Dict, Any, Optional
 from .session import SessionState, ToolCallRecord
+
+log = logging.getLogger(__name__)
 
 
 class HarnessGrounding:
@@ -21,17 +24,10 @@ class HarnessGrounding:
     def ground_from_centralized_db(session: SessionState, user_prompt: str) -> Optional[Dict[str, Any]]:
         p_lower = user_prompt.lower().strip()
         
-        # Check if user mentioned a specific project in prompt
-        if "mcp" in p_lower:
-            target_proj = "prj_mcp_market"
-        elif "fintech" in p_lower:
-            target_proj = "prj_fintech_gateway"
-        elif "ecommerce" in p_lower or "checkout" in p_lower:
-            target_proj = "prj_ecommerce_core"
-        elif "agentic" in p_lower or "framework" in p_lower:
-            target_proj = "prj_agentic_qe"
-        else:
-            target_proj = session.projectId or "prj_agentic_qe"
+        # Only the project bound to the session is used; a prompt never redirects it.
+        target_proj = session.projectId
+        if not target_proj:
+            return None  # no project bound: nothing to ground against
 
         from backend.db import db, rows, row, new_id, now
         from backend.repos.sandbox import repo_dir
@@ -69,6 +65,7 @@ class HarnessGrounding:
 
             findings_list = [dict(f) for f in findings_db]
 
+            scan_error = None
             # If no scan run or 0 findings exist, check if repository exists and execute static analysis
             if not findings_list:
                 try:
@@ -98,8 +95,9 @@ class HarnessGrounding:
                                         (target_proj,)
                                     ))
                                 findings_list = [dict(f) for f in findings_db]
-                except Exception:
-                    pass
+                except Exception as exc:
+                    log.warning("grounding scan of %s failed: %s", target_proj, exc)
+                    scan_error = str(exc)
 
             total_count = len(findings_list)
             crit_count = len([f for f in findings_list if f["severity"].lower() == "critical"])
@@ -109,7 +107,7 @@ class HarnessGrounding:
             open_count = len([f for f in findings_list if f.get("status", "open").lower() == "open"])
             closed_count = total_count - open_count
 
-            scan_info = f"`{scan_run['id']}` ({scan_run['status'].upper()})" if scan_run else "*(Scan completed via centralized runner)*"
+            scan_info = f"`{scan_run['id']}` ({scan_run['status'].upper()})" if scan_run else "*(no scan run recorded for this project)*"
 
             if total_count > 0:
                 table_rows = []
@@ -145,7 +143,7 @@ class HarnessGrounding:
                     f"### 🐛 Defect Scan Grounding · {proj_name} (`{target_proj}`)\n\n"
                     f"🔍 **Database Check (`atlas.sqlite3`):** 0 defect findings registered.\n"
                     f"- **Active Project:** **{proj_name}** (`{target_proj}`)\n"
-                    f"- **Scan Status:** Codebase has been inspected with 0 static security violations.\n"
+                    f"- **Scan Status:** {'The scan failed: ' + scan_error if scan_error else ('Scan run `' + scan_run['id'] + '` recorded 0 findings.' if scan_run else 'No scan has been run for this project, so 0 findings means nothing was checked.')}\n"
                     f"You can launch a full multi-agent code review scan from the [Bug Scan Page](/projects/{target_proj}/bugs) or by requesting `/security-audit`."
                 )
 
@@ -246,8 +244,8 @@ class HarnessGrounding:
                 if st == "approved":
                     approved_count += 1
                 icon = "🟢 `APPROVED`" if st == "approved" else "🟡 `DRAFT`" if st == "draft" else "⚪ `PENDING`"
-                decider = g.get("decided_by") or "Administrator"
-                reason = g.get("reason") or "Gate criteria verified"
+                decider = g.get("decided_by") or "—"
+                reason = g.get("reason") or "—"
                 gate_rows.append(f"| Gate {g['gate']} | {icon} | `{decider}` | {reason} |")
 
             content = (

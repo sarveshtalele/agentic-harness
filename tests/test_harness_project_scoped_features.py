@@ -1,6 +1,7 @@
 import os
 import time
 import pytest
+from backend import config
 from backend.db import db
 from backend.core.seed_data import seed_database
 from backend.harness.session import SessionState
@@ -21,7 +22,9 @@ def make_session(id: str, project_id: str) -> SessionState:
 
 @pytest.fixture(autouse=True)
 def setup_test_environment():
-    seed_database()
+    # force=True: other modules create prj_mcp_market without findings, and the app no longer seeds at startup (plan D-05),
+    # so this module inserts its own fixture rows (INSERT OR IGNORE) whatever ran before it.
+    seed_database(force=True)
     yield
 
 @pytest.mark.asyncio
@@ -52,8 +55,8 @@ async def test_harness_document_creation_persists_to_selected_project(tmp_path):
         assert row["title"] == "Automated Trading System BRD"
         
     # Verify file saved on disk in project documents directory
-    disk_path = os.path.join(workspace, "data", "projects", target_project, "documents", f"{doc_id}.md")
-    assert os.path.exists(disk_path)
+    disk_path = config.project_dir(target_project) / "documents" / f"{doc_id}.md"
+    assert disk_path.exists()
     with open(disk_path, "r", encoding="utf-8") as f:
         content = f.read()
     assert "Automated Trading System BRD" in content
@@ -66,6 +69,7 @@ async def test_harness_feature_building_writes_to_project_sandbox():
     target_project = "prj_ecommerce_core"
     session = make_session("sess_test_feat_proj", target_project)
     
+    config.repo_dir(target_project).mkdir(parents=True, exist_ok=True)  # the project's real repository folder
     rel_path = "src/features/cart_discount.ts"
     code = "// Cart Discount Feature\nexport function calculateDiscount(subtotal: number) { return subtotal * 0.15; }\n"
     
@@ -79,9 +83,10 @@ async def test_harness_feature_building_writes_to_project_sandbox():
     assert res["status"] == "Implemented"
     assert res["fileWritten"] is True
     
-    # Verify strictly written to data/projects/{projectId}/sandbox/{rel_path}
-    expected_path = os.path.join(workspace, "data", "projects", target_project, "sandbox", rel_path)
+    # Verify written inside the project's repository (config.repo_dir), not the platform's own folder
+    expected_path = str(config.repo_dir(target_project) / rel_path)
     assert os.path.exists(expected_path)
+    assert not os.path.exists(os.path.join(workspace, rel_path))
     with open(expected_path, "r", encoding="utf-8") as f:
         written_code = f.read()
     assert "calculateDiscount" in written_code
@@ -94,41 +99,37 @@ async def test_harness_security_audit_persists_findings_and_gates_to_project():
     target_project = "prj_fintech_gateway"
     session = make_session("sess_test_sec_proj", target_project)
     
-    res = await tools["qe_security_audit"].execute({}, context={"session": session, "projectId": target_project})
-    
-    assert res["projectId"] == target_project
-    assert res["status"] == "PASSED"
-    assert res["specterScore"] >= 95
-    finding_id = res["findingId"]
-    
-    # Verify in findings SQLite table
+    # No repository: nothing was scanned, and the tool says so instead of reporting NoFindings
+    from backend.db import now
     with db() as con:
-        fnd = con.execute("SELECT project_id, title, severity, status FROM findings WHERE id=?", (finding_id,)).fetchone()
-        assert fnd is not None
-        assert fnd["project_id"] == target_project
-        assert fnd["status"] in ("open", "verified")
-        
-    # Verify Gate 5 approved
-    assert gates.is_approved(target_project, 5) is True
+        con.execute("INSERT OR IGNORE INTO projects (id, name, description, created_at, updated_at, archived, owner_id) "
+                    "VALUES ('prj_sec_norepo', 'No repo', '', ?, ?, 0, 'admin')", (now(), now()))
+    assert not config.repo_dir("prj_sec_norepo").exists()
+    res = await tools["qe_security_audit"].execute({}, context={"projectId": "prj_sec_norepo"})
+    assert res["status"] == "NotScanned" and res["reason"]
 
-@pytest.mark.asyncio
-async def test_harness_quality_lifecycle_approves_all_project_gates():
-    workspace = os.getcwd()
-    tools = {t.name: t for t in build_qe_tools(workspace)}
-    
-    target_project = "prj_mcp_market"
-    session = make_session("sess_test_life_proj", target_project)
-    
-    res = await tools["run_quality_lifecycle"].execute({
-        "scope": "Regression Suite Lifecycle"
-    }, context={"session": session, "projectId": target_project})
-    
+    # A fake AWS key line planted in the project's real repository is found
+    repo = config.repo_dir(target_project)
+    repo.mkdir(parents=True, exist_ok=True)
+    (repo / "settings.py").write_text('AWS_KEY = "AKIA' + 'QZXWVUTSRQ234567' + '"\n', encoding="utf-8")
+    gate5_before = gates.is_approved(target_project, 5)
+    res = await tools["qe_security_audit"].execute({}, context={"session": session, "projectId": target_project})
+
     assert res["projectId"] == target_project
-    assert res["allGatesPassed"] is True
-    
-    # Verify all gates G0 through G5 approved in SQLite
-    for g in range(0, 6):
-        assert gates.is_approved(target_project, g) is True
+    assert res["status"] in ("Analyzed", "Partial")
+    assert any(f["rule"] == "SEC001" and f["file"] == "settings.py" for f in res["findings"]), res["findings"]
+    assert "secrets" in res["analyzersRan"]
+    assert isinstance(res["findings"], list)
+    assert res["findingCount"] == sum(res["bySeverity"].values())
+    assert "specterScore" not in res and "specterGrade" not in res
+
+    # Real analysis only: no gate changes
+    assert gates.is_approved(target_project, 5) == gate5_before
+
+def test_harness_toolset_has_no_gate_approving_tools():
+    names = {t.name for t in build_qe_tools(os.getcwd())}
+    assert "run_quality_lifecycle" not in names
+    assert "decide_approval" not in names
 
 @pytest.mark.asyncio
 async def test_harness_skill_execution_resolves_and_persists_per_project():
@@ -163,16 +164,17 @@ async def test_harness_skill_execution_resolves_and_persists_per_project():
         assert gh_doc["project_id"] == target_project
         assert gh_doc["kind"] == "gherkin"
 
-def test_agent_metrics_all_measured_without_ragas_error():
+def test_agent_metrics_not_reported_as_measured_without_an_eval_run():
+    # No real eval run: any stored baseline rows are removed, so nothing may be reported as measured.
+    with db() as con:
+        con.execute("DELETE FROM evaluation_metrics")
     for agent in ["project-copilot", "business-analyst", "repo-intelligence-analyst", "confidence-reviewer"]:
         d = detail(agent)
         assert d["agent"] == agent
         for m in d["metrics"]:
-            # Feature engineer doesn't have groundedness/faithfulness (state="n/a"), all other applicable are measured
-            if m["state"] != "n/a":
-                assert m["state"] == "measured", f"Metric {m['metric']} on {agent} is not measured: {m}"
-                assert m["value"] >= 0.85
-                assert "ragas-specter-v1" in m.get("judge_model", "")
+            assert m["state"] in ("n/a", "not_measured"), f"Metric {m['metric']} on {agent} reported without a run: {m}"
+            assert m.get("value") is None
+            assert "ragas-specter-v1" not in m.get("judge_model", "")
 
 def test_project_sdlc_export_zip_package():
     import io
