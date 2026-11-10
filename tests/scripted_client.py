@@ -14,7 +14,11 @@ class ScriptedClient(FunctionInvocationLayer, ChatMiddlewareLayer, BaseChatClien
         self.calls: list[str] = []
 
     def _reply(self, messages, options) -> str:
-        text = str(options.get("instructions") or "") + "\n" + "\n".join(str(m.text) for m in messages)
+        def seen(m) -> str:  # text plus any tool results, so a test can check what the model received from a tool
+            results = [str(getattr(c, "result", "")) for c in (m.contents or []) if getattr(c, "type", "") == "function_result"]
+            return "\n".join([str(m.text), *results])
+
+        text = str(options.get("instructions") or "") + "\n" + "\n".join(seen(m) for m in messages)
         self.calls.append(text)
         for needle, reply in self.rules:
             if needle in text:
@@ -30,6 +34,11 @@ class ScriptedClient(FunctionInvocationLayer, ChatMiddlewareLayer, BaseChatClien
             return cut_off()
         if isinstance(reply, dict):  # a tool call, for agents that act through tools
             contents = [Content.from_function_call(call_id="call_1", name=reply["call"], arguments=reply["args"])]
+            if stream:  # AG-UI and the harness stream, so the call arrives as one streamed update
+                async def call_updates():
+                    yield ChatResponseUpdate(contents=contents, role="assistant")
+
+                return ResponseStream(call_updates(), finalizer=lambda items: ChatResponse.from_updates(items))
 
             async def call_tool():
                 return ChatResponse(messages=[Message(role="assistant", contents=contents)])

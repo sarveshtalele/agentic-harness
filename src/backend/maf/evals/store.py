@@ -29,6 +29,7 @@ METRICS_BY_AGENT = {
     "bug-fix-reviewer": (True, True, "Scores proposed bug fixes and assertion preservation", "Verified fixes approved"),
     "feature-engineer": (False, False, "Named functions and hidden tests", "Hidden tests pass, none broken"),
     "project-copilot": (True, True, "Question and answer key", "Response relevancy, right tool called"),
+    "harness": (True, True, "Task and answer key", "Right skill loaded, todos finished only when done, no approvals"),
 }
 
 

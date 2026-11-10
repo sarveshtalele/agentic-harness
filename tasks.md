@@ -247,7 +247,14 @@
 - [x] CI gate 1 (`tests/test_no_fabrication.py`, ratchet 76 cases / 18 files) and gate 4 (`tests/test_agents_approve_nothing.py`, static + behavioural)
 - [ ] P1 left for later phases: canned plan, design, generate, confidence, heal, stories and gherkin tool output (D-06..D-09, P2); `doc_handler` invented thought text (P2); `skill_dispatcher.py` sample paths (P2); session gates shown from `gates.status` (P2); D-24..D-29 wording (P3c); smoke and E2E not run here (port binding blocked)
 - [ ] Owner decision: `feature/maf-harness-platform` was cut from `feature/azure-kudu-deployment`, which `scripts/verify_branch_isolation.sh` says must not be merged elsewhere. Rebase onto `main` before any PR?
-- [ ] P2 `maf/harness` factory on `create_harness_agent`, behind `ATLAS_HARNESS_ENGINE`
+- [x] P2 `maf/harness.py` factory on `create_harness_agent`, done 2026-11-10. Evidence in `docs/evidence/runs/2026-11-10-1237-f4710dc-dirty/`: 597 offline, live real-model pass, real UI chat. Scope:
+  - new `harness` agent (`maf/agents/harness.py`, `prompts/harness.md`, `evals/harness.json`) served by the existing `/agui/{agent}` route and Chat UI
+  - same governance, model allowance, deny-by-default tools, `tool_audit`, telemetry, and `ProjectContext` as other agents
+  - MAF todos (file store per thread), plan/execute modes, file memory per user and project, and skills with progressive disclosure from `skills/`; `run_skill_script` always needs approval
+  - per-call history stored under `data/harness/history` ("model-visible means logged"); sliding-window compaction like the other agents
+  - legacy `/api/harness/chat` unchanged; `HarnessView` switches engines in P7 (`ATLAS_HARNESS_ENGINE` arrives with that switch)
+  - deferred: background agents (experimental in MAF 1.24) and `agents/*.md` adapter go to P3b, MCP to P4, admin skill filter to P5
+- [x] Found while running P2 and fixed: telemetry missed streamed harness calls (`governance.telemetry` uses `with_result_hook`); CopilotKit route's hardcoded agent list crashed `harness` and `bug-fix-reviewer` chats (now read from `/api/chat/agents`); eval check keys guarded (`tests/test_eval_check_keys.py`)
 - [ ] P3 Plugin manifests and discovery; `SkillsProvider` with admin filter
 - [ ] P4 Real MCP through `MCPStdioTool` / `MCPStreamableHTTPTool`
 - [ ] P5 Admin governance for plugins, skills, MCP; admin-only writes

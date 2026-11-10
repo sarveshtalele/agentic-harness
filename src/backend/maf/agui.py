@@ -20,7 +20,7 @@ from backend.core import skills
 from backend.core.errors import stack_of
 from backend.core.security import redact, sha256
 from backend.db import db, new_id, now, row, rows
-from backend.maf import engine, governance, llm, skill_chat, tools
+from backend.maf import engine, governance, harness, llm, skill_chat, tools
 from backend.maf import runtime as agents
 
 router = APIRouter()
@@ -88,17 +88,20 @@ async def agui(agent_key: str, request: Request):
         answer: list[str] = []
         agents.set_emitter(None)
         try:
-            chat_tools = tools.document_tools(project_id) + tools.chat_tools(project_id, thread_id, engine.start)
             user_id = auth.acting_user(project_id)
-            model = auth.model_for(project_id, agent_key, None, user_id, thread["model"])
-            rendered = skills.render([])
-            if last_user and skill_chat.mode(agent_key, model) == "pick":  # one small call per user message; a failure means no skill
-                text = _text_of(last_user)
-                chosen = await skill_chat.pick(agent_key, project_id, user_id, model, text, key=(thread_id, last_user.get("id") or sha256(text)))
-                rendered = skills.render(chosen)
-                if chosen:
-                    logging.getLogger("aqe.chat").info("chat %s uses skill %s", thread_id, ", ".join(chosen))
-            agent = agents.build(agent_key, project_id, chat_tools, chat=True, source="chat", user_id=user_id, model=model, skill_set=rendered)
+            if agent_key == harness.AGENT:  # MAF's own harness: it loads skills itself through progressive disclosure
+                agent = harness.build(project_id, thread_id, engine.start, user_id=user_id, model=thread["model"])
+            else:
+                chat_tools = tools.document_tools(project_id) + tools.chat_tools(project_id, thread_id, engine.start)
+                model = auth.model_for(project_id, agent_key, None, user_id, thread["model"])
+                rendered = skills.render([])
+                if last_user and skill_chat.mode(agent_key, model) == "pick":  # one small call per user message; a failure means no skill
+                    text = _text_of(last_user)
+                    chosen = await skill_chat.pick(agent_key, project_id, user_id, model, text, key=(thread_id, last_user.get("id") or sha256(text)))
+                    rendered = skills.render(chosen)
+                    if chosen:
+                        logging.getLogger("aqe.chat").info("chat %s uses skill %s", thread_id, ", ".join(chosen))
+                agent = agents.build(agent_key, project_id, chat_tools, chat=True, source="chat", user_id=user_id, model=model, skill_set=rendered)
             wrapped = AgentFrameworkAgent(agent, require_confirmation=False)
             payload = {"messages": incoming, "thread_id": thread_id, "run_id": body.get("runId") or new_id("rn"),
                        "state": body.get("state") or {}, "tools": body.get("tools") or [], "context": body.get("context") or [],

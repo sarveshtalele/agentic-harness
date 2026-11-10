@@ -9,6 +9,11 @@ Agentic QE Platform is a Python and Next.js workspace for BAs and developers, bu
 - Change `~/.claude`, global config, or anything outside this repository.
 - Run `git reset --hard`, `git clean`, `git push --force`, or `rm -rf`.
 
+## Branches
+
+- `main` holds a separate project and is the owner's backup. Never merge into `main`, never open a pull request that targets it, and never rebase work onto it.
+- The MAF harness work lives on `feature/maf-harness-platform`. Commit and push only there, and only when the owner says so.
+
 ## Order of work
 
 1. Read the code a change touches, plus the agentic-qe plugin where relevant.

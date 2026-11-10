@@ -1362,3 +1362,35 @@ When modifying platform architecture or adding new skills:
    - When onboarding a new skill, add its technical profile to Section 10.
 3. **Verify All Links & References:** Ensure all file links use the `file:///` URI scheme with exact line citations where appropriate.
 4. **Run Benchmark Validation:** Ensure `scripts/evaluate_skill.py` passes with a 100% score on all registered skills.
+
+---
+
+## 12. The project harness on MAF `create_harness_agent` (plan P2, 2026-11-10)
+
+`src/backend/maf/harness.py` builds the `harness` agent (`maf/agents/harness.py`, `prompts/harness.md`, `evals/harness.json`) with MAF 1.24's `create_harness_agent`. It is served by the existing `/agui/{agent}` route and the Chat window (`/chat/<project>`). The legacy `src/backend/harness/` engine behind `/api/harness/chat` is unchanged.
+
+| Harness capability | MAF primitive | Platform wiring |
+|---|---|---|
+| Loop, function invocation, tool approval | `create_harness_agent` defaults (`ToolApprovalMiddleware`, `MessageInjectionMiddleware`) | Tools filtered deny-by-default by the agent policy (`governance.allowed`) |
+| Todos | `TodoProvider(store=TodoFileStore)` | `data/harness/<project>/todos/`, one file per chat thread, persists across turns |
+| Plan / execute modes | `AgentModeProvider` (default) | Mode resets each AG-UI request (no snapshot store yet) |
+| File memory | `FileMemoryProvider` over `FileSystemAgentFileStore` | `data/harness/<project>/memory/<user>/`, never the process cwd |
+| Skills, progressive disclosure | `SkillsProvider(FileSkillsSource([skills/]))` | Only names and descriptions in the first request; `load_skill` and `read_skill_resource` need no pause (trusted platform content); no script runner yet |
+| History | `FileHistoryProvider(load_messages=False)` | Keeps what the model saw and said per call under `data/harness/<project>/history/`; AG-UI still sends the thread |
+| Compaction | `before_compaction_strategy=SlidingWindowStrategy(keep_last_groups=30)` | Same window as the other agents; no invented context size |
+| Observability | `runtime.tool_audit` (function middleware) and `governance.telemetry` (chat middleware) | `tool_calls` and `agent_calls` rows for every call |
+
+Findings while building it:
+
+- **Streamed telemetry inside the harness.** MAF's harness does not apply `context.stream_result_transforms`, so `governance.telemetry` now registers `context.result.with_result_hook(...)`, which runs for plain agents and the harness alike. The live run caught this, recording 0 model calls before the fix and 3 after.
+- **Allowed provider tools.** MAF's own provider tools (todos, mode, file memory) are listed in the harness policy, so the audit does not log them as refused.
+- **CopilotKit agent list.** The CopilotKit route (`app/api/copilotkit/[[...path]]/route.ts`) had a hardcoded agent list that had drifted from the backend. It now loads `/api/chat/agents` per request.
+
+Deferred:
+
+| Item | Phase |
+|---|---|
+| Background agents (experimental in 1.24) and the `agents/*.md` adapter | P3b |
+| MCP tools | P4 |
+| Admin skill allowlist (`FilteringSkillsSource` predicate) | P5 |
+| Thread snapshot store for mode persistence | P7 |

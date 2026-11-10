@@ -54,8 +54,8 @@ def test_the_mapping_matches_the_plan_table():
         "repo-intelligence-analyst": ("analyzing-repositories",), "requirements-analyst": ("extracting-requirements",), "business-analyst": ("authoring-user-stories",),
         "principal-test-architect": ("planning-tests",), "test-design-architect": ("designing-test-cases", "generating-test-data"), "test-automation-engineer": ("generating-test-code",),
         "defect-diagnostician": ("healing-tests",), "confidence-reviewer": ("tracing-coverage",), "qa-execution-engineer": ("executing-tests",)}
-    assert len(POLICIES) in (12, 13)
-    for key in ("bug-reviewer", "feature-engineer", "project-copilot", "bug-fix-reviewer"):
+    assert len(POLICIES) == 14  # 13 platform agents plus the MAF project harness (plan P2)
+    for key in ("bug-reviewer", "feature-engineer", "project-copilot", "bug-fix-reviewer", "harness"):
         assert POLICIES[key].skills == () and skill_lib.for_agent(key) == []
     assert skill_lib.agent_of("building-qe-dashboard") == [] and skill_lib.agent_of("generating-test-data") == ["test-design-architect"]
 

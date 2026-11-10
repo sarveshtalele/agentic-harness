@@ -156,7 +156,9 @@ def telemetry(agent: str, project_id: str | None, run_id: str | None, source: st
                 record_call(agent, project_id, run_id, source, dict(response.usage_details or {}), int((time.perf_counter() - started) * 1000), _tool_count(response), "ok", "", model, user_id, prompt_ref, skills)
                 return response
 
-            context.stream_result_transforms = [*context.stream_result_transforms, finished]
+            # A hook on the stream itself runs for plain agents and inside MAF's harness alike; the harness does not
+            # apply `context.stream_result_transforms`, so streamed harness calls went unrecorded (found in the P2 live run).
+            context.result.with_result_hook(finished)
             return
         response = context.result
         _record_refused_tools(agent, project_id, run_id, source, response)
