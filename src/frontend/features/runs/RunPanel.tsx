@@ -3,6 +3,7 @@
 import { CheckCircle2, Circle, Loader2, XCircle } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { Approver } from "../../components/Approver";
 import { api } from "../../lib/api";
 import { Badge, Button, Card, ConfirmModal, useToast } from "../../components/ui";
 import { ApprovalCard } from "./ApprovalCard";
@@ -127,7 +128,7 @@ export function RunPanel({ runId, projectId, onFinished }: { runId: string; proj
                 {stage.events.map((e: any) => (
                   <li key={e.seq} className="flex gap-1.5">
                     <span className={`${e.type === "tool" ? "mono text-slate-500" : e.type === "error" ? "text-rose-500" : "text-slate-700 dark:text-slate-300"} min-w-0 break-words`}>
-                      {e.message}
+                      {e.type === "approved" && e.decided_by_name ? <Approver item={e} prefix="Approved by " /> : e.message}
                       {e.data?.document_id && <> · <Link className="text-indigo-500 underline" href={`/projects/${projectId}/documents/${e.data.document_id}`}>open</Link></>}
                     </span>
                   </li>

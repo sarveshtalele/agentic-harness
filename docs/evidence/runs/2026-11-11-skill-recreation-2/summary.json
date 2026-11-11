@@ -1,0 +1,99 @@
+[
+  {
+    "skill": "data to table",
+    "kind": "scripts",
+    "plan": 201,
+    "name": "convert-delimited-to-table",
+    "tasks": 9,
+    "files": [
+      "SKILL.md",
+      "scripts/convert_table.py",
+      "scripts/test_convert_table.py",
+      "assets/markdown_table_template.md",
+      "assets/html_table_template.html"
+    ],
+    "subagents": 0,
+    "formats": 2,
+    "eval_cases": 4,
+    "generate": 200,
+    "checks": {
+      "frontmatter": true,
+      "name format": true,
+      "name matches folder": true,
+      "description": true,
+      "body length": true,
+      "MAF loads it": true,
+      "scripts/convert_table.py parses": true,
+      "scripts/convert_table.py imports": true,
+      "scripts/test_convert_table.py parses": true,
+      "scripts/test_convert_table.py imports": true,
+      "security scan": true
+    },
+    "script_tests": {
+      "verdict": "FAIL",
+      "passed": 4,
+      "failed": 2,
+      "errors": 0,
+      "exit_code": 1
+    },
+    "evaluation": {
+      "n": 4,
+      "assertion_pass_rate_with_skill": 0.5454545454545454,
+      "assertion_pass_rate_without_skill": 0.2727272727272727,
+      "skill_uplift": 0.2727272727272727
+    },
+    "publish": {
+      "status": 409,
+      "version": null
+    },
+    "seconds": 42
+  },
+  {
+    "skill": "html to pdf",
+    "kind": "scripts",
+    "plan": 201,
+    "name": "html-to-pdf-converter",
+    "tasks": 6,
+    "files": [
+      "SKILL.md",
+      "scripts/html_to_pdf.py",
+      "scripts/test_html_to_pdf.py",
+      "assets/pdf_output_template.md"
+    ],
+    "subagents": 0,
+    "formats": 1,
+    "eval_cases": 2,
+    "generate": 200,
+    "checks": {
+      "frontmatter": true,
+      "name format": true,
+      "name matches folder": true,
+      "description": true,
+      "body length": true,
+      "MAF loads it": true,
+      "scripts/html_to_pdf.py parses": true,
+      "scripts/html_to_pdf.py imports": false,
+      "scripts/test_html_to_pdf.py parses": true,
+      "scripts/test_html_to_pdf.py imports": true,
+      "security scan": true
+    },
+    "script_tests": {
+      "verdict": "FAIL",
+      "passed": 0,
+      "failed": 0,
+      "errors": 1,
+      "exit_code": 2
+    },
+    "evaluation": {
+      "n": 2,
+      "assertion_pass_rate_with_skill": 0.0,
+      "assertion_pass_rate_without_skill": 0.75,
+      "skill_uplift": -0.75
+    },
+    "publish": {
+      "status": 409,
+      "version": null
+    },
+    "seconds": 46
+  }
+]

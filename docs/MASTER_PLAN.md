@@ -182,3 +182,350 @@ After M2, these touch separate files and run in parallel, one writer each:
 - M5 (MCP and plugins).
 
 M6 and M7 follow M4, because they need the profiles. M8 runs alongside every phase and closes in M9.
+
+---
+
+# Part 2 (revised 2026-11-11): harness first, zip deployment only
+
+Status: **approved by the owner on 2026-11-11** ("yes"), with these additions:
+- OpenTelemetry observability with a trace explorer (H9);
+- a desktop release guide (H7);
+- region eastus2;
+- remove the fake skills and recreate them with similar requirements in Skill Studio, checking the result (H5).
+
+The owner's direction:
+- Focus on the harness, Skill Studio, agents, progressive discovery and full harness behaviour, compared with DeepSeek Harness.
+- The harness must run the whole agentic-qe plugin.
+- The QE Cycle UI is **on hold**.
+- Azure is deployed **only by zip through Kudu**; GitHub cannot be connected to the Azure web app.
+
+Part 1 is committed as `5a5e6df` on `feature/maf-harness-platform`.
+
+## 1. Where the harness stands (live run on the real model, 2026-11-11)
+
+9 of 13 stories pass (the first run of the day passed 4). Passing:
+- planning with todos;
+- repository scan with file and line;
+- the tool audit;
+- `run_tests` with exact counts;
+- QE method skills;
+- the honest no-repository answer;
+- sub-agent delegation;
+- the admin grants page;
+- live status lines.
+
+## 2. Root causes, from the run's own evidence
+
+| Story | What the run shows | Root cause (first principles) |
+|---|---|---|
+| HS-02, HS-07 "start the BA / QE workflow" | The model called `find_tools`, loaded `project_status` or `run_tests`, read the same files again, and never called `start_workflow` | **The model can only use a tool it knows exists.** Discovery today is a keyword search the model must guess, so it never learned `start_workflow` exists, and the search ranked other tools first. Every turn also starts with `mode_get` and re-reads files already read, which spends the round budget |
+| HS-10 "create a skill with your tool" | The model loaded the `skill-creator` *skill*, read its resources, and looked for scripts to scaffold files. It never saw the `create_skill` *tool* | **Two ways to do one job, and the visible one is wrong.** The skill-creator skill describes a scripts workflow the harness cannot run. The tool that works was hidden behind discovery |
+| HS-06 `/agentic-qe:qe-start` | The model answered with a test run instead of the plugin's Gate 0 intake | **The harness has no plugin runtime.** The platform holds only the plugin's skills. The plugin's commands depend on its Node scripts, hooks (guards, ledger, approval phrases), validators and `.qe/` state, and the harness can neither run a command nor write files. No prompt fixes that |
+| (all) | Repeated reads, `mode_get` each turn, long exploration before acting | **The harness instructions favour exploring over acting.** MAF's default harness instructions are generic, and ours add no rule for "do exactly what was asked, then verify" |
+
+## 3. Harness against DeepSeek Harness (what is still missing)
+
+| Capability | DeepSeek Harness | Ours now | Gap to close |
+|---|---|---|---|
+| Tool discovery | Every capability is a plugin row the model can see | Keyword `find_tools` | Deferred-tool index: every tool's name and one-line purpose in context, schemas loaded on demand (as Claude Code does) |
+| Execution world | `ctx.fs` and `ctx.sandbox`: file tools and subprocesses share one workspace | Read-only repository tools; `run_tests` only | A workspace per project and thread: MAF file access tools (write needs approval) and MAF's shell executor (`agent_framework_tools.shell`), confined to the workspace, with argument lists, an allowlist, timeouts, `clean_env` and approval for every command |
+| Plugins | Everything is a plugin, with profiles and bundles | Skills and commands from plugins; MCP servers; grants | Full plugin runtime: install the whole plugin, run its commands, hooks, scripts and agents |
+| Hooks | `agent/*`, `tools/*` events | Audit and telemetry middleware only | Claude Code hook adapter on MAF middleware (PreToolUse, PostToolUse, UserPromptSubmit, SubagentStop) |
+| Sessions | Append-only log, fork at a turn, replay | Chat rows, MAF history file, durable snapshots | Fork a thread at a message; a replay check that every model-visible message is logged |
+| Sub-agents | Agent teams with a shared task board | 5 specialists as MAF background agents | The plugin's 9 agents as background agents, and background tasks that survive the turn |
+| Safety statement | `SAFETY.md` | CLAUDE.md rules | `SAFETY.md` for operators |
+
+## 4. Phases
+
+Each phase ends with:
+- offline tests;
+- the harness stories on the real model in the browser;
+- evidence;
+- `PROGRESS.md`.
+
+Commits and pushes happen only when the owner says so.
+
+### H1. Discovery that the model can actually use (fixes HS-02, HS-07, HS-10)
+1. **Deferred-tool index.** The harness context lists every tool the user may load, with its name and one line saying what it does. Schemas still load only through `load_tools(names)`. `find_tools` stays for long catalogues such as many MCP servers.
+2. **Clear tool descriptions:**
+   - `start_workflow` names its workflows (ba: requirements document, qe: tests, bug_scan, change);
+   - `create_skill` says it is the way to make a skill;
+   - every description starts with when to use it.
+3. **One way per job.** The `skill-creator` skill is for Skill Studio's own model calls. The harness's skill list leaves it out, and the harness prompt says to call `create_skill` to make a skill.
+4. **Harness instructions:**
+   - do what the user asked directly;
+   - read a file once per turn unless it changed;
+   - do not call `mode_get` unless the mode matters;
+   - after acting, verify with a tool and report counts from the tool, not from memory.
+5. **New measure.** A harness eval set (`evals/harness.json`) with these prompts and code-checked oracles, run on the real model; the score is stored.
+
+### H2. An execution world for the harness (prerequisite for the plugin)
+1. **A workspace** per project (a clone of the project repository, as `run_tests` already uses) and a scratch area per thread.
+2. **MAF file access** (`file_access_store`) on that workspace:
+   - read tools auto-approved;
+   - write tools need an approval card;
+   - every path through `safe_path`.
+3. **MAF shell executor** (`agent_framework_tools.shell`; install the official package):
+   - commands run with argument lists, no shell, in the workspace;
+   - allowlist `node`, `npx`, `npm`, `python`, `pytest`, `git` (read-only verbs);
+   - a timeout and `clean_env`;
+   - an approval card for every command;
+   - every command and its exit code are audited.
+4. **Profiles.**
+   - Desktop and local: all of the above.
+   - Web (Azure): the same tools, but every shell or write run takes one of **5 platform-wide sandbox slots**, with a queue and its position shown. stdio MCP and plugin installs stay desktop or local only.
+
+### H3. The whole agentic-qe plugin runs inside the harness (fixes HS-06; the main goal)
+1. **Install the full plugin** from branch `agentic-qe-plugin` at pinned commit `8a7497b`: manifest, commands, skills, 9 agents, `hooks/`, `scripts/`, `validators/`. It replaces today's skills-only copy (decision D4).
+2. **Claude Code hook adapter on MAF middleware.** The plugin's `hooks.json` runs:
+   - PreToolUse and PostToolUse around the harness's write and shell tools, honouring block decisions;
+   - UserPromptSubmit on every user message, so typed phrases such as `approve gate 0 for <app>` are recorded by the plugin's own `approval-hook.ts`;
+   - SubagentStop when a plugin agent finishes.
+
+   The hook JSON follows the Claude Code protocol. `CLAUDE_PLUGIN_ROOT` and `CLAUDE_PROJECT_DIR` point at the plugin and the workspace.
+3. **Plugin agents.** The 9 `agents/*.md` become MAF background agents with the tools their front matter allows. The read-only reviewers stay read-only.
+4. **Commands end to end.** `/agentic-qe:qe-start` through `/agentic-qe:qe-sign` run in the harness. The plugin's `check-gate.ts` and `qe_validate.py` decide gate completeness. Gates advance only when the human types the phrase.
+5. **Proof:** the full brownfield cycle on `personal-finance-mcp` through the harness, on the real model.
+   - Each command, approval phrase, generated test, JUnit result and gate report is kept as evidence.
+   - It is compared with the plugin's own worked example (`examples/brownfield-personal-finance-mcp`): requirements with `file:line`, scenarios per level, cases, executed tests, pass and fail counts, coverage-map gaps and defects.
+
+### H4. Harness behaviour parity
+1. **Sessions.** Fork a thread at any message, and a replay test that every model-visible message is in the log.
+2. **Background tasks** that outlive the turn, with their status in the todo panel.
+3. **`SAFETY.md`** for operators.
+4. **The CLI** (`bin/harness`) runs the same plugin commands; one story covers it.
+
+### H5. Skill Studio and agents, completed
+1. **F-09 skills** that report PASSED without doing anything (owner, 2026-11-11):
+   - remove all 5;
+   - recreate each from a similar requirement in Skill Studio on the real model;
+   - record whether the plan, files, checks, script tests and evaluation come out accurate, as evidence.
+2. **Skill Studio.**
+   - In the desktop and local profiles, script tests run in the H2 workspace.
+   - The harness `create_skill` hands over to the Studio plan.
+3. **Agents.**
+   - Every agent's eval set runs on the real model, with scores stored with `n` and the judge.
+   - Install `requirements-evals.txt` for real RAGAS metrics.
+   - Agent pages show only measured numbers.
+
+### H6. Environments, and Azure by zip deployment
+1. **Two isolated environments:**
+   - **Local** (`--env local`): SQLite and disk in `data/local/`, `.env.local`, all features.
+   - **Azure:** settings in App Service only.
+   - Templates in `deploy/environments/`.
+   - `python scripts/dev.py env-check --env local|azure` lists what is missing.
+2. **Azure on PostgreSQL and Blob:**
+   - Azure Database for PostgreSQL Flexible Server, Burstable B1ms;
+   - Blob Storage containers `documents`, `uploads`, `evidence`, `skills`, `workspaces`, `downloads`;
+   - Key Vault references with managed identity;
+   - no Redis.
+   - Code: a database dialect layer chosen by `ATLAS_DATABASE_URL`, PostgreSQL migrations, and a storage layer for disk or Blob.
+3. **Zip deployment only.**
+   - `python scripts/package_azure_kudu.py` builds the two zips; `azure-local` proves them on this machine first.
+   - The owner uploads them in Kudu `ZipDeployUI`.
+   - GitHub Actions only builds, tests and attaches the zips and installers as artifacts. It never connects to Azure.
+4. **Guide.** `docs/AZURE_POSTGRES_BLOB_PORTAL_GUIDE.md`, step by step in the portal:
+   - resource group;
+   - PostgreSQL (server, database, firewall for the web app's outbound IPs, SSL);
+   - Storage account and containers;
+   - Key Vault and managed identity role assignments;
+   - the two web apps and their settings;
+   - Kudu zip deploy;
+   - verification, backup and restore, cost and teardown.
+
+   It replaces the SQLite PoC guide.
+
+### H7. Desktop installers and the login page
+1. **Build.** CI builds the macOS DMG and the Windows MSI (with the PyInstaller backend) as artifacts. The DMG is also built and launched on this Mac.
+2. **Publish.** The owner uploads them to the Blob `downloads` container with the `latest.json` that the build writes (version, SHA-256, size).
+3. **Login page.** It shows the download links from `latest.json`, or says that no installer is published yet.
+4. **Guide.** `docs/DESKTOP_RELEASE_GUIDE.md`, step by step:
+   - run the CI build and download the artifacts;
+   - check the SHA-256;
+   - create the `downloads` container with public read access in the portal;
+   - upload the DMG, the MSI and `latest.json`;
+   - set `ATLAS_DOWNLOADS_URL` on the UI app;
+   - verify the login page;
+   - how users open an unsigned app on Windows and macOS;
+   - updating to a new version.
+
+### H9. Observability with OpenTelemetry and a trace explorer
+1. **Traces.**
+   - Turn on MAF's built-in OpenTelemetry instrumentation (`agent_framework.observability`), and add spans for API requests, tool calls, hooks, sandbox jobs and workflow stages.
+   - Each span carries project, thread or run, user, agent, model, tokens, latency and status.
+   - Inputs and outputs pass `redact()`, and secrets never appear.
+2. **Where spans go.**
+   - Always a local span store (a `spans` table through `backend.db`), so the explorer works without any cloud service.
+   - Optionally an OTLP exporter (`OTEL_EXPORTER_OTLP_ENDPOINT`), for example Azure Monitor / Application Insights in eastus2, set only in the Azure environment.
+3. **Trace explorer, like LangSmith.**
+   - A list of runs (chat turns, workflow runs, Studio calls) with filters: project, user, agent, status, time.
+   - One run opens as a tree and waterfall: agent, then model calls, tool calls, sub-agents and hooks. Each step shows inputs, outputs, tokens, duration and errors with stack id.
+   - Search inside a run, and a link from every chat reply to its trace.
+4. **Access.**
+   - Admins see every trace and the application logs.
+   - Members see only the traces of their own actions, enforced on the server through the deny-by-default route rules.
+   - Log downloads stay admin only.
+5. **Tests.**
+   - A member cannot read another member's trace, by API or by UI.
+   - Every harness tool call appears as a span with the same id as its `tool_calls` row.
+   - No secret appears in a span.
+
+### H8. Evidence
+- All harness stories, the plugin cycle and the Skill Studio, MCP, CLI and desktop stories run on the real model.
+- Everything goes into one `report.html` with screenshots, run on local and on the zip-deployed Azure app.
+
+## 5. On hold
+- **QE Cycle UI on the plugin.** Gate pages showing plugin artifacts; retiring the platform's own QE workflow. Resumes after H3 passes.
+- **Entra ID sign-in, Container Apps Jobs, Front Door.**
+
+## 6. Order
+1. H1, then H2, then H3 (the main goal).
+2. H4, H5 and H9 run beside H3 on separate files.
+3. Then H6 and H7.
+4. H8 closes.
+
+## 7. Decisions for the owner
+
+| # | Decision | Proposed |
+|---|---|---|
+| D1 | Harness on the web app with 5 sandbox slots (stdio MCP and plugin installs stay desktop or local only) | Yes |
+| D3 | Azure region | **eastus2** (owner) |
+| D4 | Replace `plugins/agentic-qe/` with the full plugin branch at `8a7497b` | Yes |
+| D6 | F-09 skills | **Remove all 5 and recreate them in Skill Studio from similar requirements** (owner) |
+| D7 | Public read access on the Blob `downloads` container only | Yes |
+| D8 | Harness shell allowlist: `node`, `npx`, `npm`, `python`, `pytest`, `git` (read-only verbs), each command approved in chat | Yes |
+| D9 | Install the official MAF tools package (`agent_framework_tools`) for the shell executor | Yes |
+
+## Phase Q (added 2026-11-11): QE workflow correctness, chat approvals, joinable logs
+
+Source: the owner's run of "Markdown-HTML-converter" (`prj_015c85df23f2`) and the evidence-backed trace in `docs/analysis/2026-11-11-markdown-html-converter-trace.md`. That document holds 18 bugs, each with its evidence and the test that catches it, and 15 log gaps. Bug ids below refer to it.
+
+The QE Cycle **UI** stays on hold. These are backend correctness fixes: the harness starts the same QE workflow through `start_workflow`.
+
+### Q1. QE workflow: never invent a subject, never call a stub a pass
+Fixed in order of damage:
+1. **B17. Empty-repository guard.** A QE run on a repository with no source files stops at Gate 0 with "no code to test" (a spec-first mode is offered separately). It never spends tokens inventing a contract. The run that started this spent 482k tokens.
+2. **B6 and B7.**
+   - A generated test that defines or stubs its own subject (the function under test) is refused in code.
+   - A run whose only passes come from such tests, or from no real execution, is INCONCLUSIVE, never FAIL or PASS.
+3. **B1 and B2.**
+   - An Exception case is required only when the requirement states an error behaviour. The quota in `qe/model/quota.py` no longer forces one per P1 requirement.
+   - The test-design prompt's contradictory rules are fixed.
+   - Boundaries follow the requirement's input type, not only numbers.
+4. **B3.** Each case's test data is checked against the requirement's stated input type (the BRD said string; the cases used `None`, `42` and a list), and every case must have an oracle.
+5. **B4 and B5.**
+   - Datasets are chosen from the requirement's input type, not by keyword. The word "negative" in a title chose `boundary.number`.
+   - A generic payload is used only when the type matches.
+   - The fixture key is named, so the `KeyError` is gone.
+6. **B14, B15, B16, B18.**
+   - A rejection or "approve with gaps" needs a real reason (a minimum length and wording check; one letter was accepted).
+   - G3 to G5 approve the documents they cover.
+   - The stale skill text is fixed.
+   - Event `data` is redacted like `message`.
+
+### Q2. Approvals in the harness chat, and chat history
+- **B11.** Every tool approval or rejection in the chat is recorded: who, when, which tool and arguments (redacted), in the ledger and as a span.
+- **B12.** When the harness starts a workflow, the chat shows its gate status and a link to approve on the Governance page. A gate waiting for a human appears in the chat, not only on the project page.
+- **B10 and B13.**
+  - A resume after an approval does not store the user's message again.
+  - MAF's stored history does not replay old user turns as new ones.
+  - The harness never says "the plan was approved" when it was not: it reads the plan's real status.
+- **B9.** The approver shown everywhere comes from the stored `decided_by` (name, role and email since 2026-11-11), never from redacted event text.
+
+### Q3. Logs that can be joined (gaps G1 to G15)
+- Every model call is stored with its input and output (redacted, size-capped), linked to run, stage, thread, document and span (G1, G2).
+- Every app and error log line carries `request_id`, `run_id`, `trace_id` (G3).
+- The chat trace links to the workflow trace it starts, and gate resumes join the run's trace (G4, G5).
+- The tool-approval lifecycle is logged (G6).
+- Actors show their name, never `***` (G7, done for new rows with the masking fix).
+- There is a span per model call with the right agent (G8, G9).
+- Progress events during long model calls, and gate wait time recorded (G10, G12).
+- Failed tests reach `run_failures` (G11).
+- `run_events.data` is redacted (G13).
+- MAF "Dropping client-supplied message" warnings are filtered (G14).
+- Manual gate decisions keep their reason and context (G15).
+
+### Q4. Proof
+- **Rerun the owner's scenario on the real model:**
+  - the same empty repository must stop at Gate 0;
+  - a real Markdown-to-HTML repository must produce cases whose data matches string input, with no Exception case the BRD does not ask for, and no stubbed subjects;
+  - the verdict must be computed from real executions.
+- **Rerun the harness stories,** with the chat approval card checked in the browser.
+
+**Order.**
+1. Q1 now: QE workflow files only.
+2. Q2 and Q3 after H2 and H3 land, because they share the harness and runtime files.
+3. Q4 closes.
+
+## Phase R (added 2026-11-11): capability registry the harness consults on every run
+
+Owner request:
+- one table of every tool, agent, skill, command and workflow, with what is nested in what and how they connect;
+- the harness refers to it on every execution, so its discovery is accurate.
+
+### What exists today (counted from code on 2026-11-11)
+- **Platform tools:** 19, one per file in `maf/tools/`. MAF harness built-ins on top: todos, modes, file memory, `load_skill`, `read_skill_resource`, background agents; file access and shell from H2.
+- **Agents:** 15 governed agents (`maf/agents/*`, each with a policy listing chat tools, workflow tools and skills). Plus 9 agentic-qe plugin agents (`plugins/agentic-qe/agents/*.md`).
+- **Skills and commands:** 45 entries in the "/" menu: 30 skills and 15 plugin commands.
+- **Workflows:** 4 (`ba`, `qe`, `bug_scan`, `change`). Their stages and agents live in code; for example `qe`: discover → repo-intelligence-analyst, requirements → requirements-analyst, plan → principal-test-architect, design → test-design-architect, generate → test-automation-engineer, execute → qa-execution-engineer, heal → defect-diagnostician, sign → confidence-reviewer.
+- **MCP:** servers, and their tools listed by real `list_tools`, with grants per role.
+- **Plugins:** manifests, hooks, scripts, agents.
+
+### First principles
+1. The model can only use what it can see. It can only choose well when it also sees how things connect: this command uses that skill and runs that script; this workflow's stage is done by that agent.
+2. The registry is **derived from code and manifests by a sync, never typed by hand**, so it cannot drift. A capability that cannot be read from a source is not in the registry.
+3. **Visibility is applied when it is read,** per user: role, plugin grants, MCP grants, profile, enabled state. The table holds everything; each user sees only what they may use.
+
+### Data model (migration after the highest existing number)
+- **`capabilities`:**
+  - `id`; `kind` (tool | agent | skill | command | workflow | stage | plugin | mcp_server | mcp_tool | hook | script);
+  - `name`, `qualified_name` (for example `agentic-qe:qe-plan`), `description`, `when_to_use`;
+  - `source` (file path or plugin), `sha256` of its source;
+  - `risk`, `needs_approval`, `profiles` (web / local / desktop), `enabled`, `updated_at`.
+- **`capability_links`:**
+  - `from_id`, `to_id`, `relation`, `detail`. Relations:
+    - `contains` (plugin → skill / command / agent / hook / script; workflow → stage);
+    - `performed_by` (stage → agent);
+    - `uses_tool` (agent → tool);
+    - `applies_skill` (agent → skill);
+    - `runs_script` (command or skill → script);
+    - `delegates_to` (harness → background agent);
+    - `serves` (mcp_server → mcp_tool);
+    - `gates` (stage → gate).
+- **`registry_versions`:** one row per sync, with the hash of all rows, so a change is visible and the harness cache knows when to refresh.
+
+### Sync (`core/registry/`)
+- **Sources:**
+  - tool objects (name, description, approval mode);
+  - agent policies;
+  - workflow stage modules, read with Python's `ast`: each stage module's `AgentCall` agent keys, no execution;
+  - plugin manifests, skills' frontmatter, command skills;
+  - script paths named in SKILL.md;
+  - `hooks.json`;
+  - plugin `agents/*.md` frontmatter;
+  - the MCP registry.
+- **When it runs:** at startup, and after a plugin install, enable or disable, a skill publish or delete, an MCP connect, or a grant change.
+- It is deterministic, with no model call.
+
+### Harness use on every execution
+1. **Before the run,** a MAF context provider reads the user's visible slice of the registry, cached by registry version.
+2. **It injects a compact index:** every capability by qualified name, with one-line purpose and kind, grouped by kind. It adds the links that matter for choosing: for each command its skills and scripts; for each workflow its stages and agents; for each background agent its skills.
+3. **Two tools replace keyword `find_tools`:**
+   - `find_capability(query)`: ranked by BM25 over name, description and linked names, using the standard library only;
+   - `describe_capability(name)`: the full entry with its links up and down.
+
+   `load_tools` keeps loading tool schemas.
+4. **Each tool call, skill load, command and delegation** records the capability id on its `tool_calls` row and span. The trace explorer then shows which registry entry was used, and gaps can be measured, for example a capability never chosen when it should have been.
+5. **The harness eval set** (H1) measures discovery accuracy on the real model: for each prompt, the expected capability is chosen.
+
+### UI
+- **`/capabilities`:**
+  - a table with kind, name, description, source, risk, approval and visibility for me;
+  - filters and search;
+  - a nested tree view (plugin → commands → skills → scripts; workflow → stages → agents → tools and skills).
+- Admins see everything. Members see their visible slice.
+
+### Order
+1. The registry core, sync, API, UI and tests: now, in files no other writer touches.
+2. Harness wiring (context provider and the two tools): after H2 and H3 land.
+3. The discovery accuracy measure on the real model closes it.

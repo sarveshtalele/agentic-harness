@@ -49,8 +49,11 @@ def test_quota_table(priorities, limit, quota, left, over):
 def test_a_cut_keeps_the_plugins_required_kinds_first():
     case = lambda n, kind: {"requirement_id": "R", "type": kind, "scenario": str(n)}
     cases = [case(1, "Positive"), case(2, "Positive"), case(3, "Positive"), case(4, "Negative"), case(5, "Negative (Boundary)"), case(6, "Negative"), case(7, "Exception")]
-    kept, dropped = model.apply_quota(cases, {"R": 4})
+    states_error = [{"id": "R", "error_behaviour": "raises TypeError for a non-number"}]
+    kept, dropped = model.apply_quota(cases, {"R": 4}, states_error)
     assert sorted(c["type"] for c in kept) == ["Exception", "Negative", "Negative (Boundary)", "Positive"] and len(dropped) == 3
+    kept, dropped = model.apply_quota(cases, {"R": 4}, [{"id": "R", "quote": "return a + b"}])
+    assert sorted(c["type"] for c in kept) == ["Negative", "Negative", "Negative (Boundary)", "Positive"] and len(dropped) == 3, "no error behaviour stated: a third Negative, not an Exception"
     assert model.apply_quota(cases, {"R": 2})[0] == cases[:2] or len(model.apply_quota(cases, {"R": 2})[0]) == 2
     assert model.apply_quota(cases, {})[0] == [], "a requirement with no quota gets no cases"
 
@@ -111,10 +114,10 @@ def test_gap_revision_obeys_the_quota(client, project):
 
     def reply(text):
         state["n"] += 1
-        if state["n"] == 1:  # the first set has no Exception case, so the checks send it back
+        if state["n"] == 1:  # the first set has only one Negative case, so the checks send it back
             out = json.loads(first(text))
             for c in out["cases"]:
-                c["type"] = "Positive" if c["type"] == "Exception" else c["type"]
+                c["type"] = "Positive" if c["type"] == "Negative (Boundary)" else c["type"]
                 c["scenario"] += " first"
             return json.dumps(out)
         out = json.loads(first(text))

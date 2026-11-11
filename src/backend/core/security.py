@@ -116,10 +116,20 @@ _LOGIN_FIELD = re.compile(r"""(?i)(["']?\b(?:password|passwd|pwd)\b["']?\s*[:=]\
 _known_secrets: set[str] = set()
 
 
+MIN_MASKED = 12  # a shorter secret is masked as a plain substring of every text, so a password like "admin" turned every "admin" into ***
+
+
 def register_secret(value: str) -> None:
-    """A value such as the admin password that must never appear in any text this app stores or logs."""
-    if len(value) >= 4:
+    """A value such as the admin password that must never appear in any text this app stores or logs.
+    Secrets shorter than MIN_MASKED are not substring-masked (they corrupt ordinary words); weak_secret() reports them instead."""
+    if len(value) >= MIN_MASKED:
         _known_secrets.add(value)
+
+
+def weak_secret(value: str, *also_not: str) -> str:
+    """Why a password is too weak, or "": shorter than MIN_MASKED characters, or the same as another login field."""
+    same = any(value.lower() == other.lower() for other in also_not if other)
+    return f"shorter than {MIN_MASKED} characters" if len(value) < MIN_MASKED else "the same as the username" if same else ""
 
 
 def redact(text: str) -> str:

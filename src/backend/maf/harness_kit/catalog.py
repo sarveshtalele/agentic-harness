@@ -1,7 +1,8 @@
 """Progressive tool discovery for the harness (plan M4).
 
 The model starts with a small core. Everything else its policy allows, plus the MCP tools the user's role was granted
-on connected servers, sits in a catalogue it searches with `find_tools` and loads with `load_tools`. Loaded names are
+on connected servers, sits in a catalogue. Every run lists the catalogue's names and one-line purposes in the instructions
+(deferred tools, as Claude Code does); the model loads schemas with `load_tools`, and `find_tools` searches long catalogues. Loaded names are
 kept per thread in `data/harness/<project>/tools/<thread>.json`, and `LoadedTools` (a MAF ContextProvider, the way
 `SkillsProvider` adds `load_skill`) puts them back on every later run. Only catalogue names can be loaded, so a tool
 the policy denies can never be loaded.
@@ -17,7 +18,6 @@ from agent_framework import ContextProvider
 from backend.core import ledger
 from backend.core.mcp import registry as mcp_registry
 
-# Read and search: what the model needs before it knows which other tools it wants.
 # read-only tools the harness needs on most turns; everything else is found and loaded on demand
 CORE = frozenset({"list_files", "read_file", "grep", "list_documents", "read_document", "search_documents",
                   "scan_repository", "sandbox_status", "list_findings"})
@@ -90,5 +90,10 @@ class LoadedTools(ContextProvider):
         return merged
 
     async def before_run(self, *, agent, session, context, state) -> None:
-        if tools := self.catalogue.resolve(self.names()):
+        # The model can only call what it knows exists: list every loadable tool by name and purpose; schemas stay deferred
+        loaded = set(self.names())
+        index = [f"- {n}: {d}" for n, d in sorted(self.catalogue.descriptions().items()) if n not in loaded]
+        if index:
+            context.extend_instructions(self.source_id, "Tools you can load with load_tools (exact names; each stays loaded for this chat):\n" + "\n".join(index))
+        if tools := self.catalogue.resolve(sorted(loaded)):
             context.extend_tools(self.source_id, tools)

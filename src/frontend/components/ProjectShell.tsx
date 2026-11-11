@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, Bot, Bug, CheckSquare, ChevronLeft, ChevronRight, Code2, Cpu, FileText, Files, FolderGit2, History, Home, Lock, ScrollText, Settings, ShieldCheck, Terminal, Wand2 } from "lucide-react";
+import { Activity, Bot, Bug, CheckSquare, ChevronLeft, ChevronRight, Code2, Cpu, FileText, Files, FolderGit2, History, Home, Lock, ScrollText, Settings, ShieldCheck, Terminal } from "lucide-react";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from "react";
@@ -31,7 +31,6 @@ const navSections: ProjectNavSection[] = [
     title: "AI SDLC & STUDIOS",
     items: [
       { href: "/ba", label: "BA Studio (BRD & Gherkin)", icon: FileText },
-      { href: "/skills-studio", label: "Skill Creator Studio", icon: Wand2 },
       { href: "/feature", label: "Feature Implementation", icon: Code2 },
       { href: "/bugs", label: "Defect Scanner & Fixes", icon: Bug },
       { href: "/qe", label: "Autonomous QE & AI SDLC", icon: ShieldCheck },
@@ -100,8 +99,8 @@ export function ProjectShell({ children }: { children: ReactNode }) {
                 </div>
               )}
               {sec.items.map((item) => {
-                const href = item.href === "/skills-studio" ? `/skills/studio?project=${id}` : base + item.href;
-                const active = item.href === "/skills-studio" ? pathname.startsWith("/skills/studio") : (item.href ? pathname.startsWith(href) : pathname === base);
+                const href = base + item.href;  // the Skill Creator Studio is platform-wide, so it is not in a project's menu
+                const active = item.href ? pathname.startsWith(href) : pathname === base;
                 const Icon = item.icon;
                 return (
                   <Link

@@ -1,0 +1,1 @@
+ALTER TABLE users ADD COLUMN email_enc TEXT NOT NULL DEFAULT '';

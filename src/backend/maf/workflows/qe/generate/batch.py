@@ -22,7 +22,8 @@ async def generate_batch(env: Env, cases: list[dict]) -> tuple[dict[str, Generat
     under_test = list(dict.fromkeys(files_of[c["requirement_id"]] for c in cases if files_of.get(c["requirement_id"])))
     request = (f"Generate executable tests under tests/agentic_qe/ for these cases, one file per case. Send a file for every case.\nCASES:\n{json.dumps(cases)}\nDETECTED RUNNERS: {a['test_runners']}\n"
                f"Import only names you can see in this code. Name each test function with its case id, for example test_TC_APP_001_empty_input.\n"
-               f"tests/agentic_qe/fixtures.json holds the shared datasets under \"datasets\" and each case's own data under \"cases\"; load it with json and pathlib relative to __file__.\n"
+               f"tests/agentic_qe/fixtures.json holds the shared datasets under \"datasets\" and, under \"cases\", one entry per case id with exactly two keys: \"data\" (the case's test data as text) "
+               f"and \"uses\" (names of the shared datasets it uses). Load it with json and pathlib relative to __file__. Never define, copy or stub the code under test: import the repository's real module.\n"
                f"{notes}\n{emit.signatures(worktree, under_test)}{feedback}\n\nCODE:\n{code}")
     key = part_key("generate", sorted(wanted), state.get("feedback", ""))
     if saved := rc.kept(key):

@@ -1,0 +1,518 @@
+{
+  "plan": {
+    "status": 201,
+    "body": {
+      "id": "spl_ce597ab580c1",
+      "project_id": "prj_da2a156c3031",
+      "author": "admin",
+      "kind": "scripts",
+      "request": "A skill with a Python script that converts an HTML file into a PDF document, keeping headings, paragraphs, lists, tables and inline CSS colors where possible, and saying clearly which HTML features were not rendered.",
+      "source_type": "text",
+      "source_ref": "",
+      "source_sha256": "5ac1c4ac142ee1940b4359d3c94cc8195d7c71328d122dc77c8abfc3d7e922d7",
+      "revise": "",
+      "status": "draft",
+      "plan_sha256": "",
+      "approved_by": "",
+      "approved_at": null,
+      "prompt_ref": "skill-creator@v1:db120a7b06d2",
+      "draft_sha256": "",
+      "generated_at": null,
+      "created_at": "2026-11-11T06:06:30+00:00",
+      "plan": {
+        "description": "Takes an HTML file and renders it into a PDF document, preserving headings, paragraphs, lists, tables, and inline CSS colors where possible. Outputs a PDF file and reports a list of HTML features that could not be rendered. Use when an HTML file must be converted to PDF with basic styling and layout.",
+        "eval_cases": [
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "Title"
+              },
+              {
+                "kind": "contains",
+                "value": "Paragraph with bold text."
+              }
+            ],
+            "input": "<html><body><h1>Title</h1><p>Paragraph with <b>bold</b> text.</p></body></html>"
+          },
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "Item one"
+              },
+              {
+                "kind": "contains",
+                "value": "Item two"
+              }
+            ],
+            "input": "<html><body><ul><li>Item one</li><li>Item two</li></ul></body></html>"
+          }
+        ],
+        "files": [
+          {
+            "path": "SKILL.md",
+            "purpose": "Main skill file with YAML frontmatter and step details."
+          },
+          {
+            "path": "scripts/html_to_pdf.py",
+            "purpose": "Python script containing the conversion logic (using fpdf2 or reportlab)."
+          },
+          {
+            "path": "scripts/test_html_to_pdf.py",
+            "purpose": "Pytest file that imports html_to_pdf and asserts correct behaviour for various HTML inputs."
+          },
+          {
+            "path": "assets/pdf_output_template.md",
+            "purpose": "Template describing the PDF output format (placeholder for documentation)."
+          }
+        ],
+        "formats": [
+          {
+            "name": "PDF document",
+            "purpose": "The main output: a PDF file with the HTML content rendered.",
+            "template_path": "assets/pdf_output_template.md"
+          }
+        ],
+        "name": "html-to-pdf-converter",
+        "subagents": [],
+        "tasks": [
+          "Parse the input HTML file and extract its document structure.",
+          "Map HTML elements to PDF objects: headings, paragraphs, lists, tables, and inline CSS colors where possible.",
+          "Render the mapped content into a PDF file using a suitable PDF generation library.",
+          "Identify any HTML features encountered that could not be rendered in the PDF and produce a summary list.",
+          "Save the PDF to a specified output path.",
+          "Return both the output PDF file path and the summary of unsupported features."
+        ]
+      },
+      "checks": [],
+      "source_chars": 216
+    }
+  },
+  "approve": {
+    "status": 200,
+    "body": {
+      "id": "spl_ce597ab580c1",
+      "project_id": "prj_da2a156c3031",
+      "author": "admin",
+      "kind": "scripts",
+      "request": "A skill with a Python script that converts an HTML file into a PDF document, keeping headings, paragraphs, lists, tables and inline CSS colors where possible, and saying clearly which HTML features were not rendered.",
+      "source_type": "text",
+      "source_ref": "",
+      "source_sha256": "5ac1c4ac142ee1940b4359d3c94cc8195d7c71328d122dc77c8abfc3d7e922d7",
+      "revise": "",
+      "status": "approved",
+      "plan_sha256": "c963c4973fa85f3932ce2dfe32d344a6a64f1dc515634174b0c1ba16d6e51e69",
+      "approved_by": "admin",
+      "approved_at": "2026-11-11T06:06:30+00:00",
+      "prompt_ref": "skill-creator@v1:db120a7b06d2",
+      "draft_sha256": "",
+      "generated_at": null,
+      "created_at": "2026-11-11T06:06:30+00:00",
+      "plan": {
+        "description": "Takes an HTML file and renders it into a PDF document, preserving headings, paragraphs, lists, tables, and inline CSS colors where possible. Outputs a PDF file and reports a list of HTML features that could not be rendered. Use when an HTML file must be converted to PDF with basic styling and layout.",
+        "eval_cases": [
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "Title"
+              },
+              {
+                "kind": "contains",
+                "value": "Paragraph with bold text."
+              }
+            ],
+            "input": "<html><body><h1>Title</h1><p>Paragraph with <b>bold</b> text.</p></body></html>"
+          },
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "Item one"
+              },
+              {
+                "kind": "contains",
+                "value": "Item two"
+              }
+            ],
+            "input": "<html><body><ul><li>Item one</li><li>Item two</li></ul></body></html>"
+          }
+        ],
+        "files": [
+          {
+            "path": "SKILL.md",
+            "purpose": "Main skill file with YAML frontmatter and step details."
+          },
+          {
+            "path": "scripts/html_to_pdf.py",
+            "purpose": "Python script containing the conversion logic (using fpdf2 or reportlab)."
+          },
+          {
+            "path": "scripts/test_html_to_pdf.py",
+            "purpose": "Pytest file that imports html_to_pdf and asserts correct behaviour for various HTML inputs."
+          },
+          {
+            "path": "assets/pdf_output_template.md",
+            "purpose": "Template describing the PDF output format (placeholder for documentation)."
+          }
+        ],
+        "formats": [
+          {
+            "name": "PDF document",
+            "purpose": "The main output: a PDF file with the HTML content rendered.",
+            "template_path": "assets/pdf_output_template.md"
+          }
+        ],
+        "name": "html-to-pdf-converter",
+        "subagents": [],
+        "tasks": [
+          "Parse the input HTML file and extract its document structure.",
+          "Map HTML elements to PDF objects: headings, paragraphs, lists, tables, and inline CSS colors where possible.",
+          "Render the mapped content into a PDF file using a suitable PDF generation library.",
+          "Identify any HTML features encountered that could not be rendered in the PDF and produce a summary list.",
+          "Save the PDF to a specified output path.",
+          "Return both the output PDF file path and the summary of unsupported features."
+        ]
+      },
+      "checks": [],
+      "source_chars": 216
+    }
+  },
+  "generate": {
+    "status": 200,
+    "body": {
+      "plan": {
+        "id": "spl_ce597ab580c1",
+        "project_id": "prj_da2a156c3031",
+        "author": "admin",
+        "kind": "scripts",
+        "request": "A skill with a Python script that converts an HTML file into a PDF document, keeping headings, paragraphs, lists, tables and inline CSS colors where possible, and saying clearly which HTML features were not rendered.",
+        "source_type": "text",
+        "source_ref": "",
+        "source_sha256": "5ac1c4ac142ee1940b4359d3c94cc8195d7c71328d122dc77c8abfc3d7e922d7",
+        "revise": "",
+        "status": "generated",
+        "plan_sha256": "c963c4973fa85f3932ce2dfe32d344a6a64f1dc515634174b0c1ba16d6e51e69",
+        "approved_by": "admin",
+        "approved_at": "2026-11-11T06:06:30+00:00",
+        "prompt_ref": "skill-creator@v1:db120a7b06d2",
+        "draft_sha256": "af9d0ad82a0c5cbd55a47cbf8e03bbbe29237916804fb80f8a0ded5d2b2e512f",
+        "generated_at": "2026-11-11T06:06:57+00:00",
+        "created_at": "2026-11-11T06:06:30+00:00",
+        "plan": {
+          "description": "Takes an HTML file and renders it into a PDF document, preserving headings, paragraphs, lists, tables, and inline CSS colors where possible. Outputs a PDF file and reports a list of HTML features that could not be rendered. Use when an HTML file must be converted to PDF with basic styling and layout.",
+          "eval_cases": [
+            {
+              "assertions": [
+                {
+                  "kind": "contains",
+                  "value": "Title"
+                },
+                {
+                  "kind": "contains",
+                  "value": "Paragraph with bold text."
+                }
+              ],
+              "input": "<html><body><h1>Title</h1><p>Paragraph with <b>bold</b> text.</p></body></html>"
+            },
+            {
+              "assertions": [
+                {
+                  "kind": "contains",
+                  "value": "Item one"
+                },
+                {
+                  "kind": "contains",
+                  "value": "Item two"
+                }
+              ],
+              "input": "<html><body><ul><li>Item one</li><li>Item two</li></ul></body></html>"
+            }
+          ],
+          "files": [
+            {
+              "path": "SKILL.md",
+              "purpose": "Main skill file with YAML frontmatter and step details."
+            },
+            {
+              "path": "scripts/html_to_pdf.py",
+              "purpose": "Python script containing the conversion logic (using fpdf2 or reportlab)."
+            },
+            {
+              "path": "scripts/test_html_to_pdf.py",
+              "purpose": "Pytest file that imports html_to_pdf and asserts correct behaviour for various HTML inputs."
+            },
+            {
+              "path": "assets/pdf_output_template.md",
+              "purpose": "Template describing the PDF output format (placeholder for documentation)."
+            }
+          ],
+          "formats": [
+            {
+              "name": "PDF document",
+              "purpose": "The main output: a PDF file with the HTML content rendered.",
+              "template_path": "assets/pdf_output_template.md"
+            }
+          ],
+          "name": "html-to-pdf-converter",
+          "subagents": [],
+          "tasks": [
+            "Parse the input HTML file and extract its document structure.",
+            "Map HTML elements to PDF objects: headings, paragraphs, lists, tables, and inline CSS colors where possible.",
+            "Render the mapped content into a PDF file using a suitable PDF generation library.",
+            "Identify any HTML features encountered that could not be rendered in the PDF and produce a summary list.",
+            "Save the PDF to a specified output path.",
+            "Return both the output PDF file path and the summary of unsupported features."
+          ]
+        },
+        "checks": [
+          {
+            "check": "frontmatter",
+            "passed": true,
+            "detail": "YAML frontmatter between --- lines"
+          },
+          {
+            "check": "name format",
+            "passed": true,
+            "detail": "name 'html-to-pdf-converter': lowercase letters, digits and single hyphens, at most 64"
+          },
+          {
+            "check": "name matches folder",
+            "passed": true,
+            "detail": "name 'html-to-pdf-converter', folder 'html-to-pdf-converter'"
+          },
+          {
+            "check": "description",
+            "passed": true,
+            "detail": "301 characters (1 to 1024)"
+          },
+          {
+            "check": "body length",
+            "passed": true,
+            "detail": "27 lines (at most 500; move detail into references/)"
+          },
+          {
+            "check": "MAF loads it",
+            "passed": true,
+            "detail": "MAF FileSkillsSource loaded it"
+          },
+          {
+            "check": "scripts/html_to_pdf.py parses",
+            "passed": true,
+            "detail": "Python syntax is valid (parsed, not executed)"
+          },
+          {
+            "check": "scripts/html_to_pdf.py imports",
+            "passed": false,
+            "detail": "imports fpdf: not standard library and not a platform package, so it cannot run where it is not installed"
+          },
+          {
+            "check": "scripts/test_html_to_pdf.py parses",
+            "passed": true,
+            "detail": "Python syntax is valid (parsed, not executed)"
+          },
+          {
+            "check": "scripts/test_html_to_pdf.py imports",
+            "passed": true,
+            "detail": "standard library only"
+          },
+          {
+            "check": "security scan",
+            "passed": true,
+            "detail": "no findings"
+          }
+        ],
+        "source_chars": 216
+      },
+      "files": [
+        {
+          "path": "SKILL.md",
+          "content": "---\nname: html-to-pdf-converter\ndescription: Takes an HTML file and renders it into a PDF document, preserving headings, paragraphs, lists, tables, and inline CSS colors where possible. Outputs a PDF file and reports a list of HTML features that could not be rendered. Use when an HTML file must be converted to PDF with basic styling and layout.\nauthor: admin\n---\n\n# HTML to PDF Converter\n\nThis skill converts an HTML file into a PDF document using the [fpdf2](https://pypi.org/project/fpdf2/) library.\n\n## Steps\n\n1. **Parse input HTML** \u2013 Read the HTML file from the input path and parse it with BeautifulSoup (not available by default; we use a simple regex/string approach in the script to avoid extra dependencies, but here we assume the environment has `fpdf2` and we implement a minimal parser).\n2. **Map elements to PDF** \u2013 Convert headings (`h1`\u2013`h6`) into bold larger text, paragraphs into plain text, lists into indented bullet items, tables into a grid of cells, and inline CSS colors via `<span style=\"color:...\">`.\n3. **Render PDF** \u2013 Build the PDF page by page using FPDF.\n4. **Report unsupported features** \u2013 Collect any HTML tags or attributes not handled and list them.\n5. **Save PDF** \u2013 Write the PDF to the output path.\n6. **Return result** \u2013 Return the output path and the list of unsupported features.\n\n## Decision Rules\n\n- Supported tags: `h1` through `h6`, `p`, `ul`, `ol`, `li`, `table`, `tr`, `td`, `th`, `b`, `strong`, `i`, `em`, `u`, `br`, `span` (with inline `style=\"color:...\"` only), `div`, `body`, `html`.\n- All other tags are recorded as unsupported.\n- Inline CSS colors: only `color: #xxx` or `color: rgb(...)` or named colors are attempted, others ignored.\n- Tables: each `tr` becomes a row, `td` and `th` become cells; no colspan/rowspan are handled.\n- Lists: nested lists are flattened with increased indentation.\n- Output filename: if not specified, the input filename with `.pdf` extension.\n\n## References\n\n- [fpdf2 documentation](https://pyfpdf.github.io/fpdf2/) \u2013 for generating PDFs.\n- [assets/pdf_output_template.md](assets/pdf_output_template.md) \u2013 description of the PDF output format.\n"
+        },
+        {
+          "path": "scripts/html_to_pdf.py",
+          "content": "#!/usr/bin/env python3\n\"\"\"\nConverts an HTML file to a PDF document using fpdf2.\nReturns a tuple (output_pdf_path, unsupported_features_list).\n\"\"\"\n\nimport os\nimport re\nimport tempfile\nfrom fpdf import FPDF\n\n# Mapping from HTML heading level to FPDF font size\nHEADING_SIZES = {1: 20, 2: 18, 3: 16, 4: 14, 5: 12, 6: 11}\n\ndef _extract_style_color(style_attr):\n    \"\"\"Return a color tuple (r, g, b) from a CSS style string, or None.\"\"\"\n    if not style_attr:\n        return None\n    match = re.search(r'color\\s*:\\s*([^;]+)', style_attr, re.IGNORECASE)\n    if not match:\n        return None\n    color_value = match.group(1).strip()\n    # Hex #xxx or #xxxxxx\n    hex_match = re.match(r'#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})', color_value)\n    if hex_match:\n        return (int(hex_match.group(1), 16), int(hex_match.group(2), 16), int(hex_match.group(3), 16))\n    hex3 = re.match(r'#([0-9a-fA-F]{1})([0-9a-fA-F]{1})([0-9a-fA-F]{1})', color_value)\n    if hex3:\n        r = int(hex3.group(1)*2, 16)\n        g = int(hex3.group(2)*2, 16)\n        b = int(hex3.group(3)*2, 16)\n        return (r, g, b)\n    # rgb(r, g, b)\n    rgb_match = re.match(r'rgb\\s*\\(\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)\\s*\\)', color_value, re.IGNORECASE)\n    if rgb_match:\n        return (int(rgb_match.group(1)), int(rgb_match.group(2)), int(rgb_match.group(3)))\n    # Named colors (limited set)\n    named = {\n        'red': (255,0,0), 'green': (0,128,0), 'blue': (0,0,255),\n        'yellow': (255,255,0), 'black': (0,0,0), 'white': (255,255,255),\n        'gray': (128,128,128), 'grey': (128,128,128)\n    }\n    return named.get(color_value.lower())\n\ndef _render_inline_tags(pdf, text, styles):\n    \"\"\"Render text with inline styles (bold, italic, underline, color).\n    styles is a list of dicts: each dict has 'start', 'end' positions and 'type' (bold/italic/underline/color).\n    \"\"\"\n    pdf.set_font('Helvetica', size=10)  # default\n    current_bold = False\n    current_italic = False\n    current_underline = False\n    current_color = None\n    pos = 0\n    while pos < len(text):\n        # Find all style changes at current position\n        active = [s for s in styles if s['start'] <= pos < s['end']]\n        bold = any(s['type'] == 'bold' for s in active)\n        italic = any(s['type'] == 'italic' for s in active)\n        underline = any(s['type'] == 'underline' for s in active)\n        color_style = next((s for s in active if s['type'] == 'color'), None)\n        color = color_style['color'] if color_style else None\n        # Update font if needed\n        style_str = ''\n        if bold:\n            style_str += 'B'\n        if italic:\n            style_str += 'I'\n        if underline:\n            style_str += 'U'\n        font_style = style_str if style_str else ''\n        # Find next break point\n        next_starts = [s['start'] for s in styles if s['start'] > pos]\n        next_ends = [s['end'] for s in styles if s['end'] > pos]\n        next_break = min(next_starts + next_ends) if next_starts or next_ends else len(text)\n        segment = text[pos:next_break]\n        if segment:\n            pdf.set_font('Helvetica', style=font_style, size=10)\n            if color and current_color != color:\n                pdf.set_text_color(*color)\n                current_color = color\n            elif not color and current_color is not None:\n                pdf.set_text_color(0)\n                current_color = None\n            pdf.write(5, segment)\n        pos = next_break\n    # Reset color to black\n    pdf.set_text_color(0)\n\ndef _parse_and_render(pdf, html_content, unsupported):\n    \"\"\"Parse HTML content and render into pdf.\n    Returns the pdf with content added.\n    \"\"\"\n    # Very simple regex-based parser for demonstration\n    # Remove <html>, <body>, <head>, etc.\n    html_content = re.sub(r'<html[^>]*>', '', html_content, flags=re.IGNORECASE)\n    html_content = re.sub(r'</html>', '', html_content, flags=re.IGNORECASE)\n    html_content = re.sub(r'<body[^>]*>', '', html_content, flags=re.IGNORECASE)\n    html_content = re.sub(r'</body>', '', html_content, flags=re.IGNORECASE)\n    html_content = re.sub(r'<head>.*?</head>', '', html_content, flags=re.IGNORECASE|re.DOTALL)\n\n    # Process block level elements\n    # Split into lines based on block tags\n    # We'll use a stack to handle nesting\n    lines = html_content.split('\\n')\n    for raw_line in lines:\n        line = raw_line.strip()\n        if not line:\n            continue\n        # Detect heading\n        h_match = re.match(r'<h([1-6])[^>]*>(.*?)</h\\1>', line, re.IGNORECASE)\n        if h_match:\n            level = int(h_match.group(1))\n            inner = h_match.group(2)\n            text = re.sub(r'<[^>]+>', '', inner)\n            pdf.set_font('Helvetica', 'B', size=HEADING_SIZES[level])\n            pdf.cell(0, 10, text, ln=True)\n            continue\n        # Detect paragraph\n        p_match = re.match(r'<p[^>]*>(.*?)</p>', line, re.IGNORECASE)\n        if p_match:\n            inner = p_match.group(1)\n            _render_paragraph(pdf, inner, unsupported)\n            continue\n        # Detect unordered list\n        ul_match = re.match(r'<ul[^>]*>(.*?)</ul>', line, re.IGNORECASE|re.DOTALL)\n        if ul_match:\n            inner = ul_match.group(1)\n            _render_list(pdf, inner, unsupported, ordered=False)\n            continue\n        # Detect ordered list\n        ol_match = re.match(r'<ol[^>]*>(.*?)</ol>', line, re.IGNORECASE|re.DOTALL)\n        if ol_match:\n            inner = ol_match.group(1)\n            _render_list(pdf, inner, unsupported, ordered=True)\n            continue\n        # Detect table\n        table_match = re.match(r'<table[^>]*>(.*?)</table>', line, re.IGNORECASE|re.DOTALL)\n        if table_match:\n            inner = table_match.group(1)\n            _render_table(pdf, inner, unsupported)\n            continue\n        # Div or other block - treat as paragraph\n        div_match = re.match(r'<div[^>]*>(.*?)</div>', line, re.IGNORECASE|re.DOTALL)\n        if div_match:\n            inner = div_match.group(1)\n            _render_paragraph(pdf, inner, unsupported)\n            continue\n        # Unrecognized block tags\n        block_match = re.match(r'<(\\w+)[^>]*>', line, re.IGNORECASE)\n        if block_match:\n            tag = block_match.group(1)\n            if tag not in ['html','body','head','h1','h2','h3','h4','h5','h6','p','ul','ol','li','table','tr','td','th','div','span','b','strong','i','em','u','br']:\n                unsupported.append(f'Block tag <{tag}>')\n        # Otherwise ignore non-matching lines (e.g., plain text outside blocks?)\n\ndef _render_paragraph(pdf, inner_html, unsupported):\n    \"\"\"Render a paragraph of HTML (no block tags inside).\"\"\"\n    # Process inline tags: b, strong, i, em, u, span with style\n    # We'll extract positions\n    text, styles, unsup = _extract_inline(inner_html)\n    unsupported.extend(unsup)\n    _render_inline_tags(pdf, text, styles)\n    pdf.ln(5)\n\ndef _extract_inline(html):\n    \"\"\"Parse inline HTML and return (plain_text, styles_list, unsupported_list).\n    styles_list: list of dicts with start, end, type, and optional color.\n    \"\"\"\n    plain = ''\n    styles = []\n    unsupported = []\n    i = 0\n    pos = 0\n    def add_style(start, end, stype, **kw):\n        styles.append({'start': start, 'end': end, 'type': stype, **kw})\n    while i < len(html):\n        if html[i] == '<':\n            tag_end = html.find('>', i)\n            if tag_end == -1:\n                break\n            tag_content = html[i+1:tag_end].strip()\n            # closing tag\n            if tag_content.startswith('/'):\n                tagname = tag_content[1:].split()[0].lower()\n                # no action needed for closing\n                i = tag_end + 1\n                continue\n            # opening tag\n            parts = tag_content.split()\n            tagname = parts[0].lower() if parts else ''\n            if tagname in ['b', 'strong']:\n                # Find closing tag\n                close_tag = f'</{tagname}>'\n                close_idx = html.find(close_tag, tag_end)\n                if close_idx == -1:\n                    # Unclosed tag, treat as text\n                    plain += html[i:tag_end+1]\n                    pos += tag_end+1 - i\n                    unsupported.append(f'Unclosed tag <{tagname}>')\n                    i = tag_end + 1\n                    continue\n                inner_start = tag_end + 1\n                inner = html[inner_start:close_idx]\n                inner_plain, inner_styles, inner_unsup = _extract_inline(inner)\n                plain += inner_plain\n                # Shift inner styles by pos\n                for s in inner_styles:\n                    s['start'] += pos\n                    s['end'] += pos\n                styles.extend(inner_styles)\n                # Add bold style for entire inner\n                add_style(pos, pos + len(inner_plain), 'bold')\n                pos += len(inner_plain)\n                unsupported.extend(inner_unsup)\n                i = close_idx + len(close_tag)\n            elif tagname in ['i', 'em']:\n                close_tag = f'</{tagname}>'\n                close_idx = html.find(close_tag, tag_end)\n                if close_idx == -1:\n                    plain += html[i:tag_end+1]\n                    pos += tag_end+1 - i\n                    unsupported.append(f'Unclosed tag <{tagname}>')\n                    i = tag_end + 1\n                    continue\n                inner_start = tag_end + 1\n                inner = html[inner_start:close_idx]\n                inner_plain, inner_styles, inner_unsup = _extract_inline(inner)\n                plain += inner_plain\n                for s in inner_styles:\n                    s['start'] += pos\n                    s['end'] += pos\n                styles.extend(inner_styles)\n                add_style(pos, pos + len(inner_plain), 'italic')\n                pos += len(inner_plain)\n                unsupported.extend(inner_unsup)\n                i = close_idx + len(close_tag)\n            elif tagname == 'u':\n                close_tag = '</u>'\n                close_idx = html.find(close_tag, tag_end)\n                if close_idx == -1:\n                    plain += html[i:tag_end+1]\n                    pos += tag_end+1 - i\n                    unsupported.append('Unclosed tag <u>')\n                    i = tag_end + 1\n                    continue\n                inner_start = tag_end + 1\n                inner = html[inner_start:close_idx]\n                inner_plain, inner_styles, inner_unsup = _extract_inline(inner)\n                plain += inner_plain\n                for s in inner_styles:\n                    s['start'] += pos\n                    s['end'] += pos\n                styles.extend(inner_styles)\n                add_style(pos, pos + len(inner_plain), 'underline')\n                pos += len(inner_plain)\n                unsupported.extend(inner_unsup)\n                i = close_idx + len(close_tag)\n            elif tagname == 'span':\n                # Extract style attribute\n                style_attr = ''\n                attr_match = re.search(r'style\\s*=\\s*\"([^\"]*)\"', tag_content, re.IGNORECASE)\n                if attr_match:\n                    style_attr = attr_match.group(1)\n                close_tag = '</span>'\n                close_idx = html.find(close_tag, tag_end)\n                if close_idx == -1:\n                    plain += html[i:tag_end+1]\n                    pos += tag_end+1 - i\n                    unsupported.append('Unclosed tag <span>')\n                    i = tag_end + 1\n                    continue\n                inner_start = tag_end + 1\n                inner = html[inner_start:close_idx]\n                inner_plain, inner_styles, inner_unsup = _extract_inline(inner)\n                plain += inner_plain\n                for s in inner_styles:\n                    s['start'] += pos\n                    s['end'] += pos\n                styles.extend(inner_styles)\n                color = _extract_style_color(style_attr)\n                if color:\n                    add_style(pos, pos + len(inner_plain), 'color', color=color)\n                # If no color, no style added\n                pos += len(inner_plain)\n                unsupported.extend(inner_unsup)\n                i = close_idx + len(close_tag)\n            elif tagname == 'br':\n                plain += '\\n'\n                pos += 1\n                i = tag_end + 1\n            else:\n                # Unknown inline tag\n                close_tag = f'</{tagname}>'\n                close_idx = html.find(close_tag, tag_end)\n                if close_idx == -1:\n                    # Maybe self-closing?\n                    if tag_content.endswith('/') or tagname in ['img','input','br']:\n                        # self-closing: skip\n                        i = tag_end + 1\n                        continue\n                    # treat as text\n                    plain += html[i:tag_end+1]\n                    pos += tag_end+1 - i\n                    unsupported.append(f'Unclosed tag <{tagname}>')\n                    i = tag_end + 1\n                    continue\n                inner_start = tag_end + 1\n                inner = html[inner_start:close_idx]\n                inner_plain, inner_styles, inner_unsup = _extract_inline(inner)\n                plain += inner_plain\n                for s in inner_styles:\n                    s['start'] += pos\n                    s['end'] += pos\n                styles.extend(inner_styles)\n                pos += len(inner_plain)\n                unsupported.append(f'Inline tag <{tagname}>')\n                unsupported.extend(inner_unsup)\n                i = close_idx + len(close_tag)\n        else:\n            plain += html[i]\n            pos += 1\n            i += 1\n    return plain, styles, unsupported\n\ndef _render_list(pdf, inner_html, unsupported, ordered=False):\n    \"\"\"Render a list (ul or ol).\"\"\"\n    # Find li items\n    li_re = re.compile(r'<li[^>]*>(.*?)</li>', re.IGNORECASE|re.DOTALL)\n    items = li_re.findall(inner_html)\n    index = 1\n    for item in items:\n        prefix = f'{index}. ' if ordered else '- '\n        text, styles, unsup = _extract_inline(item)\n        unsupported.extend(unsup)\n        pdf.set_x(pdf.l_margin + 5)\n        pdf.set_font('Helvetica', size=10)\n        pdf.cell(5, 5, prefix)\n        _render_inline_tags(pdf, text, styles)\n        pdf.ln(5)\n        index += 1\n\ndef _render_table(pdf, inner_html, unsupported):\n    \"\"\"Render a table.\"\"\"\n    # Find rows\n    tr_re = re.compile(r'<tr[^>]*>(.*?)</tr>', re.IGNORECASE|re.DOTALL)\n    rows = tr_re.findall(inner_html)\n    for row_html in rows:\n        # Find cells\n        td_re = re.compile(r'<(td|th)[^>]*>(.*?)</\\1>', re.IGNORECASE|re.DOTALL)\n        cells = td_re.findall(row_html)\n        for tag, cell_content in cells:\n            text, styles, unsup = _extract_inline(cell_content)\n            unsupported.extend(unsup)\n            pdf.set_font('Helvetica', size=10, style='B' if tag=='th' else '')\n            pdf.cell(40, 10, text, border=1)\n        pdf.ln()\n\ndef convert_html_to_pdf(input_path, output_path=None):\n    \"\"\"\n    Convert an HTML file to PDF.\n    Returns (output_path, unsupported_features).\n    \"\"\"\n    if not os.path.exists(input_path):\n        raise FileNotFoundError(f\"Input file not found: {input_path}\")\n    with open(input_path, 'r', encoding='utf-8') as f:\n        html_content = f.read()\n    \n    if output_path is None:\n        base = os.path.splitext(input_path)[0]\n        output_path = base + '.pdf'\n    \n    pdf = FPDF()\n    pdf.add_page()\n    pdf.set_auto_page_break(auto=True, margin=15)\n    unsupported = []\n    _parse_and_render(pdf, html_content, unsupported)\n    pdf.output(output_path)\n    return output_path, unsupported\n\nif __name__ == '__main__':\n    import sys\n    if len(sys.argv) < 2:\n        print(\"Usage: python html_to_pdf.py <input.html> [output.pdf]\")\n        sys.exit(1)\n    input_file = sys.argv[1]\n    output_file = sys.argv[2] if len(sys.argv) > 2 else None\n    try:\n        out_path, unsup = convert_html_to_pdf(input_file, output_file)\n        print(f\"PDF generated: {out_path}\")\n        if unsup:\n            print(\"Unsupported features:\")\n            for f in unsup:\n                print(f\"  - {f}\")\n    except Exception as e:\n        print(f\"Error: {e}\")\n        sys.exit(1)\n"
+        },
+        {
+          "path": "scripts/test_html_to_pdf.py",
+          "content": "import os\nimport tempfile\nimport pytest\nfrom scripts.html_to_pdf import convert_html_to_pdf\n\ndef test_simple_html():\n    html = \"\"\"<html><body><h1>Title</h1><p>Paragraph with <b>bold</b> text.</p></body></html>\"\"\"\n    with tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False) as f:\n        f.write(html)\n        input_path = f.name\n    output_path = input_path.replace('.html', '_test.pdf')\n    try:\n        out, unsup = convert_html_to_pdf(input_path, output_path)\n        assert os.path.exists(out)\n        assert os.path.getsize(out) > 0\n        # Check content via pdfminer? For simplicity, just check existence.\n        # Unsupported should be empty\n        assert len(unsup) == 0, f\"Unexpected unsupported features: {unsup}\"\n    finally:\n        os.unlink(input_path)\n        if os.path.exists(output_path):\n            os.unlink(output_path)\n\ndef test_list():\n    html = \"\"\"<html><body><ul><li>Item one</li><li>Item two</li></ul></body></html>\"\"\"\n    with tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False) as f:\n        f.write(html)\n        input_path = f.name\n    output_path = input_path.replace('.html', '_test.pdf')\n    try:\n        out, unsup = convert_html_to_pdf(input_path, output_path)\n        assert os.path.exists(out)\n        assert os.path.getsize(out) > 0\n        assert len(unsup) == 0, f\"Unexpected unsupported features: {unsup}\"\n    finally:\n        os.unlink(input_path)\n        if os.path.exists(output_path):\n            os.unlink(output_path)\n\ndef test_inline_style_color():\n    html = '<p><span style=\"color:red\">Red text</span></p>'\n    with tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False) as f:\n        f.write(html)\n        input_path = f.name\n    output_path = input_path.replace('.html', '_test.pdf')\n    try:\n        out, unsup = convert_html_to_pdf(input_path, output_path)\n        assert os.path.exists(out)\n        assert os.path.getsize(out) > 0\n        assert len(unsup) == 0, f\"Unexpected unsupported features: {unsup}\"\n    finally:\n        os.unlink(input_path)\n        if os.path.exists(output_path):\n            os.unlink(output_path)\n\ndef test_unsupported_tag():\n    html = '<p>Hello <video>not supported</video> world</p>'\n    with tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False) as f:\n        f.write(html)\n        input_path = f.name\n    output_path = input_path.replace('.html', '_test.pdf')\n    try:\n        out, unsup = convert_html_to_pdf(input_path, output_path)\n        assert os.path.exists(out)\n        # Should have unsupported feature\n        assert any('video' in u for u in unsup), f\"Expected video in unsupported, got {unsup}\"\n    finally:\n        os.unlink(input_path)\n        if os.path.exists(output_path):\n            os.unlink(output_path)\n\ndef test_table():\n    html = '<table><tr><td>Cell1</td><td>Cell2</td></tr></table>'\n    with tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False) as f:\n        f.write(html)\n        input_path = f.name\n    output_path = input_path.replace('.html', '_test.pdf')\n    try:\n        out, unsup = convert_html_to_pdf(input_path, output_path)\n        assert os.path.exists(out)\n        assert len(unsup) == 0, f\"Unexpected unsupported features: {unsup}\"\n    finally:\n        os.unlink(input_path)\n        if os.path.exists(output_path):\n            os.unlink(output_path)\n"
+        },
+        {
+          "path": "assets/pdf_output_template.md",
+          "content": "# PDF Output Template\n\n## Output Format\n\nThe skill produces a PDF file with the following characteristics:\n\n- **Page size**: A4 (default)\n- **Font**: Helvetica, size 10 for body, larger for headings.\n- **Headings**: Bold, sizes 20 (h1) down to 11 (h6).\n- **Paragraphs**: Justified text with line breaks.\n- **Lists**: Bullet (`-`) for unordered, numbered (`1.`, `2.`, ...) for ordered, indented 5mm.\n- **Tables**: Grid with borders, 40mm cell width, row height 10mm. Header cells are bold.\n- **Inline styling**: Bold (`<b>`), italic (`<i>`), underline (`<u>`), color from `<span style=\"color:...\">`.\n- **Unsupported features**: Listed in the return metadata, not in the PDF.\n\n## Example Output Structure\n\n```\n[PDF pages with text and tables]\n```\n\n## Limitations\n\n- No support for images, forms, scripts, CSS beyond inline color.\n- No nested tables or colspan/rowspan.\n- Unicode characters may be limited based on font.\n"
+        }
+      ],
+      "checks": [
+        {
+          "check": "frontmatter",
+          "passed": true,
+          "detail": "YAML frontmatter between --- lines"
+        },
+        {
+          "check": "name format",
+          "passed": true,
+          "detail": "name 'html-to-pdf-converter': lowercase letters, digits and single hyphens, at most 64"
+        },
+        {
+          "check": "name matches folder",
+          "passed": true,
+          "detail": "name 'html-to-pdf-converter', folder 'html-to-pdf-converter'"
+        },
+        {
+          "check": "description",
+          "passed": true,
+          "detail": "301 characters (1 to 1024)"
+        },
+        {
+          "check": "body length",
+          "passed": true,
+          "detail": "27 lines (at most 500; move detail into references/)"
+        },
+        {
+          "check": "MAF loads it",
+          "passed": true,
+          "detail": "MAF FileSkillsSource loaded it"
+        },
+        {
+          "check": "scripts/html_to_pdf.py parses",
+          "passed": true,
+          "detail": "Python syntax is valid (parsed, not executed)"
+        },
+        {
+          "check": "scripts/html_to_pdf.py imports",
+          "passed": false,
+          "detail": "imports fpdf: not standard library and not a platform package, so it cannot run where it is not installed"
+        },
+        {
+          "check": "scripts/test_html_to_pdf.py parses",
+          "passed": true,
+          "detail": "Python syntax is valid (parsed, not executed)"
+        },
+        {
+          "check": "scripts/test_html_to_pdf.py imports",
+          "passed": true,
+          "detail": "standard library only"
+        },
+        {
+          "check": "security scan",
+          "passed": true,
+          "detail": "no findings"
+        }
+      ],
+      "summary": {
+        "passed": 10,
+        "total": 11,
+        "all_passed": false
+      }
+    }
+  },
+  "test": {
+    "status": 200,
+    "body": {
+      "verdict": "FAIL",
+      "exit_code": 2,
+      "passed": 0,
+      "failed": 0,
+      "errors": 1,
+      "timed_out": false,
+      "summary": "1 error in 0.05s",
+      "stdout_tail": "\n==================================== ERRORS ====================================\n_________________ ERROR collecting scripts/test_html_to_pdf.py _________________\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/skill-test-_cq22la0/html-to-pdf-converter/scripts/test_html_to_pdf.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nscripts/test_html_to_pdf.py:4: in <module>\n    from scripts.html_to_pdf import convert_html_to_pdf\nscripts/html_to_pdf.py:10: in <module>\n    from fpdf import FPDF\nE   ModuleNotFoundError: No module named 'fpdf'\n=========================== short test summary info ============================\nERROR scripts/test_html_to_pdf.py\n!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!\n1 error in 0.05s\n",
+      "stderr_tail": "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/pytest_asyncio/plugin.py:300: PytestDeprecationWarning: The configuration option \"asyncio_default_fixture_loop_scope\" is unset.\nThe event loop scope for asynchronous fixtures will default to the \"fixture\" caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to \"function\" scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n"
+    }
+  },
+  "evaluate": {
+    "status": 200,
+    "body": {
+      "prompt_ref": "skill-creator@v1:db120a7b06d2+draft:af9d0ad82a0c",
+      "n": 2,
+      "judge_model": "deterministic-assertions",
+      "metrics": {
+        "assertion_pass_rate_with_skill": 0.0,
+        "assertion_pass_rate_without_skill": 0.75,
+        "skill_uplift": -0.75
+      },
+      "tokens": 4616,
+      "cases": [
+        {
+          "case": 1,
+          "input": "<html><body><h1>Title</h1><p>Paragraph with <b>bold</b> text.</p></body></html>",
+          "with_skill": {
+            "output": "```\nOutput path: input.html.pdf\nUnsupported features: []\n```",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "Title",
+                "passed": false
+              },
+              {
+                "kind": "contains",
+                "value": "Paragraph with bold text.",
+                "passed": false
+              }
+            ]
+          },
+          "without_skill": {
+            "output": "```pdf\n%PDF-1.4\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n\n2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n\n3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792]\n   /Contents 4 0 R /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> >>\nendobj\n\n4 0 obj\n<< /Length 245 >>\nstream\nBT\n/F1 24 Tf\n100 700 Td\n(Title) Tj\nET\nBT\n/F1 12 Tf\n100 670 Td\n(Paragraph with ) Tj\n/F2 12 Tf\n(bold) Tj\n/F1 12 Tf\n( text.) Tj\nET\nendstream\nendobj\n\n5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n\n6 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>\nendobj\n\nxref\n0 7\n0000000000 65535 f \n0000000009 00000 n \n0000000058 00000 n \n0000000115 00000 n \n0000000267 00000 n \n0000000580 00000 n \n0000000635 00000 n \n\ntrailer\n<< /Size 7 /Root 1 0 R >>\nstartxref\n694\n%%EOF\n```\n\n**Unsupported features:**\n- Inline CSS colors (none detected in input)\n- Tables\n- Lists",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "Title",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "Paragraph with bold text.",
+                "passed": false
+              }
+            ]
+          }
+        },
+        {
+          "case": 2,
+          "input": "<html><body><ul><li>Item one</li><li>Item two</li></ul></body></html>",
+          "with_skill": {
+            "output": "{\"output_path\": \"input.pdf\", \"unsupported_features\": []}",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "Item one",
+                "passed": false
+              },
+              {
+                "kind": "contains",
+                "value": "Item two",
+                "passed": false
+              }
+            ]
+          },
+          "without_skill": {
+            "output": "Here is the rendered PDF and the report, based on the input HTML.\n\n**rendered.pdf**\n\n*(A PDF file is generated in your workspace with the following content:)*\n- A document page containing a bulleted list:\n  - Item one\n  - Item two  \n- Default font (e.g., Times New Roman, 12pt), black text on white background.\n- No other styling applied (no heading hierarchy, no inline CSS colors, no tables).\n\n**Report of unrendered features**\n\n| Feature | Status | Reason |\n|---------|--------|--------|\n| Headings | Not present in input | - |\n| Paragraphs | Not present in input | - |\n| Lists | Rendered | Unordered list converted to bullet items |\n| Tables | Not present in input | - |\n| Inline CSS colors | Not present in input | - |\n\n**Conclusion:** 0 HTML features from the input could not be rendered. All structures present (the list) were successfully converted.",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "Item one",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "Item two",
+                "passed": true
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "publish": {
+    "status": 409,
+    "body": {
+      "code": null,
+      "message": "The skill's own tests did not pass (verdict FAIL). Generate again or fix the plan, then test.",
+      "action": "Wait for the current action to finish, then try again.",
+      "error_id": "err_949d7df437b5",
+      "detail": "The skill's own tests did not pass (verdict FAIL). Generate again or fix the plan, then test."
+    }
+  }
+}

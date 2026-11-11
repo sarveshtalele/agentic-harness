@@ -7,6 +7,10 @@ from pathlib import Path
 from pydantic import BaseModel, Field
 
 from backend.qe import execution
+from backend.qe.emit.subject import own_subject
+
+# ponytail: the case fields a test author reaches for; fixtures.json holds none of them, so reading one is the KeyError seen in a real run
+_NOT_FIXTURE_KEYS = re.compile(r"""(?:\[|\.get\()\s*["'](test_data|expected_result|precondition|steps|scenario|oracle)["']""")
 
 
 class GeneratedFile(BaseModel):
@@ -44,6 +48,10 @@ def _generated_file_problems(item: GeneratedFile, known: set[str], worktree: Pat
         errors.append(f"{item.path}: first line must be a CASE_ID comment")
     if len(item.case_ids) != 1:
         errors.append(f"{item.path}: one case per file")
+    errors += own_subject(worktree, item.path, item.content)
+    if "fixtures.json" in item.content and (key := _NOT_FIXTURE_KEYS.search(item.content)):
+        errors.append(f"{item.path}: reads the key {key.group(1)!r}, which fixtures.json does not have. Under \"cases\" each case id has only \"data\" (its test data as text) "
+                      "and \"uses\" (names of the shared datasets under \"datasets\")")
     if not item.path.replace("\\", "/").startswith("tests/agentic_qe/"):
         errors.append(f"{item.path}: must live under tests/agentic_qe/")
     return errors

@@ -1,0 +1,59 @@
+{
+  "name": "agentic-qe",
+  "version": "1.6.0",
+  "description": "Full test engineering lifecycle for greenfield and brownfield projects: repository analysis or BA user stories, risk-based planning, test design, test generation, isolated execution, healing, traceability and an offline release report, with human approval gates and enforced guardrails.",
+  "author": {
+    "name": "Sarvesh Talele",
+    "url": "https://github.com/sarveshtalele"
+  },
+  "repository": "https://github.com/sarveshtalele/agentic-qe",
+  "keywords": [
+    "agentic-qe",
+    "quality-engineering",
+    "test-generation",
+    "test-planning",
+    "self-healing",
+    "istqb",
+    "playwright",
+    "vitest",
+    "pytest",
+    "junit",
+    "brownfield",
+    "greenfield",
+    "user-stories"
+  ],
+  "homepage": "https://github.com/sarveshtalele/agentic-qe#readme",
+  "userConfig": {
+    "default_mode": {
+      "type": "string",
+      "title": "Default project mode",
+      "description": "greenfield (no code yet, start from user stories), brownfield (existing code and tests), or auto (detect). Used when /qe-start gets no --mode flag.",
+      "default": "auto"
+    },
+    "output_dir": {
+      "type": "string",
+      "title": "QE output folder",
+      "description": "Project-relative folder for generated QE documents. Created only after you approve it.",
+      "default": "docs/qe"
+    },
+    "panel": {
+      "type": "string",
+      "title": "Live QE pane",
+      "description": "auto opens the pane beside the transcript by itself and keeps a show bar above the prompt while it is hidden; command opens it only on /qe-pane or --watch; off never opens it.",
+      "default": "auto"
+    },
+    "open_browser": {
+      "type": "boolean",
+      "title": "Open the dashboard in the browser",
+      "description": "Open the live dashboard in your browser when you send /agentic-qe:qe-start and after approve gate 0. Off in CI and remote shells without a display.",
+      "default": true
+    },
+    "dashboard_port": {
+      "type": "number",
+      "title": "Dashboard port",
+      "description": "The port the live dashboard always uses (1024 to 4190). The next free one is taken only when another project holds it.",
+      "default": 4173
+    }
+  },
+  "types": "./types/index.d.ts"
+}

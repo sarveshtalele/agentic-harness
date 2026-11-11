@@ -6,6 +6,7 @@ request and its decision behaves exactly like the normal path.
 from __future__ import annotations
 
 import json
+import re
 
 from backend.config import RUN_TOKEN_LIMIT
 from backend.core import auth, gates, ledger
@@ -20,6 +21,21 @@ from backend.maf.engine.run_context import RunContext, add_event, part_key
 from backend.maf.engine.specs import ApprovalRequest, Definition, FanOut, StageSpec
 from backend.maf.engine.stages import Stage, compile_workflow
 from backend.qe import confidence
+
+
+MIN_REASON = 10  # characters; "a" and "ok" were accepted as reasons for approving REJECT items
+
+
+def weak_reason(reason: str, title: str = "") -> str:
+    """Why a reason for a REJECT decision is not a real one, or "": too short, fewer than two words, or the gate's own title repeated."""
+    text = " ".join(reason.split())
+    if len(text) < MIN_REASON:
+        return f"this one has {len(text)} characters, fewer than {MIN_REASON}"
+    if len(re.findall(r"[^\W\d_]{2,}", text)) < 2:
+        return "it needs at least two words"
+    if title and text.lower().strip(" .") == " ".join(title.split()).lower().strip(" ."):
+        return "it repeats the gate's title"
+    return ""
 
 
 def cancel(run_id: str) -> dict:
@@ -77,8 +93,10 @@ async def decide(approval_id: str, approved: bool, by: str, feedback: str = "", 
     if approved and (partial := json.loads(approval["payload"]).get("partial")):
         raise ValueError(f"This result is partial and cannot be approved. Missing: {partial['missing']}. Send it back, or approve nothing and retry after fixing the cause.")
     rejected = confidence.reject_ids(json.loads(approval["payload"])) if approved and approval["gate"] is not None else []
-    if rejected and not feedback.strip():  # code judged these REJECT; a person may still approve them, but must say why
-        raise ValueError(f"These items were judged REJECT: {', '.join(rejected[:12])}{' and more' if len(rejected) > 12 else ''}. Approving them needs a reason. Write it in the reason field.")
+    if rejected and (why := weak_reason(feedback, approval["title"])):  # code judged these REJECT; a person may still approve them, but must say why
+        raise ValueError(f"These items were judged REJECT: {', '.join(rejected[:12])}{' and more' if len(rejected) > 12 else ''}. Approving them needs a reason, and {why}. Write it in the reason field.")
+    if not approved and approval["gate"] is not None and (why := weak_reason(feedback, approval["title"])):
+        raise ValueError(f"Rejecting gate {approval['gate']} sends the work back, so it needs a reason the agent can act on, and {why}. Write it in the reason field.")
     if approval["gate"] is not None:
         auth.require_gate_signer(approval["project_id"], approval["gate"])  # the account's role, not a name in the request
         gates.decide(approval["project_id"], approval["gate"], approved, by, feedback, approval["run_id"])

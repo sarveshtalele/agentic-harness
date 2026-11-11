@@ -148,4 +148,4 @@ def check_python(worktree: Path, path: str, code: str, env: dict | None = None, 
 def _third_party(path: str, line: int, top: str, env: dict | None, declared: set[str] | frozenset) -> list[str]:
     if env is None or top in env["modules"] or _normal(top) in declared or ALIASES.get(top.lower(), "") in declared:
         return []  # without an inventory nothing can be said
-    return [f"{path}:{line}: the package {top!r} is not installed in the test environment. Use only the standard library, pytest, and what the repository's code already imports"]
+    return [f"{path}:{line}: the package {top!r} is not installed in the test environment. Use only the standard library, pytest, and what the repository's code already imports, and import the repository's real module under test instead of writing your own"]

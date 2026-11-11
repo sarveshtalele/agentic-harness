@@ -9,6 +9,7 @@ import json
 import re
 
 from backend.core.security import redact
+from backend.qe.model import input_type
 
 FIXTURE_LIMIT = 40_000  # characters of fixtures.json
 MAX_SAFE_INTEGER = 2**53 - 1
@@ -70,26 +71,28 @@ def mask(text: str) -> str:
     return ID_NUMBER.sub("0000-MASKED", text)
 
 
-def _kinds(case: dict) -> list[str]:
-    """Which shared datasets a case uses, from its type and wording. A case with none still gets its own data."""
+BOUNDARY_OF = {"string": "boundary.string", "number": "boundary.number", "integer": "boundary.number", "list": "boundary.json", "object": "boundary.json"}
+
+
+def _kinds(case: dict, input_type: str = "") -> list[str]:
+    """Which shared datasets a case uses. A Negative case gets the boundary set of its requirement's stated input type, never one chosen from
+    its wording, so a string input never gets numbers. A requirement with no stated type gets none. A case with none still gets its own data."""
     text = f"{case.get('scenario', '')} {case.get('test_data', '')} {' '.join(case.get('steps', []))} {case.get('expected_result', '')}".lower()
-    kinds = []
-    if "boundary" in case.get("type", "").lower() or re.search(r"\b(empty|maximum|minimum|overflow|zero|negative|too long|special character|unicode)\b", text):
-        kinds += ["boundary.string", "boundary.number"] if re.search(r"\b(string|text|name|empty|special|unicode|long)\b", text) else ["boundary.number"]
+    kinds = [BOUNDARY_OF[input_type]] if case.get("type", "").startswith("Negative") and input_type in BOUNDARY_OF else []
     if re.search(r"\b(auth|token|login|password|permission|unauthori[sz]ed|forbidden|role)\b", text):
         kinds.append("auth")
     if re.search(r"\b(user|customer|admin|account|profile)\b", text):
         kinds.append("users")
     if re.search(r"\b(page|pagination|paginate|offset|limit)\b", text):
         kinds.append("pagination")
-    if re.search(r"\b(json|payload|body|null)\b", text):
-        kinds.append("boundary.json")
     return list(dict.fromkeys(kinds))
 
 
-def build_fixtures(cases: list[dict]) -> dict:
-    """fixtures.json: shared datasets once, and a short entry per case saying which it uses and its own (masked) data."""
-    used = {k for c in cases for k in _kinds(c)}
+def build_fixtures(cases: list[dict], requirements: list[dict] = ()) -> dict:
+    """fixtures.json: shared datasets once, and a short entry per case under its id with exactly two keys: "data", its own (masked) test data, and "uses", the shared datasets it uses."""
+    types = {r["id"]: input_type(r.get("input_type")) for r in requirements}
+    kinds = {c["id"]: _kinds(c, types.get(c.get("requirement_id"), "")) for c in cases}
+    used = {k for found in kinds.values() for k in found}
     shared: dict = {}
     if "users" in used:
         shared["users"] = {f"{role}{'' if ok else 'Invalid'}": synthesize_user(role, ok) for role in ROLES for ok in (True, False) if ok or role == "customer"}
@@ -100,7 +103,7 @@ def build_fixtures(cases: list[dict]) -> dict:
             shared.setdefault("boundary", {})[kind] = boundary_payload(kind)
     if "pagination" in used:
         shared["pagination"] = {"firstPage": pagination([f"item-{n}" for n in range(1, 26)], 10, 0), "lastPage": pagination([f"item-{n}" for n in range(1, 26)], 10, 2), "empty": pagination([], 10, 0)}
-    entries = {c["id"]: {"data": mask(c.get("test_data", ""))[:500], "uses": _kinds(c)} for c in cases if c.get("test_data") or _kinds(c)}
+    entries = {c["id"]: {"data": mask(c.get("test_data", ""))[:500], "uses": kinds[c["id"]]} for c in cases if c.get("test_data") or kinds[c["id"]]}
     fixtures = {"datasets": shared, "cases": entries}
     while len(json.dumps(fixtures)) > FIXTURE_LIMIT and shared:  # bounded: the bulky shared sets go first
         shared.pop(max(shared, key=lambda k: len(json.dumps(shared[k]))))

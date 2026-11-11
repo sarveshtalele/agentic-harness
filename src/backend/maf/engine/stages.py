@@ -6,6 +6,7 @@ import logging
 
 from agent_framework import Executor, Workflow, WorkflowBuilder, WorkflowContext, handler, response_handler
 
+from backend.core import tracing
 from backend.db import db
 from backend.maf import runtime as agent_module
 from backend.maf.engine.failures import _safely
@@ -41,6 +42,10 @@ class Stage(Executor):
 
     @handler
     async def run(self, state: dict, ctx: WorkflowContext[dict, str]) -> None:
+        with tracing.span(f"stage {self.spec.id}", stage=self.spec.id, label=self.spec.label, run_id=self.run_id, project_id=self.project_id):
+            await self._run(state, ctx)
+
+    async def _run(self, state: dict, ctx: WorkflowContext[dict, str]) -> None:
         rc = self._ctx()
         rc.log(f"Started {self.spec.label or self.spec.id}", kind="stage_start")
         state = {**state, **(await _safely(rc, self.spec.fn(rc, state)) or {})}
@@ -60,6 +65,10 @@ class Stage(Executor):
 
     @response_handler
     async def decided(self, original: ApprovalRequest, decision: str, ctx: WorkflowContext[dict, str]) -> None:
+        with tracing.span(f"stage {self.spec.id} decision", stage=self.spec.id, run_id=self.run_id, project_id=self.project_id):
+            await self._decided(original, decision, ctx)
+
+    async def _decided(self, original: ApprovalRequest, decision: str, ctx: WorkflowContext[dict, str]) -> None:
         rc = self._ctx()
         answer = json.loads(decision)
         state = json.loads(original.state)

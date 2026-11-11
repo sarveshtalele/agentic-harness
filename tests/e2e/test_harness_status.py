@@ -33,7 +33,7 @@ def test_status_line_follows_real_tool_calls(page, tmp_path):
     expect(pane.get_by_role("button", name="Stop the agent")).to_be_visible()
     seen, deadline = set(), time.time() + 420
     while status.count() and time.time() < deadline:  # one live line, replaced as events arrive
-        seen.add(status.inner_text().strip())
+        seen.update(text.strip() for text in status.all_inner_texts())  # no wait: the line may vanish when the run ends
         page.wait_for_timeout(200)
     assert "Thinking" in seen, seen
     trail = pane.get_by_test_id("status-trail").last.inner_text()

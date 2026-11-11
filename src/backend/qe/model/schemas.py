@@ -4,6 +4,8 @@ from __future__ import annotations
 from typing import Literal
 from pydantic import BaseModel, Field, field_validator
 
+from backend.qe.model.domain import input_type
+
 
 CASE_TYPES = ("Positive", "Negative", "Negative (Boundary)", "Exception")
 
@@ -22,6 +24,13 @@ class Requirement(BaseModel):
     file: str = ""
     line: int = 0
     quote: str = ""
+    input_type: str = Field("", description="The type of the input the requirement states: string, number, integer, boolean, list or object. Empty when it states none.")
+    error_behaviour: str = Field("", description="The error the requirement or code states for bad input, such as 'raises ValueError when b is 0'. Empty when it states none: never invent one.")
+
+    @field_validator("input_type", mode="before")
+    @classmethod
+    def known_type(cls, value):
+        return input_type(value)
 
     @field_validator("actor", mode="before")
     @classmethod

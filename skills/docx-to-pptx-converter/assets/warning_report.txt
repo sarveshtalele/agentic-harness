@@ -1,0 +1,6 @@
+Warning Report
+==============
+{time}
+
+{headings_not_placed}
+{tables_not_placed}

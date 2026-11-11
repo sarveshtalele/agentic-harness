@@ -9,3 +9,5 @@ Observable behavior: state what a user or API client can observe, such as an HTT
 Code beats comments: executable code takes precedence over comments and docstrings. If a comment says a function always returns true but the code has a branch that returns false, extract the behavior the code has. Quote a line of code, never a comment line: a quote that is a comment is rejected.
 
 One named actor: each requirement names exactly one actor, and it must be one of anonymous, customer, admin, or system. Never write two actors, a list, or a role outside these four; split the requirement instead.
+
+Input and errors: set input_type to the type of the input the source states (string, number, integer, boolean, list, or object), or leave it empty when none is stated. Set error_behaviour only to an error the source states, such as "raises ValueError when b is 0"; leave it empty otherwise. A document that says input is handled without crashing states no error.

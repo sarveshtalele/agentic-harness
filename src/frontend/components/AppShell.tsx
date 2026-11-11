@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, BarChart3, BookOpen, ChevronLeft, ChevronRight, Cpu, UsersRound, Bot, Sparkles, CheckSquare, FileText, FolderKanban, Settings, ShieldCheck, Terminal, Wand2 } from "lucide-react";
+import { Activity, BarChart3, BookOpen, ChevronLeft, ChevronRight, Cpu, UsersRound, Bot, Sparkles, CheckSquare, FileText, FolderKanban, ListTree, Settings, ShieldCheck, Terminal, Wand2 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
@@ -42,6 +42,8 @@ const navSections: NavSection[] = [
     title: "GOVERNANCE & INSIGHTS",
     items: [
       { href: "/observability", label: "Observability & Telemetry", icon: Activity },
+      { href: "/traces", label: "Trace Explorer", icon: ListTree },
+      { href: "/capabilities", label: "Capability Registry", icon: Cpu },
       { href: "/docs", label: "Platform Documentation", icon: BookOpen },
     ],
   },
@@ -95,7 +97,9 @@ export function AppShell({ children }: { children: ReactNode }) {
               .sort((a, b) => b.length - a.length)[0] || (pathname === "/" ? "/" : "");
 
             return navSections.map((sec, secIdx) => {
-              const visibleItems = sec.items.filter((item) => !item.admin || user?.role === "admin");
+              // inside a project the Studio is out of place: skills are made for the whole platform, not for one project
+              const inProject = pathname.startsWith("/projects/");
+              const visibleItems = sec.items.filter((item) => (!item.admin || user?.role === "admin") && !(inProject && item.href === "/skills/studio"));
               if (visibleItems.length === 0) return null;
               return (
                 <div key={sec.title || secIdx} className="space-y-0.5">
@@ -159,7 +163,10 @@ export function AppShell({ children }: { children: ReactNode }) {
             <ThemeToggle />
           </div>
         </header>
-        <main className={`mx-auto p-6 ${pathname === "/harness" ? "max-w-full px-4 py-3" : "max-w-6xl"}`}>{children}</main>
+        <main className={`mx-auto p-6 ${pathname === "/harness" ? "max-w-full px-4 py-3" : "max-w-6xl"}`}>
+          {(user as any)?.warnings?.map((w: string) => <p key={w} role="alert" data-testid="admin-warning" className="mb-4 rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-700 dark:text-rose-300">{w}</p>)}
+          {children}
+        </main>
       </div>
     </div>
   );

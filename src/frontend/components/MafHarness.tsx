@@ -21,14 +21,6 @@ export function MafHarness({ projectId, onProjectChange }: { projectId: string; 
 
   if (error) return <ErrorNote message={error} />;
   if (!projects || !profile) return <Spinner label="Loading projects" />;
-  if (profile === "web") {  // the server answers 403 AQE-HARNESS-DESKTOP-ONLY here too; this says so before anyone types
-    return (
-      <div className="space-y-3 p-1" data-testid="harness-desktop-only">
-        <h1 className="text-xl font-bold">Project harness</h1>
-        <Empty title="Desktop app only">The harness runs in the desktop app; the shared web server has no per-person workspace.</Empty>
-      </div>
-    );
-  }
   const project = projects.find((p) => p.id === projectId);
 
   return (
@@ -39,7 +31,7 @@ export function MafHarness({ projectId, onProjectChange }: { projectId: string; 
           <option value="">Choose a project</option>
           {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>
-        <span className="text-xs text-slate-500">Microsoft Agent Framework harness: plans with todos, loads skills on demand, runs the repository&apos;s tests in its sandbox.</span>
+        <span className="text-xs text-slate-500">Microsoft Agent Framework harness: plans with todos, loads skills on demand, writes files and runs allowlisted commands in the project workspace, each after your approval{profile === "web" ? " (shared server: 5 sandbox slots)" : ""}.</span>
       </div>
       {!project ? (
         <Empty title={projects.length ? "Choose a project to start" : "No projects yet"}>

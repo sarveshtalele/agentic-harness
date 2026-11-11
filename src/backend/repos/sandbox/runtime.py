@@ -4,10 +4,12 @@ from __future__ import annotations
 import shutil
 import subprocess
 
+from backend.core import tracing
 from backend.repos.sandbox.env import clean_sandbox_env
 from backend.repos.sandbox.setup import ensure_sandbox
 
 
+@tracing.traced("sandbox.code", "project_id", "runtime", "timeout")
 def execute_code(project_id: str, code: str, runtime: str = "python", timeout: int = 60) -> dict:
     """Execute code in project sandbox with subprocess isolation."""
     repo = ensure_sandbox(project_id)

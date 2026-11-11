@@ -1,7 +1,8 @@
 """QE Workflow Definition: Autonomous Quality Engineering & AI SDLC Lifecycle Definition."""
 from __future__ import annotations
 
-from backend.maf.engine import Definition, REGISTRY, StageSpec
+from backend.core.errors import RepoError
+from backend.maf.engine import Definition, REGISTRY, RunContext, StageSpec
 from backend.maf.workflows.qe.common import (
     _doc_gate,
     _gate3_extras,
@@ -24,10 +25,20 @@ from backend.maf.workflows.shared import intake, intake_gate
 from backend.qe import confidence
 
 
+async def qe_intake(rc: RunContext, state: dict) -> dict:
+    """Intake that stops before Gate 0, and before any model call, when there is no code to test. A spec-first run ({"spec_first": true}) keeps the greenfield path: requirements from approved documents and a RED baseline."""
+    update = await intake(rc, state)
+    if update["mode"] == "greenfield" and not state.get("spec_first"):
+        rc.log("No code to test: the repository has no source files. The QE run stops before Gate 0", kind="warning")
+        raise RepoError("No code to test: this project's repository has no source files, so there is nothing to design, generate or run tests against.",
+                        action='Upload or connect the code, then start the QE run again. To write failing tests from approved requirements before the code exists, start it with input {"spec_first": true}.')
+    return update
+
+
 def qe_definition() -> Definition:
     """End-to-end quality engineering lifecycle: requirements to signed release, with human gates G0 to G5."""
     return Definition("qe", [
-        StageSpec("intake", intake, "Intake", approval=intake_gate, next="discover"),
+        StageSpec("intake", qe_intake, "Intake", approval=intake_gate, next="discover"),
         StageSpec("discover", qe_discover, "Discovery", next="requirements"),
         StageSpec("requirements", qe_requirements, "Requirements", approval=_doc_gate(1, "requirements", "requirements_doc", lambda s: f"{len(s['requirements'])} requirements with verified evidence.", "requirements_review"), on_rejected="requirements", next="plan"),
         StageSpec("plan", qe_plan, "Test plan", approval=_doc_gate(2, "test plan", "plan_doc", lambda s: f"Deterministic score {s['plan_score']['score']}, independent review {s['plan_review']['score'] if s['plan_review']['score'] is not None else 'not run'} ({s['plan_review']['verdict']}).", "plan_review"), on_rejected="plan", next="design"),

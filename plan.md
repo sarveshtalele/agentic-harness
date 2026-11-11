@@ -130,3 +130,22 @@ Agentic QE Platform connects to no MCP server, so the MCP count is zero and the 
 Full plan, mappings, and phase table: `docs/HARNESS_REBUILD_PLAN.md`. In short: the chat "harness" in `src/backend/harness/` does not use MAF and holds most of the fabricated data. MAF 1.24 ships `create_harness_agent` (todos, modes, compaction, file memory, skills, tool approval, background agents, looping), so the rebuild composes that and keeps the old engine behind `ATLAS_HARNESS_ENGINE=legacy` until the new one passes. Nothing is deleted.
 
 Revision 2 (2026-11-10): the plugin format follows the owner's skills marketplace (`SKILL.md` + `marketplace.yaml`); Skill Studio runs the marketplace `skill-creator` 10-phase lifecycle with the task-list approval enforced in code; security scanning uses the real NVIDIA SkillSpector; plugins and profiles follow DeepSeek Harness; desktop is Electron if approved; Rieseberg's altitude, depth, and range become four CI-checked targets. See `docs/HARNESS_REBUILD_PLAN.md`.
+
+## Tracing (H9, 2026-11-11)
+
+OpenTelemetry through MAF's instrumentation plus platform spans, a local `spans` table (migration 020) with retention, optional OTLP, and a trace explorer at `/traces` with server-side access rules. See `docs/AGENT_SKILLS_AND_MAF_SPECIFICATION.md` section 2.8.
+
+## Harness execution world and the agentic-qe plugin (H2, H3, 2026-11-11)
+
+- Workspace per project and thread: the project's sandbox clone (`repos.sandbox.initialize_sandbox`, refused without a repository) plus `data/harness/<project>/scratch/<thread>/` as the shell's TMPDIR.
+- MAF `FileAccessProvider` on a `FileSystemAgentFileStore` subclass rooted at the clone (reads auto-approved, writes approved, `.git/` refused, every path also through `safe_path`).
+- MAF shell: `agent_framework_tools.shell.LocalShellTool` (package `agent-framework-tools==1.0.0b261030`, released with core 1.24.0), its `run` replaced by an argument-list runner (`repos.sandbox.execute_command`, no shell) with the allowlist `node npx npm python python3 pytest git` (git read-only verbs), `clean_sandbox_env()`, `ATLAS_HARNESS_SHELL_TIMEOUT`, an approval card per command and a ledger row per command.
+- Web profile: each shell or write call takes one of `ATLAS_MAX_SANDBOXES` lease rows (migration 021); a sixth is refused naming the queue.
+- Plugin `agentic-qe` replaced by the upstream plugin at `8a7497b` (D4), `plugins/agentic-qe/PINNED`.
+- Claude Code hook adapter (`core/plugin_hooks.py`) runs `hooks/hooks.json` commands as argument lists with `CLAUDE_PLUGIN_ROOT`, `CLAUDE_PROJECT_DIR`, the hook JSON on stdin, the hook timeout and `clean_env`: PreToolUse/PostToolUse around write and shell (MAF function middleware), UserPromptSubmit and SessionStart in `maf/agui.py`, SubagentStop after a plugin agent's run.
+- Plugin `agents/*.md` become MAF background agents with read-only workspace tools (MAF background agents have no approval channel, so Write/Edit/Bash are not given to them).
+
+## Phase Q1: QE workflow correctness (2026-11-11)
+
+Bugs B1 to B7 and B14 to B18 of `docs/analysis/2026-11-11-markdown-html-converter-trace.md`, in the QE workflow files only (`docs/MASTER_PLAN.md` Phase Q). An empty repository stops before Gate 0 unless the run asks for `spec_first`; Exception cases only for stated error behaviour; test data and datasets follow the requirement's input type; a test that defines or stubs its subject is refused; a verdict without a real execution is INCONCLUSIVE; real reasons for REJECT decisions; G3 to G5 approve their documents; event data redacted. Tests: `tests/test_qe_correctness.py`. Q2 to Q4 wait for H2 and H3.
+

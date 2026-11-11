@@ -9,6 +9,8 @@ Unsigned unless signing variables exist (CSC_LINK on macOS and Windows).
 from __future__ import annotations
 
 import argparse
+import json
+import hashlib
 import os
 import shutil
 import subprocess
@@ -68,7 +70,7 @@ def build_backend() -> None:
         if (ROOT / name).is_dir():
             cmd += ["--add-data", f"{ROOT / name}{sep}{name}"]
     cmd += ["--add-data", f"{ROOT / 'src' / 'backend' / 'migrations'}{sep}backend/migrations"]
-    for pkg in ("agent_framework", "agent_framework_openai", "agent_framework_ag_ui", "chromadb", "gherkin", "tzdata"):
+    for pkg in ("agent_framework", "agent_framework_openai", "agent_framework_ag_ui", "gherkin", "tzdata"):
         cmd += ["--collect-all", pkg]
     cmd += ["--collect-submodules", "backend", str(DESKTOP / "backend_entry.py")]
     run(cmd, ROOT)
@@ -84,9 +86,22 @@ def package() -> None:
             sys.exit(f"Missing {need}. Run this script without --package first.")
     env = {} if os.environ.get("CSC_LINK") else {"CSC_IDENTITY_AUTO_DISCOVERY": "false"}
     run([NPX, "electron-builder"], DESKTOP, env)
+    write_manifest()
+
+
+def write_manifest() -> None:
+    """dist/latest.json: what the login page reads from the Blob downloads container. Only files that exist are listed."""
+    version = json.loads((DESKTOP / "package.json").read_text(encoding="utf-8"))["version"]
+    files = []
     for f in sorted((DESKTOP / "dist").glob("*.*")):
         if f.suffix in {".dmg", ".zip", ".msi"}:
-            print(f"Artifact: {f} ({f.stat().st_size / 1e6:.1f} MB)")
+            digest = hashlib.sha256(f.read_bytes()).hexdigest()
+            files.append({"name": f.name, "os": "windows" if f.suffix == ".msi" else "macos", "arch": "arm64" if "arm64" in f.name else "x64",
+                          "kind": f.suffix[1:], "size": f.stat().st_size, "sha256": digest})
+            print(f"Artifact: {f} ({f.stat().st_size / 1e6:.1f} MB) sha256 {digest}")
+    manifest = DESKTOP / "dist" / f"latest-{sys.platform}.json"  # one per build OS; the guide merges them into latest.json
+    manifest.write_text(json.dumps({"version": version, "files": files}, indent=2), encoding="utf-8")
+    print(f"Manifest: {manifest}")
 
 
 def main() -> None:

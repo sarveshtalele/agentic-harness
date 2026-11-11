@@ -61,6 +61,12 @@ def get_run(run_id: str):
     return engine.get(run_id)
 
 
+def _approver(items: list[dict]) -> list[dict]:
+    """An "approved" event keeps its stored text; the approver's details ride beside it."""
+    tagged = [{**i, "decided_by": i["message"].removeprefix("Approved by ")} if i["type"] == "approved" else i for i in items]
+    return auth.named(tagged) if any(i["type"] == "approved" for i in items) else items
+
+
 @router.get("/api/runs/{run_id}/events")
 async def stream_events(run_id: str, request: Request, after: int = 0):
     engine.get(run_id)
@@ -69,7 +75,7 @@ async def stream_events(run_id: str, request: Request, after: int = 0):
         last = after
         idle = 0
         while not await request.is_disconnected():
-            items = engine.events(run_id, last)
+            items = _approver(engine.events(run_id, last))
             for item in items:
                 last = item["seq"]
                 yield f"id: {last}\nevent: run\ndata: {json.dumps(item)}\n\n"
@@ -130,7 +136,7 @@ def all_approvals():
             return json.loads(p)
         except Exception:
             return {}
-    return [{**a, "payload": _load_payload(a.get("payload"))} for a in items if auth.can_see_project(a["project_id"])]
+    return [{**a, "payload": _load_payload(a.get("payload"))} for a in auth.named([a for a in items if auth.can_see_project(a["project_id"])])]
 
 
 @router.get("/api/runs/{run_id}/changes.zip")

@@ -1,0 +1,816 @@
+{
+  "plan": {
+    "status": 201,
+    "body": {
+      "id": "spl_bbb7a5b5562a",
+      "project_id": "prj_fac0b27a43a8",
+      "author": "admin",
+      "kind": "instructions",
+      "request": "A skill that writes a comprehensive quality strategy and test plan for a software project from its requirements: scope and out of scope, risks ranked by likelihood and impact, test levels (unit, integration, end to end) with what each covers, entry and exit criteria, test environments and data, and a traceability table from each requirement to its tests.",
+      "source_type": "text",
+      "source_ref": "",
+      "source_sha256": "4612a609f769de0e6d9621f2a92c3f1623206456869d8b6b8f9a368c6432263b",
+      "revise": "",
+      "status": "draft",
+      "plan_sha256": "",
+      "approved_by": "",
+      "approved_at": null,
+      "prompt_ref": "skill-creator@v1:db120a7b06d2",
+      "draft_sha256": "",
+      "generated_at": null,
+      "created_at": "2026-11-11T05:51:18+00:00",
+      "plan": {
+        "description": "Creates a comprehensive quality strategy and test plan for a software project from its requirements. Use when a list of requirements exists and a structured plan is needed that includes scope, risks, test levels, entry/exit criteria, environments, data, and a traceability table.",
+        "eval_cases": [
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "User login with email and password"
+              },
+              {
+                "kind": "contains",
+                "value": "Password reset via email link"
+              },
+              {
+                "kind": "contains",
+                "value": "Out-of-scope: Social login"
+              },
+              {
+                "kind": "contains",
+                "value": "Unit tests"
+              },
+              {
+                "kind": "contains",
+                "value": "Integration tests"
+              },
+              {
+                "kind": "contains",
+                "value": "End-to-end tests"
+              },
+              {
+                "kind": "contains",
+                "value": "Entry criteria"
+              },
+              {
+                "kind": "contains",
+                "value": "Exit criteria"
+              },
+              {
+                "kind": "contains",
+                "value": "Risk"
+              },
+              {
+                "kind": "contains",
+                "value": "Traceability"
+              }
+            ],
+            "input": "Requirements:\n- User login with email and password.\n- Password reset via email link.\n- Display user profile after login.\nOut-of-scope: Social login."
+          },
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "Admin can create new user accounts"
+              },
+              {
+                "kind": "contains",
+                "value": "Admin can delete user accounts"
+              },
+              {
+                "kind": "not_contains",
+                "value": "User self-registration"
+              },
+              {
+                "kind": "contains",
+                "value": "Unit tests"
+              },
+              {
+                "kind": "contains",
+                "value": "Risk"
+              },
+              {
+                "kind": "regex",
+                "value": "(?i)entry criteria.*exit criteria"
+              }
+            ],
+            "input": "REQUIREMENTS:\n1. Admin can create new user accounts.\n2. Admin can delete user accounts.\n3. Admin can view audit logs.\nOut of scope: User self-registration, password policies."
+          }
+        ],
+        "files": [
+          {
+            "path": "SKILL.md",
+            "purpose": "Main skill description with steps and decision rules."
+          },
+          {
+            "path": "references/quality-strategy-template.md",
+            "purpose": "Template for the quality strategy and test plan document structure."
+          },
+          {
+            "path": "references/risk-ranking-guide.md",
+            "purpose": "Guidance on ranking risks by likelihood and impact."
+          },
+          {
+            "path": "references/test-levels-guide.md",
+            "purpose": "Descriptions of unit, integration, and end-to-end test levels."
+          },
+          {
+            "path": "assets/quality-strategy-output.md",
+            "purpose": "Output template for the final document."
+          },
+          {
+            "path": "assets/traceability-table.csv",
+            "purpose": "Template for the traceability table (CSV format)."
+          }
+        ],
+        "formats": [
+          {
+            "name": "Quality Strategy & Test Plan (Markdown)",
+            "purpose": "Full document in Markdown format.",
+            "template_path": "assets/quality-strategy-output.md"
+          },
+          {
+            "name": "Traceability Table (CSV)",
+            "purpose": "Requirement-to-test mapping in CSV format.",
+            "template_path": "assets/traceability-table.csv"
+          }
+        ],
+        "name": "planning-quality-strategy",
+        "subagents": [],
+        "tasks": [
+          "Receive the project requirements as input.",
+          "Extract scope and out-of-scope items from the requirements.",
+          "Identify risks and rank them by likelihood and impact.",
+          "Define test levels (unit, integration, end to end) and describe what each covers.",
+          "Specify entry and exit criteria for the overall test process.",
+          "List the required test environments and test data.",
+          "Build a traceability table mapping each requirement to its tests.",
+          "Assemble the outputs into a cohesive quality strategy and test plan document."
+        ]
+      },
+      "checks": [],
+      "source_chars": 356
+    }
+  },
+  "approve": {
+    "status": 200,
+    "body": {
+      "id": "spl_bbb7a5b5562a",
+      "project_id": "prj_fac0b27a43a8",
+      "author": "admin",
+      "kind": "instructions",
+      "request": "A skill that writes a comprehensive quality strategy and test plan for a software project from its requirements: scope and out of scope, risks ranked by likelihood and impact, test levels (unit, integration, end to end) with what each covers, entry and exit criteria, test environments and data, and a traceability table from each requirement to its tests.",
+      "source_type": "text",
+      "source_ref": "",
+      "source_sha256": "4612a609f769de0e6d9621f2a92c3f1623206456869d8b6b8f9a368c6432263b",
+      "revise": "",
+      "status": "approved",
+      "plan_sha256": "dad8eab40d1523126393e227f93e5659e5cd8db6b0647a68e5fd20f168f2f5df",
+      "approved_by": "admin",
+      "approved_at": "2026-11-11T05:51:18+00:00",
+      "prompt_ref": "skill-creator@v1:db120a7b06d2",
+      "draft_sha256": "",
+      "generated_at": null,
+      "created_at": "2026-11-11T05:51:18+00:00",
+      "plan": {
+        "description": "Creates a comprehensive quality strategy and test plan for a software project from its requirements. Use when a list of requirements exists and a structured plan is needed that includes scope, risks, test levels, entry/exit criteria, environments, data, and a traceability table.",
+        "eval_cases": [
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "User login with email and password"
+              },
+              {
+                "kind": "contains",
+                "value": "Password reset via email link"
+              },
+              {
+                "kind": "contains",
+                "value": "Out-of-scope: Social login"
+              },
+              {
+                "kind": "contains",
+                "value": "Unit tests"
+              },
+              {
+                "kind": "contains",
+                "value": "Integration tests"
+              },
+              {
+                "kind": "contains",
+                "value": "End-to-end tests"
+              },
+              {
+                "kind": "contains",
+                "value": "Entry criteria"
+              },
+              {
+                "kind": "contains",
+                "value": "Exit criteria"
+              },
+              {
+                "kind": "contains",
+                "value": "Risk"
+              },
+              {
+                "kind": "contains",
+                "value": "Traceability"
+              }
+            ],
+            "input": "Requirements:\n- User login with email and password.\n- Password reset via email link.\n- Display user profile after login.\nOut-of-scope: Social login."
+          },
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "Admin can create new user accounts"
+              },
+              {
+                "kind": "contains",
+                "value": "Admin can delete user accounts"
+              },
+              {
+                "kind": "not_contains",
+                "value": "User self-registration"
+              },
+              {
+                "kind": "contains",
+                "value": "Unit tests"
+              },
+              {
+                "kind": "contains",
+                "value": "Risk"
+              },
+              {
+                "kind": "regex",
+                "value": "(?i)entry criteria.*exit criteria"
+              }
+            ],
+            "input": "REQUIREMENTS:\n1. Admin can create new user accounts.\n2. Admin can delete user accounts.\n3. Admin can view audit logs.\nOut of scope: User self-registration, password policies."
+          }
+        ],
+        "files": [
+          {
+            "path": "SKILL.md",
+            "purpose": "Main skill description with steps and decision rules."
+          },
+          {
+            "path": "references/quality-strategy-template.md",
+            "purpose": "Template for the quality strategy and test plan document structure."
+          },
+          {
+            "path": "references/risk-ranking-guide.md",
+            "purpose": "Guidance on ranking risks by likelihood and impact."
+          },
+          {
+            "path": "references/test-levels-guide.md",
+            "purpose": "Descriptions of unit, integration, and end-to-end test levels."
+          },
+          {
+            "path": "assets/quality-strategy-output.md",
+            "purpose": "Output template for the final document."
+          },
+          {
+            "path": "assets/traceability-table.csv",
+            "purpose": "Template for the traceability table (CSV format)."
+          }
+        ],
+        "formats": [
+          {
+            "name": "Quality Strategy & Test Plan (Markdown)",
+            "purpose": "Full document in Markdown format.",
+            "template_path": "assets/quality-strategy-output.md"
+          },
+          {
+            "name": "Traceability Table (CSV)",
+            "purpose": "Requirement-to-test mapping in CSV format.",
+            "template_path": "assets/traceability-table.csv"
+          }
+        ],
+        "name": "planning-quality-strategy",
+        "subagents": [],
+        "tasks": [
+          "Receive the project requirements as input.",
+          "Extract scope and out-of-scope items from the requirements.",
+          "Identify risks and rank them by likelihood and impact.",
+          "Define test levels (unit, integration, end to end) and describe what each covers.",
+          "Specify entry and exit criteria for the overall test process.",
+          "List the required test environments and test data.",
+          "Build a traceability table mapping each requirement to its tests.",
+          "Assemble the outputs into a cohesive quality strategy and test plan document."
+        ]
+      },
+      "checks": [],
+      "source_chars": 356
+    }
+  },
+  "generate": {
+    "status": 200,
+    "body": {
+      "plan": {
+        "id": "spl_bbb7a5b5562a",
+        "project_id": "prj_fac0b27a43a8",
+        "author": "admin",
+        "kind": "instructions",
+        "request": "A skill that writes a comprehensive quality strategy and test plan for a software project from its requirements: scope and out of scope, risks ranked by likelihood and impact, test levels (unit, integration, end to end) with what each covers, entry and exit criteria, test environments and data, and a traceability table from each requirement to its tests.",
+        "source_type": "text",
+        "source_ref": "",
+        "source_sha256": "4612a609f769de0e6d9621f2a92c3f1623206456869d8b6b8f9a368c6432263b",
+        "revise": "",
+        "status": "generated",
+        "plan_sha256": "dad8eab40d1523126393e227f93e5659e5cd8db6b0647a68e5fd20f168f2f5df",
+        "approved_by": "admin",
+        "approved_at": "2026-11-11T05:51:18+00:00",
+        "prompt_ref": "skill-creator@v1:db120a7b06d2",
+        "draft_sha256": "c5d2d6f0a993edb26e3dbc0dad13bb3c8a9d76bc537a36b148c78205a3803a6f",
+        "generated_at": "2026-11-11T05:51:27+00:00",
+        "created_at": "2026-11-11T05:51:18+00:00",
+        "plan": {
+          "description": "Creates a comprehensive quality strategy and test plan for a software project from its requirements. Use when a list of requirements exists and a structured plan is needed that includes scope, risks, test levels, entry/exit criteria, environments, data, and a traceability table.",
+          "eval_cases": [
+            {
+              "assertions": [
+                {
+                  "kind": "contains",
+                  "value": "User login with email and password"
+                },
+                {
+                  "kind": "contains",
+                  "value": "Password reset via email link"
+                },
+                {
+                  "kind": "contains",
+                  "value": "Out-of-scope: Social login"
+                },
+                {
+                  "kind": "contains",
+                  "value": "Unit tests"
+                },
+                {
+                  "kind": "contains",
+                  "value": "Integration tests"
+                },
+                {
+                  "kind": "contains",
+                  "value": "End-to-end tests"
+                },
+                {
+                  "kind": "contains",
+                  "value": "Entry criteria"
+                },
+                {
+                  "kind": "contains",
+                  "value": "Exit criteria"
+                },
+                {
+                  "kind": "contains",
+                  "value": "Risk"
+                },
+                {
+                  "kind": "contains",
+                  "value": "Traceability"
+                }
+              ],
+              "input": "Requirements:\n- User login with email and password.\n- Password reset via email link.\n- Display user profile after login.\nOut-of-scope: Social login."
+            },
+            {
+              "assertions": [
+                {
+                  "kind": "contains",
+                  "value": "Admin can create new user accounts"
+                },
+                {
+                  "kind": "contains",
+                  "value": "Admin can delete user accounts"
+                },
+                {
+                  "kind": "not_contains",
+                  "value": "User self-registration"
+                },
+                {
+                  "kind": "contains",
+                  "value": "Unit tests"
+                },
+                {
+                  "kind": "contains",
+                  "value": "Risk"
+                },
+                {
+                  "kind": "regex",
+                  "value": "(?i)entry criteria.*exit criteria"
+                }
+              ],
+              "input": "REQUIREMENTS:\n1. Admin can create new user accounts.\n2. Admin can delete user accounts.\n3. Admin can view audit logs.\nOut of scope: User self-registration, password policies."
+            }
+          ],
+          "files": [
+            {
+              "path": "SKILL.md",
+              "purpose": "Main skill description with steps and decision rules."
+            },
+            {
+              "path": "references/quality-strategy-template.md",
+              "purpose": "Template for the quality strategy and test plan document structure."
+            },
+            {
+              "path": "references/risk-ranking-guide.md",
+              "purpose": "Guidance on ranking risks by likelihood and impact."
+            },
+            {
+              "path": "references/test-levels-guide.md",
+              "purpose": "Descriptions of unit, integration, and end-to-end test levels."
+            },
+            {
+              "path": "assets/quality-strategy-output.md",
+              "purpose": "Output template for the final document."
+            },
+            {
+              "path": "assets/traceability-table.csv",
+              "purpose": "Template for the traceability table (CSV format)."
+            }
+          ],
+          "formats": [
+            {
+              "name": "Quality Strategy & Test Plan (Markdown)",
+              "purpose": "Full document in Markdown format.",
+              "template_path": "assets/quality-strategy-output.md"
+            },
+            {
+              "name": "Traceability Table (CSV)",
+              "purpose": "Requirement-to-test mapping in CSV format.",
+              "template_path": "assets/traceability-table.csv"
+            }
+          ],
+          "name": "planning-quality-strategy",
+          "subagents": [],
+          "tasks": [
+            "Receive the project requirements as input.",
+            "Extract scope and out-of-scope items from the requirements.",
+            "Identify risks and rank them by likelihood and impact.",
+            "Define test levels (unit, integration, end to end) and describe what each covers.",
+            "Specify entry and exit criteria for the overall test process.",
+            "List the required test environments and test data.",
+            "Build a traceability table mapping each requirement to its tests.",
+            "Assemble the outputs into a cohesive quality strategy and test plan document."
+          ]
+        },
+        "checks": [
+          {
+            "check": "frontmatter",
+            "passed": true,
+            "detail": "YAML frontmatter between --- lines"
+          },
+          {
+            "check": "name format",
+            "passed": true,
+            "detail": "name 'planning-quality-strategy': lowercase letters, digits and single hyphens, at most 64"
+          },
+          {
+            "check": "name matches folder",
+            "passed": true,
+            "detail": "name 'planning-quality-strategy', folder 'planning-quality-strategy'"
+          },
+          {
+            "check": "description",
+            "passed": true,
+            "detail": "279 characters (1 to 1024)"
+          },
+          {
+            "check": "body length",
+            "passed": true,
+            "detail": "32 lines (at most 500; move detail into references/)"
+          },
+          {
+            "check": "MAF loads it",
+            "passed": true,
+            "detail": "MAF FileSkillsSource loaded it"
+          },
+          {
+            "check": "security scan",
+            "passed": true,
+            "detail": "no findings"
+          }
+        ],
+        "source_chars": 356
+      },
+      "files": [
+        {
+          "path": "SKILL.md",
+          "content": "---\nname: planning-quality-strategy\ndescription: Creates a comprehensive quality strategy and test plan for a software project from its requirements. Use when a list of requirements exists and a structured plan is needed that includes scope, risks, test levels, entry/exit criteria, environments, data, and a traceability table.\n---\n\n# Quality Strategy & Test Plan Skill\n\nThis skill builds a quality strategy and test plan from a list of project requirements.\n\n## Steps\n\n1. **Receive requirements** \u2014 Accept the input as a block of text. Assume each line or numbered item is a requirement unless marked out-of-scope.\n2. **Extract scope and out-of-scope** \u2014 Identify requirements explicitly labeled \"out-of-scope\" or \"Out of scope\". The rest are in scope.\n3. **Identify risks** \u2014 For each in-scope requirement, list one or more risks (what could go wrong). Use the [risk-ranking-guide](references/risk-ranking-guide.md) to assign likelihood (Low/Medium/High) and impact (Low/Medium/High).\n4. **Define test levels** \u2014 Describe what each level covers, using the [test-levels-guide](references/test-levels-guide.md).\n   - Unit tests\n   - Integration tests\n   - End-to-end tests\n5. **Specify entry and exit criteria** \u2014 Decide overall conditions for starting and ending testing.\n6. **List test environments and data** \u2014 Describe what environments and test data are needed.\n7. **Build traceability table** \u2014 Map each requirement to the tests that verify it, using the [traceability-table template](assets/traceability-table.csv).\n8. **Assemble document** \u2014 Write the final document following the [quality-strategy-output template](assets/quality-strategy-output.md).\n\n## Files\n\n- `references/quality-strategy-template.md` \u2014 Template for the full document structure.\n- `references/risk-ranking-guide.md` \u2014 Guidance on ranking risks.\n- `references/test-levels-guide.md` \u2014 Descriptions of test levels.\n- `assets/quality-strategy-output.md` \u2014 Final document output template.\n- `assets/traceability-table.csv` \u2014 Traceability table CSV template.\n\n## Constraints\n\n- Only use information from the input. Do not add external details.\n- Risks must be plausible and derived from the requirements.\n- The document must include all sections from the template.\n"
+        },
+        {
+          "path": "references/quality-strategy-template.md",
+          "content": "# Quality Strategy & Test Plan\n\n## 1. Scope\n\nList the in-scope and out-of-scope requirements.\n\n## 2. Risks\n\n| Requirement | Risk | Likelihood | Impact | Mitigation |\n|-------------|------|------------|--------|------------|\n\n## 3. Test Levels\n\n### Unit Tests\nCover individual functions or components.\n\n### Integration Tests\nCover interactions between components.\n\n### End-to-End Tests\nCover complete user journeys across the system.\n\n## 4. Entry Criteria\n\nConditions that must be met before testing begins.\n\n## 5. Exit Criteria\n\nConditions that must be met for testing to be considered complete.\n\n## 6. Test Environments\n\nList the environments needed for testing.\n\n## 7. Test Data\n\nDescribe the data required for testing.\n\n## 8. Traceability Table\n\nSee attached CSV file.\n"
+        },
+        {
+          "path": "references/risk-ranking-guide.md",
+          "content": "# Risk Ranking Guide\n\nRank each risk by:\n\n- **Likelihood**: Low (unlikely), Medium (possible), High (likely)\n- **Impact**: Low (minor inconvenience), Medium (moderate disruption), High (critical failure, data loss)\n\nCombine these to prioritize: High/High and High/Medium risks demand clear mitigation plans.\n"
+        },
+        {
+          "path": "references/test-levels-guide.md",
+          "content": "# Test Levels Guide\n\n## Unit Tests\n- Verify individual functions, methods, or small components in isolation.\n- Fast, automated, run on every build.\n\n## Integration Tests\n- Verify interactions between two or more components (e.g., API calls, database connections).\n- Ensure data flows correctly across module boundaries.\n\n## End-to-End Tests\n- Verify complete user workflows from start to finish.\n- Exercise the system as a whole, including UI, backend, and external dependencies.\n"
+        },
+        {
+          "path": "assets/quality-strategy-output.md",
+          "content": "# Quality Strategy & Test Plan\n\n## 1. Scope\n\n**In-scope:**\n- [List in-scope requirements]\n\n**Out-of-scope:**\n- [List out-of-scope requirements]\n\n## 2. Risks\n\n| Requirement | Risk | Likelihood | Impact | Mitigation |\n|-------------|------|------------|--------|------------|\n\n## 3. Test Levels\n\n### Unit Tests\n[Description]\n\n### Integration Tests\n[Description]\n\n### End-to-End Tests\n[Description]\n\n## 4. Entry Criteria\n\n- [Entry criterion 1]\n- [Entry criterion 2]\n\n## 5. Exit Criteria\n\n- [Exit criterion 1]\n- [Exit criterion 2]\n\n## 6. Test Environments\n\n- [Environment 1]\n- [Environment 2]\n\n## 7. Test Data\n\n- [Test data requirement 1]\n- [Test data requirement 2]\n\n## 8. Traceability Table\n\nSee traceability-table.csv\n"
+        },
+        {
+          "path": "assets/traceability-table.csv",
+          "content": "Requirement,Unit Test,Integration Test,End-to-End Test\n"
+        }
+      ],
+      "checks": [
+        {
+          "check": "frontmatter",
+          "passed": true,
+          "detail": "YAML frontmatter between --- lines"
+        },
+        {
+          "check": "name format",
+          "passed": true,
+          "detail": "name 'planning-quality-strategy': lowercase letters, digits and single hyphens, at most 64"
+        },
+        {
+          "check": "name matches folder",
+          "passed": true,
+          "detail": "name 'planning-quality-strategy', folder 'planning-quality-strategy'"
+        },
+        {
+          "check": "description",
+          "passed": true,
+          "detail": "279 characters (1 to 1024)"
+        },
+        {
+          "check": "body length",
+          "passed": true,
+          "detail": "32 lines (at most 500; move detail into references/)"
+        },
+        {
+          "check": "MAF loads it",
+          "passed": true,
+          "detail": "MAF FileSkillsSource loaded it"
+        },
+        {
+          "check": "security scan",
+          "passed": true,
+          "detail": "no findings"
+        }
+      ],
+      "summary": {
+        "passed": 7,
+        "total": 7,
+        "all_passed": true
+      }
+    }
+  },
+  "evaluate": {
+    "status": 200,
+    "body": {
+      "prompt_ref": "skill-creator@v1:db120a7b06d2+draft:c5d2d6f0a993",
+      "n": 2,
+      "judge_model": "deterministic-assertions",
+      "metrics": {
+        "assertion_pass_rate_with_skill": 0.8125,
+        "assertion_pass_rate_without_skill": 0.5625,
+        "skill_uplift": 0.25
+      },
+      "tokens": 7642,
+      "cases": [
+        {
+          "case": 1,
+          "input": "Requirements:\n- User login with email and password.\n- Password reset via email link.\n- Display user profile after login.\nOut-of-scope: Social login.",
+          "with_skill": {
+            "output": "# Quality Strategy & Test Plan\n\n## 1. Scope\n\n**In-scope Requirements:**\n- User login with email and password\n- Password reset via email link\n- Display user profile after login\n\n**Out-of-scope:**\n- Social login\n\n## 2. Risks\n\n| Requirement | Risk | Likelihood | Impact | Mitigation |\n|-------------|------|------------|--------|------------|\n| User login with email and password | Brute force attack on login credentials | Medium | High | Implement account lockout after multiple failed attempts |\n| User login with email and password | Incorrect password storage leading to data breach | Medium | High | Hash passwords using strong algorithm (bcrypt/argon2) |\n| Password reset via email link | Email interception allowing unauthorized password changes | Medium | High | Use time-limited, one-time use reset links |\n| Password reset via email link | User cannot receive reset email | Low | Medium | Provide clear instructions and support contact |\n| Display user profile after login | Incorrect user data displayed | Low | Medium | Fetch fresh data from database on each profile load |\n| Display user profile after login | Unauthorized access to another user's profile | Medium | High | Verify session token and user ID match on backend |\n\n## 3. Test Levels\n\n### Unit Tests\nCover individual functions or components:\n- Login validation logic\n- Password hashing and comparison\n- Email sending function\n- Profile data retrieval function\n\n### Integration Tests\nCover interactions between components:\n- Login API endpoint with database credential verification\n- Password reset flow: API receiving request \u2192 sending email \u2192 token validation \u2192 password update\n- Profile API session authentication \u2192 data retrieval\n\n### End-to-End Tests\nCover complete user journeys across the system:\n- User login with valid credentials \u2192 profile page displays correctly\n- User requests password reset \u2192 receives email \u2192 uses link \u2192 sets new password \u2192 logs in successfully\n- User login with invalid credentials \u2192 sees appropriate error message\n\n## 4. Entry Criteria\n\n- All code for in-scope requirements is implemented and merged\n- Unit tests pass in the development environment\n- Test environments are provisioned and accessible\n- Test data set (valid users, expired tokens, etc.) is prepared\n\n## 5. Exit Criteria\n\n- All planned unit, integration, and E2E tests are executed\n- No critical or high-severity defects remain open\n- Password reset flow works across all browsers/devices in scope\n- Security tests for login authentication are completed\n- Test results are documented and reviewed\n\n## 6. Test Environments\n\n- **Development**: For initial unit testing and debugging\n- **Staging**: Mirror of production for integration and E2E testing\n- **Production-like**: With real email server (sandbox) for password reset tests\n\n## 7. Test Data\n\n- Valid user accounts with email and password for successful login\n- Invalid credentials (wrong password, non-existent email)\n- Valid and expired password reset tokens\n- Multiple user accounts to verify profile isolation\n- Test email accounts for receiving password reset links (sandbox or disposable addresses)\n\n## 8. Traceability Table\n\nSee attached CSV file.",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "User login with email and password",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "Password reset via email link",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "Out-of-scope: Social login",
+                "passed": false
+              },
+              {
+                "kind": "contains",
+                "value": "Unit tests",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "Integration tests",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "End-to-end tests",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "Entry criteria",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "Exit criteria",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "Risk",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "Traceability",
+                "passed": true
+              }
+            ]
+          },
+          "without_skill": {
+            "output": "# Quality Strategy & Test Plan\n\n## 1. Scope\n\n**In-scope:**\n- User authentication (login with email/password)\n- Password reset functionality via email link\n- Profile display post-login\n\n**Out-of-scope:**\n- Social login (Facebook, Google, etc.)\n- Account registration\n- Account deletion\n\n## 2. Risks & Mitigations\n\n| Risk | Impact | Likelihood | Mitigation |\n|------|--------|------------|------------|\n| Email delivery failure for password reset | High | Medium | Implement retry mechanism, user feedback, and monitoring |\n| Credential exposure via logs | High | Low | Ensure no logging of passwords, use parameterized queries |\n| Brute force attacks on login | Medium | Medium | Rate limiting, account lockout after N failed attempts |\n| Session hijacking after login | High | Low | Use secure cookies, HTTPS, short session expiry |\n\n## 3. Test Levels\n\n**Unit Tests** (Developers)\n- Validate email format validation\n- Check password hashing algorithm\n- Verify password reset token generation/expiry\n- Test profile data retrieval logic\n\n**Integration Tests** (QE)\n- Login endpoint with correct/incorrect credentials\n- Password reset request \u2192 email sent \u2192 token validation\n- Profile API returns correct user data after authentication\n\n**E2E Tests** (QE)\n- Full login flow: enter credentials \u2192 receive token \u2192 view profile\n- Password reset: request \u2192 check email (mock) \u2192 set new password \u2192 login with it\n\n**Security Tests**\n- Injection attacks on login fields\n- Token manipulation for password reset\n- Session fixation\n- Enforce HTTPS\n\n## 4. Entry/Exit Criteria\n\n**Entry Criteria:**\n- Requirements approved and stable\n- Development environment available\n- Test data (user accounts) prepared\n- Authentication endpoints deployed\n\n**Exit Criteria:**\n- All High-priority tests pass (100%)\n- No Critical/Blocker bugs remain\n- Password reset email delivery confirmed (mock)\n- Security scan passes\n- Test report signed off by QE lead\n\n## 5. Test Environments\n\n| Environment | Purpose | Configuration |\n|-------------|---------|---------------|\n| Dev | Developer testing | Latest build, local DB, mock email service |\n| QA | Formal testing | Staging server, dedicated test DB, real email sandbox |\n| Staging | Pre-release validation | Production-like, real email for dry-run |\n\n## 6. Test Data\n\n| Data Item | Source | Purpose |\n|-----------|--------|---------|\n| Valid email/password accounts | Test DB seed | Login success tests |\n| Invalid credentials | Hardcoded list | Negative login tests |\n| Unregistered email | Faker | Password reset for non-existent user |\n| Expired reset tokens | Manually created | Test token expiry handling |\n\n## 7. Traceability Matrix\n\n| Requirement ID | Requirement | Unit | Integration | E2E | Security |\n|----------------|-------------|------|-------------|-----|----------|\n| REQ-001 | User login with email & password | test_login_validation | test_login_endpoint | TC-LOGIN-01 | test_sql_injection_login |\n| REQ-002 | Password reset via email link | test_token_generation | test_reset_flow | TC-RESET-01 | test_token_tampering |\n| REQ-003 | Display user profile after login | test_profile_data | test_profile_api | TC-PROFILE-01 | test_unauthorized_access |",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "User login with email and password",
+                "passed": false
+              },
+              {
+                "kind": "contains",
+                "value": "Password reset via email link",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "Out-of-scope: Social login",
+                "passed": false
+              },
+              {
+                "kind": "contains",
+                "value": "Unit tests",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "Integration tests",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "End-to-end tests",
+                "passed": false
+              },
+              {
+                "kind": "contains",
+                "value": "Entry criteria",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "Exit criteria",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "Risk",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "Traceability",
+                "passed": true
+              }
+            ]
+          }
+        },
+        {
+          "case": 2,
+          "input": "REQUIREMENTS:\n1. Admin can create new user accounts.\n2. Admin can delete user accounts.\n3. Admin can view audit logs.\nOut of scope: User self-registration, password policies.",
+          "with_skill": {
+            "output": "# Quality Strategy & Test Plan\n\n## 1. Scope\n\n**In-Scope Requirements:**\n1. Admin can create new user accounts.\n2. Admin can delete user accounts.\n3. Admin can view audit logs.\n\n**Out-of-Scope:**\n- User self-registration\n- Password policies\n\n## 2. Risks\n\n| Requirement | Risk | Likelihood | Impact | Mitigation |\n|-------------|------|------------|--------|------------|\n| 1. Admin can create new user accounts. | Unauthorized user creation due to insufficient access controls. | Medium | High | Implement role-based access control and audit on creation. |\n| 1. Admin can create new user accounts. | Duplicate accounts created due to lack of validation. | Medium | Medium | Add uniqueness check for usernames/emails before creation. |\n| 2. Admin can delete user accounts. | Accidental deletion of active accounts. | Low | High | Require confirmation dialog and soft-delete before permanent removal. |\n| 2. Admin can delete user accounts. | Orphaned data (e.g., posts, records) after account deletion. | Medium | Medium | Implement cascade deletion or data reassignment. |\n| 3. Admin can view audit logs. | Logs contain sensitive data that may be exposed. | Medium | High | Mask or exclude sensitive fields (e.g., passwords) from logs. |\n| 3. Admin can view audit logs. | Logs tampered or overwritten, losing audit trail. | Low | High | Use append-only logging with access restrictions and backups. |\n\n## 3. Test Levels\n\n### Unit Tests\n- Verify the function that creates a user account (validate input, check for duplicates, call the persistence layer).\n- Verify the function that deletes a user account (check ID existence, perform soft-delete logic if implemented).\n- Verify the audit log retrieval function (filtering by date, type, user).\n\n### Integration Tests\n- Verify that creating a user correctly persists the record in the database.\n- Verify that deleting a user cascades or reassigns related data as expected.\n- Verify that audit log entries are correctly written and retrievable after user actions.\n\n### End-to-End Tests\n- Admin logs in, navigates to admin panel, creates a new user, and confirms the user appears in the user list.\n- Admin logs in, searches for an existing user, deletes the user, and confirms the user no longer appears.\n- Admin logs in, performs several actions (create, delete), then views audit logs and verifies those actions are recorded.\n\n## 4. Entry Criteria\n\n- All requirements are clearly defined and reviewed.\n- Test environment is set up and accessible.\n- Admin login functionality is working.\n- User database and audit log storage are available.\n\n## 5. Exit Criteria\n\n- All planned test cases are executed.\n- At least 90% of test cases pass.\n- No critical or high-severity defects remain open.\n- All defects are documented and triaged.\n\n## 6. Test Environments\n\n- **Test Environment 1**: Dedicated test environment with a fresh database, admin account already configured.\n- **Test Environment 2**: Staging environment (optional for E2E tests) that mirrors production.\n\n## 7. Test Data\n\n- Pre-configured admin account (username, password).\n- List of test users to create and delete.\n- Valid and invalid usernames/emails for validation testing.\n- Sample audit log entries for verifying retrieval and display.\n\n## 8. Traceability Table\n\nSee attached CSV file for the traceability matrix mapping requirements to specific test cases.",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "Admin can create new user accounts",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "Admin can delete user accounts",
+                "passed": true
+              },
+              {
+                "kind": "not_contains",
+                "value": "User self-registration",
+                "passed": false
+              },
+              {
+                "kind": "contains",
+                "value": "Unit tests",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "Risk",
+                "passed": true
+              },
+              {
+                "kind": "regex",
+                "value": "(?i)entry criteria.*exit criteria",
+                "passed": false
+              }
+            ]
+          },
+          "without_skill": {
+            "output": "# Quality Strategy & Test Plan\n\n## 1. Scope\n**In Scope:** User account management (creation and deletion by Admin) and audit log viewing.\n**Out of Scope:** User self-registration, password policies.\n\n## 2. Risks\n| Risk | Mitigation |\n|------|------------|\n| Admin creates account with existing username | Validation to prevent duplicates |\n| Admin deletes account with active sessions | Force session termination before deletion |\n| Unauthorized admin accessing audit logs | Role-based access control enforcement |\n| Data corruption during concurrent delete operations | Database transaction locking mechanisms |\n\n## 3. Test Levels\n\n### Unit Testing\n- **Level 1 - Account Creation Validation**\n  - Validate required fields: username, email, role\n  - Verify duplicate username rejection\n  - Confirm successful creation returns unique user ID\n\n- **Level 2 - Account Deletion Logic**\n  - Verify user exists before deletion\n  - Confirm cascade deletion of related data\n  - Check error handling for non-existent users\n\n- **Level 3 - Audit Log Retrieval**\n  - Validate date range filtering\n  - Confirm pagination behavior\n  - Verify log entry structure: timestamp, admin ID, action, target user\n\n### Integration Testing\n- **Data layer** interactions (create/delete operations with database)\n- **Authentication/Authorization** checks for each operation\n- **Audit trail** consistency (every account action logged)\n\n### System Testing\n- End-to-end admin workflow: Create user \u2192 Verify existence \u2192 Delete user \u2192 Confirm removal \u2192 View audit logs\n- Concurrent operations (two admins working simultaneously)\n- Performance under load (100+ account operations/minute)\n\n### Acceptance Testing\n- **Functional:** All requirements met with positive/negative cases\n- **Security:** Audit logs accessible only to authorized admins\n\n## 4. Entry/Exit Criteria\n\n| Criteria Type | Condition |\n|---------------|-----------|\n| **Entry** | All requirements documented and approved; test environment ready; test data prepared |\n| **Exit** | All test cases executed; \u226595% pass rate; no critical/open blocker bugs; audit trail verified for all actions |\n\n## 5. Test Environments\n\n| Environment | Configuration | Purpose |\n|-------------|---------------|---------|\n| **Dev** | Local DB, sample admin accounts | Unit/integration testing |\n| **Staging** | Mirrors production, isolated DB | System/acceptance testing |\n| **Production (read-only replica)** | Copy of live data (anonymized) | Performance testing |\n\n## 6. Test Data\n\n### Pre-conditions\n- 5 admin accounts with full permissions\n- 10 regular user accounts for deletion testing\n- 1 account with active sessions (for deletion validation)\n\n### Data Variations\n- Valid usernames (alphanumeric, special chars, max length)\n- Invalid usernames (empty, too long, SQL injection patterns)\n- Existing/duplicate usernames\n- Non-existent user IDs for deletion\n\n## 7. Traceability Matrix\n\n| Requirement | Test Cases (Unit) | Test Cases (Integration) | Test Cases (System) | Status |\n|-------------|------------------|------------------------|--------------------|--------|\n| R1: Create account | TC-U-01 to TC-U-05 | TC-I-01, TC-I-02 | TC-S-01, TC-S-02 | Planned |\n| R2: Delete account | TC-U-06 to TC-U-10 | TC-I-03, TC-I-04 | TC-S-03, TC-S-04 | Planned |\n| R3: View audit logs | TC-U-11 to TC-U-13 | TC-I-05 | TC-S-05, TC-S-06 | Planned |\n\n## Additional Considerations\n**Security Testing:**\n- Verify non-admin users cannot access admin endpoints\n- Test SQL injection prevention in search/filter functions\n- Validate audit log cannot be tampered with after creation\n\n**Automation Strategy:**\n- Unit tests: Run on every commit via CI pipeline\n- Integration tests: Run daily or on merge to staging branch\n- Smoke tests: Execute before each deployment",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "Admin can create new user accounts",
+                "passed": false
+              },
+              {
+                "kind": "contains",
+                "value": "Admin can delete user accounts",
+                "passed": false
+              },
+              {
+                "kind": "not_contains",
+                "value": "User self-registration",
+                "passed": false
+              },
+              {
+                "kind": "contains",
+                "value": "Unit tests",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "Risk",
+                "passed": true
+              },
+              {
+                "kind": "regex",
+                "value": "(?i)entry criteria.*exit criteria",
+                "passed": false
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "publish": {
+    "status": 201,
+    "body": {
+      "name": "planning-quality-strategy",
+      "version": 1,
+      "sha256": "c5d2d6f0a993edb26e3dbc0dad13bb3c8a9d76bc537a36b148c78205a3803a6f",
+      "checks": [
+        {
+          "check": "frontmatter",
+          "passed": true,
+          "detail": "YAML frontmatter between --- lines"
+        },
+        {
+          "check": "name format",
+          "passed": true,
+          "detail": "name 'planning-quality-strategy': lowercase letters, digits and single hyphens, at most 64"
+        },
+        {
+          "check": "name matches folder",
+          "passed": true,
+          "detail": "name 'planning-quality-strategy', folder 'planning-quality-strategy'"
+        },
+        {
+          "check": "description",
+          "passed": true,
+          "detail": "279 characters (1 to 1024)"
+        },
+        {
+          "check": "body length",
+          "passed": true,
+          "detail": "32 lines (at most 500; move detail into references/)"
+        },
+        {
+          "check": "MAF loads it",
+          "passed": true,
+          "detail": "MAF FileSkillsSource loaded it"
+        },
+        {
+          "check": "security scan",
+          "passed": true,
+          "detail": "no findings"
+        }
+      ]
+    }
+  }
+}

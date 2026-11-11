@@ -31,13 +31,13 @@ from agent_framework import (
     todos_remaining_message,
 )
 
-from backend import config
 from backend.config import DATA_DIR, HARNESS_CONTEXT_TOKENS, HARNESS_MAX_ROUNDS, HARNESS_MAX_TOOL_CALLS
 from backend.core import auth, plugin_grants, plugins, prompts
-from backend.core.errors import AqeError
 from backend.core.mcp import mcp_tools_for
 from backend.maf import governance, llm, tools
-from backend.maf.harness_kit import specialists
+from backend.maf.harness_kit import plugin_agents, specialists, workspace
+from backend.maf.harness_kit.hook_middleware import guarded
+from backend.maf.harness_kit.shell import ShellProvider, WorkspaceShell
 from backend.maf.harness_kit.nudges import while_working
 from backend.maf.harness_kit.catalog import CORE, RISKY, Catalogue, LoadedTools
 from backend.maf.harness_kit.snapshots import APPROVALS, SNAPSHOTS, scope, session_id  # noqa: F401 - used by maf/agui.py and api/chat.py
@@ -46,18 +46,7 @@ from backend.maf.tools import find_tools, load_tools
 
 AGENT = "harness"
 HARNESS_DIR = DATA_DIR / "harness"
-DESKTOP_ONLY = "The harness runs in the desktop app; the shared web server has no per-person workspace"
-
-
-class DesktopOnly(AqeError):
-    code = "AQE-HARNESS-DESKTOP-ONLY"
-    action = "Open the harness in the desktop app, or run the platform locally."
-
-
-def require_desktop() -> None:
-    """The `web` profile is one shared server: no per-person sandbox or workspace, so the harness is off there."""
-    if config.PROFILE == "web":
-        raise DesktopOnly(DESKTOP_ONLY)
+STUDIO_ONLY = frozenset({"skill-creator"})  # Skill Studio's model instructions; the harness uses create_skill
 
 
 def _skills() -> SkillsProvider:
@@ -70,7 +59,8 @@ def _skills() -> SkillsProvider:
     """
     paths = plugins.skill_paths(role=plugin_grants.role_of(auth.current_user.get()))
     commands = set().union(*(plugins.command_skill_names(path) for path in paths))
-    source = DeduplicatingSkillsSource(FilteringSkillsSource(FileSkillsSource(paths), lambda skill, _ctx: skill.frontmatter.name not in commands))
+    hidden = commands | STUDIO_ONLY  # one way per job: skills are made with the create_skill tool, not the Studio's own instructions
+    source = DeduplicatingSkillsSource(FilteringSkillsSource(FileSkillsSource(paths), lambda skill, _ctx: skill.frontmatter.name not in hidden))
     return SkillsProvider(source, disable_load_skill_approval=True, disable_read_skill_resource_approval=True)
 
 
@@ -94,7 +84,6 @@ def _compaction(client, model: str, budget: int, telemetry) -> TokenBudgetCompos
 
 def build(project_id: str, thread_id: str, start_run, *, user_id: str | None = None, model: str = "") -> Agent:
     """A harness agent for one chat turn. Same checks as `runtime.build`, then MAF's batteries-included harness."""
-    require_desktop()
     governance.require_enabled(AGENT)
     user_id = user_id or auth.acting_user(project_id)
     model = auth.model_for(project_id, AGENT, None, user_id, model)
@@ -112,6 +101,8 @@ def build(project_id: str, thread_id: str, start_run, *, user_id: str | None = N
     telemetry = governance.telemetry(AGENT, project_id, None, "chat", model, user_id, ref, json.dumps([]), also_allowed=frozenset(catalogue.mcp))
     client = llm.client(model, max_rounds=HARNESS_MAX_ROUNDS, max_tool_calls=HARNESS_MAX_TOOL_CALLS)
     compaction = _compaction(client, model, HARNESS_CONTEXT_TOKENS - max_output, telemetry)
+    ws = workspace.open_workspace(project_id, thread_id, user_id)  # None without a repository: no write or shell tools then
+    world, providers = _world(ws)
     return create_harness_agent(
         client,
         name=AGENT,
@@ -127,12 +118,21 @@ def build(project_id: str, thread_id: str, start_run, *, user_id: str | None = N
         skills_provider=_skills(),
         # like Claude Code and Codex the harness does the work; risky tools still stop for an approval card. /plan switches mode
         mode_provider=AgentModeProvider(default_mode="execute"),
-        background_agents=specialists.build(project_id, user_id) or None,
+        background_agents=specialists.build(project_id, user_id) + plugin_agents.build(project_id, user_id, model, ws) or None,
         # in execute mode MAF re-runs the turn while todos stay open; a pending approval always stops it
         loop_should_continue=while_working(todos_remaining(looping_modes=["execute"])),
         loop_next_message=todos_remaining_message,
         loop_max_iterations=HARNESS_MAX_ROUNDS,
         disable_web_search=True,  # no data leaves through a hosted search tool
-        context_providers=[ProjectContext(project_id, full=True), loaded],
-        middleware=[tool_audit(AGENT, project_id, None, "chat"), telemetry],
+        context_providers=[ProjectContext(project_id, full=True), loaded, workspace.WorkspaceContext(ws), *providers],
+        middleware=[tool_audit(AGENT, project_id, None, "chat"), *([guarded(ws)] if ws else []), telemetry],
+        **world,
     )
+
+
+def _world(ws) -> tuple[dict, list]:
+    """Plan H2: MAF file access on the workspace (reads free, writes approved) and MAF's shell tool confined to it."""
+    if ws is None:
+        return {}, []
+    world = {"file_access_store": workspace.WorkspaceStore(ws.root), "file_access_disable_readonly_tool_approval": True}
+    return world, [ShellProvider(WorkspaceShell(ws))]  # the shell comes through a provider: see harness_kit/shell.py

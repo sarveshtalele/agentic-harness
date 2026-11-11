@@ -1,5 +1,6 @@
 """Tests for Azure App Service & Kudu packaging and conversion script."""
 import os
+import shutil
 from pathlib import Path
 import subprocess
 import tempfile
@@ -118,6 +119,18 @@ def test_generate_setup_script():
     assert "az webapp cors add" in script
 
 
+def _bash() -> str:
+    """bash for the .sh script. On Windows, Git's own bash, never the WSL launcher in System32."""
+    git = shutil.which("git")
+    if os.name == "nt" and git:
+        for found in (Path(git).resolve().parent.parent / "bin" / "bash.exe", Path(git).resolve().parent.parent / "usr" / "bin" / "bash.exe"):
+            if found.is_file():
+                return str(found)
+    found = shutil.which("bash")
+    assert found, "bash is needed to run scripts/verify_branch_isolation.sh"
+    return found
+
+
 def test_branch_isolation_policy():
     """Verify that branch isolation script correctly blocks merging feature/azure-kudu-deployment into main."""
     verify_script = ROOT / "scripts/verify_branch_isolation.sh"
@@ -132,12 +145,12 @@ def test_branch_isolation_policy():
     subprocess.run(git + ["commit", "-q", "--allow-empty", "-m", "init"], cwd=scratch, check=True, timeout=30)
 
     # Locked branch targeting main must fail with exit code 1
-    res = subprocess.run([str(verify_script), "main"], capture_output=True, text=True, cwd=scratch, timeout=30)
+    res = subprocess.run([_bash(), str(verify_script), "main"], capture_output=True, text=True, cwd=scratch, timeout=30)
     assert res.returncode == 1
     assert "strictly protected" in res.stderr
     assert "cannot merge" in res.stderr
 
     # Calling targeting itself must succeed
-    res_self = subprocess.run([str(verify_script), "feature/azure-kudu-deployment"], capture_output=True, text=True, cwd=scratch, timeout=30)
+    res_self = subprocess.run([_bash(), str(verify_script), "feature/azure-kudu-deployment"], capture_output=True, text=True, cwd=scratch, timeout=30)
     assert res_self.returncode == 0
 

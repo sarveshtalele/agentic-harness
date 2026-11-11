@@ -3,12 +3,13 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+import logging
 import os
 import threading
 from contextvars import ContextVar
 from datetime import datetime, timezone
 
-from backend.core.security import encryption_key, register_secret
+from backend.core.security import encryption_key, register_secret, weak_secret
 from backend.db import db, now, row
 
 ADMIN_ID = "admin"
@@ -36,7 +37,20 @@ class Forbidden(AuthError):
 def _admin_login() -> tuple[str, str]:
     username, password = os.environ.get("ATLAS_ADMIN_USERNAME", ""), os.environ.get("ATLAS_ADMIN_PASSWORD", "")
     register_secret(password)
+    if password and (why := weak_secret(password, username)):
+        logging.getLogger("aqe.auth").warning("ATLAS_ADMIN_PASSWORD is weak (%s). Change it in .env or the app settings, then restart.", why)
     return username.strip().lower(), password
+
+
+def admin_email() -> str:
+    """Contact address of the env admin, who has no account row. Optional."""
+    return os.environ.get("ATLAS_ADMIN_EMAIL", "").strip()
+
+
+def admin_password_problem() -> str:
+    """Shown to the admin on the Settings page; the password itself is never returned."""
+    username, password = os.environ.get("ATLAS_ADMIN_USERNAME", ""), os.environ.get("ATLAS_ADMIN_PASSWORD", "")
+    return weak_secret(password, username) if password else ""
 
 
 def admin_configured() -> bool:

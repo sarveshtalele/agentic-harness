@@ -24,8 +24,9 @@ export default function AccountPage() {
   const [form, setForm] = useState({ current: "", next: "", again: "" });
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [email, setEmail] = useState("");
   const toast = useToast();
-  useEffect(() => { api("/auth/me").then(setMe).catch((e) => setError(e.message)); }, []);
+  useEffect(() => { api("/auth/me").then((m) => { setMe(m); setEmail(m.email || ""); }).catch((e) => setError(e.message)); }, []);
   if (!me) return <AppShell><PageTitle title="Account" /><ErrorNote message={error} />{!error && <Spinner />}</AppShell>;
   const admin = me.role === "admin";
   const change = async (event: React.FormEvent) => {
@@ -43,10 +44,28 @@ export default function AccountPage() {
       setBusy(false);
     }
   };
+  const saveEmail = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setError("");
+    try {
+      setMe(await api("/account/email", { method: "PATCH", json: { email } }));
+      toast("Email saved");
+    } catch (e: any) {
+      setError(e.message);
+    }
+  };
   return (
     <AppShell>
       <PageTitle title="Account" subtitle={`${me.username} · ${ROLE[me.account_role] || me.account_role}`} />
       <div className="grid gap-4 md:grid-cols-2">
+        <Card title="Email">
+          {admin ? <p className="text-sm text-slate-600 dark:text-slate-400" data-testid="admin-email-note">{me.email || "None set."} The administrator email lives in the environment (ATLAS_ADMIN_EMAIL).</p> : (
+            <form onSubmit={saveEmail} className="space-y-2">
+              <Field label="Email" hint="Shown beside your approvals to administrators. Leave blank to remove it."><input type="email" name="email" autoComplete="email" maxLength={254} className={inputClass} value={email} onChange={(e) => setEmail(e.target.value)} /></Field>
+              <Button type="submit">Save email</Button>
+            </form>
+          )}
+        </Card>
         <Card title="Password">
           {admin ? <p className="text-sm text-slate-600 dark:text-slate-400" data-testid="admin-password-note">The administrator password lives in the environment (ATLAS_ADMIN_PASSWORD). Change it there and restart the server.</p> : (
             <form onSubmit={change} className="space-y-2">

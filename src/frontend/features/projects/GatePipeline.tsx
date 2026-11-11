@@ -1,6 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "../../components/ui";
+import { Approver } from "../../components/Approver";
 
 export function GatePipeline({ gates, base }: { gates: any[]; base: string }) {
   return (
@@ -44,7 +45,7 @@ export function GatePipeline({ gates, base }: { gates: any[]; base: string }) {
                   {g.name}
                 </span>
                 <span className="block text-[11px] text-slate-500 truncate mt-0.5">
-                  {g.decided_by_name || "Automated Review"}
+                  {g.decided_by ? <Approver item={g} /> : "Automated Review"}
                 </span>
               </div>
             </Link>

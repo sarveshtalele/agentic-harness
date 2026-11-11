@@ -68,10 +68,12 @@ def backend_entries(root: Path, deploy_dir: Path, tracked: set[Path] | None = No
     """Backend package: startup files, src/backend, a top-level backend/ alias and the asset folders."""
     entries: dict[str, Path] = {
         "requirements.txt": root / "requirements.txt",
+        "requirements-evals.txt": root / "requirements-evals.txt",  # installed only with ATLAS_INSTALL_EVALS=1 (RAGAS)
         "startup.sh": deploy_dir / "backend_startup.sh",
         "startup.py": deploy_dir / "backend_startup.py",
         ".deployment": deploy_dir / "kudu.deployment",
         "web.config": deploy_dir / "backend_web.config",
+        "scripts/env_check.py": root / "scripts" / "env_check.py",  # run in Kudu SSH to check the App Service settings
     }
     src_backend_files = collect_folder(root / "src/backend", root, tracked)
     entries.update(src_backend_files)

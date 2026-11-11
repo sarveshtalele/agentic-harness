@@ -73,7 +73,6 @@ def get_chat(thread_id: str):
 @router.get("/api/chats/{thread_id}/todos")
 async def chat_todos(thread_id: str):
     """The harness's own MAF todo list for this chat thread and person, read through MAF's TodoFileStore. Empty means no todos yet."""
-    harness.require_desktop()
     with db() as con:
         thread = row(con.execute("SELECT project_id, agent FROM chat_threads WHERE id=?", (thread_id,)))
     if not thread:

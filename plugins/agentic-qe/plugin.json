@@ -1,0 +1,43 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "agentic-qe",
+  "version": "1.6.0",
+  "description": "Full test engineering lifecycle for greenfield and brownfield projects: repository analysis or BA user stories, risk-based planning, test design, test generation, isolated execution, healing, traceability and an offline release report, with human approval gates and enforced guardrails.",
+  "author": {
+    "name": "Sarvesh Talele",
+    "url": "https://github.com/sarveshtalele"
+  },
+  "homepage": "https://github.com/sarveshtalele/agentic-qe#readme",
+  "repository": "https://github.com/sarveshtalele/agentic-qe",
+  "keywords": [
+    "agentic-qe",
+    "quality-engineering",
+    "test-generation",
+    "test-planning",
+    "self-healing",
+    "istqb",
+    "playwright",
+    "vitest",
+    "pytest",
+    "junit",
+    "brownfield",
+    "greenfield",
+    "user-stories"
+  ],
+  "extensions": {
+    "com.openai": {
+      "hooks": "./hooks/hooks.json",
+      "interface": {
+        "displayName": "Agentic QE",
+        "shortDescription": "Test engineering lifecycle with approval gates and guardrails",
+        "developerName": "Sarvesh Talele",
+        "category": "Coding",
+        "defaultPrompt": [
+          "Use $qe-start to begin a QE run for this repository.",
+          "Use $qe-panel to show the live QE progress panel."
+        ]
+      }
+    }
+  },
+  "types": "./types/index.d.ts"
+}

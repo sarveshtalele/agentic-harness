@@ -6,7 +6,7 @@ import { CallStatus, useCall } from "./useCall";
 
 type Graded = { kind: string; value: string; passed: boolean };
 type Side = { output: string; assertions: Graded[] };
-type Result = { metrics: Record<string, number | undefined>; n: number; judge_model: string; prompt_ref: string; tokens: number; cases: { case: number; input: string; with_skill: Side; without_skill: Side }[] };
+type Result = { metrics: Record<string, number | undefined>; n: number; judge_model: string; prompt_ref: string; tokens: number; cases: { case: number; input: string; with_skill: Side; without_skill: Side }[]; script_failures?: number; note?: string };
 const names: [string, string][] = [["assertion_pass_rate_with_skill", "Pass rate with the skill"], ["assertion_pass_rate_without_skill", "Pass rate without the skill"], ["skill_uplift", "Uplift"]];
 
 function Assertions({ title, side }: { title: string; side: Side }) {
@@ -28,6 +28,7 @@ export function EvaluateStep({ record }: { record: PlanRecord }) {
         <CallStatus call={call} />
         {result && (
           <>
+            {result.note && <p role="alert" data-testid="studio-eval-note" className="rounded-lg bg-amber-500/15 px-3 py-1.5 text-xs text-amber-700 dark:text-amber-400">{result.note}</p>}
             <div className="grid gap-2 sm:grid-cols-3" data-testid="studio-eval-metrics">
               {names.map(([key, label]) => {
                 const v = result.metrics[key];

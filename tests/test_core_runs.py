@@ -55,7 +55,10 @@ REQS = [{"id": "REQ-1", "title": "A", "priority": "P0"}, {"id": "REQ-2", "title"
 
 def test_coverage_gaps_and_duplicates():
     cases = [{"id": "TC-1", "requirement_id": "REQ-1", "type": "Positive", "scenario": "x"}, {"id": "TC-2", "requirement_id": "REQ-1", "type": "Positive", "scenario": "X "}]
-    assert model.coverage_gaps(REQS, cases) == ["REQ-1: needs 2 Negative cases", "REQ-1: no Exception case"]
+    assert model.coverage_gaps(REQS, cases) == ["REQ-1: needs 2 Negative cases"], "no error behaviour stated, so no Exception case is required"
+    erring = [{**REQS[0], "error_behaviour": "raises ValueError when b is 0"}]
+    assert model.coverage_gaps(erring, cases) == ["REQ-1: needs 2 Negative cases", "REQ-1: no Exception case, and the requirement states error behaviour"]
+    assert model.coverage_gaps([{**REQS[0], "quote": "raise ValueError('b is 0')"}], cases)[-1].endswith("states error behaviour"), "a raise on the verified quote counts"
     assert model.duplicate_scenarios(cases) == ["TC-2"]
 
 

@@ -301,3 +301,22 @@
 - [ ] M7 Desktop: `apps/desktop` Electron app written. Dev-mode run verified 2026-11-10 by `tests/desktop/test_desktop_app.py` (real Electron over CDP: first-run admin stored with OS keychain encryption, backend and UI started, login window). Fixed: the app quit when the setup window closed. Left: PyInstaller backend bundle, DMG build, MSI on the CI Windows runner, harness stories in the packaged app
 - [ ] M8 User stories for every page; unit, integration and Playwright E2E; HTML evidence report with screenshots; real RAGAS
 - [ ] M9 Final proof on web, desktop and Azure; review; docs
+
+## Master plan Part 2, revised 2026-11-11 (harness first, zip deployment; approved 2026-11-11)
+
+- [x] H1 (2026-11-11) Deferred-tool index (every loadable tool by name and purpose in context), action-first descriptions, skill-creator hidden from the harness, acting instructions. Live: HS-02, HS-07, HS-10 now pass; 11 of 13 stories (HS-06 waits for H3; status test had a test race, fixed). Left: harness eval set
+- [ ] H2 Execution world: workspace, MAF file access with approvals, MAF shell executor with allowlist and approvals, 5 sandbox slots on web
+  - Built 2026-11-11 (offline tests pass, `tests/test_harness_world.py`): `harness_kit/workspace.py`, `shell.py`, `leases.py`, migration 021, `agent-framework-tools==1.0.0b261030`; the harness now runs on the web profile with 5 slots. Live: 19 approved shell commands ran and were audited; the validator environment was set up through `run_shell`
+- [ ] H3 Full agentic-qe plugin in the harness: install @8a7497b, Claude Code hook adapter, plugin agents, commands end to end, personal-finance-mcp cycle through the harness
+  - Built 2026-11-11: plugin @8a7497b, `core/plugin_hooks.py`, `harness_kit/hook_middleware.py`, `prompt_hooks.py`, `plugin_agents.py`; `tests/test_harness_plugin_hooks.py` runs the real guard-bash.ts and approval-hook.ts. Live cycle (`docs/evidence/runs/2026-11-11-harness-plugin/`): Gate 0 recorded by the plugin from the typed phrase; Gate 1 refused by the plugin because the model never wrote `02-requirements/requirements.json`; no phase document was written by the model (deepseek-v4-flash explored with 622 tool calls and confused the platform's `project_status` gates with the plugin's). Left: a cycle past Gate 1 on a model that follows the command steps
+- [ ] H4 Harness parity: fork, replay check, background tasks, SAFETY.md, CLI commands
+- [ ] H5 Skill Studio and agents. Done 2026-11-11: 5 fake skills removed and recreated live (quality strategy, markdown to docx 11/11 tests, html to pdf test design published; data to table published with 2 failing tests, so publish now requires the skill's own tests to PASS on the same files, and it was removed; html to pdf imported an uninstalled package, so a new check refuses imports outside the standard library and platform packages; scanner: an HTML <script> mention is medium, not blocking). Left: rerun of the two script skills, 4 more fake skills found (owner decision), per-skill dependencies, agent evals, RAGAS
+- [ ] H6 Local and Azure environments; PostgreSQL and Blob; zip deployment guide
+- [ ] H7 Desktop: docs/DESKTOP_RELEASE_GUIDE.md written; build writes latest-<os>.json with SHA-256; login page Desktop app section from ATLAS_DOWNLOADS_URL (verified empty state in the browser). Left: DMG and MSI builds
+- [ ] H9 OpenTelemetry traces, local span store, optional OTLP, trace explorer (admin all, members own)
+  - Built 2026-11-11: `core/tracing/`, migration 020, `/api/traces`, `/traces`, tests `tests/test_tracing_*.py`. Open: browser check, "View trace" link on harness replies (needs `features/chat`).
+- [ ] H8 Evidence report for everything on local and Azure
+- [ ] Phase Q (`docs/MASTER_PLAN.md`, trace `docs/analysis/2026-11-11-markdown-html-converter-trace.md`)
+  - [x] Q1 (2026-11-11) B1 to B7, B14 to B18 fixed offline with `tests/test_qe_correctness.py`. Left: Q4 live rerun on the real model (empty repository stops at Gate 0; a real converter repository gives string-typed cases, no invented Exception case, no stubbed subject)
+  - [ ] Q2 chat approvals and history (B9 to B13), Q3 joinable logs (G1 to G15), after H2 and H3
+- On hold: QE Cycle UI on the plugin

@@ -1,0 +1,5 @@
+Duplicate record ids: {duplicate_ids}
+Conflict record ids: {conflict_ids}
+Per-merchant unique totals:
+  {merchant_id}: {total}
+...

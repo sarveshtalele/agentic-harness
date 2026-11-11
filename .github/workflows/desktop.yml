@@ -29,4 +29,5 @@ jobs:
             apps/desktop/dist/*.dmg
             apps/desktop/dist/*.zip
             apps/desktop/dist/*.msi
+            apps/desktop/dist/latest-*.json
           if-no-files-found: error

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useProject } from "../../../../components/ProjectShell";
 import { useAuth } from "../../../../components/AuthGate";
+import { Approver } from "../../../../components/Approver";
 import { Badge, Button, Card, ErrorNote, Field, inputClass, PageTitle, Spinner } from "../../../../components/ui";
 import { api, when } from "../../../../lib/api";
 
@@ -49,7 +50,7 @@ export default function GovernancePage() {
             <tbody>{safeGates.map((g) => (
               <tr key={g.gate} className="border-t border-slate-200 first:border-0 dark:border-slate-800">
                 <td className="py-1.5"><b>G{g.gate} {g.name}</b><br /><span className="text-xs text-slate-500">{g.description}</span></td>
-                <td className="text-xs">{g.decided_by_name}{g.decided_at && <><br />{when(g.decided_at)}</>}{g.reason && <><br />{g.reason}</>}</td>
+                <td className="text-xs"><Approver item={g} />{g.decided_at && <><br />{when(g.decided_at)}</>}{g.reason && <><br />{g.reason}</>}</td>
                 <td><Badge>{g.status}</Badge>{g.signature_valid === false && <Badge tone="rose">bad signature</Badge>}</td>
               </tr>
             ))}</tbody>

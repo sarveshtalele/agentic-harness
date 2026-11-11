@@ -5,7 +5,7 @@ import time
 
 from agent_framework import chat_middleware
 
-from backend.core import auth, prompts
+from backend.core import auth, prompts, tracing
 from backend.core.security import redact
 from backend.db import db, now, rows
 from backend.maf import observability
@@ -17,6 +17,8 @@ SKILL_TOOLS = {"load_skill", "read_skill_resource"}  # MAF SkillsProvider tools,
 def record_call(agent: str, project_id: str | None, run_id: str | None, source: str, usage: dict, latency_ms: int, tool_calls: int, status: str, error: str = "", model: str = "", user_id: str | None = None,
                 prompt_ref: str = "", skills: str = "") -> None:
     """`prompt_ref` names the prompt and the skill text actually sent; `skills` is the JSON list of skills used (see core/skills.py)."""
+    tracing.note(project_id=project_id, run_id=run_id, user_id=user_id, agent=agent, model=model, tokens_in=usage.get("input_token_count") or 0,
+                 tokens_out=usage.get("output_token_count") or 0, status="error" if status != "ok" else None)  # the run's root span shows these
     with db() as con:
         con.execute(
             "INSERT INTO agent_calls (agent, project_id, run_id, source, prompt_ref, tokens_in, tokens_out, latency_ms, tool_calls, status, error, created_at, model, user_id, skills) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",

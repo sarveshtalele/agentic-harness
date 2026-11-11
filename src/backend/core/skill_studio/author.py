@@ -13,7 +13,8 @@ from backend.db import new_id
 AGENT = "skill-creator"
 KIND_RULES = {
     "instructions": "KIND: instructions. Files are SKILL.md, optional references/*.md, and optional assets/* templates. No scripts.",
-    "scripts": "KIND: scripts. Files are SKILL.md, scripts/*.py with real code, and at least one scripts/test_*.py pytest file that imports "
+    "scripts": "KIND: scripts. Files are SKILL.md, scripts/*.py with real code, scripts/run.py (the entry point: it reads the input as text from "
+               "standard input and prints the skill's output to standard output), and at least one scripts/test_*.py pytest file that imports "
                "the script by module name and asserts real behaviour. Optional references/*.md and assets/* templates.",
 }
 
@@ -82,6 +83,21 @@ async def write_files(plan: dict, author: str) -> list[dict]:
     ])
     generated = await _typed(_call(plan["project_id"]), message, files_schema(approved, plan["kind"], author))
     return [{"path": f.path, "content": f.content} for f in generated.files]
+
+
+async def repair_files(plan: dict, author: str, files: list[dict], failure: str) -> list[dict]:
+    """One repair round: the current files and the failing test output go back to the model, which returns every file."""
+    approved = SkillPlan.model_validate(plan["plan"])
+    message = "\n".join([
+        "TASK: repair the files of the approved skill plan; its own tests failed.",
+        KIND_RULES[plan["kind"]],
+        "APPROVED PLAN:", json.dumps(plan["plan"], indent=1),
+        "CURRENT FILES:", json.dumps(files, indent=1),
+        data_block("test-output", failure),
+        data_block("source", plan["source_text"]),
+    ])
+    repaired = await _typed(_call(plan["project_id"]), message, files_schema(approved, plan["kind"], author))
+    return [{"path": f.path, "content": f.content} for f in repaired.files]
 
 
 def skill_text(files: list[dict], name: str) -> str:

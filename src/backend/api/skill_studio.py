@@ -133,6 +133,15 @@ async def run_test(plan_id: str, body: TestIn):
         return await steps.try_sample(plan_id, sample)
 
 
+@router.post("/plans/{plan_id}/repair")
+async def repair(plan_id: str):
+    user = access.author()
+    access.plan(plan_id)
+    with _refusals():
+        testing.check_profile()
+        return await steps.repair(plan_id, user["id"])
+
+
 @router.post("/plans/{plan_id}/evaluate")
 async def evaluate(plan_id: str):
     user = access.author()
@@ -147,6 +156,8 @@ def publish(plan_id: str):
     access.plan(plan_id)
     with _refusals():
         current, folder = plans.require_generated(plan_id)
+        if current["kind"] == "scripts" and (problem := testing.passing_problem(folder)):
+            raise versions.PublishRefused(problem)
         return versions.publish(current["plan"]["name"], folder, author=user["id"], project_id=current["project_id"], plan_id=plan_id,
                                 prompt_ref=f"{current['prompt_ref']}+draft:{current['draft_sha256'][:12]}")
 

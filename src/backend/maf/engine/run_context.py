@@ -57,4 +57,21 @@ def add_event(run_id: str, kind: str, stage: str, message: str, data: dict | Non
     with db() as con:
         con.execute("BEGIN IMMEDIATE")
         seq = con.execute("SELECT COALESCE(MAX(seq),0)+1 FROM run_events WHERE run_id=?", (run_id,)).fetchone()[0]
-        con.execute("INSERT INTO run_events VALUES (?,?,?,?,?,?,?)", (run_id, seq, kind, stage, redact(message), json.dumps(data or {}, default=str), now()))
+        con.execute("INSERT INTO run_events VALUES (?,?,?,?,?,?,?)", (run_id, seq, kind, stage, redact(message), _event_data(data), now()))
+
+
+def _event_data(data: dict | None) -> str:
+    """Event data passes through the same redact() as the message. Should masking ever break the JSON, each string is masked on its own instead."""
+    text = json.dumps(data or {}, default=str)
+    try:
+        return json.dumps(json.loads(redact(text)))
+    except ValueError:
+        return json.dumps(_masked(json.loads(text)))
+
+
+def _masked(value):
+    if isinstance(value, str):
+        return redact(value)
+    if isinstance(value, dict):
+        return {k: _masked(v) for k, v in value.items()}
+    return [_masked(v) for v in value] if isinstance(value, list) else value

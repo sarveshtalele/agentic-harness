@@ -8,6 +8,7 @@ from backend.core import auth
 
 router = APIRouter()
 DATE = r"^\d{4}-\d{2}-\d{2}$|^$"
+EMAIL = r"^[^@\s]+@[^@\s]+\.[^@\s]+$|^$"  # a simple shape check; core/auth repeats it
 
 
 class LoginIn(BaseModel):
@@ -27,9 +28,14 @@ class UserIn(BaseModel):
     model: str = ""
     models: list[str] | None = None
     role: str = "developer"
+    email: str | None = Field(default=None, max_length=254, pattern=EMAIL)
     token_limit: int | None = Field(default=None, ge=0)
     active_from: str | None = Field(default=None, pattern=DATE)
     active_until: str | None = Field(default=None, pattern=DATE)
+
+
+class EmailIn(BaseModel):
+    email: str = Field(max_length=254, pattern=EMAIL)
 
 
 class PasswordIn(BaseModel):
@@ -41,6 +47,7 @@ class UserPatch(BaseModel):
     model_config = ConfigDict(protected_namespaces=())  # model_limits is a field of ours, not a pydantic setting
     password: str | None = Field(default=None, max_length=500)
     role: str | None = None
+    email: str | None = Field(default=None, max_length=254, pattern=EMAIL)
     model: str | None = None
     models: list[str] | None = None
     limits: dict[str, int | None] | None = None
@@ -78,7 +85,11 @@ def logout(request: Request, response: Response):
 
 @router.get("/api/auth/me")
 def me():
-    return auth.describe(auth.current_user.get())
+    user = auth.current_user.get()
+    found = auth.describe(user)
+    if user and user.get("role") == "admin" and (problem := auth.admin_password_problem()):  # the password itself is never returned
+        found = {**found, "warnings": [f"The admin password (ATLAS_ADMIN_PASSWORD) is weak: {problem}. Change it, then restart the backend."]}
+    return found
 
 
 @router.get("/api/auth/events")
@@ -94,7 +105,7 @@ def list_users():
 @router.post("/api/users", status_code=201)
 def create_user(body: UserIn):
     try:
-        return auth.create_user(body.username, body.password, body.model, body.token_limit, body.active_from, body.active_until, body.models, body.role)
+        return auth.create_user(body.username, body.password, body.model, body.token_limit, body.active_from, body.active_until, body.models, body.role, body.email)
     except auth.AuthError as exc:
         raise HTTPException(400, str(exc)) from exc
 
@@ -117,3 +128,12 @@ def change_password(body: PasswordIn, request: Request):
     except auth.AuthError as exc:
         raise HTTPException(400, str(exc)) from exc
     return Response(status_code=204)
+
+
+@router.patch("/api/account/email")
+def change_email(body: EmailIn):
+    """A signed-in user sets or clears their own address. It is stored encrypted and never logged."""
+    try:
+        return auth.set_email(auth.signer(), body.email)
+    except auth.AuthError as exc:
+        raise HTTPException(400, str(exc)) from exc

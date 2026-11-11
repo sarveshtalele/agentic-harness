@@ -1,0 +1,129 @@
+[
+  {
+    "skill": "docx to pptx",
+    "kind": "scripts",
+    "plan": 201,
+    "name": "docx-to-pptx-converter",
+    "tasks": 9,
+    "files": [
+      "SKILL.md",
+      "scripts/run.py",
+      "scripts/converter.py",
+      "scripts/test_converter.py",
+      "assets/title_slide.pptx",
+      "assets/content_slide.pptx",
+      "assets/chart_slide.pptx",
+      "assets/warning_report.txt",
+      "references/structure.md"
+    ],
+    "subagents": 0,
+    "formats": 2,
+    "eval_cases": 3,
+    "generate": 200,
+    "checks": {
+      "frontmatter": true,
+      "name format": true,
+      "name matches folder": true,
+      "description": true,
+      "body length": true,
+      "MAF loads it": true,
+      "scripts/converter.py parses": true,
+      "scripts/converter.py imports": true,
+      "scripts/run.py parses": true,
+      "scripts/run.py imports": true,
+      "scripts/test_converter.py parses": true,
+      "scripts/test_converter.py imports": true,
+      "security scan": true
+    },
+    "script_tests": {
+      "verdict": "FAIL",
+      "passed": 1,
+      "failed": 2,
+      "errors": 0,
+      "exit_code": 1
+    },
+    "repair": {
+      "status": 200,
+      "verdict": "PASS",
+      "rounds": 1,
+      "history": [
+        {
+          "verdict": "FAIL",
+          "passed": 1,
+          "failed": 2,
+          "errors": 0,
+          "detail": null
+        },
+        {
+          "verdict": "PASS",
+          "passed": 3,
+          "failed": 0,
+          "errors": 0,
+          "detail": null
+        }
+      ]
+    },
+    "evaluation": {
+      "n": 3,
+      "assertion_pass_rate_with_skill": 0.5714285714285714,
+      "assertion_pass_rate_without_skill": 0.7142857142857143,
+      "skill_uplift": -0.1428571428571429
+    },
+    "publish": {
+      "status": 201,
+      "version": 1
+    },
+    "seconds": 63
+  },
+  {
+    "skill": "settlement idempotency",
+    "kind": "scripts",
+    "plan": 201,
+    "name": "settlement-idempotency-verifier",
+    "tasks": 5,
+    "files": [
+      "SKILL.md",
+      "scripts/run.py",
+      "scripts/verify_settlement_idempotency.py",
+      "scripts/test_verify_settlement_idempotency.py",
+      "assets/report_template.txt"
+    ],
+    "subagents": 0,
+    "formats": 1,
+    "eval_cases": 3,
+    "generate": 200,
+    "checks": {
+      "frontmatter": true,
+      "name format": true,
+      "name matches folder": true,
+      "description": true,
+      "body length": true,
+      "MAF loads it": true,
+      "scripts/run.py parses": true,
+      "scripts/run.py imports": true,
+      "scripts/test_verify_settlement_idempotency.py parses": true,
+      "scripts/test_verify_settlement_idempotency.py imports": true,
+      "scripts/verify_settlement_idempotency.py parses": true,
+      "scripts/verify_settlement_idempotency.py imports": true,
+      "security scan": true
+    },
+    "script_tests": {
+      "verdict": "PASS",
+      "passed": 7,
+      "failed": 0,
+      "errors": 0,
+      "exit_code": 0
+    },
+    "evaluation": {
+      "n": 3,
+      "assertion_pass_rate_with_skill": 0.6923076923076923,
+      "assertion_pass_rate_without_skill": 0.8461538461538461,
+      "skill_uplift": -0.15384615384615385
+    },
+    "publish": {
+      "status": 201,
+      "version": 1
+    },
+    "seconds": 33
+  }
+]

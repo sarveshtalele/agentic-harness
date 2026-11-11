@@ -10,7 +10,7 @@ This guide deploys Agentic QE Platform as a browser link for a small team at the
 | Database | SQLite on the app's persistent `/home` share (`ATLAS_SQLITE_JOURNAL=DELETE`) | No database server to pay for. Fine for a proof of concept with a few users |
 | Cache | None | Not needed at this size |
 | Model | Your existing model endpoint, entered on the Settings page after the first sign-in | No Azure OpenAI resource is required |
-| Profile | `ATLAS_PROFILE=web` | **The harness, sandbox script runs and stdio MCP servers are switched off on the web.** They need a dedicated workspace per person, so they run in the desktop app (`docs/MASTER_PLAN.md` M7) |
+| Profile | `ATLAS_PROFILE=web` | **Everything works on the web, including the harness and Skill Studio.** Every shell, write or script run takes one of `ATLAS_MAX_SANDBOXES` (default 5) platform-wide slots; a sixth waits with a clear message. stdio MCP servers, npx and plugin installs are desktop or local only, because they would run on the shared server |
 | Access | Every person signs in. What they see follows their project membership and role | The rules live in `src/backend/core/auth` (deny by default) |
 
 **Cost.** One B1 Linux plan is the only charged resource. Check the current price for your region in the [Azure pricing calculator](https://azure.microsoft.com/pricing/calculator/) before you create it. Prices differ by region and change over time. Stop or delete the plan when you are not using it.
@@ -30,10 +30,20 @@ This guide deploys Agentic QE Platform as a browser link for a small team at the
    - two globally unique app names, for example `aqe-api-<yourname>` and `aqe-ui-<yourname>`;
    - one region close to your users.
 
+## 0. Two environments, kept apart
+
+| | Local (your machine) | Azure (this guide) |
+|---|---|---|
+| Settings | `.env` from `deploy/environments/local.env.example` | App Service settings from `deploy/environments/azure.appsettings.example` |
+| Store | `data/local/` (SQLite, files on disk) | `/home/atlas/data` on the App Service |
+| Check | `python scripts/dev.py env-check --env local` | in Kudu **SSH**: `python /home/site/wwwroot/scripts/env_check.py --env azure` |
+
+They share no database, files or secrets. Change and test code locally, build the zips, prove them with `python scripts/dev.py azure-local --check`, then deploy the zips here. **Region: eastus2.**
+
 ## 1. Create the resource group
 
 1. In the portal, search **Resource groups** and select **Create**.
-2. Choose your subscription, enter the resource group name, and pick the region.
+2. Choose your subscription, enter the resource group name, and pick the region **East US 2**.
 3. Select **Review + create**, then **Create**.
 
 ## 2. Create the App Service plan (B1)
@@ -70,9 +80,13 @@ Open **Settings, Environment variables** and add these **App settings**. Select 
 
 | Name | Value | Notes |
 |---|---|---|
-| `ATLAS_PROFILE` | `web` | Harness, script runs and stdio MCP off |
+| `ATLAS_PROFILE` | `web` | All features; sandbox runs capped by `ATLAS_MAX_SANDBOXES`; stdio MCP and npx off |
+| `ATLAS_MAX_SANDBOXES` | `5` | Concurrent sandbox jobs across all users |
+| `ATLAS_ADMIN_EMAIL` | the admin's email | Shown beside the admin's approvals |
+| `ATLAS_INSTALL_EVALS` | `1` | Optional: installs RAGAS (`requirements-evals.txt`) on first start, so faithfulness scores are measured. Adds a few minutes to the first start |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | Application Insights OTLP endpoint | Optional: traces also go to Azure Monitor. The in-app Trace Explorer works without it |
 | `ATLAS_ADMIN_USERNAME` | the first administrator's username | Used only to create the first admin |
-| `ATLAS_ADMIN_PASSWORD` | a long, unique password | Stored as an app setting; it never appears in logs. Change it later on the Account page |
+| `ATLAS_ADMIN_PASSWORD` | a long, unique password, **12+ characters, different from the username** | Stored as an app setting; it never appears in logs. A weak one shows a red warning to the admin |
 | `ATLAS_SECRET_KEY` | a long random value | Encrypts stored secrets and signs sessions. If you lose it, stored secrets cannot be read |
 | `ATLAS_DATA_DIR` | `/home/atlas/data` | `/home` survives restarts and deployments |
 | `ATLAS_SQLITE_JOURNAL` | `DELETE` | The `/home` share has no shared memory, so WAL is not used |
@@ -113,6 +127,7 @@ python -c "import secrets; print(secrets.token_urlsafe(48))"
    | Name | Value |
    |---|---|
    | `ATLAS_BACKEND_URL` | `https://aqe-api-<yourname>.azurewebsites.net` |
+   | `ATLAS_DOWNLOADS_URL` | optional: the Blob `downloads` container URL (see `docs/DESKTOP_RELEASE_GUIDE.md`) |
    | `WEBSITES_ENABLE_APP_SERVICE_STORAGE` | `true` |
    | `WEBSITES_PORT` | `3000` |
 
@@ -182,7 +197,7 @@ The evidence report is written to `docs/evidence/runs/`. (`azure-local` is added
 
 | Missing | Reason | Where it comes from |
 |---|---|---|
-| Harness on the web | It needs a dedicated workspace per person | Desktop app (M7) |
+| PostgreSQL and Blob Storage | The database and file layers are not built yet; SQLite on `/home` is used | `docs/MASTER_PLAN.md` H6 |
 | Company single sign-on (Entra ID) | Not required for a small team; built-in accounts are used | Target architecture |
 | More than one instance | SQLite on one share supports one writer | PostgreSQL in the target architecture |
 | Isolated repository runs | Repository code would share the web server | Container Apps Jobs in the target architecture; until then, admit only trusted users (CLAUDE.md) |

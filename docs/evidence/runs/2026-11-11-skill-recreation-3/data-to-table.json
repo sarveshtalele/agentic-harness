@@ -1,0 +1,999 @@
+{
+  "plan": {
+    "status": 201,
+    "body": {
+      "id": "spl_1ffe2da3ab79",
+      "project_id": "prj_f6f9781eb991",
+      "author": "admin",
+      "kind": "scripts",
+      "request": "A skill with a Python script that turns CSV, JSON (a list of objects) or pipe-delimited text into a Markdown table and an HTML table, detecting the header row, aligning numeric columns to the right, and reporting rows with the wrong number of fields.",
+      "source_type": "text",
+      "source_ref": "",
+      "source_sha256": "690d612e472c932e7e7873ea80652f5438bb136d7da0dd9dd536de893047cc13",
+      "revise": "",
+      "status": "draft",
+      "plan_sha256": "",
+      "approved_by": "",
+      "approved_at": null,
+      "prompt_ref": "skill-creator@v1:aca2d48e5b0b",
+      "draft_sha256": "",
+      "generated_at": null,
+      "created_at": "2026-11-11T06:08:59+00:00",
+      "plan": {
+        "description": "Converts CSV, JSON (list of objects), or pipe-delimited text into Markdown and HTML tables. Detects the header row, right-aligns numeric columns, and reports rows with an incorrect number of fields. Use when raw tabular data in these formats needs to be presented as a formatted table in documentation or a web context.",
+        "eval_cases": [
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "| name | age | salary |"
+              },
+              {
+                "kind": "contains",
+                "value": "| Alice | 30 | 50000 |"
+              },
+              {
+                "kind": "regex",
+                "value": "| --- | ---: | ---: |"
+              }
+            ],
+            "input": "name,age,salary\nAlice,30,50000\nBob,25,60000\nCharlie,35,70000"
+          },
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "| city | population |"
+              },
+              {
+                "kind": "contains",
+                "value": "| Paris | 2161000 |"
+              },
+              {
+                "kind": "regex",
+                "value": "| --- | ---: |"
+              }
+            ],
+            "input": "[{\"city\":\"Paris\",\"population\":2161000},{\"city\":\"London\",\"population\":8982000},{\"city\":\"Berlin\",\"population\":3645000}]"
+          },
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "| name | age | city |"
+              },
+              {
+                "kind": "contains",
+                "value": "| Bob | 25 | London |"
+              },
+              {
+                "kind": "contains",
+                "value": "<th>name</th><th>age</th><th>city</th>"
+              }
+            ],
+            "input": "name|age|city\nAlice|30|Paris\nBob|25|London\nCharlie|35|Berlin"
+          },
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "Rows with wrong number of fields:"
+              },
+              {
+                "kind": "contains",
+                "value": "Row 2: field count 2 (expected 3)"
+              },
+              {
+                "kind": "contains",
+                "value": "Row 3: field count 4 (expected 3)"
+              },
+              {
+                "kind": "regex",
+                "value": "<th>a</th><th>b</th><th>c</th>"
+              }
+            ],
+            "input": "a,b,c\n1,2,3\n4,5\n6,7,8,9"
+          },
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "| name |"
+              },
+              {
+                "kind": "contains",
+                "value": "| Alice |"
+              },
+              {
+                "kind": "not_contains",
+                "value": "Rows with wrong number of fields"
+              }
+            ],
+            "input": "name\nAlice\nBob\nCharlie"
+          }
+        ],
+        "files": [
+          {
+            "path": "SKILL.md",
+            "purpose": "Describes the skill, its steps, decision rules, and links to reference files."
+          },
+          {
+            "path": "scripts/table_converter.py",
+            "purpose": "Main Python script that implements the conversion logic."
+          },
+          {
+            "path": "scripts/test_table_converter.py",
+            "purpose": "Pytest test file that imports table_converter and asserts correct behavior with various inputs."
+          },
+          {
+            "path": "references/error_reporting.md",
+            "purpose": "Describes the format and content of the row error report."
+          },
+          {
+            "path": "assets/markdown_table.md",
+            "purpose": "Template for the Markdown table output."
+          },
+          {
+            "path": "assets/html_table.html",
+            "purpose": "Template for the HTML table output."
+          },
+          {
+            "path": "assets/error_report.md",
+            "purpose": "Template for the error report output."
+          }
+        ],
+        "formats": [
+          {
+            "name": "Markdown Table",
+            "purpose": "Formatted table in Markdown syntax, with right-aligned numeric columns.",
+            "template_path": "assets/markdown_table.md"
+          },
+          {
+            "name": "HTML Table",
+            "purpose": "Formatted table in HTML syntax, with right-aligned numeric columns.",
+            "template_path": "assets/html_table.html"
+          },
+          {
+            "name": "Error Report",
+            "purpose": "Report listing any rows with mismatched field counts.",
+            "template_path": "assets/error_report.md"
+          }
+        ],
+        "name": "tabular-data-converter",
+        "subagents": [],
+        "tasks": [
+          "Receive input text and detect its format (CSV, JSON, or pipe-delimited).",
+          "Parse input into rows and columns, detecting the header row and aligning numeric columns to the right.",
+          "Generate a Markdown table string and an HTML table string from the parsed data.",
+          "Report any rows that have a different number of fields than the header row.",
+          "Output both tables and any error reports in a structured response."
+        ]
+      },
+      "checks": [],
+      "source_chars": 250
+    }
+  },
+  "approve": {
+    "status": 200,
+    "body": {
+      "id": "spl_1ffe2da3ab79",
+      "project_id": "prj_f6f9781eb991",
+      "author": "admin",
+      "kind": "scripts",
+      "request": "A skill with a Python script that turns CSV, JSON (a list of objects) or pipe-delimited text into a Markdown table and an HTML table, detecting the header row, aligning numeric columns to the right, and reporting rows with the wrong number of fields.",
+      "source_type": "text",
+      "source_ref": "",
+      "source_sha256": "690d612e472c932e7e7873ea80652f5438bb136d7da0dd9dd536de893047cc13",
+      "revise": "",
+      "status": "approved",
+      "plan_sha256": "7d7a1d792da0c3c20553b7676e4111e4a1178a7291215f1dad72177ee58ac465",
+      "approved_by": "admin",
+      "approved_at": "2026-11-11T06:08:59+00:00",
+      "prompt_ref": "skill-creator@v1:aca2d48e5b0b",
+      "draft_sha256": "",
+      "generated_at": null,
+      "created_at": "2026-11-11T06:08:59+00:00",
+      "plan": {
+        "description": "Converts CSV, JSON (list of objects), or pipe-delimited text into Markdown and HTML tables. Detects the header row, right-aligns numeric columns, and reports rows with an incorrect number of fields. Use when raw tabular data in these formats needs to be presented as a formatted table in documentation or a web context.",
+        "eval_cases": [
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "| name | age | salary |"
+              },
+              {
+                "kind": "contains",
+                "value": "| Alice | 30 | 50000 |"
+              },
+              {
+                "kind": "regex",
+                "value": "| --- | ---: | ---: |"
+              }
+            ],
+            "input": "name,age,salary\nAlice,30,50000\nBob,25,60000\nCharlie,35,70000"
+          },
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "| city | population |"
+              },
+              {
+                "kind": "contains",
+                "value": "| Paris | 2161000 |"
+              },
+              {
+                "kind": "regex",
+                "value": "| --- | ---: |"
+              }
+            ],
+            "input": "[{\"city\":\"Paris\",\"population\":2161000},{\"city\":\"London\",\"population\":8982000},{\"city\":\"Berlin\",\"population\":3645000}]"
+          },
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "| name | age | city |"
+              },
+              {
+                "kind": "contains",
+                "value": "| Bob | 25 | London |"
+              },
+              {
+                "kind": "contains",
+                "value": "<th>name</th><th>age</th><th>city</th>"
+              }
+            ],
+            "input": "name|age|city\nAlice|30|Paris\nBob|25|London\nCharlie|35|Berlin"
+          },
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "Rows with wrong number of fields:"
+              },
+              {
+                "kind": "contains",
+                "value": "Row 2: field count 2 (expected 3)"
+              },
+              {
+                "kind": "contains",
+                "value": "Row 3: field count 4 (expected 3)"
+              },
+              {
+                "kind": "regex",
+                "value": "<th>a</th><th>b</th><th>c</th>"
+              }
+            ],
+            "input": "a,b,c\n1,2,3\n4,5\n6,7,8,9"
+          },
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "| name |"
+              },
+              {
+                "kind": "contains",
+                "value": "| Alice |"
+              },
+              {
+                "kind": "not_contains",
+                "value": "Rows with wrong number of fields"
+              }
+            ],
+            "input": "name\nAlice\nBob\nCharlie"
+          }
+        ],
+        "files": [
+          {
+            "path": "SKILL.md",
+            "purpose": "Describes the skill, its steps, decision rules, and links to reference files."
+          },
+          {
+            "path": "scripts/table_converter.py",
+            "purpose": "Main Python script that implements the conversion logic."
+          },
+          {
+            "path": "scripts/test_table_converter.py",
+            "purpose": "Pytest test file that imports table_converter and asserts correct behavior with various inputs."
+          },
+          {
+            "path": "references/error_reporting.md",
+            "purpose": "Describes the format and content of the row error report."
+          },
+          {
+            "path": "assets/markdown_table.md",
+            "purpose": "Template for the Markdown table output."
+          },
+          {
+            "path": "assets/html_table.html",
+            "purpose": "Template for the HTML table output."
+          },
+          {
+            "path": "assets/error_report.md",
+            "purpose": "Template for the error report output."
+          }
+        ],
+        "formats": [
+          {
+            "name": "Markdown Table",
+            "purpose": "Formatted table in Markdown syntax, with right-aligned numeric columns.",
+            "template_path": "assets/markdown_table.md"
+          },
+          {
+            "name": "HTML Table",
+            "purpose": "Formatted table in HTML syntax, with right-aligned numeric columns.",
+            "template_path": "assets/html_table.html"
+          },
+          {
+            "name": "Error Report",
+            "purpose": "Report listing any rows with mismatched field counts.",
+            "template_path": "assets/error_report.md"
+          }
+        ],
+        "name": "tabular-data-converter",
+        "subagents": [],
+        "tasks": [
+          "Receive input text and detect its format (CSV, JSON, or pipe-delimited).",
+          "Parse input into rows and columns, detecting the header row and aligning numeric columns to the right.",
+          "Generate a Markdown table string and an HTML table string from the parsed data.",
+          "Report any rows that have a different number of fields than the header row.",
+          "Output both tables and any error reports in a structured response."
+        ]
+      },
+      "checks": [],
+      "source_chars": 250
+    }
+  },
+  "generate": {
+    "status": 200,
+    "body": {
+      "plan": {
+        "id": "spl_1ffe2da3ab79",
+        "project_id": "prj_f6f9781eb991",
+        "author": "admin",
+        "kind": "scripts",
+        "request": "A skill with a Python script that turns CSV, JSON (a list of objects) or pipe-delimited text into a Markdown table and an HTML table, detecting the header row, aligning numeric columns to the right, and reporting rows with the wrong number of fields.",
+        "source_type": "text",
+        "source_ref": "",
+        "source_sha256": "690d612e472c932e7e7873ea80652f5438bb136d7da0dd9dd536de893047cc13",
+        "revise": "",
+        "status": "generated",
+        "plan_sha256": "7d7a1d792da0c3c20553b7676e4111e4a1178a7291215f1dad72177ee58ac465",
+        "approved_by": "admin",
+        "approved_at": "2026-11-11T06:08:59+00:00",
+        "prompt_ref": "skill-creator@v1:aca2d48e5b0b",
+        "draft_sha256": "4fa3984a586e48afc2efd75b965b86c4a58f98907d58fd9deb7e77be31d1f0c7",
+        "generated_at": "2026-11-11T06:09:33+00:00",
+        "created_at": "2026-11-11T06:08:59+00:00",
+        "plan": {
+          "description": "Converts CSV, JSON (list of objects), or pipe-delimited text into Markdown and HTML tables. Detects the header row, right-aligns numeric columns, and reports rows with an incorrect number of fields. Use when raw tabular data in these formats needs to be presented as a formatted table in documentation or a web context.",
+          "eval_cases": [
+            {
+              "assertions": [
+                {
+                  "kind": "contains",
+                  "value": "| name | age | salary |"
+                },
+                {
+                  "kind": "contains",
+                  "value": "| Alice | 30 | 50000 |"
+                },
+                {
+                  "kind": "regex",
+                  "value": "| --- | ---: | ---: |"
+                }
+              ],
+              "input": "name,age,salary\nAlice,30,50000\nBob,25,60000\nCharlie,35,70000"
+            },
+            {
+              "assertions": [
+                {
+                  "kind": "contains",
+                  "value": "| city | population |"
+                },
+                {
+                  "kind": "contains",
+                  "value": "| Paris | 2161000 |"
+                },
+                {
+                  "kind": "regex",
+                  "value": "| --- | ---: |"
+                }
+              ],
+              "input": "[{\"city\":\"Paris\",\"population\":2161000},{\"city\":\"London\",\"population\":8982000},{\"city\":\"Berlin\",\"population\":3645000}]"
+            },
+            {
+              "assertions": [
+                {
+                  "kind": "contains",
+                  "value": "| name | age | city |"
+                },
+                {
+                  "kind": "contains",
+                  "value": "| Bob | 25 | London |"
+                },
+                {
+                  "kind": "contains",
+                  "value": "<th>name</th><th>age</th><th>city</th>"
+                }
+              ],
+              "input": "name|age|city\nAlice|30|Paris\nBob|25|London\nCharlie|35|Berlin"
+            },
+            {
+              "assertions": [
+                {
+                  "kind": "contains",
+                  "value": "Rows with wrong number of fields:"
+                },
+                {
+                  "kind": "contains",
+                  "value": "Row 2: field count 2 (expected 3)"
+                },
+                {
+                  "kind": "contains",
+                  "value": "Row 3: field count 4 (expected 3)"
+                },
+                {
+                  "kind": "regex",
+                  "value": "<th>a</th><th>b</th><th>c</th>"
+                }
+              ],
+              "input": "a,b,c\n1,2,3\n4,5\n6,7,8,9"
+            },
+            {
+              "assertions": [
+                {
+                  "kind": "contains",
+                  "value": "| name |"
+                },
+                {
+                  "kind": "contains",
+                  "value": "| Alice |"
+                },
+                {
+                  "kind": "not_contains",
+                  "value": "Rows with wrong number of fields"
+                }
+              ],
+              "input": "name\nAlice\nBob\nCharlie"
+            }
+          ],
+          "files": [
+            {
+              "path": "SKILL.md",
+              "purpose": "Describes the skill, its steps, decision rules, and links to reference files."
+            },
+            {
+              "path": "scripts/table_converter.py",
+              "purpose": "Main Python script that implements the conversion logic."
+            },
+            {
+              "path": "scripts/test_table_converter.py",
+              "purpose": "Pytest test file that imports table_converter and asserts correct behavior with various inputs."
+            },
+            {
+              "path": "references/error_reporting.md",
+              "purpose": "Describes the format and content of the row error report."
+            },
+            {
+              "path": "assets/markdown_table.md",
+              "purpose": "Template for the Markdown table output."
+            },
+            {
+              "path": "assets/html_table.html",
+              "purpose": "Template for the HTML table output."
+            },
+            {
+              "path": "assets/error_report.md",
+              "purpose": "Template for the error report output."
+            }
+          ],
+          "formats": [
+            {
+              "name": "Markdown Table",
+              "purpose": "Formatted table in Markdown syntax, with right-aligned numeric columns.",
+              "template_path": "assets/markdown_table.md"
+            },
+            {
+              "name": "HTML Table",
+              "purpose": "Formatted table in HTML syntax, with right-aligned numeric columns.",
+              "template_path": "assets/html_table.html"
+            },
+            {
+              "name": "Error Report",
+              "purpose": "Report listing any rows with mismatched field counts.",
+              "template_path": "assets/error_report.md"
+            }
+          ],
+          "name": "tabular-data-converter",
+          "subagents": [],
+          "tasks": [
+            "Receive input text and detect its format (CSV, JSON, or pipe-delimited).",
+            "Parse input into rows and columns, detecting the header row and aligning numeric columns to the right.",
+            "Generate a Markdown table string and an HTML table string from the parsed data.",
+            "Report any rows that have a different number of fields than the header row.",
+            "Output both tables and any error reports in a structured response."
+          ]
+        },
+        "checks": [
+          {
+            "check": "frontmatter",
+            "passed": true,
+            "detail": "YAML frontmatter between --- lines"
+          },
+          {
+            "check": "name format",
+            "passed": true,
+            "detail": "name 'tabular-data-converter': lowercase letters, digits and single hyphens, at most 64"
+          },
+          {
+            "check": "name matches folder",
+            "passed": true,
+            "detail": "name 'tabular-data-converter', folder 'tabular-data-converter'"
+          },
+          {
+            "check": "description",
+            "passed": true,
+            "detail": "319 characters (1 to 1024)"
+          },
+          {
+            "check": "body length",
+            "passed": true,
+            "detail": "33 lines (at most 500; move detail into references/)"
+          },
+          {
+            "check": "MAF loads it",
+            "passed": true,
+            "detail": "MAF FileSkillsSource loaded it"
+          },
+          {
+            "check": "scripts/table_converter.py parses",
+            "passed": true,
+            "detail": "Python syntax is valid (parsed, not executed)"
+          },
+          {
+            "check": "scripts/table_converter.py imports",
+            "passed": true,
+            "detail": "standard library only"
+          },
+          {
+            "check": "scripts/test_table_converter.py parses",
+            "passed": true,
+            "detail": "Python syntax is valid (parsed, not executed)"
+          },
+          {
+            "check": "scripts/test_table_converter.py imports",
+            "passed": true,
+            "detail": "standard library only"
+          },
+          {
+            "check": "security scan",
+            "passed": true,
+            "detail": "no findings"
+          }
+        ],
+        "source_chars": 250
+      },
+      "files": [
+        {
+          "path": "SKILL.md",
+          "content": "---\nname: tabular-data-converter\ndescription: \"Converts CSV, JSON (list of objects), or pipe-delimited text into Markdown and HTML tables. Detects the header row, right-aligns numeric columns, and reports rows with an incorrect number of fields. Use when raw tabular data in these formats needs to be presented as a formatted table in documentation or a web context.\"\nauthor: admin\n---\n\n# Tabular Data Converter\n\n## Steps\n\n1. **Detect format**: Examine the input text to determine if it is CSV (comma-separated), JSON (a JSON array of objects), or pipe-delimited (by detecting the first row containing pipes).\n2. **Parse rows**: Split the input into rows. For JSON, convert each object to a row with keys as headers.\n3. **Identify header**: Use the first row as the header row.\n4. **Detect numeric columns**: For each column, check if all non-header values can be parsed as numbers (integers or floats). If yes, the column is numeric and will be right-aligned in tables.\n5. **Generate Markdown table**: Build a Markdown table string with the header row, a separator row (with colons for alignment: left for text, right for numeric), and data rows. Numeric values are right-aligned.\n6. **Generate HTML table**: Build an HTML table with the same alignment rules.\n7. **Report row errors**: Compare each data row's field count to the header row's field count. If mismatched, record the row number and the number of fields found (and expected).\n8. **Output**: Return a JSON object with keys `markdown_table`, `html_table`, and optionally `error_report`.\n\n## Decision Rules\n\n- If the input starts with `[` and is valid JSON, treat as JSON.\n- If the first line contains a pipe `|`, treat as pipe-delimited.\n- Otherwise, treat as CSV.\n- Numeric detection: a column is numeric if every non-header cell can be converted to a float.\n\n## Files\n\n- `scripts/table_converter.py` \u2013 main converter logic\n- `scripts/test_table_converter.py` \u2013 pytest tests\n- `references/error_reporting.md` \u2013 error report details\n- `assets/markdown_table.md` \u2013 Markdown table template\n- `assets/html_table.html` \u2013 HTML table template\n- `assets/error_report.md` \u2013 error report template\n\n## Examples\n\nSee test cases in the test file for sample inputs and expected outputs."
+        },
+        {
+          "path": "scripts/table_converter.py",
+          "content": "import json\nimport re\n\ndef convert(tabular_input: str) -> dict:\n    \"\"\"\n    Convert tabular data from CSV, JSON, or pipe-delimited format into\n    Markdown and HTML tables, with right-aligned numeric columns.\n    Returns a dict with keys 'markdown_table', 'html_table', and optionally 'error_report'.\n    \"\"\"\n    # Detect format\n    stripped = tabular_input.strip()\n    if stripped.startswith('['):\n        data = json.loads(stripped)\n        headers = list(data[0].keys())\n        rows = [[str(row[h]) for h in headers] for row in data]\n    else:\n        lines = stripped.split('\\n')\n        first_line = lines[0]\n        if '|' in first_line:\n            delimiter = '|'\n        else:\n            delimiter = ','\n        headers = [h.strip() for h in first_line.split(delimiter)]\n        rows = []\n        for line in lines[1:]:\n            if line.strip():\n                cells = [c.strip() for c in line.split(delimiter)]\n                rows.append(cells)\n\n    # Detect numeric columns\n    num_cols = len(headers)\n    numeric_cols = []\n    for col_idx in range(num_cols):\n        all_numeric = True\n        for row in rows:\n            if len(row) > col_idx:\n                try:\n                    float(row[col_idx])\n                except ValueError:\n                    all_numeric = False\n                    break\n        if all_numeric:\n            numeric_cols.append(col_idx)\n\n    # Build Markdown table\n    md = '| ' + ' | '.join(headers) + ' |\\n'\n    separator = []\n    for i in range(num_cols):\n        if i in numeric_cols:\n            separator.append('---:')\n        else:\n            separator.append('---')\n    md += '| ' + ' | '.join(separator) + ' |\\n'\n    for row in rows:\n        if len(row) == num_cols:\n            md += '| ' + ' | '.join(row) + ' |\\n'\n        else:\n            # still add row to table if possible, but it will be flagged\n            md += '| ' + ' | '.join(row) + ' |\\n'\n\n    # Build HTML table\n    html = '<table>\\n<thead>\\n<tr>'\n    for h in headers:\n        html += f'<th>{h}</th>'\n    html += '</tr>\\n</thead>\\n<tbody>\\n'\n    for row in rows:\n        html += '<tr>'\n        for i, cell in enumerate(row):\n            align = ' style=\"text-align: right;\"' if i in numeric_cols else ''\n            html += f'<td{align}>{cell}</td>'\n        # fill missing cells with empty\n        for i in range(len(row), num_cols):\n            html += '<td></td>'\n        html += '</tr>\\n'\n    html += '</tbody>\\n</table>'\n\n    # Error report\n    error_lines = []\n    for idx, row in enumerate(rows, start=1):\n        if len(row) != num_cols:\n            error_lines.append(f\"Row {idx}: field count {len(row)} (expected {num_cols})\")\n    result = {\n        'markdown_table': md,\n        'html_table': html\n    }\n    if error_lines:\n        result['error_report'] = 'Rows with wrong number of fields:\\n' + '\\n'.join(error_lines)\n    return result"
+        },
+        {
+          "path": "scripts/test_table_converter.py",
+          "content": "import pytest\nfrom scripts.table_converter import convert\n\ndef test_csv_with_numeric():\n    inp = \"name,age,salary\\nAlice,30,50000\\nBob,25,60000\\nCharlie,35,70000\"\n    res = convert(inp)\n    assert '| name | age | salary |' in res['markdown_table']\n    assert '| Alice | 30 | 50000 |' in res['markdown_table']\n    assert '| --- | ---: | ---: |' in res['markdown_table']\n\ndef test_json():\n    inp = '[{\"city\":\"Paris\",\"population\":2161000},{\"city\":\"London\",\"population\":8982000},{\"city\":\"Berlin\",\"population\":3645000}]'\n    res = convert(inp)\n    assert '| city | population |' in res['markdown_table']\n    assert '| Paris | 2161000 |' in res['markdown_table']\n    assert '| --- | ---: |' in res['markdown_table']\n\ndef test_pipe_delimited():\n    inp = \"name|age|city\\nAlice|30|Paris\\nBob|25|London\\nCharlie|35|Berlin\"\n    res = convert(inp)\n    assert '| name | age | city |' in res['markdown_table']\n    assert '| Bob | 25 | London |' in res['markdown_table']\n    assert '<th>name</th><th>age</th><th>city</th>' in res['html_table']\n\ndef test_wrong_field_count():\n    inp = \"a,b,c\\n1,2,3\\n4,5\\n6,7,8,9\"\n    res = convert(inp)\n    assert 'Rows with wrong number of fields:' in res['error_report']\n    assert 'Row 2: field count 2 (expected 3)' in res['error_report']\n    assert 'Row 3: field count 4 (expected 3)' in res['error_report']\n    assert '<th>a</th><th>b</th><th>c</th>' in res['html_table']\n\ndef test_single_column_csv():\n    inp = \"name\\nAlice\\nBob\\nCharlie\"\n    res = convert(inp)\n    assert '| name |' in res['markdown_table']\n    assert '| Alice |' in res['markdown_table']\n    assert 'error_report' not in res"
+        },
+        {
+          "path": "references/error_reporting.md",
+          "content": "# Error Reporting Format\n\nWhen any data row has a different number of fields than the header row, the skill generates an error report.\n\nThe report is a plain text string with the following structure:\n\n```\nRows with wrong number of fields:\nRow <row_number>: field count <actual> (expected <expected>)\n```\n\n- Row numbers start from 1 (the first data row after the header).\n- The expected count is the number of header fields.\n- Multiple rows are listed one per line.\n- If no errors, no error report is included in the output.\n\nExample:\n```\nRows with wrong number of fields:\nRow 2: field count 2 (expected 3)\nRow 3: field count 4 (expected 3)\n```"
+        },
+        {
+          "path": "assets/markdown_table.md",
+          "content": "<!-- Template for Markdown table output. The actual output is generated dynamically. -->\n| header1 | header2 | ... |\n| --- | ---: | ... |\n| value1 | value2 | ... |"
+        },
+        {
+          "path": "assets/html_table.html",
+          "content": "<!-- Template for HTML table output. The actual output is generated dynamically. -->\n<table>\n<thead>\n<tr><th>header1</th><th>header2</th>...</tr>\n</thead>\n<tbody>\n<tr><td>value1</td><td>value2</td>...</tr>\n</tbody>\n</table>"
+        },
+        {
+          "path": "assets/error_report.md",
+          "content": "# Error Report Template\n\nRows with wrong number of fields:\nRow <row_number>: field count <actual> (expected <expected>)"
+        }
+      ],
+      "checks": [
+        {
+          "check": "frontmatter",
+          "passed": true,
+          "detail": "YAML frontmatter between --- lines"
+        },
+        {
+          "check": "name format",
+          "passed": true,
+          "detail": "name 'tabular-data-converter': lowercase letters, digits and single hyphens, at most 64"
+        },
+        {
+          "check": "name matches folder",
+          "passed": true,
+          "detail": "name 'tabular-data-converter', folder 'tabular-data-converter'"
+        },
+        {
+          "check": "description",
+          "passed": true,
+          "detail": "319 characters (1 to 1024)"
+        },
+        {
+          "check": "body length",
+          "passed": true,
+          "detail": "33 lines (at most 500; move detail into references/)"
+        },
+        {
+          "check": "MAF loads it",
+          "passed": true,
+          "detail": "MAF FileSkillsSource loaded it"
+        },
+        {
+          "check": "scripts/table_converter.py parses",
+          "passed": true,
+          "detail": "Python syntax is valid (parsed, not executed)"
+        },
+        {
+          "check": "scripts/table_converter.py imports",
+          "passed": true,
+          "detail": "standard library only"
+        },
+        {
+          "check": "scripts/test_table_converter.py parses",
+          "passed": true,
+          "detail": "Python syntax is valid (parsed, not executed)"
+        },
+        {
+          "check": "scripts/test_table_converter.py imports",
+          "passed": true,
+          "detail": "standard library only"
+        },
+        {
+          "check": "security scan",
+          "passed": true,
+          "detail": "no findings"
+        }
+      ],
+      "summary": {
+        "passed": 11,
+        "total": 11,
+        "all_passed": true
+      }
+    }
+  },
+  "test": {
+    "status": 200,
+    "body": {
+      "verdict": "PASS",
+      "exit_code": 0,
+      "passed": 5,
+      "failed": 0,
+      "errors": 0,
+      "timed_out": false,
+      "summary": "5 passed in 0.03s",
+      "stdout_tail": ".....                                                                    [100%]\n5 passed in 0.03s\n",
+      "stderr_tail": "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/pytest_asyncio/plugin.py:300: PytestDeprecationWarning: The configuration option \"asyncio_default_fixture_loop_scope\" is unset.\nThe event loop scope for asynchronous fixtures will default to the \"fixture\" caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to \"function\" scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n"
+    }
+  },
+  "evaluate": {
+    "status": 200,
+    "body": {
+      "prompt_ref": "skill-creator@v1:aca2d48e5b0b+draft:4fa3984a586e",
+      "n": 5,
+      "judge_model": "deterministic-assertions",
+      "metrics": {
+        "assertion_pass_rate_with_skill": 0.625,
+        "assertion_pass_rate_without_skill": 0.5,
+        "skill_uplift": 0.125
+      },
+      "tokens": 13597,
+      "cases": [
+        {
+          "case": 1,
+          "input": "name,age,salary\nAlice,30,50000\nBob,25,60000\nCharlie,35,70000",
+          "with_skill": {
+            "output": "```json\n{\n  \"markdown_table\": \"| name | age | salary |\\n|------|-----|--------|\\n| Alice | 30 | 50000 |\\n| Bob | 25 | 60000 |\\n| Charlie | 35 | 70000 |\",\n  \"html_table\": \"<table><thead><tr><th>name</th><th>age</th><th>salary</th></tr></thead><tbody><tr><td>Alice</td><td style=\\\"text-align:right\\\">30</td><td style=\\\"text-align:right\\\">50000</td></tr><tr><td>Bob</td><td style=\\\"text-align:right\\\">25</td><td style=\\\"text-align:right\\\">60000</td></tr><tr><td>Charlie</td><td style=\\\"text-align:right\\\">35</td><td style=\\\"text-align:right\\\">70000</td></tr></tbody></table>\"\n}\n```",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "| name | age | salary |",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "| Alice | 30 | 50000 |",
+                "passed": true
+              },
+              {
+                "kind": "regex",
+                "value": "| --- | ---: | ---: |",
+                "passed": true
+              }
+            ]
+          },
+          "without_skill": {
+            "output": "| name | age | salary |\n|---|---:|---:|\n| Alice | 30 | 50000 |\n| Bob | 25 | 60000 |\n| Charlie | 35 | 70000 |",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "| name | age | salary |",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "| Alice | 30 | 50000 |",
+                "passed": true
+              },
+              {
+                "kind": "regex",
+                "value": "| --- | ---: | ---: |",
+                "passed": true
+              }
+            ]
+          }
+        },
+        {
+          "case": 2,
+          "input": "[{\"city\":\"Paris\",\"population\":2161000},{\"city\":\"London\",\"population\":8982000},{\"city\":\"Berlin\",\"population\":3645000}]",
+          "with_skill": {
+            "output": "```json\n{\n  \"markdown_table\": \"| city    | population |\\n|---------|-----------:|\\n| Paris   |    2161000 |\\n| London  |    8982000 |\\n| Berlin  |    3645000 |\",\n  \"html_table\": \"<table>\\n<thead>\\n<tr><th>city</th><th style=\\\"text-align:right\\\">population</th></tr>\\n</thead>\\n<tbody>\\n<tr><td>Paris</td><td style=\\\"text-align:right\\\">2161000</td></tr>\\n<tr><td>London</td><td style=\\\"text-align:right\\\">8982000</td></tr>\\n<tr><td>Berlin</td><td style=\\\"text-align:right\\\">3645000</td></tr>\\n</tbody>\\n</table>\"\n}\n```",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "| city | population |",
+                "passed": false
+              },
+              {
+                "kind": "contains",
+                "value": "| Paris | 2161000 |",
+                "passed": false
+              },
+              {
+                "kind": "regex",
+                "value": "| --- | ---: |",
+                "passed": true
+              }
+            ]
+          },
+          "without_skill": {
+            "output": "# Markdown Table\n\n| city   | population |\n|--------|-----------:|\n| Paris  |    2161000 |\n| London |    8982000 |\n| Berlin |    3645000 |\n\n# HTML Table\n\n<table>\n<thead>\n<tr>\n<th>city</th>\n<th>population</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Paris</td>\n<td>2161000</td>\n</tr>\n<tr>\n<td>London</td>\n<td>8982000</td>\n</tr>\n<tr>\n<td>Berlin</td>\n<td>3645000</td>\n</tr>\n</tbody>\n</table>\n\n---\n\n**Input format**: JSON (list of objects)  \n**Headers detected**: city, population  \n**Rows processed**: 3  \n**Rows with incorrect field count**: 0",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "| city | population |",
+                "passed": false
+              },
+              {
+                "kind": "contains",
+                "value": "| Paris | 2161000 |",
+                "passed": false
+              },
+              {
+                "kind": "regex",
+                "value": "| --- | ---: |",
+                "passed": true
+              }
+            ]
+          }
+        },
+        {
+          "case": 3,
+          "input": "name|age|city\nAlice|30|Paris\nBob|25|London\nCharlie|35|Berlin",
+          "with_skill": {
+            "output": "```json\n{\n  \"markdown_table\": \"| name    | age | city    |\\n| ------- | --: | ------- |\\n| Alice   |  30 | Paris   |\\n| Bob     |  25 | London  |\\n| Charlie |  35 | Berlin  |\",\n  \"html_table\": \"<table>\\n<thead>\\n<tr><th>name</th><th style=\\\"text-align:right\\\">age</th><th>city</th></tr>\\n</thead>\\n<tbody>\\n<tr><td>Alice</td><td style=\\\"text-align:right\\\">30</td><td>Paris</td></tr>\\n<tr><td>Bob</td><td style=\\\"text-align:right\\\">25</td><td>London</td></tr>\\n<tr><td>Charlie</td><td style=\\\"text-align:right\\\">35</td><td>Berlin</td></tr>\\n</tbody>\\n</table>\",\n  \"error_report\": null\n}\n```",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "| name | age | city |",
+                "passed": false
+              },
+              {
+                "kind": "contains",
+                "value": "| Bob | 25 | London |",
+                "passed": false
+              },
+              {
+                "kind": "contains",
+                "value": "<th>name</th><th>age</th><th>city</th>",
+                "passed": false
+              }
+            ]
+          },
+          "without_skill": {
+            "output": "```markdown\n| name    | age | city   |\n|---------|-----|--------|\n| Alice   |  30 | Paris  |\n| Bob     |  25 | London |\n| Charlie |  35 | Berlin |\n```\n\n```html\n<table>\n  <thead>\n    <tr>\n      <th>name</th>\n      <th align=\"right\">age</th>\n      <th>city</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td>Alice</td>\n      <td align=\"right\">30</td>\n      <td>Paris</td>\n    </tr>\n    <tr>\n      <td>Bob</td>\n      <td align=\"right\">25</td>\n      <td>London</td>\n    </tr>\n    <tr>\n      <td>Charlie</td>\n      <td align=\"right\">35</td>\n      <td>Berlin</td>\n    </tr>\n  </tbody>\n</table>\n```",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "| name | age | city |",
+                "passed": false
+              },
+              {
+                "kind": "contains",
+                "value": "| Bob | 25 | London |",
+                "passed": false
+              },
+              {
+                "kind": "contains",
+                "value": "<th>name</th><th>age</th><th>city</th>",
+                "passed": false
+              }
+            ]
+          }
+        },
+        {
+          "case": 4,
+          "input": "a,b,c\n1,2,3\n4,5\n6,7,8,9",
+          "with_skill": {
+            "output": "```json\n{\n  \"markdown_table\": \"| a | b | c |\\n| --- | --- | --- |\\n| 1 | 2 | 3 |\\n| 4 | 5 | - |\\n| 6 | 7 | 8 |\",\n  \"html_table\": \"<table>\\n<thead>\\n<tr><th>a</th><th>b</th><th>c</th></tr>\\n</thead>\\n<tbody>\\n<tr><td>1</td><td>2</td><td>3</td></tr>\\n<tr><td>4</td><td>5</td><td>-</td></tr>\\n<tr><td>6</td><td>7</td><td>8</td></tr>\\n</tbody>\\n</table>\",\n  \"error_report\": \"Rows with wrong number of fields:\\nRow 2: field count 2 (expected 3)\\nRow 3: field count 3 (expected 3)\"\n}\n```",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "Rows with wrong number of fields:",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "Row 2: field count 2 (expected 3)",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "Row 3: field count 4 (expected 3)",
+                "passed": false
+              },
+              {
+                "kind": "regex",
+                "value": "<th>a</th><th>b</th><th>c</th>",
+                "passed": true
+              }
+            ]
+          },
+          "without_skill": {
+            "output": "| a | b | c |\n|---|---|---:|\n| 1 | 2 | 3 |\n| 4 | 5 | * |\n| 6 | 7 | 8,9 |\n\n<table>\n  <tr><th>a</th><th>b</th><th>c</th></tr>\n  <tr><td>1</td><td>2</td><td style=\"text-align:right\">3</td></tr>\n  <tr><td>4</td><td>5</td><td>*</td></tr>\n  <tr><td>6</td><td>7</td><td>8,9</td></tr>\n</table>\n\n**Errors:**\n- Row 2: expected 3 fields, found 2\n- Row 3: expected 3 fields, found 4",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "Rows with wrong number of fields:",
+                "passed": false
+              },
+              {
+                "kind": "contains",
+                "value": "Row 2: field count 2 (expected 3)",
+                "passed": false
+              },
+              {
+                "kind": "contains",
+                "value": "Row 3: field count 4 (expected 3)",
+                "passed": false
+              },
+              {
+                "kind": "regex",
+                "value": "<th>a</th><th>b</th><th>c</th>",
+                "passed": true
+              }
+            ]
+          }
+        },
+        {
+          "case": 5,
+          "input": "name\nAlice\nBob\nCharlie",
+          "with_skill": {
+            "output": "```json\n{\n  \"markdown_table\": \"| name |\\n| --- |\\n| Alice |\\n| Bob |\\n| Charlie |\\n\",\n  \"html_table\": \"<table>\\n<thead>\\n<tr><th align=\\\"left\\\">name</th></tr>\\n</thead>\\n<tbody>\\n<tr><td align=\\\"left\\\">Alice</td></tr>\\n<tr><td align=\\\"left\\\">Bob</td></tr>\\n<tr><td align=\\\"left\\\">Charlie</td></tr>\\n</tbody>\\n</table>\\n\"\n}\n```",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "| name |",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "| Alice |",
+                "passed": true
+              },
+              {
+                "kind": "not_contains",
+                "value": "Rows with wrong number of fields",
+                "passed": true
+              }
+            ]
+          },
+          "without_skill": {
+            "output": "## Input Analysis\n\nThe input contains a single-column list:\n\n```\nname\nAlice\nBob\nCharlie\n```\n\nThis appears to be CSV-like data with one column (header: \"name\", data: Alice, Bob, Charlie). However, it's missing the usual commas or other delimiters. Converting this to Markdown and HTML tables:\n\n### Markdown Table\n\n| name |\n|------|\n| Alice |\n| Bob |\n| Charlie |\n\n### HTML Table\n\n```html\n<table>\n  <thead>\n    <tr>\n      <th>name</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td>Alice</td>\n    </tr>\n    <tr>\n      <td>Bob</td>\n    </tr>\n    <tr>\n      <td>Charlie</td>\n    </tr>\n  </tbody>\n</table>\n```\n\n**Note:** The input has one field per row (no delimiter), so it's treated as CSV with single column. No row errors detected (all rows have 1 field).",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "| name |",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "| Alice |",
+                "passed": true
+              },
+              {
+                "kind": "not_contains",
+                "value": "Rows with wrong number of fields",
+                "passed": true
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "publish": {
+    "status": 201,
+    "body": {
+      "name": "tabular-data-converter",
+      "version": 1,
+      "sha256": "4fa3984a586e48afc2efd75b965b86c4a58f98907d58fd9deb7e77be31d1f0c7",
+      "checks": [
+        {
+          "check": "frontmatter",
+          "passed": true,
+          "detail": "YAML frontmatter between --- lines"
+        },
+        {
+          "check": "name format",
+          "passed": true,
+          "detail": "name 'tabular-data-converter': lowercase letters, digits and single hyphens, at most 64"
+        },
+        {
+          "check": "name matches folder",
+          "passed": true,
+          "detail": "name 'tabular-data-converter', folder 'tabular-data-converter'"
+        },
+        {
+          "check": "description",
+          "passed": true,
+          "detail": "319 characters (1 to 1024)"
+        },
+        {
+          "check": "body length",
+          "passed": true,
+          "detail": "33 lines (at most 500; move detail into references/)"
+        },
+        {
+          "check": "MAF loads it",
+          "passed": true,
+          "detail": "MAF FileSkillsSource loaded it"
+        },
+        {
+          "check": "scripts/table_converter.py parses",
+          "passed": true,
+          "detail": "Python syntax is valid (parsed, not executed)"
+        },
+        {
+          "check": "scripts/table_converter.py imports",
+          "passed": true,
+          "detail": "standard library only"
+        },
+        {
+          "check": "scripts/test_table_converter.py parses",
+          "passed": true,
+          "detail": "Python syntax is valid (parsed, not executed)"
+        },
+        {
+          "check": "scripts/test_table_converter.py imports",
+          "passed": true,
+          "detail": "standard library only"
+        },
+        {
+          "check": "security scan",
+          "passed": true,
+          "detail": "no findings"
+        }
+      ]
+    }
+  }
+}

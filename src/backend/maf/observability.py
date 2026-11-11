@@ -28,12 +28,15 @@ EXPORT_CAP = 25000  # records in one JSON export
 APPROVAL_EVENTS = {"approval_required", "approved", "rejected"}
 
 
-def record_tool(agent: str, project_id: str | None, run_id: str | None, source: str, tool: str, arguments: dict, latency_ms: int, error: str = "", kind: str = "function") -> None:
+def record_tool(agent: str, project_id: str | None, run_id: str | None, source: str, tool: str, arguments: dict, latency_ms: int, error: str = "", kind: str = "function",
+                span: tuple[str, str] | None = None) -> int:
+    """Returns the row id. `span` is the (trace_id, span_id) of the span that wrapped the call, stored so the row and its span share one id."""
+    trace_id, span_id = span or (None, None)
     with db() as con:
-        con.execute(
-            "INSERT INTO tool_calls (agent, project_id, run_id, source, tool, kind, arguments, latency_ms, status, error, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
-            (agent, project_id, run_id, source, tool, kind, redact(json.dumps(arguments, default=str))[:4000], latency_ms, "error" if error else "ok", redact(error)[:1000], now()),
-        )
+        return con.execute(
+            "INSERT INTO tool_calls (agent, project_id, run_id, source, tool, kind, arguments, latency_ms, status, error, created_at, trace_id, span_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            (agent, project_id, run_id, source, tool, kind, redact(json.dumps(arguments, default=str))[:4000], latency_ms, "error" if error else "ok", redact(error)[:1000], now(), trace_id, span_id),
+        ).lastrowid
 
 
 # One normalized row per record: ts, s (source rank, breaks ties), id (that source's row id), kind, level, project_id, run_id, tokens, hay (text a search looks in).

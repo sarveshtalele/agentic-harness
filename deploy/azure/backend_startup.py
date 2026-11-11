@@ -21,8 +21,12 @@ def log(message: str) -> None:
     print(f"[agentic-qe] {message}", flush=True)
 
 
+EVALS = os.environ.get("ATLAS_INSTALL_EVALS") == "1" and (APP / "requirements-evals.txt").is_file()  # RAGAS for faithfulness scores
+
+
 def wanted_stamp() -> str:
-    return hashlib.sha256((APP / "requirements.txt").read_bytes() + sys.version.encode()).hexdigest()
+    evals = (APP / "requirements-evals.txt").read_bytes() if EVALS else b""
+    return hashlib.sha256((APP / "requirements.txt").read_bytes() + evals + sys.version.encode()).hexdigest()
 
 
 def build() -> None:
@@ -34,6 +38,9 @@ def build() -> None:
     HOME.mkdir(parents=True, exist_ok=True)
     subprocess.run([sys.executable, "-m", "venv", str(VENV)], check=True, timeout=300)
     subprocess.run([str(PYTHON), "-m", "pip", "install", "--no-input", "--disable-pip-version-check", "-r", str(APP / "requirements.txt")], check=True, timeout=1500)
+    if EVALS:
+        log("Installing evaluation packages (RAGAS)")
+        subprocess.run([str(PYTHON), "-m", "pip", "install", "--no-input", "--disable-pip-version-check", "-r", str(APP / "requirements-evals.txt")], check=True, timeout=1500)
     STAMP.write_text(wanted)
     log("Environment built")
 

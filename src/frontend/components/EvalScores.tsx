@@ -24,7 +24,8 @@ export function Tile({ m }: { m: any }) {
   const colors: Record<string, string> = { emerald: "text-emerald-600 dark:text-emerald-400", amber: "text-amber-600 dark:text-amber-400", rose: "text-rose-600 dark:text-rose-400" };
   const state = m?.state || m?.status;
   const isMeasured = state === "measured" && m?.value !== null && m?.value !== undefined;
-  const text = isMeasured ? `${Math.round(m.value * 100)}%` : "—";
+  const text = isMeasured ? `${Math.round(m.value * 100)}%` : state === "n/a" ? "n/a" : "—";
+  const why = isMeasured ? "" : state === "n/a" ? "Does not apply" : String(m.reason || "Not measured").replace(/^Not measured:\s*/i, "");
   const note = isMeasured ? [m.self_graded ? "self-graded" : "", m.labels === "not reviewed" || m.labels_reviewed === false ? "labels pending" : ""].filter(Boolean).join(", ") : "";
 
   return (
@@ -42,6 +43,7 @@ export function Tile({ m }: { m: any }) {
       <span className="block text-[10px] text-slate-500 dark:text-slate-400 font-medium truncate" title={m.label}>
         {m.label}
       </span>
+      {why && <span className="block text-[9px] leading-tight text-slate-400 line-clamp-2" data-testid="metric-why">{why}</span>}
     </div>
   );
 }

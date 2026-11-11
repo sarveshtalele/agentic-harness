@@ -1,0 +1,222 @@
+[
+  {
+    "skill": "quality strategy",
+    "kind": "instructions",
+    "plan": 201,
+    "name": "planning-quality-strategy",
+    "tasks": 8,
+    "files": [
+      "SKILL.md",
+      "references/quality-strategy-template.md",
+      "references/risk-ranking-guide.md",
+      "references/test-levels-guide.md",
+      "assets/quality-strategy-output.md",
+      "assets/traceability-table.csv"
+    ],
+    "subagents": 0,
+    "formats": 2,
+    "eval_cases": 2,
+    "generate": 200,
+    "checks": {
+      "frontmatter": true,
+      "name format": true,
+      "name matches folder": true,
+      "description": true,
+      "body length": true,
+      "MAF loads it": true,
+      "security scan": true
+    },
+    "evaluation": {
+      "n": 2,
+      "assertion_pass_rate_with_skill": 0.8125,
+      "assertion_pass_rate_without_skill": 0.5625,
+      "skill_uplift": 0.25
+    },
+    "publish": {
+      "status": 201,
+      "version": 1
+    },
+    "seconds": 221
+  },
+  {
+    "skill": "markdown to docx",
+    "kind": "scripts",
+    "plan": 201,
+    "name": "markdown-to-docx-converter",
+    "tasks": 6,
+    "files": [
+      "SKILL.md",
+      "scripts/md_to_docx.py",
+      "scripts/test_md_to_docx.py",
+      "references/formatting_notes.md",
+      "assets/output_report_template.txt"
+    ],
+    "subagents": 0,
+    "formats": 2,
+    "eval_cases": 5,
+    "generate": 200,
+    "checks": {
+      "frontmatter": true,
+      "name format": true,
+      "name matches folder": true,
+      "description": true,
+      "body length": true,
+      "MAF loads it": true,
+      "scripts/md_to_docx.py parses": true,
+      "scripts/test_md_to_docx.py parses": true,
+      "security scan": true
+    },
+    "script_tests": {
+      "verdict": "PASS",
+      "passed": 11,
+      "failed": 0,
+      "errors": 0,
+      "exit_code": 0
+    },
+    "evaluation": {
+      "n": 5,
+      "assertion_pass_rate_with_skill": 0.6,
+      "assertion_pass_rate_without_skill": 0.2,
+      "skill_uplift": 0.39999999999999997
+    },
+    "publish": {
+      "status": 201,
+      "version": 1
+    },
+    "seconds": 87
+  },
+  {
+    "skill": "data to table",
+    "kind": "scripts",
+    "plan": 201,
+    "name": "tabular-converter",
+    "tasks": 6,
+    "files": [
+      "SKILL.md",
+      "scripts/converter.py",
+      "scripts/test_converter.py",
+      "assets/markdown_table_template.txt",
+      "assets/html_table_template.txt",
+      "assets/error_report_template.txt",
+      "references/format_detection.md"
+    ],
+    "subagents": 0,
+    "formats": 3,
+    "eval_cases": 4,
+    "generate": 200,
+    "checks": {
+      "frontmatter": true,
+      "name format": true,
+      "name matches folder": true,
+      "description": true,
+      "body length": true,
+      "MAF loads it": true,
+      "scripts/converter.py parses": true,
+      "scripts/test_converter.py parses": true,
+      "security scan": true
+    },
+    "script_tests": {
+      "verdict": "FAIL",
+      "passed": 5,
+      "failed": 2,
+      "errors": 0,
+      "exit_code": 1
+    },
+    "evaluation": {
+      "n": 4,
+      "assertion_pass_rate_with_skill": 0.7619047619047619,
+      "assertion_pass_rate_without_skill": 0.3333333333333333,
+      "skill_uplift": 0.42857142857142855
+    },
+    "publish": {
+      "status": 201,
+      "version": 1
+    },
+    "seconds": 50
+  },
+  {
+    "skill": "html to pdf",
+    "kind": "scripts",
+    "plan": 201,
+    "name": "html-to-pdf-converter",
+    "tasks": 6,
+    "files": [
+      "SKILL.md",
+      "scripts/html_to_pdf.py",
+      "scripts/test_html_to_pdf.py",
+      "assets/html_to_pdf_output_template.txt",
+      "references/html_parsing_rules.md"
+    ],
+    "subagents": 0,
+    "formats": 1,
+    "eval_cases": 4,
+    "generate": 200,
+    "checks": {
+      "frontmatter": true,
+      "name format": true,
+      "name matches folder": true,
+      "description": true,
+      "body length": true,
+      "MAF loads it": true,
+      "scripts/html_to_pdf.py parses": true,
+      "scripts/test_html_to_pdf.py parses": true,
+      "security scan": false
+    },
+    "script_tests": {
+      "verdict": "FAIL",
+      "passed": 0,
+      "failed": 0,
+      "errors": 1,
+      "exit_code": 2
+    },
+    "evaluation": {
+      "n": 4,
+      "assertion_pass_rate_with_skill": 0.1,
+      "assertion_pass_rate_without_skill": 0.9,
+      "skill_uplift": -0.8
+    },
+    "publish": {
+      "status": 409,
+      "version": null
+    },
+    "seconds": 233
+  },
+  {
+    "skill": "html to pdf test design",
+    "kind": "instructions",
+    "plan": 201,
+    "name": "designing-html-to-pdf-test-scenarios",
+    "tasks": 6,
+    "files": [
+      "SKILL.md",
+      "references/test-design-rules.md",
+      "references/feature-boundaries.md",
+      "assets/scenario-matrix-template.md",
+      "assets/test-case-detail-template.md"
+    ],
+    "subagents": 0,
+    "formats": 2,
+    "eval_cases": 5,
+    "generate": 200,
+    "checks": {
+      "frontmatter": true,
+      "name format": true,
+      "name matches folder": true,
+      "description": true,
+      "body length": true,
+      "MAF loads it": true,
+      "security scan": true
+    },
+    "evaluation": {
+      "n": 5,
+      "assertion_pass_rate_with_skill": 0.8666666666666667,
+      "assertion_pass_rate_without_skill": 0.8666666666666667,
+      "skill_uplift": 0.0
+    },
+    "publish": {
+      "status": 201,
+      "version": 1
+    },
+    "seconds": 87
+  }
+]

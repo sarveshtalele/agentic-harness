@@ -16,7 +16,13 @@ Write exactly the files the approved plan lists, at those paths, and nothing els
 - SKILL.md starts with YAML frontmatter holding the plan's name and description copied exactly, with no version. Its body is under 500 lines: the steps in order, the decision rules, and links to references/ files for detail.
 - A script is real, working Python that uses only the standard library unless the plan names a dependency. Never call eval, exec, os.system, or a shell. Never read outside the skill folder.
 - A pytest file under scripts/ imports the script by its module name and asserts real behaviour on inputs from the source. No assert True, no skips.
+- scripts/run.py is the entry point: it reads the input text from standard input, calls the skill's code, and prints the skill's output. Evaluation runs it on each eval case.
 - Templates in assets/ show the exact output layout.
+
+## Job: repair the files
+The skill's own tests failed. The failing output is in an untrusted-data block. Find the real cause and rewrite the files so the behaviour matches the approved plan and the source.
+- Fix the code when the code is wrong. Fix a test only when the test contradicts the approved plan or the source, and then keep it as strict: never remove a test or an assertion, never add assert True or a skip.
+- Return every file of the plan, changed or not, at the same paths.
 
 ## Job: apply a skill under test
 Follow the skill under test, as written, on the input, and reply with only the output the skill asks for. When there is no skill, handle the input for the stated purpose as well as you can.

@@ -8,7 +8,7 @@ from agent_framework import Agent, FunctionInvocationContext, SlidingWindowStrat
 from pydantic import BaseModel
 
 from backend.config import MODEL_NO_CACHE
-from backend.core import auth, prompts
+from backend.core import auth, prompts, tracing
 from backend.core import skills as skill_lib
 from backend.core.security import redact
 from backend.maf import governance, llm, observability, skill_chat, tools
@@ -27,20 +27,30 @@ def tool_audit(agent_key: str, project_id: str, run_id: str | None, source: str)
         name = context.function.name
         args = context.arguments.model_dump() if isinstance(context.arguments, BaseModel) else dict(context.arguments)
         failure = ""
-        try:
-            await call_next()
-            context.result = governance.guard_tool_result(agent_key, name, context.result, project_id, run_id)
-        except Exception as exc:
-            failure = str(exc) or type(exc).__name__
-            raise
-        finally:
-            took = int((time.perf_counter() - started) * 1000)
-            observability.record_tool(agent_key, project_id, run_id, source, name, args, took, failure)
-            emit = _emit.get()
-            if emit:
-                emit("tool", f"{name} {redact(json.dumps(args, default=str))[:180]}", {"tool": name, "ms": took})
+        # One span per call; MAF's execute_tool span nests under it. Arguments are redacted by tracing.span.
+        with tracing.span(f"tool {name}", tool=name, agent=agent_key, project_id=project_id, run_id=run_id, source=source, input=args) as span:
+            try:
+                await call_next()
+                context.result = governance.guard_tool_result(agent_key, name, context.result, project_id, run_id)
+                span.set_attribute("output", tracing.clean(_text(context.result)[:2000]))
+            except Exception as exc:
+                failure = str(exc) or type(exc).__name__
+                raise
+            finally:
+                took = int((time.perf_counter() - started) * 1000)
+                span.set_attribute("tool_call_id", observability.record_tool(agent_key, project_id, run_id, source, name, args, took, failure, span=tracing.ids(span)))
+                span.set_attribute("status", "error" if failure else "ok")
+                emit = _emit.get()
+                if emit:
+                    emit("tool", f"{name} {redact(json.dumps(args, default=str))[:180]}", {"tool": name, "ms": took})
 
     return audit
+
+
+def _text(result) -> str:
+    """A tool result as text: MAF returns a list of Content items."""
+    items = result if isinstance(result, list) else [result]
+    return "\n".join(str(getattr(item, "text", None) or getattr(item, "result", None) or item) for item in items)
 
 
 def build(agent_key: str, project_id: str, tool_list=None, *, root=None, chat: bool = False, run_id: str | None = None, source: str = "workflow",

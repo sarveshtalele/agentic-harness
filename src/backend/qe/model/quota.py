@@ -4,9 +4,11 @@ from __future__ import annotations
 from typing import Literal
 from pydantic import BaseModel, Field
 
+from backend.qe.model.domain import states_error
+
 
 def coverage_gaps(requirements: list[dict], cases: list[dict]) -> list[str]:
-    """Plugin rule: each P0/P1 requirement gets 1 Positive, 2 Negative (boundary counts) and 1 Exception."""
+    """Each P0/P1 requirement gets 1 Positive and 2 Negative (boundary counts). An Exception case is required only when the requirement states error behaviour."""
     gaps = []
     for requirement in requirements:
         if requirement.get("priority") == "P2":
@@ -16,8 +18,8 @@ def coverage_gaps(requirements: list[dict], cases: list[dict]) -> list[str]:
             gaps.append(f"{requirement['id']}: no Positive case")
         if sum(k.startswith("Negative") for k in kinds) < 2:
             gaps.append(f"{requirement['id']}: needs 2 Negative cases")
-        if "Exception" not in kinds:
-            gaps.append(f"{requirement['id']}: no Exception case")
+        if "Exception" not in kinds and states_error(requirement):
+            gaps.append(f"{requirement['id']}: no Exception case, and the requirement states error behaviour")
     return gaps
 
 
@@ -79,7 +81,7 @@ def limit_cases(cases: list[dict], requirements: list[dict], limit: int) -> tupl
                   "p0_over_limit": p0 > limit, "requirements_without_cases": uncovered, "message": note + ("; P0 cases are never cut, so the limit was exceeded" if p0 > limit else "")}
 
 
-FULL_QUOTA = 4  # the plugin's rule for P0 and P1: 1 Positive, 2 Negative, 1 Exception
+FULL_QUOTA = 4  # P0 and P1: 1 Positive, 2 Negative, and 1 Exception when the requirement states error behaviour, else a third Negative
 
 
 def case_quota(requirements: list[dict], limit: int) -> dict:
@@ -102,13 +104,15 @@ def case_quota(requirements: list[dict], limit: int) -> dict:
     return {"limit": limit, "quota": quota, "planned": planned, "left_out_requirements": left, "p0_over_limit": over, "message": message}
 
 
-def apply_quota(cases: list[dict], quota: dict[str, int]) -> tuple[list[dict], list[dict]]:
-    """Keeps at most the quota of cases per requirement, in order. The plugin's required kinds (1 Positive, 2 Negative, 1 Exception) are kept first, so a cut never opens a coverage gap. Returns (kept, dropped)."""
-    want = {"Positive": 1, "Negative": 2, "Exception": 1}
+def apply_quota(cases: list[dict], quota: dict[str, int], requirements: list[dict] = ()) -> tuple[list[dict], list[dict]]:
+    """Keeps at most the quota of cases per requirement, in order. The required kinds are kept first, so a cut never opens a coverage gap:
+    1 Positive, 2 Negative and 1 Exception for a requirement that states error behaviour, else 1 Positive and 3 Negative. Returns (kept, dropped)."""
+    errors = {r["id"] for r in requirements if states_error(r)}
     kind = lambda c: "Negative" if c["type"].startswith("Negative") else c["type"]
     keep: set[int] = set()
     for req in {c["requirement_id"] for c in cases}:
-        idx, left = [i for i, c in enumerate(cases) if c["requirement_id"] == req], dict(want)
+        idx = [i for i, c in enumerate(cases) if c["requirement_id"] == req]
+        left = {"Positive": 1, "Negative": 2, "Exception": 1} if req in errors else {"Positive": 1, "Negative": 3}
         chosen = []
         for i in idx:
             if left.get(kind(cases[i]), 0) > 0 and len(chosen) < quota.get(req, 0):

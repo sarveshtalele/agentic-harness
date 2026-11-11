@@ -122,12 +122,20 @@ def test_test_data_port_has_the_plugins_shapes_and_no_real_personal_data():
 
 
 def test_fixtures_are_masked_bounded_and_reference_shared_datasets():
-    cases = [{"id": "TC-1", "type": "Negative (Boundary)", "scenario": "Empty name", "test_data": "jane.doe@gmail.com, 123-45-6789, sk-" + "a" * 30, "steps": ["send an empty name"], "expected_result": "rejected"}]
-    fixtures = test_data.build_fixtures(cases)
+    cases = [{"id": "TC-1", "requirement_id": "R1", "type": "Negative (Boundary)", "scenario": "Empty name", "test_data": "jane.doe@gmail.com, 123-45-6789, sk-" + "a" * 30, "steps": ["send an empty name"], "expected_result": "rejected"}]
+    fixtures = test_data.build_fixtures(cases, [{"id": "R1", "input_type": "string"}])
     text = json.dumps(fixtures)
     assert "jane.doe" not in text and "123-45-6789" not in text and "sk-" + "a" * 30 not in text and "masked@example.com" in text
-    assert "boundary" in fixtures["datasets"] and fixtures["cases"]["TC-1"]["uses"]
+    assert list(fixtures["datasets"]["boundary"]) == ["string"] and fixtures["cases"]["TC-1"]["uses"] == ["boundary.string"], "the stated input type picks the boundary set"
+    assert set(fixtures["cases"]["TC-1"]) == {"data", "uses"}
     assert len(json.dumps(test_data.build_fixtures(cases * 1))) < test_data.FIXTURE_LIMIT
+
+
+def test_datasets_follow_the_input_type_never_the_wording():
+    case = {"id": "TC-1", "requirement_id": "R1", "type": "Negative", "scenario": "Heading with too many hashes (negative)", "test_data": "'####### Title'", "steps": ["convert it"], "expected_result": "a paragraph"}
+    fixtures = test_data.build_fixtures([case], [{"id": "R1", "input_type": "string"}])
+    assert fixtures["cases"]["TC-1"]["uses"] == ["boundary.string"] and "number" not in fixtures["datasets"]["boundary"], "the word negative never picks boundary.number"
+    assert test_data.build_fixtures([case])["datasets"] == {}, "no stated input type: no generic boundary payload"
 
 
 # defect records and healing limits

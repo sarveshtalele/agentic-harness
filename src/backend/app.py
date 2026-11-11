@@ -21,7 +21,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from backend import config
 from backend import db as database
 from backend.api import ROUTERS
-from backend.core import auth, documents, files, gates, logs, models, prompts
+from backend.core import auth, documents, files, gates, logs, models, prompts, registry, tracing
 from backend.core import skills as skill_lib
 from backend.core.errors import AqeError, classify, stack_of
 from backend.core.security import install_log_mask, redact, PathEscape
@@ -43,6 +43,7 @@ def fail(request: Request | None, status: int, message: str, *, code: str | None
     message = redact(message)
     if status >= 500 or code:
         log.error("request %s answered %s %s error_id=%s %s", request_id, status, code or "", error_id, message, extra={"fields": {"request_id": request_id, "error_id": error_id, "status": status, "code": code}})
+    tracing.note(error_id=error_id, status="error" if status >= 500 else None)  # the run view links a failed request to its error id
     body = {"code": code, "message": message, "action": action, "error_id": error_id, "detail": message if detail is None else detail}
     return JSONResponse(body, status_code=status, headers={"X-Request-Id": request_id} if request_id else None)
 
@@ -53,13 +54,11 @@ async def lifespan(_: FastAPI):
     # startup seeding removed: seed_database() wrote fabricated data (plan D-04/D-05)
     prompts.seed()
     skill_lib.load()  # a skill MAF cannot load is a warning in the log and is absent
+    registry.sync()  # the capability registry, derived from code and manifests (plan Phase R)
     files.seed_templates()
     models.seed_from_config(llm.current()["model"])
     engine.recover()
-    if os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT"):
-        from agent_framework.observability import configure_otel_providers
-
-        configure_otel_providers()
+    tracing.setup()  # local span store always, OTLP only when OTEL_EXPORTER_OTLP_ENDPOINT is set; prunes old spans
     yield
 
 
@@ -117,6 +116,9 @@ async def request_id(request: Request, call_next):
     return response
 
 
+app.add_middleware(tracing.TraceRequests)  # added last, so outermost: the span covers the guards and the whole streamed reply
+
+
 STATUS = {"AQE-ALLOW-001": 403, "AQE-HARNESS-DESKTOP-ONLY": 403, "AQE-ALLOW-002": 429, "AQE-MODEL-006": 502, "AQE-MODEL-004": 504, "AQE-REPO-001": 400}
 HINT = {401: "Sign in again.", 403: "Ask your administrator.", 404: "Check the address, or refresh the page.", 409: "Wait for the current action to finish, then try again.", 412: "Open Settings and finish the setup.", 413: "Use a smaller file."}
 
@@ -134,7 +136,9 @@ async def forbidden(request: Request, exc: auth.Forbidden):
 
 @app.exception_handler(StarletteHTTPException)
 async def http_failure(request: Request, exc: StarletteHTTPException):
-    return fail(request, exc.status_code, str(exc.detail), action=HINT.get(exc.status_code, "Check the request and try again."), detail=exc.detail)
+    # a structured detail ({message, ...}) keeps its own message; str() of a dict would show Python text to the user
+    message = exc.detail.get("message") if isinstance(exc.detail, dict) and isinstance(exc.detail.get("message"), str) else str(exc.detail)
+    return fail(request, exc.status_code, message, action=HINT.get(exc.status_code, "Check the request and try again."), detail=exc.detail)
 
 
 @app.exception_handler(RequestValidationError)

@@ -8,6 +8,7 @@ from __future__ import annotations
 import re
 from typing import Literal
 
+import yaml
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from backend.core.skill_studio.checks import NAME_RULE, frontmatter
@@ -104,6 +105,8 @@ def plan_problems(plan: SkillPlan, kind: str, taken: set[str], source_text: str,
         problems.append("files must include SKILL.md")
     if kind == "scripts" and not any(TEST_FILE.match(p) for p in paths):
         problems.append("a scripts skill needs at least one scripts/test_*.py pytest file")
+    if kind == "scripts" and "scripts/run.py" not in paths:  # evaluation runs the skill through it
+        problems.append("a scripts skill needs scripts/run.py: read the input from standard input, print the output")
     problems += [f"format {f.name!r} uses {f.template_path}, which is not in files" for f in plan.formats if f.template_path not in paths]
     source = _squash(source_text)
     # an input is a realistic example the skill would receive, never the source's own rules (live run 2026-11-10 measured that as uplift -0.375)
@@ -161,10 +164,28 @@ def files_problems(files: GeneratedFiles, plan: SkillPlan, kind: str, author: st
     return problems
 
 
+def canonical_skill_md(content: str, plan: SkillPlan, author: str) -> str:
+    """SKILL.md with frontmatter written by the server from the approved plan, and the model's body kept.
+
+    The name and description must equal the plan word for word, so the server owns them and quotes them as YAML.
+    A model that wrote an unquoted colon in the description broke the YAML three times in a row (owner report
+    2026-11-11); writing it here removes that failure. The author is the signed-in user; no version is written."""
+    text = content.lstrip("\ufeff \n")
+    body = text
+    if text.startswith("---") and "\n---" in text[3:]:
+        rest = text[3:].split("\n---", 1)[1]
+        body = rest.split("\n", 1)[1] if "\n" in rest else ""
+    head = {"name": plan.name, "description": plan.description, "metadata": {"author": author}}
+    return "---\n" + yaml.safe_dump(head, sort_keys=False, allow_unicode=True, width=100_000) + "---\n" + body.lstrip("\n")
+
+
 def files_schema(plan: SkillPlan, kind: str, author: str) -> type[GeneratedFiles]:
     class CheckedFiles(GeneratedFiles):
         @model_validator(mode="after")
         def _plan_rules(self):
+            for item in self.files:
+                if item.path == "SKILL.md":
+                    item.content = canonical_skill_md(item.content, plan, author)
             if problems := files_problems(self, plan, kind, author):
                 raise ValueError("; ".join(problems))
             return self

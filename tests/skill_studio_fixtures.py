@@ -28,7 +28,8 @@ def test_net_is_quantity_times_price():
 def test_text_without_invoices_gives_no_lines():
     assert lines("no invoices here") == []
 '''
-FILES = ["SKILL.md", "scripts/ledger.py", "scripts/test_ledger.py", "references/rules.md", "assets/ledger.md"]
+RUN = """import sys\n\nfrom ledger import lines\n\nfor row in lines(sys.stdin.read()):\n    print(f"{row['invoice']} {row['item']} {row['quantity']} net {row['net']} EUR")\n"""
+FILES = ["SKILL.md", "scripts/ledger.py", "scripts/run.py", "scripts/test_ledger.py", "references/rules.md", "assets/ledger.md"]
 
 
 def unique_name() -> str:
@@ -55,7 +56,7 @@ def files(name: str, kind: str = "scripts", extra: list[dict] | None = None) -> 
     out = [{"path": "SKILL.md", "content": skill_md}, {"path": "references/rules.md", "content": "# Rules\n\nAmounts are in EUR.\n"},
            {"path": "assets/ledger.md", "content": "| invoice | item | quantity | net |\n"}]
     if kind == "scripts":
-        out += [{"path": "scripts/ledger.py", "content": SCRIPT}, {"path": "scripts/test_ledger.py", "content": TEST}]
+        out += [{"path": "scripts/ledger.py", "content": SCRIPT}, {"path": "scripts/run.py", "content": RUN}, {"path": "scripts/test_ledger.py", "content": TEST}]
     return {"files": out + (extra or [])}
 
 

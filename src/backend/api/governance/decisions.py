@@ -20,8 +20,7 @@ def project_gates(project_id: str):
 
 
 def _named(items: list[dict]) -> list[dict]:
-    names = auth.display_names({g["decided_by"] for g in items if g["decided_by"]})
-    return [{**g, "decided_by_name": names.get(g["decided_by"], g["decided_by"])} for g in items]
+    return auth.named(items)
 
 
 class GateIn(BaseModel):
@@ -49,7 +48,7 @@ def project_approvals(project_id: str, status: str = "pending"):
             return json.loads(payload)
         except Exception:
             return {}
-    return [{**a, "payload": _parse_payload(a.get("payload"))} for a in items]
+    return [{**a, "payload": _parse_payload(a.get("payload"))} for a in auth.named(items)]
 
 
 class DecisionIn(BaseModel):

@@ -1,0 +1,5 @@
+{
+ "gate": 1,
+ "ok": false,
+ "error": "the pandas/numpy validator is not set up: run /agentic-qe:qe-doctor (it creates the validator's Python environment with pandas and numpy)"
+}

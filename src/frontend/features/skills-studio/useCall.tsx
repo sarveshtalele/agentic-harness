@@ -3,13 +3,11 @@ import { ErrorNote, Spinner } from "../../components/ui";
 
 type Failure = { message: string; replyFile?: string };
 
-/** The server's 502 detail is {message, reply_file}; api() hands it over as JSON text. */
+/** A rejected model reply comes back as detail {message, reply_file}; the message is shown, and the kept reply's file name. */
 function failure(e: any): Failure {
-  try {
-    const body = JSON.parse(e.message);
-    if (body && typeof body.message === "string") return { message: body.message, replyFile: body.reply_file };
-  } catch {}
-  return { message: e.message || "Request failed" };
+  const detail = e?.detail;
+  if (detail && typeof detail === "object" && typeof detail.message === "string") return { message: detail.message, replyFile: detail.reply_file };
+  return { message: e?.message || "Request failed" };
 }
 
 export type Call = { busy: string; error: Failure | null; run: <T>(label: string, fn: () => Promise<T>) => Promise<T | undefined> };

@@ -22,6 +22,7 @@ from backend.core.security import redact, sha256
 from backend.db import db, new_id, now, row, rows
 from backend.maf import engine, governance, harness, llm, skill_chat, tools
 from backend.maf import runtime as agents
+from backend.maf.harness_kit import prompt_hooks
 from backend.maf.harness_kit.nudges import HideLoopNudges
 
 router = APIRouter()
@@ -66,8 +67,6 @@ def _text_of(message: dict) -> str:
 async def agui(agent_key: str, request: Request):
     if agent_key not in agents.CHAT_AGENTS:
         raise HTTPException(404, "Unknown agent")
-    if agent_key == harness.AGENT:
-        harness.require_desktop()  # 403 AQE-HARNESS-DESKTOP-ONLY under the web profile
     body = await request.json()
     thread_id = body.get("threadId") or body.get("thread_id") or ""
     with db() as con:
@@ -81,16 +80,25 @@ async def agui(agent_key: str, request: Request):
         raise HTTPException(403, "Your role is viewer. A viewer can read but not chat with the agents")
     incoming = body.get("messages") or []
     last_user = next((m for m in reversed(incoming) if m.get("role") == "user"), None)
+    hooked = None  # the plugins' prompt hooks' outcome (harness only)
     if last_user:
         clean = governance.guard_text(agent_key, _text_of(last_user), "input", project_id)
         if clean != _text_of(last_user):  # the model and the store only ever see the redacted text
             last_user["content"] = clean
+        first = not thread_messages(thread_id)
         _append(thread_id, "user", clean, agent_key, last_user.get("id"))
-        if agent_key == harness.AGENT and (command := plugins.expand_slash(clean)):
-            last_user["content"] = command  # the model gets the command's instructions; the chat keeps what the user typed
+        if agent_key == harness.AGENT:
+            # plan H3: plugins' SessionStart and UserPromptSubmit hooks see the human's own text, before any expansion
+            hooked = None if body.get("resume") else await prompt_hooks.submitted(project_id, thread_id, auth.acting_user(project_id), clean, first)
+            command = plugins.expand_slash(clean)  # the model gets the command's instructions; the chat keeps what the user typed
+            last_user["content"] = prompt_hooks.for_model(command or clean, hooked) if hooked else (command or clean)
     encoder = EventEncoder()
 
     async def stream():
+        if hooked and hooked.blocked:  # a plugin's UserPromptSubmit hook refused the message: the model is not called
+            for event in prompt_hooks.blocked_events(thread_id, body.get("runId") or new_id("rn"), hooked.reason):
+                yield encoder.encode(event)
+            return
         answer: list[str] = []
         agents.set_emitter(None)
         try:

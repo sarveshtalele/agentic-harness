@@ -1,0 +1,787 @@
+{
+  "plan": {
+    "status": 201,
+    "body": {
+      "id": "spl_e3baf32b0a1b",
+      "project_id": "prj_1264eda60d54",
+      "author": "admin",
+      "kind": "scripts",
+      "request": "A skill with a Python script that verifies settlement idempotency in a list of payment settlement records (JSON): every idempotency key settles at most once, a retried request with the same key and the same amount is a duplicate and is reported, the same key with a different amount is a conflict and is reported, and the total settled per merchant must equal the sum of unique settlements. It prints every duplicate and conflict with its record ids.",
+      "source_type": "text",
+      "source_ref": "",
+      "source_sha256": "afa2049fd771f0472f5b0a39667aa88571867561c59d5074e8131df8850eaa2f",
+      "revise": "",
+      "status": "draft",
+      "plan_sha256": "",
+      "approved_by": "",
+      "approved_at": null,
+      "prompt_ref": "skill-creator@v1:aca2d48e5b0b",
+      "draft_sha256": "",
+      "generated_at": null,
+      "created_at": "2026-11-11T07:32:25+00:00",
+      "plan": {
+        "description": "Verifies settlement idempotency in a list of payment settlement records (JSON): every idempotency key settles at most once, a retried request with the same key and same amount is a duplicate and is reported, the same key with a different amount is a conflict and is reported, and the total settled per merchant must equal the sum of unique settlements. Use when a user provides a JSON array of settlement records and needs to validate idempotency rules.",
+        "eval_cases": [
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "Duplicate: id=2"
+              },
+              {
+                "kind": "contains",
+                "value": "Merchant m1 total: 300"
+              },
+              {
+                "kind": "not_contains",
+                "value": "Conflict"
+              }
+            ],
+            "input": "[{\"id\": \"1\", \"merchant_id\": \"m1\", \"idempotency_key\": \"key1\", \"amount\": 100}, {\"id\": \"2\", \"merchant_id\": \"m1\", \"idempotency_key\": \"key1\", \"amount\": 100}, {\"id\": \"3\", \"merchant_id\": \"m1\", \"idempotency_key\": \"key2\", \"amount\": 200}]"
+          },
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "Conflict: id=b"
+              },
+              {
+                "kind": "contains",
+                "value": "Merchant m2 total: 50"
+              },
+              {
+                "kind": "not_contains",
+                "value": "Duplicate"
+              }
+            ],
+            "input": "[{\"id\": \"a\", \"merchant_id\": \"m2\", \"idempotency_key\": \"k1\", \"amount\": 50}, {\"id\": \"b\", \"merchant_id\": \"m2\", \"idempotency_key\": \"k1\", \"amount\": 60}]"
+          },
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "Merchant mx total: 99"
+              },
+              {
+                "kind": "not_contains",
+                "value": "Duplicate"
+              },
+              {
+                "kind": "not_contains",
+                "value": "Conflict"
+              }
+            ],
+            "input": "[{\"id\": \"x\", \"merchant_id\": \"mx\", \"idempotency_key\": \"unq\", \"amount\": 99}]"
+          },
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "Duplicate: id=i2"
+              },
+              {
+                "kind": "contains",
+                "value": "Merchant m1 total: 10"
+              },
+              {
+                "kind": "contains",
+                "value": "Merchant m2 total: 0"
+              },
+              {
+                "kind": "not_contains",
+                "value": "Conflict"
+              }
+            ],
+            "input": "[{\"id\": \"i1\", \"merchant_id\": \"m1\", \"idempotency_key\": \"k\", \"amount\": 10}, {\"id\": \"i2\", \"merchant_id\": \"m2\", \"idempotency_key\": \"k\", \"amount\": 10}]"
+          }
+        ],
+        "files": [
+          {
+            "path": "SKILL.md",
+            "purpose": "Skill documentation with YAML frontmatter, steps, decision rules, and links to references."
+          },
+          {
+            "path": "scripts/verify_settlement_idempotency.py",
+            "purpose": "Python script implementing the verification logic."
+          },
+          {
+            "path": "scripts/test_verify_settlement_idempotency.py",
+            "purpose": "Pytest test file importing the script by module name and asserting real behavior."
+          },
+          {
+            "path": "assets/report_template.txt",
+            "purpose": "Template for the output report format."
+          }
+        ],
+        "formats": [
+          {
+            "name": "report",
+            "purpose": "Displays duplicates, conflicts, and per-merchant totals.",
+            "template_path": "assets/report_template.txt"
+          }
+        ],
+        "name": "settlement-idempotency-verifier",
+        "subagents": [],
+        "tasks": [
+          "Receive a JSON array of settlement records, each with fields: id, merchant_id, idempotency_key, amount (numeric).",
+          "Parse the JSON input and validate its structure; report errors for malformed input.",
+          "Group records by idempotency_key; for each key, identify if there are multiple occurrences: if any two have the same amount, mark the later ones as duplicates; if amounts differ, mark all after the first as conflicts.",
+          "For each duplicate or conflict found, print a line including the record id and the type (duplicate or conflict).",
+          "Filter out duplicates and conflicts to obtain a list of unique settlements (first occurrence per key that is not invalid).",
+          "Group unique settlements by merchant_id, sum their amounts, and compute the total settled per merchant.",
+          "Verify that the sum of unique settlement amounts for each merchant equals the total from the original (unique) records; if not, report a discrepancy. Print the final summary: list of duplicates, conflicts, and per-merchant totals."
+        ]
+      },
+      "checks": [],
+      "source_chars": 450
+    }
+  },
+  "approve": {
+    "status": 200,
+    "body": {
+      "id": "spl_e3baf32b0a1b",
+      "project_id": "prj_1264eda60d54",
+      "author": "admin",
+      "kind": "scripts",
+      "request": "A skill with a Python script that verifies settlement idempotency in a list of payment settlement records (JSON): every idempotency key settles at most once, a retried request with the same key and the same amount is a duplicate and is reported, the same key with a different amount is a conflict and is reported, and the total settled per merchant must equal the sum of unique settlements. It prints every duplicate and conflict with its record ids.",
+      "source_type": "text",
+      "source_ref": "",
+      "source_sha256": "afa2049fd771f0472f5b0a39667aa88571867561c59d5074e8131df8850eaa2f",
+      "revise": "",
+      "status": "approved",
+      "plan_sha256": "5298210d79b1003c64974ac2270b9a4404c278290818e18b745b076be6b52943",
+      "approved_by": "admin",
+      "approved_at": "2026-11-11T07:32:25+00:00",
+      "prompt_ref": "skill-creator@v1:aca2d48e5b0b",
+      "draft_sha256": "",
+      "generated_at": null,
+      "created_at": "2026-11-11T07:32:25+00:00",
+      "plan": {
+        "description": "Verifies settlement idempotency in a list of payment settlement records (JSON): every idempotency key settles at most once, a retried request with the same key and same amount is a duplicate and is reported, the same key with a different amount is a conflict and is reported, and the total settled per merchant must equal the sum of unique settlements. Use when a user provides a JSON array of settlement records and needs to validate idempotency rules.",
+        "eval_cases": [
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "Duplicate: id=2"
+              },
+              {
+                "kind": "contains",
+                "value": "Merchant m1 total: 300"
+              },
+              {
+                "kind": "not_contains",
+                "value": "Conflict"
+              }
+            ],
+            "input": "[{\"id\": \"1\", \"merchant_id\": \"m1\", \"idempotency_key\": \"key1\", \"amount\": 100}, {\"id\": \"2\", \"merchant_id\": \"m1\", \"idempotency_key\": \"key1\", \"amount\": 100}, {\"id\": \"3\", \"merchant_id\": \"m1\", \"idempotency_key\": \"key2\", \"amount\": 200}]"
+          },
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "Conflict: id=b"
+              },
+              {
+                "kind": "contains",
+                "value": "Merchant m2 total: 50"
+              },
+              {
+                "kind": "not_contains",
+                "value": "Duplicate"
+              }
+            ],
+            "input": "[{\"id\": \"a\", \"merchant_id\": \"m2\", \"idempotency_key\": \"k1\", \"amount\": 50}, {\"id\": \"b\", \"merchant_id\": \"m2\", \"idempotency_key\": \"k1\", \"amount\": 60}]"
+          },
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "Merchant mx total: 99"
+              },
+              {
+                "kind": "not_contains",
+                "value": "Duplicate"
+              },
+              {
+                "kind": "not_contains",
+                "value": "Conflict"
+              }
+            ],
+            "input": "[{\"id\": \"x\", \"merchant_id\": \"mx\", \"idempotency_key\": \"unq\", \"amount\": 99}]"
+          },
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "Duplicate: id=i2"
+              },
+              {
+                "kind": "contains",
+                "value": "Merchant m1 total: 10"
+              },
+              {
+                "kind": "contains",
+                "value": "Merchant m2 total: 0"
+              },
+              {
+                "kind": "not_contains",
+                "value": "Conflict"
+              }
+            ],
+            "input": "[{\"id\": \"i1\", \"merchant_id\": \"m1\", \"idempotency_key\": \"k\", \"amount\": 10}, {\"id\": \"i2\", \"merchant_id\": \"m2\", \"idempotency_key\": \"k\", \"amount\": 10}]"
+          }
+        ],
+        "files": [
+          {
+            "path": "SKILL.md",
+            "purpose": "Skill documentation with YAML frontmatter, steps, decision rules, and links to references."
+          },
+          {
+            "path": "scripts/verify_settlement_idempotency.py",
+            "purpose": "Python script implementing the verification logic."
+          },
+          {
+            "path": "scripts/test_verify_settlement_idempotency.py",
+            "purpose": "Pytest test file importing the script by module name and asserting real behavior."
+          },
+          {
+            "path": "assets/report_template.txt",
+            "purpose": "Template for the output report format."
+          }
+        ],
+        "formats": [
+          {
+            "name": "report",
+            "purpose": "Displays duplicates, conflicts, and per-merchant totals.",
+            "template_path": "assets/report_template.txt"
+          }
+        ],
+        "name": "settlement-idempotency-verifier",
+        "subagents": [],
+        "tasks": [
+          "Receive a JSON array of settlement records, each with fields: id, merchant_id, idempotency_key, amount (numeric).",
+          "Parse the JSON input and validate its structure; report errors for malformed input.",
+          "Group records by idempotency_key; for each key, identify if there are multiple occurrences: if any two have the same amount, mark the later ones as duplicates; if amounts differ, mark all after the first as conflicts.",
+          "For each duplicate or conflict found, print a line including the record id and the type (duplicate or conflict).",
+          "Filter out duplicates and conflicts to obtain a list of unique settlements (first occurrence per key that is not invalid).",
+          "Group unique settlements by merchant_id, sum their amounts, and compute the total settled per merchant.",
+          "Verify that the sum of unique settlement amounts for each merchant equals the total from the original (unique) records; if not, report a discrepancy. Print the final summary: list of duplicates, conflicts, and per-merchant totals."
+        ]
+      },
+      "checks": [],
+      "source_chars": 450
+    }
+  },
+  "generate": {
+    "status": 200,
+    "body": {
+      "plan": {
+        "id": "spl_e3baf32b0a1b",
+        "project_id": "prj_1264eda60d54",
+        "author": "admin",
+        "kind": "scripts",
+        "request": "A skill with a Python script that verifies settlement idempotency in a list of payment settlement records (JSON): every idempotency key settles at most once, a retried request with the same key and the same amount is a duplicate and is reported, the same key with a different amount is a conflict and is reported, and the total settled per merchant must equal the sum of unique settlements. It prints every duplicate and conflict with its record ids.",
+        "source_type": "text",
+        "source_ref": "",
+        "source_sha256": "afa2049fd771f0472f5b0a39667aa88571867561c59d5074e8131df8850eaa2f",
+        "revise": "",
+        "status": "generated",
+        "plan_sha256": "5298210d79b1003c64974ac2270b9a4404c278290818e18b745b076be6b52943",
+        "approved_by": "admin",
+        "approved_at": "2026-11-11T07:32:25+00:00",
+        "prompt_ref": "skill-creator@v1:aca2d48e5b0b",
+        "draft_sha256": "371522185c0683912a32ca6dce106b662d70f7af9b552567d0aef54478c3d905",
+        "generated_at": "2026-11-11T07:32:58+00:00",
+        "created_at": "2026-11-11T07:32:25+00:00",
+        "plan": {
+          "description": "Verifies settlement idempotency in a list of payment settlement records (JSON): every idempotency key settles at most once, a retried request with the same key and same amount is a duplicate and is reported, the same key with a different amount is a conflict and is reported, and the total settled per merchant must equal the sum of unique settlements. Use when a user provides a JSON array of settlement records and needs to validate idempotency rules.",
+          "eval_cases": [
+            {
+              "assertions": [
+                {
+                  "kind": "contains",
+                  "value": "Duplicate: id=2"
+                },
+                {
+                  "kind": "contains",
+                  "value": "Merchant m1 total: 300"
+                },
+                {
+                  "kind": "not_contains",
+                  "value": "Conflict"
+                }
+              ],
+              "input": "[{\"id\": \"1\", \"merchant_id\": \"m1\", \"idempotency_key\": \"key1\", \"amount\": 100}, {\"id\": \"2\", \"merchant_id\": \"m1\", \"idempotency_key\": \"key1\", \"amount\": 100}, {\"id\": \"3\", \"merchant_id\": \"m1\", \"idempotency_key\": \"key2\", \"amount\": 200}]"
+            },
+            {
+              "assertions": [
+                {
+                  "kind": "contains",
+                  "value": "Conflict: id=b"
+                },
+                {
+                  "kind": "contains",
+                  "value": "Merchant m2 total: 50"
+                },
+                {
+                  "kind": "not_contains",
+                  "value": "Duplicate"
+                }
+              ],
+              "input": "[{\"id\": \"a\", \"merchant_id\": \"m2\", \"idempotency_key\": \"k1\", \"amount\": 50}, {\"id\": \"b\", \"merchant_id\": \"m2\", \"idempotency_key\": \"k1\", \"amount\": 60}]"
+            },
+            {
+              "assertions": [
+                {
+                  "kind": "contains",
+                  "value": "Merchant mx total: 99"
+                },
+                {
+                  "kind": "not_contains",
+                  "value": "Duplicate"
+                },
+                {
+                  "kind": "not_contains",
+                  "value": "Conflict"
+                }
+              ],
+              "input": "[{\"id\": \"x\", \"merchant_id\": \"mx\", \"idempotency_key\": \"unq\", \"amount\": 99}]"
+            },
+            {
+              "assertions": [
+                {
+                  "kind": "contains",
+                  "value": "Duplicate: id=i2"
+                },
+                {
+                  "kind": "contains",
+                  "value": "Merchant m1 total: 10"
+                },
+                {
+                  "kind": "contains",
+                  "value": "Merchant m2 total: 0"
+                },
+                {
+                  "kind": "not_contains",
+                  "value": "Conflict"
+                }
+              ],
+              "input": "[{\"id\": \"i1\", \"merchant_id\": \"m1\", \"idempotency_key\": \"k\", \"amount\": 10}, {\"id\": \"i2\", \"merchant_id\": \"m2\", \"idempotency_key\": \"k\", \"amount\": 10}]"
+            }
+          ],
+          "files": [
+            {
+              "path": "SKILL.md",
+              "purpose": "Skill documentation with YAML frontmatter, steps, decision rules, and links to references."
+            },
+            {
+              "path": "scripts/verify_settlement_idempotency.py",
+              "purpose": "Python script implementing the verification logic."
+            },
+            {
+              "path": "scripts/test_verify_settlement_idempotency.py",
+              "purpose": "Pytest test file importing the script by module name and asserting real behavior."
+            },
+            {
+              "path": "assets/report_template.txt",
+              "purpose": "Template for the output report format."
+            }
+          ],
+          "formats": [
+            {
+              "name": "report",
+              "purpose": "Displays duplicates, conflicts, and per-merchant totals.",
+              "template_path": "assets/report_template.txt"
+            }
+          ],
+          "name": "settlement-idempotency-verifier",
+          "subagents": [],
+          "tasks": [
+            "Receive a JSON array of settlement records, each with fields: id, merchant_id, idempotency_key, amount (numeric).",
+            "Parse the JSON input and validate its structure; report errors for malformed input.",
+            "Group records by idempotency_key; for each key, identify if there are multiple occurrences: if any two have the same amount, mark the later ones as duplicates; if amounts differ, mark all after the first as conflicts.",
+            "For each duplicate or conflict found, print a line including the record id and the type (duplicate or conflict).",
+            "Filter out duplicates and conflicts to obtain a list of unique settlements (first occurrence per key that is not invalid).",
+            "Group unique settlements by merchant_id, sum their amounts, and compute the total settled per merchant.",
+            "Verify that the sum of unique settlement amounts for each merchant equals the total from the original (unique) records; if not, report a discrepancy. Print the final summary: list of duplicates, conflicts, and per-merchant totals."
+          ]
+        },
+        "checks": [
+          {
+            "check": "frontmatter",
+            "passed": true,
+            "detail": "YAML frontmatter between --- lines"
+          },
+          {
+            "check": "name format",
+            "passed": true,
+            "detail": "name 'settlement-idempotency-verifier': lowercase letters, digits and single hyphens, at most 64"
+          },
+          {
+            "check": "name matches folder",
+            "passed": true,
+            "detail": "name 'settlement-idempotency-verifier', folder 'settlement-idempotency-verifier'"
+          },
+          {
+            "check": "description",
+            "passed": true,
+            "detail": "453 characters (1 to 1024)"
+          },
+          {
+            "check": "body length",
+            "passed": true,
+            "detail": "21 lines (at most 500; move detail into references/)"
+          },
+          {
+            "check": "MAF loads it",
+            "passed": true,
+            "detail": "MAF FileSkillsSource loaded it"
+          },
+          {
+            "check": "scripts/test_verify_settlement_idempotency.py parses",
+            "passed": true,
+            "detail": "Python syntax is valid (parsed, not executed)"
+          },
+          {
+            "check": "scripts/test_verify_settlement_idempotency.py imports",
+            "passed": true,
+            "detail": "standard library only"
+          },
+          {
+            "check": "scripts/verify_settlement_idempotency.py parses",
+            "passed": true,
+            "detail": "Python syntax is valid (parsed, not executed)"
+          },
+          {
+            "check": "scripts/verify_settlement_idempotency.py imports",
+            "passed": true,
+            "detail": "standard library only"
+          },
+          {
+            "check": "security scan",
+            "passed": true,
+            "detail": "no findings"
+          }
+        ],
+        "source_chars": 450
+      },
+      "files": [
+        {
+          "path": "SKILL.md",
+          "content": "---\nname: settlement-idempotency-verifier\ndescription: \"Verifies settlement idempotency in a list of payment settlement records (JSON): every idempotency key settles at most once, a retried request with the same key and same amount is a duplicate and is reported, the same key with a different amount is a conflict and is reported, and the total settled per merchant must equal the sum of unique settlements. Use when a user provides a JSON array of settlement records and needs to validate idempotency rules.\"\nauthor: admin\n---\n\n# Settlement Idempotency Verifier\n\n## Steps\n\n1. Parse the JSON input string into a Python list of dictionaries. Validate that every record has the required fields (`id`, `merchant_id`, `idempotency_key`, `amount`). If the input cannot be parsed or a record is invalid, return an error message.\n2. Group records by `idempotency_key`. For each key, process records in order of appearance:\n   - If the key appears only once, the record is a valid unique settlement.\n   - If more than one record shares the same key:\n     - If the amount matches the first record's amount, mark all subsequent records as **duplicates**.\n     - If the amount differs from the first record's amount, mark all subsequent records as **conflicts**.\n3. For each duplicate, append a line to the output: `\"Duplicate: id=<id>\"`.\n4. For each conflict, append a line to the output: `\"Conflict: id=<id>\"`.\n5. Collect the first occurrence per idempotency key as the unique settlement (skip duplicates and conflicts).\n6. Group unique settlements by `merchant_id`, sum their amounts, and for each merchant compute the total. Print a line: `\"Merchant <merchant_id> total: <sum>\"`.\n7. Return the full report string.\n\n## Rules\n\n- If the JSON is malformed (e.g., not a list, missing fields), return `\"Error: Invalid input\"`.\n- Amounts must be numeric (int or float). Non-numeric amounts are treated as invalid input.\n"
+        },
+        {
+          "path": "scripts/verify_settlement_idempotency.py",
+          "content": "import json\nfrom typing import List, Dict, Any\n\n\ndef verify_settlement_idempotency(input_str: str) -> str:\n    \"\"\"\n    Verifies settlement idempotency from a JSON string of records.\n    Returns a report string.\n    \"\"\"\n    try:\n        records = json.loads(input_str)\n    except json.JSONDecodeError:\n        return \"Error: Invalid input\"\n\n    if not isinstance(records, list):\n        return \"Error: Invalid input\"\n\n    required_fields = {\"id\", \"merchant_id\", \"idempotency_key\", \"amount\"}\n    for rec in records:\n        if not isinstance(rec, dict):\n            return \"Error: Invalid input\"\n        if not required_fields.issubset(rec.keys()):\n            return \"Error: Invalid input\"\n        if not isinstance(rec[\"amount\"], (int, float)):\n            return \"Error: Invalid input\"\n\n    # Group by idempotency_key\n    groups: Dict[str, List[Dict[str, Any]]] = {}\n    for rec in records:\n        key = rec[\"idempotency_key\"]\n        groups.setdefault(key, []).append(rec)\n\n    duplicates: List[str] = []\n    conflicts: List[str] = []\n    unique_settlements: List[Dict[str, Any]] = []\n\n    for key, recs in groups.items():\n        if len(recs) == 1:\n            unique_settlements.append(recs[0])\n        else:\n            first = recs[0]\n            unique_settlements.append(first)\n            for rec in recs[1:]:\n                if rec[\"amount\"] == first[\"amount\"]:\n                    duplicates.append(rec[\"id\"])\n                else:\n                    conflicts.append(rec[\"id\"])\n\n    # Per-merchant totals from unique settlements\n    merchant_totals: Dict[str, float] = {}\n    for rec in unique_settlements:\n        mid = rec[\"merchant_id\"]\n        merchant_totals[mid] = merchant_totals.get(mid, 0) + rec[\"amount\"]\n\n    lines: List[str] = []\n    for dup_id in duplicates:\n        lines.append(f\"Duplicate: id={dup_id}\")\n    for conf_id in conflicts:\n        lines.append(f\"Conflict: id={conf_id}\")\n    # Sort merchants for deterministic output (optional)\n    for mid in sorted(merchant_totals.keys()):\n        lines.append(f\"Merchant {mid} total: {int(merchant_totals[mid])}\")\n    return \"\\n\".join(lines)\n"
+        },
+        {
+          "path": "scripts/test_verify_settlement_idempotency.py",
+          "content": "import pytest\nfrom verify_settlement_idempotency import verify_settlement_idempotency\n\n\ndef test_duplicate_and_totals():\n    input_str = '[{\"id\": \"1\", \"merchant_id\": \"m1\", \"idempotency_key\": \"key1\", \"amount\": 100}, {\"id\": \"2\", \"merchant_id\": \"m1\", \"idempotency_key\": \"key1\", \"amount\": 100}, {\"id\": \"3\", \"merchant_id\": \"m1\", \"idempotency_key\": \"key2\", \"amount\": 200}]'\n    result = verify_settlement_idempotency(input_str)\n    assert \"Duplicate: id=2\" in result\n    assert \"Merchant m1 total: 300\" in result\n    assert \"Conflict\" not in result\n\n\ndef test_conflict():\n    input_str = '[{\"id\": \"a\", \"merchant_id\": \"m2\", \"idempotency_key\": \"k1\", \"amount\": 50}, {\"id\": \"b\", \"merchant_id\": \"m2\", \"idempotency_key\": \"k1\", \"amount\": 60}]'\n    result = verify_settlement_idempotency(input_str)\n    assert \"Conflict: id=b\" in result\n    assert \"Merchant m2 total: 50\" in result\n    assert \"Duplicate\" not in result\n\n\ndef test_single_unique():\n    input_str = '[{\"id\": \"x\", \"merchant_id\": \"mx\", \"idempotency_key\": \"unq\", \"amount\": 99}]'\n    result = verify_settlement_idempotency(input_str)\n    assert \"Merchant mx total: 99\" in result\n    assert \"Duplicate\" not in result\n    assert \"Conflict\" not in result\n\n\ndef test_duplicate_across_merchants():\n    input_str = '[{\"id\": \"i1\", \"merchant_id\": \"m1\", \"idempotency_key\": \"k\", \"amount\": 10}, {\"id\": \"i2\", \"merchant_id\": \"m2\", \"idempotency_key\": \"k\", \"amount\": 10}]'\n    result = verify_settlement_idempotency(input_str)\n    assert \"Duplicate: id=i2\" in result\n    assert \"Merchant m1 total: 10\" in result\n    assert \"Merchant m2 total: 0\" in result\n    assert \"Conflict\" not in result\n\n\ndef test_invalid_json():\n    result = verify_settlement_idempotency(\"not json\")\n    assert result == \"Error: Invalid input\"\n\n\ndef test_missing_field():\n    result = verify_settlement_idempotency('[{\"id\": \"1\", \"merchant_id\": \"m1\", \"amount\": 100}]')\n    assert result == \"Error: Invalid input\"\n\n\ndef test_non_numeric_amount():\n    result = verify_settlement_idempotency('[{\"id\": \"1\", \"merchant_id\": \"m1\", \"idempotency_key\": \"k\", \"amount\": \"abc\"}]')\n    assert result == \"Error: Invalid input\"\n"
+        },
+        {
+          "path": "assets/report_template.txt",
+          "content": "Duplicate: id=<duplicate_id>\nConflict: id=<conflict_id>\nMerchant <merchant_id> total: <sum>\n"
+        }
+      ],
+      "checks": [
+        {
+          "check": "frontmatter",
+          "passed": true,
+          "detail": "YAML frontmatter between --- lines"
+        },
+        {
+          "check": "name format",
+          "passed": true,
+          "detail": "name 'settlement-idempotency-verifier': lowercase letters, digits and single hyphens, at most 64"
+        },
+        {
+          "check": "name matches folder",
+          "passed": true,
+          "detail": "name 'settlement-idempotency-verifier', folder 'settlement-idempotency-verifier'"
+        },
+        {
+          "check": "description",
+          "passed": true,
+          "detail": "453 characters (1 to 1024)"
+        },
+        {
+          "check": "body length",
+          "passed": true,
+          "detail": "21 lines (at most 500; move detail into references/)"
+        },
+        {
+          "check": "MAF loads it",
+          "passed": true,
+          "detail": "MAF FileSkillsSource loaded it"
+        },
+        {
+          "check": "scripts/test_verify_settlement_idempotency.py parses",
+          "passed": true,
+          "detail": "Python syntax is valid (parsed, not executed)"
+        },
+        {
+          "check": "scripts/test_verify_settlement_idempotency.py imports",
+          "passed": true,
+          "detail": "standard library only"
+        },
+        {
+          "check": "scripts/verify_settlement_idempotency.py parses",
+          "passed": true,
+          "detail": "Python syntax is valid (parsed, not executed)"
+        },
+        {
+          "check": "scripts/verify_settlement_idempotency.py imports",
+          "passed": true,
+          "detail": "standard library only"
+        },
+        {
+          "check": "security scan",
+          "passed": true,
+          "detail": "no findings"
+        }
+      ],
+      "summary": {
+        "passed": 11,
+        "total": 11,
+        "all_passed": true
+      }
+    }
+  },
+  "test": {
+    "status": 200,
+    "body": {
+      "verdict": "FAIL",
+      "exit_code": 1,
+      "passed": 6,
+      "failed": 1,
+      "errors": 0,
+      "timed_out": false,
+      "summary": "1 failed, 6 passed in 0.03s",
+      "stdout_tail": "...F...                                                                  [100%]\n=================================== FAILURES ===================================\n_______________________ test_duplicate_across_merchants ________________________\n\n    def test_duplicate_across_merchants():\n        input_str = '[{\"id\": \"i1\", \"merchant_id\": \"m1\", \"idempotency_key\": \"k\", \"amount\": 10}, {\"id\": \"i2\", \"merchant_id\": \"m2\", \"idempotency_key\": \"k\", \"amount\": 10}]'\n        result = verify_settlement_idempotency(input_str)\n        assert \"Duplicate: id=i2\" in result\n        assert \"Merchant m1 total: 10\" in result\n>       assert \"Merchant m2 total: 0\" in result\nE       AssertionError: assert 'Merchant m2 total: 0' in 'Duplicate: id=i2\\nMerchant m1 total: 10'\n\nscripts/test_verify_settlement_idempotency.py:34: AssertionError\n=========================== short test summary info ============================\nFAILED scripts/test_verify_settlement_idempotency.py::test_duplicate_across_merchants\n1 failed, 6 passed in 0.03s\n",
+      "stderr_tail": "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/pytest_asyncio/plugin.py:300: PytestDeprecationWarning: The configuration option \"asyncio_default_fixture_loop_scope\" is unset.\nThe event loop scope for asynchronous fixtures will default to the \"fixture\" caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to \"function\" scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n"
+    }
+  },
+  "repair": {
+    "status": 404,
+    "body": {
+      "code": null,
+      "message": "Not found: source_text",
+      "action": "Check the address, or refresh the page.",
+      "error_id": "err_ac34acf8695c",
+      "detail": "Not found: source_text"
+    }
+  },
+  "evaluate": {
+    "status": 200,
+    "body": {
+      "prompt_ref": "skill-creator@v1:aca2d48e5b0b+draft:0c03b24bf0ca",
+      "n": 4,
+      "judge_model": "deterministic-assertions",
+      "metrics": {
+        "assertion_pass_rate_with_skill": 0.6153846153846154,
+        "assertion_pass_rate_without_skill": 0.07692307692307693,
+        "skill_uplift": 0.5384615384615385
+      },
+      "tokens": 9580,
+      "cases": [
+        {
+          "case": 1,
+          "input": "[{\"id\": \"1\", \"merchant_id\": \"m1\", \"idempotency_key\": \"key1\", \"amount\": 100}, {\"id\": \"2\", \"merchant_id\": \"m1\", \"idempotency_key\": \"key1\", \"amount\": 100}, {\"id\": \"3\", \"merchant_id\": \"m1\", \"idempotency_key\": \"key2\", \"amount\": 200}]",
+          "with_skill": {
+            "output": "Duplicate: id=2\nMerchant m1 total: 300",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "Duplicate: id=2",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "Merchant m1 total: 300",
+                "passed": true
+              },
+              {
+                "kind": "not_contains",
+                "value": "Conflict",
+                "passed": true
+              }
+            ]
+          },
+          "without_skill": {
+            "output": "```json\n{\n  \"duplicate_settlements\": [\n    {\n      \"original\": {\"id\": \"1\", \"merchant_id\": \"m1\", \"idempotency_key\": \"key1\", \"amount\": 100},\n      \"duplicate\": {\"id\": \"2\", \"merchant_id\": \"m1\", \"idempotency_key\": \"key1\", \"amount\": 100}\n    }\n  ],\n  \"conflicting_settlements\": [],\n  \"summary\": {\n    \"total_records\": 3,\n    \"duplicate_count\": 1,\n    \"conflict_count\": 0,\n    \"merchant_balances\": {\n      \"m1\": {\n        \"unique_settlements_count\": 2,\n        \"total_settled_amount\": 300,\n        \"total_unique_settled_amount\": 300,\n        \"balance_ok\": true\n      }\n    }\n  }\n}\n```",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "Duplicate: id=2",
+                "passed": false
+              },
+              {
+                "kind": "contains",
+                "value": "Merchant m1 total: 300",
+                "passed": false
+              },
+              {
+                "kind": "not_contains",
+                "value": "Conflict",
+                "passed": false
+              }
+            ]
+          }
+        },
+        {
+          "case": 2,
+          "input": "[{\"id\": \"a\", \"merchant_id\": \"m2\", \"idempotency_key\": \"k1\", \"amount\": 50}, {\"id\": \"b\", \"merchant_id\": \"m2\", \"idempotency_key\": \"k1\", \"amount\": 60}]",
+          "with_skill": {
+            "output": "Conflict: id=b\nMerchant m2 total: 50",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "Conflict: id=b",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "Merchant m2 total: 50",
+                "passed": true
+              },
+              {
+                "kind": "not_contains",
+                "value": "Duplicate",
+                "passed": true
+              }
+            ]
+          },
+          "without_skill": {
+            "output": "{\"skill\": \"settlement_idempotency_checker\", \"output\": {\"duplicates\": [], \"conflicts\": [{\"id\": \"b\", \"merchant_id\": \"m2\", \"idempotency_key\": \"k1\", \"amount\": 60, \"first_amount\": 50}], \"merchant_totals\": {\"m2\": {\"unique_settlements_sum\": 50, \"all_records_sum\": 110, \"discrepancy\": 60}}}}",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "Conflict: id=b",
+                "passed": false
+              },
+              {
+                "kind": "contains",
+                "value": "Merchant m2 total: 50",
+                "passed": false
+              },
+              {
+                "kind": "not_contains",
+                "value": "Duplicate",
+                "passed": false
+              }
+            ]
+          }
+        },
+        {
+          "case": 3,
+          "input": "[{\"id\": \"x\", \"merchant_id\": \"mx\", \"idempotency_key\": \"unq\", \"amount\": 99}]",
+          "with_skill": {
+            "output": "Duplicate: id=x\nConflict: id=x\nMerchant mx total: 0",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "Merchant mx total: 99",
+                "passed": false
+              },
+              {
+                "kind": "not_contains",
+                "value": "Duplicate",
+                "passed": false
+              },
+              {
+                "kind": "not_contains",
+                "value": "Conflict",
+                "passed": false
+              }
+            ]
+          },
+          "without_skill": {
+            "output": "```json\n{\n  \"status\": \"valid\",\n  \"idempotency_check\": {\n    \"duplicates\": [],\n    \"conflicts\": [],\n    \"unique_settlements\": 1\n  },\n  \"merchant_totals\": {\n    \"mx\": {\n      \"total_settled\": 99,\n      \"sum_of_unique\": 99,\n      \"match\": true\n    }\n  },\n  \"summary\": \"All settlement records pass idempotency validation.\"\n}\n```",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "Merchant mx total: 99",
+                "passed": false
+              },
+              {
+                "kind": "not_contains",
+                "value": "Duplicate",
+                "passed": false
+              },
+              {
+                "kind": "not_contains",
+                "value": "Conflict",
+                "passed": false
+              }
+            ]
+          }
+        },
+        {
+          "case": 4,
+          "input": "[{\"id\": \"i1\", \"merchant_id\": \"m1\", \"idempotency_key\": \"k\", \"amount\": 10}, {\"id\": \"i2\", \"merchant_id\": \"m2\", \"idempotency_key\": \"k\", \"amount\": 10}]",
+          "with_skill": {
+            "output": "Duplicate: id=i2\nConflict: id=i2\nMerchant m1 total: 10",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "Duplicate: id=i2",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "Merchant m1 total: 10",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "Merchant m2 total: 0",
+                "passed": false
+              },
+              {
+                "kind": "not_contains",
+                "value": "Conflict",
+                "passed": false
+              }
+            ]
+          },
+          "without_skill": {
+            "output": "```\n[\n  {\n    \"id\": \"i1\",\n    \"merchant_id\": \"m1\",\n    \"idempotency_key\": \"k\",\n    \"amount\": 10,\n    \"status\": \"duplicate\",\n    \"duplicate_of\": \"i2\"\n  },\n  {\n    \"id\": \"i2\",\n    \"merchant_id\": \"m2\",\n    \"idempotency_key\": \"k\",\n    \"amount\": 10,\n    \"status\": \"unique\"\n  }\n]\n```",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "Duplicate: id=i2",
+                "passed": false
+              },
+              {
+                "kind": "contains",
+                "value": "Merchant m1 total: 10",
+                "passed": false
+              },
+              {
+                "kind": "contains",
+                "value": "Merchant m2 total: 0",
+                "passed": false
+              },
+              {
+                "kind": "not_contains",
+                "value": "Conflict",
+                "passed": true
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "publish": {
+    "status": 409,
+    "body": {
+      "code": null,
+      "message": "The skill's own tests did not pass (verdict FAIL). Generate again or fix the plan, then test.",
+      "action": "Wait for the current action to finish, then try again.",
+      "error_id": "err_c04e68019b72",
+      "detail": "The skill's own tests did not pass (verdict FAIL). Generate again or fix the plan, then test."
+    }
+  }
+}

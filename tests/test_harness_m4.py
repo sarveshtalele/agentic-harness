@@ -1,4 +1,4 @@
-"""Plan M4 harness features on the real MAF stack, with only the model replaced by ScriptedClient: the web profile 403,
+"""Plan M4 harness features on the real MAF stack, with only the model replaced by ScriptedClient: the web profile (D1),
 progressive tool discovery, specialists as background agents, mode kept across requests, approval interrupts for risky
 tools, the loop cap and compaction settings.
 """
@@ -62,16 +62,15 @@ def tool_rows(project_id: str, agent: str = "harness") -> list[dict]:
         return [dict(r) for r in con.execute("SELECT tool, status, error FROM tool_calls WHERE project_id=? AND agent=? ORDER BY id", (project_id, agent))]
 
 
-def test_web_profile_switches_the_harness_off(client, thread, monkeypatch):
+def test_web_profile_runs_the_harness_too(client, thread, monkeypatch):
+    """Decision D1 (plan H2): the harness runs on the web profile; its writes and commands share the sandbox slots."""
     monkeypatch.setattr(config, "PROFILE", "web")
     assert client.get("/api/profile").json() == {"profile": "web"}
-    refused = client.post("/agui/harness", json={"threadId": thread["id"], "messages": []})
-    assert refused.status_code == 403 and refused.json()["code"] == "AQE-HARNESS-DESKTOP-ONLY"
-    assert "desktop app" in refused.json()["message"]
-    todos = client.get(f"/api/chats/{thread['id']}/todos")
-    assert todos.status_code == 403 and todos.json()["code"] == "AQE-HARNESS-DESKTOP-ONLY"
+    llm.set_client_override(ScriptedClient([(NEEDLE, "Hello from the web profile.")]))
+    events = turn(client, thread["id"], "hello", "web1")
+    assert events[-1]["type"] == "RUN_FINISHED" and any(e.get("delta") == "Hello from the web profile." for e in events)
+    assert client.get(f"/api/chats/{thread['id']}/todos").status_code == 200
     monkeypatch.setattr(config, "PROFILE", "local")
-    assert client.get("/api/profile").json() == {"profile": "local"}
 
 
 def test_find_and_load_tools_load_only_allowed_tools_and_keep_them(client, thread, monkeypatch):

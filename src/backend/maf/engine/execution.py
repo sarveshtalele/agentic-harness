@@ -7,7 +7,7 @@ import json
 from agent_framework import FileCheckpointStorage
 
 from backend.config import CHECKPOINTS
-from backend.core import ledger
+from backend.core import ledger, tracing
 from backend.core.security import redact
 from backend.db import db, now
 from backend.maf.engine.failures import _failures, record_failure
@@ -66,14 +66,21 @@ def _finish(run_id: str, status: str, error: str = "") -> None:
 
 
 async def _guarded(run_id: str, project_id: str, stream) -> None:
-    try:
-        await _consume(run_id, project_id, stream)
-    except asyncio.CancelledError:
-        _finish(run_id, "cancelled")
-        raise
-    except Exception as exc:  # recorded in run_failures with a redacted stack, then shown on the run
-        failure = _failures.pop(run_id, None) or record_failure(run_id, "", exc)
-        _finish(run_id, "failed", f"{failure['stage']}: {failure['message']}" if failure["stage"] else failure["message"])
+    """Each start, resume or retry is its own trace: a background run outlives the request that started it."""
+    with db() as con:
+        run = con.execute("SELECT workflow, user_id, model FROM runs WHERE id=?", (run_id,)).fetchone()
+    with tracing.new_root(f"workflow {run['workflow'] if run else ''}".strip(), run_id=run_id, project_id=project_id, user_id=run["user_id"] if run else None,
+                          workflow=run["workflow"] if run else None, model=run["model"] if run else None) as span:
+        try:
+            await _consume(run_id, project_id, stream)
+        except asyncio.CancelledError:
+            _finish(run_id, "cancelled")
+            span.set_attribute("status", "cancelled")
+            raise
+        except Exception as exc:  # recorded in run_failures with a redacted stack, then shown on the run
+            failure = _failures.pop(run_id, None) or record_failure(run_id, "", exc)
+            _finish(run_id, "failed", f"{failure['stage']}: {failure['message']}" if failure["stage"] else failure["message"])
+            tracing.note(status="error", error_id=failure.get("id") or failure.get("error_id"))
 
 
 def _spawn(run_id: str, coro) -> asyncio.Task:

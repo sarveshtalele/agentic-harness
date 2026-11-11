@@ -33,7 +33,8 @@ async def qe_design(rc: RunContext, state: dict) -> dict:
     rc.log(budget["message"], budget, "warning" if budget["left_out_requirements"] or budget["p0_over_limit"] else "log")
 
     def asked_for(requirements: list[dict]) -> str:
-        return "\nCASE QUOTA, at most this many cases for each requirement (for 4: 1 Positive, 2 Negative, 1 Exception; with fewer, the Positive case first):\n" + ", ".join(f"{r['id']}: {quota.get(r['id'], 0)}" for r in requirements)
+        return ("\nCASE QUOTA, at most this many cases for each requirement (for 4: 1 Positive, 2 Negative, then 1 Exception only when the requirement states error behaviour, "
+                "else a third Negative; with fewer, the Positive case first). Test data must be of the requirement's input_type:\n") + ", ".join(f"{r['id']}: {quota.get(r['id'], 0)}" for r in requirements)
 
     async def design(requirements: list[dict], note: str = "") -> list[dict]:
         batch_call = AgentCall(rc.run_id, rc.project_id, "test-design-architect", skills=("designing-test-cases",))
@@ -51,14 +52,14 @@ async def qe_design(rc: RunContext, state: dict) -> dict:
         return [c.model_dump() for c in result.cases]
 
     async def design_and_review(requirements: list[dict]) -> tuple[list[dict], list[dict], dict, list[dict]]:
-        found, over = model.apply_quota(await design(requirements), quota)
+        found, over = model.apply_quota(await design(requirements), quota, requirements)
 
         async def revise_case(i: int, record: dict, calls: list) -> str:
             old = found[i]
             again = AgentCall(rc.run_id, rc.project_id, "test-design-architect", skills=("designing-test-cases",))
             calls.append(again)
             owner = [r for r in requirements if r["id"] == old["requirement_id"]] or requirements
-            result = await again.typed(f"Rewrite only this one test case, keeping its type, and fix every flaw the independent reviewer found. Send one case.\nREQUIREMENT:\n{json.dumps(owner)}\nCASE:\n{json.dumps(old)}\nFLAWS AND FIXES:\n{confidence.flaw_lines(record)}\nPLAN:\n{json.dumps(state['plan'])}", model.CaseSet, attempts=2)
+            result = await again.typed(f"Rewrite only this one test case and fix every flaw the independent reviewer found. Keep its type, except that an Exception case for a requirement that states no error behaviour becomes a Negative case. Send one case.\nREQUIREMENT:\n{json.dumps(owner)}\nCASE:\n{json.dumps(old)}\nFLAWS AND FIXES:\n{confidence.flaw_lines(record)}\nPLAN:\n{json.dumps(state['plan'])}", model.CaseSet, attempts=2)
             found[i] = {**result.cases[0].model_dump(), "requirement_id": old["requirement_id"]}
             return json.dumps(found[i])
 
@@ -87,21 +88,25 @@ async def qe_design(rc: RunContext, state: dict) -> dict:
     cases = [case for case, _ in pairs]
     # batches number their cases separately, so ids are assigned here
     _number_cases(cases)
-    gaps, dupes = model.coverage_gaps(state["requirements"], cases), model.duplicate_scenarios(cases)
+    checks = lambda found: model.coverage_gaps(state["requirements"], found) + [why for _, why in model.case_problems(state["requirements"], found)]
+    gaps, dupes = checks(cases), model.duplicate_scenarios(cases)
     if gaps or dupes:
         rc.log(f"Design checks found gaps {gaps} and duplicates {dupes}; revising", kind="warning")
         affected = {g.split(":")[0] for g in gaps} | {c["requirement_id"] for c in cases if c["id"] in dupes}
         missing = set(partial["missing"]) if partial else set()  # a partial result is not designed again here
         wanted = [r for r in designed if r["id"] in affected - missing] or ([] if partial else designed)
         if wanted:
-            revised, over = model.apply_quota(await design(wanted, f"\n\nThese cases failed checks. Gaps: {gaps}. Duplicates: {dupes}. Return a full corrected set for these requirements, within the case quota."), quota)
+            revised, over = model.apply_quota(await design(wanted, f"\n\nThese cases failed checks. Gaps: {gaps}. Duplicates: {dupes}. Return a full corrected set for these requirements, within the case quota."), quota, wanted)
             dropped += over
             fresh, spent = await review_cases(rc, "design", "design cases", [(f"C{n}", json.dumps(c)) for n, c in enumerate(revised, 1)], lambda keys: _design_evidence(rc, wanted, [revised[int(k[1:]) - 1] for k in keys]), source, DESIGN_REVIEW_BATCH)
             tokens["review"] += spent
             tokens["total"] += spent
             pairs = [p for p in pairs if p[0]["requirement_id"] not in {r["id"] for r in wanted}] + list(zip(revised, fresh))
             cases = [case for case, _ in pairs]
-        gaps = model.coverage_gaps(state["requirements"], cases)
+        refused = model.case_problems(state["requirements"], cases)  # still of the wrong type after the revision, so the case is refused
+        pairs = [p for p in pairs if not any(p[0] is case for case, _ in refused)]
+        cases = [case for case, _ in pairs]
+        gaps = model.coverage_gaps(state["requirements"], cases) + [f"refused {why}" for _, why in refused]
     _number_cases(cases)
     records = {case["id"]: {**record, "tc_id": case["id"]} for case, record in pairs}
     # final safety check: after the quota nothing should be cut here, and if something is, it is reported

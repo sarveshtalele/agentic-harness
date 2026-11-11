@@ -16,7 +16,9 @@ GATES = {
 
 
 # the gate that rests on each kind of document, so editing an approved one reopens that gate and every later gate
-DOC_GATE = {"discovery": 1, "requirements": 1, "test_plan": 2, "test_cases": 3, "test_code": 4, "release": 5}
+DOC_GATE = {"discovery": 1, "requirements": 1, "test_plan": 2, "test_cases": 3, "test_data": 3, "test_code": 4, "release": 5}
+# the documents an approval of each gate approves: each gate signs off what it showed
+GATE_DOCS = {0: ["discovery"], 1: ["brd", "requirements"], 2: ["test_plan"], 3: ["test_cases", "gherkin", "test_data"], 4: ["test_code"], 5: ["release", "traceability", "defect_report"]}
 
 
 class GateOrderError(ValueError):
@@ -73,7 +75,7 @@ def decide(project_id: str, gate: int, approved: bool, by: str, reason: str = ""
             con.execute("DELETE FROM gates WHERE project_id=? AND gate>?", (project_id, gate))
         else:
             # Synchronize corresponding documents for this project
-            gate_doc_kinds = {0: ["discovery"], 1: ["brd", "requirements"], 2: ["test_plan"], 3: ["test_cases", "gherkin"]}.get(gate, [])
+            gate_doc_kinds = GATE_DOCS.get(gate, [])
             if gate_doc_kinds:
                 placeholders = ",".join("?" for _ in gate_doc_kinds)
                 con.execute(f"UPDATE documents SET status='approved', updated_at=? WHERE project_id=? AND kind IN ({placeholders}) AND status!='approved'", (stamp, project_id, *gate_doc_kinds))

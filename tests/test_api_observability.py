@@ -79,7 +79,7 @@ def test_large_design_runs_in_batches_and_revises_only_what_failed(client, proje
         wanted = [i for i in ids if i in section]
         batches.append(wanted)
         first_try_of_last = "REQ-007" in wanted and not any("REQ-007" in earlier for earlier in batches[:-1])
-        kinds = ["Positive", "Negative", "Negative (Boundary)"] + ([] if first_try_of_last else ["Exception"])
+        kinds = ["Positive", "Negative", "Exception"] + ([] if first_try_of_last else ["Negative (Boundary)"])  # one Negative short: a gap
         return json.dumps({"cases": [{"id": "TC-APP-001", "requirement_id": r, "scenario": f"{r} {k}", "type": k, "level": "Unit", "steps": ["call add"], "expected_result": "correct", "oracle": "specified"} for r in wanted for k in kinds]})
 
     llm.set_client_override(ScriptedClient([

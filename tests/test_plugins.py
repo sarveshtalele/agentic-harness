@@ -77,7 +77,8 @@ def test_api_needs_sign_in_and_lists_real_plugins():
         body = {p["id"]: p for p in client.get("/api/plugins").json()}
     assert body["local-skills"]["skills"] > 0
     qe = body["agentic-qe"]
-    assert qe["skills"] > 0 and {"qe-start", "qe-plan", "qe-generate"} <= set(qe["commands"]) and qe["problems"] == ["no manifest"]
+    assert qe["skills"] > 0 and {"qe-start", "qe-plan", "qe-generate"} <= set(qe["commands"]) and qe["problems"] == []
+    assert qe["version"] == "1.6.0"  # the full plugin at the pinned commit (plugins/agentic-qe/PINNED) ships its plugin.json
 
 
 def test_slash_menu_lists_commands_with_plugin_prefix_and_expands_arguments(tmp_path):

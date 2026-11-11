@@ -5,6 +5,7 @@ Each check is {check, passed, detail}. Nothing is graded beyond passed and total
 from __future__ import annotations
 
 import ast
+import sys
 import hashlib
 import json
 import re
@@ -39,6 +40,25 @@ def maf_loads(skill_dir: Path) -> tuple[bool, str]:
     return ok, "MAF FileSkillsSource loaded it" if ok else "MAF FileSkillsSource did not load it"
 
 
+def _platform_modules() -> set[str]:
+    """Import names of the packages the platform itself declares in requirements.txt, so they exist wherever it runs."""
+    from importlib.metadata import packages_distributions
+    from backend.config import ROOT
+
+    declared = {re.split(r"[<>=!~\[; ]", line.strip(), maxsplit=1)[0].lower().replace("_", "-")
+                for line in (ROOT / "requirements.txt").read_text(encoding="utf-8").splitlines() if line.strip() and not line.startswith("#")}
+    return {module for module, dists in packages_distributions().items() if any(d.lower().replace("_", "-") in declared for d in dists)}
+
+
+def _third_party(tree: ast.AST, local: set[str]) -> set[str]:
+    """Top-level imports that are not standard library, not the skill's own modules, not pytest, and not a package the
+    platform declares. ponytail: no per-skill dependency list yet; a skill needing another package fails this check."""
+    names = {a.name.split(".")[0] for n in ast.walk(tree) if isinstance(n, ast.Import) for a in n.names}
+    names |= {n.module.split(".")[0] for n in ast.walk(tree) if isinstance(n, ast.ImportFrom) and n.module and not n.level}
+    allowed = local | {"pytest", "scripts"} | _platform_modules()
+    return {n for n in names if n not in sys.stdlib_module_names and n not in allowed}
+
+
 def run(skill_dir: Path) -> list[dict]:
     checks: list[dict] = []
 
@@ -60,14 +80,19 @@ def run(skill_dir: Path) -> list[dict]:
     for script in sorted(p for p in skill_dir.rglob("*.py") if p.is_file()):
         rel = script.relative_to(skill_dir).as_posix()
         try:
-            ast.parse(script.read_text(encoding="utf-8", errors="replace"), filename=rel)
+            tree = ast.parse(script.read_text(encoding="utf-8", errors="replace"), filename=rel)
             check(f"{rel} parses", True, "Python syntax is valid (parsed, not executed)")
         except SyntaxError as exc:
             check(f"{rel} parses", False, f"line {exc.lineno}: {exc.msg}")
+            continue
+        outside = sorted(_third_party(tree, {p.stem for p in script.parent.glob("*.py")}))
+        check(f"{rel} imports", not outside, "standard library only" if not outside else
+              f"imports {', '.join(outside)}: not standard library and not a platform package, so it cannot run where it is not installed")
     from backend.maf.skill_scan import scan  # late: maf imports core
 
     findings = scan(skill_dir)["findings"]
-    check("security scan", not findings, "no findings" if not findings else "; ".join(f"{f['file']}:{f['line']} {f['check']}: {f['detail']}" for f in findings[:10]))
+    blocking = [f for f in findings if f["severity"] in ("critical", "high")]  # medium and low are shown, not blocking
+    check("security scan", not blocking, "no findings" if not findings else "; ".join(f"{f['file']}:{f['line']} {f['severity']} {f['check']}: {f['detail']}" for f in findings[:10]))
     return checks
 
 

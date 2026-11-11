@@ -15,7 +15,7 @@ DRAFT = "The plan is a draft. Review and approve it in Skill Studio; nothing is 
 
 
 def build(project_id: str):
-    @tool(name="create_skill", description="Plan a new agent skill in Skill Studio from the user's request or a project document. "
+    @tool(name="create_skill", description="Use when the user asks for a new skill: this is the way to make one. Plans a new agent skill in Skill Studio from the user's request or a project document. "
                                            "Writes a draft plan only; a human approves, generates and publishes it in Skill Studio.")
     async def create_skill(
         request: Annotated[str, Field(description="What the skill should do, in the user's words")],

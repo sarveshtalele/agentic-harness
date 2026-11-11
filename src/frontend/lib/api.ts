@@ -1,5 +1,5 @@
 export class ApiError extends Error {
-  constructor(message: string, public status: number, public code: string | null = null, public action = "", public errorId = "", public requestId = "") {
+  constructor(message: string, public status: number, public code: string | null = null, public action = "", public errorId = "", public requestId = "", public detail: unknown = null) {
     super(message);
   }
 }
@@ -30,9 +30,9 @@ export async function api<T = any>(path: string, init: RequestInit & { json?: un
     let body: any = {};
     try {
       body = await response.json();
-      detail = typeof body.detail === "string" ? body.detail : body.message || JSON.stringify(body.detail);
+      detail = typeof body.detail === "string" ? body.detail : body.message || JSON.stringify(body.detail);  // structured details stay on the error
     } catch {}
-    throw new ApiError(detail || `Request failed (${response.status})`, response.status, body.code ?? null, body.action ?? "", body.error_id ?? "", response.headers.get("X-Request-Id") ?? "");
+    throw new ApiError(detail || `Request failed (${response.status})`, response.status, body.code ?? null, body.action ?? "", body.error_id ?? "", response.headers.get("X-Request-Id") ?? "", body.detail ?? null);
   }
   if (response.status === 204) return undefined as T;
   return (response.headers.get("content-type") || "").includes("json") ? response.json() : ((await response.text()) as T);

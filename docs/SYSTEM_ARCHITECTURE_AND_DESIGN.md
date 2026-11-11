@@ -498,6 +498,8 @@ flowchart TD
       priority: Literal["P0", "P1", "P2"]
       tier: Literal["specified", "observed", "inferred"]
       actor: Literal["anonymous", "customer", "admin", "system"]   # Exactly one named actor
+      input_type: str        # string | number | integer | boolean | list | object, or "" when none is stated (Q1)
+      error_behaviour: str   # the error the source states, or "" (Q1)
       file: str = ""
       line: int = 0
       quote: str = ""
@@ -1107,6 +1109,25 @@ This canonical document incorporates and enforces all specifications originally 
 | **HAR-SKL-1..4**| Skill Testing | Sandboxed runner (`scripts/run.py`), deterministic evals (`evals.json`), NVIDIA Skill Specter AST security checks, AG-UI workflow | Section 9.3 (`harness/skill_tester.py`, `skill_specter.py`) | Unit & API |
 
 ---
+
+## 10a. Tracing and the trace explorer (H9)
+
+OpenTelemetry spans from MAF and from the platform (requests, tool calls, workflow runs and stages, sandbox jobs) go to a local `spans` table through a batch exporter, and to OTLP only when `OTEL_EXPORTER_OTLP_ENDPOINT` is set. Attributes are redacted. `/traces` lists runs (root spans) and shows one run as a span tree beside a waterfall. Admins see all runs; members see their own runs in projects they can see. Details: `docs/AGENT_SKILLS_AND_MAF_SPECIFICATION.md` section 2.8.
+
+## 10b. Harness execution world and plugin runtime (H2, H3)
+
+The harness works in a workspace: the project's sandbox clone plus a scratch folder per thread. MAF file access tools (reads free, writes approved) and a MAF shell tool (argument lists only, allowlisted programs, read-only git, clean environment, timeout, approval and a ledger row per command) act inside it. On the web profile each write or command holds one of five platform-wide sandbox leases. Enabled plugins' Claude Code hooks (`hooks/hooks.json`) run around those tools, on each user message and when a plugin agent finishes; a block from a hook returns its reason to the model. The agentic-qe plugin is installed whole at a pinned commit, so its commands, scripts, validators, ledger and approval phrases work as they do in Claude Code. Details: `docs/AGENT_SKILLS_AND_MAF_SPECIFICATION.md` section 12.
+
+## 10c. QE workflow correctness rules (Phase Q1, 2026-11-11)
+
+From the trace in `docs/analysis/2026-11-11-markdown-html-converter-trace.md`:
+
+- **No code, no QE run.** `qe_intake` (`maf/workflows/qe/definition.py`) stops a run on a repository with no source files before Gate 0 and before any model call (`AQE-REPO-001`, "No code to test"). Input `{"spec_first": true}` keeps the greenfield path: requirements from approved documents, a RED baseline, and an INCONCLUSIVE verdict.
+- **Requirements carry `input_type` and `error_behaviour`.** An Exception case is required, and kept first by the quota, only when the requirement states error behaviour (`error_behaviour`, or a raise or throw on its verified quote). Otherwise the fourth case is a third Negative.
+- **Test data must fit the input type** (`qe/model/domain.py`). A case whose data is of another type goes back to the designer once, then is refused and named in the Gate 3 gaps. Another type is allowed only in an Exception case for a requirement that states error behaviour.
+- **Shared datasets follow the input type** (`qe/test_data.py`): a Negative case gets the boundary set of its requirement's type, never one picked from its wording. `fixtures.json` entries have exactly `data` and `uses`, and the generate prompt names them.
+- **A test must exercise the product** (`qe/emit/subject.py`). Generation refuses a Python test that defines, shadows or monkeypatches its own subject, or that defines code and imports none from the repository. Trace makes the verdict INCONCLUSIVE when the mode is greenfield or no executed test reached the repository's code.
+- **Decisions and documents.** Approving REJECT items or rejecting a gate needs a reason of at least 10 characters and two words that is not the gate title. Gates 3 to 5 approve the documents they show (`core/gates.py` `GATE_DOCS`). `run_events.data` is redacted like `message`.
 
 ## 11. Summary of Documentation Consolidation
 

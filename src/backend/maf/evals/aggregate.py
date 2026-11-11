@@ -17,6 +17,8 @@ def _aggregate(agent_key: str, prompt_ref: str, results: list[dict], ragas: dict
         if not store.applies(agent_key, metric):
             store.record(agent_key, prompt_ref, metric, status="n/a", reason="Does not apply to this agent", **base)
     g = [r["measured"]["groundedness"] for r in cases if "groundedness" in r["measured"]]
+    if not g and store.applies(agent_key, "groundedness"):  # the tile says why instead of "no evaluation has run"
+        store.record(agent_key, prompt_ref, "groundedness", status="not_measured", reason="No eval case gave the agent repository or document context to cite", **base)
     if g and store.applies(agent_key, "groundedness"):
         n = sum(x["n"] for x in g)
         if n:
@@ -24,6 +26,10 @@ def _aggregate(agent_key: str, prompt_ref: str, results: list[dict], ragas: dict
         else:
             store.record(agent_key, prompt_ref, "groundedness", status="not_measured", reason="No reply cited a file, line, or quote", **base)
     k = [r["measured"]["key"] for r in cases if "key" in r["measured"]]
+    if not k:
+        for metric in ("recall", "f1"):
+            if store.applies(agent_key, metric):
+                store.record(agent_key, prompt_ref, metric, status="not_measured", reason="No eval case has a labelled answer key to count against", **base)
     if k:
         tp, fn = sum(x["tp"] for x in k), sum(x["fn"] for x in k)
         fp = None if any(x["fp"] is None for x in k) else sum(x["fp"] for x in k)

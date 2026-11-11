@@ -6,7 +6,7 @@ import { AppShell } from "../../components/AppShell";
 import { Badge, Button, Card, Empty, ErrorNote, Field, inputClass, PageTitle, Spinner, useToast } from "../../components/ui";
 import { api } from "../../lib/api";
 
-const blank = { username: "", password: "", role: "developer", token_limit: "", active_from: "", active_until: "" };
+const blank = { username: "", email: "", password: "", role: "developer", token_limit: "", active_from: "", active_until: "" };
 const ROLES = [["developer", "Developer"], ["qe_lead", "QE lead"], ["ba", "BA"], ["viewer", "Viewer (read only)"]] as const;
 const PERIODS = [["day", "Daily"], ["week", "Weekly"], ["month", "Monthly"]] as const;
 type Limits = Record<string, string>;
@@ -59,7 +59,7 @@ function ModelTicks({ all, ticked, setTicked, def, setDef, perModel, setPerModel
 }
 
 function UserCard({ user, all, onChange }: { user: any; all: any[]; onChange: () => void }) {
-  const [form, setForm] = useState({ password: "", role: user.account_role as string, token_limit: user.token_limit ?? "", active_from: user.active_from || "", active_until: user.active_until || "" });
+  const [form, setForm] = useState({ password: "", email: user.email || "", role: user.account_role as string, token_limit: user.token_limit ?? "", active_from: user.active_from || "", active_until: user.active_until || "" });
   const [ticked, setTicked] = useState<string[]>(user.models);
   const [def, setDef] = useState<string>(user.model);
   const [limits, setLimits] = useState<Limits>(Object.fromEntries(PERIODS.map(([p]) => [p, user.limits[p] ?? ""])));
@@ -87,6 +87,7 @@ function UserCard({ user, all, onChange }: { user: any; all: any[]; onChange: ()
   return (
     <Card title={<span className="flex items-center gap-2"><UserRound className="h-4 w-4" /> {user.username}</span>} actions={<Badge tone={user.status === "Active" ? "emerald" : "rose"}>{user.status}</Badge>}>
       <div data-testid="user-card">
+        <p className="mb-2 text-xs text-slate-500">Email: <span data-testid="user-email">{user.email || "none"}</span></p>
         <div className="mb-3 space-y-2">
           <UsageBar label="Allocation" used={user.tokens_used} limit={user.token_limit} />
           {PERIODS.map(([period, label]) => <UsageBar key={period} label={label === "Daily" ? "Today" : label === "Weekly" ? "This week" : "This month"} used={user.usage[period].used} limit={user.usage[period].limit} />)}
@@ -102,6 +103,7 @@ function UserCard({ user, all, onChange }: { user: any; all: any[]; onChange: ()
             <Field label="Token allocation"><input aria-label={`Tokens for ${user.username}`} type="number" min={0} className={inputClass} placeholder="Unlimited" value={form.token_limit} onChange={(e) => set("token_limit", e.target.value)} /></Field>
             <Field label="Active from"><input type="date" className={inputClass} value={form.active_from} onChange={(e) => set("active_from", e.target.value)} /></Field>
             <Field label="Active until"><input aria-label={`Active until for ${user.username}`} type="date" className={inputClass} value={form.active_until} onChange={(e) => set("active_until", e.target.value)} /></Field>
+            <Field label="Email"><input type="email" aria-label={`Email for ${user.username}`} maxLength={254} className={inputClass} value={form.email} onChange={(e) => set("email", e.target.value)} /></Field>
             <Field label="New password" hint="Leave blank to keep it."><input type="password" autoComplete="new-password" className={inputClass} value={form.password} onChange={(e) => set("password", e.target.value)} /></Field>
           </div>
         </div>
@@ -153,6 +155,7 @@ export default function UsersPage() {
       <Card title="New user">
         <form onSubmit={create} className="grid gap-2 md:grid-cols-3">
           <Field label="Username"><input required name="new-username" autoComplete="off" className={inputClass} value={form.username} onChange={(e) => set("username", e.target.value)} /></Field>
+          <Field label="Email" hint="Optional."><input type="email" name="new-email" autoComplete="off" maxLength={254} className={inputClass} value={form.email} onChange={(e) => set("email", e.target.value)} /></Field>
           <Field label="Password" hint="At least 10 characters."><input required type="password" name="new-password" autoComplete="new-password" className={inputClass} value={form.password} onChange={(e) => set("password", e.target.value)} /></Field>
           <Field label="Role"><select name="new-role" className={inputClass} value={form.role} onChange={(e) => set("role", e.target.value)}>{ROLES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></Field>
           <Field label="Token allocation" hint="Blank is unlimited."><input type="number" min={0} name="new-tokens" className={inputClass} value={form.token_limit} onChange={(e) => set("token_limit", e.target.value)} /></Field>

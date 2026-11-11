@@ -27,9 +27,9 @@ def test_a_path_with_no_rule_is_refused_for_everyone_but_the_admin():
     assert auth.access_problem("GET", "/api/brand-new-thing", {"id": "admin", "role": "admin", "account_role": "admin"}) is None
 
 
-ADMIN_ONLY = ("/api/users", "/api/connections", "/api/logs", "/api/auth/events", "/api/models", "/api/usage", "/api/agents/guardrail-events")
+ADMIN_ONLY = ("/api/users", "/api/connections", "/api/logs", "/api/auth/events", "/api/models", "/api/usage", "/api/agents/guardrail-events", "/api/capabilities/sync")
 ADMIN_WRITE = ("/api/settings", "/api/prompts", "/api/agents", "/api/evals")
-VIEWER_MAY_WRITE = ("/api/auth/logout", "/api/account/password")
+VIEWER_MAY_WRITE = ("/api/auth/logout", "/api/account/password", "/api/account/email")
 
 
 def expected(persona, method, template):

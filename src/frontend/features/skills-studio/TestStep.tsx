@@ -7,6 +7,7 @@ import { CallStatus, useCall } from "./useCall";
 type Run = { verdict: string; exit_code: number | null; passed: number; failed: number; errors: number; stdout_tail: string; stderr_tail: string };
 type Sample = { output: string; tokens_in: number; tokens_out: number; prompt_ref: string; draft_sha256: string };
 type Doc = { id: string; title: string };
+type Repair = { verdict: string; rounds: number; history: { verdict: string; passed?: number; failed?: number; detail?: string }[] };
 
 export function TestStep({ record }: { record: PlanRecord }) {
   const [run, setRun] = useState<Run | null>(null);
@@ -16,8 +17,11 @@ export function TestStep({ record }: { record: PlanRecord }) {
   const [docs, setDocs] = useState<Doc[]>([]);
   const tests = useCall();
   const trial = useCall();
+  const fixer = useCall();
+  const [repair, setRepair] = useState<Repair | null>(null);
   useEffect(() => { api(`/skill-studio/documents?project_id=${record.project_id}`).then((r) => setDocs(r.documents)).catch(() => setDocs([])); }, [record.project_id]);
   const runTests = () => tests.run("Running the skill's tests…", async () => setRun(await api(`/skill-studio/plans/${record.id}/test`, { json: { mode: "scripts" } })));
+  const repairFiles = () => fixer.run("Repairing the skill from its test failures…", async () => setRepair(await api(`/skill-studio/plans/${record.id}/repair`, { method: "POST" })));
   const trySample = () => trial.run("Trying the skill on the sample…", async () =>
     setSample(await api(`/skill-studio/plans/${record.id}/test`, { json: { mode: "sample", ...(docId ? { document_id: docId } : { sample_text: text }) } })));
   return (
@@ -32,7 +36,15 @@ export function TestStep({ record }: { record: PlanRecord }) {
                 <p className="flex items-center gap-2" data-testid="studio-test-verdict"><Badge>{run.verdict}</Badge><span>{run.passed} passed, {run.failed} failed, {run.errors} errors (exit code {String(run.exit_code)})</span></p>
                 {run.stdout_tail && <pre className="max-h-60 overflow-auto rounded-lg bg-slate-100 p-2 dark:bg-slate-900">{run.stdout_tail}</pre>}
                 {run.stderr_tail && <pre className="max-h-40 overflow-auto rounded-lg bg-slate-100 p-2 dark:bg-slate-900">{run.stderr_tail}</pre>}
+                {run.verdict !== "PASS" && <Button variant="secondary" onClick={repairFiles} disabled={!!fixer.busy} busy={!!fixer.busy} data-testid="studio-repair">Repair from test failures</Button>}
               </div>
+            )}
+            <CallStatus call={fixer} />
+            {repair && (
+              <p className="text-xs" data-testid="studio-repair-result">
+                <Badge>{repair.verdict}</Badge> after {repair.rounds} repair round(s):{" "}
+                {repair.history.map((h) => h.detail || `${h.verdict} ${h.passed ?? 0} passed ${h.failed ?? 0} failed`).join(" → ")}. Generate the files again to see them.
+              </p>
             )}
           </div>
         )}

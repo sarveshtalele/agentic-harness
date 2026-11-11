@@ -1,0 +1,17 @@
+{
+  "$schema": "https://www.schemastore.org/claude-code-marketplace.json",
+  "name": "agentic-qe",
+  "description": "Agentic Quality Engineering Platform: autonomous testing lifecycle from repository intelligence to test design, polyglot test generation, isolated execution, self-healing, and release proof pack.",
+  "owner": {
+    "name": "Sarvesh Talele",
+    "url": "https://github.com/sarveshtalele"
+  },
+  "plugins": [
+    {
+      "name": "agentic-qe",
+      "description": "Autonomous Quality Engineering Plugin: repository intelligence, test planning, ISTQB test design, polyglot test generation, isolated execution, auto-healing, and offline HTML Control Room Dashboard.",
+      "source": "./",
+      "category": "development"
+    }
+  ]
+}

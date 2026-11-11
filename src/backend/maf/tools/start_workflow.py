@@ -9,7 +9,7 @@ from pydantic import Field
 
 
 def build(project_id: str, thread_id: str, start_run):
-    @tool(name="start_workflow", description="Start a workflow run. workflow is one of: ba (needs brief), qe, bug_scan, change (needs spec or finding_id). Humans approve gates in the app. Use only when the user asks to run it.")
+    @tool(name="start_workflow", description="Use when the user asks to run a workflow. Starts one: ba writes a requirements document (BRD) from a brief; qe analyses the repository, designs and generates tests and runs them; bug_scan scans for defects; change implements a spec or a finding_id on a branch. A named human approves its gates in the app; you never approve.")
     async def start_workflow(
         workflow: str,
         brief: Annotated[str, Field(description="Requirements brief for ba, or the change description for change")] = "",

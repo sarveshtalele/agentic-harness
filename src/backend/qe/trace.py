@@ -46,3 +46,15 @@ def release_summary(matrix: dict, results: list[dict], defects: list[dict]) -> d
     return {"verdict": overall, "executed": total, "passed": passed, "failed": failed, "pass_rate": round(100 * passed / total, 1) if total else 0,
             "requirements": len(rows), "requirements_covered": sum(r["covered"] for r in rows),
             "coverage": round(100 * sum(r["covered"] for r in rows) / len(rows), 1) if rows else 0, "gaps": matrix["gaps"], "defects": len(defects)}
+
+
+def no_product_run(mode: str, matrix: dict, real_files: set[str]) -> str:
+    """Why the verdict must be INCONCLUSIVE although tests ran, or "". With no code under test, or when no executed test reached the
+    repository's code (each defined or stubbed its own subject), a pass or a fail says nothing about the product."""
+    if mode == "greenfield":
+        return "No code under test: the repository has no source files, so these results are a spec-first baseline, not a verdict on the product"
+    ran = [c for r in matrix["rows"] for c in r["cases"] if c["result"] in ("passed", "failed")]
+    if ran and not any(c["test_file"] in real_files for c in ran):
+        return f"None of the {len(ran)} executed tests exercised the repository's code"
+    return ""
+

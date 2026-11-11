@@ -20,6 +20,7 @@ CHECKPOINTS = DATA_DIR / "checkpoints"
 RUNS = DATA_DIR / "runs"  # per run: rejected model replies under failures/, finished batches under parts/
 LOGS = DATA_DIR / "logs"  # app-YYYY-MM-DD.jsonl, one file per day
 LOG_RETENTION_DAYS = int(os.environ.get("ATLAS_LOG_RETENTION_DAYS", "30"))
+TRACE_RETENTION_DAYS = int(os.environ.get("ATLAS_TRACE_RETENTION_DAYS", "30"))  # spans table, pruned at startup
 PROMPTS_DIR = ROOT / "prompts"
 SKILLS_DIR = Path(os.environ.get("ATLAS_SKILLS_DIR", ROOT / "skills")).resolve()  # the Azure package keeps skills/ beside prompts/
 TEMPLATES_DIR = ROOT / "templates"
@@ -39,6 +40,10 @@ HARNESS_MAX_ROUNDS = int(os.environ.get("ATLAS_HARNESS_MAX_ROUNDS", "25"))
 HARNESS_MAX_TOOL_CALLS = int(os.environ.get("ATLAS_HARNESS_MAX_TOOL_CALLS", "60"))
 # The harness model's context window; MAF compaction (tool results first, then a summary) keeps each request inside it.
 HARNESS_CONTEXT_TOKENS = int(os.environ.get("ATLAS_HARNESS_CONTEXT_TOKENS", "128000"))
+# The harness shell tool (plan H2): seconds per command, and on the web profile the platform-wide sandbox slots that
+# shell and write calls share (harness_kit/leases.py).
+HARNESS_SHELL_TIMEOUT = int(os.environ.get("ATLAS_HARNESS_SHELL_TIMEOUT", "600"))
+MAX_SANDBOXES = int(os.environ.get("ATLAS_MAX_SANDBOXES", "5"))
 # WAL needs shared memory, which network storage such as Azure App Service /home lacks. Use DELETE there.
 SQLITE_JOURNAL = os.environ.get("ATLAS_SQLITE_JOURNAL", "WAL").upper()
 ALLOWED_ORIGINS = {

@@ -71,8 +71,8 @@ def scan(skill_dir: Path) -> dict:
                     findings.append(_finding("secret", "critical", rel, number, f"looks like a {label}"))
             if path.suffix.lower() == ".md":
                 for pattern, label in INJECTION:
-                    if pattern.search(line):
-                        findings.append(_finding("prompt-injection", "critical", rel, number, f"phrase: {label}"))
+                    if pattern.search(line):  # naming an HTML tag is normal in an HTML skill; an instruction override is not
+                        findings.append(_finding("prompt-injection", "medium" if label == "HTML script tag" else "critical", rel, number, f"phrase: {label}"))
         if path.suffix.lower() == ".py":
             findings.extend(_python(path, rel))
             findings.extend(_finding("path", "medium", rel, n, "refers to a parent directory (../)")

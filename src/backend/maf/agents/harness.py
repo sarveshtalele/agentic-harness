@@ -15,6 +15,9 @@ HARNESS_PROVIDER_TOOLS = frozenset({
     "background_agents_get_all_tasks", "background_agents_continue_task", "background_agents_clear_completed_task",
     # progressive tool discovery (maf/harness_kit/catalog.py)
     "find_tools", "load_tools",
+    # plan H2: MAF file access on the workspace (writes approved) and the allowlisted shell (each command approved)
+    "file_access_read", "file_access_read_lines", "file_access_ls", "file_access_grep", "file_access_write", "file_access_delete",
+    "file_access_replace", "file_access_replace_lines", "run_shell",
 })
 
 POLICY = AgentPolicy(

@@ -1,0 +1,12 @@
+Conversion Report
+=================
+Input file: {{input_path}}
+Output file: {{output_path}}
+{% if unconverted_elements %}
+Unconverted Elements:
+{% for elem in unconverted_elements %}
+  - {{elem}}
+{% endfor %}
+{% else %}
+No unconverted elements.
+{% endif %}

@@ -1,0 +1,38 @@
+{
+  "name": "agentic-qe",
+  "version": "1.6.0",
+  "private": true,
+  "description": "Claude Code plugin for the full test engineering lifecycle on greenfield and brownfield projects, with human approval gates and enforced guardrails.",
+  "author": "Sarvesh Talele",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/plugin/*.test.ts",
+    "test:pane": "node scripts/test-pane.ts",
+    "validate": "claude plugin validate .",
+    "typecheck": "tsc --noEmit",
+    "verify:commands": "node scripts/verify-commands.ts --strict",
+    "panel": "node skills/qe-panel/scripts/panel.ts",
+    "setup:validator": "node skills/qe-doctor/scripts/agentic-qe.ts validator"
+  },
+  "keywords": [
+    "claude-plugin",
+    "agentic-qe",
+    "quality-engineering",
+    "agentskills",
+    "testing",
+    "playwright",
+    "pytest",
+    "autonomous-testing"
+  ],
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=22.18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sarveshtalele/agentic-qe.git"
+  }
+}

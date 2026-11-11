@@ -15,14 +15,15 @@ OWNED_PATHS = [
     (re.compile(r"^/api/chats/([^/]+)"), "SELECT project_id FROM chat_threads WHERE id=?"),
     (re.compile(r"^/api/memories/([^/]+)"), "SELECT project_id FROM memories WHERE id=?"),
 ]
-ADMIN_ONLY = re.compile(r"^/api/(users|connections|logs|auth/events|models|usage)(/|$)|^/api/agents/guardrail-events$|^/api/projects/[^/]+/(repo/local|transfer)$")
+ADMIN_ONLY = re.compile(r"^/api/(users|connections|logs|auth/events|models|usage|capabilities/sync)(/|$)|^/api/agents/guardrail-events$|^/api/projects/[^/]+/(repo/local|transfer)$")
 ADMIN_WRITES = re.compile(r"^/api/(settings|prompts|agents|evals)(/|$)")
 OWNER_ONLY = re.compile(r"^/api/projects/[^/]+/members(/|$)")  # also the admin
 OWNER_DELETE = re.compile(r"^/api/projects/[^/]+$")
+# /api/traces is session-only here; core/tracing/queries.py limits each answer to the caller's own runs (404 otherwise).
 # Signed-in users with no project in the path. A path in none of these lists is refused, so a new route has to be added here or above.
-SESSION_ONLY = re.compile(r"^(/agui/[^/]+|/api/(auth/(me|logout)|account/password|chat/agents|profile|approvals|documents|findings|projects|harness(/.*)?|observability(/errors|/export)?|plugins(/.*)?|templates(/upload|/[^/]+)?"
-                          r"|prompts(/[^/]+(/scores)?)?|skills(/.*)?|skill-studio(/.*)?|agents(/[^/]+(/metrics)?)?|evals(/[^/]+)?|mcp(/.*)?|settings/(llm|models|timezone|gate-roles)))$")
-VIEWER_MAY_WRITE = re.compile(r"^/api/(auth/logout|account/password)$")  # a viewer can still sign out and change their own password
+SESSION_ONLY = re.compile(r"^(/agui/[^/]+|/api/(auth/(me|logout)|account/(password|email)|chat/agents|profile|approvals|documents|findings|projects|harness(/.*)?|observability(/errors|/export)?|plugins(/.*)?|templates(/upload|/[^/]+)?"
+                          r"|prompts(/[^/]+(/scores)?)?|skills(/.*)?|skill-studio(/.*)?|agents(/[^/]+(/metrics)?)?|evals(/[^/]+)?|mcp(/.*)?|settings/(llm|models|timezone|gate-roles)|traces(/[^/]+)?|capabilities(/.*)?))$")
+VIEWER_MAY_WRITE = re.compile(r"^/api/(auth/logout|account/(password|email))$")  # a viewer can still sign out and change their own password
 WRITES = {"POST", "PUT", "PATCH", "DELETE"}
 
 

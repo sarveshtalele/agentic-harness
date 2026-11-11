@@ -174,7 +174,11 @@ def expand_slash(text: str, root: Path | None = None) -> str | None:
         return f"Load the skill {found['name']} with load_skill, then use it for this request: {args or 'the current project'}"
     _, body = _split(found["path"])
     body = body.replace("$ARGUMENTS", args) if "$ARGUMENTS" in body else f"{body}\n\nARGUMENTS: {args}"
-    return (f"The user ran the command /{found['name']} {args}".rstrip() + ". Carry out its instructions below with the tools you have. "
+    # Claude Code's own variables in plugin commands, filled the way Claude Code fills them (the model writes these paths in shell commands)
+    plugin_root = next((p.root for p in discover(root) if p.id == found["plugin"]), None)
+    body = body.replace("${CLAUDE_SKILL_DIR}", str(found["path"].parent)).replace("${CLAUDE_PLUGIN_ROOT}", str(plugin_root or found["path"].parent))
+    return (f"The user ran the command /{found['name']} {args}".rstrip() + ". Carry out its instructions below with the tools you have: do its steps in order, "
+            "stop where it says to wait for the user, and do nothing it does not ask for. "
             "Where a step needs a tool or script you do not have here, say so plainly instead of claiming it ran.\n\n"
             f"<command name=\"{found['name']}\">\n{body.strip()}\n</command>")
 

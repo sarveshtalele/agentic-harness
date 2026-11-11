@@ -1,0 +1,859 @@
+{
+  "plan": {
+    "status": 201,
+    "body": {
+      "id": "spl_97a61d98129b",
+      "project_id": "prj_fac0b27a43a8",
+      "author": "admin",
+      "kind": "instructions",
+      "request": "A skill that designs deterministic test cases and a scenario matrix for an HTML to PDF converter: positive, negative, boundary and exception cases for headings, tables, images, CSS, page breaks, encodings and very large files, each with an exact expected result.",
+      "source_type": "text",
+      "source_ref": "",
+      "source_sha256": "a96cf633c202ddff545d8acd9546ce2cbec5bb8ba4026f6c13c4d1964a3a7b2d",
+      "revise": "",
+      "status": "draft",
+      "plan_sha256": "",
+      "approved_by": "",
+      "approved_at": null,
+      "prompt_ref": "skill-creator@v1:db120a7b06d2",
+      "draft_sha256": "",
+      "generated_at": null,
+      "created_at": "2026-11-11T06:01:04+00:00",
+      "plan": {
+        "description": "Designs deterministic test cases and a scenario matrix for an HTML to PDF converter across positive, negative, boundary and exception categories for headings, tables, images, CSS, page breaks, encodings and very large files, each with an exact expected result. Use when a quality engineer needs structured, repeatable test designs for validating an HTML to PDF conversion engine.",
+        "eval_cases": [
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "positive"
+              },
+              {
+                "kind": "contains",
+                "value": "<h1>"
+              },
+              {
+                "kind": "not_contains",
+                "value": "negative"
+              }
+            ],
+            "input": "Feature: headings. The converter specification says headings <h1> through <h6> are supported, with <h1> being the largest. Nested headings are allowed."
+          },
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "boundary"
+              },
+              {
+                "kind": "contains",
+                "value": "20 columns"
+              },
+              {
+                "kind": "contains",
+                "value": "500 rows"
+              }
+            ],
+            "input": "Feature: tables. Tables can have up to 20 columns and 500 rows. Cells may contain images or other HTML. Border and background CSS are supported."
+          },
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "boundary"
+              },
+              {
+                "kind": "regex",
+                "value": "(?i)50 MB"
+              },
+              {
+                "kind": "regex",
+                "value": "(?i)error"
+              }
+            ],
+            "input": "Feature: very large files. Files larger than 50 MB should trigger an error. Files between 10 MB and 50 MB are processed but may be slow. Files under 10 MB are fast."
+          },
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "UTF-8"
+              },
+              {
+                "kind": "contains",
+                "value": "ISO-8859-1"
+              },
+              {
+                "kind": "contains",
+                "value": "exception"
+              }
+            ],
+            "input": "Feature: encodings. Supported: UTF-8, ISO-8859-1, and Windows-1252. Unsupported encodings should fall back to UTF-8 with a warning."
+          },
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "positive"
+              },
+              {
+                "kind": "contains",
+                "value": "page-break-before"
+              },
+              {
+                "kind": "not_contains",
+                "value": "negative"
+              }
+            ],
+            "input": "Feature: page breaks. The CSS property page-break-before, page-break-after, page-break-inside are supported. Multiple page breaks can be adjacent."
+          }
+        ],
+        "files": [
+          {
+            "path": "SKILL.md",
+            "purpose": "Main skill definition containing frontmatter with name and description, and body with step-by-step instructions, decision rules, and links to references/ files for detail."
+          },
+          {
+            "path": "references/test-design-rules.md",
+            "purpose": "Detailed rules for categorizing positive, negative, boundary, and exception test cases; examples for each feature type."
+          },
+          {
+            "path": "references/feature-boundaries.md",
+            "purpose": "Documented boundary values for each feature (e.g., maximum heading level, maximum table rows/columns, max file size)."
+          },
+          {
+            "path": "assets/scenario-matrix-template.md",
+            "purpose": "Template for the scenario matrix output (markdown table)."
+          },
+          {
+            "path": "assets/test-case-detail-template.md",
+            "purpose": "Template for the full test case detail document (structured markdown per case)."
+          }
+        ],
+        "formats": [
+          {
+            "name": "scenario-matrix",
+            "purpose": "A markdown table summarizing test coverage per feature and category.",
+            "template_path": "assets/scenario-matrix-template.md"
+          },
+          {
+            "name": "test-case-details",
+            "purpose": "A structured markdown document with detailed information per test case.",
+            "template_path": "assets/test-case-detail-template.md"
+          }
+        ],
+        "name": "designing-html-to-pdf-test-scenarios",
+        "subagents": [],
+        "tasks": [
+          "Analyze the converter's specification to identify key conversion features: headings, tables, images, CSS, page breaks, encodings, and very large files.",
+          "For each feature, define test case categories: positive (valid inputs produce correct output), negative (invalid/malformed inputs produce graceful handling), boundary (edge values e.g., maximum table size, max heading depth), and exception (unsupported constructs, corrupted data).",
+          "For every test case, record: id, feature, category, input HTML snippet or description, expected PDF output (layout, content, error status).",
+          "Compile all cases into a scenario matrix mapping each feature to its test coverage across the four categories.",
+          "Ensure every case is deterministic \u2014 same input always yields same output \u2014 and includes an exact expected result, not a human judgment.",
+          "Output the matrix as a markdown table and the full case details in a structured document for review and automation."
+        ]
+      },
+      "checks": [],
+      "source_chars": 262
+    }
+  },
+  "approve": {
+    "status": 200,
+    "body": {
+      "id": "spl_97a61d98129b",
+      "project_id": "prj_fac0b27a43a8",
+      "author": "admin",
+      "kind": "instructions",
+      "request": "A skill that designs deterministic test cases and a scenario matrix for an HTML to PDF converter: positive, negative, boundary and exception cases for headings, tables, images, CSS, page breaks, encodings and very large files, each with an exact expected result.",
+      "source_type": "text",
+      "source_ref": "",
+      "source_sha256": "a96cf633c202ddff545d8acd9546ce2cbec5bb8ba4026f6c13c4d1964a3a7b2d",
+      "revise": "",
+      "status": "approved",
+      "plan_sha256": "b8e6dcc30ad1c41ef0a9082764bd2855180b3d162205411766da228e71dc1e30",
+      "approved_by": "admin",
+      "approved_at": "2026-11-11T06:01:04+00:00",
+      "prompt_ref": "skill-creator@v1:db120a7b06d2",
+      "draft_sha256": "",
+      "generated_at": null,
+      "created_at": "2026-11-11T06:01:04+00:00",
+      "plan": {
+        "description": "Designs deterministic test cases and a scenario matrix for an HTML to PDF converter across positive, negative, boundary and exception categories for headings, tables, images, CSS, page breaks, encodings and very large files, each with an exact expected result. Use when a quality engineer needs structured, repeatable test designs for validating an HTML to PDF conversion engine.",
+        "eval_cases": [
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "positive"
+              },
+              {
+                "kind": "contains",
+                "value": "<h1>"
+              },
+              {
+                "kind": "not_contains",
+                "value": "negative"
+              }
+            ],
+            "input": "Feature: headings. The converter specification says headings <h1> through <h6> are supported, with <h1> being the largest. Nested headings are allowed."
+          },
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "boundary"
+              },
+              {
+                "kind": "contains",
+                "value": "20 columns"
+              },
+              {
+                "kind": "contains",
+                "value": "500 rows"
+              }
+            ],
+            "input": "Feature: tables. Tables can have up to 20 columns and 500 rows. Cells may contain images or other HTML. Border and background CSS are supported."
+          },
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "boundary"
+              },
+              {
+                "kind": "regex",
+                "value": "(?i)50 MB"
+              },
+              {
+                "kind": "regex",
+                "value": "(?i)error"
+              }
+            ],
+            "input": "Feature: very large files. Files larger than 50 MB should trigger an error. Files between 10 MB and 50 MB are processed but may be slow. Files under 10 MB are fast."
+          },
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "UTF-8"
+              },
+              {
+                "kind": "contains",
+                "value": "ISO-8859-1"
+              },
+              {
+                "kind": "contains",
+                "value": "exception"
+              }
+            ],
+            "input": "Feature: encodings. Supported: UTF-8, ISO-8859-1, and Windows-1252. Unsupported encodings should fall back to UTF-8 with a warning."
+          },
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "positive"
+              },
+              {
+                "kind": "contains",
+                "value": "page-break-before"
+              },
+              {
+                "kind": "not_contains",
+                "value": "negative"
+              }
+            ],
+            "input": "Feature: page breaks. The CSS property page-break-before, page-break-after, page-break-inside are supported. Multiple page breaks can be adjacent."
+          }
+        ],
+        "files": [
+          {
+            "path": "SKILL.md",
+            "purpose": "Main skill definition containing frontmatter with name and description, and body with step-by-step instructions, decision rules, and links to references/ files for detail."
+          },
+          {
+            "path": "references/test-design-rules.md",
+            "purpose": "Detailed rules for categorizing positive, negative, boundary, and exception test cases; examples for each feature type."
+          },
+          {
+            "path": "references/feature-boundaries.md",
+            "purpose": "Documented boundary values for each feature (e.g., maximum heading level, maximum table rows/columns, max file size)."
+          },
+          {
+            "path": "assets/scenario-matrix-template.md",
+            "purpose": "Template for the scenario matrix output (markdown table)."
+          },
+          {
+            "path": "assets/test-case-detail-template.md",
+            "purpose": "Template for the full test case detail document (structured markdown per case)."
+          }
+        ],
+        "formats": [
+          {
+            "name": "scenario-matrix",
+            "purpose": "A markdown table summarizing test coverage per feature and category.",
+            "template_path": "assets/scenario-matrix-template.md"
+          },
+          {
+            "name": "test-case-details",
+            "purpose": "A structured markdown document with detailed information per test case.",
+            "template_path": "assets/test-case-detail-template.md"
+          }
+        ],
+        "name": "designing-html-to-pdf-test-scenarios",
+        "subagents": [],
+        "tasks": [
+          "Analyze the converter's specification to identify key conversion features: headings, tables, images, CSS, page breaks, encodings, and very large files.",
+          "For each feature, define test case categories: positive (valid inputs produce correct output), negative (invalid/malformed inputs produce graceful handling), boundary (edge values e.g., maximum table size, max heading depth), and exception (unsupported constructs, corrupted data).",
+          "For every test case, record: id, feature, category, input HTML snippet or description, expected PDF output (layout, content, error status).",
+          "Compile all cases into a scenario matrix mapping each feature to its test coverage across the four categories.",
+          "Ensure every case is deterministic \u2014 same input always yields same output \u2014 and includes an exact expected result, not a human judgment.",
+          "Output the matrix as a markdown table and the full case details in a structured document for review and automation."
+        ]
+      },
+      "checks": [],
+      "source_chars": 262
+    }
+  },
+  "generate": {
+    "status": 200,
+    "body": {
+      "plan": {
+        "id": "spl_97a61d98129b",
+        "project_id": "prj_fac0b27a43a8",
+        "author": "admin",
+        "kind": "instructions",
+        "request": "A skill that designs deterministic test cases and a scenario matrix for an HTML to PDF converter: positive, negative, boundary and exception cases for headings, tables, images, CSS, page breaks, encodings and very large files, each with an exact expected result.",
+        "source_type": "text",
+        "source_ref": "",
+        "source_sha256": "a96cf633c202ddff545d8acd9546ce2cbec5bb8ba4026f6c13c4d1964a3a7b2d",
+        "revise": "",
+        "status": "generated",
+        "plan_sha256": "b8e6dcc30ad1c41ef0a9082764bd2855180b3d162205411766da228e71dc1e30",
+        "approved_by": "admin",
+        "approved_at": "2026-11-11T06:01:04+00:00",
+        "prompt_ref": "skill-creator@v1:db120a7b06d2",
+        "draft_sha256": "4b82cacb2ad8a05a8807d5445b7e9d11694fc1188b7a31fcd3b7106bef0cddeb",
+        "generated_at": "2026-11-11T06:01:14+00:00",
+        "created_at": "2026-11-11T06:01:04+00:00",
+        "plan": {
+          "description": "Designs deterministic test cases and a scenario matrix for an HTML to PDF converter across positive, negative, boundary and exception categories for headings, tables, images, CSS, page breaks, encodings and very large files, each with an exact expected result. Use when a quality engineer needs structured, repeatable test designs for validating an HTML to PDF conversion engine.",
+          "eval_cases": [
+            {
+              "assertions": [
+                {
+                  "kind": "contains",
+                  "value": "positive"
+                },
+                {
+                  "kind": "contains",
+                  "value": "<h1>"
+                },
+                {
+                  "kind": "not_contains",
+                  "value": "negative"
+                }
+              ],
+              "input": "Feature: headings. The converter specification says headings <h1> through <h6> are supported, with <h1> being the largest. Nested headings are allowed."
+            },
+            {
+              "assertions": [
+                {
+                  "kind": "contains",
+                  "value": "boundary"
+                },
+                {
+                  "kind": "contains",
+                  "value": "20 columns"
+                },
+                {
+                  "kind": "contains",
+                  "value": "500 rows"
+                }
+              ],
+              "input": "Feature: tables. Tables can have up to 20 columns and 500 rows. Cells may contain images or other HTML. Border and background CSS are supported."
+            },
+            {
+              "assertions": [
+                {
+                  "kind": "contains",
+                  "value": "boundary"
+                },
+                {
+                  "kind": "regex",
+                  "value": "(?i)50 MB"
+                },
+                {
+                  "kind": "regex",
+                  "value": "(?i)error"
+                }
+              ],
+              "input": "Feature: very large files. Files larger than 50 MB should trigger an error. Files between 10 MB and 50 MB are processed but may be slow. Files under 10 MB are fast."
+            },
+            {
+              "assertions": [
+                {
+                  "kind": "contains",
+                  "value": "UTF-8"
+                },
+                {
+                  "kind": "contains",
+                  "value": "ISO-8859-1"
+                },
+                {
+                  "kind": "contains",
+                  "value": "exception"
+                }
+              ],
+              "input": "Feature: encodings. Supported: UTF-8, ISO-8859-1, and Windows-1252. Unsupported encodings should fall back to UTF-8 with a warning."
+            },
+            {
+              "assertions": [
+                {
+                  "kind": "contains",
+                  "value": "positive"
+                },
+                {
+                  "kind": "contains",
+                  "value": "page-break-before"
+                },
+                {
+                  "kind": "not_contains",
+                  "value": "negative"
+                }
+              ],
+              "input": "Feature: page breaks. The CSS property page-break-before, page-break-after, page-break-inside are supported. Multiple page breaks can be adjacent."
+            }
+          ],
+          "files": [
+            {
+              "path": "SKILL.md",
+              "purpose": "Main skill definition containing frontmatter with name and description, and body with step-by-step instructions, decision rules, and links to references/ files for detail."
+            },
+            {
+              "path": "references/test-design-rules.md",
+              "purpose": "Detailed rules for categorizing positive, negative, boundary, and exception test cases; examples for each feature type."
+            },
+            {
+              "path": "references/feature-boundaries.md",
+              "purpose": "Documented boundary values for each feature (e.g., maximum heading level, maximum table rows/columns, max file size)."
+            },
+            {
+              "path": "assets/scenario-matrix-template.md",
+              "purpose": "Template for the scenario matrix output (markdown table)."
+            },
+            {
+              "path": "assets/test-case-detail-template.md",
+              "purpose": "Template for the full test case detail document (structured markdown per case)."
+            }
+          ],
+          "formats": [
+            {
+              "name": "scenario-matrix",
+              "purpose": "A markdown table summarizing test coverage per feature and category.",
+              "template_path": "assets/scenario-matrix-template.md"
+            },
+            {
+              "name": "test-case-details",
+              "purpose": "A structured markdown document with detailed information per test case.",
+              "template_path": "assets/test-case-detail-template.md"
+            }
+          ],
+          "name": "designing-html-to-pdf-test-scenarios",
+          "subagents": [],
+          "tasks": [
+            "Analyze the converter's specification to identify key conversion features: headings, tables, images, CSS, page breaks, encodings, and very large files.",
+            "For each feature, define test case categories: positive (valid inputs produce correct output), negative (invalid/malformed inputs produce graceful handling), boundary (edge values e.g., maximum table size, max heading depth), and exception (unsupported constructs, corrupted data).",
+            "For every test case, record: id, feature, category, input HTML snippet or description, expected PDF output (layout, content, error status).",
+            "Compile all cases into a scenario matrix mapping each feature to its test coverage across the four categories.",
+            "Ensure every case is deterministic \u2014 same input always yields same output \u2014 and includes an exact expected result, not a human judgment.",
+            "Output the matrix as a markdown table and the full case details in a structured document for review and automation."
+          ]
+        },
+        "checks": [
+          {
+            "check": "frontmatter",
+            "passed": true,
+            "detail": "YAML frontmatter between --- lines"
+          },
+          {
+            "check": "name format",
+            "passed": true,
+            "detail": "name 'designing-html-to-pdf-test-scenarios': lowercase letters, digits and single hyphens, at most 64"
+          },
+          {
+            "check": "name matches folder",
+            "passed": true,
+            "detail": "name 'designing-html-to-pdf-test-scenarios', folder 'designing-html-to-pdf-test-scenarios'"
+          },
+          {
+            "check": "description",
+            "passed": true,
+            "detail": "379 characters (1 to 1024)"
+          },
+          {
+            "check": "body length",
+            "passed": true,
+            "detail": "48 lines (at most 500; move detail into references/)"
+          },
+          {
+            "check": "MAF loads it",
+            "passed": true,
+            "detail": "MAF FileSkillsSource loaded it"
+          },
+          {
+            "check": "security scan",
+            "passed": true,
+            "detail": "no findings"
+          }
+        ],
+        "source_chars": 262
+      },
+      "files": [
+        {
+          "path": "SKILL.md",
+          "content": "---\nname: designing-html-to-pdf-test-scenarios\ndescription: >\n  Designs deterministic test cases and a scenario matrix for an HTML to PDF\n  converter across positive, negative, boundary and exception categories for\n  headings, tables, images, CSS, page breaks, encodings and very large files,\n  each with an exact expected result. Use when a quality engineer needs\n  structured, repeatable test designs for validating an HTML to PDF conversion\n  engine.\nauthor: admin\n---\n\n# Designing HTML to PDF Test Scenarios\n\nThis skill takes an HTML to PDF converter specification and produces a set of\nstructured, repeatable test designs covering all key features and categories.\n\n## Steps\n\n1. **Analyze the specification** \u2013 Identify the features explicitly listed:\n   headings, tables, images, CSS, page breaks, encodings, and very large files.\n2. **For each feature, define test cases** under these categories:\n   - **positive** \u2013 valid inputs should produce correct output.\n   - **negative** \u2013 invalid or malformed inputs should be handled gracefully (error or fallback).\n   - **boundary** \u2013 edge values (maximum, minimum, large, etc.).\n   - **exception** \u2013 unsupported constructs or corrupted data.\n3. **For every test case, record**:\n   - id (e.g., `H-POS-01`)\n   - feature\n   - category\n   - input description or HTML snippet\n   - expected result (exact, deterministic)\n4. **Compile all cases into a scenario matrix** \u2013 a markdown table mapping each\n   feature to its coverage across the four categories.\n5. **Output the matrix** using `assets/scenario-matrix-template.md` and the\n   full case details using `assets/test-case-detail-template.md`.\n\n## Decision Rules\n\n- Every test case must be deterministic \u2013 same input always produces same output.\n- Positive cases cover supported features with valid data.\n- Negative cases use invalid/malformed input; expect an error, gracefully\n  degraded output, or fallback behavior.\n- Boundary cases target the documented limits (see\n  [references/feature-boundaries.md](references/feature-boundaries.md)).\n- Exception cases target unsupported constructs (e.g., `<canvas>`, corrupted\n  HTML, unclosed tags).\n- Do not create cases for features not mentioned in the specification.\n\n## References\n\n- [Test Design Rules](references/test-design-rules.md)\n- [Feature Boundaries](references/feature-boundaries.md)\n\n## Outputs\n\n- Scenario matrix (markdown table) per `assets/scenario-matrix-template.md`\n- Test case details (structured markdown document) per\n  `assets/test-case-detail-template.md`\n"
+        },
+        {
+          "path": "references/test-design-rules.md",
+          "content": "# Test Design Rules\n\nThis document defines the rules for categorizing test cases in an HTML to PDF\nconversion context.\n\n## Categories\n\n### Positive\n- Valid, well-formed HTML that exercises supported features.\n- Expected PDF output matches the intended layout.\n\n### Negative\n- Invalid HTML (e.g., missing closing tags, malformed attributes).\n- Unsupported CSS properties (e.g., `grid` if not implemented).\n- Expected behavior: converter returns an error, or gracefully degrades (e.g.,\n  ignores unknown property).\n\n### Boundary\n- Limits documented in the specification or inferred from common practice.\n- Examples: maximum heading level (6), maximum table columns (20), maximum\n  file size (50 MB).\n- Test at and just beyond each limit.\n\n### Exception\n- Unexpected or corrupted input data.\n- Examples: binary file with `.html` extension, zero-byte file, unsupported\n  character encoding.\n- Expected behavior: clear error message, fallback to default, or safe abort.\n\n## Example for Each Feature\n\n| Feature   | Positive Example                      | Negative Example               | Boundary Example                        | Exception Example          |\n|-----------|---------------------------------------|--------------------------------|----------------------------------------|----------------------------|\n| headings  | `<h1>Title</h1>`                     | `<h1>Title` (missing close)    | 7 nested `<h1>` inside each other      | `<canvas>` element inside  |\n| tables    | Simple 3x3 table                     | Table with unclosed `<tr>`     | 20 columns, 500 rows                    | Table inside a table       |\n| images    | `<img src=\"photo.jpg\">`            | `<img src=\"\">`               | 1000 images on one page                 | SVG as an image            |\n| CSS       | `color: #333`                        | `color: invalidvalue`          | 10 MB of inline CSS                     | CSS `@import` to a binary  |\n| page breaks | `page-break-after: always`         | `page-break-after: bogus`      | 50 adjacent page breaks                 | Page break inside an inline element |\n| encodings | UTF-8 with accented characters       | Invalid UTF-8 byte sequence    | 100 MB file with UTF-8                  | Binary encoding declared as UTF-8 |\n| large files | 9 MB file (fast threshold)          | 51 MB file (over limit)        | Exactly 50 MB file                      | Zero-byte file             |\n"
+        },
+        {
+          "path": "references/feature-boundaries.md",
+          "content": "# Feature Boundaries\n\nDocumented boundary values for each feature of the HTML to PDF converter.\n\n## Headings\n- Maximum heading level: 6 (`<h6>` is smallest, `<h1>` largest).\n- No defined minimum; single heading is valid.\n\n## Tables\n- Maximum columns: 20\n- Maximum rows: 500\n- Cells may contain images or other HTML.\n- Supported CSS for borders and backgrounds.\n\n## Images\n- Supported formats: JPEG, PNG, GIF (assumed unless spec says otherwise).\n- No defined limit on file size per image; boundary tested with very large image\n  (e.g., 50 MB single image).\n\n## CSS\n- Supported properties: as per spec (common ones: `color`, `font-*`,\n  `page-break-*`, `border`, `background`).\n- No defined limit on total CSS size; boundary tested with 10 MB inline CSS.\n\n## Page Breaks\n- Supported properties: `page-break-before`, `page-break-after`,\n  `page-break-inside`.\n- Adjacent page breaks are allowed.\n- No defined maximum count; boundary tested with 50 consecutive breaks.\n\n## Encodings\n- Supported: UTF-8, ISO-8859-1, Windows-1252.\n- Unsupported encoding: fallback to UTF-8 with warning.\n- No file size limit specific to encoding.\n\n## Very Large Files\n- Fast (under 10 MB): processed quickly.\n- Medium (10 MB to 50 MB): processed but may be slow.\n- Over 50 MB: error triggered.\n\n**Note:** All boundaries are taken from the specification provided. If the\nspec is updated, these values must be updated accordingly.\n"
+        },
+        {
+          "path": "assets/scenario-matrix-template.md",
+          "content": "# Scenario Matrix\n\n| Feature       | Positive | Negative | Boundary | Exception |\n|---------------|----------|----------|----------|-----------|\n| _FeatureName_ | \u2713        | \u2713        | \u2713        | \u2713         |\n\n_Each checkmark (\u2713) indicates at least one test case covering that\nfeature\u2013category combination._\n"
+        },
+        {
+          "path": "assets/test-case-detail-template.md",
+          "content": "# Test Case Details\n\n## Test Case: `{ID}`\n\n- **Feature:** {Feature}\n- **Category:** {positive | negative | boundary | exception}\n- **Input Description:** {Describe the HTML or scenario}\n- **Input HTML Snippet:**\n  ```html\n  {HTML code or empty if not applicable}\n  ```\n- **Expected Result:**\n  - {Exact, deterministic outcome: e.g., \"PDF page 1 contains heading in bold\n    Arial 24pt\", \"Error message: 'Unsupported encoding'\", etc.}\n- **Notes:** {Any additional context or dependencies}\n\n---\n"
+        }
+      ],
+      "checks": [
+        {
+          "check": "frontmatter",
+          "passed": true,
+          "detail": "YAML frontmatter between --- lines"
+        },
+        {
+          "check": "name format",
+          "passed": true,
+          "detail": "name 'designing-html-to-pdf-test-scenarios': lowercase letters, digits and single hyphens, at most 64"
+        },
+        {
+          "check": "name matches folder",
+          "passed": true,
+          "detail": "name 'designing-html-to-pdf-test-scenarios', folder 'designing-html-to-pdf-test-scenarios'"
+        },
+        {
+          "check": "description",
+          "passed": true,
+          "detail": "379 characters (1 to 1024)"
+        },
+        {
+          "check": "body length",
+          "passed": true,
+          "detail": "48 lines (at most 500; move detail into references/)"
+        },
+        {
+          "check": "MAF loads it",
+          "passed": true,
+          "detail": "MAF FileSkillsSource loaded it"
+        },
+        {
+          "check": "security scan",
+          "passed": true,
+          "detail": "no findings"
+        }
+      ],
+      "summary": {
+        "passed": 7,
+        "total": 7,
+        "all_passed": true
+      }
+    }
+  },
+  "evaluate": {
+    "status": 200,
+    "body": {
+      "prompt_ref": "skill-creator@v1:db120a7b06d2+draft:4b82cacb2ad8",
+      "n": 5,
+      "judge_model": "deterministic-assertions",
+      "metrics": {
+        "assertion_pass_rate_with_skill": 0.8666666666666667,
+        "assertion_pass_rate_without_skill": 0.8666666666666667,
+        "skill_uplift": 0.0
+      },
+      "tokens": 24688,
+      "cases": [
+        {
+          "case": 1,
+          "input": "Feature: headings. The converter specification says headings <h1> through <h6> are supported, with <h1> being the largest. Nested headings are allowed.",
+          "with_skill": {
+            "output": "# Scenario Matrix\n\n| Feature     | Positive | Negative        | Boundary        | Exception              |\n|-------------|----------|-----------------|-----------------|------------------------|\n| Headings    | H-POS-01 | H-NEG-01, H-NEG-02 | H-BND-01, H-BND-02 | H-EXC-01, H-EXC-02 |\n\n---\n\n# Test Case Details\n\n## H-POS-01\n\n- **ID:** H-POS-01\n- **Feature:** Headings\n- **Category:** Positive\n- **Input:** `<h1>Main Title</h1><h2>Subtitle</h2><h3>Section</h3><h4>Subsection</h4><h5>Detail</h5><h6>Footnote</h6>`\n- **Expected Result:** PDF displays six heading levels in correct hierarchy, with `<h1>` being the largest and `<h6>` the smallest.\n\n---\n\n## H-NEG-01\n\n- **ID:** H-NEG-01\n- **Feature:** Headings\n- **Category:** Negative\n- **Input:** `<h1>Unclosed heading`\n- **Expected Result:** Converter returns error or degrades gracefully (ignores malformed tag, renders remaining content).\n\n---\n\n## H-NEG-02\n\n- **ID:** H-NEG-02\n- **Feature:** Headings\n- **Category:** Negative\n- **Input:** `<h7>Invalid level</h7>`\n- **Expected Result:** Converter returns error or renders `<h7>` with default paragraph styling, warning about unsupported tag.\n\n---\n\n## H-BND-01\n\n- **ID:** H-BND-01\n- **Feature:** Headings\n- **Category:** Boundary\n- **Input:** Single `<h1>` element\n- **Expected Result:** PDF renders one heading at the largest size; no layout errors.\n\n---\n\n## H-BND-02\n\n- **ID:** H-BND-02\n- **Feature:** Headings\n- **Category:** Boundary\n- **Input:** `<h1>Level 1</h1><h1>Level 1</h1><h1>Level 1</h1><h1>Level 1</h1><h1>Level 1</h1><h1>Level 1</h1><h1>Level 1</h1>` (7 top-level headings nested inside each other)\n- **Expected Result:** PDF renders all seven `<h1>` elements; deep nesting does not crash or produce malformed output.\n\n---\n\n## H-EXC-01\n\n- **ID:** H-EXC-01\n- **Feature:** Headings\n- **Category:** Exception\n- **Input:** `<h1><canvas>Fallback</canvas></h1>`\n- **Expected Result:** Converter handles the `<canvas>` element by ignoring it or rendering a fallback; no crash.\n\n---\n\n## H-EXC-02\n\n- **ID:** H-EXC-02\n- **Feature:** Headings\n- **Category:** Exception\n- **Input:** `<h1>Normal heading</h6>`\n- **Expected Result:** Converter detects conflicting closing tag and either issues an error or gracefully renders the content as an `<h1>` ignoring the stray `</h6>`.",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "positive",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "<h1>",
+                "passed": true
+              },
+              {
+                "kind": "not_contains",
+                "value": "negative",
+                "passed": false
+              }
+            ]
+          },
+          "without_skill": {
+            "output": "# Test Suite: HTML to PDF Converter \u2013 Headings Feature\n\n## Positive Test Cases\n\n### TC-HD-P001: Basic h1 Heading\n- **Input**: `<html><body><h1>Main Title</h1></body></html>`\n- **Expected**: Single page PDF containing large, bold \"Main Title\" text\n- **Category**: Positive\n\n### TC-HD-P002: All Heading Levels\n- **Input**: `<html><body><h1>Level 1</h1><h2>Level 2</h2><h3>Level 3</h3><h4>Level 4</h4><h5>Level 5</h5><h6>Level 6</h6></body></html>`\n- **Expected**: Six distinct heading sizes, visually decreasing from h1 to h6\n- **Category**: Positive\n\n### TC-HD-P003: Nested Headings Structure\n- **Input**: `<html><body><h1>Chapter 1</h1><h2>Section 1.1</h2><h3>Subsection 1.1.1</h3><h2>Section 1.2</h2></body></html>`\n- **Expected**: Hierarchical heading structure maintained in PDF\n- **Category**: Positive\n\n### TC-HD-P004: Heading with Body Text\n- **Input**: `<html><body><h1>Title</h1><p>Body text follows heading.</p></body></html>`\n- **Expected**: Heading on its own line followed by body text\n- **Category**: Positive\n\n## Negative Test Cases\n\n### TC-HD-N001: Invalid Heading Tag\n- **Input**: `<html><body><h7>Invalid heading</h7></body></html>`\n- **Expected**: Rendered as normal body text, not as heading\n- **Category**: Negative\n\n### TC-HD-N002: Malformed Heading Tag\n- **Input**: `<html><body><<<h1>>>Broken heading</h1></body></html>`\n- **Expected**: Browser's error handling, likely no heading rendering\n- **Category**: Negative\n\n### TC-HD-N003: Empty Heading Content\n- **Input**: `<html><body><h1></h1></body></html>`\n- **Expected**: No visible content, zero-height element\n- **Category**: Negative\n\n### TC-HD-N004: Heading with Non-Text Content Only\n- **Input**: `<html><body><h1><img src=\"nonexistent.png\"></h1></body></html>`\n- **Expected**: Broken image or no content; no text rendered as heading\n- **Category**: Negative\n\n## Boundary Test Cases\n\n### TC-HD-B001: Single Character Heading\n- **Input**: `<html><body><h1>A</h1></body></html>`\n- **Expected**: Single character rendered at h1 size\n- **Category**: Boundary\n\n### TC-HD-B002: Maximum Characters Heading (1000 chars)\n- **Input**: `<html><body><h1>` + \"A\" * 1000 + `</h1></body></html>`\n- **Expected**: Text wraps properly, no overflow or truncation\n- **Category**: Boundary\n\n### TC-HD-B003: Heading with Special Characters\n- **Input**: `<html><body><h1>Test@#$%^&*()_+{}|:\"<>?`~</h1></body></html>`\n- **Expected**: Special characters rendered correctly (except < > which may be interpreted)\n- **Category**: Boundary\n\n### TC-HD-B004: Maximum Number of Nested Headings (6 levels)\n- **Input**: ```html\n<html><body><h1>L1<h2>L2<h3>L3<h4>L4<h5>L5<h6>L6</h6></h5></h4></h3></h2></h1></body></html>\n```\n- **Expected**: All six levels preserved, with proper nesting hierarchy\n- **Category**: Boundary\n\n## Exception Test Cases\n\n### TC-HD-E001: Heading with Unicode Characters\n- **Input**: `<html><body><h1>Caf\u00e9 R\u00e9sum\u00e9 \u00f1o\u00f1o \u03b1\u03b2\u03b3 \u4f60\u597d</h1></body></html>`\n- **Expected**: All Unicode characters rendered, UTF-8 encoding preserved\n- **Category**: Exception\n\n### TC-HD-E002: Heading with <script> Injection\n- **Input**: `<html><body><h1>Title<script>alert('xss')</script></h1></body></html>`\n- **Expected**: Script tag not executed; rendered as text (or stripped)\n- **Category**: Exception\n\n### TC-HD-E003: Heading with CSS display:none\n- **Input**: `<html><body><h1 style=\"display:none\">Hidden Title</h1></body></html>`\n- **Expected**: Heading not visible in PDF (no content rendered)\n- **Category**: Exception\n\n### TC-HD-E004: Heading with Extreme Font Sizes\n- **Input**: `<html><body><h1 style=\"font-size:300px\">Oversized Heading</h1></body></html>`\n- **Expected**: Content may overflow page boundary or cause layout issues\n- **Category**: Exception\n\n### TC-HD-E005: Heading After Page Break\n- **Input**: `<html><body><div style=\"page-break-after:always\"></div><h1>Title on new page</h1></body></html>`\n- **Expected**: Heading appears on new page after page break\n- **Category**: Exception\n\n## Scenario Matrix\n\n| Test ID | Category | Heading Levels | Nested | Content Type | Special Condition | Expected Result |\n|---------|----------|----------------|--------|--------------|-------------------|-----------------|\n| TC-HD-P001 | Positive | h1 only | No | Plain text | - | Large bold title |\n| TC-HD-P002 | Positive | All 6 levels | No | Plain text | Different sizes | Distinct font sizes |\n| TC-HD-P003 | Positive | Mixed | Yes | Plain text | 3-level nesting | Preserved hierarchy |\n| TC-HD-P004 | Positive | h1 | No | Text + paragraph | Mixed content | Heading + body |\n| TC-HD-N001 | Negative | h7 | No | Text | Invalid tag | Body text rendering |\n| TC-HD-N002 | Negative | Malformed | N/A | Text | Syntax error | Error recovery |\n| TC-HD-N003 | Negative | h1 | No | Empty | No content | Blank space |\n| TC-HD-N004 | Negative | h1 | No | Image only | No text | No heading |\n| TC-HD-B001 | Boundary | h1 | No | Single char | Minimal content | Single character |\n| TC-HD-B002 | Boundary | h1 | No | 1000 chars | Max length | Text wrapping |\n| TC-HD-B003 | Boundary | h1 | No | Special chars | Symbols | Correct rendering |\n| TC-HD-B004 | Boundary | All | Yes (6 deep) | Text | Max nesting | Hierarchy preserved |\n| TC-HD-E001 | Exception | h1 | No | Unicode | International | UTF-8 preserved |\n| TC-HD-E002 | Exception | h1 | No | Script injection | XSS risk | Script not executed |\n| TC-HD-E003 | Exception | h1 | No | CSS hidden | display:none | Invisible |\n| TC-HD-E004 | Exception | h1 | No | Oversized | Extreme font | Possible overflow |\n| TC-HD-E005 | Exception | h1 | No | Page break | Section break | New page heading |\n\n---\n\n**Testing Artifacts Produced:**\n1. 17 deterministic test cases with exact inputs and expected results\n2. 4 categories: Positive (4), Negative (4), Boundary (4), Exception (5)\n3. Cross-reference scenario matrix for quick test selection\n4. Coverage includes: all heading levels, nesting, edge cases, security concerns, and rendering variations\n\n**Next Steps:**\n1. Execute each test case against the converter\n2. Compare actual results with expected values\n3. Document any failures for developer fixes\n4. Re-run all tests after fixes\n5. Add additional tests for other features (tables, images, CSS, page breaks, encodings, large files) as specified",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "positive",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "<h1>",
+                "passed": true
+              },
+              {
+                "kind": "not_contains",
+                "value": "negative",
+                "passed": false
+              }
+            ]
+          }
+        },
+        {
+          "case": 2,
+          "input": "Feature: tables. Tables can have up to 20 columns and 500 rows. Cells may contain images or other HTML. Border and background CSS are supported.",
+          "with_skill": {
+            "output": "# Scenario Matrix\n\n| Feature  | Positive | Negative | Boundary | Exception |\n|----------|----------|----------|----------|-----------|\n| Tables   | T-POS-01 | T-NEG-01 | T-BND-01, T-BND-02, T-BND-03 | T-EXC-01, T-EXC-02 |\n\n---\n\n# Test Case Details\n\n## T-POS-01\n\n| Field            | Value                                                                 |\n|------------------|-----------------------------------------------------------------------|\n| **Feature**      | Tables                                                               |\n| **Category**     | Positive                                                             |\n| **Input**        | Simple 3x3 HTML table with borders and background CSS                |\n| **Expected Result** | PDF correctly renders a 3x3 table with borders and background colors |\n\n---\n\n## T-NEG-01\n\n| Field            | Value                                                                 |\n|------------------|-----------------------------------------------------------------------|\n| **Feature**      | Tables                                                               |\n| **Category**     | Negative                                                             |\n| **Input**        | HTML table with an unclosed `<tr>` tag                               |\n| **Expected Result** | Error message or gracefully degraded output (e.g., table rendered with missing row) |\n\n---\n\n## T-BND-01\n\n| Field            | Value                                                                 |\n|------------------|-----------------------------------------------------------------------|\n| **Feature**      | Tables                                                               |\n| **Category**     | Boundary                                                             |\n| **Input**        | HTML table with exactly 20 columns and 500 rows (maximum limits)     |\n| **Expected Result** | PDF correctly renders the complete table without truncation or errors |\n\n---\n\n## T-BND-02\n\n| Field            | Value                                                                 |\n|------------------|-----------------------------------------------------------------------|\n| **Feature**      | Tables                                                               |\n| **Category**     | Boundary                                                             |\n| **Input**        | HTML table with 21 columns (one beyond maximum)                      |\n| **Expected Result** | Error or graceful handling (e.g., overflow cropped or warning)       |\n\n---\n\n## T-BND-03\n\n| Field            | Value                                                                 |\n|------------------|-----------------------------------------------------------------------|\n| **Feature**      | Tables                                                               |\n| **Category**     | Boundary                                                             |\n| **Input**        | HTML table with 501 rows (one beyond maximum)                        |\n| **Expected Result** | Error or graceful handling (e.g., extra rows omitted with warning)   |\n\n---\n\n## T-EXC-01\n\n| Field            | Value                                                                 |\n|------------------|-----------------------------------------------------------------------|\n| **Feature**      | Tables                                                               |\n| **Category**     | Exception                                                            |\n| **Input**        | HTML table nested inside another table (table within a table)        |\n| **Expected Result** | Graceful degradation (e.g., inner table rendered as plain text or ignored) or error |\n\n---\n\n## T-EXC-02\n\n| Field            | Value                                                                 |\n|------------------|-----------------------------------------------------------------------|\n| **Feature**      | Tables                                                               |\n| **Category**     | Exception                                                            |\n| **Input**        | Corrupted HTML table with an extremely large number of columns (e.g., 1000) in a single row |\n| **Expected Result** | Error message or safe fallback (e.g., row truncated or table not rendered) |",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "boundary",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "20 columns",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "500 rows",
+                "passed": true
+              }
+            ]
+          },
+          "without_skill": {
+            "output": "## Test Case Design: HTML to PDF Converter \u2014 Tables Feature\n\n### Category: Positive Tests (Valid Inputs)\n\n| ID | Test Case | Input | Expected Result |\n|----|-----------|-------|-----------------|\n| TBL-POS-01 | Simple table with text | `<table><tr><td>A</td><td>B</td></tr></table>` | PDF shows a 2-column, 1-row table with cells \"A\" and \"B\" |\n| TBL-POS-02 | Table with border CSS | `<table style=\"border:1px solid black\"><tr><td>Cell</td></tr></table>` | PDF shows table with black 1px border around cells |\n| TBL-POS-03 | Table with background color | `<table><tr><td style=\"background:yellow\">Highlight</td></tr></table>` | PDF shows cell with yellow background |\n| TBL-POS-04 | Maximum columns (20) | `<table>` + 20 `<th>` elements in single row, each with unique text | PDF displays 20 columns correctly without overflow |\n| TBL-POS-05 | Maximum rows (500) | `<table>` + 500 `<tr><td>Row N</td></tr>` elements | PDF displays all 500 rows, paginated if needed |\n| TBL-POS-06 | Cell containing image | `<table><tr><td><img src=\"valid.png\" width=\"50\"></td></tr></table>` | PDF shows image inside table cell at specified dimensions |\n| TBL-POS-07 | Cell containing nested HTML | `<table><tr><td><div><ul><li>Item</li></ul></div></td></tr></table>` | PDF renders nested HTML correctly within cell |\n| TBL-POS-08 | Combined border and background | `<td style=\"border:2px dashed red; background:lightblue\">Styled</td>` | PDF shows dashed red border with light blue fill |\n\n### Category: Negative Tests (Invalid/Malformed Inputs)\n\n| ID | Test Case | Input | Expected Result |\n|----|-----------|-------|-----------------|\n| TBL-NEG-01 | Unclosed table tag | `<table><tr><td>Text` | PDF shows error or gracefully recovers without crash; no malformed output |\n| TBL-NEG-02 | Mismatched row/column counts | `<table><tr><td>A</td><td>B</td></tr><tr><td>C</td></tr></table>` | PDF renders second row with empty second cell or auto-stretches to match first row |\n| TBL-NEG-03 | Invalid border value | `<table style=\"border:abc\">` | PDF ignores invalid CSS and renders without border (falls back to default) |\n| TBL-NEG-04 | Broken image in cell | `<td><img src=\"nonexistent.jpg\"></td>` | PDF shows alt text or placeholder (no crash) |\n| TBL-NEG-05 | Table inside invalid parent | `<div><table><tr><td>Nested</td></tr></table></div>` | PDF renders table content (browser-like recovery) |\n| TBL-NEG-06 | Attribute injection attempt | `<td style=\"border:1px solid red\" onmouseover=\"alert('xss')\">XSS</td>` | PDF ignores event handlers; only renders visual style |\n\n### Category: Boundary Tests\n\n| ID | Test Case | Input | Expected Result |\n|----|-----------|-------|-----------------|\n| TBL-BND-01 | Zero columns | `<table><tr></tr></table>` | PDF renders empty table with no visible columns |\n| TBL-BND-02 | Single column | `<table><tr><td>Only</td></tr></table>` | PDF displays single column correctly |\n| TBL-BND-03 | Maximum columns (20) with long text | 20 columns each containing 100-character strings | PDF renders without text overflow; may word-wrap or truncate depending on table-layout |\n| TBL-BND-04 | 1 row (min) | `<table><tr><td>Single row</td></tr></table>` | PDF shows one row |\n| TBL-BND-05 | 500 rows with empty cells | 500 rows, each with `<td></td>` | PDF renders 500 empty cells without performance degradation |\n| TBL-BND-06 | 501 rows (exceeds max) | 501 rows | PDF may truncate at 500, show error, or render all (check spec); assume truncation warning |\n| TBL-BND-07 | 21 columns (exceeds max) | 21 columns | PDF should truncate or show warning; no crash |\n| TBL-BND-08 | Cell with zero-width image | `<td><img src=\"valid.png\" width=\"0\"></td>` | PDF renders image at minimum visible size or as empty space |\n\n### Category: Exception Tests (Edge Cases)\n\n| ID | Test Case | Input | Expected Result |\n|----|-----------|-------|-----------------|\n| TBL-EXC-01 | Table inside table (nested) | `<table><tr><td><table><tr><td>Nested</td></tr></table></td></tr></table>` | PDF renders nested table within parent cell; may cause layout issues but no crash |\n| TBL-EXC-02 | Colspan exceeding column count | `<tr><td colspan=\"5\">Span</td></tr>` in 2-column table | PDF collapses to available columns or extends beyond table width |\n| TBL-EXC-03 | Rowspan causing overlap | `<tr><td rowspan=\"2\">A</td><td>B</td></tr>` without enough subsequent rows | PDF renders remaining span into next rows or truncates |\n| TBL-EXC-04 | CSS `display: none` on table | `<table style=\"display:none\"><tr><td>Hidden</td></tr></table>` | PDF hides entire table |\n| TBL-EXC-05 | Table with `position: absolute` | `<table style=\"position:absolute; top:50px\"><tr><td>Absolute</td></tr></table>` | PDF positions table at absolute offset from page origin |\n| TBL-EXC-06 | Empty table | `<table></table>` | PDF renders nothing (empty table node omitted or zero-height) |\n| TBL-EXC-07 | Table in `<thead>/<tbody>/<tfoot>` | `<table><thead><tr><th>Header</th></tr></thead><tbody><tr><td>Data</td></tr></tbody></table>` | PDF preserves header/body/footer structure visually |\n| TBL-EXC-08 | inline table style conflicts | `<td style=\"background:red\" bgcolor=\"blue\">Conflict</td>` | CSS `background` overrides HTML `bgcolor` attribute |\n\n### Scenario Matrix: Tables Feature\n\n| Scenario ID | Table Size | Content Type | CSS Applied | Page Break Context | Expected Behaviour |\n|-------------|------------|--------------|-------------|-------------------|-------------------|\n| S-TBL-01 | 2\u00d72 (small) | Text only | None | No break | Standard table rendering |\n| S-TBL-02 | 20\u00d7500 (max) | Mixed text + images | Border + background | Page break mid-table (e.g., row 250) | Table splits across pages with header repeated (if `<thead>`) |\n| S-TBL-03 | 10\u00d7200 | Nested HTML inside cells | No CSS | Before table (`page-break-before: always`) | Table starts on new page |\n| S-TBL-04 | 1\u00d71 (minimal) | Single image | Background color only | After table (`page-break-after: always`) | Page break follows table |\n| S-TBL-05 | 5\u00d750 | Empty cells / short text | No CSS | Table spans page boundary naturally | Table splits at row boundary, no data loss |\n| S-TBL-06 | 500\u00d720 (wide) | Text with varying lengths | Border styling | Print landscape orientation | Table fits width without horizontal scroll |\n| S-TBL-07 | 0 columns | Empty table | None | Any | No rendering; zero space |\n| S-TBL-08 | 21\u00d7500 (excess columns) | Text | `table-layout:fixed` | Any | Columns truncated at 20; warning in log |\n| S-TBL-09 | 10\u00d710 | Unicode text (e.g., Chinese characters) | Background CSS | No break | Characters render correctly within cells |\n| S-TBL-10 | 3\u00d73 | Table inside another table (nested) | Nested has border | No break | Inner table renders inside outer cell; both visible |",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "boundary",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "20 columns",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "500 rows",
+                "passed": true
+              }
+            ]
+          }
+        },
+        {
+          "case": 3,
+          "input": "Feature: very large files. Files larger than 50 MB should trigger an error. Files between 10 MB and 50 MB are processed but may be slow. Files under 10 MB are fast.",
+          "with_skill": {
+            "output": "# Scenario Matrix\n\n| Feature | Positive | Negative | Boundary | Exception |\n|---------|----------|----------|----------|-----------|\n| Very Large Files | 9 MB file (fast) | 51 MB file (over limit) | Exactly 50 MB file | Zero-byte file |\n\n---\n\n# Test Case Details\n\n## Very Large Files\n\n### VL-POS-01\n- **Feature:** Very Large Files\n- **Category:** Positive\n- **Input Description:** A 9 MB valid HTML file.\n- **Expected Result:** Conversion completes quickly (under reasonable time).\n\n### VL-NEG-01\n- **Feature:** Very Large Files\n- **Category:** Negative\n- **Input Description:** A 51 MB valid HTML file.\n- **Expected Result:** Converter returns an error indicating file exceeds maximum supported size.\n\n### VL-BND-01\n- **Feature:** Very Large Files\n- **Category:** Boundary\n- **Input Description:** A 50 MB valid HTML file.\n- **Expected Result:** Converter processes the file but may be slow.\n\n### VL-EXC-01\n- **Feature:** Very Large Files\n- **Category:** Exception\n- **Input Description:** A zero-byte file (empty file).\n- **Expected Result:** Converter returns a clear error indicating empty or invalid file.",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "boundary",
+                "passed": true
+              },
+              {
+                "kind": "regex",
+                "value": "(?i)50 MB",
+                "passed": true
+              },
+              {
+                "kind": "regex",
+                "value": "(?i)error",
+                "passed": true
+              }
+            ]
+          },
+          "without_skill": {
+            "output": "# Test Case Design: Very Large Files in HTML to PDF Converter\n\n## 1. Positive Test Cases\n\n### Case VL-POS-01: Small File (Under 10 MB)\n- **Input**: HTML file of 5 MB with valid markup\n- **Expected Result**: Fast conversion (completed within 5 seconds)\n- **Priority**: High\n\n### Case VL-POS-02: Medium File (10 MB - 50 MB)\n- **Input**: HTML file of 25 MB with valid markup\n- **Expected Result**: Successful conversion (processing may be slow, no timeout)\n- **Priority**: High\n\n## 2. Negative Test Cases\n\n### Case VL-NEG-01: Excessively Large File (Above 50 MB)\n- **Input**: HTML file of 75 MB\n- **Expected Result**: Error message returned, no PDF generated\n- **Priority**: Critical\n\n### Case VL-NEG-02: Empty File (0 MB)\n- **Input**: Empty HTML file (0 bytes)\n- **Expected Result**: Error or graceful handling (no conversion attempted)\n- **Priority**: Medium\n\n## 3. Boundary Test Cases\n\n### Case VL-BOUND-01: Exactly 10 MB\n- **Input**: HTML file of exactly 10,000,000 bytes\n- **Expected Result**: Successful conversion, processing time may be moderate\n- **Priority**: High\n\n### Case VL-BOUND-02: Exactly 50 MB\n- **Input**: HTML file of exactly 50,000,000 bytes\n- **Expected Result**: Error triggered (at threshold)\n- **Priority**: High\n\n### Case VL-BOUND-03: 9.9 MB (Just Below 10 MB)\n- **Input**: HTML file of 9,900,000 bytes\n- **Expected Result**: Fast conversion\n- **Priority**: Medium\n\n### Case VL-BOUND-04: 50.1 MB (Just Above 50 MB)\n- **Input**: HTML file of 50,100,000 bytes\n- **Expected Result**: Error triggered\n- **Priority**: Medium\n\n## 4. Exception Test Cases\n\n### Case VL-EXC-01: File with Maximum Allowed Size Before Error\n- **Input**: HTML file of 49.9 MB\n- **Expected Result**: Successful conversion (boundary of \"may be slow\" range)\n- **Priority**: Medium\n\n### Case VL-EXC-02: Corrupted Large File\n- **Input**: Corrupted HTML file of 30 MB\n- **Expected Result**: Error or graceful failure (not confused with size limit)\n- **Priority**: Low\n\n## 5. Scenario Matrix\n\n| Test ID | File Size | Behavior | Conversion | Performance | Expected Result |\n|---------|-----------|----------|------------|-------------|-----------------|\n| VL-POS-01 | 5 MB | Processed | Fast | < 5 sec | Success |\n| VL-POS-02 | 25 MB | Processed | Slow | > 5 sec | Success |\n| VL-NEG-01 | 75 MB | Error | Rejected | N/A | Error message |\n| VL-NEG-02 | 0 bytes | Error | Rejected | N/A | Error message |\n| VL-BOUND-01 | 10 MB | Processed | Moderate | ~5 sec | Success |\n| VL-BOUND-02 | 50 MB | Error | Rejected | N/A | Error message |\n| VL-BOUND-03 | 9.9 MB | Processed | Fast | < 5 sec | Success |\n| VL-BOUND-04 | 50.1 MB | Error | Rejected | N/A | Error message |\n| VL-EXC-01 | 49.9 MB | Processed | Slow | > 5 sec | Success |\n| VL-EXC-02 | 30 MB (corrupted) | Error | Rejected | N/A | Error message |",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "boundary",
+                "passed": true
+              },
+              {
+                "kind": "regex",
+                "value": "(?i)50 MB",
+                "passed": true
+              },
+              {
+                "kind": "regex",
+                "value": "(?i)error",
+                "passed": true
+              }
+            ]
+          }
+        },
+        {
+          "case": 4,
+          "input": "Feature: encodings. Supported: UTF-8, ISO-8859-1, and Windows-1252. Unsupported encodings should fall back to UTF-8 with a warning.",
+          "with_skill": {
+            "output": "# Scenario Matrix\n\n| Feature | Positive | Negative | Boundary | Exception |\n|---------|----------|----------|----------|-----------|\n| encodings | ENC-POS-01 | ENC-NEG-01 | ENC-BND-01 | ENC-EXC-01 |\n\n# Test Case Details\n\n## ENC-POS-01\n- **Feature**: encodings\n- **Category**: positive\n- **Input Description**: UTF-8 encoded HTML document containing accented characters (e.g., `\u00e9`, `\u00fc`, `\u00f1`)\n- **Expected Result**: PDF renders all accented characters correctly\n\n## ENC-POS-02\n- **Feature**: encodings\n- **Category**: positive\n- **Input Description**: ISO-8859-1 encoded HTML document with Western European characters\n- **Expected Result**: PDF renders all characters correctly\n\n## ENC-POS-03\n- **Feature**: encodings\n- **Category**: positive\n- **Input Description**: Windows-1252 encoded HTML document with typographic symbols (e.g., `\u20ac`, `\u2122`, `\u2013`)\n- **Expected Result**: PDF renders all symbols correctly\n\n## ENC-NEG-01\n- **Feature**: encodings\n- **Category**: negative\n- **Input Description**: HTML document declared as UTF-8 but containing invalid byte sequences\n- **Expected Result**: Converter returns an error or gracefully degrades with replacement characters\n\n## ENC-BND-01\n- **Feature**: encodings\n- **Category**: boundary\n- **Input Description**: 100 MB HTML file encoded in UTF-8 with extensive accented text\n- **Expected Result**: PDF conversion completes (may be slow) with all characters preserved\n\n## ENC-EXC-01\n- **Feature**: encodings\n- **Category**: exception\n- **Input Description**: HTML document declared as UTF-8 but containing binary data (null bytes)\n- **Expected Result**: Clear error message, fallback to UTF-8 with warning, or safe abort",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "UTF-8",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "ISO-8859-1",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "exception",
+                "passed": true
+              }
+            ]
+          },
+          "without_skill": {
+            "output": "## HTML to PDF Conversion Test Matrix \u2013 Encodings Category\n\n### Test Case Design\n\n| ID | Category | Test Name | Input (HTML Snippet) | Encoding | Expected Result |\n|---|----------|-----------|----------------------|----------|----------------|\n| ENC-001 | Positive | UTF-8 basic characters | `<html><body><p>\u03b1\u03b2\u03b3 \u4e2d\u6587 espa\u00f1ol</p></body></html>` | UTF-8 | PDF renders all characters correctly: Greek letters, Chinese characters, accented Latin |\n| ENC-002 | Positive | ISO\u20118859\u20111 basic characters | `<html><body><p>caf\u00e9 No\u00ebl \u00fcber na\u00efve</p></body></html>` | ISO-8859-1 | PDF renders accented characters correctly (\u00e9, \u00fc, \u00ef) |\n| ENC-003 | Positive | Windows\u20111252 special characters | `<html><body><p>Euro sign: \u20ac, bullet: \u2022, trademark: \u2122</p></body></html>` | Windows-1252 | PDF renders \u20ac, \u2022, \u2122 correctly |\n| ENC-004 | Boundary | Large UTF-8 document (>1MB) | Full HTML page with 500,000 Chinese characters | UTF-8 | PDF generated without truncation; all characters present |\n| ENC-005 | Negative | Unsupported encoding (Shift_JIS) | `<html><meta charset=\"Shift_JIS\"><body><p>\u65e5\u672c\u8a9e</p></body></html>` | Shift_JIS | Fallback to UTF-8; warning logged; Japanese characters may become garbled if not re-encoded |\n| ENC-006 | Negative | Invalid encoding name | `<html><meta charset=\"nonexistent\"><body><p>Hello</p></body></html>` | \"nonexistent\" | Fallback to UTF-8; warning logged; \"Hello\" renders correctly |\n| ENC-007 | Negative | Mixed encoding in one document | `<html><head><meta charset=\"UTF-8\"></head><body><p>caf\u00e9</p><p style=\"color:red\">\u00fcber</p><script charset=\"Windows-1252\">document.write(\"\u20ac\")</script></body></html>` | UTF-8 head, Windows-1252 script | Page-level UTF-8 used; script content decoded as UTF-8 \u2192 \u20ac may render as garbage; warning logged |\n| ENC-008 | Exception | Binary/non\u2011text input | Bytestream: `\\xFF\\xFE\\x00\\x61` | (none) | Conversion fails with clear error: \"Invalid HTML encoding\" |\n| ENC-009 | Exception | Encoding declaration inside body | `<html><body><meta charset=\"ISO-8859-1\"><p>No\u00ebl</p></body></html>` | UTF-8 (implied) | Meta tag ignored per spec; page treated as UTF-8; \"No\u00ebl\" renders correctly (ASCII subset) |\n\n### Scenario Matrix (User\u2011Facing Paths)\n\n| Scenario | Precondition | Action | Expected System Behaviour | Pass/Fail |\n|----------|-------------|--------|--------------------------|-----------|\n| Typical UTF-8 document | HTML contains multilingual text | Convert to PDF | All characters render correctly | PASS |\n| ISO\u20118859\u20111 legacy document | Document uses extended Latin only | Convert to PDF | Accented characters render correctly | PASS |\n| Windows\u20111252 document with typographic symbols | Document contains \u20ac, \u2022, \u2122, \u2019 | Convert to PDF | Symbols render correctly | PASS |\n| Unknown/unsupported encoding | Charset meta declares \"Shift_JIS\" | Convert to PDF | Fallback to UTF-8; warning logged; re\u2011encoded characters may look wrong | PASS (or FAIL if no fallback) |\n| No encoding declaration | No `<meta charset>` or `Content-Type` | Convert to PDF | Assume UTF\u20118; document renders as ASCII | PASS |\n| Huge UTF\u20118 document | File >1 MB with heavy Unicode | Convert to PDF | Conversion completes; no out\u2011of\u2011memory error | PASS (or FAIL if timeout) |\n| Corrupted encoding declaration | `<meta charset=\"bxor\">` | Convert to PDF | Fallback to UTF\u20118; warning logged | PASS |",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "UTF-8",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "ISO-8859-1",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "exception",
+                "passed": true
+              }
+            ]
+          }
+        },
+        {
+          "case": 5,
+          "input": "Feature: page breaks. The CSS property page-break-before, page-break-after, page-break-inside are supported. Multiple page breaks can be adjacent.",
+          "with_skill": {
+            "output": "Based on the limited specification provided (only page breaks are mentioned), I will design test cases for **page breaks only**, as the skill's decision rules state: \"Do not create cases for features not mentioned in the specification.\"\n\nHowever, I note the specification only mentions page breaks. For completeness, I will still produce a partial scenario matrix and test case details as per the skill's output requirements, acknowledging that only one feature is specified.\n\n---\n\n## Scenario Matrix\n\n| Feature     | Positive | Negative | Boundary | Exception |\n|-------------|----------|----------|----------|-----------|\n| Page Breaks | \u2714        | \u2714        | \u2714        | \u2714         |\n\n---\n\n## Test Case Details\n\n#### Test Case ID: PB-POS-01\n- **Feature:** Page Breaks\n- **Category:** Positive\n- **Input:**\n  ```html\n  <div style=\"page-break-before: always;\">Page 1</div>\n  <div style=\"page-break-after: always;\">Page 2</div>\n  <div style=\"page-break-inside: avoid;\">Content that should not break</div>\n  ```\n- **Expected Result:** PDF renders three pages. Page 1 starts with a break before the first div. Page 2 is followed by a break after it. The third div's content stays on one page (no mid-element break).\n\n#### Test Case ID: PB-NEG-01\n- **Feature:** Page Breaks\n- **Category:** Negative\n- **Input:**\n  ```html\n  <div style=\"page-break-before: bogus;\">Content</div>\n  ```\n- **Expected Result:** Converter ignores the invalid value for `page-break-before` and does not insert a page break. No error is raised (graceful degradation).\n\n#### Test Case ID: PB-NEG-02\n- **Feature:** Page Breaks\n- **Category:** Negative\n- **Input:**\n  ```html\n  <div style=\"page-break-after: invalid;\">Content</div>\n  ```\n- **Expected Result:** Converter ignores the invalid value for `page-break-after` and does not insert a page break. No error is raised (graceful degradation).\n\n#### Test Case ID: PB-NEG-03\n- **Feature:** Page Breaks\n- **Category:** Negative\n- **Input:**\n  ```html\n  <div style=\"page-break-inside: never;\">Content</div>\n  ```\n- **Expected Result:** `never` is not a supported value for `page-break-inside` (valid values: `auto`, `avoid`). Converter ignores the unsupported value and uses default `auto`.\n\n#### Test Case ID: PB-BND-01\n- **Feature:** Page Breaks\n- **Category:** Boundary\n- **Input:**\n  ```html\n  <div style=\"page-break-before: always;\">Page 1</div>\n  <div style=\"page-break-before: always;\">Page 2</div>\n  <!-- ... 48 more such divs, total 50 -->\n  ```\n- **Expected Result:** PDF renders 50 pages, each starting with a page break. Performance is acceptable (within specification limits).\n\n#### Test Case ID: PB-BND-02\n- **Feature:** Page Breaks\n- **Category:** Boundary\n- **Input:**\n  ```html\n  <div style=\"page-break-before: always;\">Page 1</div>\n  <div style=\"page-break-before: always;\">Page 2</div>\n  <!-- ... 48 more such divs, total 50 -->\n  <div style=\"page-break-before: always;\">Page 51</div>\n  ```\n- **Expected Result:** PDF renders 51 pages. Additional page break beyond specified boundary (50) still works, but may indicate that the 50 boundary is not strict. (Note: The spec says \"no defined maximum count\", but boundary test puts it at 50 as per references/feature-boundaries.md.)\n\n#### Test Case ID: PB-EXC-01\n- **Feature:** Page Breaks\n- **Category:** Exception\n- **Input:**\n  ```html\n  <span style=\"page-break-before: always;\">Inline element</span>\n  ```\n- **Expected Result:** Converter handles gracefully. Since `page-break-before` is typically applied to block-level elements, applying to an inline `<span>` may be ignored or cause unexpected layout. Expected: no error, but break may not occur (or an error if strict).\n\n#### Test Case ID: PB-EXC-02\n- **Feature:** Page Breaks\n- **Category:** Exception\n- **Input:**\n  ```html\n  <div style=\"display: inline; page-break-before: always;\">Inline-block content</div>\n  ```\n- **Expected Result:** Page break property applied to an element with `display: inline` is unsupported. Converter should fallback (no break) or produce a warning.\n\n---\n\nThis completes the output for the given specification (page breaks only). For a broader coverage, the specification would need to include other features.",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "positive",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "page-break-before",
+                "passed": true
+              },
+              {
+                "kind": "not_contains",
+                "value": "negative",
+                "passed": false
+              }
+            ]
+          },
+          "without_skill": {
+            "output": "# Test Case Design: HTML to PDF Converter - Page Break Feature\n\n## Test Categories\n\n### Positive Tests\n\n**TP_PB_01: Simple page-break-before**\n- Input: `<div style=\"page-break-before: always\">Page 2</div>`\n- Expected: Content starts on new page\n- Type: Positive\n\n**TP_PB_02: Simple page-break-after**\n- Input: `<div style=\"page-break-after: always\">Page 1</div><div>Page 2</div>`\n- Expected: Second div on new page\n- Type: Positive\n\n**TP_PB_03: page-break-inside: avoid**\n- Input: `<div style=\"page-break-inside: avoid\">Long content...</div>`\n- Expected: Entire div on same page (or moved if it fits on next page)\n- Type: Positive\n\n**TP_PB_04: Adjacent multiple page-break-before**\n- Input: `<div style=\"page-break-before: always\">A</div><div style=\"page-break-before: always\">B</div>`\n- Expected: A on new page, B on new page (two blank pages may appear)\n- Type: Positive\n\n**TP_PB_05: Adjacent multiple page-break-after**\n- Input: `<div>A</div><div style=\"page-break-after: always\">B</div><div style=\"page-break-after: always\">C</div><div>D</div>`\n- Expected: A on page 1, B on page 2, C on page 3, D on page 4\n- Type: Positive\n\n---\n\n### Negative Tests\n\n**TN_PB_01: Invalid page-break value**\n- Input: `<div style=\"page-break-before: maybe\">Content</div>`\n- Expected: No page break occurs; fallback to normal flow\n- Type: Negative\n\n**TN_PB_02: Non-existent property**\n- Input: `<div style=\"page-break-inline: always\">Content</div>`\n- Expected: Property ignored, no page break\n- Type: Negative\n\n**TN_PB_03: Typo in property name**\n- Input: `<div style=\"page-brake-before: always\">Content</div>`\n- Expected: Property ignored, no page break\n- Type: Negative\n\n---\n\n### Boundary Tests\n\n**TB_PB_01: page-break-before with auto (default)**\n- Input: `<div style=\"page-break-before: auto\">Content</div>`\n- Expected: No forced break; browser determines breaks\n- Type: Boundary\n\n**TB_PB_02: page-break-after with auto**\n- Input: `<div style=\"page-break-after: auto\">Content</div>`\n- Expected: No forced break\n- Type: Boundary\n\n**TB_PB_03: page-break-inside with auto**\n- Input: `<div style=\"page-break-inside: auto\">Long content...</div>`\n- Expected: Normal wrapping, may break inside\n- Type: Boundary\n\n**TB_PB_04: Empty container with page break**\n- Input: `<div style=\"page-break-before: always\"></div>`\n- Expected: Creates blank page\n- Type: Boundary\n\n**TB_PB_05: page break on inline element**\n- Input: `<span style=\"page-break-before: always\">Text</span>`\n- Expected: May not work (only works on block-level); no guaranteed break\n- Type: Boundary\n\n---\n\n### Exception Tests\n\n**TE_PB_01: Overlapping page breaks on same element**\n- Input: `<div style=\"page-break-before: always; page-break-after: always\">Content</div>`\n- Expected: Both applied; likely blank pages before and after\n- Type: Exception\n\n**TE_PB_02: page-break-inside: avoid with insufficient space**\n- Input: `<div style=\"page-break-inside: avoid; height: 1200px\">Very tall content that cannot fit on one page</div>`\n- Expected: Content may overflow or break despite avoid\n- Type: Exception\n\n**TE_PB_03: Extremely many adjacent page breaks**\n- Input: 10 `<div>` elements each with `page-break-before: always`\n- Expected: 11+ blank pages; should not crash converter\n- Type: Exception\n\n**TE_PB_04: Page break on absolutely positioned element**\n- Input: `<div style=\"position: absolute; page-break-before: always\">Content</div>`\n- Expected: May not work due to positioning; unpredictable\n- Type: Exception\n\n**TE_PB_05: Page break inside table cell**\n- Input: `<table><tr><td style=\"page-break-before: always\">Cell content</td></tr></table>`\n- Expected: May not work within table cells\n- Type: Exception\n\n---\n\n## Scenario Matrix\n\n| ID | Scenario | page-break-before | page-break-after | page-break-inside | Adjacent | Expected Behavior |\n|----|----------|-------------------|------------------|-------------------|----------|-------------------|\n| SM1 | Simple before | always | auto | auto | No | Break before element |\n| SM2 | Simple after | auto | always | auto | No | Break after element |\n| SM3 | Both before and after | always | always | auto | No | Two breaks (blank pages might appear) |\n| SM4 | Avoid break inside | auto | auto | avoid | No | Content kept together |\n| SM5 | Adjacent before breaks | always(x2) | auto | auto | Yes | Two consecutive breaks |\n| SM6 | Adjacent after breaks | auto | always(x2) | auto | Yes | Two consecutive breaks |\n| SM7 | Mix of before/after adjacent | always | always(x2) | auto | Yes | Three breaks total |\n| SM8 | Avoid inside with natural break | auto | auto | avoid | Natural page break | Try to keep together; if impossible, break anyway |\n| SM9 | All three set | always | always | avoid | No Conflicting; likely before and after take precedence |\n| SM10 | Nested page breaks | always on parent | auto | avoid | Internal child also has `page-break-before: always` | Both breaks apply; child on new page after parent's break |\n\n---\n\n## Expected Output Format\n\nEach test result should include:\n1. Number of pages generated\n2. Whether content from specified elements appears on intended pages\n3. Any warnings/errors in conversion log\n4. Time to conversion (for performance profiling in large file scenarios)",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "positive",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "page-break-before",
+                "passed": true
+              },
+              {
+                "kind": "not_contains",
+                "value": "negative",
+                "passed": false
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "publish": {
+    "status": 201,
+    "body": {
+      "name": "designing-html-to-pdf-test-scenarios",
+      "version": 1,
+      "sha256": "4b82cacb2ad8a05a8807d5445b7e9d11694fc1188b7a31fcd3b7106bef0cddeb",
+      "checks": [
+        {
+          "check": "frontmatter",
+          "passed": true,
+          "detail": "YAML frontmatter between --- lines"
+        },
+        {
+          "check": "name format",
+          "passed": true,
+          "detail": "name 'designing-html-to-pdf-test-scenarios': lowercase letters, digits and single hyphens, at most 64"
+        },
+        {
+          "check": "name matches folder",
+          "passed": true,
+          "detail": "name 'designing-html-to-pdf-test-scenarios', folder 'designing-html-to-pdf-test-scenarios'"
+        },
+        {
+          "check": "description",
+          "passed": true,
+          "detail": "379 characters (1 to 1024)"
+        },
+        {
+          "check": "body length",
+          "passed": true,
+          "detail": "48 lines (at most 500; move detail into references/)"
+        },
+        {
+          "check": "MAF loads it",
+          "passed": true,
+          "detail": "MAF FileSkillsSource loaded it"
+        },
+        {
+          "check": "security scan",
+          "passed": true,
+          "detail": "no findings"
+        }
+      ]
+    }
+  }
+}

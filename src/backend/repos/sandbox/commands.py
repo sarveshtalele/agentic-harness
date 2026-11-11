@@ -6,10 +6,12 @@ import shutil
 import subprocess
 from pathlib import Path
 from backend.config import project_dir, sandbox_dir
+from backend.core import tracing
 from backend.repos.sandbox.env import clean_sandbox_env
 from backend.repos.sandbox.setup import ensure_sandbox
 
 
+@tracing.traced("sandbox.command", "project_id", "timeout")  # no argv: an argument may hold a value the span must not keep
 def execute_command(
     project_id: str,
     command: str | list[str],

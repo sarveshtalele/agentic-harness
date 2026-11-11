@@ -1,11 +1,14 @@
 """QE Traceability Stage: Building requirement-to-test matrix, execution summary, and confidence capping."""
 from __future__ import annotations
 
+from pathlib import Path
+
 from backend.core import documents
 from backend.maf.engine import RunContext
 from backend.maf.workflows.qe.common import _cell
 from backend.maf.workflows.qe.heal import _records
 from backend.qe import confidence, execution, trace
+from backend.qe.emit.subject import exercises_repository
 
 
 import re
@@ -29,6 +32,9 @@ async def qe_trace(rc: RunContext, state: dict) -> dict:
     failed = [c for suite in results for c in suite["cases"] if c["status"] == "failed"]
     if failed and summary["passed"] == 0 and all(execution.classify_failure(c["message"]) == "ENVIRONMENT" for c in failed):
         summary |= {"verdict": "INCONCLUSIVE", "reason": "Tests could not run in this environment"}
+    real = {t["path"] for t in state.get("tests", []) if state.get("worktree") and exercises_repository(Path(state["worktree"]), t["path"])}
+    if reason := trace.no_product_run(state.get("mode", ""), matrix, real):
+        summary |= {"verdict": "INCONCLUSIVE", "reason": reason}
     summary["failure_classes"] = execution.failure_counts(results)
     records = _records(results, state.get("defect_notes", {}), {r["test"].split("::")[-1] for r in state.get("defect_records", []) if r["healed"]})
     defect_doc = documents.create(rc.project_id, "defect_report", "Repository Defect Triaging & Anomaly Report", _defect_body(records), "system", data=records, run_id=rc.run_id)
