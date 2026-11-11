@@ -12,6 +12,7 @@ class ScriptedClient(FunctionInvocationLayer, ChatMiddlewareLayer, BaseChatClien
         super().__init__()
         self.rules = rules
         self.calls: list[str] = []
+        self.tools: list[list[str]] = []  # the tool names offered on each call
 
     def _reply(self, messages, options) -> str:
         def seen(m) -> str:  # text plus any tool results, so a test can check what the model received from a tool
@@ -20,6 +21,7 @@ class ScriptedClient(FunctionInvocationLayer, ChatMiddlewareLayer, BaseChatClien
 
         text = str(options.get("instructions") or "") + "\n" + "\n".join(seen(m) for m in messages)
         self.calls.append(text)
+        self.tools.append([getattr(t, 'name', str(t)) for t in options.get('tools') or []])
         for needle, reply in self.rules:
             if needle in text:
                 return reply(text) if callable(reply) else reply

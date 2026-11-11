@@ -74,6 +74,7 @@ def backend_entries(root: Path, deploy_dir: Path, tracked: set[Path] | None = No
         ".deployment": deploy_dir / "kudu.deployment",
         "web.config": deploy_dir / "backend_web.config",
         "scripts/env_check.py": root / "scripts" / "env_check.py",  # run in Kudu SSH to check the App Service settings
+        "scripts/sqlite_to_postgres.py": root / "scripts" / "sqlite_to_postgres.py",  # once, to move an old SQLite store (guide section 11)
     }
     src_backend_files = collect_folder(root / "src/backend", root, tracked)
     entries.update(src_backend_files)

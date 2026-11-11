@@ -26,7 +26,7 @@ UI, API = "http://127.0.0.1:3011", "http://127.0.0.1:8011"
 ADMIN = {"username": "smoke-admin", "password": secrets.token_urlsafe(18)}
 MEMBER = {"username": "smoke-member", "password": secrets.token_urlsafe(18)}
 PAGES = [
-    ("Projects", "Projects", "/"),
+    ("Projects", "Projects", "/projects"),
     ("Gate Approvals", "Approvals", "/approvals"),
     ("AI Specialist Roster", "Agents", "/agents"),
     ("Observability & Telemetry", "Observability", "/observability"),
@@ -108,7 +108,7 @@ def test_main_pages_open_and_show_their_empty_state(browser):
     for link, heading, href in PAGES:
         tab.locator(f"a[href='{href}']").first.click()
         expect(tab.get_by_role("heading", name=heading, exact=True) if heading else tab.get_by_role("heading", level=1)).to_be_visible(timeout=20_000)  # the docs page is titled by its article
-    tab.goto(UI)  # the docs section has its own frame, so go back to the workspace by address
+    tab.goto(f"{UI}/projects")  # the docs section has its own frame, so go back to the workspace by address
     tab.locator("a[href='/approvals']").first.click()
     expect(tab.get_by_text("Nothing needs your approval").or_(tab.locator("article, table, [data-testid='approval-card']").first)).to_be_visible(timeout=20_000)
     tab.locator("a[href='/observability']").first.click()
@@ -140,3 +140,22 @@ def test_a_non_admin_is_refused_on_users(browser, app):
     assert status == 403
     assert tab.evaluate("fetch('/api/logs').then(r => r.status)") == 403
     tab.context.close()
+
+
+def test_the_home_page_is_a_public_landing_page_with_downloads_and_sign_in(browser):
+    context = browser.new_context(viewport={"width": 1440, "height": 900})
+    tab = context.new_page()
+    tab.goto(UI)
+    expect(tab).not_to_have_url(re.compile(r"/login$"))
+    expect(tab.get_by_role("heading", level=1)).to_be_visible(timeout=30_000)
+    for os_name in ("macos", "windows"):  # no installer is published in this test, so each says so instead of linking
+        expect(tab.get_by_test_id(f"download-{os_name}")).to_contain_text("installer is published yet")
+    tab.get_by_test_id("landing-sign-in").first.click()
+    expect(tab).to_have_url(re.compile(r"/login$"))
+    tab.get_by_label("Username").fill(ADMIN["username"])
+    tab.get_by_label("Password").fill(ADMIN["password"])
+    tab.get_by_role("button", name="Sign in").click()
+    expect(tab).to_have_url(re.compile(r"/projects$"), timeout=30_000)
+    tab.goto(UI)
+    expect(tab.get_by_test_id("landing-open").first).to_be_visible(timeout=15_000)
+    context.close()

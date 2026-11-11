@@ -23,7 +23,7 @@ const navSections: NavSection[] = [
   {
     title: "WORKSPACE & AGENTS",
     items: [
-      { href: "/", label: "Projects", icon: FolderKanban },
+      { href: "/projects", label: "Projects", icon: FolderKanban },
       { href: "/harness", label: "Autonomous QE Harness", icon: Terminal },
       { href: "/approvals", label: "Gate Approvals", icon: CheckSquare, badge: true },
       { href: "/agents", label: "AI Specialist Roster", icon: Bot },
@@ -76,7 +76,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <aside className={`sticky top-0 flex h-screen shrink-0 flex-col border-r border-slate-200 bg-white p-3 transition-all dark:border-slate-800 dark:bg-[#060a17] ${collapsed ? "w-16" : "w-60"}`}>
         <div className="mb-4 flex items-center justify-between border-b border-slate-200 pb-3 dark:border-slate-800">
           {!collapsed && (
-            <Link href="/" className="flex items-center gap-2.5 px-1">
+            <Link href="/projects" className="flex items-center gap-2.5 px-1">
               <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white"><ShieldCheck className="h-4 w-4" /></span>
               <span className="text-base font-bold">Agentic QE Platform</span>
             </Link>

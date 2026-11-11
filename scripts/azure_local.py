@@ -59,7 +59,11 @@ def main() -> int:
     subprocess.run([sys.executable, str(ROOT / "scripts" / "package_azure_kudu.py")], cwd=ROOT, check=True, timeout=900)
     api_dir, ui_dir = _unpack("backend"), _unpack("frontend")
     base = {k: v for k, v in os.environ.items() if not k.startswith("ATLAS_")}  # only what App Service would set
-    api_env = {**base, "ATLAS_PROFILE": "web", "ATLAS_HOME": str(WORK / "backend" / "home"), "PORT": api_port,
+    sys.path.insert(0, str(ROOT))
+    from scripts import pg_local  # stands in for Azure Database for PostgreSQL (atlas-database-url in Key Vault)
+
+    database = pg_local.start(WORK / "postgres")
+    api_env = {**base, "ATLAS_PROFILE": "web", "ATLAS_HOME": str(WORK / "backend" / "home"), "PORT": api_port, "ATLAS_DATABASE_URL": database,
                "ATLAS_ADMIN_USERNAME": user, "ATLAS_ADMIN_PASSWORD": password, "ATLAS_ALLOWED_ORIGINS": f"http://127.0.0.1:{ui_port},http://localhost:{ui_port}"}
     ui_env = {**base, "ATLAS_HOME": str(WORK / "frontend" / "home"), "PORT": ui_port, "ATLAS_BACKEND_URL": f"http://127.0.0.1:{api_port}"}
     node = shutil.which("node")

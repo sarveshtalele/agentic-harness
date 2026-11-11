@@ -20,7 +20,7 @@ def get(path: str):
 
 
 def test_f1_clone_repo_by_shorthand(page):
-    page.goto(UI)
+    page.goto(f"{UI}/projects")
     page.get_by_role("button", name="New project").click()
     dialog = page.get_by_role("dialog")
     dialog.get_by_label("Name").fill("Personal Finance MCP")

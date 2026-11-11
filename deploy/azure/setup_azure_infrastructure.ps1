@@ -13,6 +13,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+$KeyVault = "kv-agentic-harness"  # holds atlas-admin-password, atlas-secret-key, atlas-database-url
 
 Write-Host "==================================================================" -ForegroundColor Cyan
 Write-Host " 1-Time Azure Infrastructure Setup" -ForegroundColor Cyan
@@ -56,7 +57,7 @@ az webapp config appsettings set `
     WEBSITES_ENABLE_APP_SERVICE_STORAGE="true" `
     ATLAS_HOME="/home/atlas" `
     ATLAS_DATA_DIR="/home/atlas/data" `
-    ATLAS_SQLITE_JOURNAL="DELETE" `
+    ATLAS_KEY_VAULT_URL="https://$KeyVault.vault.azure.net" `
     ATLAS_ALLOWED_HOSTS="$BackendApp.azurewebsites.net" `
     ATLAS_ALLOWED_ORIGINS="https://$FrontendApp.azurewebsites.net" `
     SCM_DO_BUILD_DURING_DEPLOYMENT="true" `

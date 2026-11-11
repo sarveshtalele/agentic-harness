@@ -5,6 +5,8 @@ mcp>=2.2,<3  # MCPStdioTool/MCPStreamableHTTPTool need it; agent-framework-core 
 agent-framework-tools==1.0.0b261030  # MAF's shell tooling (agent_framework_tools.shell), released with core 1.24.0
 opentelemetry-sdk==1.45.2
 opentelemetry-exporter-otlp-proto-grpc==1.45.2
+psycopg[binary]>=3.2,<4  # PostgreSQL only (MASTER_PLAN Part 3, G5)
+psycopg-pool>=3.2,<4
 fastapi>=0.115,<1
 uvicorn[standard]>=0.30,<1
 python-multipart>=0.0.9,<1

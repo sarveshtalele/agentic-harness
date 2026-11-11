@@ -22,7 +22,7 @@ from backend.core.security import redact, sha256
 from backend.db import db, new_id, now, row, rows
 from backend.maf import engine, governance, harness, llm, skill_chat, tools
 from backend.maf import runtime as agents
-from backend.maf.harness_kit import prompt_hooks
+from backend.maf.harness_kit import active_command, prompt_hooks
 from backend.maf.harness_kit.nudges import HideLoopNudges
 
 router = APIRouter()
@@ -91,7 +91,10 @@ async def agui(agent_key: str, request: Request):
             # plan H3: plugins' SessionStart and UserPromptSubmit hooks see the human's own text, before any expansion
             hooked = None if body.get("resume") else await prompt_hooks.submitted(project_id, thread_id, auth.acting_user(project_id), clean, first)
             command = plugins.expand_slash(clean)  # the model gets the command's instructions; the chat keeps what the user typed
-            last_user["content"] = prompt_hooks.for_model(command or clean, hooked) if hooked else (command or clean)
+            # a plugin command becomes the thread's active command, given in the instructions on every call (never compacted)
+            pinned = active_command.remember(harness.state_dirs(project_id, auth.acting_user(project_id))["tools"], thread_id, command)
+            text = clean if pinned else (command or clean)
+            last_user["content"] = prompt_hooks.for_model(text, hooked) if hooked else text
     encoder = EventEncoder()
 
     async def stream():

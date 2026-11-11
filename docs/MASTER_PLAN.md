@@ -529,3 +529,82 @@ Owner request:
 1. The registry core, sync, API, UI and tests: now, in files no other writer touches.
 2. Harness wiring (context provider and the two tools): after H2 and H3 land.
 3. The discovery accuracy measure on the real model closes it.
+
+# Part 3 (owner goal, 2026-11-11): an accurate harness end to end, PostgreSQL only, Azure standard
+
+**Owner goal.** The harness acts like Claude Code in real time. It develops a working application end to end, and it runs the whole agentic-qe cycle on a real repository. Every feature has evidence: skills, subagents, Skill Studio, the UI.
+
+The deployment standard becomes **PostgreSQL plus Blob Storage in East US 2**. SQLite is removed now, so there is no migration later. Work goes in the order below. The harness comes first.
+
+## G1. Harness accuracy on plugin commands (in progress)
+- **Root cause of the stop at Gate 1:** `plan.md`, "Plugin command focus".
+- **Done when:** a live `/agentic-qe:qe-start` … `qe-sign` cycle on `personal-finance-mcp` gets Gates 0 to 5 recorded by the plugin itself, each gate's documents are on disk and pass the plugin's validators, and the evidence is in `docs/evidence/runs/<date>-harness-plugin/`.
+- **Also:** rerun the 13 harness stories and the status-line test on the real model, and produce one HTML evidence report.
+
+## G2. The harness builds an application end to end
+- **Story:** from a short requirement, in an empty repository, the harness plans with todos, writes the code and tests in the workspace (each write approved), runs the tests with the shell, fixes failures, and commits on a work branch. The run has to finish with green tests that the harness ran.
+- **Evidence:** a live browser run with screenshots and the transcript.
+- **Done when:** the generated app's tests pass when run again outside the harness.
+
+## G3. Skills and subagents from the harness
+- **Skills:** `create_skill` exists.
+- **Subagents:** a harness tool creates a project subagent as a plugin-style `agents/<name>.md`, with read-only tools unless approved. It is registered in the capability registry and usable at once as a MAF background agent.
+- **Proof:** both are made from chat and used in the same thread.
+
+## G4. Skill Studio requirements page (BRD style, task based)
+- The plan step becomes an editable document page, like the BRD page. Its sections:
+  - purpose;
+  - input contract;
+  - outputs;
+  - tasks, as a checklist with an owner (skill, script or subagent);
+  - subagents;
+  - formats;
+  - eval cases with their assertions.
+- Every edit is a new version (SHA-256, author). Approval hashes the edited version. Generation reads only the approved version.
+- The page shows the risk of negative assertions before approval (from the H5 findings).
+
+## G5. PostgreSQL only (SQLite removed)
+- **Database layer:** `backend/db` moves to psycopg 3 (`psycopg[binary]`), one connection pool, and `ATLAS_DATABASE_URL` required everywhere. A missing or unreachable database is a clear startup error.
+- **SQL changes:**
+  - `?` becomes `%s`;
+  - `INSERT OR IGNORE` and `INSERT OR REPLACE` become `ON CONFLICT`;
+  - `BEGIN IMMEDIATE` becomes row locks (`SELECT … FOR UPDATE`) or advisory locks;
+  - `sqlite_master` becomes `information_schema`;
+  - JSON and time columns are checked one by one.
+- **Migrations:** the `.sql` files are converted to PostgreSQL. A fresh database is built from them, and a test proves every table exists.
+- **The ledger:** the hash chain is kept, and appends are serialised with an advisory lock.
+- **Data move:** `scripts/sqlite_to_postgres.py` copies an existing store once, then re-verifies the ledger chain and the document SHA-256 values. It is the only code that still reads SQLite, and it is removed after the owner moves the data.
+- **Tests:** each test session creates and drops its own database. CI installs PostgreSQL on Ubuntu, macOS and Windows.
+- **Local:** PostgreSQL 16 from the official installer, Homebrew or Docker. `scripts/dev.py setup` checks for it and says how to get it.
+- **Desktop (owner decision D-P1):** the default is a bundled PostgreSQL (the `embedded-postgres` binaries) started by the Electron main process on a free local port, with data in the user's app folder.
+- **Removal:** the SQLite code and `ATLAS_SQLITE_JOURNAL` are removed. The exact files are listed for the owner's yes before deletion.
+
+## G6. Blob Storage for files
+- **What moves:** documents, uploads, evidence, published skills and installers move to Blob containers through one storage module.
+- **Credentials:** a managed identity on Azure; local folders when `ATLAS_STORAGE_URL` is not set.
+- **What stays:** workspaces and git clones stay on the instance's disk, because git needs a real filesystem. They are rebuilt from the repository when missing.
+
+## G7. Key Vault for secrets
+- **On Azure,** when `ATLAS_KEY_VAULT_URL` is set, the backend reads `atlas-admin-password`, `atlas-secret-key` and `atlas-database-url` from Key Vault. It authenticates with the App Service managed identity through the platform token endpoint, using `httpx` (already installed); no new SDK is added.
+- **Locally,** `.env` stays. A secret is never logged, and never put in argv or a URL.
+- **Tests** cover the token and secret requests against a local fake HTTP server.
+
+## G8. Desktop installers in GitHub CI
+- **On push** to `feature/maf-harness-platform`, `desktop.yml` builds the macOS DMG (arm64 and x64) and the Windows MSI and uploads them as workflow artifacts with `latest-<os>.json`.
+- **On a `v*` tag,** it also creates a GitHub Release with the installers and the SHA-256 values.
+- Code signing waits for the owner's certificates (unsigned builds are labelled so).
+
+## G9. Azure standard guide (East US 2)
+- **What it covers:** `docs/AZURE_DESKTOP_TARGET_ARCHITECTURE.md` becomes the one standard: App Service plan B1 (two apps), PostgreSQL Flexible Server Burstable B1ms with 32 GiB, Blob Storage (Standard LRS, Hot), Key Vault Standard, and optional Application Insights.
+- **Format:** every portal step, settings from Key Vault, zip deployment only, and a monthly cost table from the Azure pricing calculator for East US 2, with the date the prices were read.
+
+## Order
+1. G1.
+2. G5 and G6, together, because the storage layer and the database layer both touch every module.
+3. G7.
+4. G8.
+5. G4.
+6. G2 and G3.
+7. G9, kept current as each item lands.
+
+After each item: the offline suite, the gates, lint, a browser check, and evidence. Commit only on the owner's word.

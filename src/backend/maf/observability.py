@@ -34,9 +34,9 @@ def record_tool(agent: str, project_id: str | None, run_id: str | None, source: 
     trace_id, span_id = span or (None, None)
     with db() as con:
         return con.execute(
-            "INSERT INTO tool_calls (agent, project_id, run_id, source, tool, kind, arguments, latency_ms, status, error, created_at, trace_id, span_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            "INSERT INTO tool_calls (agent, project_id, run_id, source, tool, kind, arguments, latency_ms, status, error, created_at, trace_id, span_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?) RETURNING id",
             (agent, project_id, run_id, source, tool, kind, redact(json.dumps(arguments, default=str))[:4000], latency_ms, "error" if error else "ok", redact(error)[:1000], now(), trace_id, span_id),
-        ).lastrowid
+        ).fetchone()[0]
 
 
 # One normalized row per record: ts, s (source rank, breaks ties), id (that source's row id), kind, level, project_id, run_id, tokens, hay (text a search looks in).

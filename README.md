@@ -28,6 +28,7 @@ Every number it shows comes from a stored measurement, or it says "not measured"
 | Python | 3.12 or newer (tested on 3.14) | `python3 --version` (Windows: `py --version`) |
 | Node.js | 22.18 or newer (the agentic-qe plugin runs TypeScript natively) | `node --version` |
 | Git | any | `git --version` |
+| PostgreSQL | 16 or newer, installed (the app starts its own cluster in `data/postgres`) | macOS: `brew install postgresql@17`; Windows: the installer from postgresql.org; Linux: `apt install postgresql` |
 | A model | any OpenAI-compatible endpoint | Set on the Settings page after the first sign-in |
 
 ## Quick start: macOS
@@ -43,9 +44,12 @@ Open `.env` and set `ATLAS_ADMIN_USERNAME` and `ATLAS_ADMIN_PASSWORD`. The passw
 
 ```bash
 python3 scripts/dev.py setup
+python3 scripts/dev.py db
 python3 scripts/dev.py env-check --env local
 python3 scripts/dev.py up
 ```
+
+`db` starts a local PostgreSQL in `data/postgres` and adds its URL to `.env` (it never prints the URL). Run it again after a restart. If you had an older SQLite store, `python3 scripts/dev.py db --import-sqlite` copies it in and verifies the ledger chains and document hashes.
 
 `setup` creates `.venv`, installs Python and Node packages, and installs Playwright's Chromium. `up` builds the UI, starts both servers and opens <http://127.0.0.1:3000>.
 
@@ -67,6 +71,7 @@ In `.env`, set `ATLAS_ADMIN_USERNAME` and `ATLAS_ADMIN_PASSWORD` (12+ characters
 
 ```powershell
 py scripts\dev.py setup
+py scripts\dev.py db
 py scripts\dev.py env-check --env local
 py scripts\dev.py up
 ```
@@ -113,7 +118,7 @@ python scripts/dev.py azure-local --check
 
 The first command builds `dist/azure_backend.zip` and `dist/azure_frontend.zip`. The second runs both zips locally through their own startup scripts in the web profile.
 
-Then follow **`docs/AZURE_POC_PORTAL_GUIDE.md`**: one B1 plan in **East US 2**, two web apps, settings, Kudu `ZipDeployUI`, access restriction, first sign-in, members.
+Then follow **`docs/AZURE_DESKTOP_TARGET_ARCHITECTURE.md`**, the standard guide: East US 2, one B1 plan with two web apps, PostgreSQL Flexible Server B1ms, Blob Storage, Key Vault, Kudu `ZipDeployUI`, about $28.50 a month.
 
 ## Desktop app
 
@@ -147,7 +152,7 @@ Then `cd apps/desktop`, `npm install` and `npx electron .`.
 |---|---|
 | `docs/PLAN_NEXT_STEPS.md` | Current status and the ordered next steps |
 | `docs/MASTER_PLAN.md` | The approved plan: Part 2 (H1 to H9), Phase Q (QE correctness), Phase R (capability registry) |
-| `docs/AZURE_POC_PORTAL_GUIDE.md` | Azure deployment by zip, step by step |
+| `docs/AZURE_DESKTOP_TARGET_ARCHITECTURE.md` | The standard Azure deployment (PostgreSQL, Blob, Key Vault, East US 2) with costs and a UI tour |
 | `docs/DESKTOP_RELEASE_GUIDE.md` | Building and publishing the desktop installers |
 | `docs/AGENT_SKILLS_AND_MAF_SPECIFICATION.md` | How MAF is used: agents, harness, skills, observability |
 | `docs/USER_STORIES.md`, `docs/HARNESS_USER_STORIES.md` | The stories the end-to-end tests prove |

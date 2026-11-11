@@ -14,7 +14,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
-  const open = pathname === "/login";
+  const open = pathname === "/login" || pathname === "/"; // the landing page and sign-in need no session
   useEffect(() => {
     if (open) return;
     api("/auth/me").then(setUser).catch(() => router.replace("/login"));

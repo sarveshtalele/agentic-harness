@@ -11,6 +11,7 @@ from backend.db import db, rows
 from backend.maf import llm
 from backend.maf.runtime import AgentCall
 
+from tests.helpers_db import every_table
 from tests.scripted_client import ScriptedClient
 from tests.helpers_errors import Designer, run_to_design
 
@@ -27,7 +28,7 @@ def test_a_secret_in_a_rejected_reply_reaches_no_file_log_table_or_response(clie
     saved = config.RUNS / run["id"] / failure["reply_file"]
     assert saved.is_file() and "sk-Z" in saved.read_text(encoding="utf-8"), "the reply is saved, with the secret masked"
     with db() as con:
-        tables = {t["name"] for t in rows(con.execute("SELECT name FROM sqlite_master WHERE type='table'"))}
+        tables = set(every_table())
         stored = json.dumps({t: rows(con.execute(f"SELECT * FROM {t}")) for t in sorted(tables - {"users", "sessions"})}, default=str)
     files = "".join(p.read_text(encoding="utf-8", errors="ignore") for p in (config.RUNS / run["id"]).rglob("*") if p.is_file())
     api = client.get(f"/api/runs/{run['id']}").text

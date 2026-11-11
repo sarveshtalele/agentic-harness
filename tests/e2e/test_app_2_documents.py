@@ -23,7 +23,7 @@ def test_06_ba_workflow_with_template_gherkin_and_gates(page):
     page.locator('input[name="doc-title"]').fill("Inventory BRD")
     page.get_by_role("button", name="Generate Requirements Document").click()
     wait_card(page, "Gate 0")
-    page.goto(UI)
+    page.goto(f"{UI}/projects")
     expect(page.get_by_test_id("stat-need-approval")).to_contain_text("1")
     page.get_by_role("link", name=re.compile("Gate Approvals")).click()
     expect(page.get_by_test_id("approvals-summary")).to_contain_text("1 project needs your approval")

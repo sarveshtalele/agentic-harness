@@ -4,7 +4,7 @@ This guide puts a new version of the desktop app where users can download it fro
 
 | Step | Where | Result |
 |---|---|---|
-| 1. Build | GitHub Actions, workflow `desktop` | `desktop-macos-latest` and `desktop-windows-latest` artifacts |
+| 1. Build | GitHub Actions, workflow `desktop` (every push to the feature branch that touches the app, every tag) | three installer artifacts plus `desktop-latest-json`; a `v*` tag also makes a GitHub Release |
 | 2. Check | Your computer | SHA-256 values match the manifests |
 | 3. Publish | Azure portal, Storage account | DMG, zip, MSI and `latest.json` in the `downloads` container |
 | 4. Point the UI at it | Azure portal, UI web app | `ATLAS_DOWNLOADS_URL` app setting |
@@ -13,14 +13,20 @@ This guide puts a new version of the desktop app where users can download it fro
 ## 1. Build the installers in GitHub Actions
 
 1. On GitHub, open the repository, then **Actions**, then the **desktop** workflow.
-2. Select **Run workflow**, choose the branch `feature/maf-harness-platform` (or a `v*` / `desktop-*` tag), then **Run workflow**. Pushing a tag such as `desktop-0.2.0` also starts it.
-3. Wait for both jobs to finish:
-   - `macos-latest` builds the DMG and zip;
-   - `windows-latest` builds the MSI.
-4. Open the finished run. Under **Artifacts**, download `desktop-macos-latest` and `desktop-windows-latest`.
-5. Unzip both. You now have:
-   - macOS: `Agentic QE Platform-<version>-arm64.dmg`, `...-x64.dmg`, and the zips, plus `latest-darwin.json`;
-   - Windows: `Agentic QE Platform <version>.msi`, plus `latest-win32.json`.
+2. It starts by itself on every push to `feature/maf-harness-platform` that changes `apps/desktop`, `src`, `scripts/desktop_build.py` or `requirements.txt`, and on every `v*` or `desktop-*` tag. To start it by hand, select **Run workflow** and choose the branch or tag.
+3. Wait for the three build jobs to finish. Each builds for its own processor, because the bundled backend is built for the machine it runs on:
+   - `macos-latest` / `arm64`: DMG and zip for Apple silicon;
+   - `macos-15-intel` / `x64`: DMG and zip for Intel Macs;
+   - `windows-latest` / `x64`: the MSI.
+
+   Then the `manifest` job merges their manifests into one `latest.json`.
+4. Open the finished run. Under **Artifacts**, download the three `desktop-…` artifacts and `desktop-latest-json`.
+5. Unzip them. You now have:
+   - macOS: `Agentic QE Platform-<version>-arm64.dmg`, `...-x64.dmg`, and the zips;
+   - Windows: `Agentic QE Platform <version>.msi`;
+   - `latest.json`, listing every installer with its size and SHA-256.
+
+**A `v*` tag** (for example `git tag v0.2.0 && git push origin v0.2.0`) also runs the `release` job, which publishes the installers and `latest.json` as a GitHub Release with the same name.
 
 **Building on a Mac without CI:** `python scripts/desktop_build.py` builds the UI, the PyInstaller backend and the DMG on this machine. The MSI can only be built on Windows.
 
@@ -33,13 +39,7 @@ Every `latest-*.json` lists each installer's name, size and SHA-256. Compare the
 
 If a value differs, do not publish. Download the artifact again.
 
-Then make one `latest.json` that the login page reads, by merging the two manifests:
-
-```bash
-python -c "import json,sys; a=[json.load(open(p)) for p in sys.argv[1:]]; print(json.dumps({'version': a[0]['version'], 'files': [f for m in a for f in m['files']]}, indent=2))" latest-darwin.json latest-win32.json > latest.json
-```
-
-Both manifests must show the same version. If they do not, the two jobs built different commits; run the workflow again.
+CI already merged the manifests into `latest.json`. To merge them yourself, put the per-runner `latest-*.json` files in one folder and run `python scripts/desktop_build.py --merge <folder>`. It refuses manifests of different versions, which means the jobs built different commits; run the workflow again.
 
 ## 3. Publish to the Blob `downloads` container (Azure portal, eastus2)
 

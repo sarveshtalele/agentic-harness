@@ -3,7 +3,6 @@
 import os
 
 import subprocess
-import sys
 
 from pathlib import Path
 
@@ -75,13 +74,6 @@ def test_packages_exclude_secrets_and_tests():
     assert {"startup.js", "package.json", "package-lock.json", "next.config.ts"} <= set(frontend)
     for name in [*backend, *frontend]:
         assert not name.startswith(("tests/", "data/")) and "node_modules" not in name and ".next/" not in name and not name.endswith(".env")
-
-
-def test_sqlite_journal_mode_is_a_setting(tmp_path):
-    env = {**os.environ, "ATLAS_DATA_DIR": str(tmp_path), "ATLAS_SQLITE_JOURNAL": "DELETE", "PYTHONPATH": "src"}
-    code = "from backend import db; db.migrate()\nwith db.db() as c: print(c.execute('PRAGMA journal_mode').fetchone()[0])"
-    root = Path(__file__).resolve().parent.parent
-    assert subprocess.run([sys.executable, "-c", code], env=env, cwd=root, capture_output=True, text=True, timeout=60).stdout.strip() == "delete"
 
 
 def test_launchers_exist_and_call_the_same_command():

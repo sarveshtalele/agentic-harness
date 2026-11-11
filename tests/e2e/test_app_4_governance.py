@@ -83,7 +83,7 @@ def test_15e_admin_creates_user_who_sees_only_their_own_work(page):
     shot(page, "22b-users")
     guest = page.context.browser.new_context(viewport={"width": 1440, "height": 900})
     tab = guest.new_page()
-    tab.goto(UI)
+    tab.goto(f"{UI}/projects")
     expect(tab).to_have_url(re.compile("/login"), timeout=15_000)
     shot(tab, "22a-login")
     tab.get_by_label("Username").fill(name)

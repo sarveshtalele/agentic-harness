@@ -2,6 +2,7 @@
 """One cross-platform entry point. Standard library only, so it runs before any install.
 
   python scripts/dev.py setup      create .venv, install Python and Node dependencies
+  python scripts/dev.py db         start local PostgreSQL (data/postgres), put its URL in .env; --import-sqlite [path] copies an old store
   python scripts/dev.py backend    FastAPI on 127.0.0.1:8000
   python scripts/dev.py frontend   Next.js dev server on 127.0.0.1:3000
   python scripts/dev.py up         install if needed, build, run backend and UI, open the browser
@@ -156,9 +157,10 @@ def evidence() -> None:
 
 
 COMMANDS = {
+    "db": lambda: run([str(PYTHON), str(ROOT / "scripts" / "pg_local.py"), *sys.argv[2:]]),
     "evidence": evidence,
     "env-check": lambda: run([sys.executable, str(ROOT / "scripts" / "env_check.py"), *sys.argv[2:]]),
-    "azure-local": lambda: run([sys.executable, str(ROOT / "scripts" / "azure_local.py"), *sys.argv[2:]]),
+    "azure-local": lambda: run([str(PYTHON), str(ROOT / "scripts" / "azure_local.py"), *sys.argv[2:]]),  # needs psycopg for its local PostgreSQL
     "up": up,
     "setup": setup,
     "backend": lambda: run(BACKEND),

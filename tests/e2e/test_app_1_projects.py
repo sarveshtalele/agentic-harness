@@ -27,7 +27,7 @@ APP_ZIP = {
 
 
 def test_01_projects_page_replaces_the_dropdown(page):
-    page.goto(UI)
+    page.goto(f"{UI}/projects")
     expect(page.get_by_role("heading", name="Projects")).to_be_visible()
     expect(page.get_by_text("No projects yet").or_(page.get_by_role("article").first)).to_be_visible()
     assert page.locator("header select").count() == 0, "no project dropdown"
@@ -64,7 +64,7 @@ def test_03_repository_scan_shows_real_facts(page):
 
 
 def test_04_real_public_github_clone(page):
-    page.goto(UI)
+    page.goto(f"{UI}/projects")
     page.get_by_role("button", name="New project").click()
     dialog = page.get_by_role("dialog")
     dialog.get_by_label("Name").fill("Agentic QE plugin")
@@ -76,13 +76,13 @@ def test_04_real_public_github_clone(page):
     expect(details).to_contain_text("TypeScript", timeout=30_000)
     expect(details).to_contain_text("Recent commits")
     shot(page, "04-repository-github")
-    page.goto(UI)
+    page.goto(f"{UI}/projects")
     expect(page.get_by_test_id("project-card")).to_have_count(2)
     shot(page, "05-projects-list")
 
 
 def test_04b_rename_project_docs_and_brand(page):
-    page.goto(UI)
+    page.goto(f"{UI}/projects")
     expect(page.get_by_text("Governed requirements, code changes, and test engineering for BAs and developers.")).to_have_count(0)
     page.get_by_role("button", name="Rename Agentic QE plugin").click()  # opens the in-app rename modal
     modal = page.get_by_role("dialog")
@@ -105,10 +105,10 @@ def test_04b_rename_project_docs_and_brand(page):
     page.get_by_test_id("card-bugs").first.click()
     expect(page.get_by_role("heading", name="Bug Scan")).to_be_visible()
     expect(page.locator('ol[aria-label="Quality gates"]')).to_have_count(0)
-    page.goto(UI)
+    page.goto(f"{UI}/projects")
     page.get_by_test_id("stat-findings").click()
     expect(page.get_by_role("heading", name="Open findings")).to_be_visible()
-    page.goto(UI)
+    page.goto(f"{UI}/projects")
     page.get_by_test_id("stat-documents").click()
     expect(page.get_by_role("heading", level=1, name="Documents")).to_be_visible()
 

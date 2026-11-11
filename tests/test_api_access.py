@@ -57,10 +57,9 @@ def test_session_cookie_is_protected_and_logout_ends_it(client):
 
 def test_passwords_and_usernames_never_reach_storage_or_logs(client, caplog):
     import logging
-    import sqlite3
 
-    from backend.config import DB_PATH
     from backend.core.security import redact
+    from tests.helpers_db import dump as dump_tables
 
     name = unique("secretname")
     user = make_user(client, name)
@@ -72,9 +71,7 @@ def test_passwords_and_usernames_never_reach_storage_or_logs(client, caplog):
         logging.getLogger("uvicorn.access").warning('body {"%s": "%s"} and %s=%s', field, typed, field, typed)
     logged = caplog.text
     assert typed not in logged and USER_PASSWORD not in logged and name not in logged
-    con = sqlite3.connect(DB_PATH)
-    dump = "\n".join(con.iterdump())
-    con.close()
+    dump = dump_tables()
     assert USER_PASSWORD not in dump and name not in dump and admin_value not in dump
     assert "password" not in json.dumps(user) and USER_PASSWORD not in json.dumps(client.get("/api/users").json())
     assert admin_value not in redact(f"it leaked: {admin_value}")

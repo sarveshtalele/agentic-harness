@@ -22,7 +22,7 @@ export default function LoginPage() {
     try {
       await api("/auth/login", { json: { username, password } });
       setPassword("");
-      window.location.href = "/"; // a full load, so every page starts from the new session
+      window.location.href = "/projects"; // a full load, so every page starts from the new session
     } catch (e: any) {
       setPassword("");
       setError(e.message);

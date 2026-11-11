@@ -56,7 +56,6 @@ stages:
               pytest tests/ -q -m "not e2e" --ignore=node_modules
             displayName: 'Execute Core Unit Tests'
             env:
-              ATLAS_SQLITE_JOURNAL: 'DELETE'
               ATLAS_RUN_TOKEN_LIMIT: '50000000'
 
       - job: FrontendCI
@@ -149,7 +148,7 @@ stages:
                     appSettings: |
                       -WEBSITES_PORT 8000
                       -ATLAS_DATA_DIR /home/atlas/data
-                      -ATLAS_SQLITE_JOURNAL DELETE
+                      -ATLAS_KEY_VAULT_URL https://kv-agentic-harness.vault.azure.net
                       -ATLAS_RUN_TOKEN_LIMIT 50000000
                       -SCM_DO_BUILD_DURING_DEPLOYMENT true
 

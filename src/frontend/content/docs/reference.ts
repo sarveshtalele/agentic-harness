@@ -73,7 +73,8 @@ Put these in \`.env\`, or in Azure's environment variables. They keep the \`ATLA
 | \`ATLAS_RUN_TOKEN_LIMIT\` | 600000 | Token budget for one run |
 | \`ATLAS_MODEL_TIMEOUT\` | 180 | Seconds before one model call fails |
 | \`ATLAS_MODEL_CONCURRENCY\` | 4 | Model calls at once |
-| \`ATLAS_SQLITE_JOURNAL\` | WAL | Use DELETE on network storage |
+| \`ATLAS_DATABASE_URL\` | None | PostgreSQL connection. Locally \`python scripts/dev.py db\` fills it in; on Azure it comes from Key Vault |
+| \`ATLAS_KEY_VAULT_URL\` | None | Azure: read the secrets from this Key Vault at startup with the app's managed identity |
 | \`ATLAS_PORT\`, \`ATLAS_UI_PORT\` | 8000, 3000 | Local ports |
 | \`ATLAS_ALLOWED_ORIGINS\`, \`ATLAS_ALLOWED_HOSTS\` | Local addresses | Who may call the API |
 | \`ATLAS_ADMIN_USERNAME\`, \`ATLAS_ADMIN_PASSWORD\` | None | The administrator's sign-in. Nobody can sign in until both are set |

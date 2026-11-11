@@ -2,7 +2,7 @@
 
 import io
 
-import sqlite3
+import psycopg
 
 import pytest
 from docx import Document
@@ -74,7 +74,7 @@ def test_prompt_versions(project):
 def test_prompt_history_is_immutable_at_primary_key():
     prompts.seed()
     current = prompts.active("project-copilot")
-    with pytest.raises(sqlite3.IntegrityError), db() as con:
+    with pytest.raises(psycopg.errors.IntegrityError), db() as con:
         con.execute("INSERT INTO prompts VALUES (?,?,?,?,?,?,1,?)", ("project-copilot", current["version"], "x", "y", "", "", now()))
 
 

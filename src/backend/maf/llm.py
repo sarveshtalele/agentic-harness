@@ -67,7 +67,7 @@ def set_client_override(client) -> None:
     _override = client
 
 
-def client(model: str = "", *, max_rounds: int = 10, max_tool_calls: int = 30):
+def client(model: str = "", *, max_rounds: int = 10, max_tool_calls: int = 30, detailed_errors: bool = False):
     """A project owner's allocated model replaces the default. All models share the configured endpoint and key."""
     if _override is not None:
         return _override
@@ -79,7 +79,9 @@ def client(model: str = "", *, max_rounds: int = 10, max_tool_calls: int = 30):
     # a hung model call must fail the run with a clear error, not leave it running forever
     http = AsyncOpenAI(api_key=cfg["api_key"], base_url=cfg["base_url"] or None, timeout=MODEL_TIMEOUT, max_retries=1)
     return OpenAIChatCompletionClient(model=cfg["model"], async_client=http,
-                                      function_invocation_configuration={"max_iterations": max_rounds, "max_function_calls": max_tool_calls})
+                                      function_invocation_configuration={"max_iterations": max_rounds, "max_function_calls": max_tool_calls,
+                                                                                         # the harness: a tool error's text reaches the model, so it can fix its call
+                                                                                         "include_detailed_errors": detailed_errors})
 
 
 async def test_connection(base_url: str | None = None, model: str | None = None, api_key: str | None = None) -> dict:

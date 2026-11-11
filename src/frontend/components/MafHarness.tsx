@@ -35,7 +35,7 @@ export function MafHarness({ projectId, onProjectChange }: { projectId: string; 
       </div>
       {!project ? (
         <Empty title={projects.length ? "Choose a project to start" : "No projects yet"}>
-          {projects.length ? "The harness works on one project at a time." : <Link href="/" className="underline">Create a project first.</Link>}
+          {projects.length ? "The harness works on one project at a time." : <Link href="/projects" className="underline">Create a project first.</Link>}
         </Empty>
       ) : (
         <div className="grid gap-3 lg:grid-cols-[1fr_280px]">

@@ -86,6 +86,28 @@ Still to do for real agent scores:
 - **Azure guide:** `docs/AZURE_DESKTOP_TARGET_ARCHITECTURE.md` is now the end-to-end portal guide, with a UI tour.
 - **Owner cleanup (not deleted):** an early registry probe created an `atlas.sqlite3` at the repo root and the empty folders `checkpoints/`, `logs/`, `projects/` and `runs/`. Git ignores or skips them all.
 
+## Part 3 progress (owner goal 2026-11-11: accurate harness, PostgreSQL only, Azure standard)
+
+- **G1 harness accuracy** (`maf/harness_kit/active_command.py`, `strict_args.py`; `tests/test_harness_active_command.py`):
+  - A typed plugin command stays the thread's active command, in the instructions on every call.
+  - The platform's QE workflow, gate and document tools are hidden while it runs.
+  - Its files are listed as written or MISSING on disk.
+  - Unknown tool arguments are now an error the model reads, with `include_detailed_errors`. Before, they were silently dropped: `file_access_ls(path=...)` listed the root 73 times.
+  - Live cycle: `docs/evidence/runs/2026-11-11-harness-plugin-cycle2/`. Attempts 1 to 3 found the problems above, and attempt 4 runs with all fixes.
+- **G5 PostgreSQL only:**
+  - `backend/db.py` uses psycopg 3 with a pool; `backend/sql_dialect.py` translates the SQLite dialect; `migrations/postgres/0001_baseline.sql` is the final schema of migrations 001 to 023.
+  - `backend/local_postgres.py` starts a local cluster for development, tests, `azure-local` and the desktop app.
+  - `scripts/sqlite_to_postgres.py` moves a store once and verifies it. The owner's `data/v2` store was moved: every count matches, 2 of 2 ledgers verify, and 12 of 12 document hashes match.
+  - Offline suite on PostgreSQL: 672 passed. The failures left are the SQLite-upgrade tests listed below.
+- **G7 Key Vault:** `backend/keyvault.py` reads secrets with the managed identity (`ATLAS_KEY_VAULT_URL`); `tests/test_keyvault.py`.
+- **G8 desktop CI:** `desktop.yml` builds the DMG (arm64 and x64, each on its own runner) and the MSI on every push that changes the app, and a `v*` tag makes a GitHub Release.
+- **G9 guide:** `docs/AZURE_DESKTOP_TARGET_ARCHITECTURE.md` is the standard: PostgreSQL B1ms, Blob, Key Vault, East US 2, about $28.50 a month (prices read 2026-11-11).
+- **CI fixes:** the evals job ran a deleted test file; a Windows path case; macOS runners get PostgreSQL.
+- **Waiting on the owner's yes to delete:**
+  - the SQLite-only tests: `tests/test_migration_006.py`, `test_access_account.py::test_migration_010_…`, `test_models_usage.py::test_migration_009_…`, `test_core_platform.py::test_sqlite_journal_mode_is_a_setting`;
+  - the old SQLite migrations `src/backend/migrations/0*.sql` (001 to 023), replaced by `migrations/postgres/0001_baseline.sql`.
+- **Not done yet:** G6 (files in Blob), G4 (Skill Studio requirements page), G2 and G3 (an app built end to end; subagents from chat), bundled PostgreSQL for the desktop (D-P1).
+
 ## Running or stopped
 
 | Item | State | Restart |

@@ -66,7 +66,7 @@ def page(servers):
         browser = driver.chromium.launch()
         context = browser.new_context(viewport={"width": 1440, "height": 900}, accept_downloads=True)
         tab = context.new_page()
-        tab.goto(UI)
+        tab.goto(f"{UI}/login")
         tab.get_by_label("Username").fill(os.environ["ATLAS_ADMIN_USERNAME"])
         tab.get_by_label("Password").fill(os.environ["ATLAS_ADMIN_PASSWORD"])
         tab.get_by_role("button", name="Sign in").click()

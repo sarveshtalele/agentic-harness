@@ -1,5 +1,7 @@
 # Azure proof of concept: step-by-step in the Azure portal
 
+> **Superseded (2026-11-11).** The platform now runs on PostgreSQL only, with secrets in Key Vault. The standard guide is **`docs/AZURE_DESKTOP_TARGET_ARCHITECTURE.md`**. This page describes the earlier SQLite proof of concept and is kept for reference.
+
 This guide deploys Agentic QE Platform as a browser link for a small team at the lowest cost. It follows `docs/MASTER_PLAN.md` phase M6.
 
 ## What you get

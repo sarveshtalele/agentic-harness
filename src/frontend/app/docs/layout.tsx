@@ -61,7 +61,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
               </ul>
             )}
           </div>
-          <Link href="/" className="shrink-0 rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-indigo-500">Open app</Link>
+          <Link href="/projects" className="shrink-0 rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-indigo-500">Open app</Link>
           <ThemeToggle />
         </div>
         {menu && <div className="max-h-[70vh] overflow-y-auto border-t border-slate-200 p-4 lg:hidden dark:border-slate-800"><Sidebar current={current} onPick={() => setMenu(false)} /></div>}

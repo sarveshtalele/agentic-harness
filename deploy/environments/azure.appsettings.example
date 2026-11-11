@@ -4,11 +4,12 @@
 # --- API web app ---
 ATLAS_PROFILE=web
 ATLAS_DATA_DIR=/home/atlas/data
-ATLAS_SQLITE_JOURNAL=DELETE
 ATLAS_ADMIN_USERNAME=
-ATLAS_ADMIN_PASSWORD=
 ATLAS_ADMIN_EMAIL=
-ATLAS_SECRET_KEY=
+# Secrets live in Key Vault, read at startup with the web app's managed identity (backend/keyvault.py):
+#   atlas-admin-password -> ATLAS_ADMIN_PASSWORD, atlas-secret-key -> ATLAS_SECRET_KEY, atlas-database-url -> ATLAS_DATABASE_URL
+ATLAS_KEY_VAULT_URL=https://<vault-name>.vault.azure.net
+# Without a vault, set ATLAS_ADMIN_PASSWORD and ATLAS_SECRET_KEY here instead.
 ATLAS_ALLOWED_HOSTS=
 ATLAS_ALLOWED_ORIGINS=
 ATLAS_MAX_SANDBOXES=5

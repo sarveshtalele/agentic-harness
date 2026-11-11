@@ -8,7 +8,7 @@ commands leave `skill_paths()` and `slash_entries()`, and so do an ungranted plu
 from __future__ import annotations
 
 import json
-import sqlite3
+import psycopg
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -63,7 +63,7 @@ def _enabled() -> dict[str, bool]:
     try:
         with db() as con:
             return {r[0]: bool(r[1]) for r in con.execute("SELECT plugin_id, enabled FROM plugin_state")}
-    except sqlite3.OperationalError:  # before migration 017 there is no plugin_state, and every plugin was enabled
+    except psycopg.errors.UndefinedTable:  # before plugin_state exists, every plugin was enabled
         return {}
 
 

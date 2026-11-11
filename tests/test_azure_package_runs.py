@@ -49,15 +49,15 @@ def test_extracted_backend_package_finds_its_assets(name, tmp_path):
 
 def test_every_azure_setup_script_sets_what_the_backend_needs():
     """Without these the deployed backend refuses every request (host guard), every write (origin guard), every
-    sign-in (no admin), or locks SQLite on the /home share (WAL)."""
+    sign-in (no admin), or reads no secret (no Key Vault)."""
     root = Path(__file__).resolve().parents[1]
     scripts = {"sh": (root / "deploy/azure/setup_azure_infrastructure.sh").read_text(encoding="utf-8"),
                "ps1": (root / "deploy/azure/setup_azure_infrastructure.ps1").read_text(encoding="utf-8"),
                "generated": azure_convert_and_deploy.generate_setup_script()}
     for name, text in scripts.items():
-        for needed in ("ATLAS_ALLOWED_HOSTS=", "ATLAS_ALLOWED_ORIGINS=", "ATLAS_ADMIN_USERNAME", "ATLAS_ADMIN_PASSWORD", 'ATLAS_SQLITE_JOURNAL="DELETE"'):
+        for needed in ("ATLAS_ALLOWED_HOSTS=", "ATLAS_ALLOWED_ORIGINS=", "ATLAS_ADMIN_USERNAME", "ATLAS_ADMIN_PASSWORD", "ATLAS_KEY_VAULT_URL="):
             assert needed in text, f"{name} setup script lacks {needed}"
-        assert 'ATLAS_SQLITE_JOURNAL="WAL"' not in text, name
+        assert "ATLAS_SQLITE_JOURNAL" not in text, name  # SQLite is gone (MASTER_PLAN Part 3, G5)
 
 
 def test_frontend_startup_copies_standalone_with_real_files():

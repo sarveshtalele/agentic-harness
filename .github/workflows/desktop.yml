@@ -1,15 +1,24 @@
 name: desktop
+# Builds the desktop installers: macOS DMG and ZIP (Apple silicon and Intel, each on its own runner, because the bundled
+# backend is built for the runner's own architecture) and the Windows MSI. Every run uploads them as workflow artifacts
+# with latest.json (SHA-256 per file). A v* tag also publishes them as a GitHub Release. Unsigned unless CSC_LINK is set.
 on:
   workflow_dispatch:
   push:
+    branches: ["feature/maf-harness-platform"]
     tags: ["v*", "desktop-*"]
+    paths: ["apps/desktop/**", "src/**", "scripts/desktop_build.py", "requirements.txt", ".github/workflows/desktop.yml"]
 jobs:
   build:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest]
+        include:
+          - { os: macos-latest, arch: arm64 }
+          - { os: macos-15-intel, arch: x64 }
+          - { os: windows-latest, arch: x64 }
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -21,13 +30,48 @@ jobs:
         working-directory: src/frontend
       - run: npm ci
         working-directory: apps/desktop
-      - run: python scripts/desktop_build.py
+      - run: python scripts/desktop_build.py --ui
+      - run: python scripts/desktop_build.py --backend
+      - run: python scripts/desktop_build.py --package --arch ${{ matrix.arch }}
       - uses: actions/upload-artifact@v4
         with:
-          name: desktop-${{ matrix.os }}
+          name: desktop-${{ matrix.os }}-${{ matrix.arch }}
           path: |
             apps/desktop/dist/*.dmg
             apps/desktop/dist/*.zip
             apps/desktop/dist/*.msi
             apps/desktop/dist/latest-*.json
           if-no-files-found: error
+
+  manifest:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { path: installers }
+      - run: python scripts/desktop_build.py --merge installers
+      - uses: actions/upload-artifact@v4
+        with:
+          name: desktop-latest-json
+          path: installers/latest.json
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { path: installers }
+      - run: python scripts/desktop_build.py --merge installers
+      - name: Publish the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          shopt -s nullglob globstar
+          gh release create "${GITHUB_REF_NAME}" installers/**/*.dmg installers/**/*.zip installers/**/*.msi installers/latest.json \
+            --title "Agentic QE Platform ${GITHUB_REF_NAME}" --notes "Desktop installers. SHA-256 values are in latest.json. Unsigned builds unless noted."

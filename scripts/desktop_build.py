@@ -70,7 +70,7 @@ def build_backend() -> None:
         if (ROOT / name).is_dir():
             cmd += ["--add-data", f"{ROOT / name}{sep}{name}"]
     cmd += ["--add-data", f"{ROOT / 'src' / 'backend' / 'migrations'}{sep}backend/migrations"]
-    for pkg in ("agent_framework", "agent_framework_openai", "agent_framework_ag_ui", "gherkin", "tzdata"):
+    for pkg in ("agent_framework", "agent_framework_openai", "agent_framework_ag_ui", "gherkin", "tzdata", "psycopg", "psycopg_binary", "psycopg_pool"):
         cmd += ["--collect-all", pkg]
     cmd += ["--collect-submodules", "backend", str(DESKTOP / "backend_entry.py")]
     run(cmd, ROOT)
@@ -80,12 +80,13 @@ def build_backend() -> None:
     print(f"Backend built: {out}")
 
 
-def package() -> None:
+def package(arch: str | None = None) -> None:
     for need in (BUILD / "ui", BUILD / "backend"):
         if not need.is_dir():
             sys.exit(f"Missing {need}. Run this script without --package first.")
     env = {} if os.environ.get("CSC_LINK") else {"CSC_IDENTITY_AUTO_DISCOVERY": "false"}
-    run([NPX, "electron-builder"], DESKTOP, env)
+    # the backend binary is built for this machine only, so CI builds each architecture on its own runner
+    run([NPX, "electron-builder", *([f"--{arch}"] if arch else [])], DESKTOP, env)
     write_manifest()
 
 
@@ -104,11 +105,25 @@ def write_manifest() -> None:
     print(f"Manifest: {manifest}")
 
 
+def merge(folder: Path) -> None:
+    """latest.json from every latest-*.json under `folder` (one per CI runner): what the release and the Blob container get."""
+    parts = [json.loads(f.read_text(encoding="utf-8")) for f in sorted(folder.rglob("latest-*.json"))]
+    if not parts or len({p["version"] for p in parts}) != 1:
+        sys.exit(f"Expected latest-*.json files of one version under {folder}, found {[p['version'] for p in parts]}")
+    merged = {"version": parts[0]["version"], "files": [f for p in parts for f in p["files"]]}
+    (folder / "latest.json").write_text(json.dumps(merged, indent=2), encoding="utf-8")
+    print(f"Merged {len(merged['files'])} installers into {folder / 'latest.json'}")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     for flag in ("ui", "backend", "package"):
         ap.add_argument(f"--{flag}", action="store_true")
+    ap.add_argument("--arch", choices=["arm64", "x64"], help="only this architecture's installers")
+    ap.add_argument("--merge", type=Path, help="merge the latest-*.json files under this folder into latest.json, then stop")
     a = ap.parse_args()
+    if a.merge:
+        return merge(a.merge)
     everything = not (a.ui or a.backend or a.package)
     if everything or a.ui:
         build_ui()
@@ -116,7 +131,7 @@ def main() -> None:
         build_backend()
     if everything or a.package:
         run([NPM, "ci", "--no-audit", "--no-fund"], DESKTOP) if not (DESKTOP / "node_modules").is_dir() else None
-        package()
+        package(a.arch)
 
 
 if __name__ == "__main__":

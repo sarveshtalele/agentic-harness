@@ -34,9 +34,8 @@ else
     pip install --no-cache-dir --disable-pip-version-check -r requirements.txt
 fi
 
-# SQLite journal: the data folder is on the App Service /home network share, which lacks the shared memory WAL needs (config.py).
+# Files live on the App Service /home share; the database is PostgreSQL (ATLAS_DATABASE_URL, from Key Vault).
 export ATLAS_DATA_DIR="${ATLAS_DATA_DIR:-$ATLAS_HOME/data}"
-export ATLAS_SQLITE_JOURNAL="${ATLAS_SQLITE_JOURNAL:-DELETE}"
 mkdir -p "$ATLAS_DATA_DIR"
 
 # Ensure python can locate backend modules

@@ -55,7 +55,7 @@ def test_guard_text_redacts_credentials_and_logs(project):
 
     with db() as con:
         event = con.execute(
-            "SELECT * FROM guardrail_events WHERE project_id=? AND kind='secret' ORDER BY rowid DESC LIMIT 1",
+            "SELECT * FROM guardrail_events WHERE project_id=? AND kind='secret' ORDER BY id DESC LIMIT 1",
             (proj_id,),
         ).fetchone()
         assert event is not None

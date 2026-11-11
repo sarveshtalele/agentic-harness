@@ -35,9 +35,10 @@ from backend.config import DATA_DIR, HARNESS_CONTEXT_TOKENS, HARNESS_MAX_ROUNDS,
 from backend.core import auth, plugin_grants, plugins, prompts
 from backend.core.mcp import mcp_tools_for
 from backend.maf import governance, llm, tools
-from backend.maf.harness_kit import plugin_agents, specialists, workspace
+from backend.maf.harness_kit import active_command, plugin_agents, specialists, workspace
 from backend.maf.harness_kit.hook_middleware import guarded
 from backend.maf.harness_kit.shell import ShellProvider, WorkspaceShell
+from backend.maf.harness_kit.strict_args import strict_arguments
 from backend.maf.harness_kit.nudges import while_working
 from backend.maf.harness_kit.catalog import CORE, RISKY, Catalogue, LoadedTools
 from backend.maf.harness_kit.snapshots import APPROVALS, SNAPSHOTS, scope, session_id  # noqa: F401 - used by maf/agui.py and api/chat.py
@@ -89,20 +90,25 @@ def build(project_id: str, thread_id: str, start_run, *, user_id: str | None = N
     model = auth.model_for(project_id, AGENT, None, user_id, model)
     auth.check_allowance(project_id, user_id, model)
     every = governance.allowed(AGENT, tools.repo_tools(project_id) + tools.document_tools(project_id) + tools.chat_tools(project_id, thread_id, start_run) + tools.harness_tools(project_id, thread_id, start_run), True)
+    dirs = state_dirs(project_id, user_id)
+    ws = workspace.open_workspace(project_id, thread_id, user_id)  # None without a repository: no write or shell tools then
+    command = active_command.current(dirs["tools"], thread_id)
+    if command and ws:  # a plugin command does the QE work itself: one way per job, so the platform's QE and repository tools step aside
+        every = [t for t in every if t.name not in active_command.PLATFORM_QE_TOOLS]
     for tool in every:
         if tool.name in RISKY:
             tool.approval_mode = "always_require"  # these objects are built for this turn, so other agents keep theirs
     user = auth.current_user.get()
     catalogue = Catalogue([t for t in every if t.name not in CORE], mcp_tools_for(project_id, user) if user else [])
-    dirs = state_dirs(project_id, user_id)
     loaded = LoadedTools(dirs["tools"], project_id, thread_id, catalogue)
     core = [t for t in every if t.name in CORE] + [find_tools.build(catalogue), load_tools.build(catalogue, loaded)]
     ref, max_output = prompts.ref(AGENT), governance.token_limit(AGENT)
     telemetry = governance.telemetry(AGENT, project_id, None, "chat", model, user_id, ref, json.dumps([]), also_allowed=frozenset(catalogue.mcp))
-    client = llm.client(model, max_rounds=HARNESS_MAX_ROUNDS, max_tool_calls=HARNESS_MAX_TOOL_CALLS)
+    client = llm.client(model, max_rounds=HARNESS_MAX_ROUNDS, max_tool_calls=HARNESS_MAX_TOOL_CALLS, detailed_errors=True)
     compaction = _compaction(client, model, HARNESS_CONTEXT_TOKENS - max_output, telemetry)
-    ws = workspace.open_workspace(project_id, thread_id, user_id)  # None without a repository: no write or shell tools then
     world, providers = _world(ws)
+    if command:  # without a repository it still says which command runs; WorkspaceContext says there are no file tools
+        providers.append(active_command.ActiveCommandContext(command, ws.root if ws else None))
     return create_harness_agent(
         client,
         name=AGENT,
@@ -125,7 +131,7 @@ def build(project_id: str, thread_id: str, start_run, *, user_id: str | None = N
         loop_max_iterations=HARNESS_MAX_ROUNDS,
         disable_web_search=True,  # no data leaves through a hosted search tool
         context_providers=[ProjectContext(project_id, full=True), loaded, workspace.WorkspaceContext(ws), *providers],
-        middleware=[tool_audit(AGENT, project_id, None, "chat"), *([guarded(ws)] if ws else []), telemetry],
+        middleware=[strict_arguments, tool_audit(AGENT, project_id, None, "chat"), *([guarded(ws)] if ws else []), telemetry],
         **world,
     )
 

@@ -13,11 +13,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 REQUIRED = {
-    "local": ["ATLAS_ADMIN_USERNAME", "ATLAS_ADMIN_PASSWORD"],
-    "azure": ["ATLAS_PROFILE", "ATLAS_DATA_DIR", "ATLAS_SQLITE_JOURNAL", "ATLAS_ADMIN_USERNAME", "ATLAS_ADMIN_PASSWORD", "ATLAS_SECRET_KEY",
+    "local": ["ATLAS_ADMIN_USERNAME", "ATLAS_ADMIN_PASSWORD", "ATLAS_DATABASE_URL"],
+    "azure": ["ATLAS_PROFILE", "ATLAS_DATA_DIR", "ATLAS_DATABASE_URL", "ATLAS_ADMIN_USERNAME", "ATLAS_ADMIN_PASSWORD", "ATLAS_SECRET_KEY",
               "ATLAS_ALLOWED_HOSTS", "ATLAS_ALLOWED_ORIGINS"],
 }
-EXPECTED = {"azure": {"ATLAS_PROFILE": "web", "ATLAS_SQLITE_JOURNAL": "DELETE"}, "local": {}}
+EXPECTED = {"azure": {"ATLAS_PROFILE": "web"}, "local": {}}
 
 
 def _dotenv() -> dict[str, str]:
@@ -35,6 +35,15 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--env", choices=["local", "azure"], required=True)
     which = parser.parse_args().env
+    vault = []
+    if os.environ.get("ATLAS_KEY_VAULT_URL"):  # the same Key Vault read the app does at startup; names only are reported
+        sys.path[:0] = [str(ROOT / "src"), str(ROOT)]
+        from backend import keyvault
+        try:
+            vault = keyvault.load()
+        except keyvault.KeyVaultError as exc:
+            print(f"{which}: {exc}")
+            return 1
     values = {**(_dotenv() if which == "local" else {}), **os.environ}
     problems = [f"missing {k}" for k in REQUIRED[which] if not values.get(k)]
     problems += [f"{k} should be {v}" for k, v in EXPECTED[which].items() if values.get(k) and values[k] != v]
@@ -43,6 +52,8 @@ def main() -> int:
         problems.append("ATLAS_ADMIN_PASSWORD is weak: use 12+ characters, different from the username")
     if which == "local" and any(k.startswith("WEBSITE_") for k in os.environ):
         problems.append("Azure App Service variables are present: the local environment must not run with Azure settings")
+    if vault:
+        print(f"From Key Vault: {', '.join(vault)}")
     print(f"{which}: " + ("OK" if not problems else "; ".join(problems)))
     return 1 if problems else 0
 

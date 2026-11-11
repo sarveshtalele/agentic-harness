@@ -149,3 +149,18 @@ OpenTelemetry through MAF's instrumentation plus platform spans, a local `spans`
 
 Bugs B1 to B7 and B14 to B18 of `docs/analysis/2026-11-11-markdown-html-converter-trace.md`, in the QE workflow files only (`docs/MASTER_PLAN.md` Phase Q). An empty repository stops before Gate 0 unless the run asks for `spec_first`; Exception cases only for stated error behaviour; test data and datasets follow the requirement's input type; a test that defines or stubs its subject is refused; a verdict without a real execution is INCONCLUSIVE; real reasons for REJECT decisions; G3 to G5 approve their documents; event data redacted. Tests: `tests/test_qe_correctness.py`. Q2 to Q4 wait for H2 and H3.
 
+## Landing page (owner request, 2026-11-11)
+
+`/` becomes a public landing page: what the platform does, the desktop downloads for macOS and Windows (from `ATLAS_DOWNLOADS_URL` through `app/api/downloads`, empty state when none are published), and a Sign in button. A signed-in visitor sees "Open workspace" instead. The projects list moves to `/projects`, and sign-in lands there. `AuthGate` treats `/` like `/login` (no session needed); the landing page reads no project data, and every API path stays denied by default.
+
+## Plugin command focus (owner request, 2026-11-11: "run the complete workflow")
+
+The live agentic-qe cycle stopped at Gate 1 because the model never wrote `02-requirements/requirements.json` (622 tool calls, 322 reads, no write). Causes found in `docs/evidence/runs/2026-11-11-harness-plugin/transcript.jsonl`:
+1. The command's instructions lived only in a user message, and MAF compaction summarised it away mid-turn, so the model forgot which command it was running ("Let me start the QE workflow as the user requested").
+2. The platform's own QE tools (`start_workflow`, `project_status` gates, platform documents, the repository copy) stayed visible beside the plugin's, so the model mixed the two gate systems and read every file twice.
+3. Nothing told the model which files the step must produce, and the command's "wait for the user's yes" read as "ask in chat", so it explored until the tool budget ran out.
+
+Fix (`maf/harness_kit/active_command.py`):
+- A slash command becomes the thread's **active command**, kept beside the thread and given to the model in the instructions on every call (MAF `ContextProvider`), never compacted. The chat history keeps only what the user typed.
+- While a plugin command is active, the platform's QE, document and repository tools are hidden; the model works only on the workspace (MAF file access, the shell) with the plugin's hooks.
+- The instructions list the files the command may create (`Paths this command may create`, `<app-name>` filled in), each marked written or missing on disk, and say that the approval card on each write is the yes the command asks for.

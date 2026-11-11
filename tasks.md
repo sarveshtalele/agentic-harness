@@ -320,3 +320,9 @@
   - [x] Q1 (2026-11-11) B1 to B7, B14 to B18 fixed offline with `tests/test_qe_correctness.py`. Left: Q4 live rerun on the real model (empty repository stops at Gate 0; a real converter repository gives string-typed cases, no invented Exception case, no stubbed subject)
   - [ ] Q2 chat approvals and history (B9 to B13), Q3 joinable logs (G1 to G15), after H2 and H3
 - On hold: QE Cycle UI on the plugin
+- [x] Landing page (owner request 2026-11-11, smoke test `test_the_home_page_is_a_public_landing_page_with_downloads_and_sign_in`, screenshots `docs/evidence/screens/landing-*.png`): public `/` with desktop downloads and Sign in; projects list at `/projects`; links, sign-in redirect and e2e tests follow
+- [x] Plugin command focus (owner 2026-11-11, offline tests pass; live cycle attempt 4 running): active command pinned in instructions, platform QE tools hidden during a plugin command, required files shown as written or missing; live agentic-qe cycle on personal-finance-mcp past Gate 1
+- [x] G5 PostgreSQL only: psycopg pool, dialect translator, baseline schema, local cluster, data move verified; 672 offline tests pass on PostgreSQL. Left: owner's yes to delete the SQLite-only tests and old migrations; G6 Blob files
+- [x] G7 Key Vault at startup (managed identity, `backend/keyvault.py`)
+- [x] G8 desktop installers in CI (per-arch DMG, MSI, release on tag); first CI run pending a push
+- [x] G9 standard Azure guide with East US 2 costs

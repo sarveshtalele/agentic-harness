@@ -199,7 +199,8 @@ Typography relies exclusively on native system font stacks (`system-ui, -apple-s
 #### 2.2.2 Navigation Hierarchy & Routing Table
 
 ```text
-/                                   Project Portfolio grid with search, filter, and creation
+/                                   Public landing page: what it does, desktop downloads (macOS, Windows), Sign in
+/projects                           Project Portfolio grid with search, filter, and creation (sign-in lands here)
 /settings                           Model providers, private repo access, system health
 /approvals                          Aggregated pending human gates across all projects
 /login                              Session authentication
@@ -625,7 +626,7 @@ flowchart LR
 
 ## 8. Data Models & Database Schema Specifications
 
-The platform state is persisted in SQLite WAL mode (`data/atlas.sqlite3`). Schema evolution is managed via sequential migrations (`src/backend/migrations/001` through `012`).
+The platform state is persisted in PostgreSQL (`ATLAS_DATABASE_URL`; locally a cluster in `data/postgres`, on Azure a Flexible Server). The schema is `src/backend/migrations/postgres/0001_baseline.sql`, the final form of SQLite migrations 001 to 023, and later changes are new numbered files there, each applied once under a lock and recorded in `schema_migrations`. SQLite was removed on 2026-11-11; `scripts/sqlite_to_postgres.py` moves an old store once.
 
 ```mermaid
 erDiagram
@@ -1138,3 +1139,7 @@ In accordance with the repository documentation policy (**1 Single Doc for Each 
   - `DESIGN.md` -> Fully integrated into Section 2.2 (Frontend UI Architecture & Design System).
   - `specs.md` -> Fully integrated into Sections 3, 4, 5, 6, 8, 9, 10.
   - `docs/ARCHITECTURE.md` -> Architectural diagrams, engine analysis, and inventory consolidated; replaced by pointer to this document.
+
+### Active plugin command (2026-11-11)
+
+`maf/agui.py` records a typed plugin command (`/plugin:command args`) as the thread's active command (`harness_kit/active_command.py`, a JSON file beside the thread's tool state). `harness.build` reads it each turn: the command's instructions and the on-disk state of the files it may create go into the instructions through a MAF `ContextProvider`, and the platform's own QE, document and repository tools are left out while it is active. A later slash command replaces it; `/harness` text without a command keeps it.

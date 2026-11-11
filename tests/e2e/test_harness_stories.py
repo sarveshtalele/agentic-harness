@@ -25,7 +25,7 @@ REPO = {
 
 
 def _create_project(page, tmp_path, name: str, with_repo: bool) -> str:
-    page.goto(UI)
+    page.goto(f"{UI}/projects")
     page.get_by_role("button", name="New project").click()
     dialog = page.get_by_role("dialog")
     dialog.get_by_label("Name").fill(name)

@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import json
-import sqlite3
+import psycopg
 
 from backend.core.registry.model import Graph, digest
 from backend.db import db, now, row, rows
@@ -43,7 +43,7 @@ def latest() -> dict | None:
     try:
         with db() as con:
             found = row(con.execute("SELECT * FROM registry_versions ORDER BY id DESC LIMIT 1"))
-    except sqlite3.OperationalError:  # before migration 023
+    except psycopg.errors.UndefinedTable:  # before the registry tables exist
         return None
     if found:
         found["problems"] = json.loads(found["problems"])

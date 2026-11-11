@@ -56,5 +56,5 @@ def activate(agent: str, version: int) -> dict:
     with db() as con:
         if not con.execute("SELECT 1 FROM prompts WHERE agent=? AND version=?", (agent, version)).fetchone():
             raise KeyError(f"{agent} v{version}")
-        con.execute("UPDATE prompts SET active=(version=?) WHERE agent=?", (version, agent))
+        con.execute("UPDATE prompts SET active=CASE WHEN version=? THEN 1 ELSE 0 END WHERE agent=?", (version, agent))
     return active(agent)

@@ -24,6 +24,7 @@ APP_PLAN="{plan_name}"
 BACKEND_APP="{backend_app}"
 FRONTEND_APP="{frontend_app}"
 SKU="{sku}"
+KEY_VAULT="kv-agentic-harness"  # holds atlas-admin-password, atlas-secret-key, atlas-database-url
 
 echo "=================================================================="
 echo " 1-Time Azure Infrastructure Setup"
@@ -67,7 +68,7 @@ az webapp config appsettings set \\
     WEBSITES_ENABLE_APP_SERVICE_STORAGE="true" \\
     ATLAS_HOME="/home/atlas" \\
     ATLAS_DATA_DIR="/home/atlas/data" \\
-    ATLAS_SQLITE_JOURNAL="DELETE" \\
+    ATLAS_KEY_VAULT_URL="https://$KEY_VAULT.vault.azure.net" \\
     ATLAS_ALLOWED_HOSTS="$BACKEND_APP.azurewebsites.net" \\
     ATLAS_ALLOWED_ORIGINS="https://$FRONTEND_APP.azurewebsites.net" \\
     SCM_DO_BUILD_DURING_DEPLOYMENT="true" \\

@@ -43,6 +43,7 @@ def _key_counts(answer: str, key: dict) -> dict:
 
 
 async def _run_case(agent_key: str, case: dict) -> dict:
+    _sandbox()  # every case runs in the eval project, whoever calls it
     case = {"checks": None, **case}
     if "skill" in case and not case["checks"]:  # nothing code can check: a judge grades it, and without one it stays unrun
         judge = ragas_evaluator.judge_model()

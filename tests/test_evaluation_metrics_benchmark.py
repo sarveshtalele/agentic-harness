@@ -38,7 +38,9 @@ def test_benchmark_run_computes_precision_recall_f1_and_groundedness_from_the_ke
     got = {t["metric"]: t for t in store.card("bug-reviewer")["tiles"]}
     assert got["recall"]["value"] == pytest.approx(0.6) and got["f1"]["value"] == pytest.approx(0.6)
     assert got["groundedness"]["value"] == pytest.approx(0.8) and got["groundedness"]["n"] == 5
-    assert got["recall"]["labels"] == "not reviewed" and got["faithfulness"]["state"] in ("not_measured", "measured")
+    assert got["recall"]["labels"] == "not reviewed" and got["faithfulness"]["state"] in ("not_measured", "measured", "failed")
+    if got["faithfulness"]["state"] == "failed":  # RAGAS installed and its judge unreachable: an honest failure that says why, never a score
+        assert got["faithfulness"]["value"] is None and got["faithfulness"].get("reason")
     spread = store.detail("bug-reviewer")["spread"]["recall"]
     assert spread["runs"] == 2 and spread["min"] == spread["max"] == pytest.approx(0.6)
     assert "does not exist" in case["reason"] or "not in" in case["reason"], "the reason names why a citation failed"

@@ -1414,3 +1414,11 @@ Deferred:
 | Item | Phase |
 |---|---|
 | Admin skill allowlist per skill (plugin-level grants shipped with HS-12) | P5 |
+
+## Active plugin command and strict tool arguments (2026-11-11)
+
+- **Active command.** A typed `/plugin:command` is the thread's active command (`maf/harness_kit/active_command.py`).
+  - Its instructions reach the model through a MAF `ContextProvider` (`context.extend_instructions`) on every call, so MAF compaction never summarises them away. The chat history keeps only the typed text.
+  - While it is active, `harness.build` leaves out the platform's QE workflow, gate and document tools (`PLATFORM_QE_TOOLS`).
+  - The files the command may create are shown as written or MISSING, read from disk before each call.
+- **Strict arguments.** `maf/harness_kit/strict_args.py` is a MAF chat middleware: before each model call it makes every offered tool's input model forbid extra keys. The harness client sets MAF's `include_detailed_errors`, so a misnamed argument comes back as a readable validation error instead of being silently dropped.

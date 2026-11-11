@@ -81,7 +81,7 @@ export function ProjectShell({ children }: { children: ReactNode }) {
       <aside className={`sticky top-0 flex h-screen shrink-0 flex-col border-r border-slate-200 bg-white p-3 transition-all dark:border-slate-800 dark:bg-[#060a17] ${collapsed ? "w-16" : "w-60"}`}>
         <div className="mb-3 flex items-center justify-between border-b border-slate-200 pb-3 dark:border-slate-800">
           {!collapsed && (
-            <Link href="/" className="flex items-center gap-1 text-xs font-semibold text-slate-600 hover:text-indigo-500 dark:text-slate-400">
+            <Link href="/projects" className="flex items-center gap-1 text-xs font-semibold text-slate-600 hover:text-indigo-500 dark:text-slate-400">
               <ChevronLeft className="h-3.5 w-3.5" /> All projects
             </Link>
           )}
