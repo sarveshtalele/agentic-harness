@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useProject } from "../../../../../components/ProjectShell";
-import { RunPanel } from "../../../../../components/RunPanel";
+import { RunPanel } from "../../../../../features/runs/RunPanel";
 
 export default function RunPage() {
   const { project, refresh } = useProject();

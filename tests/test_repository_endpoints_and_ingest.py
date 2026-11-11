@@ -4,14 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from backend.app import app
-from backend.config import repo_dir, sandbox_dir
 from backend.repos import ingest
-
-
-@pytest.fixture(autouse=True, scope="module")
-def ensure_seed():
-    from backend.core.seed_data import seed_database
-    seed_database()
 
 
 @pytest.fixture
@@ -43,21 +36,14 @@ def test_analysis_normalization_with_empty_dict():
     assert norm["top_imports"] == []
 
 
-def test_analysis_normalization_derives_lines_of_code():
-    # If lines_of_code missing, derive from languages
-    raw = {
-        "languages": ["TypeScript", "Python"],
-        "frameworks": ["FastAPI", "React"],
-        "total_files": 10
-    }
-    norm = ingest.normalize_analysis(raw)
-    assert isinstance(norm["languages"], dict)
-    assert "TypeScript" in norm["languages"]
-    assert "Python" in norm["languages"]
-    assert isinstance(norm["lines_of_code"], dict)
-    assert norm["lines_of_code"]["TypeScript"] > 0
-    assert norm["lines_of_code"]["Python"] > 0
-    assert norm["frameworks"] == ["FastAPI", "React"]
+def test_analysis_normalization_never_estimates_lines_of_code(tmp_path):
+    # a list of language names says nothing about size, so no line count is made up
+    norm = ingest.normalize_analysis({"languages": ["TypeScript", "Python"], "frameworks": ["FastAPI", "React"]})
+    assert norm["lines_of_code"] == {} and norm["source_files"] == 0 and norm["frameworks"] == ["FastAPI", "React"]
+    (tmp_path / "app.py").write_text("a = 1\nb = 2\nc = 3\n", encoding="utf-8")
+    (tmp_path / "notes.txt").write_text("x\n", encoding="utf-8")
+    counted = ingest.normalize_analysis({}, tmp_path)
+    assert counted["lines_of_code"] == {"Python": 3} and counted["total_files"] == 2 and counted["source_files"] == 1
 
 
 def test_analysis_normalization_top_imports_as_list():
@@ -68,21 +54,16 @@ def test_analysis_normalization_top_imports_as_list():
     assert "pytest" in norm["top_imports"]
 
 
-@pytest.mark.parametrize("project_id", [
-    "prj_agentic_qe",
-    "prj_fintech_gateway",
-    "prj_ecommerce_core",
-    "prj_mcp_market"
-])
-def test_all_seeded_projects_repo_and_tree(client, project_id):
-    r = repo_dir(project_id)
-    r.mkdir(parents=True, exist_ok=True)
-    if not (r / "README.md").exists():
-        (r / "README.md").write_text(f"# {project_id}\n\nProject repository.\n", encoding="utf-8")
-    # real source file so the real scan finds a language; startup no longer seeds fabricated analysis (plan D-04/D-05)
-    (r / "app.py").write_text("print('hello')\n", encoding="utf-8")
-    from backend.core.seed_data import seed_database
-    seed_database(force=True)  # explicit fixture seeding is allowed in tests only
+def test_uploaded_repository_has_measured_analysis_tree_and_files(client):
+    import io
+    import zipfile
+    project_id = client.post("/api/projects", json={"name": "Repo shop", "description": "repo"}).json()["id"]
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w") as bundle:
+        bundle.writestr("README.md", "# Repo shop\n")
+        bundle.writestr("app.py", "def add(a, b):\n    return a + b\n")
+        bundle.writestr("tests/test_app.py", "from app import add\n\n\ndef test_add():\n    assert add(1, 2) == 3\n")
+    assert client.post(f"/api/projects/{project_id}/repo/zip", files={"file": ("code.zip", buffer.getvalue(), "application/zip")}).status_code in (200, 201)
 
     # 1. /api/projects/{id}/repo
     res = client.get(f"/api/projects/{project_id}/repo")
@@ -132,7 +113,7 @@ def test_all_seeded_projects_repo_and_tree(client, project_id):
 
 
 def test_repo_file_404_on_missing_file(client):
-    res = client.get("/api/projects/prj_agentic_qe/repo/file?path=does_not_exist.txt")
+    res = client.get(f"/api/projects/{_project_with_repo(client)}/repo/file?path=does_not_exist.txt")
     assert res.status_code == 404
     data = res.json()
     assert "detail" in data
@@ -150,3 +131,10 @@ def test_repo_tree_empty_when_no_repo(client):
     res = client.get("/api/projects/prj_empty/repo/tree")
     assert res.status_code == 200
     assert res.json() == {"files": []}
+
+
+def _project_with_repo(client) -> str:
+    from tests.conftest import connect_test_repo
+    project_id = client.post("/api/projects", json={"name": "Repo 404", "description": ""}).json()["id"]
+    connect_test_repo(project_id)
+    return project_id

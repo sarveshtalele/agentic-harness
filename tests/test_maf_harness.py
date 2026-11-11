@@ -124,6 +124,41 @@ def test_tool_call_written_as_text_ends_the_turn_with_an_error(client, project):
             "state": {}, "tools": [], "context": [], "forwardedProps": {}}
     with client.stream("POST", "/agui/project-copilot", json=body) as response:
         text = "".join(response.iter_text())
-    assert "DSML" not in text and "AQE-MODEL-TOOL-TEXT" in text and "RUN_FINISHED" not in text
+    assert "DSML" not in text and "reached its tool budget" in text and "RUN_FINISHED" in text
     saved = client.get(f"/api/chats/{thread['id']}").json()["messages"]
-    assert saved[-1]["role"] == "assistant" and saved[-1]["content"] == "Let me check."
+    assert saved[-1]["role"] == "assistant" and saved[-1]["content"].startswith("Let me check.") and "Reply" in saved[-1]["content"]
+
+
+def test_slash_command_sends_its_instructions_to_the_model_and_stores_what_was_typed(client, project):
+    scripted = ScriptedClient([(NEEDLE, "Started.")])
+    llm.set_client_override(scripted)
+    thread = client.post(f"/api/projects/{project['id']}/chats", json={"agent": "harness"}).json()
+    _turn(client, thread["id"], "/agentic-qe:qe-start calculator --mode brownfield", "m1")
+    assert '<command name="agentic-qe:qe-start">' in scripted.calls[0] and "calculator --mode brownfield" in scripted.calls[0]
+    assert "$ARGUMENTS" not in scripted.calls[0]
+    saved = client.get(f"/api/chats/{thread['id']}").json()["messages"]
+    assert saved[0]["content"] == "/agentic-qe:qe-start calculator --mode brownfield"
+
+
+def test_memory_stays_inside_its_project(client, project):
+    """Facts and memory files written in one project never reach the harness in another project."""
+    other = client.post("/api/projects", json={"name": "Other shop", "description": "isolation"}).json()
+    fact, note = "fact-" + os.urandom(6).hex(), "note-" + os.urandom(6).hex()
+    assert client.post(f"/api/projects/{project['id']}/memories", json={"content": f"The release code is {fact}"}).status_code == 201
+    llm.set_client_override(ScriptedClient([(NEEDLE, _tool_then_text("file_memory_write", {"file_name": "release.md", "content": note}, "Saved."))]))
+    mine = client.post(f"/api/projects/{project['id']}/chats", json={"agent": "harness"}).json()
+    _turn(client, mine["id"], "Remember the release note", "m1")
+    written = [p for p in harness.HARNESS_DIR.joinpath(project["id"]).rglob("*") if p.is_file() and note in p.read_text(errors="ignore")]
+    assert written, "the memory file was written under this project's harness folder"
+    scripted = ScriptedClient([(NEEDLE, _tool_then_text("file_memory_ls", {}, "Listed."))])
+    llm.set_client_override(scripted)
+    theirs = client.post(f"/api/projects/{other['id']}/chats", json={"agent": "harness"}).json()
+    _turn(client, theirs["id"], "What do you remember?", "m2")
+    assert all(fact not in call and note not in call and "release.md" not in call for call in scripted.calls)
+    assert not [p for p in harness.HARNESS_DIR.joinpath(other["id"]).rglob("*") if p.is_file() and note in p.read_text(errors="ignore")]
+    assert client.get(f"/api/projects/{other['id']}/memories").json() == []
+    scripted = ScriptedClient([(NEEDLE, "ok")])
+    llm.set_client_override(scripted)
+    again = client.post(f"/api/projects/{project['id']}/chats", json={"agent": "harness"}).json()
+    _turn(client, again["id"], "hi", "m3")
+    assert fact in scripted.calls[0]  # the project's own facts do reach its harness

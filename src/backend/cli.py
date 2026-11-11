@@ -1,156 +1,141 @@
-"""Command Line Interface (CLI) for Agentic QE Harness.
-Allows running the complete Enterprise QE Harness directly from terminal/headless environments
-without requiring the Web UI.
+"""Terminal harness: the same MAF harness as the web and desktop app, reached through the running backend's AG-UI route.
+
+The CLI holds no agent of its own, so the terminal gets the same tools, skills, plugin commands, governance, audit
+and per-project memory as the browser.
 
 Usage:
-  bin/harness [command or prompt]
-  bin/harness /skills
-  bin/harness /projects
-  bin/harness /project <id>
-  bin/harness /gates
-  bin/harness /audit
-  bin/harness
+  bin/harness --project <project id> "prompt"     one turn, then exit
+  bin/harness --project <project id>              interactive; /help lists the commands
+  bin/harness --projects                          list the projects you can see
+
+Sign-in: ATLAS_CLI_USERNAME and ATLAS_CLI_PASSWORD, or a prompt (the password is read with getpass and never echoed).
+The backend address is ATLAS_API_URL (default http://127.0.0.1:8000).
 """
 from __future__ import annotations
 
 import argparse
-import asyncio
+import getpass
 import json
 import os
 import sys
-import time
+import uuid
 
-# Ensure src is on sys.path
-SRC_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-ROOT_DIR = os.path.abspath(os.path.join(SRC_DIR, ".."))
-if SRC_DIR not in sys.path:
-    sys.path.insert(0, SRC_DIR)
-if ROOT_DIR not in sys.path:
-    sys.path.insert(0, ROOT_DIR)
+import httpx
 
-from backend import config, db
-from backend.harness.discovery import LocalSkillDiscovery
-from backend.harness.harness_agent import HarnessAgent
-from backend.harness.llm_config import LLMConfig, load_llm_config
-from backend.harness.project_repository import global_project_repo
-from backend.harness.session import AgentSessionManager, SessionState
+HELP = """Commands:
+  /help              this list
+  /new               start a new chat thread
+  /todos             the thread's todos
+  /commands [text]   plugin commands and skills (filtered by text)
+  /exit              leave
+Anything else, including /plugin:command args, goes to the harness."""
+STATUS = {"scan_repository": "Analysing the repository", "run_tests": "Running tests", "load_skill": "Loading a skill",
+          "start_workflow": "Starting a workflow", "save_document": "Saving a document", "read_file": "Reading a file",
+          "grep": "Searching the code", "list_files": "Listing files"}
 
 
-# ANSI colors
-CYAN = "\033[96m"
-GREEN = "\033[92m"
-YELLOW = "\033[93m"
-MAGENTA = "\033[95m"
-BLUE = "\033[94m"
-RED = "\033[91m"
-BOLD = "\033[1m"
-DIM = "\033[2m"
-RESET = "\033[0m"
+class Session:
+    def __init__(self, base: str):
+        self.http = httpx.Client(base_url=base, timeout=httpx.Timeout(30, read=900))
+
+    def sign_in(self) -> None:
+        user = os.environ.get("ATLAS_CLI_USERNAME") or input("Username: ")
+        password = os.environ.get("ATLAS_CLI_PASSWORD") or getpass.getpass("Password: ")
+        got = self.http.post("/api/auth/login", json={"username": user, "password": password})
+        if got.status_code != 200:
+            raise SystemExit(f"Sign-in failed ({got.status_code}): {got.json().get('detail', got.text)[:200]}")
+
+    def get(self, path: str):
+        got = self.http.get(path)
+        if got.status_code >= 400:
+            raise SystemExit(f"{path} failed ({got.status_code}): {got.text[:300]}")
+        return got.json()
+
+    def new_thread(self, project: str) -> str:
+        got = self.http.post(f"/api/projects/{project}/chats", json={"agent": "harness", "title": "New chat"})
+        if got.status_code != 201:
+            raise SystemExit(f"Could not open a harness chat ({got.status_code}): {got.text[:300]}")
+        return got.json()["id"]
+
+    def turn(self, thread: str, text: str, out=sys.stdout) -> str:
+        """One harness turn. Prints text as it streams and a status line per tool call; returns the reply."""
+        body = {"threadId": thread, "runId": f"cli_{uuid.uuid4().hex[:12]}", "state": {}, "tools": [], "context": [], "forwardedProps": {},
+                "messages": [{"id": f"m_{uuid.uuid4().hex[:12]}", "role": "user", "content": text}]}
+        reply: list[str] = []
+        with self.http.stream("POST", "/agui/harness", json=body) as response:
+            if response.status_code != 200:
+                raise SystemExit(f"Harness refused the turn ({response.status_code}): {response.read().decode()[:300]}")
+            for line in response.iter_lines():
+                if not line.startswith("data:"):
+                    continue
+                event = json.loads(line[5:])
+                kind = event.get("type")
+                if kind == "TEXT_MESSAGE_CONTENT":
+                    reply.append(event["delta"])
+                    out.write(event["delta"])
+                    out.flush()
+                elif kind == "TOOL_CALL_START":
+                    name = event.get("toolCallName", "")
+                    out.write(f"\n  ... {STATUS.get(name, 'Using ' + name)}\n")
+                elif kind == "RUN_ERROR":
+                    out.write(f"\nError {event.get('code', '')}: {event.get('message', '')}\n")
+        out.write("\n")
+        return "".join(reply)
 
 
-def print_banner():
-    print(f"{CYAN}{BOLD}╔═══════════════════════════════════════════════════════════════════╗{RESET}")
-    print(f"{CYAN}{BOLD}║         ⚡ AGENTIC QE HARNESS — TERMINAL COMMAND CENTER             ║{RESET}")
-    print(f"{CYAN}{BOLD}╚═══════════════════════════════════════════════════════════════════╝{RESET}")
-    print(f"{DIM}Autonomous Quality Engineering · 58 Local Skills · SQLite WAL Knowledge Base{RESET}\n")
-
-
-async def run_prompt_stream(harness: HarnessAgent, session: SessionState, prompt: str, llm_conf: LLMConfig):
-    """Streams the agent output directly to stdout in real-time."""
-    in_thought = False
-    async for sse_chunk in harness.run(session, prompt, llm_conf):
-        for line in sse_chunk.splitlines():
-            line = line.strip()
-            if not line.startswith("data: "):
-                continue
-            payload = line[6:]
-            try:
-                event = json.loads(payload)
-                ev_type = event.get("type")
-                if ev_type == "TEXT_CHUNK":
-                    if in_thought:
-                        print(f"{RESET}")
-                        in_thought = False
-                    sys.stdout.write(event.get("chunk", ""))
-                    sys.stdout.flush()
-                elif ev_type == "THOUGHT_CHUNK":
-                    if not in_thought:
-                        print(f"{MAGENTA}{DIM}[Reasoning] ", end="")
-                        in_thought = True
-                    sys.stdout.write(event.get("thought", ""))
-                    sys.stdout.flush()
-                elif ev_type == "TOOL_INVOKED":
-                    tool = event.get("tool", {})
-                    print(f"\n{YELLOW}⚙️  Invoking Tool: {tool.get('name')} {DIM}{tool.get('args')}{RESET}")
-                elif ev_type == "GATE_APPROVAL_REQUIRED":
-                    appr = event.get("approval", {})
-                    print(f"\n{RED}{BOLD}🚨 Human Approval Required for Gate G{appr.get('gateNumber')}:{RESET} {appr.get('title')}")
-                elif ev_type == "AGENT_SWITCH":
-                    print(f"\n{BLUE}🔄 Handoff to Agent: {BOLD}{event.get('targetAgent')}{RESET}")
-                elif ev_type == "RUN_FINISHED":
-                    if in_thought:
-                        print(f"{RESET}")
-                        in_thought = False
-                    print(f"\n{DIM}✓ Execution finished in {event.get('durationMs', 0)}ms{RESET}\n")
-            except Exception:
-                pass
-
-
-def repl(harness: HarnessAgent, session_manager: AgentSessionManager, llm_conf: LLMConfig):
-    """Interactive Read-Eval-Print Loop."""
-    print_banner()
-    session = session_manager.create_session("CLI Harness Session", "plan")
-    skills_count = len(harness.skill_discovery.list_skills())
-    projects = global_project_repo.list_projects()
-
-    print(f"  {GREEN}●{RESET} Model: {BOLD}{llm_conf.model}{RESET}")
-    print(f"  {GREEN}●{RESET} Mode: {YELLOW}[{session.mode.upper()}]{RESET}")
-    print(f"  {GREEN}●{RESET} Local Skills: {BOLD}{skills_count}{RESET} loaded")
-    print(f"  {GREEN}●{RESET} Registered Projects: {BOLD}{len(projects)}{RESET} in database")
-    print(f"\nType {CYAN}/help{RESET} for commands or {CYAN}/exit{RESET} to quit.\n")
-
+def _repl(session: Session, project: str) -> None:
+    thread = session.new_thread(project)
+    print(f"Harness on project {project}, thread {thread}. /help lists commands.")
     while True:
         try:
-            mode_badge = f"{YELLOW}[PLAN]{RESET}" if session.mode == "plan" else f"{GREEN}[EXECUTE]{RESET}"
-            prompt_input = input(f"{BOLD}harness{RESET} {mode_badge} > ").strip()
-            if not prompt_input:
-                continue
-            if prompt_input.lower() in ("/exit", "/quit", "exit", "quit"):
-                print(f"\n{CYAN}Session saved. Exiting Agentic QE Harness. Goodbye!{RESET}")
-                break
-            
-            asyncio.run(run_prompt_stream(harness, session, prompt_input, llm_conf))
-            session_manager.save_session(session)
-        except (KeyboardInterrupt, EOFError):
-            print(f"\n\n{CYAN}Harness interrupted. Exiting.{RESET}")
-            break
+            text = input("\nharness> ").strip()
+        except (EOFError, KeyboardInterrupt):
+            print()
+            return
+        if not text:
+            continue
+        if text in ("/exit", "/quit"):
+            return
+        if text == "/help":
+            print(HELP)
+        elif text == "/new":
+            thread = session.new_thread(project)
+            print(f"New thread {thread}")
+        elif text == "/todos":
+            todos = session.get(f"/api/chats/{thread}/todos")
+            print("\n".join(f"[{'x' if t['done'] else ' '}] {t['title']}" for t in todos["todos"]) or "No todos yet")
+        elif text.startswith("/commands"):
+            needle = text[len("/commands"):].strip().lower()
+            for entry in session.get("/api/plugins/slash"):
+                if needle in entry["name"].lower():
+                    print(f"/{entry['name']:<40} {entry['kind']:<8} {entry['description'][:70]}")
+        else:
+            session.turn(thread, text)
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Agentic QE Terminal Harness")
-    parser.add_argument("query", nargs="*", help="Optional command or query to execute immediately")
-    parser.add_argument("--mode", choices=["plan", "execute"], default="plan", help="Execution mode")
-    parser.add_argument("--model", help="LLM model override")
-    args = parser.parse_args()
-
-    # Ensure DB is migrated; seeding removed because it wrote fabricated data (plan D-04/D-05)
-    db.migrate()
-
-    llm_conf = load_llm_config()
-    if args.model:
-        llm_conf.model = args.model
-
-    session_manager = AgentSessionManager()
-    skill_discovery = LocalSkillDiscovery(ROOT_DIR)
-    harness = HarnessAgent(ROOT_DIR, skill_discovery=skill_discovery)
-
-    if args.query:
-        full_query = " ".join(args.query).strip()
-        session = session_manager.create_session("Single Run Session", args.mode)
-        asyncio.run(run_prompt_stream(harness, session, full_query, llm_conf))
-    else:
-        repl(harness, session_manager, llm_conf)
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(prog="harness", description="Agentic QE Platform harness in the terminal")
+    parser.add_argument("--project", help="project id")
+    parser.add_argument("--projects", action="store_true", help="list the projects you can see and exit")
+    parser.add_argument("prompt", nargs="*", help="one prompt; without it the harness is interactive")
+    args = parser.parse_args(argv)
+    session = Session(os.environ.get("ATLAS_API_URL", "http://127.0.0.1:8000"))
+    try:
+        session.sign_in()
+        if args.projects or not args.project:
+            for project in session.get("/api/projects"):
+                print(f"{project['id']:<24} {project['name']}")
+            if not args.projects:
+                print("\nPick one with --project <id>.")
+            return 0
+        if args.prompt:
+            session.turn(session.new_thread(args.project), " ".join(args.prompt))
+        else:
+            _repl(session, args.project)
+    except httpx.HTTPError as exc:
+        raise SystemExit(f"Cannot reach the backend at {session.http.base_url}: {exc}. Start it with: python scripts/dev.py backend") from None
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

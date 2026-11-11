@@ -30,6 +30,7 @@ METRICS_BY_AGENT = {
     "feature-engineer": (False, False, "Named functions and hidden tests", "Hidden tests pass, none broken"),
     "project-copilot": (True, True, "Question and answer key", "Response relevancy, right tool called"),
     "harness": (True, True, "Task and answer key", "Right skill loaded, todos finished only when done, no approvals"),
+    "skill-creator": (False, True, "Eval cases with assertions, run with and without the skill", "Assertion pass rate with and without the skill, uplift"),  # cites no repository files, so groundedness is n/a
 }
 
 

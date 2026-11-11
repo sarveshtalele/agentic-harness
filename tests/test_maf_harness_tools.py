@@ -80,7 +80,8 @@ def test_harness_uses_scan_tool_and_todos_show_over_the_api(client):
 
     def reply(_text):
         calls["n"] += 1
-        return {1: {"call": "todos_add", "args": {"todos": [{"title": "Scan the repository"}]}}, 2: {"call": "scan_repository", "args": {}}}.get(calls["n"], "Found one secret.")
+        return {1: {"call": "todos_add", "args": {"todos": [{"title": "Scan the repository"}]}}, 2: {"call": "load_tools", "args": {"names": ["scan_repository"]}},  # plan M4: found and loaded first
+                3: {"call": "scan_repository", "args": {}}}.get(calls["n"], "Found one secret.")
 
     llm.set_client_override(ScriptedClient([(NEEDLE, reply)]))
     thread = client.post(f"/api/projects/{pid}/chats", json={"agent": "harness"}).json()

@@ -116,7 +116,10 @@ def main(argv: list[str]) -> int:
     out.mkdir(parents=True, exist_ok=True)
     (out / "report.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
     (out / "REPORT.md").write_text(markdown(report), encoding="utf-8")
-    print(f"{report['overall']}: {out / 'REPORT.md'}")
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import evidence_html  # noqa: E402 - sibling script, stdlib only
+    page = evidence_html.write(report, out, list(levels.values()), screens)
+    print(f"{report['overall']}: {out / 'REPORT.md'} and {page}")
     return 0 if report["overall"] == "PASS" else 1
 
 

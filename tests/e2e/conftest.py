@@ -14,6 +14,7 @@ from playwright.sync_api import sync_playwright
 ROOT = Path(__file__).resolve().parents[2]
 EVIDENCE = ROOT / "docs" / "evidence"
 UI = "http://127.0.0.1:3010"
+E2E_DIST = os.environ.get("ATLAS_E2E_DIST_DIR", ".next-e2e")  # a fresh folder when the old build cache is stale
 API = "http://127.0.0.1:8010"
 state: dict = {}
 
@@ -40,7 +41,7 @@ def api_get(path: str) -> bytes:
 
 @pytest.fixture(scope="session")
 def servers():
-    env = {**os.environ, "PYTHONPATH": str(ROOT / "src"), "ATLAS_BACKEND_URL": API, "ATLAS_DIST_DIR": ".next-e2e", "ATLAS_ALLOWED_ORIGINS": UI}
+    env = {**os.environ, "PYTHONPATH": str(ROOT / "src"), "ATLAS_BACKEND_URL": API, "ATLAS_DIST_DIR": E2E_DIST, "ATLAS_ALLOWED_ORIGINS": UI}
     EVIDENCE.mkdir(parents=True, exist_ok=True)
     frontend_dir = ROOT / "src" / "frontend"
     npm = shutil.which("npm")

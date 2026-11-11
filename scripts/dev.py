@@ -10,6 +10,7 @@
   python scripts/dev.py smoke      browser smoke test on its own ports with no model (used by CI)
   python scripts/dev.py e2e        Playwright end-to-end tests against real servers and the real model
   python scripts/dev.py evidence   run tests and smoke (add --e2e for end to end) into JUnit, then write the evidence report
+  python scripts/dev.py azure-local  run the two Azure zips locally in the web profile (add --check to check and stop)
 """
 from __future__ import annotations
 
@@ -155,6 +156,7 @@ def evidence() -> None:
 
 COMMANDS = {
     "evidence": evidence,
+    "azure-local": lambda: run([sys.executable, str(ROOT / "scripts" / "azure_local.py"), *sys.argv[2:]]),
     "up": up,
     "setup": setup,
     "backend": lambda: run(BACKEND),

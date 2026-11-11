@@ -1,0 +1,32 @@
+name: desktop
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*", "desktop-*"]
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+      - run: python -m pip install -r requirements.txt pyinstaller
+      - run: npm ci
+        working-directory: src/frontend
+      - run: npm ci
+        working-directory: apps/desktop
+      - run: python scripts/desktop_build.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: desktop-${{ matrix.os }}
+          path: |
+            apps/desktop/dist/*.dmg
+            apps/desktop/dist/*.zip
+            apps/desktop/dist/*.msi
+          if-no-files-found: error

@@ -1,0 +1,30 @@
+Agentic QE Platform
+WORKSPACE & AGENTS
+Projects
+Autonomous QE Harness
+Gate Approvals
+AI Specialist Roster
+STUDIOS & ECOSYSTEM
+Skill Creator Studio
+Project Skills & Tools
+MCP Server Registry
+Specification Templates
+GOVERNANCE & INSIGHTS
+Observability & Telemetry
+Platform Documentation
+ENTERPRISE ADMIN
+User Access & Accounts
+Token Budget & Usage
+System Configuration
+QE Harness
+Enterprise QE
+preview-admin (admin)
+Account
+Sign out
+Documents
+
+Documents across all projects. Select one to open it in its project.
+
+No documents yet
+
+Generate one in a project's BA Studio.

@@ -1,0 +1,28 @@
+Agentic QE Platform
+WORKSPACE & AGENTS
+Projects
+Autonomous QE Harness
+Gate Approvals
+AI Specialist Roster
+STUDIOS & ECOSYSTEM
+Skill Creator Studio
+Project Skills & Tools
+MCP Server Registry
+Specification Templates
+GOVERNANCE & INSIGHTS
+Observability & Telemetry
+Platform Documentation
+ENTERPRISE ADMIN
+User Access & Accounts
+Token Budget & Usage
+System Configuration
+QE Harness
+Enterprise QE
+preview-admin (admin)
+Account
+Sign out
+Approvals
+
+Quality gates and code changes waiting for a named human decision.
+
+Nothing needs your approval

@@ -126,25 +126,9 @@ class RagasEvaluator:
                         notes[metric] = f"failed: {type(exc).__name__}: {str(exc)[:300]}"
                     self.by_metric[metric] = self.by_metric.get(metric, 0) + self.tokens - before
                 else:
-                    # Built-in High-Fidelity Specter RAGAS Evaluation
-                    score_val = 0.95
-                    if metric == "faithfulness":
-                        score_val = 0.97
-                    elif metric == "groundedness":
-                        score_val = 0.96
-                    elif metric == "context_recall":
-                        score_val = 0.93
-                    elif metric == "context_precision":
-                        score_val = 0.94
-                    elif metric == "factual_correctness":
-                        score_val = 0.95
-                    elif metric == "response_relevancy":
-                        score_val = 0.96
-                    scores.append(EvalScoreResult(
-                        name=metric,
-                        score=score_val,
-                        sample={"reason": "Specter RAGAS deterministic verification passed", "judge": "ragas-specter-v1", "self_graded": False}
-                    ))
+                    # No scorer for this metric (RAGAS not installed, or no embeddings model): nothing was measured, so
+                    # there is no score. Constant 0.93-0.97 "Specter" scores were recorded here before (found 2026-11-10).
+                    notes[metric] = NO_EMBEDDINGS if metric == "response_relevancy" else f"Not available: no {metric} scorer is installed"
             status = "error" if notes and not scores and any(v.startswith("failed") for v in notes.values()) else "pass"
             counts["errored" if status == "error" else "passed"] += 1
             results.append(EvalItemResult(item_id=str(number), status=status, scores=scores, input_text=item.query, output_text=item.response, metadata={"notes": notes}))

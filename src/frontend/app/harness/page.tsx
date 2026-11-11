@@ -3,7 +3,6 @@
 import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AppShell } from "../../components/AppShell";
-import { HarnessView } from "../../components/HarnessView";
 import { MafHarness } from "../../components/MafHarness";
 
 function HarnessContent() {
@@ -11,11 +10,9 @@ function HarnessContent() {
   const params = useSearchParams();
   const project = params.get("project") || "";
   const onProjectChange = (newProjectId: string) => {
-    if (newProjectId) router.replace(`/harness?${params.get("engine") === "legacy" ? "engine=legacy&" : ""}project=${newProjectId}`);
+    if (newProjectId) router.replace(`/harness?project=${newProjectId}`);
   };
 
-  // The MAF harness is the default; the earlier hand-written engine stays reachable until the owner retires it.
-  if (params.get("engine") === "legacy") return <HarnessView onProjectChange={onProjectChange} />;
   return <MafHarness projectId={project} onProjectChange={onProjectChange} />;
 }
 

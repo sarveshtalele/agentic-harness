@@ -1,0 +1,33 @@
+{
+  "name": "agentic-qe-desktop",
+  "productName": "Agentic QE Platform",
+  "version": "0.1.0",
+  "description": "Agentic QE Platform desktop app: Electron shell around the local MAF backend and Next.js UI",
+  "main": "main.js",
+  "private": true,
+  "author": "Agentic QE Platform",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^39.0.0",
+    "electron-builder": "^26.0.0"
+  },
+  "build": {
+    "appId": "com.agenticqe.platform",
+    "productName": "Agentic QE Platform",
+    "directories": { "output": "dist" },
+    "files": ["main.js", "preload.js", "setup.html", "lib/**/*", "package.json"],
+    "extraResources": [
+      { "from": "build/backend", "to": "backend" },
+      { "from": "build/ui", "to": "ui" }
+    ],
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "target": [{ "target": "dmg", "arch": ["arm64", "x64"] }, { "target": "zip", "arch": ["arm64", "x64"] }]
+    },
+    "win": { "target": [{ "target": "msi", "arch": ["x64"] }] },
+    "msi": { "oneClick": false, "perMachine": false }
+  }
+}

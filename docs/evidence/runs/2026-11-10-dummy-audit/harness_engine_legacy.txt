@@ -1,0 +1,104 @@
+Agentic QE Platform
+WORKSPACE & AGENTS
+Projects
+Autonomous QE Harness
+Gate Approvals
+AI Specialist Roster
+STUDIOS & ECOSYSTEM
+Skill Creator Studio
+Project Skills & Tools
+MCP Server Registry
+Specification Templates
+GOVERNANCE & INSIGHTS
+Observability & Telemetry
+Platform Documentation
+ENTERPRISE ADMIN
+User Access & Accounts
+Token Budget & Usage
+System Configuration
+Autonomous QE Harness
+Microsoft Agent Framework
+preview-admin (admin)
+Account
+Sign out
+Autonomous Multi-Agent Loops
+Plan & Execute Engine
+Project:
+Audit empty
+──────────
++ Create New Project...
+CONVERSATIONS
+New Conversation
+Clear All
+Projects
+Audit empty
+Audit empty
+(prj_47f687d2afc5)
+⚡ Cached: 0 tokens
+0/8 Gates
+Autonomous QE Harness Active · Audit empty
+
+Select a core Quality Engineering goal below, or type your instructions. The harness automatically routes tasks to specialized engineering skills.
+
+Create BRD
+Requirements
+
+Generate full Business Requirements Document with 8 quality gates & compliance
+
+Customize & Send
+Create PRD
+Product
+
+Author Product Requirements Document with user stories & Gherkin criteria
+
+Customize & Send
+Run Testing Lifecycle
+Full QE Loop
+
+Execute autonomous test engineering lifecycle (Gate 0 through Gate 8 sign-off)
+
+Customize & Send
+Feature Building
+Sandbox Build
+
+Implement and verify features end-to-end in project sandbox
+
+Customize & Send
+GitHub Bug Fix & PR
+Defect Repair
+
+Scan repository, diagnose broken tests or defect drift, heal code & create PR
+
+Customize & Send
+Run Security Audit
+Security Audit
+
+Perform Cloudflare Zero-Trust & NVIDIA Skill Specter security evaluation
+
+Customize & Send
+Connect & Scan Repo
+Intake Scan
+
+Clone target repository into sandbox, scan AST manifests, and generate test strategy
+
+Customize & Send
+Create Agent Skill
+Agent Skill
+
+Synthesize, test, and package an autonomous agent skill conforming to MAF standards
+
+Customize & Send
+Configured Model
+⚡ Execute Mode
+Type / for skills · Enter to send · Shift+Enter for newline
+Project: Audit empty
+Skills (0)
+Tasks (0)
+Evals
+Ledger (0)
+Loaded Skills (0)
+⚡ Live Context
+
+No Skills Loaded Yet
+
+Skills are loaded dynamically into session context as you execute goals or instruct the harness.

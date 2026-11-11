@@ -1,0 +1,95 @@
+Agentic QE Platform
+WORKSPACE & AGENTS
+Projects
+Autonomous QE Harness
+Gate Approvals
+AI Specialist Roster
+STUDIOS & ECOSYSTEM
+Skill Creator Studio
+Project Skills & Tools
+MCP Server Registry
+Specification Templates
+GOVERNANCE & INSIGHTS
+Observability & Telemetry
+Platform Documentation
+ENTERPRISE ADMIN
+User Access & Accounts
+Token Budget & Usage
+System Configuration
+QE Harness
+Enterprise QE
+preview-admin (admin)
+Account
+Sign out
+Model Context Protocol (MCP) Servers
+
+Connect, manage, and authorize local NPX tools and remote SSE/HTTP MCP servers with runtime sandboxing.
+
+Connect MCP Server
+5
+Total Servers
+5
+Connected Servers
+92
+Total Tools
+92
+Authorized Tools
+Type:
+All Server Types
+Local NPX Servers
+Remote SSE Servers
+Playwright Browser Automation
+Local NPX
+Connected
+npx -y @playwright/mcp@latest
+Authorized Tools:
+71 / 71
+active
+Transport:
+STDIO
+Disable All Tools
+View & Manage Tools (71)
+Local NPX Filesystem
+Local NPX
+Connected
+npx -y @modelcontextprotocol/server-filesystem
+Authorized Tools:
+8 / 8
+active
+Transport:
+STDIO
+Disable All Tools
+View & Manage Tools (8)
+Local NPX Memory
+Local NPX
+Connected
+npx -y @modelcontextprotocol/server-memory
+Authorized Tools:
+6 / 6
+active
+Transport:
+STDIO
+Disable All Tools
+View & Manage Tools (6)
+Local NPX Fetch
+Local NPX
+Connected
+npx -y @modelcontextprotocol/server-fetch
+Authorized Tools:
+1 / 1
+active
+Transport:
+STDIO
+Disable All Tools
+View & Manage Tools (1)
+Remote GitHub MCP
+Remote SSE
+Connected
+https://api.githubcopilot.com/mcp
+Authorized Tools:
+6 / 6
+active
+Transport:
+SSE
+Disable All Tools
+View & Manage Tools (6)

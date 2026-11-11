@@ -1,0 +1,43 @@
+All projects
+
+Audit empty
+
+CORE REPOSITORY
+Overview
+Codebase & AST Discovery
+Project Specifications
+AI SDLC & STUDIOS
+BA Studio (BRD & Gherkin)
+Skill Creator Studio
+Feature Implementation
+Defect Scanner & Fixes
+Autonomous QE & AI SDLC
+GOVERNANCE & TELEMETRY
+Quality Gate Approvals
+Governance & Policies
+Execution Runs & Metrics
+Telemetry & Logs
+Prompt Management
+MCP Servers
+Templates
+Settings
+Audit empty
+prj_47f687d2afc5
+QE Harness
+No model configured
+preview-admin (admin)
+Account
+Sign out
+Governed Project Documents
+
+Versioned requirements, test plans, and release evidence isolated to this project with unique governance IDs.
+
+Author New Specification from Template
+Business Requirements Document (BRD)
+Product Requirements Document
+User Stories
+Create Document
+
+No documents found
+
+Generate one in BA Studio or start from a template above.

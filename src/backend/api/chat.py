@@ -8,6 +8,7 @@ from fastapi.responses import (
 )
 from pydantic import BaseModel, Field
 
+from backend import config
 from backend.api.common import _project
 from backend.core import auth
 from backend.db import db, row, rows
@@ -31,6 +32,12 @@ class ThreadPatch(BaseModel):
 
 class MemoryIn(BaseModel):
     content: str = Field(min_length=1)
+
+
+@router.get("/api/profile")
+def profile():
+    """Which deployment profile this server runs (web, local, desktop), so the UI can say what is switched off."""
+    return {"profile": config.PROFILE}
 
 
 @router.get("/api/chat/agents")
@@ -65,14 +72,16 @@ def get_chat(thread_id: str):
 
 @router.get("/api/chats/{thread_id}/todos")
 async def chat_todos(thread_id: str):
-    """The harness's own MAF todo list for this chat thread, read through MAF's TodoFileStore. Empty means no todos yet."""
+    """The harness's own MAF todo list for this chat thread and person, read through MAF's TodoFileStore. Empty means no todos yet."""
+    harness.require_desktop()
     with db() as con:
         thread = row(con.execute("SELECT project_id, agent FROM chat_threads WHERE id=?", (thread_id,)))
     if not thread:
         raise HTTPException(404, f"Chat thread not found: {thread_id}")
     if thread["agent"] != harness.AGENT:
         return {"todos": [], "note": "Only the project harness keeps a todo list"}
-    items, _ = await TodoFileStore(harness.HARNESS_DIR / thread["project_id"] / "todos").load_state(AgentSession(session_id=thread_id), source_id="todo")
+    session = AgentSession(session_id=harness.session_id(thread["project_id"], auth.acting_user(thread["project_id"]), thread_id))
+    items, _ = await TodoFileStore(harness.HARNESS_DIR / thread["project_id"] / "todos").load_state(session, source_id="todo")
     return {"todos": [{"id": t.id, "title": t.title, "description": t.description, "done": t.is_complete} for t in items]}
 
 

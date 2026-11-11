@@ -17,17 +17,15 @@ SRC = Path(__file__).resolve().parents[1] / "src"
 
 DECIDE_ALLOWED = {
     "backend/core/gates.py": "defines decide",
-    "backend/maf/engine.py": "applies a decision a signed-in human sent through the API",
-    "backend/api/governance.py": "human route, signer from auth.signer()",
+    "backend/maf/engine/__init__.py": "applies a decision a signed-in human sent through the API",
+    "backend/api/governance/decisions.py": "human route, signer from auth.signer()",
     "backend/api/runs.py": "human route, signer from auth.signer()",
     "backend/core/documents.py": "set_status cascades a human document approval",
-    "backend/harness/approval_manager.py": "defines resolve_approval",
 }
-APPROVE_DOC_ALLOWED = {"backend/api/documents.py", "backend/maf/workflows/ba.py", "backend/core/documents.py"}
+APPROVE_DOC_ALLOWED = {"backend/api/documents/versions.py", "backend/maf/workflows/ba.py", "backend/core/documents.py"}
 SQL_WRITE = re.compile(r"""(?i)\b(?:(?:INSERT(?:\s+OR\s+\w+)?|REPLACE)\s+INTO|UPDATE)\s+["`]?(?:gates|approvals)\b""")
-SQL_ALLOWED = {"backend/core/gates.py", "backend/maf/engine.py"}
-# ponytail: known legacy writer, not called at startup since P1 (plan D-05); owner decides its fate (decision 3).
-SQL_KNOWN_LEGACY = {"backend/core/seed_data.py"}
+SQL_ALLOWED = {"backend/core/gates.py", "backend/maf/engine/__init__.py", "backend/maf/engine/execution.py"}
+SQL_KNOWN_LEGACY: set[str] = set()  # the seed writer was retired 2026-11-10 (owner yes)
 DECISION_MODULES = {"gates", "engine", "approval_manager", "global_approval_manager"}
 DECISION_FUNCS = {"decide", "resolve_approval"}
 
@@ -115,25 +113,28 @@ def _snapshot(project_id: str) -> tuple:
 
 @pytest.mark.asyncio
 async def test_every_harness_tool_leaves_gates_and_approvals_unchanged():
-    from backend.config import repo_dir
+    """Every tool the MAF harness can call, invoked with approval-shaped arguments, changes no gate, approval or document status."""
     from backend.db import db, now
-    from backend.harness.approval_manager import global_approval_manager
-    from backend.harness.qe_tools import build_qe_tools
+    from backend.maf import tools
+    from tests.conftest import connect_test_repo
 
     pid = "prj_gate4_behaviour"
     with db() as con:
         con.execute("INSERT OR IGNORE INTO projects (id, name, description, created_at, updated_at, archived, owner_id) "
                     "VALUES (?, 'Gate 4 behaviour', '', ?, ?, 0, 'admin')", (pid, now(), now()))
-    repo_dir(pid).mkdir(parents=True, exist_ok=True)
-    (repo_dir(pid) / "app.py").write_text("def add(a, b):\n    return a + b\n", encoding="utf-8")
+    connect_test_repo(pid)
+    started = []
 
-    before, pending_before = _snapshot(pid), global_approval_manager.get_pending_list()
-    tools = build_qe_tools(str(Path.cwd()))
-    assert tools, "no harness tools registered, so the check would prove nothing"
-    for tool in tools:
+    def start_run(*args, **kwargs):  # a workflow start is recorded, not run: runs open gates for humans, never decide them
+        started.append(args)
+        raise RuntimeError("not started in this test")
+
+    every = tools.repo_tools(pid) + tools.document_tools(pid) + tools.chat_tools(pid, "thr_gate4", start_run) + tools.harness_tools(pid, "thr_gate4", start_run)
+    assert every, "no harness tools registered, so the check would prove nothing"
+    before = _snapshot(pid)
+    for tool in every:
         try:
-            await tool.execute({"projectId": pid, "approvalId": "appr_gate4", "approved": True}, {"projectId": pid})
+            await tool.invoke(arguments={"approval_id": "appr_gate4", "approved": True, "gate": 4, "decision": "approve"})
         except Exception:  # a refusal or a missing argument is fine; only state changes matter here
             pass
     assert _snapshot(pid) == before
-    assert global_approval_manager.get_pending_list() == pending_before

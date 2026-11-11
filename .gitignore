@@ -62,3 +62,8 @@ scratch/
 
 # Local preview config with generated throwaway test credentials
 .claude/launch.json
+
+# desktop app build outputs
+apps/desktop/build/
+apps/desktop/dist/
+apps/desktop/node_modules/

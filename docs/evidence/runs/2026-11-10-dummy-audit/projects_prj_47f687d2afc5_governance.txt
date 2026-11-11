@@ -1,0 +1,73 @@
+All projects
+
+Audit empty
+
+CORE REPOSITORY
+Overview
+Codebase & AST Discovery
+Project Specifications
+AI SDLC & STUDIOS
+BA Studio (BRD & Gherkin)
+Skill Creator Studio
+Feature Implementation
+Defect Scanner & Fixes
+Autonomous QE & AI SDLC
+GOVERNANCE & TELEMETRY
+Quality Gate Approvals
+Governance & Policies
+Execution Runs & Metrics
+Telemetry & Logs
+Prompt Management
+MCP Servers
+Templates
+Settings
+Audit empty
+prj_47f687d2afc5
+QE Harness
+No model configured
+preview-admin (admin)
+Account
+Sign out
+Governance
+
+Signed gate decisions and a hash-chained audit ledger.
+
+Quality gates
+G0 Intake
+Scope, mode and read-only boundaries		pending
+G1 Requirements
+Requirements and stories with evidence		pending
+G2 Plan
+Risk-ranked test strategy		pending
+G3 Design
+Test cases with deterministic oracles		pending
+G4 Generate
+Generated test source reviewed		pending
+G5 Release
+Executed evidence signed off		pending
+Awaiting approval (0)
+
+Nothing is waiting.
+
+Record a gate decision
+
+For decisions made outside a run, such as revoking an approval. Rejecting a gate clears later approvals.
+
+Gate
+G0 Intake
+G1 Requirements
+G2 Plan
+G3 Design
+G4 Generate
+G5 Release
+Signing as
+
+preview-admin
+
+Reason
+Approve
+Reject
+Audit ledger
+Chain valid, 1 entries
+#	Time	Actor	Action	Target	Hash
+1	Nov 10, 2026, 7:03 PM	Administrator	project.created	prj_47f687d2afc5	5ccd1bb22c

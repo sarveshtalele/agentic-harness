@@ -1,0 +1,48 @@
+Agentic QE Platform
+WORKSPACE & AGENTS
+Projects
+Autonomous QE Harness
+Gate Approvals
+AI Specialist Roster
+STUDIOS & ECOSYSTEM
+Skill Creator Studio
+Project Skills & Tools
+MCP Server Registry
+Specification Templates
+GOVERNANCE & INSIGHTS
+Observability & Telemetry
+Platform Documentation
+ENTERPRISE ADMIN
+User Access & Accounts
+Token Budget & Usage
+System Configuration
+QE Harness
+Enterprise QE
+preview-admin (admin)
+Account
+Sign out
+Users
+
+Create accounts and tick the models each may use, and set token limits, allocation, and active dates. Each user sees only their own projects.
+
+New user
+Username
+Password
+At least 10 characters.
+Role
+Developer
+QE lead
+BA
+Viewer (read only)
+Token allocation
+Blank is unlimited.
+Active from
+Active until
+
+No models yet. Add one under Settings, then tick it here.
+
+Create user
+
+No users yet
+
+Create the first one above.

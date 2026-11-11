@@ -1,0 +1,905 @@
+{
+  "plan": {
+    "status": 201,
+    "body": {
+      "id": "spl_56b6c86ec65b",
+      "project_id": "prj_efc5ace946da",
+      "author": "admin",
+      "kind": "instructions",
+      "request": "A skill that writes release notes in this house format from a list of merged changes.",
+      "source_type": "text",
+      "source_ref": "",
+      "source_sha256": "ac55fe2957f7f4b0eaa333d4792026fe209a0207d8508931e8b01afa5d237e6e",
+      "revise": "",
+      "status": "draft",
+      "plan_sha256": "",
+      "approved_by": "",
+      "approved_at": null,
+      "prompt_ref": "skill-creator@v1:db120a7b06d2",
+      "draft_sha256": "",
+      "generated_at": null,
+      "created_at": "2026-11-10T17:19:54+00:00",
+      "plan": {
+        "description": "Generates release notes in a standard house format from a list of merged changes. Groups entries under the headings Added, Changed, and Fixed, using a ticket id (e.g., QE-123) as the prefix for each line. Entries without a ticket id are rejected. Breaking changes are marked with BREAKING in capitals. Use when a list of merged pull requests or changelog items needs to be transformed into structured release notes for a version release.",
+        "eval_cases": [
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "## Release Notes"
+              },
+              {
+                "kind": "contains",
+                "value": "### Added"
+              },
+              {
+                "kind": "contains",
+                "value": "### Changed"
+              },
+              {
+                "kind": "contains",
+                "value": "### Fixed"
+              },
+              {
+                "kind": "contains",
+                "value": "BREAKING"
+              }
+            ],
+            "input": "QE-123 New login page\nQE-456 Fixed timeout issue\nQE-789 Updated API endpoint\nQE-012 BREAKING Removed legacy system\nQE-999 Added dark mode\nQE-111 Changed footer layout"
+          },
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "### Added"
+              },
+              {
+                "kind": "not_contains",
+                "value": "no-ticket"
+              }
+            ],
+            "input": "QE-100 New feature\nno-ticket something"
+          },
+          {
+            "assertions": [
+              {
+                "kind": "regex",
+                "value": "^## Release Notes"
+              },
+              {
+                "kind": "contains",
+                "value": "BREAKING"
+              },
+              {
+                "kind": "contains",
+                "value": "QE-001"
+              }
+            ],
+            "input": "QE-001 Fix crash\nQE-002 Add tests\nQE-003 BREAKING Remove v1"
+          },
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "QE-100"
+              },
+              {
+                "kind": "regex",
+                "value": "Minor\\s*\\n.*QE-100"
+              }
+            ],
+            "input": "QE-100 Minor\nQE-100 Another item"
+          },
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "## Release Notes"
+              },
+              {
+                "kind": "not_contains",
+                "value": "without ticket"
+              }
+            ],
+            "input": "random line without ticket"
+          },
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "### Added"
+              },
+              {
+                "kind": "contains",
+                "value": "### Changed"
+              },
+              {
+                "kind": "contains",
+                "value": "### Fixed"
+              }
+            ],
+            "input": "QE-001 Added\nQE-002 Changed\nQE-003 Fixed"
+          }
+        ],
+        "files": [
+          {
+            "path": "SKILL.md",
+            "purpose": "Contains the full definition of the skill, including the steps, decision rules, and links to references for details."
+          },
+          {
+            "path": "assets/release-notes-template.md",
+            "purpose": "Defines the output layout for the release notes."
+          }
+        ],
+        "formats": [
+          {
+            "name": "release-notes",
+            "purpose": "Structured release notes with the three sections Added, Changed, Fixed and BREAKING markers.",
+            "template_path": "assets/release-notes-template.md"
+          }
+        ],
+        "name": "writing-release-notes",
+        "subagents": [],
+        "tasks": [
+          "Receive the input list of merged changes, each expected to contain a ticket id (like QE-123), a description, and an optional BREAKING flag.",
+          "Parse each entry and reject any that does not include a ticket id.",
+          "Assign each valid entry to one of three categories: Added (new features), Changed (modifications or improvements), Fixed (bug fixes).",
+          "Sort entries within each category alphabetically by ticket id.",
+          "Format the output with the heading '## Release Notes' followed by three subheadings '### Added', '### Changed', '### Fixed' and list the entries under the appropriate subheading, prefixing each line with the ticket id and marking breaking changes with BREAKING.",
+          "Return the formatted release notes as plain text."
+        ]
+      },
+      "checks": [],
+      "source_chars": 221
+    }
+  },
+  "approve": {
+    "status": 200,
+    "body": {
+      "id": "spl_56b6c86ec65b",
+      "project_id": "prj_efc5ace946da",
+      "author": "admin",
+      "kind": "instructions",
+      "request": "A skill that writes release notes in this house format from a list of merged changes.",
+      "source_type": "text",
+      "source_ref": "",
+      "source_sha256": "ac55fe2957f7f4b0eaa333d4792026fe209a0207d8508931e8b01afa5d237e6e",
+      "revise": "",
+      "status": "approved",
+      "plan_sha256": "30e33490b9425103f8d82d66f7885faa24b537a21bf3f3a6af001cf3a5885c39",
+      "approved_by": "admin",
+      "approved_at": "2026-11-10T17:19:54+00:00",
+      "prompt_ref": "skill-creator@v1:db120a7b06d2",
+      "draft_sha256": "",
+      "generated_at": null,
+      "created_at": "2026-11-10T17:19:54+00:00",
+      "plan": {
+        "description": "Generates release notes in a standard house format from a list of merged changes. Groups entries under the headings Added, Changed, and Fixed, using a ticket id (e.g., QE-123) as the prefix for each line. Entries without a ticket id are rejected. Breaking changes are marked with BREAKING in capitals. Use when a list of merged pull requests or changelog items needs to be transformed into structured release notes for a version release.",
+        "eval_cases": [
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "## Release Notes"
+              },
+              {
+                "kind": "contains",
+                "value": "### Added"
+              },
+              {
+                "kind": "contains",
+                "value": "### Changed"
+              },
+              {
+                "kind": "contains",
+                "value": "### Fixed"
+              },
+              {
+                "kind": "contains",
+                "value": "BREAKING"
+              }
+            ],
+            "input": "QE-123 New login page\nQE-456 Fixed timeout issue\nQE-789 Updated API endpoint\nQE-012 BREAKING Removed legacy system\nQE-999 Added dark mode\nQE-111 Changed footer layout"
+          },
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "### Added"
+              },
+              {
+                "kind": "not_contains",
+                "value": "no-ticket"
+              }
+            ],
+            "input": "QE-100 New feature\nno-ticket something"
+          },
+          {
+            "assertions": [
+              {
+                "kind": "regex",
+                "value": "^## Release Notes"
+              },
+              {
+                "kind": "contains",
+                "value": "BREAKING"
+              },
+              {
+                "kind": "contains",
+                "value": "QE-001"
+              }
+            ],
+            "input": "QE-001 Fix crash\nQE-002 Add tests\nQE-003 BREAKING Remove v1"
+          },
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "QE-100"
+              },
+              {
+                "kind": "regex",
+                "value": "Minor\\s*\\n.*QE-100"
+              }
+            ],
+            "input": "QE-100 Minor\nQE-100 Another item"
+          },
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "## Release Notes"
+              },
+              {
+                "kind": "not_contains",
+                "value": "without ticket"
+              }
+            ],
+            "input": "random line without ticket"
+          },
+          {
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "### Added"
+              },
+              {
+                "kind": "contains",
+                "value": "### Changed"
+              },
+              {
+                "kind": "contains",
+                "value": "### Fixed"
+              }
+            ],
+            "input": "QE-001 Added\nQE-002 Changed\nQE-003 Fixed"
+          }
+        ],
+        "files": [
+          {
+            "path": "SKILL.md",
+            "purpose": "Contains the full definition of the skill, including the steps, decision rules, and links to references for details."
+          },
+          {
+            "path": "assets/release-notes-template.md",
+            "purpose": "Defines the output layout for the release notes."
+          }
+        ],
+        "formats": [
+          {
+            "name": "release-notes",
+            "purpose": "Structured release notes with the three sections Added, Changed, Fixed and BREAKING markers.",
+            "template_path": "assets/release-notes-template.md"
+          }
+        ],
+        "name": "writing-release-notes",
+        "subagents": [],
+        "tasks": [
+          "Receive the input list of merged changes, each expected to contain a ticket id (like QE-123), a description, and an optional BREAKING flag.",
+          "Parse each entry and reject any that does not include a ticket id.",
+          "Assign each valid entry to one of three categories: Added (new features), Changed (modifications or improvements), Fixed (bug fixes).",
+          "Sort entries within each category alphabetically by ticket id.",
+          "Format the output with the heading '## Release Notes' followed by three subheadings '### Added', '### Changed', '### Fixed' and list the entries under the appropriate subheading, prefixing each line with the ticket id and marking breaking changes with BREAKING.",
+          "Return the formatted release notes as plain text."
+        ]
+      },
+      "checks": [],
+      "source_chars": 221
+    }
+  },
+  "generate": {
+    "status": 200,
+    "body": {
+      "plan": {
+        "id": "spl_56b6c86ec65b",
+        "project_id": "prj_efc5ace946da",
+        "author": "admin",
+        "kind": "instructions",
+        "request": "A skill that writes release notes in this house format from a list of merged changes.",
+        "source_type": "text",
+        "source_ref": "",
+        "source_sha256": "ac55fe2957f7f4b0eaa333d4792026fe209a0207d8508931e8b01afa5d237e6e",
+        "revise": "",
+        "status": "generated",
+        "plan_sha256": "30e33490b9425103f8d82d66f7885faa24b537a21bf3f3a6af001cf3a5885c39",
+        "approved_by": "admin",
+        "approved_at": "2026-11-10T17:19:54+00:00",
+        "prompt_ref": "skill-creator@v1:db120a7b06d2",
+        "draft_sha256": "fa0b9c0e818a2c427b7d36233941c7841f723fae49259f39473b95a25752be0c",
+        "generated_at": "2026-11-10T17:20:00+00:00",
+        "created_at": "2026-11-10T17:19:54+00:00",
+        "plan": {
+          "description": "Generates release notes in a standard house format from a list of merged changes. Groups entries under the headings Added, Changed, and Fixed, using a ticket id (e.g., QE-123) as the prefix for each line. Entries without a ticket id are rejected. Breaking changes are marked with BREAKING in capitals. Use when a list of merged pull requests or changelog items needs to be transformed into structured release notes for a version release.",
+          "eval_cases": [
+            {
+              "assertions": [
+                {
+                  "kind": "contains",
+                  "value": "## Release Notes"
+                },
+                {
+                  "kind": "contains",
+                  "value": "### Added"
+                },
+                {
+                  "kind": "contains",
+                  "value": "### Changed"
+                },
+                {
+                  "kind": "contains",
+                  "value": "### Fixed"
+                },
+                {
+                  "kind": "contains",
+                  "value": "BREAKING"
+                }
+              ],
+              "input": "QE-123 New login page\nQE-456 Fixed timeout issue\nQE-789 Updated API endpoint\nQE-012 BREAKING Removed legacy system\nQE-999 Added dark mode\nQE-111 Changed footer layout"
+            },
+            {
+              "assertions": [
+                {
+                  "kind": "contains",
+                  "value": "### Added"
+                },
+                {
+                  "kind": "not_contains",
+                  "value": "no-ticket"
+                }
+              ],
+              "input": "QE-100 New feature\nno-ticket something"
+            },
+            {
+              "assertions": [
+                {
+                  "kind": "regex",
+                  "value": "^## Release Notes"
+                },
+                {
+                  "kind": "contains",
+                  "value": "BREAKING"
+                },
+                {
+                  "kind": "contains",
+                  "value": "QE-001"
+                }
+              ],
+              "input": "QE-001 Fix crash\nQE-002 Add tests\nQE-003 BREAKING Remove v1"
+            },
+            {
+              "assertions": [
+                {
+                  "kind": "contains",
+                  "value": "QE-100"
+                },
+                {
+                  "kind": "regex",
+                  "value": "Minor\\s*\\n.*QE-100"
+                }
+              ],
+              "input": "QE-100 Minor\nQE-100 Another item"
+            },
+            {
+              "assertions": [
+                {
+                  "kind": "contains",
+                  "value": "## Release Notes"
+                },
+                {
+                  "kind": "not_contains",
+                  "value": "without ticket"
+                }
+              ],
+              "input": "random line without ticket"
+            },
+            {
+              "assertions": [
+                {
+                  "kind": "contains",
+                  "value": "### Added"
+                },
+                {
+                  "kind": "contains",
+                  "value": "### Changed"
+                },
+                {
+                  "kind": "contains",
+                  "value": "### Fixed"
+                }
+              ],
+              "input": "QE-001 Added\nQE-002 Changed\nQE-003 Fixed"
+            }
+          ],
+          "files": [
+            {
+              "path": "SKILL.md",
+              "purpose": "Contains the full definition of the skill, including the steps, decision rules, and links to references for details."
+            },
+            {
+              "path": "assets/release-notes-template.md",
+              "purpose": "Defines the output layout for the release notes."
+            }
+          ],
+          "formats": [
+            {
+              "name": "release-notes",
+              "purpose": "Structured release notes with the three sections Added, Changed, Fixed and BREAKING markers.",
+              "template_path": "assets/release-notes-template.md"
+            }
+          ],
+          "name": "writing-release-notes",
+          "subagents": [],
+          "tasks": [
+            "Receive the input list of merged changes, each expected to contain a ticket id (like QE-123), a description, and an optional BREAKING flag.",
+            "Parse each entry and reject any that does not include a ticket id.",
+            "Assign each valid entry to one of three categories: Added (new features), Changed (modifications or improvements), Fixed (bug fixes).",
+            "Sort entries within each category alphabetically by ticket id.",
+            "Format the output with the heading '## Release Notes' followed by three subheadings '### Added', '### Changed', '### Fixed' and list the entries under the appropriate subheading, prefixing each line with the ticket id and marking breaking changes with BREAKING.",
+            "Return the formatted release notes as plain text."
+          ]
+        },
+        "checks": [
+          {
+            "check": "frontmatter",
+            "passed": true,
+            "detail": "YAML frontmatter between --- lines"
+          },
+          {
+            "check": "name format",
+            "passed": true,
+            "detail": "name 'writing-release-notes': lowercase letters, digits and single hyphens, at most 64"
+          },
+          {
+            "check": "name matches folder",
+            "passed": true,
+            "detail": "name 'writing-release-notes', folder 'writing-release-notes'"
+          },
+          {
+            "check": "description",
+            "passed": true,
+            "detail": "437 characters (1 to 1024)"
+          },
+          {
+            "check": "body length",
+            "passed": true,
+            "detail": "63 lines (at most 500; move detail into references/)"
+          },
+          {
+            "check": "MAF loads it",
+            "passed": true,
+            "detail": "MAF FileSkillsSource loaded it"
+          },
+          {
+            "check": "security scan",
+            "passed": true,
+            "detail": "no findings"
+          }
+        ],
+        "source_chars": 221
+      },
+      "files": [
+        {
+          "path": "SKILL.md",
+          "content": "---\nname: writing-release-notes\ndescription: >\n  Generates release notes in a standard house format from a list of merged changes.\n  Groups entries under the headings Added, Changed, and Fixed, using a ticket id\n  (e.g., QE-123) as the prefix for each line. Entries without a ticket id are\n  rejected. Breaking changes are marked with BREAKING in capitals. Use when a list\n  of merged pull requests or changelog items needs to be transformed into structured\n  release notes for a version release.\nauthor: admin\n---\n\n# Writing Release Notes\n\nThis skill converts a raw list of merged changes into structured release notes\norganized under the standard headings: **Added**, **Changed**, and **Fixed**.\nEach entry must contain a ticket id (e.g., `QE-123`). Entries without one are\nrejected. Breaking changes are prefixed with `BREAKING`.\n\n## Steps\n\n1. **Receive input** \u2014 Accept a list of merged changes. Each entry is expected to\n   contain a ticket id (like `QE-123`), a description, and an optional `BREAKING`\n   marker.\n\n2. **Parse and validate** \u2014 Split the input by newlines. For each line:\n   - Remove leading/trailing whitespace.\n   - Skip blank lines.\n   - Check that the line contains a ticket id matching the pattern\n     `[A-Z]+-\\d+`. If not, reject the entry (do not include it in the output).\n\n3. **Categorize** \u2014 Based on the description text (case-insensitive), assign each\n   valid entry to one of three groups:\n   - **Added**: if the description starts with or contains keywords suggesting\n     a new feature (e.g., \"added\", \"new\", \"support for\" \u2014 see references for\n     the full list).\n   - **Fixed**: if the description contains \"fixed\", \"fix\", \"bug\", \"crash\",\n     \"timeout\", \"error\", \"issue\".\n   - **Changed**: everything else (modifications, improvements, updates).\n\n4. **Detect BREAKING** \u2014 If the description (after the ticket id) contains the\n   word `BREAKING` (in any case, but typically capitals), mark the entry with\n   `BREAKING` in the output.\n\n5. **Sort** \u2014 Within each category, sort entries alphabetically by ticket id\n   (string sort).\n\n6. **Format output** \u2014 Produce release notes following the template in\n   `assets/release-notes-template.md`. The template provides:\n   - Heading `## Release Notes`\n   - Subheadings `### Added`, `### Changed`, `### Fixed`\n   - Under each subheading, bullet points with `- ticket-id description`,\n     and `- BREAKING ticket-id description` for breaking changes.\n\n7. **Return** the formatted release notes as plain text.\n\n## Decision rules\n\n- A valid ticket id is one or more uppercase letters, a hyphen, and one or more\n  digits (regex: `[A-Z]+-\\d+`).\n- Entries that do not contain such a pattern are silently dropped.\n- The `BREAKING` marker must appear as a separate token (or part of the\n  description) to be recognized; if present, the entry's line is prefixed with\n  `BREAKING` and placed in the appropriate category.\n- Categorization priority is based on keyword matching; if a description matches\n  both Added and Fixed patterns, Fixed takes precedence.\n\n## References\n\n- For a detailed description of categorization keywords, see [references/categorization.md](references/categorization.md).\n\n## Output format\n\nSee the template at `assets/release-notes-template.md`.\n"
+        },
+        {
+          "path": "assets/release-notes-template.md",
+          "content": "## Release Notes\n\n### Added\n- {ticket_id} {description}\n- BREAKING {ticket_id} {description}\n\n### Changed\n- {ticket_id} {description}\n- BREAKING {ticket_id} {description}\n\n### Fixed\n- {ticket_id} {description}\n- BREAKING {ticket_id} {description}\n"
+        }
+      ],
+      "checks": [
+        {
+          "check": "frontmatter",
+          "passed": true,
+          "detail": "YAML frontmatter between --- lines"
+        },
+        {
+          "check": "name format",
+          "passed": true,
+          "detail": "name 'writing-release-notes': lowercase letters, digits and single hyphens, at most 64"
+        },
+        {
+          "check": "name matches folder",
+          "passed": true,
+          "detail": "name 'writing-release-notes', folder 'writing-release-notes'"
+        },
+        {
+          "check": "description",
+          "passed": true,
+          "detail": "437 characters (1 to 1024)"
+        },
+        {
+          "check": "body length",
+          "passed": true,
+          "detail": "63 lines (at most 500; move detail into references/)"
+        },
+        {
+          "check": "MAF loads it",
+          "passed": true,
+          "detail": "MAF FileSkillsSource loaded it"
+        },
+        {
+          "check": "security scan",
+          "passed": true,
+          "detail": "no findings"
+        }
+      ],
+      "summary": {
+        "passed": 7,
+        "total": 7,
+        "all_passed": true
+      }
+    }
+  },
+  "sample": {
+    "status": 200,
+    "body": {
+      "output": "## Release Notes\n\n### Added\n- QE-101 add CSV export\n\n### Changed\n- BREAKING QE-103 rename API field id to key (breaking).\n\n### Fixed\n- QE-102 fix login crash",
+      "tokens_in": 1496,
+      "tokens_out": 48,
+      "prompt_ref": "skill-creator@v1:db120a7b06d2",
+      "draft_sha256": "fa0b9c0e818a2c427b7d36233941c7841f723fae49259f39473b95a25752be0c"
+    }
+  },
+  "evaluate": {
+    "status": 200,
+    "body": {
+      "prompt_ref": "skill-creator@v1:db120a7b06d2+draft:fa0b9c0e818a",
+      "n": 6,
+      "judge_model": "deterministic-assertions",
+      "metrics": {
+        "assertion_pass_rate_with_skill": 0.9411764705882353,
+        "assertion_pass_rate_without_skill": 0.7058823529411765,
+        "skill_uplift": 0.23529411764705876
+      },
+      "tokens": 13950,
+      "cases": [
+        {
+          "case": 1,
+          "input": "QE-123 New login page\nQE-456 Fixed timeout issue\nQE-789 Updated API endpoint\nQE-012 BREAKING Removed legacy system\nQE-999 Added dark mode\nQE-111 Changed footer layout",
+          "with_skill": {
+            "output": "## Release Notes\n\n### Added\n- QE-123 New login page\n- QE-999 Added dark mode\n\n### Changed\n- QE-111 Changed footer layout\n- QE-789 Updated API endpoint\n\n### Fixed\n- QE-456 Fixed timeout issue\n- BREAKING QE-012 BREAKING Removed legacy system",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "## Release Notes",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "### Added",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "### Changed",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "### Fixed",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "BREAKING",
+                "passed": true
+              }
+            ]
+          },
+          "without_skill": {
+            "output": "## Release Notes\n\n### Added\n- QE-123: New login page\n- QE-999: Added dark mode\n\n### Changed\n- QE-789: Updated API endpoint\n- QE-111: Changed footer layout\n\n### Fixed\n- QE-456: Fixed timeout issue\n\n### BREAKING\n- QE-012: Removed legacy system",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "## Release Notes",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "### Added",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "### Changed",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "### Fixed",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "BREAKING",
+                "passed": true
+              }
+            ]
+          }
+        },
+        {
+          "case": 2,
+          "input": "QE-100 New feature\nno-ticket something",
+          "with_skill": {
+            "output": "## Release Notes\n\n### Added\n- QE-100 New feature",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "### Added",
+                "passed": true
+              },
+              {
+                "kind": "not_contains",
+                "value": "no-ticket",
+                "passed": true
+              }
+            ]
+          },
+          "without_skill": {
+            "output": "## Release Notes\n\n### Version [VERSION]\n\n### Added\n- QE-100 New feature\n\n### Fixed\n*(None)*\n\n### Changed\n*(None)*\n\n---\n\n### Rejected entries (no ticket ID):\n- no-ticket something",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "### Added",
+                "passed": true
+              },
+              {
+                "kind": "not_contains",
+                "value": "no-ticket",
+                "passed": false
+              }
+            ]
+          }
+        },
+        {
+          "case": 3,
+          "input": "QE-001 Fix crash\nQE-002 Add tests\nQE-003 BREAKING Remove v1",
+          "with_skill": {
+            "output": "## Release Notes\n\n### Added\n- QE-002 Add tests\n\n### Changed\n- BREAKING QE-003 BREAKING Remove v1\n\n### Fixed\n- QE-001 Fix crash",
+            "assertions": [
+              {
+                "kind": "regex",
+                "value": "^## Release Notes",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "BREAKING",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "QE-001",
+                "passed": true
+              }
+            ]
+          },
+          "without_skill": {
+            "output": "## Release Notes\n\n### Added\n- QE-002 Add tests\n\n### Changed\n\n### Fixed\n- QE-001 Fix crash\n\n### Breaking Changes\n- QE-003 BREAKING Remove v1",
+            "assertions": [
+              {
+                "kind": "regex",
+                "value": "^## Release Notes",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "BREAKING",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "QE-001",
+                "passed": true
+              }
+            ]
+          }
+        },
+        {
+          "case": 4,
+          "input": "QE-100 Minor\nQE-100 Another item",
+          "with_skill": {
+            "output": "## Release Notes\n\n### Changed\n- QE-100 Another item\n- QE-100 Minor",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "QE-100",
+                "passed": true
+              },
+              {
+                "kind": "regex",
+                "value": "Minor\\s*\\n.*QE-100",
+                "passed": false
+              }
+            ]
+          },
+          "without_skill": {
+            "output": "## Release Notes\n\n### QE-100\n- **Changed:** Minor\n- **Changed:** Another item",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "QE-100",
+                "passed": true
+              },
+              {
+                "kind": "regex",
+                "value": "Minor\\s*\\n.*QE-100",
+                "passed": false
+              }
+            ]
+          }
+        },
+        {
+          "case": 5,
+          "input": "random line without ticket",
+          "with_skill": {
+            "output": "## Release Notes\n\n### Added\n\n### Changed\n\n### Fixed",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "## Release Notes",
+                "passed": true
+              },
+              {
+                "kind": "not_contains",
+                "value": "without ticket",
+                "passed": true
+              }
+            ]
+          },
+          "without_skill": {
+            "output": "## Release Notes\n\nNo valid changes to report. All entries must include a ticket ID (e.g., QE-123).",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "## Release Notes",
+                "passed": true
+              },
+              {
+                "kind": "not_contains",
+                "value": "without ticket",
+                "passed": true
+              }
+            ]
+          }
+        },
+        {
+          "case": 6,
+          "input": "QE-001 Added\nQE-002 Changed\nQE-003 Fixed",
+          "with_skill": {
+            "output": "## Release Notes\n\n### Added\n- QE-001 Added\n\n### Changed\n- QE-002 Changed\n\n### Fixed\n- QE-003 Fixed",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "### Added",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "### Changed",
+                "passed": true
+              },
+              {
+                "kind": "contains",
+                "value": "### Fixed",
+                "passed": true
+              }
+            ]
+          },
+          "without_skill": {
+            "output": "# Release Notes v1.0.0\n\n## Added\n- QE-001: Added\n\n## Changed\n- QE-002: Changed\n\n## Fixed\n- QE-003: Fixed",
+            "assertions": [
+              {
+                "kind": "contains",
+                "value": "### Added",
+                "passed": false
+              },
+              {
+                "kind": "contains",
+                "value": "### Changed",
+                "passed": false
+              },
+              {
+                "kind": "contains",
+                "value": "### Fixed",
+                "passed": false
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "publish": {
+    "status": 201,
+    "body": {
+      "name": "writing-release-notes",
+      "version": 1,
+      "sha256": "fa0b9c0e818a2c427b7d36233941c7841f723fae49259f39473b95a25752be0c",
+      "checks": [
+        {
+          "check": "frontmatter",
+          "passed": true,
+          "detail": "YAML frontmatter between --- lines"
+        },
+        {
+          "check": "name format",
+          "passed": true,
+          "detail": "name 'writing-release-notes': lowercase letters, digits and single hyphens, at most 64"
+        },
+        {
+          "check": "name matches folder",
+          "passed": true,
+          "detail": "name 'writing-release-notes', folder 'writing-release-notes'"
+        },
+        {
+          "check": "description",
+          "passed": true,
+          "detail": "437 characters (1 to 1024)"
+        },
+        {
+          "check": "body length",
+          "passed": true,
+          "detail": "63 lines (at most 500; move detail into references/)"
+        },
+        {
+          "check": "MAF loads it",
+          "passed": true,
+          "detail": "MAF FileSkillsSource loaded it"
+        },
+        {
+          "check": "security scan",
+          "passed": true,
+          "detail": "no findings"
+        }
+      ]
+    }
+  },
+  "versions": {
+    "status": 200,
+    "body": {
+      "name": "writing-release-notes",
+      "versions": [
+        {
+          "name": "writing-release-notes",
+          "version": 1,
+          "sha256": "fa0b9c0e818a2c427b7d36233941c7841f723fae49259f39473b95a25752be0c",
+          "author": "admin",
+          "plan_id": "spl_56b6c86ec65b",
+          "project_id": "prj_efc5ace946da",
+          "prompt_ref": "skill-creator@v1:db120a7b06d2+draft:fa0b9c0e818a",
+          "created_at": "2026-11-10T17:20:45+00:00"
+        }
+      ]
+    }
+  },
+  "delete": {
+    "status": 200,
+    "body": {
+      "name": "writing-release-notes",
+      "deleted": true,
+      "versions_kept": 1
+    }
+  }
+}

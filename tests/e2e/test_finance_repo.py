@@ -7,7 +7,7 @@ import pytest
 from playwright.sync_api import expect
 
 from tests.e2e.conftest import api_get
-from tests.e2e.test_app import UI, approve, approve_next, shot, wait_card
+from tests.e2e.helpers_app import UI, approve, approve_next, shot, wait_card
 
 pytestmark = pytest.mark.e2e
 EVIDENCE_DIR = Path(__file__).resolve().parents[2] / "docs" / "evidence"

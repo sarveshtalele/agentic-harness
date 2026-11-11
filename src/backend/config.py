@@ -12,7 +12,8 @@ _HERE = Path(__file__).resolve()
 ROOT = next((p for p in _HERE.parents if (p / "prompts").is_dir()), _HERE.parents[2])
 load_dotenv(ROOT / ".env")
 
-DATA_DIR = Path(os.environ.get("ATLAS_DATA_DIR", ROOT / "data")).resolve()
+_DATA = Path(os.environ.get("ATLAS_DATA_DIR", ROOT / "data"))
+DATA_DIR = (_DATA if _DATA.is_absolute() else ROOT / _DATA).resolve()  # a relative path means relative to the repository, not the cwd
 WORKSPACES = Path(os.environ.get("ATLAS_WORKSPACES", DATA_DIR / "projects")).resolve()
 DB_PATH = DATA_DIR / "atlas.sqlite3"
 CHECKPOINTS = DATA_DIR / "checkpoints"
@@ -30,6 +31,14 @@ MODEL_TIMEOUT = int(os.environ.get("ATLAS_MODEL_TIMEOUT", "180"))
 # LiteLLM answers an identical prompt from its cache, so a retry would get the same bad reply. Set 0 for endpoints that reject the field.
 MODEL_NO_CACHE = os.environ.get("ATLAS_MODEL_NO_CACHE", "1") != "0"
 MODEL_CONCURRENCY = int(os.environ.get("ATLAS_MODEL_CONCURRENCY", "4"))
+# web (shared server: no skill script runs), local, or desktop. Plan M4 profiles.
+PROFILE = os.environ.get("ATLAS_PROFILE", "local")
+# Model rounds and tool calls per chat turn. The harness plans and explores, so it gets more than other agents;
+# when a budget runs out MAF asks for a final answer with tools off (see maf/agui.py).
+HARNESS_MAX_ROUNDS = int(os.environ.get("ATLAS_HARNESS_MAX_ROUNDS", "25"))
+HARNESS_MAX_TOOL_CALLS = int(os.environ.get("ATLAS_HARNESS_MAX_TOOL_CALLS", "60"))
+# The harness model's context window; MAF compaction (tool results first, then a summary) keeps each request inside it.
+HARNESS_CONTEXT_TOKENS = int(os.environ.get("ATLAS_HARNESS_CONTEXT_TOKENS", "128000"))
 # WAL needs shared memory, which network storage such as Azure App Service /home lacks. Use DELETE there.
 SQLITE_JOURNAL = os.environ.get("ATLAS_SQLITE_JOURNAL", "WAL").upper()
 ALLOWED_ORIGINS = {

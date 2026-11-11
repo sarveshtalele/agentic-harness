@@ -177,7 +177,7 @@ The table below catalogs every MAF primitive utilized in the codebase:
 | MAF Primitive | API Class / Decorator | File Location | Operational Role in Platform |
 |---|---|---|---|
 | **Model Client** | `OpenAIChatCompletionClient` | `src/backend/maf/llm.py` | Unified OpenAI-compatible client connecting to any LLM endpoint. |
-| **Tool Loop Guard** | `function_invocation_configuration` | `src/backend/maf/llm.py` | Caps tool loops at 10 rounds and 30 invocations, forcing final answers. |
+| **Tool Loop Guard** | `function_invocation_configuration` | `src/backend/maf/llm.py` | Caps tool loops at 10 rounds and 30 invocations, forcing final answers. The harness gets 25 rounds and 60 calls (`ATLAS_HARNESS_MAX_ROUNDS`, `ATLAS_HARNESS_MAX_TOOL_CALLS`). When a limit is reached MAF sends `tool_choice="none"`; a model that then writes its call as text has that text cut in `maf/agui.py`, and the reply says the budget ran out. |
 | **Chat Middleware** | `@chat_middleware` | `src/backend/maf/governance.py` | Token allowance checks, latency tracking, secret redaction, audit ledger. |
 | **Agent Specialists** | `Agent` | `src/backend/maf/runtime.py` | Instantiates the 13 specialist personas with system instructions. |
 | **Structured Edits** | `Agent` + Pydantic schema | `src/backend/maf/workflows/edits.py` | Generates verified `ChangeSet` edits applied through strict path guards. |
@@ -1365,20 +1365,29 @@ When modifying platform architecture or adding new skills:
 
 ---
 
-## 12. The project harness on MAF `create_harness_agent` (plan P2, 2026-11-10)
+## 12. The project harness on MAF `create_harness_agent` (plan P2 and M4, 2026-11-10)
 
 `src/backend/maf/harness.py` builds the `harness` agent (`maf/agents/harness.py`, `prompts/harness.md`, `evals/harness.json`) with MAF 1.24's `create_harness_agent`. It is served by the existing `/agui/{agent}` route and the Chat window (`/chat/<project>`). Since 2026-11-10 `/harness` renders this harness (MAF Chat preset to `harness`, plus the thread's MAF todos from `GET /api/chats/{thread}/todos`); the legacy engine stays at `/harness?engine=legacy`. The legacy `src/backend/harness/` engine behind `/api/harness/chat` is unchanged.
 
 | Harness capability | MAF primitive | Platform wiring |
 |---|---|---|
-| Loop, function invocation, tool approval | `create_harness_agent` defaults (`ToolApprovalMiddleware`, `MessageInjectionMiddleware`) | Tools filtered deny-by-default by the agent policy (`governance.allowed`) |
-| Todos | `TodoProvider(store=TodoFileStore)` | `data/harness/<project>/todos/`, one file per chat thread, persists across turns |
-| Plan / execute modes | `AgentModeProvider` (default) | Mode resets each AG-UI request (no snapshot store yet) |
+| Loop, function invocation, tool approval | `create_harness_agent` defaults (`ToolApprovalMiddleware`, `MessageInjectionMiddleware`) plus `loop_should_continue=todos_remaining(looping_modes=["execute"])`, `loop_next_message=todos_remaining_message`, `loop_max_iterations=HARNESS_MAX_ROUNDS` (M4) | Tools filtered deny-by-default by the agent policy (`governance.allowed`). The loop cap only acts with a `loop_should_continue`, so the harness re-runs a turn in execute mode while MAF todos stay open; a pending approval always stops it |
+| Progressive tool discovery (M4) | A `ContextProvider` (`harness_kit/catalog.LoadedTools`) calling `context.extend_tools`, as `SkillsProvider` does, and `FunctionInvocationContext.add_tools` (MAF progressive tool exposure) inside `load_tools` | Core: `list_files`, `read_file`, `grep`, `list_documents`, `read_document`, `search_documents`, `find_tools`, `load_tools` plus MAF's todos, mode, memory and skill tools. `find_tools(query)` searches the catalogue (every other policy-allowed tool and the user's granted MCP tools from `core.mcp.mcp_tools_for`) and returns names and one-line descriptions. `load_tools(names)` refuses any name outside it, adds platform tools for the next step of the same turn, stores the names in `data/harness/<project>/tools/<thread>.json` and the ledger, and `tool_audit` records the call. MCP tools join at the next run, when MAF opens their sessions |
+| Approvals for risky tools (M4) | `approval_mode="always_require"` on `save_document`, `remember`, `run_tests`, `start_workflow` and every MCP tool, handled by the harness's `ToolApprovalMiddleware`; AG-UI ends the run with `RUN_FINISHED.outcome.type == "interrupt"` | The chat shows Approve / Reject cards from the interrupt and resumes with AG-UI `resume` entries `{interruptId, status: "resolved", payload: {approved}}`. Read-only tools never ask. MAF's approval registry lives in the `AgentFrameworkAgent`, which the route builds per request, so one process-wide `InMemoryAGUIApprovalStateStore` is shared (private attribute in 1.24); a pending card does not survive a restart |
+| Sub-agents (M4, HS-11) | `background_agents=` (`BackgroundAgentsProvider`, experimental) | `test-design-architect`, `requirements-analyst`, `repo-intelligence-analyst`, `principal-test-architect`, `confidence-reviewer`, each from `runtime.build` with its own policy's read tools (never a write, test run or workflow start), so its tool calls are audited under its own key. A disabled agent or refused model is left out. Tasks live in the provider instance, so they do not outlive the turn |
+| Slash commands | Command skills (`disable-model-invocation: true`) are kept out of `SkillsProvider`; `/plugin:command args` sends the command's SKILL.md with `$ARGUMENTS` filled (`core/plugins.expand_slash`) | The chat keeps what the user typed; `GET /api/plugins/slash` feeds the "/" menu |
+| Todos | `TodoProvider(store=TodoFileStore)` | `data/harness/<project>/todos/`, one file per chat thread and person, persists across turns |
+| Plan / execute modes | `AgentModeProvider` (default), restored from the AG-UI thread snapshot | `harness_kit/snapshots.SqliteSnapshotStore` implements `AGUIThreadSnapshotStore` on SQLite (migration 018, text redacted), scope `<project>/<user>` set by the route, so mode and pending interrupts persist across requests. The scoped MAF session id (`snapshots.session_id`) also keys todos and memory |
 | File memory | `FileMemoryProvider` over `FileSystemAgentFileStore` | `data/harness/<project>/memory/<user>/`, never the process cwd |
 | Skills, progressive disclosure | `SkillsProvider(DeduplicatingSkillsSource(FilteringSkillsSource(FileSkillsSource(plugins.skill_paths()))))` | Skill folders from every discovered plugin (`core/plugins.py`: `skills/` as `local-skills`, then `plugins/*/` with `plugin.json` or `.claude-plugin/plugin.json`), re-read each turn. Command skills (`disable-model-invocation: true`, such as agentic-qe `qe-*`) are filtered out of the model's list. Only names and descriptions go in the first request; `load_skill` and `read_skill_resource` need no pause (trusted platform content); no script runner yet |
 | Sandbox and scan | Function tools `run_tests`, `scan_repository`, `sandbox_status` (`maf/tools/`) | `run_tests` runs the repository's registered runner through `qe/execution.run_suite` in the project sandbox clone, with counts from JUnit. `scan_repository` runs `static_analysis.run_all` and saves nothing. Each refuses with a clear reason when the project has no repository. There is no general shell tool |
+| Skill creation (HS-10) | Function tool `create_skill` (`maf/tools/create_skill.py`), in `RISKY` so `approval_mode="always_require"`, loaded through `find_tools`/`load_tools` | After the user approves the card it calls `core/skill_studio/steps.propose` (the same function as `POST /api/skill-studio/plans`, with the same author and project checks) and returns the draft plan's id, counts and `studio_url=/skills/studio?plan=<id>`. It never approves, generates or publishes; refusals come back as the tool's text |
+| Plugin grants per role (HS-12) | `FilteringSkillsSource` input narrowed by `plugins.skill_paths(role=...)` | Migration 019 `plugin_grants`, `core/plugin_grants.py`, admin-only `POST/DELETE /api/plugins/{id}/grants`. No grant means open; with grants only those roles and the admin get the plugin's skills (harness `_skills()`), its `/` menu entries and its command expansion. Each change goes to every project's ledger (`plugin.grant_added`/`plugin.grant_removed`) |
 | History | `FileHistoryProvider(load_messages=False)` | Keeps what the model saw and said per call under `data/harness/<project>/history/`; AG-UI still sends the thread |
-| Compaction | `before_compaction_strategy=SlidingWindowStrategy(keep_last_groups=30)` | Same window as the other agents; no invented context size |
+| Compaction | `max_context_window_tokens=ATLAS_HARNESS_CONTEXT_TOKENS` (default 128000) and `TokenBudgetComposedStrategy([ToolResultCompactionStrategy(keep_last_tool_call_groups=4), SummarizationStrategy(target_count=8)])` for both phases, budget = context minus the output limit | The summary model call carries `governance.telemetry`, so it has an `agent_calls` row |
+| Profiles (M4) | none | `ATLAS_PROFILE=web` answers `/agui/harness` and `/api/chats/{thread}/todos` with 403 `AQE-HARNESS-DESKTOP-ONLY`; `GET /api/profile` (session-only) tells the UI, which shows the message instead of the chat |
+| Status lines (M4, US-60) | AG-UI `TOOL_CALL_START` / `TOOL_CALL_END` / `TEXT_MESSAGE_CONTENT` events | One live line with a spinner (`features/chat/RunStatus.tsx`, phrases in `status.ts`): "Thinking" first, "Writing" while text streams, a tool phrase per call. The finished reply keeps its lines (`status-trail`) beside `tool-calls`. Stop calls `copilotkit.stopAgent`; the server's stream ends when the client disconnects |
+| Hooks | `create_agent_hooks_middleware` exists in 1.24 | Not wired: it needs the optional `agent-hooks-sdk` package (not installed) and at least one interceptor, and no plugin ships one yet |
 | Observability | `runtime.tool_audit` (function middleware) and `governance.telemetry` (chat middleware) | `tool_calls` and `agent_calls` rows for every call |
 
 Findings while building it:
@@ -1391,7 +1400,5 @@ Deferred:
 
 | Item | Phase |
 |---|---|
-| Background agents (experimental in 1.24) and the `agents/*.md` adapter | P3b |
-| MCP tools | P4 |
-| Admin skill allowlist (`FilteringSkillsSource` predicate) | P5 |
-| Thread snapshot store for mode persistence | P7 |
+| The `agents/*.md` adapter for plugin-defined sub-agents | P3b |
+| Admin skill allowlist per skill (plugin-level grants shipped with HS-12) | P5 |

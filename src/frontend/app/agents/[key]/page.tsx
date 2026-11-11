@@ -1,38 +1,20 @@
 "use client";
 
-import { ArrowLeft, Play, Info, ShieldCheck, Lock, AlertTriangle, ShieldAlert, CheckCircle2 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { AppShell } from "../../../components/AppShell";
 import { useAuth } from "../../../components/AuthGate";
-import { Badge, Button, Card, ErrorNote, Field, inputClass, PageTitle, Spinner, useToast } from "../../../components/ui";
+import { PageTitle, Spinner, useToast } from "../../../components/ui";
 import { AgentScores } from "../../../components/EvalScores";
-import { api, when } from "../../../lib/api";
-
-const RISK_MEANING: Record<string, string> = {
-  low: "Low: reads and writes text only. It cannot reach code by itself.",
-  medium: "Medium: reads the repository's code, or can act on project data in chat.",
-  high: "Impact: changes code. Its edits land on a separate branch and need a person's review.",
-};
-
-// what contains an agent that changes code, so the badge reads as a description of its job and not a warning
-const CHANGE_CONTROLS: [string, string][] = [
-  ["No tools in workflows", "It can only return proposed edits as text."],
-  ["Guarded edits", "Code refuses path escapes, secrets, overwrites, deletions, out-of-scope files, and edits that break syntax."],
-  ["Separate branch", "Your main code is never touched."],
-  ["Real tests and a confidence review", "Run before anyone is asked to decide."],
-  ["Named human approval", "Nothing is committed without it, and agents cannot approve."],
-  ["Disable switch and token limits", "The admin can stop it at once."],
-];
-
-function InfoTip({ text }: { text: string }) {
-  return (
-    <span className="inline-flex items-center ml-1 text-slate-400 hover:text-indigo-500 cursor-help transition" title={text}>
-      <Info className="h-3.5 w-3.5" />
-    </span>
-  );
-}
+import { ActiveGuardrails } from "../../../features/agents/ActiveGuardrails";
+import { AgentCallsCard } from "../../../features/agents/AgentCallsCard";
+import { AgentControlsCard } from "../../../features/agents/AgentControlsCard";
+import { AgentDetailsCard } from "../../../features/agents/AgentDetailsCard";
+import { AgentEvalsCard } from "../../../features/agents/AgentEvalsCard";
+import { InterceptionEvents } from "../../../features/agents/InterceptionEvents";
+import { api } from "../../../lib/api";
 
 function Detail({ agentKey }: { agentKey: string }) {
   const { user } = useAuth();
@@ -87,152 +69,15 @@ function Detail({ agentKey }: { agentKey: string }) {
   const latest = item.evals[0];
   return (
     <div className="space-y-4" data-testid="agent-detail">
-      <Card title="Details" actions={<Badge tone={item.enabled ? "emerald" : "rose"}>{item.enabled ? "enabled" : "disabled"}</Badge>}>
-        <table className="w-full text-left text-sm" data-testid="agent-details-table"><tbody className="[&_th]:w-48 [&_th]:py-1.5 [&_th]:pr-3 [&_th]:align-top [&_th]:font-semibold [&_tr]:border-t [&_tr]:border-slate-200 dark:[&_tr]:border-slate-800">
-          <tr><th>Purpose</th><td>{item.purpose}</td></tr>
-          <tr><th>Risk</th><td>{RISK_MEANING[item.risk]}</td></tr>
-          {item.risk === "high" && <tr data-testid="impact-controls"><th>Controls on code changes</th><td><ul className="space-y-1 text-xs">{CHANGE_CONTROLS.map(([name, effect]) => <li key={name}><b>{name}.</b> {effect}</li>)}</ul></td></tr>}
-          <tr><th>Status</th><td>{item.enabled ? "Enabled" : "Disabled"}</td></tr>
-          <tr><th>Prompt version</th><td className="mono text-xs">{item.prompt_ref}</td></tr>
-          <tr><th>Skills</th><td className="mono text-xs" data-testid="agent-skills">{item.skills?.length ? item.skills.join(", ") : "None"}</td></tr>
-          <tr><th>Workflow tools</th><td className="mono text-xs">{item.workflow_tools.join(", ") || "None. It works only from the text it is given"}</td></tr>
-          <tr><th>Chat tools</th><td className="mono text-xs">{item.in_chat ? item.chat_tools.join(", ") : "Not offered in chat"}</td></tr>
-          <tr><th>Can change code</th><td>{item.can_change_code ? "Yes, on a branch, after human review" : "No"}</td></tr>
-          <tr><th>Tokens per model call</th><td>{item.token_limit.toLocaleString()}</td></tr>
-          <tr><th>Evaluations</th><td>{item.eval ? `${item.eval.passed} of ${item.eval.total} passed` : "Not run"}</td></tr>
-          <tr><th>Model calls</th><td>{item.calls}</td></tr>
-          <tr><th>Tokens used</th><td>{item.tokens.toLocaleString()}</td></tr>
-          <tr><th>Average response</th><td>{item.avg_latency_ms === null || item.avg_latency_ms === undefined ? "No calls yet" : `${item.avg_latency_ms} ms`}</td></tr>
-          <tr><th>Errors</th><td>{item.errors}</td></tr>
-          <tr><th>Guardrail events</th><td>{item.guardrail_events}</td></tr>
-          {item.settings_by && <tr><th>Last changed by</th><td>{item.settings_by_name}{item.settings_reason ? `: ${item.settings_reason}` : ""}</td></tr>}
-        </tbody></table>
-      </Card>
-      {admin && <Card title="Controls">
-        <div className="mt-3 grid gap-2 md:grid-cols-4">
-          <Field label="Signing as"><p className="py-2 text-sm font-semibold" data-testid="signing-as">{user.username}</p></Field>
-          <Field label="Reason"><input className={inputClass} value={reason} onChange={(e) => setReason(e.target.value)} /></Field>
-          <Field label="Tokens per model call"><input type="number" min={500} max={64000} className={inputClass} value={limit} onChange={(e) => setLimit(e.target.value)} /></Field>
-          <Field label="Model"><select className={inputClass} value={model} onChange={(e) => setModel(e.target.value)} data-testid="agent-model"><option value="">Each user&apos;s default</option>{[...new Set([...choices, ...(model ? [model] : [])])].map((m) => <option key={m} value={m}>{m}</option>)}</select></Field>
-        </div>
-        <ErrorNote message={error} />
-        <div className="mt-2 flex gap-2">
-          <Button variant="secondary" onClick={() => save(item.enabled)}>Save limit</Button>
-          {item.enabled ? <Button variant="danger" disabled={!reason.trim()} onClick={() => save(false)}>Disable agent</Button> : <Button variant="success" onClick={() => save(true)}>Enable agent</Button>}
-        </div>
-      </Card>}
-      <Card title="Evaluations" actions={admin && item.has_evals && <Button variant="secondary" busy={running} disabled={!item.enabled} onClick={evaluate}><Play className="h-4 w-4" /> Run on the real model</Button>}>
-        {latest ? (
-          <>
-            <p className="mb-2 text-xs text-slate-500">Latest on <span className="mono">{latest.prompt_ref}</span>, {when(latest.created_at)}</p>
-            <ul className="space-y-1 text-sm">{latest.results.map((r: any) => (
-              <li key={r.name}>
-                {r.passed === null ? <Badge tone="amber">needs grader</Badge> : <Badge tone={r.passed ? "emerald" : "rose"}>{r.passed ? "pass" : "fail"}</Badge>} <Badge>{r.category}</Badge> {r.skill && <Badge tone="indigo">{`skill ${r.skill}`}</Badge>} {r.name.replace(/_/g, " ")}
-                {r.passed === null && <p className="ml-1 text-xs text-slate-500">Not scored: the plugin wrote these expectations for a person or a grader, and no code can check them yet.</p>}
-                {!r.passed && <p className="mono ml-1 text-xs text-rose-500">{r.failed_checks.join("; ")}</p>}
-              </li>
-            ))}</ul>
-          </>
-        ) : <p className="text-sm text-slate-500">Not evaluated yet.</p>}
-      </Card>
+      <AgentDetailsCard item={item} />
+      {admin && <AgentControlsCard item={item} user={user} reason={reason} setReason={setReason} limit={limit} setLimit={setLimit} model={model} setModel={setModel} choices={choices} error={error} save={save} />}
+      <AgentEvalsCard item={item} admin={admin} running={running} evaluate={evaluate} />
       <AgentScores agentKey={agentKey} admin={admin} enabled={item.enabled} />
-      <Card title={`Recent model calls (${item.calls_recent.length})`}>
-        {item.calls_recent.length ? (
-          <div className="max-h-64 overflow-auto"><table className="w-full text-left text-xs"><thead className="text-slate-500"><tr><th className="py-1">When</th><th>Source</th><th>Tokens</th><th>ms</th><th>Tools</th><th>Status</th></tr></thead>
-            <tbody>{item.calls_recent.map((c: any) => <tr key={c.id} className="border-t border-slate-200 dark:border-slate-800" title={c.error}><td className="py-1">{when(c.created_at)}</td><td>{c.source}</td><td>{c.tokens_in + c.tokens_out}</td><td>{c.latency_ms}</td><td>{c.tool_calls}</td><td><Badge tone={c.status === "ok" ? "emerald" : "rose"}>{c.status}</Badge></td></tr>)}</tbody></table></div>
-        ) : <p className="text-sm text-slate-500">No calls recorded.</p>}
-      </Card>
+      <AgentCallsCard item={item} />
       {/* Guardrail Policy Architecture Cards */}
-      <Card title="Active Security Guardrails & Enforcements">
-        <div className="grid gap-3 md:grid-cols-2 text-xs">
-          <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-3 dark:border-slate-800 dark:bg-slate-900/40 space-y-1.5">
-            <div className="flex items-center justify-between">
-              <span className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                <ShieldCheck className="h-4 w-4 text-emerald-500" />
-                Prompt Injection Demarcation
-              </span>
-              <Badge tone="emerald">Active</Badge>
-            </div>
-            <p className="text-slate-500 dark:text-slate-400">
-              NVIDIA Skill Specter Tier 1 standard: XML boundary framing (`&lt;skill&gt;`, `&lt;reference&gt;`, `TASK:`) and automatic neutralization of hostile prompt overrides.
-            </p>
-          </div>
-
-          <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-3 dark:border-slate-800 dark:bg-slate-900/40 space-y-1.5">
-            <div className="flex items-center justify-between">
-              <span className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                <Lock className="h-4 w-4 text-indigo-500" />
-                Zero-Trust Assertion Preservation
-              </span>
-              <Badge tone="indigo">Enforced</Badge>
-            </div>
-            <p className="text-slate-500 dark:text-slate-400">
-              Cloudflare P0 standard: Healing and test-generation tools strictly reject candidate patches that delete, weaken, or substitute assertions with trivial checks.
-            </p>
-          </div>
-
-          <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-3 dark:border-slate-800 dark:bg-slate-900/40 space-y-1.5">
-            <div className="flex items-center justify-between">
-              <span className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                <ShieldAlert className="h-4 w-4 text-amber-500" />
-                Sandbox Boundary &amp; Path Traversal
-              </span>
-              <Badge tone="amber">Strict</Badge>
-            </div>
-            <p className="text-slate-500 dark:text-slate-400">
-              Canonical realpath boundary isolation with NUL byte guards. Strict directory containment prevents path traversal and writes to protected folders (`.git`, `.venv`, `.qe`).
-            </p>
-          </div>
-
-          <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-3 dark:border-slate-800 dark:bg-slate-900/40 space-y-1.5">
-            <div className="flex items-center justify-between">
-              <span className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                <AlertTriangle className="h-4 w-4 text-rose-500" />
-                Secret Scanner &amp; Redaction
-              </span>
-              <Badge tone="rose">Real-time</Badge>
-            </div>
-            <p className="text-slate-500 dark:text-slate-400">
-              Shannon entropy calculation and multi-vendor regex scanning (GitHub tokens, AWS, GCP, Slack, private keys) auto-redacting sensitive credentials before model consumption.
-            </p>
-          </div>
-        </div>
-      </Card>
-
+      <ActiveGuardrails />
       {/* Recent Guardrail Interceptions as Individual Cards */}
-      <Card title={`Recent Guardrail Interception Events (${item.events_recent.length})`}>
-        {item.events_recent.length > 0 ? (
-          <div className="grid gap-2.5 md:grid-cols-2">
-            {item.events_recent.map((e: any) => (
-              <div
-                key={e.id}
-                className="rounded-xl border border-amber-200/80 bg-amber-50/30 p-3 text-xs dark:border-amber-900/50 dark:bg-amber-950/20 space-y-2"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200">
-                    <ShieldAlert className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                    <span>{e.kind.replace(/_/g, " ")}</span>
-                  </div>
-                  <Badge tone={e.action === "neutralize" || e.action === "neutralized" ? "amber" : "rose"}>
-                    {e.action}
-                  </Badge>
-                </div>
-
-                <div className="rounded-lg bg-slate-900 p-2 font-mono text-[11px] text-amber-200 break-all border border-slate-800">
-                  {e.detail}
-                </div>
-
-                <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400">
-                  <span>Enforcement: Automated Runtime Filter</span>
-                  <span>{when(e.created_at)}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-sm text-slate-500 py-3 text-center">No security guardrail violations detected on this agent.</p>
-        )}
-      </Card>
+      <InterceptionEvents item={item} />
     </div>
   );
 }

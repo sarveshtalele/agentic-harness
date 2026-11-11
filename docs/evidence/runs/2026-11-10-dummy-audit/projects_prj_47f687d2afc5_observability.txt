@@ -1,0 +1,74 @@
+All projects
+
+Audit empty
+
+CORE REPOSITORY
+Overview
+Codebase & AST Discovery
+Project Specifications
+AI SDLC & STUDIOS
+BA Studio (BRD & Gherkin)
+Skill Creator Studio
+Feature Implementation
+Defect Scanner & Fixes
+Autonomous QE & AI SDLC
+GOVERNANCE & TELEMETRY
+Quality Gate Approvals
+Governance & Policies
+Execution Runs & Metrics
+Telemetry & Logs
+Prompt Management
+MCP Servers
+Templates
+Settings
+Audit empty
+prj_47f687d2afc5
+QE Harness
+No model configured
+preview-admin (admin)
+Account
+Sign out
+Observability
+
+Every skill, agent call, tool call, workflow step, approval, and guardrail in this project. Pick a run to see its full trace.
+
+0
+Runs
+0
+Skills
+0
+Agent calls
+0
+Tokens
+0
+Tool calls
+0
+MCP tool calls
+0
+Guardrails
+0
+Errors
+
+Audit ledger verified for 1 project
+
+MCP tools: none recorded. This application connects to no MCP server, so its agents use only built-in tools.
+
+Log
+Errors
+All runs
+Live
+Refresh
+Download JSON
+All
+Skills 0
+Agents 0
+Tools 0
+MCP tools 0
+Workflow steps 0
+Approvals 0
+Guardrails 0
+Audit ledger 1
+Nov 10, 2026, 7:03 PM
+audit
+project.created admin: prj_47f687d2afc5
+Showing 1 of 1, newest first.

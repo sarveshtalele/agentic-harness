@@ -1,5 +1,7 @@
 # Plan
 
+> The active plan is `docs/MASTER_PLAN.md` (2026-11-10). This file keeps the history of earlier phases.
+
 Modify the existing project into a production-ready app for BAs and developers, on branch `feat/real-maf-platform`. Nothing is deleted without the owner's permission. The previous code stays in Git history at commit 09f14fe. The `legacy/` folder was removed in commit f1a7070.
 
 ## Audit of the previous code

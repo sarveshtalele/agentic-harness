@@ -1,6 +1,6 @@
 "use client";
 
-import { Chat } from "../../../../components/Chat";
+import { Chat } from "../../../../features/chat/Chat";
 import { useProject } from "../../../../components/ProjectShell";
 
 export default function ChatPage() {

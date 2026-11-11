@@ -3,8 +3,6 @@ import os
 from pathlib import Path
 import subprocess
 import tempfile
-import zipfile
-import pytest
 
 from scripts.azure_convert_and_deploy import (
     run_preflight_checks,

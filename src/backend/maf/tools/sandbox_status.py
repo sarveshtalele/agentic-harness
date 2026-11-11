@@ -8,7 +8,7 @@ from agent_framework import tool
 from backend.config import repo_dir
 from backend.repos import sandbox
 
-# Measured fields only; info()'s constant "sandbox_ready" is left out because it is always True.
+# Measured fields only; "sandbox_ready" is the same as "repository" here, so it is left out.
 FIELDS = ("commit", "current_branch", "commits", "complete_history", "run_worktrees", "sandbox_initialized", "size_mb")
 
 

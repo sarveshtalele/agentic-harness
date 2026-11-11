@@ -16,3 +16,16 @@ from backend.core import files, prompts  # noqa: E402
 database.migrate()
 prompts.seed()
 files.seed_templates()
+
+
+def connect_test_repo(project_id: str):
+    """A real git repository with one real file for tests that need a connected repository (the sandbox refuses without one)."""
+    from backend.config import repo_dir
+    from backend.repos import git
+
+    repo = repo_dir(project_id)
+    if not (repo / ".git").exists():
+        repo.mkdir(parents=True, exist_ok=True)
+        (repo / "app.py").write_text("def add(a, b):\n    return a + b\n", encoding="utf-8")
+        git.init_snapshot(repo, "test repository")
+    return repo

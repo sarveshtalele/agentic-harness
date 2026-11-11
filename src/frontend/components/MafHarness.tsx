@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { CheckCircle2, Circle, ListTodo } from "lucide-react";
 import { api } from "../lib/api";
-import { Chat } from "./Chat";
+import { Chat } from "../features/chat/Chat";
 import { Card, Empty, ErrorNote, Spinner, inputClass } from "./ui";
 
 /** The project harness on MAF's create_harness_agent: the MAF chat with the harness agent, beside the thread's own todo list. */
@@ -12,13 +12,23 @@ export function MafHarness({ projectId, onProjectChange }: { projectId: string; 
   const [projects, setProjects] = useState<any[] | null>(null);
   const [thread, setThread] = useState<any>(null);
   const [error, setError] = useState("");
+  const [profile, setProfile] = useState<string | null>(null);
 
   useEffect(() => {
     api("/projects").then(setProjects).catch((e) => setError(e.message));
+    api("/profile").then((r) => setProfile(r.profile)).catch((e) => setError(e.message));
   }, []);
 
   if (error) return <ErrorNote message={error} />;
-  if (!projects) return <Spinner label="Loading projects" />;
+  if (!projects || !profile) return <Spinner label="Loading projects" />;
+  if (profile === "web") {  // the server answers 403 AQE-HARNESS-DESKTOP-ONLY here too; this says so before anyone types
+    return (
+      <div className="space-y-3 p-1" data-testid="harness-desktop-only">
+        <h1 className="text-xl font-bold">Project harness</h1>
+        <Empty title="Desktop app only">The harness runs in the desktop app; the shared web server has no per-person workspace.</Empty>
+      </div>
+    );
+  }
   const project = projects.find((p) => p.id === projectId);
 
   return (
@@ -30,7 +40,6 @@ export function MafHarness({ projectId, onProjectChange }: { projectId: string; 
           {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>
         <span className="text-xs text-slate-500">Microsoft Agent Framework harness: plans with todos, loads skills on demand, runs the repository&apos;s tests in its sandbox.</span>
-        <Link href={`/harness?engine=legacy${projectId ? `&project=${projectId}` : ""}`} className="ml-auto text-xs text-slate-500 underline">Legacy view</Link>
       </div>
       {!project ? (
         <Empty title={projects.length ? "Choose a project to start" : "No projects yet"}>

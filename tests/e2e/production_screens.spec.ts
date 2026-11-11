@@ -11,38 +11,13 @@ test.describe("Production Screens and Multi-Agent Harness E2E", () => {
     await page.waitForURL((url) => !url.pathname.includes("/login"), { timeout: 8000 });
   });
 
-  test("01: Harness renders unified header and 8 goal cards with zero leaks", async ({ page }) => {
-    await page.goto("/harness?engine=legacy");  // the legacy view; /harness now serves the MAF harness
+  test("01: Harness page serves the MAF harness with its todo panel", async ({ page }) => {
+    await page.goto("/harness");
     await page.waitForLoadState("networkidle");
-
-    // Verify AppShell header breadcrumb
     await expect(page.locator("header").first()).toBeVisible();
-    await expect(page.locator("text=Autonomous QE Harness").first()).toBeVisible();
     await expect(page.locator("text=Microsoft Agent Framework").first()).toBeVisible();
-
-    // Verify Harness status bar
-    await expect(page.locator("text=Autonomous Multi-Agent Loops")).toBeVisible();
-    await expect(page.locator("text=Plan & Execute Engine")).toBeVisible();
-
-    // Click "+ New Conversation" to ensure empty session state with goal cards
-    const newConvBtn = page.locator("button:has-text('New Conversation')");
-    if (await newConvBtn.isVisible()) {
-      await newConvBtn.click();
-      await page.waitForTimeout(500);
-    }
-
-    // Verify Quick Goal Cards (rendered in clean 2-column grid)
-    const goalCards = page.locator("button:has-text('Customize & Send')");
-    await expect(goalCards).toHaveCount(8);
-
-    // Verify specific goals without truncation
-    const skillGoal = page.locator("button:has-text('Create Agent Skill')");
-    await skillGoal.scrollIntoViewIfNeeded();
-    await expect(skillGoal).toBeVisible();
-
-    const auditGoal = page.locator("button:has-text('Run Security Audit')");
-    await auditGoal.scrollIntoViewIfNeeded();
-    await expect(auditGoal).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Project harness" })).toBeVisible();
+    await expect(page.locator("text=Todos").first()).toBeVisible();
   });
 
   test("02: AI Specialist Roster displays clean risk badges and measured evals", async ({ page }) => {

@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from backend.config import repo_dir
 from backend.maf.tools import (
+    create_skill,
     grep,
     list_documents,
     list_files,
@@ -38,5 +39,6 @@ def chat_tools(project_id: str, thread_id: str, start_run) -> list:
 
 
 def harness_tools(project_id: str, thread_id: str, start_run) -> list:
-    """Sandbox and scan tools for the project harness: the repository's own tests and the static analyzers, nothing else."""
-    return [run_tests.build(project_id, thread_id, start_run), scan_repository.build(project_id, thread_id, start_run), sandbox_status.build(project_id, thread_id, start_run)]
+    """Project harness tools: the repository's own tests in the sandbox, the static analyzers, and Skill Studio draft plans."""
+    return [run_tests.build(project_id, thread_id, start_run), scan_repository.build(project_id, thread_id, start_run), sandbox_status.build(project_id, thread_id, start_run),
+            create_skill.build(project_id)]

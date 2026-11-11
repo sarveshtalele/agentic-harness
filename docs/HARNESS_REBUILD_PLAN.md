@@ -1,5 +1,7 @@
 # MAF Harness Rebuild Plan (revision 2)
 
+> **Superseded on 2026-11-10 by `docs/MASTER_PLAN.md`,** the single active plan. The findings below stay valid.
+
 Status: **draft, waiting for the owner's approval.** Nothing in this plan has been implemented. No file has been deleted, moved, or overwritten.
 Revision 1: 2026-11-10 11:07. Revision 2: 2026-11-10, after reading `shivswami/awesome-agent-skills` (marketplace branch), `deepseek-ai/deepseek-harness`, and Felix Rieseberg's "How to be more ambitious" (2026-10-13).
 Branch to create after approval: `feature/maf-harness-platform`, cut from `feature/azure-kudu-deployment` at `8477250`.

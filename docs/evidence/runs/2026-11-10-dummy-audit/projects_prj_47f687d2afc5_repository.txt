@@ -1,0 +1,52 @@
+All projects
+
+Audit empty
+
+CORE REPOSITORY
+Overview
+Codebase & AST Discovery
+Project Specifications
+AI SDLC & STUDIOS
+BA Studio (BRD & Gherkin)
+Skill Creator Studio
+Feature Implementation
+Defect Scanner & Fixes
+Autonomous QE & AI SDLC
+GOVERNANCE & TELEMETRY
+Quality Gate Approvals
+Governance & Policies
+Execution Runs & Metrics
+Telemetry & Logs
+Prompt Management
+MCP Servers
+Templates
+Settings
+Audit empty
+prj_47f687d2afc5
+QE Harness
+No model configured
+preview-admin (admin)
+Account
+Sign out
+Repository
+
+Clone a Git repository or upload a ZIP. All analysis comes from the real files.
+
+From Git
+Private repository access
+None (public repository)
+A saved token is sent only to the Git host, never stored in the clone.
+
+Add a token in Settings to reach private repositories.
+
+HTTPS URL or owner/repo
+Branch or tag (optional)
+Clone and scan
+From ZIP
+ZIP archive
+No repository host needed. Traversal paths, symlinks, and zip bombs are refused.
+Upload and scan
+From a folder on this machine
+Folder path
+Copied into the project. The original folder is not changed.
+Import and scan

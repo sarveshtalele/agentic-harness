@@ -1,6 +1,9 @@
-"""Daily JSON-lines application log: data/logs/app-YYYY-MM-DD.jsonl.
+"""Daily JSON-lines logs in data/logs/:
 
-One line per API request and per warning or error. A new day starts a new file, so no file is ever renamed
+- app-YYYY-MM-DD.jsonl: one line per API request and per warning or error.
+- errors-YYYY-MM-DD.jsonl: warnings and errors only, each with its stack trace, for debugging.
+
+ A new day starts a new file, so no file is ever renamed
 (an open file cannot be renamed on Windows). Each line is written and closed, so retention can delete an old file at any time.
 Every value passes redact(). Request bodies, query strings, cookies, and usernames are never given to this module.
 """
@@ -10,12 +13,14 @@ import json
 import logging
 import re
 import threading
+import traceback
 from datetime import date, datetime, timedelta, timezone
 
 from backend import config
 from backend.core.security import redact
 
-NAME = re.compile(r"^app-(\d{4}-\d{2}-\d{2})\.jsonl$")
+NAME = re.compile(r"^(app|errors)-(\d{4}-\d{2}-\d{2})\.jsonl$")
+KINDS = ("app", "errors")
 IDS = ("request_id", "run_id", "stage", "agent", "error_id")  # attached to a record with extra={"fields": {...}} where known
 
 
@@ -23,8 +28,8 @@ def today() -> date:
     return datetime.now(timezone.utc).date()
 
 
-def file_for(day: date):
-    return config.LOGS / f"app-{day.isoformat()}.jsonl"
+def file_for(day: date, kind: str = "app"):
+    return config.LOGS / f"{kind}-{day.isoformat()}.jsonl"
 
 
 def prune(keep_days: int, now: date | None = None) -> list[str]:
@@ -33,7 +38,7 @@ def prune(keep_days: int, now: date | None = None) -> list[str]:
     oldest = (now or today()) - timedelta(days=keep_days)
     for path in config.LOGS.iterdir() if config.LOGS.exists() else []:
         match = NAME.match(path.name)
-        if match and path.is_file() and date.fromisoformat(match.group(1)) < oldest:
+        if match and path.is_file() and date.fromisoformat(match.group(2)) < oldest:
             try:
                 path.unlink()
                 removed.append(path.name)
@@ -59,8 +64,15 @@ class DailyJsonHandler(logging.Handler):
             fields = getattr(record, "fields", {}) or {}
             line = {"ts": datetime.fromtimestamp(record.created, timezone.utc).isoformat(timespec="milliseconds"), "level": record.levelname, "logger": record.name,
                     "message": redact(record.getMessage()), **{k: redact(str(v)) if isinstance(v, str) else v for k, v in fields.items()}}
-            with self.lock, file_for(day).open("a", encoding="utf-8") as out:
-                out.write(json.dumps(line, default=str) + "\n")
+            with self.lock:
+                with file_for(day).open("a", encoding="utf-8") as out:
+                    out.write(json.dumps(line, default=str) + "\n")
+                if record.levelno >= logging.WARNING:
+                    where = {"where": f"{record.pathname}:{record.lineno} in {record.funcName}"}
+                    if record.exc_info:
+                        where["stack"] = redact("".join(traceback.format_exception(*record.exc_info)))
+                    with file_for(day, "errors").open("a", encoding="utf-8") as out:
+                        out.write(json.dumps({**line, **where}, default=str) + "\n")
         except Exception:  # noqa: BLE001 - logging must never break a request; the console handler still reports it
             self.handleError(record)
 

@@ -1,11 +1,11 @@
 # Agentic QE Platform & Autonomous Multi-Agent Harness
 
 [![CI](https://github.com/sarveshtalele/agentic-harness/actions/workflows/ci.yml/badge.svg)](https://github.com/sarveshtalele/agentic-harness/actions/workflows/ci.yml)
-[![MAF 2.0](https://img.shields.io/badge/MAF-2.0%20Native-blue.svg)](https://github.com/microsoft/agent-framework)
-[![ChromaDB](https://img.shields.io/badge/RAG-ChromaDB%20Persistent-emerald.svg)](https://www.trychroma.com/)
-[![NVIDIA Skill Specter](https://img.shields.io/badge/Security-NVIDIA%20Skill%20Specter%20A%2B-purple.svg)](docs/SECURITY_GOVERNANCE_AND_AUDIT.md)
+[![MAF](https://img.shields.io/badge/Microsoft%20Agent%20Framework-1.24-blue.svg)](https://github.com/microsoft/agent-framework)
 
-An enterprise-grade, cryptographically governed **Autonomous Quality Engineering (AQE) Platform & Multi-Agent Harness** built natively on the **Microsoft Agent Framework (MAF 2.0)** in Python with a **Next.js 16 (React 19)** web command center, **ChromaDB persistent RAG vector store**, **real NVIDIA Skill Specter AST security scanning**, and a first-class **Headless Terminal CLI (`bin/harness`)**.
+A quality engineering platform and project harness built on the **Microsoft Agent Framework (MAF)**, with a FastAPI backend, a Next.js web app and a terminal CLI (`bin/harness`). Every number it shows comes from a stored measurement, or it says "not measured".
+
+> Status 2026-11-10: the legacy hand-written harness, its ChromaDB store and the seed data were retired. Sections below that still describe them are being rewritten (`docs/MASTER_PLAN.md`, phase M9).
 
 The platform orchestrates the complete software quality lifecycle across **8 Human-in-the-Loop Quality Gates (G0–G7)** using **12 Specialized Agent Personas** and **59+ Dynamic Domain Skills**.
 
@@ -230,27 +230,19 @@ Navigate to `/harness` to access the full multi-agent workspace:
   3. `evals/evals.json`: Benchmark test evaluations.
 * **Attach to QE Workflow:** Click **"Attach Test Cases to Project"** to bind generated deterministic test scenarios directly into the project's quality pipeline.
 
-### 3. Headless Terminal CLI (`bin/harness`)
-Run the autonomous harness directly from your terminal:
+### 3. Terminal harness (`bin/harness`)
+The CLI is a client of the running backend: the same MAF harness, tools, skills, plugin commands, permissions and audit as the web app. Start the backend first (`python scripts/dev.py backend`).
 ```bash
-# Interactive REPL mode
-./bin/harness
+# sign in (or set ATLAS_CLI_USERNAME and ATLAS_CLI_PASSWORD) and list your projects
+./bin/harness --projects
 
-# List indexed SQLite projects
-./bin/harness /projects
+# interactive harness on one project; /help, /commands, /todos, /new inside
+./bin/harness --project <project id>
 
-# Load a specific project context
-./bin/harness /project prj_agentic_qe
-
-# List all 59+ registered agent skills
-./bin/harness /skills
-
-# Run security audit on workspace
-./bin/harness /security-audit
-
-# Free-form agent prompt
-./bin/harness "Perform boundary value analysis on payment settlement logic"
+# one turn
+./bin/harness --project <project id> "Scan the repository and list each finding with file and line"
 ```
+On Windows use `bin\harness.bat` or `bin/harness.ps1`. The backend address is `ATLAS_API_URL` (default `http://127.0.0.1:8000`).
 
 ---
 

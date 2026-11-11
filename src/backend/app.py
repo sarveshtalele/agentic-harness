@@ -51,8 +51,6 @@ def fail(request: Request | None, status: int, message: str, *, code: str | None
 async def lifespan(_: FastAPI):
     database.migrate()
     # startup seeding removed: seed_database() wrote fabricated data (plan D-04/D-05)
-    from backend.api.mcp import seed_mcp_servers
-    seed_mcp_servers()
     prompts.seed()
     skill_lib.load()  # a skill MAF cannot load is a warning in the log and is absent
     files.seed_templates()
@@ -119,7 +117,7 @@ async def request_id(request: Request, call_next):
     return response
 
 
-STATUS = {"AQE-ALLOW-001": 403, "AQE-ALLOW-002": 429, "AQE-MODEL-006": 502, "AQE-MODEL-004": 504, "AQE-REPO-001": 400}
+STATUS = {"AQE-ALLOW-001": 403, "AQE-HARNESS-DESKTOP-ONLY": 403, "AQE-ALLOW-002": 429, "AQE-MODEL-006": 502, "AQE-MODEL-004": 504, "AQE-REPO-001": 400}
 HINT = {401: "Sign in again.", 403: "Ask your administrator.", 404: "Check the address, or refresh the page.", 409: "Wait for the current action to finish, then try again.", 412: "Open Settings and finish the setup.", 413: "Use a smaller file."}
 
 

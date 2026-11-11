@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { api, when } from "../lib/api";
-import { ApprovalCard } from "./RunPanel";
+import { ApprovalCard } from "../features/runs/ApprovalCard";
 import { Empty, Spinner, useToast } from "./ui";
 
 /** Everything waiting on a human, for one project or all of them. */

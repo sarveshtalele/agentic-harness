@@ -1,0 +1,64 @@
+All projects
+
+Audit empty
+
+CORE REPOSITORY
+Overview
+Codebase & AST Discovery
+Project Specifications
+AI SDLC & STUDIOS
+BA Studio (BRD & Gherkin)
+Skill Creator Studio
+Feature Implementation
+Defect Scanner & Fixes
+Autonomous QE & AI SDLC
+GOVERNANCE & TELEMETRY
+Quality Gate Approvals
+Governance & Policies
+Execution Runs & Metrics
+Telemetry & Logs
+Prompt Management
+MCP Servers
+Templates
+Settings
+Audit empty
+prj_47f687d2afc5
+QE Harness
+No model configured
+preview-admin (admin)
+Account
+Sign out
+Prompts
+
+Prompts are versioned and shared by all projects. Each saved document records the prompt version that wrote it.
+
+bug-fix-reviewer
+v1
+bug-reviewer
+v1
+business-analyst
+v1
+confidence-reviewer
+v1
+defect-diagnostician
+v1
+feature-engineer
+v1
+harness
+v1
+principal-test-architect
+v1
+project-copilot
+v1
+qa-execution-engineer
+v1
+repo-intelligence-analyst
+v1
+requirements-analyst
+v1
+test-automation-engineer
+v1
+test-design-architect
+v1
+
+Choose an agent to view its prompt.

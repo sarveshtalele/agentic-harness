@@ -1,0 +1,126 @@
+Agentic QE Platform
+WORKSPACE & AGENTS
+Projects
+Autonomous QE Harness
+Gate Approvals
+AI Specialist Roster
+STUDIOS & ECOSYSTEM
+Skill Creator Studio
+Project Skills & Tools
+MCP Server Registry
+Specification Templates
+GOVERNANCE & INSIGHTS
+Observability & Telemetry
+Platform Documentation
+ENTERPRISE ADMIN
+User Access & Accounts
+Token Budget & Usage
+System Configuration
+QE Harness
+Enterprise QE
+preview-admin (admin)
+Account
+Sign out
+Agents
+Project harness
+
+Policy, evaluations, and recorded use for this agent.
+
+Details
+enabled
+Purpose	Plans and works through multi-step project tasks with todos, modes, memory, and skills
+Risk	Impact: changes code. Its edits land on a separate branch and need a person's review.
+Controls on code changes	
+No tools in workflows. It can only return proposed edits as text.
+Guarded edits. Code refuses path escapes, secrets, overwrites, deletions, out-of-scope files, and edits that break syntax.
+Separate branch. Your main code is never touched.
+Real tests and a confidence review. Run before anyone is asked to decide.
+Named human approval. Nothing is committed without it, and agents cannot approve.
+Disable switch and token limits. The admin can stop it at once.
+
+Status	Enabled
+Prompt version	harness@v1:b24f9ff31c16
+Skills	None
+Workflow tools	None. It works only from the text it is given
+Chat tools	file_memory_delete, file_memory_grep, file_memory_ls, file_memory_read, file_memory_replace, file_memory_replace_lines, file_memory_write, grep, list_documents, list_files, list_findings, mode_get, mode_set, project_status, read_document, read_file, remember, run_tests, sandbox_status, save_document, scan_repository, search_documents, start_workflow, todos_add, todos_complete, todos_get_all, todos_get_remaining, todos_remove, verify_ledger
+Can change code	No
+Tokens per model call	16,000
+Evaluations	Not run
+Model calls	0
+Tokens used	0
+Average response	No calls yet
+Errors	0
+Guardrail events	0
+Controls
+Signing as
+
+preview-admin
+
+Reason
+Tokens per model call
+Model
+Each user's default
+Save limit
+Disable agent
+Evaluations
+Run on the real model
+
+Not evaluated yet.
+
+Scores
+Measure
+
+Recall and F1 are measured against: Task and answer key. Agent-specific: Right skill loaded, todos finished only when done, no approvals.
+
+Benchmark
+Agent cases only
+Repeats
+1
+2
+3
+5
+Include model-graded metrics (uses tokens)
+Not measured: RAGAS is not installed
+Metric	Value	Items	Judge	Notes
+Groundedness	Not measured			Not measured: no evaluation has run
+Faithfulness	Not measured			Not measured: no evaluation has run
+Context recall	Not measured			Not measured: no evaluation has run
+Context precision	Not measured			Not measured: no evaluation has run
+Response relevancy	Not measured			Not measured: no evaluation has run
+Factual correctness	Not measured			Not measured: no evaluation has run
+Precision	Not measured			Not measured: no evaluation has run
+Recall	Not measured			Not measured: no evaluation has run
+F1	Not measured			Not measured: no evaluation has run
+Mutation score	Not measured			Not measured: no evaluation has run
+Cases of the latest run, worst first
+
+No run yet.
+
+Recent model calls (0)
+
+No calls recorded.
+
+Active Security Guardrails & Enforcements
+Prompt Injection Demarcation
+Active
+
+NVIDIA Skill Specter Tier 1 standard: XML boundary framing (`<skill>`, `<reference>`, `TASK:`) and automatic neutralization of hostile prompt overrides.
+
+Zero-Trust Assertion Preservation
+Enforced
+
+Cloudflare P0 standard: Healing and test-generation tools strictly reject candidate patches that delete, weaken, or substitute assertions with trivial checks.
+
+Sandbox Boundary & Path Traversal
+Strict
+
+Canonical realpath boundary isolation with NUL byte guards. Strict directory containment prevents path traversal and writes to protected folders (`.git`, `.venv`, `.qe`).
+
+Secret Scanner & Redaction
+Real-time
+
+Shannon entropy calculation and multi-vendor regex scanning (GitHub tokens, AWS, GCP, Slack, private keys) auto-redacting sensitive credentials before model consumption.
+
+Recent Guardrail Interception Events (0)
+
+No security guardrail violations detected on this agent.

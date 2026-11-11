@@ -1,0 +1,69 @@
+Agentic QE Platform
+WORKSPACE & AGENTS
+Projects
+Autonomous QE Harness
+Gate Approvals
+AI Specialist Roster
+STUDIOS & ECOSYSTEM
+Skill Creator Studio
+Project Skills & Tools
+MCP Server Registry
+Specification Templates
+GOVERNANCE & INSIGHTS
+Observability & Telemetry
+Platform Documentation
+ENTERPRISE ADMIN
+User Access & Accounts
+Token Budget & Usage
+System Configuration
+QE Harness
+Enterprise QE
+preview-admin (admin)
+Account
+Sign out
+Observability
+
+Every skill, agent call, tool call, workflow step, approval, and guardrail, across all projects. All entries come from stored records.
+
+0
+Runs
+0
+Skills
+0
+Agent calls
+0
+Tokens
+0
+Tool calls
+0
+MCP tool calls
+0
+Guardrails
+0
+Errors
+
+Audit ledger verified for 1 project
+
+MCP tools: none recorded. This application connects to no MCP server, so its agents use only built-in tools.
+
+All projects
+Audit empty
+Log
+Errors
+All runs
+Live
+Refresh
+Download JSON
+All
+Skills 0
+Agents 0
+Tools 0
+MCP tools 0
+Workflow steps 0
+Approvals 0
+Guardrails 0
+Audit ledger 1
+Nov 10, 2026, 7:03 PM
+audit
+project.created admin: prj_47f687d2afc5 · Audit empty
+Showing 1 of 1, newest first.

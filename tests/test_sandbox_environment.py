@@ -2,29 +2,28 @@
 Tests workspace creation, safe file writes, path traversal defenses,
 code execution containment, and dependency management.
 """
-import os
-import sys
 import pytest
 
 from backend.repos import sandbox
 from backend.core.security import safe_path
 from backend.core.errors import RepoError
+from tests.conftest import connect_test_repo
 
 
-def test_ensure_sandbox_creates_repo_and_git():
-    """Verify ensure_sandbox creates repo directory with valid git repository and initial commit."""
-    test_project = "prj_unit_sandbox_test"
-    repo_path = sandbox.ensure_sandbox(test_project)
-    
-    assert repo_path.exists()
-    assert (repo_path / ".git").exists()
-    assert (repo_path / "README.md").exists()
-    
-    # Verify sandbox info
-    info = sandbox.info(test_project)
-    assert info["sandbox_ready"] is True
-    assert info["commit"] != ""
-    assert int(info["commits"]) >= 1
+@pytest.fixture(autouse=True)
+def _connected():
+    connect_test_repo("prj_unit_sandbox_test")
+
+
+def test_ensure_sandbox_refuses_without_a_repository_and_invents_nothing():
+    """Without a connected repository there is no sandbox, and no README or commit is made up in its place."""
+    empty = "prj_unit_sandbox_empty"
+    with pytest.raises(RepoError):
+        sandbox.ensure_sandbox(empty)
+    assert not (sandbox.repo_dir(empty) / "README.md").exists()
+    assert sandbox.info(empty)["sandbox_ready"] is False
+    info = sandbox.info("prj_unit_sandbox_test")
+    assert info["sandbox_ready"] is True and info["commit"] != "" and int(info["commits"]) >= 1
 
 
 def test_sandbox_create_file_safe():

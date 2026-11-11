@@ -1,64 +1,8 @@
 {
   "backend/api/mcp.py": {
-    "connected-literal": 5
-  },
-  "backend/harness/agent_evals.py": {
-    "brand-claim": 1,
-    "grade-literal": 8
-  },
-  "backend/harness/discovery.py": {
-    "brand-claim": 1,
-    "grade-literal": 2
-  },
-  "backend/harness/domain_brd_generator.py": {
-    "brand-claim": 4,
-    "fixed-score": 1
-  },
-  "backend/harness/handlers/command_handler.py": {
-    "brand-claim": 3
-  },
-  "backend/harness/handlers/skill_handler.py": {
-    "brand-claim": 5
-  },
-  "backend/harness/mcp_manager.py": {
-    "connected-literal": 2
-  },
-  "backend/harness/qe_guardrails.py": {
-    "brand-claim": 2
-  },
-  "backend/harness/qe_tools.py": {
-    "fixed-score": 2
-  },
-  "backend/harness/skill_specter.py": {
-    "brand-claim": 3,
-    "grade-literal": 1
-  },
-  "backend/harness/skill_tester.py": {
-    "brand-claim": 5,
-    "grade-literal": 1,
-    "score-constant": 1
-  },
-  "backend/repos/sandbox.py": {
-    "mock-content": 1
-  },
-  "frontend/app/agents/[key]/page.tsx": {
-    "brand-claim": 2
+    "connected-literal": 1
   },
   "frontend/app/mcp/page.tsx": {
     "connected-literal": 1
-  },
-  "frontend/app/skills/page.tsx": {
-    "brand-claim": 4,
-    "grade-literal": 1
-  },
-  "frontend/app/skills/studio/page.tsx": {
-    "fake-project-fallback": 1
-  },
-  "frontend/components/HarnessView.tsx": {
-    "brand-claim": 12,
-    "grade-literal": 3
-  },
-  "frontend/content/docs.ts": {
-    "brand-claim": 4
   }
 }

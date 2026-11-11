@@ -168,11 +168,6 @@ async def merge_pr(run_id: str):
 
 @router.post("/api/approvals/{approval_id}/decide")
 async def decide(approval_id: str, body: DecisionIn):
-    from backend.harness.approval_manager import global_approval_manager
-    action = "approve" if body.approved else "reject"
-    if approval_id in global_approval_manager.pending_approvals:
-        global_approval_manager.resolve_approval(approval_id, action, body.feedback)
-
     with db() as con:
         appr_row = row(con.execute("SELECT * FROM approvals WHERE id=?", (approval_id,)))
     if not appr_row:

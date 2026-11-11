@@ -1,7 +1,6 @@
 """Plugin discovery on fake plugin folders, and the read-only API against the real repo."""
 import json
 
-import pytest
 from fastapi.testclient import TestClient
 
 from backend.app import app
@@ -79,3 +78,32 @@ def test_api_needs_sign_in_and_lists_real_plugins():
     assert body["local-skills"]["skills"] > 0
     qe = body["agentic-qe"]
     assert qe["skills"] > 0 and {"qe-start", "qe-plan", "qe-generate"} <= set(qe["commands"]) and qe["problems"] == ["no manifest"]
+
+
+def test_slash_menu_lists_commands_with_plugin_prefix_and_expands_arguments(tmp_path):
+    folder = tmp_path / "plugins" / "qe"
+    folder.mkdir(parents=True)
+    (folder / "plugin.json").write_text(json.dumps({"id": "qe"}))
+    (folder / "skills" / "start").mkdir(parents=True)
+    (folder / "skills" / "start" / "SKILL.md").write_text(
+        "---\nname: start\ndescription: starts\nargument-hint: <app>\ndisable-model-invocation: true\n---\nParse `$ARGUMENTS` and begin.\n", encoding="utf-8")
+    _skill(folder / "skills", "helper")
+    names = {e["name"]: e["kind"] for e in plugins.slash_entries(tmp_path)}
+    assert names["qe:start"] == "command" and names["helper"] == "skill"
+    expanded = plugins.expand_slash("/qe:start calc --mode brownfield", tmp_path)
+    assert "Parse `calc --mode brownfield` and begin." in expanded and "$ARGUMENTS" not in expanded and "/qe:start calc" in expanded
+    assert plugins.expand_slash("/start calc", tmp_path) == plugins.expand_slash("/qe:start calc", tmp_path)  # bare command name works
+    assert "load_skill" in plugins.expand_slash("/helper on calc.py", tmp_path)
+    assert plugins.expand_slash("/unknown x", tmp_path) is None and plugins.expand_slash("hello /qe:start", tmp_path) is None
+
+
+def test_slash_api_lists_real_plugin_commands_for_a_signed_in_user():
+    import os
+    assert TestClient(app).get("/api/plugins/slash").status_code == 401
+    with TestClient(app) as client:
+        assert client.post("/api/auth/login", json={"username": "qa-admin", "password": os.environ["ATLAS_ADMIN_PASSWORD"]}).status_code == 200
+        got = client.get("/api/plugins/slash")
+    assert got.status_code == 200
+    entries = {e["name"]: e for e in got.json()}
+    assert entries["agentic-qe:qe-start"]["kind"] == "command" and entries["agentic-qe:qe-start"]["argument_hint"]
+    assert any(e["kind"] == "skill" for e in entries.values()) and all("path" not in e for e in entries.values())
