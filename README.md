@@ -57,7 +57,30 @@ You can also double-click `start-mac.command`.
 
 ## Quick start: Windows
 
-In PowerShell:
+Use **PowerShell** (not Command Prompt). Every step below was written for Windows 10 or 11, 64-bit.
+
+**1. Install the tools once.** `winget` ships with Windows. Close and reopen PowerShell afterwards, so the new programs are on `PATH`.
+
+```powershell
+winget install --id Python.Python.3.12 -e
+winget install --id OpenJS.NodeJS.LTS -e
+winget install --id Git.Git -e
+winget install --id PostgreSQL.PostgreSQL.17 -e
+```
+
+- **Without winget:** use the installers from python.org (tick **Add python.exe to PATH**), nodejs.org (LTS, 22.18 or newer), git-scm.com and postgresql.org.
+- **PostgreSQL:** keep the default folder (`C:\Program Files\PostgreSQL\17`). The app finds its programs there by itself, or through `PGBIN` if you installed somewhere else. You do not need to create a database or remember the installer's password: the app runs its own cluster in `data\postgres`.
+
+**Check:**
+
+```powershell
+py --version
+node --version
+git --version
+& "C:\Program Files\PostgreSQL\17\bin\initdb.exe" --version
+```
+
+**2. Get the code and the settings file.**
 
 ```powershell
 git clone https://github.com/sarveshtalele/agentic-harness.git
@@ -67,7 +90,9 @@ Copy-Item deploy\environments\local.env.example .env
 notepad .env
 ```
 
-In `.env`, set `ATLAS_ADMIN_USERNAME` and `ATLAS_ADMIN_PASSWORD` (12+ characters, different from the username). Then:
+In `.env`, set `ATLAS_ADMIN_USERNAME` and `ATLAS_ADMIN_PASSWORD` (12+ characters, different from the username). Save and close Notepad.
+
+**3. Install, start the database, check, run.**
 
 ```powershell
 py scripts\dev.py setup
@@ -76,9 +101,25 @@ py scripts\dev.py env-check --env local
 py scripts\dev.py up
 ```
 
-You can also double-click `start-windows.bat`. In the terminal harness, use `bin\harness.bat` or `bin\harness.ps1`.
+- `setup` creates `.venv`, installs the Python and Node packages, and installs Playwright's Chromium (used for browser tests and QE screenshots).
+- `db` starts PostgreSQL in `data\postgres` and adds `ATLAS_DATABASE_URL` to `.env`. After a restart of Windows, run `db` again before `up`.
+- `up` builds the UI and opens <http://127.0.0.1:3000>.
 
-**Developing:** run `python scripts/dev.py backend` and `python scripts/dev.py frontend` in two terminals. The backend is on port 8000 and the UI on port 3000.
+You can also double-click `start-windows.bat`.
+
+**Terminal harness:** `bin\harness.bat`, or `bin\harness.ps1`. If PowerShell refuses the script, run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once.
+
+**Developing:** run `py scripts\dev.py backend` and `py scripts\dev.py frontend` in two PowerShell windows. The backend is on port 8000, the UI on port 3000.
+
+**Windows problems and fixes:**
+
+| Problem | Fix |
+|---|---|
+| `py` is not recognized | Reinstall Python with **Add python.exe to PATH**, or use the full path `C:\Users\<you>\AppData\Local\Programs\Python\Python312\python.exe` |
+| `initdb.exe` was not found | Install PostgreSQL (step 1), or set `$env:PGBIN="C:\Program Files\PostgreSQL\17\bin"` before `db` |
+| Port 8000 or 3000 is in use | Close the other program, or pick free ports for this window: `$env:ATLAS_PORT="8010"; $env:ATLAS_UI_PORT="3010"` |
+| `npm` fails with `EPERM` in `node_modules` | Close editors and terminals that hold the folder, then run `setup` again |
+| A path is too long (`ENAMETOOLONG`) | Clone into a short folder such as `C:\src\agentic-harness` |
 
 ## Two environments: local and Azure
 
@@ -109,16 +150,35 @@ Faithfulness scores need RAGAS.
 
 ## Deploy to Azure (zip and Kudu)
 
-GitHub never connects to Azure.
+GitHub never connects to Azure. You build two zips on your computer and upload them in the browser.
+
+**On macOS or Linux:**
 
 ```bash
 python scripts/package_azure_kudu.py
-python scripts/dev.py azure-local --check
+ATLAS_ADMIN_USERNAME=<name> ATLAS_ADMIN_PASSWORD=<12+ chars> python scripts/dev.py azure-local --check
 ```
 
-The first command builds `dist/azure_backend.zip` and `dist/azure_frontend.zip`. The second runs both zips locally through their own startup scripts in the web profile.
+**On Windows, in PowerShell from the repository folder:**
 
-Then follow **`docs/AZURE_DESKTOP_TARGET_ARCHITECTURE.md`**, the standard guide: East US 2, one B1 plan with two web apps, PostgreSQL Flexible Server B1ms, Blob Storage, Key Vault, Kudu `ZipDeployUI`, about $28.50 a month.
+```powershell
+py scripts\package_azure_kudu.py
+$env:ATLAS_ADMIN_USERNAME = "<name>"
+$env:ATLAS_ADMIN_PASSWORD = "<12+ chars>"
+py scripts\dev.py azure-local --check
+Remove-Item Env:ATLAS_ADMIN_PASSWORD
+```
+
+- **The first command** writes `dist\azure_backend.zip` and `dist\azure_frontend.zip`.
+  - Always use this script, not Explorer's **Send to, Compressed folder**. The script stores paths with forward slashes, which the Linux App Service needs. It keeps the startup scripts' line endings, and it ships only files Git tracks or would track: `.gitignore` keeps `.env`, `data\` and build folders out of every zip.
+- **`azure-local --check`** unzips both packages into `data\azure-local`, starts them through their own startup scripts in the web profile with a local PostgreSQL, and must print `API health: 200; UI /login: 200`.
+
+**Upload the zips:**
+1. Open `https://<api app>.scm.azurewebsites.net/ZipDeployUI` in your browser. Drag `dist\azure_backend.zip` from Explorer onto the page and wait for it to finish.
+2. Do the same for `dist\azure_frontend.zip` on `https://<ui app>.scm.azurewebsites.net/ZipDeployUI`.
+3. Restart both apps in the portal.
+
+The full setup is in **`docs/AZURE_DESKTOP_TARGET_ARCHITECTURE.md`**, the standard guide: East US 2, one B1 plan with two web apps, PostgreSQL Flexible Server B1ms, Blob Storage, Key Vault, about $28.50 a month.
 
 ## Desktop app
 
@@ -151,6 +211,8 @@ Then `cd apps/desktop`, `npm install` and `npx electron .`.
 | Document | What it covers |
 |---|---|
 | `docs/PLAN_NEXT_STEPS.md` | Current status and the ordered next steps |
+| `docs/PROJECT_STRUCTURE.md` | Every file in a table: what it does, what it uses and what uses it (generated from the real imports by `python scripts/gen_structure.py`) |
+| `docs/SECURITY_REVIEW_2026-11-11.md` | Dependency audits, code scan, fixes and accepted risks, with the commands to repeat them |
 | `docs/MASTER_PLAN.md` | The approved plan: Part 2 (H1 to H9), Phase Q (QE correctness), Phase R (capability registry) |
 | `docs/AZURE_DESKTOP_TARGET_ARCHITECTURE.md` | The standard Azure deployment (PostgreSQL, Blob, Key Vault, East US 2) with costs and a UI tour |
 | `docs/DESKTOP_RELEASE_GUIDE.md` | Building and publishing the desktop installers |

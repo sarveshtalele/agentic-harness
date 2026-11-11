@@ -24,7 +24,7 @@ APP = os.environ.get("CYCLE_APP", "personal-finance-mcp")
 REPO = os.environ.get("CYCLE_REPO", "https://github.com/sarveshtalele/personal-finance-mcp")
 LAST_GATE = int(os.environ.get("CYCLE_LAST_GATE", "5"))
 STEPS = [  # (what the human types, the gate it ends at or None)
-    (f"/agentic-qe:qe-start {APP} --mode brownfield", 0),
+    (f"/agentic-qe:qe-start {APP} --mode brownfield", 0),  # its gate phrase: approve gate 0 for <app> mode brownfield
     ("/agentic-qe:qe-doctor", None),
     ("Set up the pandas/numpy validator that qe-doctor reports as not set up: run its validator command with --yes, then run qe-doctor's check again.", None),
     (f"/agentic-qe:qe-discover {APP}", None),
@@ -124,7 +124,8 @@ with TestClient(app) as client:
         if gate is None:
             continue
         for attempt in range(GATE_TRIES):
-            turn(client, thread["id"], f"approve gate {gate} for {APP}", f"s{n}g{attempt}")
+            phrase = f"approve gate {gate} for {APP}" + (" mode brownfield" if gate == 0 else "")  # exactly what each command asks for
+            turn(client, thread["id"], phrase, f"s{n}g{attempt}")
             if gate in gates(ws):
                 note("gate_approved", gate=gate, attempt=attempt)
                 break

@@ -38,7 +38,9 @@ from backend.maf import governance, llm, tools
 from backend.maf.harness_kit import active_command, plugin_agents, specialists, workspace
 from backend.maf.harness_kit.hook_middleware import guarded
 from backend.maf.harness_kit.shell import ShellProvider, WorkspaceShell
+from backend.maf.harness_kit.skill_runner import run_skill_script
 from backend.maf.harness_kit.strict_args import strict_arguments
+from backend.maf.harness_kit.write_first import write_first
 from backend.maf.harness_kit.nudges import while_working
 from backend.maf.harness_kit.catalog import CORE, RISKY, Catalogue, LoadedTools
 from backend.maf.harness_kit.snapshots import APPROVALS, SNAPSHOTS, scope, session_id  # noqa: F401 - used by maf/agui.py and api/chat.py
@@ -53,15 +55,16 @@ STUDIO_ONLY = frozenset({"skill-creator"})  # Skill Studio's model instructions;
 def _skills() -> SkillsProvider:
     """Skills from every discovered plugin (plus skills/ as local-skills), read fresh each turn so a new plugin folder
     shows up without a restart. Command skills (disable-model-invocation: true, like agentic-qe's qe-*) are user
-    commands, so the model never sees them. Platform skills are trusted content: reading one needs no pause, and there
-    is no script runner yet.
+    commands, so the model never sees them. Platform skills are trusted content: reading one needs no pause. Running a
+    skill's `scripts/run.py` waits for the human's approval card (`harness_kit/skill_runner.py`).
 
     A plugin granted to other roles (core/plugin_grants.py) is left out for this user, so its skills never reach the model.
     """
     paths = plugins.skill_paths(role=plugin_grants.role_of(auth.current_user.get()))
     commands = set().union(*(plugins.command_skill_names(path) for path in paths))
     hidden = commands | STUDIO_ONLY  # one way per job: skills are made with the create_skill tool, not the Studio's own instructions
-    source = DeduplicatingSkillsSource(FilteringSkillsSource(FileSkillsSource(paths), lambda skill, _ctx: skill.frontmatter.name not in hidden))
+    files = FileSkillsSource(paths, script_runner=run_skill_script)  # scripts/run.py of a Studio skill runs after the approval card
+    source = DeduplicatingSkillsSource(FilteringSkillsSource(files, lambda skill, _ctx: skill.frontmatter.name not in hidden))
     return SkillsProvider(source, disable_load_skill_approval=True, disable_read_skill_resource_approval=True)
 
 
@@ -131,7 +134,7 @@ def build(project_id: str, thread_id: str, start_run, *, user_id: str | None = N
         loop_max_iterations=HARNESS_MAX_ROUNDS,
         disable_web_search=True,  # no data leaves through a hosted search tool
         context_providers=[ProjectContext(project_id, full=True), loaded, workspace.WorkspaceContext(ws), *providers],
-        middleware=[strict_arguments, tool_audit(AGENT, project_id, None, "chat"), *([guarded(ws)] if ws else []), telemetry],
+        middleware=[strict_arguments, write_first(thread_id, ws.root if ws else None, command), tool_audit(AGENT, project_id, None, "chat"), *([guarded(ws)] if ws else []), telemetry],
         **world,
     )
 

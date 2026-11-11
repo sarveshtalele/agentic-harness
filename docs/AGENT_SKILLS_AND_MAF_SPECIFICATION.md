@@ -593,6 +593,8 @@ The Studio consists of five cohesive layers:
 
 ### 7.2 Dynamic ChromaDB RAG Vector Store & Multi-DB Grounding Engine
 
+> **Removed (2026-11-11).** No code uses this store any more, and `chromadb` was dropped from `requirements.txt` (it carried 5 advisories with no fixed version). The text below describes the retired design.
+
 A core failure mode of autonomous agent skills is generic or hallucinated domain logic. The platform resolves this through dynamic **ChromaDB RAG Vector Store Grounding** managed by [`src/backend/harness/rag_store.py`](file:///Users/sarveshtalele/Downloads/agentic-harness/src/backend/harness/rag_store.py) (`RAGVectorStore`).
 
 ```mermaid

@@ -108,6 +108,23 @@ Still to do for real agent scores:
   - the old SQLite migrations `src/backend/migrations/0*.sql` (001 to 023), replaced by `migrations/postgres/0001_baseline.sql`.
 - **Not done yet:** G6 (files in Blob), G4 (Skill Studio requirements page), G2 and G3 (an app built end to end; subagents from chat), bundled PostgreSQL for the desktop (D-P1).
 
+## Batch after commit 16af7f7 (2026-11-11)
+- **Harness `write_first` guard** (`maf/harness_kit/write_first.py`): while the active command owes files, 15 reads in a row nudge, and 25 refuse until something is written. Commands whose files follow a gate (qe-start) are exempt.
+  - Found live: attempt 4 read 318 files and wrote none.
+  - Attempt 5 wrote, but qe-start wrote before Gate 0, which is now exempt.
+  - Attempt 6 is running.
+- **`local_postgres`:** a new cluster gets its password over SQL, not from a password file, because the file is unreadable to `initdb` on Windows (CI failure). Unix sockets are off: a long app-data path broke the 103-byte limit.
+- **Desktop MSI:** WiX needs an icon. Added `apps/desktop/assets/icon.png` and `icon.ico`.
+- **Templates are Markdown only** (API refuses others with 415; UI pickers `.md`).
+- **Security** (`docs/SECURITY_REVIEW_2026-11-11.md`):
+  - pip-audit clean after removing the unused `chromadb`;
+  - npm audit 33 to 19, all from 2 root advisories, accepted with reasons;
+  - Bandit: 0 high, untrusted XML now parsed with defusedxml;
+  - the CopilotKit route answers 401 or 413 before parsing.
+- **`docs/PROJECT_STRUCTURE.md`:** all 1,069 files described, with Uses and Used by.
+- **`docs/DESKTOP_RELEASE_GUIDE.md`:** GitHub Release publishing; install steps for everyone; where data and session JSONL files live; MCP via npx; plugins; scope.
+- **Live skill from a BRD** (`docs/evidence/runs/2026-11-11-skill-from-brd/`): Studio plan, approve, generate and test passed 9 of 9 on the first run; the full run, including the harness, is running.
+
 ## Running or stopped
 
 | Item | State | Restart |

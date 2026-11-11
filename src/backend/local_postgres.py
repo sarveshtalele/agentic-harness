@@ -51,29 +51,44 @@ def free_port() -> int:
 
 
 def start(folder: Path, port: int | None = None, database: str = "agentic_qe") -> str:
-    """Create the cluster if needed, start it, make the database; returns the connection URL."""
+    """Create the cluster if needed, start it, make the database; returns the connection URL.
+
+    A new cluster is made with loopback-only trust, given its random password over SQL, and switched to SCRAM before
+    anything else connects. (A password file for initdb fails on Windows: initdb drops to a restricted token that cannot
+    read a file the administrator account just wrote.)"""
+    import psycopg  # the backend's own driver
+    from psycopg import sql
+
     folder = Path(folder).resolve()
-    secret = folder / ".atlas-password"
-    data = folder / "data"
-    if not (data / "PG_VERSION").is_file():
+    secret, data = folder / ".atlas-password", folder / "data"
+    fresh = not (data / "PG_VERSION").is_file()
+    if fresh:
         folder.mkdir(parents=True, exist_ok=True)
-        secret.write_text(secrets.token_urlsafe(24), encoding="utf-8")
-        os.chmod(secret, 0o600)
-        _run([binary("initdb"), "-D", str(data), "-U", USER, "--auth=scram-sha-256", f"--pwfile={secret}", "-E", "UTF8", "--locale=C"])
+        _run([binary("initdb"), "-D", str(data), "-U", USER, "--auth=trust", "-E", "UTF8", "--locale=C"])
+    elif not secret.is_file():
+        sys.exit(f"{data} exists but its password file {secret} is missing. Move the folder away to start a new cluster.")
     saved = folder / ".atlas-port"  # a developer cluster keeps its port, so the URL in .env stays right
     if not port:
         port = int(saved.read_text(encoding="utf-8")) if saved.is_file() else free_port()
     saved.write_text(str(port), encoding="utf-8")
-    options = f"-p {port} -c listen_addresses=127.0.0.1" + ("" if os.name == "nt" else f" -k {folder}")
+    # TCP on loopback only; no Unix socket, whose path has a 103-byte limit a deep app-data folder can exceed (Windows has none by default)
+    options = f"-p {port} -c listen_addresses=127.0.0.1" + ("" if os.name == "nt" else " -c unix_socket_directories=''")
     if subprocess.run([binary("pg_ctl"), "-D", str(data), "status"], capture_output=True, timeout=30, check=False, env=_env()).returncode != 0:
         _run([binary("pg_ctl"), "-D", str(data), "-o", options, "-l", str(folder / "server.log"), "-w", "-t", "60", "start"])
+    if fresh:
+        password = secrets.token_urlsafe(24)
+        with psycopg.connect(f"postgresql://{USER}@127.0.0.1:{port}/postgres", autocommit=True) as con:
+            con.execute(sql.SQL("ALTER USER {} PASSWORD {}").format(sql.Identifier(USER), sql.Literal(password)))
+        hba = data / "pg_hba.conf"
+        hba.write_text(hba.read_text(encoding="utf-8").replace(" trust", " scram-sha-256"), encoding="utf-8")
+        _run([binary("pg_ctl"), "-D", str(data), "reload"])
+        secret.write_text(password, encoding="utf-8")
+        os.chmod(secret, 0o600)
     password = secret.read_text(encoding="utf-8").strip()
-    import psycopg  # the backend's own driver
-
     admin = f"postgresql://{USER}:{password}@127.0.0.1:{port}/postgres"
     with psycopg.connect(admin, autocommit=True) as con:
         if not con.execute("SELECT 1 FROM pg_database WHERE datname=%s", (database,)).fetchone():
-            con.execute(f'CREATE DATABASE "{database}"')
+            con.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(database)))
     return f"postgresql://{USER}:{password}@127.0.0.1:{port}/{database}"
 
 

@@ -103,3 +103,16 @@ def test_server_writes_frontmatter_so_an_unquoted_colon_cannot_break_it():
     front, body = frontmatter(skill_md)
     assert front == {"name": name, "description": plan.description, "metadata": {"author": "dev-1"}}
     assert body.strip() == "# Body kept" and "version" not in skill_md
+
+
+def test_a_script_skill_without_run_py_fails_its_checks(tmp_path):
+    from backend.core.skill_studio import checks
+
+    folder = tmp_path / "invoice-totals"
+    (folder / "scripts").mkdir(parents=True)
+    (folder / "SKILL.md").write_text("---\nname: invoice-totals\ndescription: Computes invoice totals.\n---\n\nRun the script.\n")
+    (folder / "scripts" / "invoice_total_calculator.py").write_text("print('total')\n")  # what the live generation shipped instead of run.py
+    entry = {c["check"]: c for c in checks.run(folder)}["scripts/run.py entry point"]
+    assert not entry["passed"] and "no scripts/run.py" in entry["detail"]
+    (folder / "scripts" / "run.py").write_text("import sys\nprint(sys.stdin.read())\n")
+    assert {c["check"]: c for c in checks.run(folder)}["scripts/run.py entry point"]["passed"]

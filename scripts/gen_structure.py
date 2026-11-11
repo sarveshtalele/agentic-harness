@@ -52,6 +52,9 @@ PURPOSE = {
     "src/frontend/app/docs/layout.tsx": "Documentation site frame: search and sidebar", "docs/PROJECT_STRUCTURE.md": "This file",
 }
 
+PURPOSE.update({"azure-pipelines.yml": "Azure DevOps pipeline (not used: deployment is zip and Kudu only)", "deploy/azure/azure-pipelines.yml": "Azure DevOps pipeline template (not used: zip and Kudu only)", "deploy/azure/backend_startup.sh": "API startup for App Service (shell form of backend_startup.py)", "deploy/azure/backend_web.config": "IIS settings for the API on Windows App Service", "deploy/azure/frontend_web.config": "IIS settings for the UI on Windows App Service", "deploy/azure/kudu.deployment": "Kudu deployment settings shipped in each zip", "playwright.config.ts": "Playwright settings for the TypeScript screen checks",
+                "plugins/agentic-qe/PINNED": "Upstream branch and commit of the bundled agentic-qe plugin", "plugins/agentic-qe/scripts/parse-junit.ts": "agentic-qe: reads JUnit XML results into the plugin's result format", "plugins/security-audit/validate-coverage-ledger.test.cjs": "Tests for the security-audit coverage ledger validator", "plugins/security-audit/validate-findings.test.cjs": "Tests for the security-audit findings validator", "scripts/capture_evidence.py": "Captures UI screenshots for the evidence folder", "src/frontend/components/ui/index.ts": "Exports the shared UI components (Button, Card, Field, and others)", "src/frontend/features/skills/lib.ts": "Helpers for the skills pages: filters and labels"})
+
 
 def listed() -> list[str]:
     names = subprocess.run(["git", "ls-files", "-co", "--exclude-standard"], cwd=ROOT, capture_output=True, text=True, check=True, timeout=60).stdout.splitlines()
@@ -121,6 +124,34 @@ def _purpose(name: str, doc: str, source: str = "") -> str:
         return f"Built-in {path.stem} template"
     if name.startswith("src/backend/migrations/"):
         return f"Database change: {path.stem.split('_', 1)[-1].replace('_', ' ')}"
+    return _own_words(path, source)
+
+
+def _own_words(path: Path, source: str) -> str:
+    """The file's own first description: front matter, first heading, first comment, a package description, a workflow name."""
+    first = lambda text: re.split(r"(?<=[.!?])\s", " ".join(text.split()), maxsplit=1)[0][:200]
+    if path.suffix == ".md":
+        described = re.search(r"(?m)^description:\s*\"?(.+?)\"?\s*$", source)
+        heading = re.search(r"(?m)^#{1,3}\s+(.+)$", source)
+        return first(described.group(1)) if described else first(heading.group(1)) if heading else ""
+    if path.suffix in (".ts", ".tsx", ".js", ".mjs", ".cjs"):
+        comment = re.search(r"/\*\*?\s*(.+?)\*/|^\s*//\s*(.+)$", source, re.S | re.M)
+        if comment:
+            return first(re.sub(r"^\s*\*\s?", "", comment.group(1) or comment.group(2), flags=re.M))
+        exported = re.search(r"export\s+(?:default\s+)?(?:async\s+)?(?:function|const|class)\s+(\w+)", source)
+        if exported:
+            return f"{'Component' if path.suffix == '.tsx' else 'Module'} `{exported.group(1)}`"
+        return "Type definitions" if path.name.endswith(".d.ts") or path.stem == "types" else ""
+    if path.suffix == ".json":
+        described = re.search(r'"description"\s*:\s*"([^"]+)"', source)
+        return first(described.group(1)) if described else ("Evaluation cases" if path.stem == "evals" else f"{path.stem} data")
+    if path.suffix in (".yml", ".yaml"):
+        named = re.search(r"(?m)^name:\s*(.+)$", source)
+        return f"Workflow: {named.group(1).strip()}" if named else ("Codex agent settings for this skill" if path.name == "openai.yaml" else "")
+    if path.suffix in (".sh", ".bat", ".ps1", ".cjs", ".example", ".txt", ".deployment", ".config", ".html", "") or path.name.startswith(("Dockerfile", "harness")):
+        comment = next((re.sub(r"^(#|::|REM|rem|<!--)\s*", "", line.strip()).rstrip("-> ") for line in source.splitlines()[:15]
+                        if line.strip().startswith(("#", "::", "REM", "rem", "<!--")) and not line.startswith("#!") and len(line.strip()) > 3), "")
+        return first(comment)
     return ""
 
 
@@ -148,7 +179,7 @@ def main() -> None:
              "In this table, `ui/` means `src/frontend/`, and backend paths start from `src/backend/`.", "", "## How the parts connect", "", "```mermaid", "flowchart LR",
              "  UI[Next.js pages and components] -->|/api proxy| API[api routers]", "  UI -->|CopilotKit route| AGUI[maf/agui.py]", "  API --> ENGINE[maf/engine.py]", "  API --> CORE[core services]", "  ENGINE --> WF[maf/workflows]",
              "  WF --> RT[maf/runtime.py]", "  AGUI --> RT", "  RT --> AG[maf/agents policies]", "  RT --> TOOLS[maf/tools]", "  RT --> GOV[maf/governance.py]", "  RT --> LLM[maf/llm.py]", "  WF --> REPOS[repos]", "  WF --> QE[qe]", "  WF --> CORE",
-             "  GOV --> OBS[maf/observability.py]", "  TOOLS --> OBS", "  CORE --> DB[(SQLite)]", "  OBS --> DB", "  REPOS --> SBX[(Project sandbox)]", "  QE --> SBX", "```", "", f"The project has {len(names)} files, not counting screenshots.", ""]
+             "  GOV --> OBS[maf/observability.py]", "  TOOLS --> OBS", "  CORE --> DB[(PostgreSQL)]", "  OBS --> DB", "  REPOS --> SBX[(Project sandbox)]", "  QE --> SBX", "```", "", f"The project has {len(names)} files, not counting screenshots.", ""]
     remaining = list(names)
     for title, *prefixes in [*GROUPS, ("Project root", "")]:
         members = [n for n in remaining if any(n.startswith(p) for p in prefixes)]

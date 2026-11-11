@@ -33,7 +33,7 @@ export default function TemplatesPage() {
   return (
     <AppShell>
       <PageTitle title="Templates" subtitle="Generated documents keep every heading of the chosen template. Upload your organization's format as Markdown or Word." actions={
-        <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500"><Upload className="h-4 w-4" /> Upload template<input type="file" name="template-file" accept=".md,.txt,.docx" className="hidden" onChange={(e) => add(e.target.files?.[0])} /></label>
+        <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500"><Upload className="h-4 w-4" /> Upload template<input type="file" name="template-file" accept=".md" className="hidden" onChange={(e) => add(e.target.files?.[0])} /></label>
       } />
       <ErrorNote message={error} />
       <div className="grid gap-4 md:grid-cols-[280px_1fr]">

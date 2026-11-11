@@ -6,17 +6,12 @@ import re
 import shutil
 import zipfile
 from pathlib import Path
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET  # noqa: F401 - the Element type callers receive
 
+import defusedxml.ElementTree as defused_ET  # a requirement: there is no unsafe fallback parser
+import defusedxml.common as defused_common
 
-try:
-    import defusedxml.ElementTree as defused_ET
-    import defusedxml.common as defused_common
-    HAVE_DEFUSEDXML = True
-except ImportError:
-    HAVE_DEFUSEDXML = False
-    defused_ET = None
-    defused_common = None
+HAVE_DEFUSEDXML = True
 
 
 # Maximum upload size for documents: 20 MB
@@ -81,13 +76,7 @@ def safe_parse_xml(content: str | bytes, forbid_dtd: bool = True, forbid_entitie
             raise XXEError(f"Secure XML parser blocked unsafe payload: {exc}") from exc
         except Exception as exc:
             raise DocumentSecurityError(f"XML parse failure: {exc}") from exc
-
-    # Fallback to standard ElementTree with entity/DTD prevention
-    try:
-        parser = ET.XMLParser()
-        return ET.fromstring(raw_str, parser=parser)
-    except Exception as exc:
-        raise DocumentSecurityError(f"XML parse failure: {exc}") from exc
+    raise DocumentSecurityError("XML parsing needs defusedxml")  # unreachable while defusedxml is installed
 
 
 def validate_zip_archive(

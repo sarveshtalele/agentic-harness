@@ -9,7 +9,7 @@ from __future__ import annotations
 import html
 import re
 import shutil
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET  # JUnit files can carry text from the code under test
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]

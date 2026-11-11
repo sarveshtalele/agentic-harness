@@ -90,21 +90,93 @@ Older installers can stay in the container. The login page links only the files 
 
 The page never shows a link that `latest.json` does not list.
 
-## 6. How users open the app (it is not signed yet)
+## 6. Publish without Azure: a GitHub Release
 
-The installers are unsigned until the owner provides signing certificates (`CSC_LINK` for Windows, an Apple Developer ID for macOS). Until then:
+Anyone with the link can download from a GitHub Release, so this works with or without the Blob container.
 
-- **Windows.** Run the MSI. If SmartScreen shows "Windows protected your PC", select **More info**, then **Run anyway**.
-- **macOS.** Open the DMG and drag the app into Applications. On first launch, right-click the app, select **Open**, then **Open** again. If macOS says the app "is damaged", run this once in Terminal:
+- **Automatic.** Push a tag such as `v0.2.0`. The `release` job attaches the DMGs, the zips, the MSI and `latest.json` to a release of that name.
+- **By hand.**
+  1. On GitHub, open the repository, then **Releases**, then **Draft a new release**.
+  2. Choose or create a tag (for example `v0.2.0`) on `feature/maf-harness-platform`.
+  3. Drag in the files from the run's artifacts:
+     - `Agentic QE Platform-<version>-arm64.dmg`;
+     - `Agentic QE Platform-<version>-x64.dmg`;
+     - `Agentic QE Platform <version>.msi`;
+     - `latest.json`.
+  4. In the description, paste the SHA-256 values from `latest.json`.
+  5. Select **Publish release**.
+- **The repository is private?** Then only people with access can download. To share wider, use the Blob container (section 3) or make a public releases repository.
+
+## 7. Install the desktop app (for everyone)
+
+**1. Get the installer.** Use one of:
+- the web app's home page or sign-in page, **Download** section;
+- the GitHub Release page;
+- a link the admin sends.
+
+| Your computer | File |
+|---|---|
+| Mac with Apple silicon (Apple menu, **About This Mac**, Chip: Apple M1 or later) | `Agentic QE Platform-<version>-arm64.dmg` |
+| Mac with an Intel processor (Processor: Intel) | `Agentic QE Platform-<version>-x64.dmg` |
+| Windows 10 or 11, 64-bit | `Agentic QE Platform <version>.msi` |
+
+**2. Check the file** (recommended). Its SHA-256 must equal the value on the download page or in `latest.json`:
+- macOS: `shasum -a 256 ~/Downloads/"Agentic QE Platform-<version>-arm64.dmg"`;
+- Windows PowerShell: `Get-FileHash "$env:USERPROFILE\Downloads\Agentic QE Platform <version>.msi" -Algorithm SHA256`.
+
+**3. Install PostgreSQL once** (version 16 or newer). The app keeps its data in its own local PostgreSQL cluster and starts it by itself. It needs the PostgreSQL programs on the computer:
+- macOS: `brew install postgresql@17` (with Homebrew), or the installer from postgresql.org;
+- Windows: the installer from postgresql.org. Keep the default folder; you do not need to create a database.
+
+**4. Install the app.**
+- **Windows.** Double-click the MSI and follow the steps. The installers are not signed yet: if SmartScreen shows "Windows protected your PC", select **More info**, then **Run anyway**.
+- **macOS.** Open the DMG and drag **Agentic QE Platform** into **Applications**. On first launch, right-click the app, select **Open**, then **Open** again. If macOS says the app "is damaged", run this once in Terminal, then open it again:
   ```bash
   xattr -dr com.apple.quarantine "/Applications/Agentic QE Platform.app"
   ```
 
-**First run.** The app asks for a local admin username and a password of at least 12 characters. They are stored with the operating system's keychain encryption and never leave the machine.
+**5. First run.** The app asks for a local admin username and a password of at least 12 characters, stored with the operating system's keychain encryption. Then the home page opens; select **Sign in**. The model is set on **Settings**.
 
-The desktop app runs everything locally, data included: the harness, plugin installs, npx commands, local and remote MCP servers. Nothing is shared with the web app unless the user exports it.
+**Where the app keeps things** (`<data>` is `~/Library/Application Support/Agentic QE Platform/data` on macOS, `%APPDATA%\Agentic QE Platform\data` on Windows):
 
-## 7. Releasing a new version
+| What | Where |
+|---|---|
+| Database (local PostgreSQL cluster) | `<data>/postgres` |
+| Projects, repository clones, workspaces | `<data>/projects` |
+| Harness conversations: one JSONL file per chat session, one message per line, written by MAF's file history | `<data>/harness/<project id>/history/~session-<id>.jsonl` |
+| Harness todos and per-user memory | `<data>/harness/<project id>/todos`, `<data>/harness/<project id>/memory/<user id>` |
+| Plugins' own state (for example agentic-qe's validator environment) | `<data>/harness/plugin-home` |
+| Logs | `<data>/logs/app-DAY.jsonl`, `errors-DAY.jsonl`, and `../logs/backend.log` |
+
+**Uninstall.**
+- Windows: **Settings**, **Apps**, then **Agentic QE Platform**, **Uninstall**.
+- macOS: drag the app to the Bin.
+
+The data folder above stays until you delete it.
+
+## 8. What the desktop app can do that the web app cannot
+
+The desktop app runs on the user's own computer, so it allows what a shared server must not:
+
+- **MCP servers started by a command** (stdio).
+  - To add one, an admin opens **MCP**, **Add server**, and sets:
+    - **Transport:** stdio;
+    - **Command:** `npx` (or `node`, `uvx`, `python`, `python3`, or a full path to a program);
+    - **Arguments:** select **Add argument** for each, for example `-y`, then `@modelcontextprotocol/server-filesystem@<version>`, then the folder it may read;
+    - **Environment:** secret values, stored encrypted and never shown again.
+  - Then select **Connect**: the tools come from the server's own `list_tools`.
+  - Then **grant** each tool to the roles that may use it.
+
+  Pin the package version (`@<version>`), because `npx -y` runs whatever version it downloads.
+- **Plugins.**
+  1. **Settings**, **Plugins**, **Upload** takes a plugin zip (Claude Code format).
+  2. Enable it, and grant it to roles.
+  3. Its skills, commands (`/plugin:command` in the harness), hooks and agents load on the next harness turn.
+  4. MCP servers its `.mcp.json` declares appear on **MCP**, not connected, until an admin connects them.
+- **Scope today.** MCP servers and plugins are **platform-wide**, one list per installation. **Per role:** tools and plugins are granted to roles. **Per project:** only members see a project. **Per chat session:** a session gets the tools its user's role was granted, plus the ones it loads with `load_tools`; nothing is configured per session. Project-level and session-level MCP configuration (as in Claude Code's project `.mcp.json`) is not built. A repository's own `.mcp.json` is never started by itself, because repository content is untrusted.
+- **Terminal harness.** `bin/harness` (macOS and Linux), `bin\harness.bat` or `bin\harness.ps1` (Windows) runs the same harness in a terminal against the same data.
+
+## 9. Releasing a new version
 
 1. Raise `version` in `apps/desktop/package.json`, for example `0.2.0`, and commit.
 2. Push a tag `desktop-0.2.0`, or run the workflow by hand.

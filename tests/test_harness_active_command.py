@@ -87,3 +87,50 @@ def test_an_unknown_tool_argument_is_an_error_the_model_reads():
     scripted.function_invocation_configuration["include_detailed_errors"] = True  # what llm.client(detailed_errors=True) sets
     assert asyncio.run(Agent(scripted, tools=[ls], middleware=[strict_arguments]).run("go")).text == "fixed"
     assert "path" in scripted.calls[-1] and "listed" not in scripted.calls[-1]  # never the root listing for a misnamed argument
+
+
+def test_reads_turn_into_writes_while_the_command_owes_files(tmp_path):
+    import asyncio
+
+    from agent_framework import Agent, tool
+
+    from backend.maf.harness_kit import write_first
+
+    @tool(name="read_file", description="Read a file.")
+    def read_file(path: str) -> str:
+        return f"content of {path}"
+
+    command = {"name": "agentic-qe:qe-requirements", "args": APP, "body": "", "paths": [REQS]}
+    reads = [{"call": "read_file", "args": {"path": f"f{i}.py"}} for i in range(write_first.LIMIT + 2)]
+    scripted = ScriptedClient([("Refused:", "stopped reading"), ("go", steps(*reads, "done"))])
+    scripted.function_invocation_configuration["max_iterations"] = write_first.LIMIT + 5
+    asyncio.run(Agent(scripted, tools=[read_file], middleware=[write_first.write_first("thr_wf", tmp_path, command)]).run("go"))
+    seen = "\n".join(scripted.calls)
+    assert f"{write_first.NUDGE} reads in a row without a write. Write {REQS} now" in seen
+    assert f"Refused: {write_first.LIMIT} reads in a row and nothing written while {REQS} is missing" in seen
+    (tmp_path / REQS).parent.mkdir(parents=True)
+    (tmp_path / REQS).write_text("{}")  # once the file exists nothing is counted or refused
+    write_first._reads["thr_wf"] = 0
+    again = ScriptedClient([("go", steps(*reads[:3], "done"))])
+    asyncio.run(Agent(again, tools=[read_file], middleware=[write_first.write_first("thr_wf", tmp_path, command)]).run("go"))
+    assert "[harness]" not in "\n".join(again.calls) and write_first._reads["thr_wf"] == 0
+
+
+def test_files_that_wait_for_a_gate_are_never_pushed_out_early(tmp_path):
+    start = active_command.parse(plugins.expand_slash(f"/agentic-qe:qe-start {APP} --mode brownfield"))
+    assert start["after_gate"] == 0 and active_command.parse(plugins.expand_slash(f"/agentic-qe:qe-requirements {APP}"))["after_gate"] is None
+    import asyncio
+
+    from agent_framework import Agent, tool
+
+    from backend.maf.harness_kit import write_first
+
+    @tool(name="read_file", description="Read a file.")
+    def read_file(path: str) -> str:
+        return f"content of {path}"
+
+    reads = [{"call": "read_file", "args": {"path": f"f{i}.py"}} for i in range(write_first.LIMIT + 2)]
+    scripted = ScriptedClient([("go", steps(*reads, "done"))])
+    scripted.function_invocation_configuration["max_iterations"] = write_first.LIMIT + 5
+    asyncio.run(Agent(scripted, tools=[read_file], middleware=[write_first.write_first("thr_gate", tmp_path, start)]).run("go"))
+    assert "Refused:" not in "\n".join(scripted.calls) and "[harness]" not in "\n".join(scripted.calls)

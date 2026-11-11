@@ -72,14 +72,16 @@ def test_invalid_gherkin_edit_refused_by_api(client, project):
     assert client.get(f"/api/documents/{doc['id']}").json()["version"] == 1
 
 
-def test_template_upload_docx_and_builtin_protected(client, project):
+def test_template_upload_is_markdown_only_and_builtin_protected(client, project):
     word = Document()
     word.add_heading("Our Template", 1)
-    word.add_heading("Purpose", 2)
-    word.add_heading("Controls", 2)
     buffer = io.BytesIO()
     word.save(buffer)
-    created = client.post("/api/templates/upload", files={"file": ("ours.docx", buffer.getvalue())}, data={"name": "Ours", "kind": "brd", "project_id": project["id"]}).json()
+    refused = client.post("/api/templates/upload", files={"file": ("ours.docx", buffer.getvalue())}, data={"name": "Ours", "kind": "brd", "project_id": project["id"]})
+    assert refused.status_code == 415 and "Markdown" in refused.json()["detail"]
+    assert client.post("/api/templates/upload", files={"file": ("bad.md", b"\xff\xfe# x")}, data={"name": "Bad", "kind": "brd"}).status_code == 415
+    md = b"# Our Template\n\n## Purpose\nWhy.\n\n## Controls\nHow.\n"
+    created = client.post("/api/templates/upload", files={"file": ("ours.md", md)}, data={"name": "Ours", "kind": "brd", "project_id": project["id"]}).json()
     assert created["headings"] == ["Purpose", "Controls"]
     assert created["id"] in [t["id"] for t in client.get(f"/api/templates?project_id={project['id']}").json()]
     assert client.delete("/api/templates/builtin_brd").status_code == 400

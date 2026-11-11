@@ -57,4 +57,4 @@ def test_template_upload_reads_markdown_sections_and_plain_text(admin):
     got = admin.post(f"/api/projects/{project}/templates/upload", files={"file": ("brd.md", io.BytesIO(md), "text/markdown")})
     assert got.status_code == 201 and got.json()["template_id"] and len(got.json()["sections"]) >= 3
     got = admin.post(f"/api/projects/{project}/templates/upload", files={"file": ("plain.txt", io.BytesIO(b"Requirement 1: fast login.\n"), "text/plain")})
-    assert got.status_code == 201 and len(got.json()["sections"]) >= 1
+    assert got.status_code == 415 and "Markdown" in got.json()["detail"], "templates are Markdown only"

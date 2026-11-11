@@ -6,7 +6,7 @@ from pathlib import Path
 from fastapi import APIRouter, File, HTTPException, UploadFile
 
 from backend.api.common import _project
-from backend.core import auth, documents, ledger
+from backend.core import auth, documents, files, ledger
 from backend.core.security import sha256
 from backend.db import db, new_id, now
 from backend.repos.doc_parser import parse_document
@@ -19,11 +19,10 @@ async def upload_project_template(
     project_id: str,
     file: UploadFile = File(...),
 ):
-    """Upload custom BRD template (.md, .docx, .txt, .pdf), parse structure, and register it."""
+    """Upload a custom BRD template (Markdown only), parse its structure, and register it."""
     _project(project_id)
     blob = await file.read()
-    if not blob:
-        raise HTTPException(400, "Uploaded template file is empty")
+    files.markdown_template(file.filename or "", blob)
 
     parsed = parse_document(blob, file.filename or "template.md")
     template_name = parsed["title"] or Path(file.filename or "template").stem

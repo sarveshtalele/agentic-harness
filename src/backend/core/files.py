@@ -19,6 +19,21 @@ class UnsupportedFile(ValueError):
     pass
 
 
+def markdown_template(filename: str, blob: bytes) -> str:
+    """Templates are Markdown only (owner rule 2026-11-11): a .md file of UTF-8 text, or a clear refusal."""
+    from fastapi import HTTPException
+
+    if not filename.lower().endswith(".md"):
+        raise HTTPException(415, "Templates must be Markdown (.md) files. Convert the document to Markdown, then upload it")
+    try:
+        text = blob.decode("utf-8")
+    except UnicodeDecodeError:
+        raise HTTPException(415, "The template is not UTF-8 text. Save it as UTF-8 Markdown, then upload it") from None
+    if not text.strip():
+        raise HTTPException(400, "Uploaded template file is empty")
+    return text
+
+
 def extract_text(filename: str, blob: bytes) -> str:
     suffix = "." + filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
     if suffix in TEXT_SUFFIXES:

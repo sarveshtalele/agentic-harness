@@ -14,7 +14,7 @@ import argparse
 import json
 import subprocess
 import sys
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET  # JUnit files can carry text from the code under test
 from datetime import datetime, timezone
 from pathlib import Path
 

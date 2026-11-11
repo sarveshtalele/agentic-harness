@@ -8,6 +8,9 @@ import subprocess
 import sys
 import time
 import xml.etree.ElementTree as ET
+
+import defusedxml.ElementTree as safe_xml
+from defusedxml.common import DefusedXmlException
 from pathlib import Path
 
 
@@ -32,9 +35,9 @@ def parse_junit(xml_text: str) -> dict:
     if not xml_text.strip():
         return empty
     try:
-        root = ET.fromstring(xml_text)
-    except ET.ParseError:
-        return empty
+        root = safe_xml.fromstring(xml_text)  # the report comes from running the repository's own code: untrusted
+    except (ET.ParseError, DefusedXmlException):
+        return empty  # no results read: the run is INCONCLUSIVE, never PASS
     cases = []
     for node in root.iter("testcase"):
         failure = node.find("failure")

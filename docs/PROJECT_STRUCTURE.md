@@ -24,13 +24,13 @@ flowchart LR
   WF --> CORE
   GOV --> OBS[maf/observability.py]
   TOOLS --> OBS
-  CORE --> DB[(SQLite)]
+  CORE --> DB[(PostgreSQL)]
   OBS --> DB
   REPOS --> SBX[(Project sandbox)]
   QE --> SBX
 ```
 
-The project has 1068 files, not counting screenshots.
+The project has 1069 files, not counting screenshots.
 
 ## Backend application
 
@@ -55,7 +55,7 @@ The project has 1068 files, not counting screenshots.
 | `src/backend/api/documents/crud.py` | Documents API: list, create, read, save and delete. | `api/common.py`, `core/auth/__init__.py`, `core/documents.py`, `core/files.py`, `core/gates.py`, `db.py` | `api/documents/__init__.py`, `api/documents/versions.py` |
 | `src/backend/api/documents/exports.py` | Documents API: export as md, docx, feature, patch, csv or jira, and embedded images. | `core/auth/__init__.py`, `core/documents.py`, `core/files.py`, `core/security.py` | `api/documents/__init__.py` |
 | `src/backend/api/documents/templates.py` | Documents API: BRD generation from a template. | `api/common.py`, `api/documents/brd.py`, `core/auth/__init__.py`, `core/documents.py`, `core/files.py`, `core/ledger.py`, `db.py`, `repos/doc_parser/__init__.py` | `api/documents/__init__.py` |
-| `src/backend/api/documents/upload.py` | Documents API: upload a custom BRD template and register its structure. | `api/common.py`, `core/auth/__init__.py`, `core/documents.py`, `core/ledger.py`, `core/security.py`, `db.py`, `repos/doc_parser/__init__.py` | `api/documents/__init__.py` |
+| `src/backend/api/documents/upload.py` | Documents API: upload a custom BRD template and register its structure. | `api/common.py`, `core/auth/__init__.py`, `core/documents.py`, `core/files.py`, `core/ledger.py`, `core/security.py`, `db.py`, `repos/doc_parser/__init__.py` | `api/documents/__init__.py` |
 | `src/backend/api/documents/versions.py` | Documents API: versions, diff, restore and approve. | `api/documents/crud.py`, `core/auth/__init__.py`, `core/documents.py` | `api/documents/__init__.py` |
 | `src/backend/api/findings.py` | Findings API. | `api/common.py`, `core/auth/__init__.py`, `core/ledger.py`, `db.py`, `maf/agui.py`, `maf/engine/__init__.py`, `maf/evals/__init__.py`, `maf/governance/__init__.py`, and 2 more | `api/__init__.py` |
 | `src/backend/api/governance/__init__.py` | Governance API. | `api/governance/agent_routes.py`, `api/governance/decisions.py`, `api/governance/eval_routes.py`, `api/governance/prompt_routes.py`, `maf/agui.py`, `maf/engine/__init__.py`, `maf/evals/__init__.py`, `maf/governance/__init__.py`, and 2 more | `api/__init__.py` |
@@ -247,7 +247,7 @@ The project has 1068 files, not counting screenshots.
 | `src/backend/core/doc_checks.py` | Deterministic requirements checks. They cap the reviewer's score, so a model cannot pass a weak document. | `core/files.py` | `api/documents/ai.py`, `maf/workflows/ba.py`, `maf/workflows/qe/discover.py`, `tests/test_api_reviews.py`, `tests/test_core_agents.py`, `tests/test_core_platform.py`, `tests/test_core_review.py` |
 | `src/backend/core/documents.py` | Versioned documents. Every save is an immutable version with SHA-256, author, and prompt reference. | `config.py`, `core/gates.py`, `core/gherkin.py`, `core/ledger.py`, `core/security.py`, `db.py`, `qe/model/__init__.py` | `api/documents/ai.py`, `api/documents/crud.py`, `api/documents/exports.py`, `api/documents/templates.py`, `api/documents/upload.py`, `api/documents/versions.py`, `api/projects/export.py`, `api/projects/overview.py`, and 27 more |
 | `src/backend/core/errors.py` | Typed errors. Each says what happened, what to do next, and whether a plain retry may help. | `core/security.py` | `app.py`, `core/auth/__init__.py`, `core/auth/allowance.py`, `core/models/periods.py`, `core/skill_studio/author.py`, `maf/agui.py`, `maf/engine/__init__.py`, `maf/engine/failures.py`, and 30 more |
-| `src/backend/core/files.py` | Uploaded-file text extraction, templates, and DOCX export. | `config.py`, `core/security.py`, `db.py`, `repos/doc_parser/__init__.py` | `api/documents/ai.py`, `api/documents/crud.py`, `api/documents/exports.py`, `api/documents/templates.py`, `api/templates.py`, `app.py`, `core/doc_checks.py`, `maf/workflows/ba.py`, and 3 more |
+| `src/backend/core/files.py` | Uploaded-file text extraction, templates, and DOCX export. | `config.py`, `core/security.py`, `db.py`, `repos/doc_parser/__init__.py` | `api/documents/ai.py`, `api/documents/crud.py`, `api/documents/exports.py`, `api/documents/templates.py`, `api/documents/upload.py`, `api/templates.py`, `app.py`, `core/doc_checks.py`, and 4 more |
 | `src/backend/core/gates.py` | Quality gates G0-G5. Sequential approval, HMAC-signed records, human signer required. | `core/ledger.py`, `core/security.py`, `db.py` | `api/documents/crud.py`, `api/governance/decisions.py`, `api/projects/overview.py`, `app.py`, `core/documents.py`, `core/registry/workflow_sources.py`, `maf/engine/__init__.py`, `maf/tools/project_status.py`, and 4 more |
 | `src/backend/core/gherkin.py` | Gherkin validation with the official Cucumber parser. |  | `core/documents.py`, `maf/evals/checks.py`, `maf/workflows/ba.py`, `tests/test_core_documents.py` |
 | `src/backend/core/ledger.py` | Tamper-evident audit ledger: each entry hashes the previous entry, per project. | `core/security.py`, `db.py` | `scripts/sqlite_to_postgres.py`, `api/documents/templates.py`, `api/documents/upload.py`, `api/findings.py`, `api/governance/decisions.py`, `api/mcp/calls.py`, `api/projects/crud.py`, `api/runs.py`, and 23 more |
@@ -431,7 +431,7 @@ The project has 1068 files, not counting screenshots.
 | `src/frontend/app/agents/[key]/page.tsx` | Page for one agent: details table, controls, evaluations | `ui/components/AppShell.tsx`, `ui/components/AuthGate.tsx`, `ui/components/EvalScores.tsx`, `ui/components/ui/index.ts`, `ui/features/agents/ActiveGuardrails.tsx`, `ui/features/agents/AgentCallsCard.tsx`, `ui/features/agents/AgentControlsCard.tsx`, `ui/features/agents/AgentDetailsCard.tsx`, and 3 more |  |
 | `src/frontend/app/agents/page.tsx` | Page at `/agents` | `ui/components/AppShell.tsx`, `ui/components/AuthGate.tsx`, `ui/components/ui/index.ts`, `ui/features/agents/AgentCard.tsx`, `ui/features/agents/GuardrailEvents.tsx`, `ui/features/agents/GuardrailMatrix.tsx`, `ui/lib/api.ts` |  |
 | `src/frontend/app/api/copilotkit/[[...path]]/route.ts` | CopilotKit runtime, connecting chat to the AG-UI endpoint |  |  |
-| `src/frontend/app/api/downloads/route.ts` |  |  |  |
+| `src/frontend/app/api/downloads/route.ts` | Desktop installers for the login page, read from the Blob `downloads` container's latest.json (docs/DESKTOP_RELEASE_GUIDE.md). |  |  |
 | `src/frontend/app/approvals/page.tsx` | Page at `/approvals` | `ui/components/AppShell.tsx`, `ui/components/ApprovalsList.tsx`, `ui/components/ui/index.ts` |  |
 | `src/frontend/app/capabilities/page.tsx` | Page at `/capabilities` | `ui/components/AppShell.tsx`, `ui/components/ui/index.ts`, `ui/features/capabilities/CapabilitiesPage.tsx` |  |
 | `src/frontend/app/chat/[id]/page.tsx` | Page at `/chat/{id}` | `ui/features/chat/Chat.tsx` |  |
@@ -480,34 +480,34 @@ The project has 1068 files, not counting screenshots.
 |---|---|---|---|
 | `src/frontend/components/AppShell.tsx` | Workspace sidebar and header | `ui/components/AuthGate.tsx`, `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/app/account/page.tsx`, `ui/app/agents/[key]/page.tsx`, `ui/app/agents/page.tsx`, `ui/app/approvals/page.tsx`, `ui/app/capabilities/page.tsx`, `ui/app/documents/page.tsx`, `ui/app/findings/page.tsx`, `ui/app/harness/page.tsx`, and 10 more |
 | `src/frontend/components/ApprovalsList.tsx` | List of pending approvals | `ui/components/ui/index.ts`, `ui/features/runs/ApprovalCard.tsx`, `ui/lib/api.ts` | `ui/app/approvals/page.tsx`, `ui/app/projects/[id]/approvals/page.tsx` |
-| `src/frontend/components/Approver.tsx` |  |  | `ui/app/projects/[id]/governance/page.tsx`, `ui/features/projects/GatePipeline.tsx`, `ui/features/runs/RunPanel.tsx` |
+| `src/frontend/components/Approver.tsx` | Who decided: "name (role)" and the mail id when the viewer may see it. |  | `ui/app/projects/[id]/governance/page.tsx`, `ui/features/projects/GatePipeline.tsx`, `ui/features/runs/RunPanel.tsx` |
 | `src/frontend/components/AuthGate.tsx` | Sends people to sign in, and holds the sign-out menu | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/app/agents/[key]/page.tsx`, `ui/app/agents/page.tsx`, `ui/app/layout.tsx`, `ui/app/projects/[id]/governance/page.tsx`, `ui/app/settings/page.tsx`, `ui/app/skills/page.tsx`, `ui/components/AppShell.tsx`, `ui/components/ProjectShell.tsx`, and 8 more |
-| `src/frontend/components/ConfirmModal.tsx` |  |  | `ui/features/documents/DocumentPage.tsx`, `ui/features/documents/DocumentsPage.tsx`, `ui/features/home/ProjectsPage.tsx`, `ui/features/projects/GovernanceAccess.tsx`, `ui/features/projects/OverviewPage.tsx`, `ui/features/repository/Details.tsx` |
-| `src/frontend/components/EvalScores.tsx` |  | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/app/agents/[key]/page.tsx`, `ui/app/projects/[id]/prompts/page.tsx`, `ui/features/agents/AgentCard.tsx` |
-| `src/frontend/components/MafHarness.tsx` |  | `ui/components/ui/index.ts`, `ui/features/chat/Chat.tsx`, `ui/lib/api.ts` | `ui/app/harness/page.tsx` |
+| `src/frontend/components/ConfirmModal.tsx` | Handled by caller } finally { setLoading(false); } }; const isDanger = tone === "danger"; const isWarning = tone === "warning"; return ( <div className="fixed inset-0 z-50 flex items-center justify-ce |  | `ui/features/documents/DocumentPage.tsx`, `ui/features/documents/DocumentsPage.tsx`, `ui/features/home/ProjectsPage.tsx`, `ui/features/projects/GovernanceAccess.tsx`, `ui/features/projects/OverviewPage.tsx`, `ui/features/repository/Details.tsx` |
+| `src/frontend/components/EvalScores.tsx` | What a tile or row reads. | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/app/agents/[key]/page.tsx`, `ui/app/projects/[id]/prompts/page.tsx`, `ui/features/agents/AgentCard.tsx` |
+| `src/frontend/components/MafHarness.tsx` | The project harness on MAF's create_harness_agent: the MAF chat with the harness agent, beside the thread's own todo list. | `ui/components/ui/index.ts`, `ui/features/chat/Chat.tsx`, `ui/lib/api.ts` | `ui/app/harness/page.tsx` |
 | `src/frontend/components/ModelPicker.tsx` | Menu to choose the model for a run or a chat thread | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/app/projects/[id]/feature/page.tsx`, `ui/features/ba/RequirementsForm.tsx`, `ui/features/chat/Conversation.tsx`, `ui/features/findings/BugsPage.tsx`, `ui/features/qe/StagePipeline.tsx` |
 | `src/frontend/components/Observability.tsx` | Log with filters, run trace, and download | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/app/observability/page.tsx`, `ui/app/projects/[id]/observability/page.tsx` |
 | `src/frontend/components/ProjectShell.tsx` | Project sidebar and header | `ui/components/AuthGate.tsx`, `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/app/projects/[id]/approvals/page.tsx`, `ui/app/projects/[id]/chat/page.tsx`, `ui/app/projects/[id]/feature/page.tsx`, `ui/app/projects/[id]/governance/page.tsx`, `ui/app/projects/[id]/layout.tsx`, `ui/app/projects/[id]/observability/page.tsx`, `ui/app/projects/[id]/runs/[runId]/page.tsx`, `ui/app/projects/[id]/runs/page.tsx`, and 7 more |
-| `src/frontend/components/ui/Badge.tsx` |  |  | `ui/components/ui/index.ts` |
-| `src/frontend/components/ui/Button.tsx` |  |  | `ui/components/ui/ConfirmModal.tsx`, `ui/components/ui/index.ts` |
-| `src/frontend/components/ui/Card.tsx` |  |  | `ui/components/ui/index.ts` |
-| `src/frontend/components/ui/ConfirmModal.tsx` |  | `ui/components/ui/Button.tsx` | `ui/components/ui/index.ts` |
-| `src/frontend/components/ui/ErrorNote.tsx` |  |  | `ui/components/ui/index.ts` |
-| `src/frontend/components/ui/Field.tsx` |  |  | `ui/components/ui/index.ts` |
-| `src/frontend/components/ui/Markdown.tsx` |  |  | `ui/components/ui/index.ts` |
-| `src/frontend/components/ui/PageTitle.tsx` |  |  | `ui/components/ui/index.ts` |
-| `src/frontend/components/ui/States.tsx` |  |  | `ui/components/ui/index.ts` |
-| `src/frontend/components/ui/ThemeToggle.tsx` |  |  | `ui/components/ui/index.ts` |
-| `src/frontend/components/ui/Toast.tsx` |  |  | `ui/components/ui/index.ts` |
-| `src/frontend/components/ui/index.ts` |  | `ui/components/ui/Badge.tsx`, `ui/components/ui/Button.tsx`, `ui/components/ui/Card.tsx`, `ui/components/ui/ConfirmModal.tsx`, `ui/components/ui/ErrorNote.tsx`, `ui/components/ui/Field.tsx`, `ui/components/ui/Markdown.tsx`, `ui/components/ui/PageTitle.tsx`, and 3 more | `ui/app/account/page.tsx`, `ui/app/agents/[key]/page.tsx`, `ui/app/agents/page.tsx`, `ui/app/approvals/page.tsx`, `ui/app/capabilities/page.tsx`, `ui/app/docs/[slug]/page.tsx`, `ui/app/docs/layout.tsx`, `ui/app/documents/page.tsx`, and 124 more |
-| `src/frontend/content/docs/architecture.ts` |  | `ui/content/docs/types.ts` | `ui/content/docs/index.ts` |
-| `src/frontend/content/docs/evaluations.ts` |  | `ui/content/docs/types.ts` | `ui/content/docs/reference.ts` |
-| `src/frontend/content/docs/features.ts` |  | `ui/content/docs/types.ts` | `ui/content/docs/index.ts` |
-| `src/frontend/content/docs/getStarted.ts` |  | `ui/content/docs/types.ts` | `ui/content/docs/index.ts` |
-| `src/frontend/content/docs/govern.ts` |  | `ui/content/docs/types.ts` | `ui/content/docs/index.ts` |
-| `src/frontend/content/docs/index.ts` |  | `ui/content/docs/architecture.ts`, `ui/content/docs/features.ts`, `ui/content/docs/getStarted.ts`, `ui/content/docs/govern.ts`, `ui/content/docs/reference.ts`, `ui/content/docs/types.ts` | `ui/app/docs/[slug]/page.tsx`, `ui/app/docs/layout.tsx` |
-| `src/frontend/content/docs/reference.ts` |  | `ui/content/docs/evaluations.ts`, `ui/content/docs/types.ts` | `ui/content/docs/index.ts` |
-| `src/frontend/content/docs/types.ts` |  |  | `ui/content/docs/architecture.ts`, `ui/content/docs/evaluations.ts`, `ui/content/docs/features.ts`, `ui/content/docs/getStarted.ts`, `ui/content/docs/govern.ts`, `ui/content/docs/index.ts`, `ui/content/docs/reference.ts` |
+| `src/frontend/components/ui/Badge.tsx` | Component `Badge` |  | `ui/components/ui/index.ts` |
+| `src/frontend/components/ui/Button.tsx` | Component `Button` |  | `ui/components/ui/ConfirmModal.tsx`, `ui/components/ui/index.ts` |
+| `src/frontend/components/ui/Card.tsx` | Component `Card` |  | `ui/components/ui/index.ts` |
+| `src/frontend/components/ui/ConfirmModal.tsx` | Component `ConfirmModal` | `ui/components/ui/Button.tsx` | `ui/components/ui/index.ts` |
+| `src/frontend/components/ui/ErrorNote.tsx` | a run page named in the message (for example the run that is already active) becomes a link const parts = message.split(/(\/projects\/[\w-]+\/runs\/[\w-]+)/); return <p role="alert" className="rounded |  | `ui/components/ui/index.ts` |
+| `src/frontend/components/ui/Field.tsx` | Component `inputClass` |  | `ui/components/ui/index.ts` |
+| `src/frontend/components/ui/Markdown.tsx` | document text is untrusted, and loading an outside image would tell that site who is reading function SafeImage({ src, alt }: { src?: unknown; alt?: string }) { const url = typeof src === "string" ? |  | `ui/components/ui/index.ts` |
+| `src/frontend/components/ui/PageTitle.tsx` | Component `PageTitle` |  | `ui/components/ui/index.ts` |
+| `src/frontend/components/ui/States.tsx` | Component `Empty` |  | `ui/components/ui/index.ts` |
+| `src/frontend/components/ui/ThemeToggle.tsx` | Component `ThemeToggle` |  | `ui/components/ui/index.ts` |
+| `src/frontend/components/ui/Toast.tsx` | Component `useToast` |  | `ui/components/ui/index.ts` |
+| `src/frontend/components/ui/index.ts` | Exports the shared UI components (Button, Card, Field, and others) | `ui/components/ui/Badge.tsx`, `ui/components/ui/Button.tsx`, `ui/components/ui/Card.tsx`, `ui/components/ui/ConfirmModal.tsx`, `ui/components/ui/ErrorNote.tsx`, `ui/components/ui/Field.tsx`, `ui/components/ui/Markdown.tsx`, `ui/components/ui/PageTitle.tsx`, and 3 more | `ui/app/account/page.tsx`, `ui/app/agents/[key]/page.tsx`, `ui/app/agents/page.tsx`, `ui/app/approvals/page.tsx`, `ui/app/capabilities/page.tsx`, `ui/app/docs/[slug]/page.tsx`, `ui/app/docs/layout.tsx`, `ui/app/documents/page.tsx`, and 124 more |
+| `src/frontend/content/docs/architecture.ts` | Module `architecture` | `ui/content/docs/types.ts` | `ui/content/docs/index.ts` |
+| `src/frontend/content/docs/evaluations.ts` | Module `evaluationsPage` | `ui/content/docs/types.ts` | `ui/content/docs/reference.ts` |
+| `src/frontend/content/docs/features.ts` | Module `features` | `ui/content/docs/types.ts` | `ui/content/docs/index.ts` |
+| `src/frontend/content/docs/getStarted.ts` | Module `getStarted` | `ui/content/docs/types.ts` | `ui/content/docs/index.ts` |
+| `src/frontend/content/docs/govern.ts` | Module `govern` | `ui/content/docs/types.ts` | `ui/content/docs/index.ts` |
+| `src/frontend/content/docs/index.ts` | Module `groups` | `ui/content/docs/architecture.ts`, `ui/content/docs/features.ts`, `ui/content/docs/getStarted.ts`, `ui/content/docs/govern.ts`, `ui/content/docs/reference.ts`, `ui/content/docs/types.ts` | `ui/app/docs/[slug]/page.tsx`, `ui/app/docs/layout.tsx` |
+| `src/frontend/content/docs/reference.ts` | Module `reference` | `ui/content/docs/evaluations.ts`, `ui/content/docs/types.ts` | `ui/content/docs/index.ts` |
+| `src/frontend/content/docs/types.ts` | Documentation pages. |  | `ui/content/docs/architecture.ts`, `ui/content/docs/evaluations.ts`, `ui/content/docs/features.ts`, `ui/content/docs/getStarted.ts`, `ui/content/docs/govern.ts`, `ui/content/docs/index.ts`, `ui/content/docs/reference.ts` |
 | `src/frontend/lib/api.ts` | Browser calls to the API |  | `ui/app/account/page.tsx`, `ui/app/agents/[key]/page.tsx`, `ui/app/agents/page.tsx`, `ui/app/documents/page.tsx`, `ui/app/findings/page.tsx`, `ui/app/login/page.tsx`, `ui/app/projects/[id]/feature/page.tsx`, `ui/app/projects/[id]/governance/page.tsx`, and 74 more |
 
 ## Frontend configuration
@@ -517,143 +517,143 @@ The project has 1068 files, not counting screenshots.
 | `src/frontend/.gitignore` | Frontend files kept out of Git |  |  |
 | `src/frontend/AGENTS.md` | Notes for coding agents about this Next.js version |  |  |
 | `src/frontend/eslint.config.mjs` | Lint rules |  |  |
-| `src/frontend/features/agents/ActiveGuardrails.tsx` |  | `ui/components/ui/index.ts` | `ui/app/agents/[key]/page.tsx` |
-| `src/frontend/features/agents/AgentCallsCard.tsx` |  | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/app/agents/[key]/page.tsx` |
-| `src/frontend/features/agents/AgentCard.tsx` |  | `ui/components/EvalScores.tsx`, `ui/components/ui/index.ts` | `ui/app/agents/page.tsx` |
-| `src/frontend/features/agents/AgentControlsCard.tsx` |  | `ui/components/ui/index.ts` | `ui/app/agents/[key]/page.tsx` |
-| `src/frontend/features/agents/AgentDetailsCard.tsx` |  | `ui/components/ui/index.ts` | `ui/app/agents/[key]/page.tsx` |
-| `src/frontend/features/agents/AgentEvalsCard.tsx` |  | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/app/agents/[key]/page.tsx` |
-| `src/frontend/features/agents/GuardrailEvents.tsx` |  | `ui/components/ui/index.ts`, `ui/features/agents/guardrailFlags.ts`, `ui/lib/api.ts` | `ui/app/agents/page.tsx` |
-| `src/frontend/features/agents/GuardrailMatrix.tsx` |  | `ui/components/ui/index.ts`, `ui/features/agents/guardrailFlags.ts` | `ui/app/agents/page.tsx` |
-| `src/frontend/features/agents/InterceptionEvents.tsx` |  | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/app/agents/[key]/page.tsx` |
-| `src/frontend/features/agents/guardrailFlags.ts` |  |  | `ui/features/agents/GuardrailEvents.tsx`, `ui/features/agents/GuardrailMatrix.tsx` |
-| `src/frontend/features/ba/BaPage.tsx` |  | `ui/components/ProjectShell.tsx`, `ui/components/ui/index.ts`, `ui/features/ba/LifecyclePipeline.tsx`, `ui/features/ba/RecentDocs.tsx`, `ui/features/ba/RequirementsForm.tsx`, `ui/features/ba/SourcesCard.tsx`, `ui/features/ba/lib.ts`, `ui/features/ba/useBaData.ts`, and 4 more | `ui/app/projects/[id]/ba/page.tsx` |
-| `src/frontend/features/ba/LifecyclePipeline.tsx` |  |  | `ui/features/ba/BaPage.tsx` |
-| `src/frontend/features/ba/RecentDocs.tsx` |  | `ui/components/ui/index.ts` | `ui/features/ba/BaPage.tsx` |
-| `src/frontend/features/ba/RequirementsForm.tsx` |  | `ui/components/ModelPicker.tsx`, `ui/components/ui/index.ts` | `ui/features/ba/BaPage.tsx` |
-| `src/frontend/features/ba/SourcesCard.tsx` |  | `ui/components/ui/index.ts`, `ui/features/ba/lib.ts` | `ui/features/ba/BaPage.tsx` |
-| `src/frontend/features/ba/lib.ts` |  |  | `ui/features/ba/BaPage.tsx`, `ui/features/ba/SourcesCard.tsx` |
-| `src/frontend/features/ba/useBaData.ts` |  | `ui/lib/api.ts` | `ui/features/ba/BaPage.tsx` |
-| `src/frontend/features/capabilities/CapDrawer.tsx` |  | `ui/components/ui/index.ts`, `ui/features/capabilities/types.ts`, `ui/lib/api.ts` | `ui/features/capabilities/CapabilitiesPage.tsx` |
-| `src/frontend/features/capabilities/CapTable.tsx` |  | `ui/components/ui/index.ts`, `ui/features/capabilities/types.ts` | `ui/features/capabilities/CapabilitiesPage.tsx` |
-| `src/frontend/features/capabilities/CapTree.tsx` |  | `ui/components/ui/index.ts`, `ui/features/capabilities/types.ts` | `ui/features/capabilities/CapabilitiesPage.tsx` |
-| `src/frontend/features/capabilities/CapabilitiesPage.tsx` |  | `ui/components/AuthGate.tsx`, `ui/components/ui/index.ts`, `ui/features/capabilities/CapDrawer.tsx`, `ui/features/capabilities/CapTable.tsx`, `ui/features/capabilities/CapTree.tsx`, `ui/features/capabilities/types.ts`, `ui/lib/api.ts` | `ui/app/capabilities/page.tsx` |
-| `src/frontend/features/capabilities/types.ts` |  |  | `ui/features/capabilities/CapDrawer.tsx`, `ui/features/capabilities/CapTable.tsx`, `ui/features/capabilities/CapTree.tsx`, `ui/features/capabilities/CapabilitiesPage.tsx` |
-| `src/frontend/features/chat/Chat.tsx` |  | `ui/components/ui/index.ts`, `ui/features/chat/Conversation.tsx`, `ui/lib/api.ts` | `ui/app/chat/[id]/page.tsx`, `ui/app/projects/[id]/chat/page.tsx`, `ui/components/MafHarness.tsx` |
-| `src/frontend/features/chat/Conversation.tsx` |  | `ui/components/ModelPicker.tsx`, `ui/components/ui/index.ts`, `ui/features/chat/RunStatus.tsx`, `ui/features/chat/SlashMenu.tsx`, `ui/lib/api.ts` | `ui/features/chat/Chat.tsx` |
-| `src/frontend/features/chat/RunStatus.tsx` |  | `ui/components/ui/index.ts`, `ui/features/chat/status.ts` | `ui/features/chat/Conversation.tsx` |
-| `src/frontend/features/chat/SlashMenu.tsx` |  | `ui/lib/api.ts` | `ui/features/chat/Conversation.tsx` |
-| `src/frontend/features/chat/status.ts` |  |  | `ui/features/chat/RunStatus.tsx` |
-| `src/frontend/features/documents/AgentBar.tsx` |  | `ui/components/ui/index.ts` | `ui/features/documents/DocumentPage.tsx` |
-| `src/frontend/features/documents/DocumentEditor.tsx` |  | `ui/features/documents/editor/InsertButtons.tsx`, `ui/features/documents/editor/TableBlock.tsx`, `ui/features/documents/editor/TextBlock.tsx`, `ui/features/documents/editor/blocks.ts` | `ui/features/documents/DocumentPage.tsx` |
-| `src/frontend/features/documents/DocumentFilters.tsx` |  | `ui/components/ui/index.ts` | `ui/features/documents/DocumentsPage.tsx` |
-| `src/frontend/features/documents/DocumentHeader.tsx` |  | `ui/components/ui/index.ts`, `ui/features/documents/lib.ts` | `ui/features/documents/DocumentPage.tsx` |
-| `src/frontend/features/documents/DocumentPage.tsx` |  | `ui/components/AuthGate.tsx`, `ui/components/ConfirmModal.tsx`, `ui/components/ProjectShell.tsx`, `ui/components/ui/index.ts`, `ui/features/documents/AgentBar.tsx`, `ui/features/documents/DocumentEditor.tsx`, `ui/features/documents/DocumentHeader.tsx`, `ui/features/documents/DocumentTabs.tsx`, and 4 more | `ui/app/projects/[id]/documents/[docId]/page.tsx` |
-| `src/frontend/features/documents/DocumentTabs.tsx` |  |  | `ui/features/documents/DocumentPage.tsx` |
-| `src/frontend/features/documents/DocumentsPage.tsx` |  | `ui/components/ConfirmModal.tsx`, `ui/components/ProjectShell.tsx`, `ui/components/ui/index.ts`, `ui/features/documents/DocumentFilters.tsx`, `ui/features/documents/DocumentsTable.tsx`, `ui/features/documents/NewDocumentCard.tsx`, `ui/features/documents/lib.ts`, `ui/features/documents/useDocuments.ts` | `ui/app/projects/[id]/documents/page.tsx` |
-| `src/frontend/features/documents/DocumentsTable.tsx` |  | `ui/components/ui/index.ts`, `ui/features/documents/lib.ts`, `ui/lib/api.ts` | `ui/features/documents/DocumentsPage.tsx` |
-| `src/frontend/features/documents/NewDocumentCard.tsx` |  | `ui/components/ui/index.ts` | `ui/features/documents/DocumentsPage.tsx` |
-| `src/frontend/features/documents/SaveBar.tsx` |  | `ui/components/ui/index.ts`, `ui/features/documents/lib.ts` | `ui/features/documents/DocumentPage.tsx` |
-| `src/frontend/features/documents/VersionHistory.tsx` |  | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/features/documents/DocumentPage.tsx` |
-| `src/frontend/features/documents/editor/InsertButtons.tsx` |  | `ui/lib/api.ts` | `ui/features/documents/DocumentEditor.tsx` |
-| `src/frontend/features/documents/editor/TableBlock.tsx` |  | `ui/features/documents/editor/blocks.ts` | `ui/features/documents/DocumentEditor.tsx` |
-| `src/frontend/features/documents/editor/TextBlock.tsx` |  | `ui/components/ui/index.ts` | `ui/features/documents/DocumentEditor.tsx` |
-| `src/frontend/features/documents/editor/blocks.ts` |  |  | `ui/features/documents/DocumentEditor.tsx`, `ui/features/documents/editor/TableBlock.tsx` |
-| `src/frontend/features/documents/gherkin/FeatureHeader.tsx` |  | `ui/features/documents/gherkin/parse.ts` | `ui/features/documents/gherkin/GherkinVisualizer.tsx` |
-| `src/frontend/features/documents/gherkin/GherkinVisualizer.tsx` |  | `ui/features/documents/gherkin/FeatureHeader.tsx`, `ui/features/documents/gherkin/ScenarioCard.tsx`, `ui/features/documents/gherkin/parse.ts`, `ui/features/documents/gherkin/steps.tsx` | `ui/features/documents/DocumentPage.tsx` |
-| `src/frontend/features/documents/gherkin/ScenarioCard.tsx` |  | `ui/features/documents/gherkin/parse.ts`, `ui/features/documents/gherkin/steps.tsx` | `ui/features/documents/gherkin/GherkinVisualizer.tsx` |
-| `src/frontend/features/documents/gherkin/parse.ts` |  |  | `ui/features/documents/gherkin/FeatureHeader.tsx`, `ui/features/documents/gherkin/GherkinVisualizer.tsx`, `ui/features/documents/gherkin/ScenarioCard.tsx` |
-| `src/frontend/features/documents/gherkin/steps.tsx` |  |  | `ui/features/documents/gherkin/GherkinVisualizer.tsx`, `ui/features/documents/gherkin/ScenarioCard.tsx` |
-| `src/frontend/features/documents/lib.ts` |  |  | `ui/features/documents/DocumentHeader.tsx`, `ui/features/documents/DocumentsPage.tsx`, `ui/features/documents/DocumentsTable.tsx`, `ui/features/documents/SaveBar.tsx`, `ui/features/documents/useDocument.ts`, `ui/features/projects/DocumentsCard.tsx` |
-| `src/frontend/features/documents/useDocument.ts` |  | `ui/components/ui/index.ts`, `ui/features/documents/lib.ts`, `ui/lib/api.ts` | `ui/features/documents/DocumentPage.tsx` |
-| `src/frontend/features/documents/useDocuments.ts` |  | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/features/documents/DocumentsPage.tsx` |
-| `src/frontend/features/findings/BugsPage.tsx` |  | `ui/components/ModelPicker.tsx`, `ui/components/ProjectShell.tsx`, `ui/components/ui/index.ts`, `ui/features/findings/DiagnoseCard.tsx`, `ui/features/findings/FindingsList.tsx`, `ui/features/findings/GuideModal.tsx`, `ui/features/findings/useFindings.ts`, `ui/features/runs/RunDocuments.tsx`, and 4 more | `ui/app/projects/[id]/bugs/page.tsx` |
-| `src/frontend/features/findings/DiagnoseCard.tsx` |  | `ui/components/ui/index.ts` | `ui/features/findings/BugsPage.tsx` |
-| `src/frontend/features/findings/FindingCard.tsx` |  | `ui/components/ui/index.ts` | `ui/features/findings/FindingsList.tsx` |
-| `src/frontend/features/findings/FindingsList.tsx` |  | `ui/components/ui/index.ts`, `ui/features/findings/FindingCard.tsx` | `ui/features/findings/BugsPage.tsx` |
-| `src/frontend/features/findings/GuideModal.tsx` |  | `ui/components/ui/index.ts`, `ui/features/findings/lib.ts` | `ui/features/findings/BugsPage.tsx` |
-| `src/frontend/features/findings/lib.ts` |  |  | `ui/features/findings/GuideModal.tsx` |
-| `src/frontend/features/findings/useFindings.ts` |  | `ui/lib/api.ts` | `ui/features/findings/BugsPage.tsx` |
-| `src/frontend/features/home/NewProject.tsx` |  | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/features/home/ProjectsPage.tsx` |
-| `src/frontend/features/home/ProjectCard.tsx` |  | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/features/home/ProjectsPage.tsx` |
-| `src/frontend/features/home/ProjectsPage.tsx` |  | `ui/components/AppShell.tsx`, `ui/components/ConfirmModal.tsx`, `ui/components/ui/index.ts`, `ui/features/home/NewProject.tsx`, `ui/features/home/ProjectCard.tsx`, `ui/features/home/StatsRow.tsx`, `ui/lib/api.ts` | `ui/app/projects/page.tsx` |
-| `src/frontend/features/home/StatsRow.tsx` |  |  | `ui/features/home/ProjectsPage.tsx` |
-| `src/frontend/features/landing/Landing.tsx` |  | `ui/components/ui/index.ts`, `ui/features/login/DesktopDownloads.tsx`, `ui/lib/api.ts` | `ui/app/page.tsx` |
-| `src/frontend/features/login/DesktopDownloads.tsx` |  |  | `ui/app/login/page.tsx`, `ui/features/landing/Landing.tsx` |
-| `src/frontend/features/mcp/Catalog.tsx` |  | `ui/components/ui/index.ts`, `ui/features/mcp/types.ts` | `ui/features/mcp/McpRegistry.tsx` |
-| `src/frontend/features/mcp/GrantsTable.tsx` |  | `ui/components/ui/index.ts`, `ui/features/mcp/types.ts`, `ui/lib/api.ts` | `ui/features/mcp/ServerCard.tsx` |
-| `src/frontend/features/mcp/KeyValueRows.tsx` |  | `ui/components/ui/index.ts`, `ui/features/mcp/types.ts` | `ui/features/mcp/ServerForm.tsx` |
-| `src/frontend/features/mcp/McpRegistry.tsx` |  | `ui/components/AuthGate.tsx`, `ui/components/ui/index.ts`, `ui/features/mcp/Catalog.tsx`, `ui/features/mcp/ServerCard.tsx`, `ui/features/mcp/ServerForm.tsx`, `ui/features/mcp/types.ts`, `ui/lib/api.ts` | `ui/app/mcp/page.tsx` |
-| `src/frontend/features/mcp/ServerCard.tsx` |  | `ui/components/ui/index.ts`, `ui/features/mcp/GrantsTable.tsx`, `ui/features/mcp/TryTool.tsx`, `ui/features/mcp/types.ts`, `ui/lib/api.ts` | `ui/features/mcp/McpRegistry.tsx` |
-| `src/frontend/features/mcp/ServerForm.tsx` |  | `ui/components/ui/index.ts`, `ui/features/mcp/KeyValueRows.tsx`, `ui/features/mcp/types.ts`, `ui/lib/api.ts` | `ui/features/mcp/McpRegistry.tsx` |
-| `src/frontend/features/mcp/TryTool.tsx` |  | `ui/components/ui/index.ts`, `ui/features/mcp/types.ts`, `ui/lib/api.ts` | `ui/features/mcp/ServerCard.tsx` |
-| `src/frontend/features/mcp/types.ts` |  |  | `ui/features/mcp/Catalog.tsx`, `ui/features/mcp/GrantsTable.tsx`, `ui/features/mcp/KeyValueRows.tsx`, `ui/features/mcp/McpRegistry.tsx`, `ui/features/mcp/ServerCard.tsx`, `ui/features/mcp/ServerForm.tsx`, `ui/features/mcp/TryTool.tsx` |
-| `src/frontend/features/plugins/PluginCard.tsx` |  | `ui/components/ui/index.ts`, `ui/features/plugins/PluginGrants.tsx`, `ui/lib/api.ts` | `ui/features/plugins/PluginsCard.tsx` |
-| `src/frontend/features/plugins/PluginGrants.tsx` |  | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/features/plugins/PluginCard.tsx` |
-| `src/frontend/features/plugins/PluginsCard.tsx` |  | `ui/components/AuthGate.tsx`, `ui/components/ui/index.ts`, `ui/features/plugins/PluginCard.tsx`, `ui/lib/api.ts` | `ui/app/settings/page.tsx` |
-| `src/frontend/features/projects/AssignMemberForm.tsx` |  | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/features/projects/GovernanceAccess.tsx` |
-| `src/frontend/features/projects/DocumentsCard.tsx` |  | `ui/components/ui/index.ts`, `ui/features/documents/lib.ts` | `ui/features/projects/OverviewPage.tsx` |
-| `src/frontend/features/projects/GatePipeline.tsx` |  | `ui/components/Approver.tsx`, `ui/components/ui/index.ts` | `ui/features/projects/OverviewPage.tsx` |
-| `src/frontend/features/projects/GovernanceAccess.tsx` |  | `ui/components/AuthGate.tsx`, `ui/components/ConfirmModal.tsx`, `ui/components/ui/index.ts`, `ui/features/projects/AssignMemberForm.tsx`, `ui/features/projects/MembersTable.tsx`, `ui/features/projects/OwnershipTransfer.tsx`, `ui/lib/api.ts` | `ui/features/projects/OverviewPage.tsx` |
-| `src/frontend/features/projects/KpiCards.tsx` |  |  | `ui/features/projects/OverviewPage.tsx` |
-| `src/frontend/features/projects/MembersTable.tsx` |  | `ui/components/ui/index.ts` | `ui/features/projects/GovernanceAccess.tsx` |
-| `src/frontend/features/projects/NextStepBanner.tsx` |  |  | `ui/features/projects/OverviewPage.tsx` |
-| `src/frontend/features/projects/OverviewPage.tsx` |  | `ui/components/ConfirmModal.tsx`, `ui/components/ProjectShell.tsx`, `ui/components/ui/index.ts`, `ui/features/projects/DocumentsCard.tsx`, `ui/features/projects/GatePipeline.tsx`, `ui/features/projects/GovernanceAccess.tsx`, `ui/features/projects/KpiCards.tsx`, `ui/features/projects/NextStepBanner.tsx`, and 4 more | `ui/app/projects/[id]/page.tsx` |
-| `src/frontend/features/projects/OwnershipTransfer.tsx` |  | `ui/components/ui/index.ts` | `ui/features/projects/GovernanceAccess.tsx` |
-| `src/frontend/features/projects/RepoCard.tsx` |  | `ui/components/ui/index.ts` | `ui/features/projects/OverviewPage.tsx` |
-| `src/frontend/features/projects/RunsCard.tsx` |  | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/features/projects/OverviewPage.tsx` |
-| `src/frontend/features/projects/lib.ts` |  |  | `ui/features/projects/OverviewPage.tsx` |
-| `src/frontend/features/qe/ModeSelector.tsx` |  |  | `ui/features/qe/QePage.tsx` |
-| `src/frontend/features/qe/QePage.tsx` |  | `ui/components/ProjectShell.tsx`, `ui/components/ui/index.ts`, `ui/features/qe/ModeSelector.tsx`, `ui/features/qe/SandboxStatus.tsx`, `ui/features/qe/SetupPackageCard.tsx`, `ui/features/qe/StagePipeline.tsx`, `ui/features/qe/useQeData.ts`, `ui/features/runs/RunDocuments.tsx`, and 4 more | `ui/app/projects/[id]/qe/page.tsx` |
-| `src/frontend/features/qe/SandboxStatus.tsx` |  | `ui/components/ui/index.ts` | `ui/features/qe/QePage.tsx` |
-| `src/frontend/features/qe/SetupPackageCard.tsx` |  |  | `ui/features/qe/QePage.tsx` |
-| `src/frontend/features/qe/StagePipeline.tsx` |  | `ui/components/ModelPicker.tsx`, `ui/components/ui/index.ts`, `ui/features/qe/lib.ts` | `ui/features/qe/QePage.tsx` |
-| `src/frontend/features/qe/lib.ts` |  |  | `ui/features/qe/StagePipeline.tsx` |
-| `src/frontend/features/qe/useQeData.ts` |  | `ui/lib/api.ts` | `ui/features/qe/QePage.tsx` |
-| `src/frontend/features/repository/Connect.tsx` |  | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/features/repository/RepositoryPage.tsx` |
-| `src/frontend/features/repository/Details.tsx` |  | `ui/components/ConfirmModal.tsx`, `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/features/repository/RepositoryPage.tsx` |
-| `src/frontend/features/repository/RepositoryPage.tsx` |  | `ui/components/ProjectShell.tsx`, `ui/components/ui/index.ts`, `ui/features/repository/Connect.tsx`, `ui/features/repository/Details.tsx`, `ui/lib/api.ts` | `ui/app/projects/[id]/repository/page.tsx` |
-| `src/frontend/features/runs/ApprovalCard.tsx` |  | `ui/components/AuthGate.tsx`, `ui/components/ui/index.ts`, `ui/features/runs/ConfidenceNote.tsx`, `ui/features/runs/lib.ts`, `ui/lib/api.ts` | `ui/components/ApprovalsList.tsx`, `ui/features/runs/RunPanel.tsx` |
-| `src/frontend/features/runs/ConfidenceNote.tsx` |  | `ui/components/ui/index.ts`, `ui/features/runs/lib.ts` | `ui/features/runs/ApprovalCard.tsx` |
-| `src/frontend/features/runs/FailureCard.tsx` |  | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/features/runs/RunPanel.tsx` |
-| `src/frontend/features/runs/LiveLog.tsx` |  |  | `ui/features/runs/RunPanel.tsx` |
-| `src/frontend/features/runs/RunDocuments.tsx` |  | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/app/projects/[id]/feature/page.tsx`, `ui/features/ba/BaPage.tsx`, `ui/features/findings/BugsPage.tsx`, `ui/features/qe/QePage.tsx` |
-| `src/frontend/features/runs/RunList.tsx` |  | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/app/projects/[id]/feature/page.tsx`, `ui/features/ba/BaPage.tsx`, `ui/features/findings/BugsPage.tsx`, `ui/features/qe/QePage.tsx` |
-| `src/frontend/features/runs/RunPanel.tsx` |  | `ui/components/Approver.tsx`, `ui/components/ui/index.ts`, `ui/features/runs/ApprovalCard.tsx`, `ui/features/runs/FailureCard.tsx`, `ui/features/runs/LiveLog.tsx`, `ui/features/runs/lib.ts`, `ui/features/runs/useRunStream.ts`, `ui/lib/api.ts` | `ui/app/projects/[id]/feature/page.tsx`, `ui/app/projects/[id]/runs/[runId]/page.tsx`, `ui/features/ba/BaPage.tsx`, `ui/features/findings/BugsPage.tsx`, `ui/features/qe/QePage.tsx` |
-| `src/frontend/features/runs/lib.ts` |  |  | `ui/features/runs/ApprovalCard.tsx`, `ui/features/runs/ConfidenceNote.tsx`, `ui/features/runs/RunPanel.tsx` |
-| `src/frontend/features/runs/usePersistedRunId.ts` |  |  | `ui/features/findings/BugsPage.tsx`, `ui/features/qe/QePage.tsx` |
-| `src/frontend/features/runs/useRunStream.ts` |  | `ui/lib/api.ts` | `ui/features/runs/RunPanel.tsx` |
-| `src/frontend/features/settings/ConnectionsCard.tsx` |  | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/app/settings/page.tsx` |
-| `src/frontend/features/settings/GateRoles.tsx` |  | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/app/settings/page.tsx` |
-| `src/frontend/features/settings/HealthCard.tsx` |  | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/app/settings/page.tsx` |
-| `src/frontend/features/settings/LogCard.tsx` |  | `ui/components/ui/index.ts` | `ui/app/settings/page.tsx` |
-| `src/frontend/features/settings/ModelList.tsx` |  | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/app/settings/page.tsx` |
-| `src/frontend/features/settings/ModelProviderCard.tsx` |  | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/app/settings/page.tsx` |
-| `src/frontend/features/skills-studio/ChecksList.tsx` |  | `ui/components/ui/index.ts`, `ui/features/skills-studio/types.ts` | `ui/features/skills-studio/GenerateStep.tsx`, `ui/features/skills-studio/PublishStep.tsx`, `ui/features/skills-studio/UploadCard.tsx` |
-| `src/frontend/features/skills-studio/EvalCasesEditor.tsx` |  | `ui/components/ui/index.ts`, `ui/features/skills-studio/ListEditors.tsx`, `ui/features/skills-studio/types.ts` | `ui/features/skills-studio/PlanEditor.tsx` |
-| `src/frontend/features/skills-studio/EvaluateStep.tsx` |  | `ui/components/ui/index.ts`, `ui/features/skills-studio/types.ts`, `ui/features/skills-studio/useCall.tsx`, `ui/lib/api.ts` | `ui/features/skills-studio/Studio.tsx` |
-| `src/frontend/features/skills-studio/GenerateStep.tsx` |  | `ui/components/ui/index.ts`, `ui/features/skills-studio/ChecksList.tsx`, `ui/features/skills-studio/types.ts`, `ui/features/skills-studio/useCall.tsx`, `ui/lib/api.ts` | `ui/features/skills-studio/Studio.tsx` |
-| `src/frontend/features/skills-studio/KindStep.tsx` |  | `ui/components/ui/index.ts`, `ui/features/skills-studio/types.ts` | `ui/features/skills-studio/Studio.tsx` |
-| `src/frontend/features/skills-studio/ListEditors.tsx` |  | `ui/components/ui/index.ts` | `ui/features/skills-studio/EvalCasesEditor.tsx`, `ui/features/skills-studio/PlanLists.tsx` |
-| `src/frontend/features/skills-studio/PlanEditor.tsx` |  | `ui/components/ui/index.ts`, `ui/features/skills-studio/EvalCasesEditor.tsx`, `ui/features/skills-studio/PlanLists.tsx`, `ui/features/skills-studio/types.ts`, `ui/features/skills-studio/useCall.tsx`, `ui/lib/api.ts` | `ui/features/skills-studio/Studio.tsx` |
-| `src/frontend/features/skills-studio/PlanLists.tsx` |  | `ui/components/ui/index.ts`, `ui/features/skills-studio/ListEditors.tsx`, `ui/features/skills-studio/types.ts` | `ui/features/skills-studio/PlanEditor.tsx` |
-| `src/frontend/features/skills-studio/PublishStep.tsx` |  | `ui/components/ui/index.ts`, `ui/features/skills-studio/ChecksList.tsx`, `ui/features/skills-studio/types.ts`, `ui/features/skills-studio/useCall.tsx`, `ui/lib/api.ts` | `ui/features/skills-studio/Studio.tsx` |
-| `src/frontend/features/skills-studio/RequestStep.tsx` |  | `ui/components/ui/index.ts`, `ui/features/skills-studio/useCall.tsx` | `ui/features/skills-studio/Studio.tsx` |
-| `src/frontend/features/skills-studio/SourceStep.tsx` |  | `ui/components/ui/index.ts`, `ui/features/skills-studio/types.ts`, `ui/features/skills-studio/useCall.tsx`, `ui/lib/api.ts` | `ui/features/skills-studio/Studio.tsx` |
-| `src/frontend/features/skills-studio/Studio.tsx` |  | `ui/components/AuthGate.tsx`, `ui/components/ui/index.ts`, `ui/features/skills-studio/EvaluateStep.tsx`, `ui/features/skills-studio/GenerateStep.tsx`, `ui/features/skills-studio/KindStep.tsx`, `ui/features/skills-studio/PlanEditor.tsx`, `ui/features/skills-studio/PublishStep.tsx`, `ui/features/skills-studio/RequestStep.tsx`, and 6 more | `ui/app/skills/studio/page.tsx` |
-| `src/frontend/features/skills-studio/TestStep.tsx` |  | `ui/components/ui/index.ts`, `ui/features/skills-studio/types.ts`, `ui/features/skills-studio/useCall.tsx`, `ui/lib/api.ts` | `ui/features/skills-studio/Studio.tsx` |
-| `src/frontend/features/skills-studio/UploadCard.tsx` |  | `ui/components/ui/index.ts`, `ui/features/skills-studio/ChecksList.tsx`, `ui/features/skills-studio/types.ts`, `ui/features/skills-studio/useCall.tsx`, `ui/lib/api.ts` | `ui/features/skills-studio/Studio.tsx` |
-| `src/frontend/features/skills-studio/types.ts` |  |  | `ui/features/skills-studio/ChecksList.tsx`, `ui/features/skills-studio/EvalCasesEditor.tsx`, `ui/features/skills-studio/EvaluateStep.tsx`, `ui/features/skills-studio/GenerateStep.tsx`, `ui/features/skills-studio/KindStep.tsx`, `ui/features/skills-studio/PlanEditor.tsx`, `ui/features/skills-studio/PlanLists.tsx`, `ui/features/skills-studio/PublishStep.tsx`, and 4 more |
-| `src/frontend/features/skills-studio/useCall.tsx` |  | `ui/components/ui/index.ts` | `ui/features/skills-studio/EvaluateStep.tsx`, `ui/features/skills-studio/GenerateStep.tsx`, `ui/features/skills-studio/PlanEditor.tsx`, `ui/features/skills-studio/PublishStep.tsx`, `ui/features/skills-studio/RequestStep.tsx`, `ui/features/skills-studio/SourceStep.tsx`, `ui/features/skills-studio/Studio.tsx`, `ui/features/skills-studio/TestStep.tsx`, and 1 more |
-| `src/frontend/features/skills/SkillCard.tsx` |  | `ui/features/skills/lib.ts` | `ui/app/skills/page.tsx` |
-| `src/frontend/features/skills/SkillFilters.tsx` |  |  | `ui/app/skills/page.tsx` |
-| `src/frontend/features/skills/SkillModal.tsx` |  | `ui/components/ui/index.ts`, `ui/features/skills/lib.ts` | `ui/app/skills/page.tsx` |
-| `src/frontend/features/skills/lib.ts` |  |  | `ui/app/skills/page.tsx`, `ui/features/skills/SkillCard.tsx`, `ui/features/skills/SkillModal.tsx` |
-| `src/frontend/features/traces/RunView.tsx` |  | `ui/components/ui/index.ts`, `ui/features/traces/SpanDetail.tsx`, `ui/features/traces/lib.ts`, `ui/lib/api.ts` | `ui/features/traces/TracesPage.tsx` |
-| `src/frontend/features/traces/RunsTable.tsx` |  | `ui/components/AuthGate.tsx`, `ui/components/ui/index.ts`, `ui/features/traces/lib.ts`, `ui/lib/api.ts` | `ui/features/traces/TracesPage.tsx` |
-| `src/frontend/features/traces/SpanDetail.tsx` |  | `ui/components/ui/index.ts`, `ui/features/traces/lib.ts` | `ui/features/traces/RunView.tsx` |
-| `src/frontend/features/traces/TracesPage.tsx` |  | `ui/features/traces/RunView.tsx`, `ui/features/traces/RunsTable.tsx` | `ui/app/traces/page.tsx` |
-| `src/frontend/features/traces/lib.ts` |  |  | `ui/features/traces/RunView.tsx`, `ui/features/traces/RunsTable.tsx`, `ui/features/traces/SpanDetail.tsx` |
+| `src/frontend/features/agents/ActiveGuardrails.tsx` | Component `ActiveGuardrails` | `ui/components/ui/index.ts` | `ui/app/agents/[key]/page.tsx` |
+| `src/frontend/features/agents/AgentCallsCard.tsx` | Component `AgentCallsCard` | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/app/agents/[key]/page.tsx` |
+| `src/frontend/features/agents/AgentCard.tsx` | Component `AgentCard` | `ui/components/EvalScores.tsx`, `ui/components/ui/index.ts` | `ui/app/agents/page.tsx` |
+| `src/frontend/features/agents/AgentControlsCard.tsx` | Component `AgentControlsCard` | `ui/components/ui/index.ts` | `ui/app/agents/[key]/page.tsx` |
+| `src/frontend/features/agents/AgentDetailsCard.tsx` | what contains an agent that changes code, so the badge reads as a description of its job and not a warning const CHANGE_CONTROLS: [string, string][] = [ ["No tools in workflows", "It can only return p | `ui/components/ui/index.ts` | `ui/app/agents/[key]/page.tsx` |
+| `src/frontend/features/agents/AgentEvalsCard.tsx` | Component `AgentEvalsCard` | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/app/agents/[key]/page.tsx` |
+| `src/frontend/features/agents/GuardrailEvents.tsx` | Component `GuardrailEvents` | `ui/components/ui/index.ts`, `ui/features/agents/guardrailFlags.ts`, `ui/lib/api.ts` | `ui/app/agents/page.tsx` |
+| `src/frontend/features/agents/GuardrailMatrix.tsx` | Hover Tooltip | `ui/components/ui/index.ts`, `ui/features/agents/guardrailFlags.ts` | `ui/app/agents/page.tsx` |
+| `src/frontend/features/agents/InterceptionEvents.tsx` | Component `InterceptionEvents` | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/app/agents/[key]/page.tsx` |
+| `src/frontend/features/agents/guardrailFlags.ts` | Module `GUARDRAIL_FLAGS` |  | `ui/features/agents/GuardrailEvents.tsx`, `ui/features/agents/GuardrailMatrix.tsx` |
+| `src/frontend/features/ba/BaPage.tsx` | Autonomous Multi-Agent BA Lifecycle Flowchart | `ui/components/ProjectShell.tsx`, `ui/components/ui/index.ts`, `ui/features/ba/LifecyclePipeline.tsx`, `ui/features/ba/RecentDocs.tsx`, `ui/features/ba/RequirementsForm.tsx`, `ui/features/ba/SourcesCard.tsx`, `ui/features/ba/lib.ts`, `ui/features/ba/useBaData.ts`, and 4 more | `ui/app/projects/[id]/ba/page.tsx` |
+| `src/frontend/features/ba/LifecyclePipeline.tsx` | Component `LifecyclePipeline` |  | `ui/features/ba/BaPage.tsx` |
+| `src/frontend/features/ba/RecentDocs.tsx` | Component `RecentDocs` | `ui/components/ui/index.ts` | `ui/features/ba/BaPage.tsx` |
+| `src/frontend/features/ba/RequirementsForm.tsx` | Component `RequirementsForm` | `ui/components/ModelPicker.tsx`, `ui/components/ui/index.ts` | `ui/features/ba/BaPage.tsx` |
+| `src/frontend/features/ba/SourcesCard.tsx` | Component `SourcesCard` | `ui/components/ui/index.ts`, `ui/features/ba/lib.ts` | `ui/features/ba/BaPage.tsx` |
+| `src/frontend/features/ba/lib.ts` | Module `getDomainPresets` |  | `ui/features/ba/BaPage.tsx`, `ui/features/ba/SourcesCard.tsx` |
+| `src/frontend/features/ba/useBaData.ts` | Documents refresh when a run is initiated or finished (strictly zero interval polling) useEffect(() => { if (!runId) return; loadDocs(); }, [runId, loadDocs]); return { templates, sources, docs, loadT | `ui/lib/api.ts` | `ui/features/ba/BaPage.tsx` |
+| `src/frontend/features/capabilities/CapDrawer.tsx` | One capability with what links to it (up) and what it links to (down). | `ui/components/ui/index.ts`, `ui/features/capabilities/types.ts`, `ui/lib/api.ts` | `ui/features/capabilities/CapabilitiesPage.tsx` |
+| `src/frontend/features/capabilities/CapTable.tsx` | The flat registry: one row per capability the signed-in user may see. | `ui/components/ui/index.ts`, `ui/features/capabilities/types.ts` | `ui/features/capabilities/CapabilitiesPage.tsx` |
+| `src/frontend/features/capabilities/CapTree.tsx` | Plugin → commands, skills, agents, hooks, scripts; workflow → stages → agents → tools and skills; MCP server → tools. | `ui/components/ui/index.ts`, `ui/features/capabilities/types.ts` | `ui/features/capabilities/CapabilitiesPage.tsx` |
+| `src/frontend/features/capabilities/CapabilitiesPage.tsx` | /capabilities: the registry as a table or a tree, filtered by kind and text, with a detail drawer. | `ui/components/AuthGate.tsx`, `ui/components/ui/index.ts`, `ui/features/capabilities/CapDrawer.tsx`, `ui/features/capabilities/CapTable.tsx`, `ui/features/capabilities/CapTree.tsx`, `ui/features/capabilities/types.ts`, `ui/lib/api.ts` | `ui/app/capabilities/page.tsx` |
+| `src/frontend/features/capabilities/types.ts` | Shapes of /api/capabilities (backend/core/registry). |  | `ui/features/capabilities/CapDrawer.tsx`, `ui/features/capabilities/CapTable.tsx`, `ui/features/capabilities/CapTree.tsx`, `ui/features/capabilities/CapabilitiesPage.tsx` |
+| `src/frontend/features/chat/Chat.tsx` | title and message count arrive after the assistant replies useEffect(() => { if (!thread) return; const timer = setInterval(loadThreads, 5000); return () => clearInterval(timer); }, [thread, loadThrea | `ui/components/ui/index.ts`, `ui/features/chat/Conversation.tsx`, `ui/lib/api.ts` | `ui/app/chat/[id]/page.tsx`, `ui/app/projects/[id]/chat/page.tsx`, `ui/components/MafHarness.tsx` |
+| `src/frontend/features/chat/Conversation.tsx` | Headless CopilotKit over AG-UI: the UI waits until the agent is ready, so a send is never lost. | `ui/components/ModelPicker.tsx`, `ui/components/ui/index.ts`, `ui/features/chat/RunStatus.tsx`, `ui/features/chat/SlashMenu.tsx`, `ui/lib/api.ts` | `ui/features/chat/Chat.tsx` |
+| `src/frontend/features/chat/RunStatus.tsx` | One live status line per run, from TOOL_CALL_START/END and TEXT_MESSAGE_CONTENT events, plus the lines it went through and the approval interrupts the run ended with (RUN_FINISHED outcome "interrupt", | `ui/components/ui/index.ts`, `ui/features/chat/status.ts` | `ui/features/chat/Conversation.tsx` |
+| `src/frontend/features/chat/SlashMenu.tsx` | The "/" menu: typing "/" at the start of the message lists plugin commands and skills from /api/plugins/slash. | `ui/lib/api.ts` | `ui/features/chat/Conversation.tsx` |
+| `src/frontend/features/chat/status.ts` | Plain-words status lines for the harness, derived only from real AG-UI events (plan M4, US-60). |  | `ui/features/chat/RunStatus.tsx` |
+| `src/frontend/features/documents/AgentBar.tsx` | Component `AgentBar` | `ui/components/ui/index.ts` | `ui/features/documents/DocumentPage.tsx` |
+| `src/frontend/features/documents/DocumentEditor.tsx` | The formatted document. | `ui/features/documents/editor/InsertButtons.tsx`, `ui/features/documents/editor/TableBlock.tsx`, `ui/features/documents/editor/TextBlock.tsx`, `ui/features/documents/editor/blocks.ts` | `ui/features/documents/DocumentPage.tsx` |
+| `src/frontend/features/documents/DocumentFilters.tsx` | Component `DocumentFilters` | `ui/components/ui/index.ts` | `ui/features/documents/DocumentsPage.tsx` |
+| `src/frontend/features/documents/DocumentHeader.tsx` | Component `DocumentHeader` | `ui/components/ui/index.ts`, `ui/features/documents/lib.ts` | `ui/features/documents/DocumentPage.tsx` |
+| `src/frontend/features/documents/DocumentPage.tsx` | Confirmation Modal for Document Deletion | `ui/components/AuthGate.tsx`, `ui/components/ConfirmModal.tsx`, `ui/components/ProjectShell.tsx`, `ui/components/ui/index.ts`, `ui/features/documents/AgentBar.tsx`, `ui/features/documents/DocumentEditor.tsx`, `ui/features/documents/DocumentHeader.tsx`, `ui/features/documents/DocumentTabs.tsx`, and 4 more | `ui/app/projects/[id]/documents/[docId]/page.tsx` |
+| `src/frontend/features/documents/DocumentTabs.tsx` | Component `DocumentTabs` |  | `ui/features/documents/DocumentPage.tsx` |
+| `src/frontend/features/documents/DocumentsPage.tsx` | Confirmation Modal for Document Deletion | `ui/components/ConfirmModal.tsx`, `ui/components/ProjectShell.tsx`, `ui/components/ui/index.ts`, `ui/features/documents/DocumentFilters.tsx`, `ui/features/documents/DocumentsTable.tsx`, `ui/features/documents/NewDocumentCard.tsx`, `ui/features/documents/lib.ts`, `ui/features/documents/useDocuments.ts` | `ui/app/projects/[id]/documents/page.tsx` |
+| `src/frontend/features/documents/DocumentsTable.tsx` | Component `DocumentsTable` | `ui/components/ui/index.ts`, `ui/features/documents/lib.ts`, `ui/lib/api.ts` | `ui/features/documents/DocumentsPage.tsx` |
+| `src/frontend/features/documents/NewDocumentCard.tsx` | Component `NewDocumentCard` | `ui/components/ui/index.ts` | `ui/features/documents/DocumentsPage.tsx` |
+| `src/frontend/features/documents/SaveBar.tsx` | Component `SaveBar` | `ui/components/ui/index.ts`, `ui/features/documents/lib.ts` | `ui/features/documents/DocumentPage.tsx` |
+| `src/frontend/features/documents/VersionHistory.tsx` | Component `VersionHistory` | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/features/documents/DocumentPage.tsx` |
+| `src/frontend/features/documents/editor/InsertButtons.tsx` | Component `Insert` | `ui/lib/api.ts` | `ui/features/documents/DocumentEditor.tsx` |
+| `src/frontend/features/documents/editor/TableBlock.tsx` | Component `TableBlock` | `ui/features/documents/editor/blocks.ts` | `ui/features/documents/DocumentEditor.tsx` |
+| `src/frontend/features/documents/editor/TextBlock.tsx` | Component `GherkinText` | `ui/components/ui/index.ts` | `ui/features/documents/DocumentEditor.tsx` |
+| `src/frontend/features/documents/editor/blocks.ts` | Splits a document into blocks. |  | `ui/features/documents/DocumentEditor.tsx`, `ui/features/documents/editor/TableBlock.tsx` |
+| `src/frontend/features/documents/gherkin/FeatureHeader.tsx` | Component `FeatureHeader` | `ui/features/documents/gherkin/parse.ts` | `ui/features/documents/gherkin/GherkinVisualizer.tsx` |
+| `src/frontend/features/documents/gherkin/GherkinVisualizer.tsx` | Filter and Search Bar | `ui/features/documents/gherkin/FeatureHeader.tsx`, `ui/features/documents/gherkin/ScenarioCard.tsx`, `ui/features/documents/gherkin/parse.ts`, `ui/features/documents/gherkin/steps.tsx` | `ui/features/documents/DocumentPage.tsx` |
+| `src/frontend/features/documents/gherkin/ScenarioCard.tsx` | Scenario Header | `ui/features/documents/gherkin/parse.ts`, `ui/features/documents/gherkin/steps.tsx` | `ui/features/documents/gherkin/GherkinVisualizer.tsx` |
+| `src/frontend/features/documents/gherkin/parse.ts` | Tags if (trimmed.startsWith("@")) { const tags = trimmed.split(/\s+/).filter((t) => t.startsWith("@")); currentTags.push(...tags); continue; } // Feature if (/^Feature:/i.test(trimmed)) { featureFound |  | `ui/features/documents/gherkin/FeatureHeader.tsx`, `ui/features/documents/gherkin/GherkinVisualizer.tsx`, `ui/features/documents/gherkin/ScenarioCard.tsx` |
+| `src/frontend/features/documents/gherkin/steps.tsx` | Highlights quoted strings and variables in step text export const formatStepText = (text: string) => { const parts = text.split(/("[^"]*"/<[^>]*>)/g); return parts.map((part, idx) => { if (part.starts |  | `ui/features/documents/gherkin/GherkinVisualizer.tsx`, `ui/features/documents/gherkin/ScenarioCard.tsx` |
+| `src/frontend/features/documents/lib.ts` | Module `getGovernanceId` |  | `ui/features/documents/DocumentHeader.tsx`, `ui/features/documents/DocumentsPage.tsx`, `ui/features/documents/DocumentsTable.tsx`, `ui/features/documents/SaveBar.tsx`, `ui/features/documents/useDocument.ts`, `ui/features/projects/DocumentsCard.tsx` |
+| `src/frontend/features/documents/useDocument.ts` | Module `useDocument` | `ui/components/ui/index.ts`, `ui/features/documents/lib.ts`, `ui/lib/api.ts` | `ui/features/documents/DocumentPage.tsx` |
+| `src/frontend/features/documents/useDocuments.ts` | Strictly project-scoped document fetch api(`/projects/${project.id}/documents`) .then((res) => { const list = Array.isArray(res) ? | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/features/documents/DocumentsPage.tsx` |
+| `src/frontend/features/findings/BugsPage.tsx` | Right Sidebar: Error Diagnosis & Past Runs | `ui/components/ModelPicker.tsx`, `ui/components/ProjectShell.tsx`, `ui/components/ui/index.ts`, `ui/features/findings/DiagnoseCard.tsx`, `ui/features/findings/FindingsList.tsx`, `ui/features/findings/GuideModal.tsx`, `ui/features/findings/useFindings.ts`, `ui/features/runs/RunDocuments.tsx`, and 4 more | `ui/app/projects/[id]/bugs/page.tsx` |
+| `src/frontend/features/findings/DiagnoseCard.tsx` | Component `DiagnoseCard` | `ui/components/ui/index.ts` | `ui/features/findings/BugsPage.tsx` |
+| `src/frontend/features/findings/FindingCard.tsx` | Card Header | `ui/components/ui/index.ts` | `ui/features/findings/FindingsList.tsx` |
+| `src/frontend/features/findings/FindingsList.tsx` | Component `FindingsList` | `ui/components/ui/index.ts`, `ui/features/findings/FindingCard.tsx` | `ui/features/findings/BugsPage.tsx` |
+| `src/frontend/features/findings/GuideModal.tsx` | Modal Header | `ui/components/ui/index.ts`, `ui/features/findings/lib.ts` | `ui/features/findings/BugsPage.tsx` |
+| `src/frontend/features/findings/lib.ts` | Module `generateStepByStepGuide` |  | `ui/features/findings/GuideModal.tsx` |
+| `src/frontend/features/findings/useFindings.ts` | Loads the open findings, and picks the active or latest scan or change run on mount. | `ui/lib/api.ts` | `ui/features/findings/BugsPage.tsx` |
+| `src/frontend/features/home/NewProject.tsx` | Component `NewProject` | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/features/home/ProjectsPage.tsx` |
+| `src/frontend/features/home/ProjectCard.tsx` | Component `ProjectCard` | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/features/home/ProjectsPage.tsx` |
+| `src/frontend/features/home/ProjectsPage.tsx` | Confirmation Modal for Renaming Project | `ui/components/AppShell.tsx`, `ui/components/ConfirmModal.tsx`, `ui/components/ui/index.ts`, `ui/features/home/NewProject.tsx`, `ui/features/home/ProjectCard.tsx`, `ui/features/home/StatsRow.tsx`, `ui/lib/api.ts` | `ui/app/projects/page.tsx` |
+| `src/frontend/features/home/StatsRow.tsx` | Component `StatsRow` |  | `ui/features/home/ProjectsPage.tsx` |
+| `src/frontend/features/landing/Landing.tsx` | Public home page: what the platform does, the desktop downloads and the way in. | `ui/components/ui/index.ts`, `ui/features/login/DesktopDownloads.tsx`, `ui/lib/api.ts` | `ui/app/page.tsx` |
+| `src/frontend/features/login/DesktopDownloads.tsx` | Desktop installers from the published manifest only. |  | `ui/app/login/page.tsx`, `ui/features/landing/Landing.tsx` |
+| `src/frontend/features/mcp/Catalog.tsx` | Component `Catalog` | `ui/components/ui/index.ts`, `ui/features/mcp/types.ts` | `ui/features/mcp/McpRegistry.tsx` |
+| `src/frontend/features/mcp/GrantsTable.tsx` | Which role may call which tool of one server. | `ui/components/ui/index.ts`, `ui/features/mcp/types.ts`, `ui/lib/api.ts` | `ui/features/mcp/ServerCard.tsx` |
+| `src/frontend/features/mcp/KeyValueRows.tsx` | Name and value rows. | `ui/components/ui/index.ts`, `ui/features/mcp/types.ts` | `ui/features/mcp/ServerForm.tsx` |
+| `src/frontend/features/mcp/McpRegistry.tsx` | Component `McpRegistry` | `ui/components/AuthGate.tsx`, `ui/components/ui/index.ts`, `ui/features/mcp/Catalog.tsx`, `ui/features/mcp/ServerCard.tsx`, `ui/features/mcp/ServerForm.tsx`, `ui/features/mcp/types.ts`, `ui/lib/api.ts` | `ui/app/mcp/page.tsx` |
+| `src/frontend/features/mcp/ServerCard.tsx` | Component `ServerCard` | `ui/components/ui/index.ts`, `ui/features/mcp/GrantsTable.tsx`, `ui/features/mcp/TryTool.tsx`, `ui/features/mcp/types.ts`, `ui/lib/api.ts` | `ui/features/mcp/McpRegistry.tsx` |
+| `src/frontend/features/mcp/ServerForm.tsx` | Add a server. | `ui/components/ui/index.ts`, `ui/features/mcp/KeyValueRows.tsx`, `ui/features/mcp/types.ts`, `ui/lib/api.ts` | `ui/features/mcp/McpRegistry.tsx` |
+| `src/frontend/features/mcp/TryTool.tsx` | Calls one tool for real, as the signed-in user, on a project. | `ui/components/ui/index.ts`, `ui/features/mcp/types.ts`, `ui/lib/api.ts` | `ui/features/mcp/ServerCard.tsx` |
+| `src/frontend/features/mcp/types.ts` | Type definitions |  | `ui/features/mcp/Catalog.tsx`, `ui/features/mcp/GrantsTable.tsx`, `ui/features/mcp/KeyValueRows.tsx`, `ui/features/mcp/McpRegistry.tsx`, `ui/features/mcp/ServerCard.tsx`, `ui/features/mcp/ServerForm.tsx`, `ui/features/mcp/TryTool.tsx` |
+| `src/frontend/features/plugins/PluginCard.tsx` | Component `PluginCard` | `ui/components/ui/index.ts`, `ui/features/plugins/PluginGrants.tsx`, `ui/lib/api.ts` | `ui/features/plugins/PluginsCard.tsx` |
+| `src/frontend/features/plugins/PluginGrants.tsx` | Which roles may use one plugin. | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/features/plugins/PluginCard.tsx` |
+| `src/frontend/features/plugins/PluginsCard.tsx` | Installed plugins and their plugin grants. | `ui/components/AuthGate.tsx`, `ui/components/ui/index.ts`, `ui/features/plugins/PluginCard.tsx`, `ui/lib/api.ts` | `ui/app/settings/page.tsx` |
+| `src/frontend/features/projects/AssignMemberForm.tsx` | Component `AssignMemberForm` | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/features/projects/GovernanceAccess.tsx` |
+| `src/frontend/features/projects/DocumentsCard.tsx` | Component `DocumentsCard` | `ui/components/ui/index.ts`, `ui/features/documents/lib.ts` | `ui/features/projects/OverviewPage.tsx` |
+| `src/frontend/features/projects/GatePipeline.tsx` | Component `GatePipeline` | `ui/components/Approver.tsx`, `ui/components/ui/index.ts` | `ui/features/projects/OverviewPage.tsx` |
+| `src/frontend/features/projects/GovernanceAccess.tsx` | Enterprise Governance & RBAC Access Control. | `ui/components/AuthGate.tsx`, `ui/components/ConfirmModal.tsx`, `ui/components/ui/index.ts`, `ui/features/projects/AssignMemberForm.tsx`, `ui/features/projects/MembersTable.tsx`, `ui/features/projects/OwnershipTransfer.tsx`, `ui/lib/api.ts` | `ui/features/projects/OverviewPage.tsx` |
+| `src/frontend/features/projects/KpiCards.tsx` | Card 1: Repository Codebase Health |  | `ui/features/projects/OverviewPage.tsx` |
+| `src/frontend/features/projects/MembersTable.tsx` | Component `MembersTable` | `ui/components/ui/index.ts` | `ui/features/projects/GovernanceAccess.tsx` |
+| `src/frontend/features/projects/NextStepBanner.tsx` | Component `NextStepBanner` |  | `ui/features/projects/OverviewPage.tsx` |
+| `src/frontend/features/projects/OverviewPage.tsx` | 4. | `ui/components/ConfirmModal.tsx`, `ui/components/ProjectShell.tsx`, `ui/components/ui/index.ts`, `ui/features/projects/DocumentsCard.tsx`, `ui/features/projects/GatePipeline.tsx`, `ui/features/projects/GovernanceAccess.tsx`, `ui/features/projects/KpiCards.tsx`, `ui/features/projects/NextStepBanner.tsx`, and 4 more | `ui/app/projects/[id]/page.tsx` |
+| `src/frontend/features/projects/OwnershipTransfer.tsx` | Component `OwnershipTransfer` | `ui/components/ui/index.ts` | `ui/features/projects/GovernanceAccess.tsx` |
+| `src/frontend/features/projects/RepoCard.tsx` | Component `RepoCard` | `ui/components/ui/index.ts` | `ui/features/projects/OverviewPage.tsx` |
+| `src/frontend/features/projects/RunsCard.tsx` | Component `RunsCard` | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/features/projects/OverviewPage.tsx` |
+| `src/frontend/features/projects/lib.ts` | Module `nextStep` |  | `ui/features/projects/OverviewPage.tsx` |
+| `src/frontend/features/qe/ModeSelector.tsx` | Component `ModeSelector` |  | `ui/features/qe/QePage.tsx` |
+| `src/frontend/features/qe/QePage.tsx` | Project Mode Selector (Greenfield vs Brownfield) | `ui/components/ProjectShell.tsx`, `ui/components/ui/index.ts`, `ui/features/qe/ModeSelector.tsx`, `ui/features/qe/SandboxStatus.tsx`, `ui/features/qe/SetupPackageCard.tsx`, `ui/features/qe/StagePipeline.tsx`, `ui/features/qe/useQeData.ts`, `ui/features/runs/RunDocuments.tsx`, and 4 more | `ui/app/projects/[id]/qe/page.tsx` |
+| `src/frontend/features/qe/SandboxStatus.tsx` | Component `SandboxStatus` | `ui/components/ui/index.ts` | `ui/features/qe/QePage.tsx` |
+| `src/frontend/features/qe/SetupPackageCard.tsx` | Component `SetupPackageCard` |  | `ui/features/qe/QePage.tsx` |
+| `src/frontend/features/qe/StagePipeline.tsx` | Component `StagePipeline` | `ui/components/ModelPicker.tsx`, `ui/components/ui/index.ts`, `ui/features/qe/lib.ts` | `ui/features/qe/QePage.tsx` |
+| `src/frontend/features/qe/lib.ts` | Module `STAGES` |  | `ui/features/qe/StagePipeline.tsx` |
+| `src/frontend/features/qe/useQeData.ts` | Project documents, plus picking the active or latest qe run on mount. | `ui/lib/api.ts` | `ui/features/qe/QePage.tsx` |
+| `src/frontend/features/repository/Connect.tsx` | Component `Connect` | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/features/repository/RepositoryPage.tsx` |
+| `src/frontend/features/repository/Details.tsx` | Confirmation Modal for Disconnecting Repository | `ui/components/ConfirmModal.tsx`, `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/features/repository/RepositoryPage.tsx` |
+| `src/frontend/features/repository/RepositoryPage.tsx` | Component `RepositoryPage` | `ui/components/ProjectShell.tsx`, `ui/components/ui/index.ts`, `ui/features/repository/Connect.tsx`, `ui/features/repository/Details.tsx`, `ui/lib/api.ts` | `ui/app/projects/[id]/repository/page.tsx` |
+| `src/frontend/features/runs/ApprovalCard.tsx` | The server is the real check; this only hides what it would refuse const allowed = !project // (approval.gate === null // approval.gate === undefined ? | `ui/components/AuthGate.tsx`, `ui/components/ui/index.ts`, `ui/features/runs/ConfidenceNote.tsx`, `ui/features/runs/lib.ts`, `ui/lib/api.ts` | `ui/components/ApprovalsList.tsx`, `ui/features/runs/RunPanel.tsx` |
+| `src/frontend/features/runs/ConfidenceNote.tsx` | One row per case, as code judged it: the total is the sum of the scores and the verdict follows the rule, whatever the reviewer wrote. | `ui/components/ui/index.ts`, `ui/features/runs/lib.ts` | `ui/features/runs/ApprovalCard.tsx` |
+| `src/frontend/features/runs/FailureCard.tsx` | What happened, what to do, and the technical detail collapsed. | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/features/runs/RunPanel.tsx` |
+| `src/frontend/features/runs/LiveLog.tsx` | Component `LiveLog` |  | `ui/features/runs/RunPanel.tsx` |
+| `src/frontend/features/runs/RunDocuments.tsx` | Component `RunDocuments` | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/app/projects/[id]/feature/page.tsx`, `ui/features/ba/BaPage.tsx`, `ui/features/findings/BugsPage.tsx`, `ui/features/qe/QePage.tsx` |
+| `src/frontend/features/runs/RunList.tsx` | eslint-disable-next-line react-hooks/exhaustive-deps }, [projectId, refreshKey]); if (!runs.length) return null; return ( <ul className="divide-y divide-slate-200 text-sm dark:divide-slate-800"> {runs | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/app/projects/[id]/feature/page.tsx`, `ui/features/ba/BaPage.tsx`, `ui/features/findings/BugsPage.tsx`, `ui/features/qe/QePage.tsx` |
+| `src/frontend/features/runs/RunPanel.tsx` | Component `RunPanel` | `ui/components/Approver.tsx`, `ui/components/ui/index.ts`, `ui/features/runs/ApprovalCard.tsx`, `ui/features/runs/FailureCard.tsx`, `ui/features/runs/LiveLog.tsx`, `ui/features/runs/lib.ts`, `ui/features/runs/useRunStream.ts`, `ui/lib/api.ts` | `ui/app/projects/[id]/feature/page.tsx`, `ui/app/projects/[id]/runs/[runId]/page.tsx`, `ui/features/ba/BaPage.tsx`, `ui/features/findings/BugsPage.tsx`, `ui/features/qe/QePage.tsx` |
+| `src/frontend/features/runs/lib.ts` | Module `verdictTone` |  | `ui/features/runs/ApprovalCard.tsx`, `ui/features/runs/ConfidenceNote.tsx`, `ui/features/runs/RunPanel.tsx` |
+| `src/frontend/features/runs/usePersistedRunId.ts` | The active run id, kept across tab switches in local and session storage. |  | `ui/features/findings/BugsPage.tsx`, `ui/features/qe/QePage.tsx` |
+| `src/frontend/features/runs/useRunStream.ts` | Loads a run, streams its events, and follows it again after a retry or decision. | `ui/lib/api.ts` | `ui/features/runs/RunPanel.tsx` |
+| `src/frontend/features/settings/ConnectionsCard.tsx` | Component `ConnectionsCard` | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/app/settings/page.tsx` |
+| `src/frontend/features/settings/GateRoles.tsx` | Which roles may sign each gate. | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/app/settings/page.tsx` |
+| `src/frontend/features/settings/HealthCard.tsx` | Component `HealthCard` | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/app/settings/page.tsx` |
+| `src/frontend/features/settings/LogCard.tsx` | Component `LogCard` | `ui/components/ui/index.ts` | `ui/app/settings/page.tsx` |
+| `src/frontend/features/settings/ModelList.tsx` | The models on the one endpoint. | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/app/settings/page.tsx` |
+| `src/frontend/features/settings/ModelProviderCard.tsx` | Component `ModelProviderCard` | `ui/components/ui/index.ts`, `ui/lib/api.ts` | `ui/app/settings/page.tsx` |
+| `src/frontend/features/skills-studio/ChecksList.tsx` | Component `ChecksList` | `ui/components/ui/index.ts`, `ui/features/skills-studio/types.ts` | `ui/features/skills-studio/GenerateStep.tsx`, `ui/features/skills-studio/PublishStep.tsx`, `ui/features/skills-studio/UploadCard.tsx` |
+| `src/frontend/features/skills-studio/EvalCasesEditor.tsx` | Component `EvalCases` | `ui/components/ui/index.ts`, `ui/features/skills-studio/ListEditors.tsx`, `ui/features/skills-studio/types.ts` | `ui/features/skills-studio/PlanEditor.tsx` |
+| `src/frontend/features/skills-studio/EvaluateStep.tsx` | Component `EvaluateStep` | `ui/components/ui/index.ts`, `ui/features/skills-studio/types.ts`, `ui/features/skills-studio/useCall.tsx`, `ui/lib/api.ts` | `ui/features/skills-studio/Studio.tsx` |
+| `src/frontend/features/skills-studio/GenerateStep.tsx` | Component `GenerateStep` | `ui/components/ui/index.ts`, `ui/features/skills-studio/ChecksList.tsx`, `ui/features/skills-studio/types.ts`, `ui/features/skills-studio/useCall.tsx`, `ui/lib/api.ts` | `ui/features/skills-studio/Studio.tsx` |
+| `src/frontend/features/skills-studio/KindStep.tsx` | Component `KindStep` | `ui/components/ui/index.ts`, `ui/features/skills-studio/types.ts` | `ui/features/skills-studio/Studio.tsx` |
+| `src/frontend/features/skills-studio/ListEditors.tsx` | Component `move` | `ui/components/ui/index.ts` | `ui/features/skills-studio/EvalCasesEditor.tsx`, `ui/features/skills-studio/PlanLists.tsx` |
+| `src/frontend/features/skills-studio/PlanEditor.tsx` | Component `PlanEditor` | `ui/components/ui/index.ts`, `ui/features/skills-studio/EvalCasesEditor.tsx`, `ui/features/skills-studio/PlanLists.tsx`, `ui/features/skills-studio/types.ts`, `ui/features/skills-studio/useCall.tsx`, `ui/lib/api.ts` | `ui/features/skills-studio/Studio.tsx` |
+| `src/frontend/features/skills-studio/PlanLists.tsx` | Component `Tasks` | `ui/components/ui/index.ts`, `ui/features/skills-studio/ListEditors.tsx`, `ui/features/skills-studio/types.ts` | `ui/features/skills-studio/PlanEditor.tsx` |
+| `src/frontend/features/skills-studio/PublishStep.tsx` | Component `Versions` | `ui/components/ui/index.ts`, `ui/features/skills-studio/ChecksList.tsx`, `ui/features/skills-studio/types.ts`, `ui/features/skills-studio/useCall.tsx`, `ui/lib/api.ts` | `ui/features/skills-studio/Studio.tsx` |
+| `src/frontend/features/skills-studio/RequestStep.tsx` | Component `RequestStep` | `ui/components/ui/index.ts`, `ui/features/skills-studio/useCall.tsx` | `ui/features/skills-studio/Studio.tsx` |
+| `src/frontend/features/skills-studio/SourceStep.tsx` | Component `SourceStep` | `ui/components/ui/index.ts`, `ui/features/skills-studio/types.ts`, `ui/features/skills-studio/useCall.tsx`, `ui/lib/api.ts` | `ui/features/skills-studio/Studio.tsx` |
+| `src/frontend/features/skills-studio/Studio.tsx` | Component `Studio` | `ui/components/AuthGate.tsx`, `ui/components/ui/index.ts`, `ui/features/skills-studio/EvaluateStep.tsx`, `ui/features/skills-studio/GenerateStep.tsx`, `ui/features/skills-studio/KindStep.tsx`, `ui/features/skills-studio/PlanEditor.tsx`, `ui/features/skills-studio/PublishStep.tsx`, `ui/features/skills-studio/RequestStep.tsx`, and 6 more | `ui/app/skills/studio/page.tsx` |
+| `src/frontend/features/skills-studio/TestStep.tsx` | Component `TestStep` | `ui/components/ui/index.ts`, `ui/features/skills-studio/types.ts`, `ui/features/skills-studio/useCall.tsx`, `ui/lib/api.ts` | `ui/features/skills-studio/Studio.tsx` |
+| `src/frontend/features/skills-studio/UploadCard.tsx` | Component `UploadCard` | `ui/components/ui/index.ts`, `ui/features/skills-studio/ChecksList.tsx`, `ui/features/skills-studio/types.ts`, `ui/features/skills-studio/useCall.tsx`, `ui/lib/api.ts` | `ui/features/skills-studio/Studio.tsx` |
+| `src/frontend/features/skills-studio/types.ts` | Type definitions |  | `ui/features/skills-studio/ChecksList.tsx`, `ui/features/skills-studio/EvalCasesEditor.tsx`, `ui/features/skills-studio/EvaluateStep.tsx`, `ui/features/skills-studio/GenerateStep.tsx`, `ui/features/skills-studio/KindStep.tsx`, `ui/features/skills-studio/PlanEditor.tsx`, `ui/features/skills-studio/PlanLists.tsx`, `ui/features/skills-studio/PublishStep.tsx`, and 4 more |
+| `src/frontend/features/skills-studio/useCall.tsx` | A rejected model reply comes back as detail {message, reply_file}; the message is shown, and the kept reply's file name. | `ui/components/ui/index.ts` | `ui/features/skills-studio/EvaluateStep.tsx`, `ui/features/skills-studio/GenerateStep.tsx`, `ui/features/skills-studio/PlanEditor.tsx`, `ui/features/skills-studio/PublishStep.tsx`, `ui/features/skills-studio/RequestStep.tsx`, `ui/features/skills-studio/SourceStep.tsx`, `ui/features/skills-studio/Studio.tsx`, `ui/features/skills-studio/TestStep.tsx`, and 1 more |
+| `src/frontend/features/skills/SkillCard.tsx` | Header: name, version and content hash | `ui/features/skills/lib.ts` | `ui/app/skills/page.tsx` |
+| `src/frontend/features/skills/SkillFilters.tsx` | Component `SkillFilters` |  | `ui/app/skills/page.tsx` |
+| `src/frontend/features/skills/SkillModal.tsx` | Modal Header | `ui/components/ui/index.ts`, `ui/features/skills/lib.ts` | `ui/app/skills/page.tsx` |
+| `src/frontend/features/skills/lib.ts` | Helpers for the skills pages: filters and labels |  | `ui/app/skills/page.tsx`, `ui/features/skills/SkillCard.tsx`, `ui/features/skills/SkillModal.tsx` |
+| `src/frontend/features/traces/RunView.tsx` | One run: a collapsible span tree beside a waterfall timeline whose bars are scaled to each span's duration. | `ui/components/ui/index.ts`, `ui/features/traces/SpanDetail.tsx`, `ui/features/traces/lib.ts`, `ui/lib/api.ts` | `ui/features/traces/TracesPage.tsx` |
+| `src/frontend/features/traces/RunsTable.tsx` | The runs list: one row per root span, newest first, filtered and paged on the server. | `ui/components/AuthGate.tsx`, `ui/components/ui/index.ts`, `ui/features/traces/lib.ts`, `ui/lib/api.ts` | `ui/features/traces/TracesPage.tsx` |
+| `src/frontend/features/traces/SpanDetail.tsx` | One span: what it took in and gave out (redacted on the server), tokens, duration, and any error with its error id. | `ui/components/ui/index.ts`, `ui/features/traces/lib.ts` | `ui/features/traces/RunView.tsx` |
+| `src/frontend/features/traces/TracesPage.tsx` | /traces lists runs; /traces?trace=<id> opens one, so a run can be linked to from anywhere. | `ui/features/traces/RunView.tsx`, `ui/features/traces/RunsTable.tsx` | `ui/app/traces/page.tsx` |
+| `src/frontend/features/traces/lib.ts` | Trace explorer types and helpers. |  | `ui/features/traces/RunView.tsx`, `ui/features/traces/RunsTable.tsx`, `ui/features/traces/SpanDetail.tsx` |
 | `src/frontend/next.config.ts` | Next.js settings and the API proxy |  |  |
 | `src/frontend/package-lock.json` | Exact Node dependency versions |  |  |
 | `src/frontend/package.json` | Node dependencies and scripts |  |  |
@@ -670,7 +670,7 @@ The project has 1068 files, not counting screenshots.
 | `tests/e2e/__init__.py` | Marks the end-to-end tests package |  |  |
 | `tests/e2e/conftest.py` | Real servers on separate ports with their own build folder, so a running copy of the app is never touched. |  | `tests/e2e/test_app_1_projects.py`, `tests/e2e/test_app_2_documents.py`, `tests/e2e/test_app_3_workflows.py`, `tests/e2e/test_app_4_governance.py`, `tests/e2e/test_finance_repo.py`, `tests/e2e/test_harness_status.py`, `tests/e2e/test_harness_stories.py`, `tests/e2e/test_skill_studio.py`, and 1 more |
 | `tests/e2e/helpers_app.py` | Shared constants and helpers for the end-to-end app tests. |  | `tests/e2e/test_app_1_projects.py`, `tests/e2e/test_app_2_documents.py`, `tests/e2e/test_app_3_workflows.py`, `tests/e2e/test_app_4_governance.py`, `tests/e2e/test_finance_repo.py` |
-| `tests/e2e/production_screens.spec.ts` |  |  |  |
+| `tests/e2e/production_screens.spec.ts` | Authenticate as administrator await page.goto("/login"); await page.waitForLoadState("networkidle"); await page.fill('input[type="text"], input[name="username"]', "admin"); await page.fill('input[type |  |  |
 | `tests/e2e/test_app_1_projects.py` | End-to-end, part 1: projects, repository, clone, rename and settings. | `tests/e2e/conftest.py`, `tests/e2e/helpers_app.py` |  |
 | `tests/e2e/test_app_2_documents.py` | End-to-end, part 2: BA workflow, Gherkin and document editing. | `tests/e2e/conftest.py`, `tests/e2e/helpers_app.py` |  |
 | `tests/e2e/test_app_3_workflows.py` | End-to-end, part 3: bug scan, feature builder, QE lifecycle, chat and harness. | `tests/e2e/conftest.py`, `tests/e2e/helpers_app.py` |  |
@@ -680,8 +680,8 @@ The project has 1068 files, not counting screenshots.
 | `tests/e2e/test_harness_stories.py` | E2E: every harness user story (docs/HARNESS_USER_STORIES.md) in the real browser, on the real model and repository. | `tests/e2e/conftest.py` | `tests/e2e/test_harness_status.py` |
 | `tests/e2e/test_skill_studio.py` | E2E: Skill Creator Studio, US-51 (instructions skill from requirements) and US-53 (evaluate on the model). | `tests/e2e/conftest.py` |  |
 | `tests/e2e/test_smoke.py` | Browser smoke test with no model: a built app, an empty throwaway data folder, and a real browser. | `tests/e2e/conftest.py` |  |
-| `tests/fabrication_baseline.json` |  |  |  |
-| `tests/file_size_baseline.json` |  |  |  |
+| `tests/fabrication_baseline.json` | fabrication_baseline data |  |  |
+| `tests/file_size_baseline.json` | file_size_baseline data |  |  |
 | `tests/fixtures/mcp_echo_server.py` | A real MCP server over stdio for the MCP tests: two tools, `echo` and `add`. Run: python mcp_echo_server.py |  |  |
 | `tests/helpers_access.py` | Shared world for the access tests: one project, one item of every kind, and an account of each kind around it. | `core/auth/__init__.py`, `db.py`, `tests/helpers_api.py` | `tests/test_access_account.py`, `tests/test_access_gates.py`, `tests/test_access_members.py`, `tests/test_access_routes.py`, `tests/test_user_email.py` |
 | `tests/helpers_api.py` | Shared fixtures, constants and helpers for the API workflow tests. | `app.py`, `core/models/__init__.py`, `maf/llm.py` | `tests/helpers_access.py`, `tests/helpers_confidence.py`, `tests/helpers_errors.py`, `tests/helpers_models.py`, `tests/test_access_account.py`, `tests/test_access_gates.py`, `tests/test_access_members.py`, `tests/test_access_routes.py`, and 46 more |
@@ -807,21 +807,21 @@ The project has 1068 files, not counting screenshots.
 
 | File | What it does | Uses | Used by |
 |---|---|---|---|
-| `deploy/azure/Dockerfile.backend` |  |  |  |
-| `deploy/azure/Dockerfile.frontend` |  |  |  |
-| `deploy/azure/azure-pipelines.yml` |  |  |  |
+| `deploy/azure/Dockerfile.backend` | ============================================================================== |  |  |
+| `deploy/azure/Dockerfile.frontend` | ============================================================================== |  |  |
+| `deploy/azure/azure-pipelines.yml` | Azure DevOps pipeline template (not used: zip and Kudu only) |  |  |
 | `deploy/azure/backend_startup.py` | App Service startup for the backend. Builds the Python environment once per requirements change, then serves. |  |  |
-| `deploy/azure/backend_startup.sh` |  |  |  |
-| `deploy/azure/backend_web.config` |  |  |  |
+| `deploy/azure/backend_startup.sh` | API startup for App Service (shell form of backend_startup.py) |  |  |
+| `deploy/azure/backend_web.config` | IIS settings for the API on Windows App Service |  |  |
 | `deploy/azure/frontend_startup.js` | App Service startup for the frontend: builds when needed, then serves |  |  |
-| `deploy/azure/frontend_startup.sh` |  |  |  |
-| `deploy/azure/frontend_web.config` |  |  |  |
-| `deploy/azure/kudu.deployment` |  |  |  |
-| `deploy/azure/setup_azure_infrastructure.ps1` |  |  |  |
-| `deploy/azure/setup_azure_infrastructure.sh` |  |  |  |
-| `deploy/azure/staticwebapp.config.json` |  |  |  |
-| `deploy/environments/azure.appsettings.example` |  |  |  |
-| `deploy/environments/local.env.example` |  |  |  |
+| `deploy/azure/frontend_startup.sh` | Optimize memory consumption for Basic B1 (1.75 GB RAM) |  |  |
+| `deploy/azure/frontend_web.config` | IIS settings for the UI on Windows App Service |  |  |
+| `deploy/azure/kudu.deployment` | Kudu deployment settings shipped in each zip |  |  |
+| `deploy/azure/setup_azure_infrastructure.ps1` | ============================================================================== |  |  |
+| `deploy/azure/setup_azure_infrastructure.sh` | ============================================================================== |  |  |
+| `deploy/azure/staticwebapp.config.json` | staticwebapp.config data |  |  |
+| `deploy/environments/azure.appsettings.example` | AZURE environment (web profile): enter these as App Service "Environment variables" in the portal. |  |  |
+| `deploy/environments/local.env.example` | LOCAL environment: develop and test the whole project on your own machine. |  |  |
 | `scripts/azure/__init__.py` | Shared pieces of the Azure packaging scripts in scripts/. Each entry script keeps its own behaviour and wording. |  |  |
 | `scripts/azure/archive.py` | Create and verify the deployment zips. | `scripts/azure/files.py` | `scripts/azure_convert_and_deploy.py`, `scripts/package_azure_kudu.py` |
 | `scripts/azure/deploy.py` | Pre-build the Next.js standalone bundle and deploy the zips with the Azure CLI. |  | `scripts/azure_convert_and_deploy.py` |
@@ -830,9 +830,9 @@ The project has 1068 files, not counting screenshots.
 | `scripts/azure/preflight.py` | Pre-flight checks. The two scripts check slightly different things and word their errors differently. |  | `scripts/azure_convert_and_deploy.py`, `scripts/package_azure_kudu.py` |
 | `scripts/azure/setup_script.py` | The one-time Azure infrastructure setup script (bash) that azure_convert_and_deploy.py prints or writes. |  | `scripts/azure_convert_and_deploy.py` |
 | `scripts/azure_convert_and_deploy.py` | azure_convert_and_deploy.py - End-to-End Azure App Service / Kudu Conversion & Deployment Automation | `scripts/azure/archive.py`, `scripts/azure/deploy.py`, `scripts/azure/files.py`, `scripts/azure/logs.py`, `scripts/azure/preflight.py`, `scripts/azure/setup_script.py` | `tests/test_azure_kudu_packaging.py`, `tests/test_azure_package_runs.py` |
-| `scripts/azure_convert_and_deploy.sh` |  |  |  |
+| `scripts/azure_convert_and_deploy.sh` | ============================================================================== |  |  |
 | `scripts/azure_local.py` | Run the two Azure zips locally, through their own startup scripts, in the web profile (docs/AZURE_POC_PORTAL_GUIDE.md section 10). | `scripts/pg_local.py` |  |
-| `scripts/capture_evidence.py` |  |  |  |
+| `scripts/capture_evidence.py` | Captures UI screenshots for the evidence folder |  |  |
 | `scripts/desktop_build.py` | Build the desktop app: UI standalone, backend with PyInstaller, then installers with electron-builder. |  |  |
 | `scripts/dev.py` | One cross-platform entry point. Standard library only, so it runs before any install. |  |  |
 | `scripts/env_check.py` | Check an environment's settings without printing any value. | `__init__.py`, `keyvault.py` |  |
@@ -842,12 +842,12 @@ The project has 1068 files, not counting screenshots.
 | `scripts/hooks/activity_log.py` | Append timestamped activity to progress.md. Stdlib only; works on Windows, macOS, Linux. |  |  |
 | `scripts/package_azure.py` | Make the Azure ZIPs and a clean production repository in dist/. Nothing outside dist/ changes. |  | `tests/test_azure_package_runs.py` |
 | `scripts/package_azure_kudu.py` | package_azure_kudu.py - Packaging automation for Azure App Service & Kudu ZipDeploy | `scripts/azure/archive.py`, `scripts/azure/files.py`, `scripts/azure/logs.py`, `scripts/azure/preflight.py` | `tests/test_azure_package_runs.py` |
-| `scripts/package_azure_kudu.sh` |  |  |  |
+| `scripts/package_azure_kudu.sh` | Ensure Python 3 is available |  |  |
 | `scripts/pg_local.py` | `python scripts/dev.py db`: local PostgreSQL in data/postgres for development; its URL goes into .env once, never on | `local_postgres.py` | `scripts/azure_local.py`, `tests/conftest.py` |
 | `scripts/registry_report.py` | Write docs/CAPABILITY_REGISTRY.md from a real registry sync against a throwaway store (plan Phase R). | `__init__.py`, `core/registry/__init__.py`, `core/registry/read.py`, `db.py` |  |
 | `scripts/sqlite_to_postgres.py` | Copy an existing SQLite store into PostgreSQL once (MASTER_PLAN Part 3, G5). The SQLite file is only read. | `__init__.py`, `config.py`, `core/ledger.py`, `core/security.py`, `db.py` |  |
-| `scripts/verify_branch_isolation.sh` |  |  |  |
-| `scripts/verify_production_screens.mjs` |  |  |  |
+| `scripts/verify_branch_isolation.sh` | ============================================================================== |  |  |
+| `scripts/verify_production_screens.mjs` | 1. |  |  |
 | `start-mac.command` | Double-click launcher for macOS |  |  |
 | `start-windows.bat` | Double-click launcher for Windows |  |  |
 
@@ -857,30 +857,31 @@ The project has 1068 files, not counting screenshots.
 |---|---|---|---|
 | `docs/AGENT_SKILLS_AND_MAF_SPECIFICATION.md` | Master canonical guide: MAF 2.0 conformance, Progressive Disclosure, Harness Patterns, Skill Studio, and 13 skills inventory |  |  |
 | `docs/ARCHITECTURE.md` | Architecture pointer and inventory index |  |  |
-| `docs/AZURE_DESKTOP_TARGET_ARCHITECTURE.md` |  |  |  |
+| `docs/AZURE_DESKTOP_TARGET_ARCHITECTURE.md` | Azure and desktop: the standard deployment guide (East US 2) |  |  |
 | `docs/AZURE_ENTERPRISE_DEPLOYMENT_GUIDE.md` | Canonical Azure guide: pricing, storage, sandbox, RBAC |  |  |
-| `docs/AZURE_POC_PORTAL_GUIDE.md` |  |  |  |
-| `docs/CAPABILITY_REGISTRY.md` |  |  |  |
-| `docs/CODEBASE_DUPLICATION_AND_MAPPING_REPORT.md` |  |  |  |
-| `docs/DATA_ARCHITECTURE.md` |  |  |  |
-| `docs/DESKTOP_APP_GUIDE.md` |  |  |  |
-| `docs/DESKTOP_RELEASE_GUIDE.md` |  |  |  |
-| `docs/EVALUATIONS.md` |  |  |  |
-| `docs/FINAL_HARNESS_PLAN.md` |  |  |  |
-| `docs/HARNESS_GAP_ANALYSIS.md` |  |  |  |
-| `docs/HARNESS_REBUILD_PLAN.md` |  |  |  |
-| `docs/HARNESS_USER_STORIES.md` |  |  |  |
-| `docs/MASTER_PLAN.md` |  |  |  |
-| `docs/MODULARIZATION_PLAN.md` |  |  |  |
-| `docs/PLAN_NEXT_STEPS.md` |  |  |  |
-| `docs/PRODUCTION_NAMING_CONVENTIONS_MAPPING.md` |  |  |  |
+| `docs/AZURE_POC_PORTAL_GUIDE.md` | Azure proof of concept: step-by-step in the Azure portal |  |  |
+| `docs/CAPABILITY_REGISTRY.md` | Capability registry |  |  |
+| `docs/CODEBASE_DUPLICATION_AND_MAPPING_REPORT.md` | Codebase Duplication, Component Consolidation & Architecture Mapping Report |  |  |
+| `docs/DATA_ARCHITECTURE.md` | Data architecture |  |  |
+| `docs/DESKTOP_APP_GUIDE.md` | Desktop App Guide |  |  |
+| `docs/DESKTOP_RELEASE_GUIDE.md` | Desktop release guide: build, publish to Blob, show on the login page |  |  |
+| `docs/EVALUATIONS.md` | Evaluations |  |  |
+| `docs/FINAL_HARNESS_PLAN.md` | Final Plan: a complete, working MAF harness with no dummy data |  |  |
+| `docs/HARNESS_GAP_ANALYSIS.md` | Harness Gap Analysis: our MAF harness against DeepSeek Harness |  |  |
+| `docs/HARNESS_REBUILD_PLAN.md` | MAF Harness Rebuild Plan (revision 2) |  |  |
+| `docs/HARNESS_USER_STORIES.md` | Project Harness User Stories |  |  |
+| `docs/MASTER_PLAN.md` | Master Plan: one plan for the whole application |  |  |
+| `docs/MODULARIZATION_PLAN.md` | Modularization Plan: the 200-line rule and feature-based layout |  |  |
+| `docs/PLAN_NEXT_STEPS.md` | Next steps: status and restart point (2026-11-11) |  |  |
+| `docs/PRODUCTION_NAMING_CONVENTIONS_MAPPING.md` | Enterprise Production Naming Conventions & Codebase Architecture Mapping |  |  |
 | `docs/PROJECT_STRUCTURE.md` | This file |  |  |
-| `docs/SECURITY_GOVERNANCE_AND_AUDIT.md` |  |  |  |
-| `docs/SKILL_STUDIO_AUDIT.md` |  |  |  |
+| `docs/SECURITY_GOVERNANCE_AND_AUDIT.md` | Master Security Governance, Threat Remediation & Audit Specification |  |  |
+| `docs/SECURITY_REVIEW_2026-11-11.md` | Security and dependency review, 2026-11-11 |  |  |
+| `docs/SKILL_STUDIO_AUDIT.md` | Skill Studio audit |  |  |
 | `docs/SYSTEM_ARCHITECTURE_AND_DESIGN.md` | Canonical architecture, Next.js/FastAPI full-stack design, MAF 2.0 orchestration, AST code packs, and QE specifications |  |  |
-| `docs/UI_GUIDE_AND_COSTING.md` |  |  |  |
-| `docs/USER_STORIES.md` |  |  |  |
-| `docs/analysis/2026-11-11-markdown-html-converter-trace.md` |  |  |  |
+| `docs/UI_GUIDE_AND_COSTING.md` | 🖥️ Platform UI Operational Guide & Comprehensive Cloud Costing Analysis |  |  |
+| `docs/USER_STORIES.md` | User stories for the whole application |  |  |
+| `docs/analysis/2026-11-11-markdown-html-converter-trace.md` | Trace and root-cause analysis: project "Markdown-HTML-converter" (`prj_015c85df23f2`) |  |  |
 
 ## Project root
 
@@ -889,211 +890,211 @@ The project has 1068 files, not counting screenshots.
 | `.claude/settings.json` | Hooks that write progress.md |  |  |
 | `.env.example` | Settings template |  |  |
 | `.gitattributes` | Line endings for launcher scripts |  |  |
-| `.github/BRANCH_PROTECTION.md` |  |  |  |
-| `.github/workflows/azure-deploy.yml` |  |  |  |
-| `.github/workflows/branch-lock-check.yml` |  |  |  |
+| `.github/BRANCH_PROTECTION.md` | 🔒 Strict Branch Protection & Isolation Policy |  |  |
+| `.github/workflows/azure-deploy.yml` | Workflow: Azure Kudu Deployment |  |  |
+| `.github/workflows/branch-lock-check.yml` | Workflow: Branch Isolation & Merge Lock Policy |  |  |
 | `.github/workflows/ci.yml` | Tests on Windows, macOS, and Linux |  |  |
-| `.github/workflows/desktop.yml` |  |  |  |
+| `.github/workflows/desktop.yml` | Workflow: desktop |  |  |
 | `.gitignore` | Files kept out of Git |  |  |
 | `.mcp.json` | Developer MCP servers for Claude Code |  |  |
-| `BRANCH_README.md` |  |  |  |
+| `BRANCH_README.md` | ☁️ Azure Kudu Standalone Deployment Branch |  |  |
 | `CLAUDE.md` | Rules for changing this project |  |  |
-| `PROGRESS.md` |  |  |  |
+| `PROGRESS.md` | Progress and activity log |  |  |
 | `README.md` | Project overview, setup, and links |  |  |
-| `UI_AUDIT_AND_AMBITION_REPORT.md` |  |  |  |
-| `USER_STORIES.md` |  |  |  |
+| `UI_AUDIT_AND_AMBITION_REPORT.md` | Evidence-Based UI Audit & Enterprise Ambition Report |  |  |
+| `USER_STORIES.md` | Agentic QE Harness: User Stories & MAF Architecture Mapping |  |  |
 | `apps/desktop/backend_entry.py` | PyInstaller entry point: runs the FastAPI app on loopback. The port comes from the Electron shell. | `__init__.py`, `app.py`, `local_postgres.py` |  |
-| `apps/desktop/lib/layout.js` |  |  |  |
-| `apps/desktop/lib/procs.js` |  |  |  |
-| `apps/desktop/lib/secrets.js` |  |  |  |
-| `apps/desktop/lib/windows.js` |  |  |  |
-| `apps/desktop/main.js` |  |  |  |
-| `apps/desktop/package-lock.json` |  |  |  |
-| `apps/desktop/package.json` |  |  |  |
-| `apps/desktop/preload.js` |  |  |  |
-| `apps/desktop/setup.html` |  |  |  |
-| `azure-pipelines.yml` |  |  |  |
-| `bin/harness` |  |  |  |
-| `bin/harness.bat` |  |  |  |
-| `bin/harness.ps1` |  |  |  |
-| `harness` |  |  |  |
-| `harness.bat` |  |  |  |
-| `package-lock.json` |  |  |  |
-| `package.json` |  |  |  |
+| `apps/desktop/lib/layout.js` | Where the backend and UI live: inside the installed app (packaged) or in the repository (dev). |  |  |
+| `apps/desktop/lib/procs.js` | Child processes: argument lists only, never a shell. |  |  |
+| `apps/desktop/lib/secrets.js` | Admin login and the signing key live in userData as OS-encrypted blobs (safeStorage). |  |  |
+| `apps/desktop/lib/windows.js` | Windows: the first-run setup form and the main app window, both locked down. |  |  |
+| `apps/desktop/main.js` | Electron main: starts the local backend and UI on loopback, then opens the app. |  |  |
+| `apps/desktop/package-lock.json` | package-lock data |  |  |
+| `apps/desktop/package.json` | Agentic QE Platform desktop app: Electron shell around the local MAF backend and Next.js UI |  |  |
+| `apps/desktop/preload.js` | Exposes one call to the setup page. |  |  |
+| `apps/desktop/setup.html` | error { color: #b00020; margin-top: 12px; min-height: 18px; } |  |  |
+| `azure-pipelines.yml` | Azure DevOps pipeline (not used: deployment is zip and Kudu only) |  |  |
+| `bin/harness` | Agentic QE MAF 2.0 Terminal Harness Runner |  |  |
+| `bin/harness.bat` | Agentic QE MAF 2.0 Terminal Harness Runner for Windows (CMD) |  |  |
+| `bin/harness.ps1` | Agentic QE MAF 2.0 Terminal Harness Runner for Windows (PowerShell) |  |  |
+| `harness` | Root alias for Agentic QE Harness (Mac / Linux) |  |  |
+| `harness.bat` | Root alias for Agentic QE Harness (Windows) |  |  |
+| `package-lock.json` | package-lock data |  |  |
+| `package.json` | Microsoft Agent Framework (MAF) based Quality Engineering Chatbot & Multi-Agent Harness |  |  |
 | `plan.md` | Design decisions and reuse audit |  |  |
-| `playwright.config.ts` |  |  |  |
-| `plugins/agentic-qe/.claude-plugin/marketplace.json` |  |  |  |
-| `plugins/agentic-qe/.claude-plugin/plugin.json` |  |  |  |
-| `plugins/agentic-qe/PINNED` |  |  |  |
-| `plugins/agentic-qe/agents/confidence-reviewer.md` |  |  |  |
-| `plugins/agentic-qe/agents/coverage-auditor.md` |  |  |  |
-| `plugins/agentic-qe/agents/defect-diagnostician.md` |  |  |  |
-| `plugins/agentic-qe/agents/principal-test-architect.md` |  |  |  |
-| `plugins/agentic-qe/agents/qa-execution-engineer.md` |  |  |  |
-| `plugins/agentic-qe/agents/repo-intelligence-analyst.md` |  |  |  |
-| `plugins/agentic-qe/agents/requirements-analyst.md` |  |  |  |
-| `plugins/agentic-qe/agents/test-automation-engineer.md` |  |  |  |
-| `plugins/agentic-qe/agents/test-design-architect.md` |  |  |  |
-| `plugins/agentic-qe/hooks/hooks.json` |  |  |  |
-| `plugins/agentic-qe/hooks/pane.test.tsx` |  |  |  |
-| `plugins/agentic-qe/hooks/pane.tsx` |  |  |  |
-| `plugins/agentic-qe/hooks/src/approval-hook.ts` |  | `plugins/agentic-qe/hooks/src/coverage.ts`, `plugins/agentic-qe/hooks/src/fingerprint.ts`, `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/hooks/src/memory-logger.ts`, `plugins/agentic-qe/hooks/src/on-decision.ts`, `plugins/agentic-qe/hooks/src/phase-lease.ts`, `plugins/agentic-qe/hooks/src/validate.ts` | `plugins/agentic-qe/skills/qe-panel/scripts/dashboard-server.ts`, `plugins/agentic-qe/skills/qe-panel/scripts/panel.ts` |
-| `plugins/agentic-qe/hooks/src/confidence.ts` |  | `plugins/agentic-qe/hooks/src/hook-common.ts` | `plugins/agentic-qe/skills/building-qe-dashboard/scripts/build-trace-report.ts`, `plugins/agentic-qe/skills/building-qe-dashboard/scripts/gate-report-md.ts`, `plugins/agentic-qe/skills/designing-test-cases/scripts/check-confidence.ts` |
-| `plugins/agentic-qe/hooks/src/coverage.ts` |  | `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/hooks/src/inventory.ts`, `plugins/agentic-qe/hooks/src/layout.ts`, `plugins/agentic-qe/skills/building-qe-dashboard/scripts/build-trace-report.ts` | `plugins/agentic-qe/hooks/src/approval-hook.ts`, `plugins/agentic-qe/hooks/src/ledger-hook.ts`, `plugins/agentic-qe/hooks/src/review-capture.ts`, `plugins/agentic-qe/hooks/src/validate.ts`, `plugins/agentic-qe/skills/qe-panel/scripts/dashboard-server.ts`, `plugins/agentic-qe/skills/qe-panel/scripts/export-session.ts`, `plugins/agentic-qe/skills/tracing-coverage/scripts/check-gate.ts` |
-| `plugins/agentic-qe/hooks/src/file-changed.ts` |  | `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/hooks/src/ledger-hook.ts` |  |
-| `plugins/agentic-qe/hooks/src/fingerprint.ts` |  | `plugins/agentic-qe/hooks/src/layout.ts` | `plugins/agentic-qe/hooks/src/approval-hook.ts`, `plugins/agentic-qe/hooks/src/on-decision.ts` |
-| `plugins/agentic-qe/hooks/src/guard-bash.ts` |  | `plugins/agentic-qe/hooks/src/guard-write.ts`, `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/hooks/src/memory-logger.ts` |  |
-| `plugins/agentic-qe/hooks/src/guard-write.ts` |  | `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/hooks/src/layout.ts`, `plugins/agentic-qe/hooks/src/memory-logger.ts`, `plugins/agentic-qe/hooks/src/phase-lease.ts` | `plugins/agentic-qe/hooks/src/guard-bash.ts` |
-| `plugins/agentic-qe/hooks/src/hook-common.ts` |  | `plugins/agentic-qe/hooks/src/memory-logger.ts` | `plugins/agentic-qe/hooks/src/approval-hook.ts`, `plugins/agentic-qe/hooks/src/confidence.ts`, `plugins/agentic-qe/hooks/src/coverage.ts`, `plugins/agentic-qe/hooks/src/file-changed.ts`, `plugins/agentic-qe/hooks/src/guard-bash.ts`, `plugins/agentic-qe/hooks/src/guard-write.ts`, `plugins/agentic-qe/hooks/src/ledger-hook.ts`, `plugins/agentic-qe/hooks/src/phase-lease.ts`, and 18 more |
-| `plugins/agentic-qe/hooks/src/inventory.ts` |  |  | `plugins/agentic-qe/hooks/src/coverage.ts`, `plugins/agentic-qe/hooks/src/phase-lease.ts`, `plugins/agentic-qe/hooks/src/session-check.ts`, `plugins/agentic-qe/skills/qe-panel/scripts/dashboard-server.ts` |
-| `plugins/agentic-qe/hooks/src/layout.ts` |  |  | `plugins/agentic-qe/hooks/src/coverage.ts`, `plugins/agentic-qe/hooks/src/fingerprint.ts`, `plugins/agentic-qe/hooks/src/guard-write.ts`, `plugins/agentic-qe/hooks/src/phase-lease.ts`, `plugins/agentic-qe/hooks/src/review-capture.ts`, `plugins/agentic-qe/skills/building-qe-dashboard/scripts/build-trace-report.ts`, `plugins/agentic-qe/skills/building-qe-dashboard/scripts/gate-report-md.ts`, `plugins/agentic-qe/skills/qe-panel/scripts/dashboard-server.ts`, and 2 more |
-| `plugins/agentic-qe/hooks/src/ledger-hook.ts` |  | `plugins/agentic-qe/hooks/src/coverage.ts`, `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/hooks/src/memory-logger.ts`, `plugins/agentic-qe/hooks/src/on-decision.ts` | `plugins/agentic-qe/hooks/src/file-changed.ts` |
-| `plugins/agentic-qe/hooks/src/memory-logger.ts` |  |  | `plugins/agentic-qe/hooks/src/approval-hook.ts`, `plugins/agentic-qe/hooks/src/guard-bash.ts`, `plugins/agentic-qe/hooks/src/guard-write.ts`, `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/hooks/src/ledger-hook.ts`, `plugins/agentic-qe/hooks/src/on-decision.ts`, `plugins/agentic-qe/hooks/src/session-check.ts`, `plugins/agentic-qe/hooks/src/validate.ts`, and 4 more |
-| `plugins/agentic-qe/hooks/src/on-decision.ts` |  | `plugins/agentic-qe/hooks/src/fingerprint.ts`, `plugins/agentic-qe/hooks/src/memory-logger.ts` | `plugins/agentic-qe/hooks/src/approval-hook.ts`, `plugins/agentic-qe/hooks/src/ledger-hook.ts`, `plugins/agentic-qe/skills/building-qe-dashboard/scripts/build-trace-report.ts`, `plugins/agentic-qe/skills/building-qe-dashboard/scripts/gate-report-md.ts`, `plugins/agentic-qe/skills/qe-panel/scripts/dashboard-server.ts`, `plugins/agentic-qe/skills/qe-panel/scripts/export-session.ts`, `plugins/agentic-qe/skills/qe-panel/scripts/panel.ts` |
-| `plugins/agentic-qe/hooks/src/phase-lease.ts` |  | `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/hooks/src/inventory.ts`, `plugins/agentic-qe/hooks/src/layout.ts` | `plugins/agentic-qe/hooks/src/approval-hook.ts`, `plugins/agentic-qe/hooks/src/guard-write.ts` |
-| `plugins/agentic-qe/hooks/src/review-capture.ts` |  | `plugins/agentic-qe/hooks/src/coverage.ts`, `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/hooks/src/layout.ts` |  |
-| `plugins/agentic-qe/hooks/src/session-check.mjs` |  |  |  |
-| `plugins/agentic-qe/hooks/src/session-check.ts` |  | `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/hooks/src/inventory.ts`, `plugins/agentic-qe/hooks/src/memory-logger.ts`, `plugins/agentic-qe/hooks/src/validate.ts` |  |
-| `plugins/agentic-qe/hooks/src/stamp-metadata.ts` |  | `plugins/agentic-qe/hooks/src/hook-common.ts` | `plugins/agentic-qe/skills/authoring-user-stories/scripts/export-cases.ts`, `plugins/agentic-qe/skills/qe-panel/scripts/dashboard-server.ts` |
-| `plugins/agentic-qe/hooks/src/validate.ts` |  | `plugins/agentic-qe/hooks/src/coverage.ts`, `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/hooks/src/memory-logger.ts` | `plugins/agentic-qe/hooks/src/approval-hook.ts`, `plugins/agentic-qe/hooks/src/session-check.ts`, `plugins/agentic-qe/skills/qe-doctor/scripts/agentic-qe.ts`, `plugins/agentic-qe/skills/tracing-coverage/scripts/check-gate.ts` |
-| `plugins/agentic-qe/package.json` |  |  |  |
-| `plugins/agentic-qe/plugin.json` |  |  |  |
-| `plugins/agentic-qe/scripts/agentic-qe.ts` |  |  |  |
-| `plugins/agentic-qe/scripts/parse-junit.ts` |  | `plugins/agentic-qe/skills/executing-tests/scripts/parse-junit.ts` | `plugins/agentic-qe/skills/qe-panel/scripts/panel.ts` |
-| `plugins/agentic-qe/scripts/test-pane.ts` |  |  |  |
-| `plugins/agentic-qe/scripts/verify-commands.ts` |  |  |  |
-| `plugins/agentic-qe/skills/analyzing-repositories/SKILL.md` |  |  |  |
-| `plugins/agentic-qe/skills/analyzing-repositories/evals/evals.json` |  |  |  |
-| `plugins/agentic-qe/skills/analyzing-repositories/references/STACK_SIGNALS.md` |  |  |  |
-| `plugins/agentic-qe/skills/analyzing-repositories/scripts/scan-repo.ts` |  | `plugins/agentic-qe/hooks/src/hook-common.ts` |  |
-| `plugins/agentic-qe/skills/authoring-user-stories/SKILL.md` |  |  |  |
-| `plugins/agentic-qe/skills/authoring-user-stories/evals/evals.json` |  |  |  |
-| `plugins/agentic-qe/skills/authoring-user-stories/references/TEMPLATE.md` |  |  |  |
-| `plugins/agentic-qe/skills/authoring-user-stories/scripts/export-cases.ts` |  | `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/hooks/src/stamp-metadata.ts` |  |
-| `plugins/agentic-qe/skills/building-qe-dashboard/SKILL.md` |  |  |  |
-| `plugins/agentic-qe/skills/building-qe-dashboard/evals/evals.json` |  |  |  |
-| `plugins/agentic-qe/skills/building-qe-dashboard/scripts/build-trace-report.ts` |  | `plugins/agentic-qe/hooks/src/confidence.ts`, `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/hooks/src/layout.ts`, `plugins/agentic-qe/hooks/src/on-decision.ts`, `plugins/agentic-qe/skills/executing-tests/scripts/parse-junit.ts` | `plugins/agentic-qe/hooks/src/coverage.ts`, `plugins/agentic-qe/skills/building-qe-dashboard/scripts/gate-report-md.ts`, `plugins/agentic-qe/skills/qe-panel/scripts/dashboard-server.ts` |
-| `plugins/agentic-qe/skills/building-qe-dashboard/scripts/gate-report-md.ts` |  | `plugins/agentic-qe/hooks/src/confidence.ts`, `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/hooks/src/layout.ts`, `plugins/agentic-qe/hooks/src/on-decision.ts`, `plugins/agentic-qe/skills/building-qe-dashboard/scripts/build-trace-report.ts` | `plugins/agentic-qe/skills/qe-panel/scripts/dashboard-server.ts` |
-| `plugins/agentic-qe/skills/building-qe-dashboard/scripts/html.ts` |  |  | `plugins/agentic-qe/skills/qe-panel/scripts/dashboard-server.ts` |
-| `plugins/agentic-qe/skills/designing-test-cases/SKILL.md` |  |  |  |
-| `plugins/agentic-qe/skills/designing-test-cases/evals/evals.json` |  |  |  |
-| `plugins/agentic-qe/skills/designing-test-cases/references/ORACLE_TYPES.md` |  |  |  |
-| `plugins/agentic-qe/skills/designing-test-cases/scripts/check-confidence.ts` |  | `plugins/agentic-qe/hooks/src/confidence.ts`, `plugins/agentic-qe/hooks/src/hook-common.ts` |  |
-| `plugins/agentic-qe/skills/designing-test-cases/scripts/generate-cases.ts` |  |  |  |
-| `plugins/agentic-qe/skills/executing-tests/SKILL.md` |  |  |  |
-| `plugins/agentic-qe/skills/executing-tests/evals/evals.json` |  |  |  |
-| `plugins/agentic-qe/skills/executing-tests/references/RUNNER_REGISTRY.md` |  |  |  |
-| `plugins/agentic-qe/skills/executing-tests/references/VERSIONS.md` |  |  |  |
-| `plugins/agentic-qe/skills/executing-tests/scripts/collect-evidence.ts` |  | `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/skills/executing-tests/scripts/parse-junit.ts` |  |
-| `plugins/agentic-qe/skills/executing-tests/scripts/mcp-evidence.ts` |  | `plugins/agentic-qe/hooks/src/hook-common.ts` |  |
-| `plugins/agentic-qe/skills/executing-tests/scripts/parse-junit.ts` |  |  | `plugins/agentic-qe/scripts/parse-junit.ts`, `plugins/agentic-qe/skills/building-qe-dashboard/scripts/build-trace-report.ts`, `plugins/agentic-qe/skills/executing-tests/scripts/collect-evidence.ts` |
-| `plugins/agentic-qe/skills/executing-tests/scripts/run-isolated.ts` |  |  |  |
-| `plugins/agentic-qe/skills/extracting-requirements/SKILL.md` |  |  |  |
-| `plugins/agentic-qe/skills/extracting-requirements/evals/evals.json` |  |  |  |
-| `plugins/agentic-qe/skills/extracting-requirements/references/REQUIREMENT_RULES.md` |  |  |  |
-| `plugins/agentic-qe/skills/extracting-requirements/scripts/extract-contracts.ts` |  |  |  |
-| `plugins/agentic-qe/skills/generating-test-code/SKILL.md` |  |  |  |
-| `plugins/agentic-qe/skills/generating-test-code/assets/playwright.config.ts` |  |  |  |
-| `plugins/agentic-qe/skills/generating-test-code/evals/evals.json` |  |  |  |
-| `plugins/agentic-qe/skills/generating-test-code/references/LANGUAGE_RULES.md` |  |  |  |
-| `plugins/agentic-qe/skills/generating-test-code/references/VERSIONS.md` |  |  |  |
-| `plugins/agentic-qe/skills/generating-test-code/scripts/emit-tests.ts` |  |  |  |
-| `plugins/agentic-qe/skills/generating-test-data/SKILL.md` |  |  |  |
-| `plugins/agentic-qe/skills/generating-test-data/assets/schema-templates.json` |  |  |  |
-| `plugins/agentic-qe/skills/generating-test-data/evals/evals.json` |  |  |  |
-| `plugins/agentic-qe/skills/generating-test-data/scripts/synthesize-data.ts` |  |  |  |
-| `plugins/agentic-qe/skills/healing-tests/SKILL.md` |  |  |  |
-| `plugins/agentic-qe/skills/healing-tests/evals/evals.json` |  |  |  |
-| `plugins/agentic-qe/skills/healing-tests/references/HEALING_PATTERNS.md` |  |  |  |
-| `plugins/agentic-qe/skills/healing-tests/scripts/apply-healing.ts` |  |  |  |
-| `plugins/agentic-qe/skills/healing-tests/scripts/diagnose-failure.ts` |  |  |  |
-| `plugins/agentic-qe/skills/planning-tests/SKILL.md` |  |  |  |
-| `plugins/agentic-qe/skills/planning-tests/evals/evals.json` |  |  |  |
-| `plugins/agentic-qe/skills/planning-tests/references/LEVEL_GUIDELINES.md` |  |  |  |
-| `plugins/agentic-qe/skills/planning-tests/scripts/calculate-risk.ts` |  |  |  |
-| `plugins/agentic-qe/skills/qe-data/SKILL.md` |  |  |  |
-| `plugins/agentic-qe/skills/qe-data/agents/openai.yaml` |  |  |  |
-| `plugins/agentic-qe/skills/qe-data/evals/evals.json` |  |  |  |
-| `plugins/agentic-qe/skills/qe-design/SKILL.md` |  |  |  |
-| `plugins/agentic-qe/skills/qe-design/agents/openai.yaml` |  |  |  |
-| `plugins/agentic-qe/skills/qe-design/evals/evals.json` |  |  |  |
-| `plugins/agentic-qe/skills/qe-discover/SKILL.md` |  |  |  |
-| `plugins/agentic-qe/skills/qe-discover/agents/openai.yaml` |  |  |  |
-| `plugins/agentic-qe/skills/qe-discover/evals/evals.json` |  |  |  |
-| `plugins/agentic-qe/skills/qe-doctor/SKILL.md` |  |  |  |
-| `plugins/agentic-qe/skills/qe-doctor/agents/openai.yaml` |  |  |  |
-| `plugins/agentic-qe/skills/qe-doctor/evals/evals.json` |  |  |  |
-| `plugins/agentic-qe/skills/qe-doctor/scripts/agentic-qe.ts` |  | `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/hooks/src/memory-logger.ts`, `plugins/agentic-qe/hooks/src/validate.ts` |  |
-| `plugins/agentic-qe/skills/qe-execute/SKILL.md` |  |  |  |
-| `plugins/agentic-qe/skills/qe-execute/agents/openai.yaml` |  |  |  |
-| `plugins/agentic-qe/skills/qe-execute/evals/evals.json` |  |  |  |
-| `plugins/agentic-qe/skills/qe-generate/SKILL.md` |  |  |  |
-| `plugins/agentic-qe/skills/qe-generate/agents/openai.yaml` |  |  |  |
-| `plugins/agentic-qe/skills/qe-generate/evals/evals.json` |  |  |  |
-| `plugins/agentic-qe/skills/qe-heal/SKILL.md` |  |  |  |
-| `plugins/agentic-qe/skills/qe-heal/agents/openai.yaml` |  |  |  |
-| `plugins/agentic-qe/skills/qe-heal/evals/evals.json` |  |  |  |
-| `plugins/agentic-qe/skills/qe-panel/SKILL.md` |  |  |  |
-| `plugins/agentic-qe/skills/qe-panel/agents/openai.yaml` |  |  |  |
-| `plugins/agentic-qe/skills/qe-panel/evals/evals.json` |  |  |  |
-| `plugins/agentic-qe/skills/qe-panel/scripts/dashboard-server.ts` |  | `plugins/agentic-qe/hooks/src/approval-hook.ts`, `plugins/agentic-qe/hooks/src/coverage.ts`, `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/hooks/src/inventory.ts`, `plugins/agentic-qe/hooks/src/layout.ts`, `plugins/agentic-qe/hooks/src/memory-logger.ts`, `plugins/agentic-qe/hooks/src/on-decision.ts`, `plugins/agentic-qe/hooks/src/stamp-metadata.ts`, and 5 more |  |
-| `plugins/agentic-qe/skills/qe-panel/scripts/dashboard-ui.ts` |  |  | `plugins/agentic-qe/skills/qe-panel/scripts/dashboard-server.ts` |
-| `plugins/agentic-qe/skills/qe-panel/scripts/export-session.ts` |  | `plugins/agentic-qe/hooks/src/coverage.ts`, `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/hooks/src/layout.ts`, `plugins/agentic-qe/hooks/src/memory-logger.ts`, `plugins/agentic-qe/hooks/src/on-decision.ts` |  |
-| `plugins/agentic-qe/skills/qe-panel/scripts/panel-split.ts` |  | `plugins/agentic-qe/hooks/src/hook-common.ts` |  |
-| `plugins/agentic-qe/skills/qe-panel/scripts/panel.ts` |  | `plugins/agentic-qe/hooks/src/approval-hook.ts`, `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/hooks/src/layout.ts`, `plugins/agentic-qe/hooks/src/memory-logger.ts`, `plugins/agentic-qe/hooks/src/on-decision.ts`, `plugins/agentic-qe/scripts/parse-junit.ts` |  |
-| `plugins/agentic-qe/skills/qe-panel/scripts/zip.ts` |  |  | `plugins/agentic-qe/skills/qe-panel/scripts/dashboard-server.ts` |
-| `plugins/agentic-qe/skills/qe-plan/SKILL.md` |  |  |  |
-| `plugins/agentic-qe/skills/qe-plan/agents/openai.yaml` |  |  |  |
-| `plugins/agentic-qe/skills/qe-plan/evals/evals.json` |  |  |  |
-| `plugins/agentic-qe/skills/qe-requirements/SKILL.md` |  |  |  |
-| `plugins/agentic-qe/skills/qe-requirements/agents/openai.yaml` |  |  |  |
-| `plugins/agentic-qe/skills/qe-requirements/evals/evals.json` |  |  |  |
-| `plugins/agentic-qe/skills/qe-sign/SKILL.md` |  |  |  |
-| `plugins/agentic-qe/skills/qe-sign/agents/openai.yaml` |  |  |  |
-| `plugins/agentic-qe/skills/qe-sign/evals/evals.json` |  |  |  |
-| `plugins/agentic-qe/skills/qe-start/SKILL.md` |  |  |  |
-| `plugins/agentic-qe/skills/qe-start/agents/openai.yaml` |  |  |  |
-| `plugins/agentic-qe/skills/qe-start/evals/evals.json` |  |  |  |
-| `plugins/agentic-qe/skills/qe-stories/SKILL.md` |  |  |  |
-| `plugins/agentic-qe/skills/qe-stories/agents/openai.yaml` |  |  |  |
-| `plugins/agentic-qe/skills/qe-stories/evals/evals.json` |  |  |  |
-| `plugins/agentic-qe/skills/qe-sync/SKILL.md` |  |  |  |
-| `plugins/agentic-qe/skills/qe-sync/agents/openai.yaml` |  |  |  |
-| `plugins/agentic-qe/skills/qe-sync/evals/evals.json` |  |  |  |
-| `plugins/agentic-qe/skills/qe-trace/SKILL.md` |  |  |  |
-| `plugins/agentic-qe/skills/qe-trace/agents/openai.yaml` |  |  |  |
-| `plugins/agentic-qe/skills/qe-trace/evals/evals.json` |  |  |  |
-| `plugins/agentic-qe/skills/tracing-coverage/SKILL.md` |  |  |  |
-| `plugins/agentic-qe/skills/tracing-coverage/evals/evals.json` |  |  |  |
-| `plugins/agentic-qe/skills/tracing-coverage/scripts/build-matrix.ts` |  | `plugins/agentic-qe/hooks/src/hook-common.ts` |  |
-| `plugins/agentic-qe/skills/tracing-coverage/scripts/check-gate.ts` |  | `plugins/agentic-qe/hooks/src/coverage.ts`, `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/hooks/src/validate.ts` |  |
-| `plugins/agentic-qe/types/index.d.ts` |  |  |  |
+| `playwright.config.ts` | Playwright settings for the TypeScript screen checks |  |  |
+| `plugins/agentic-qe/.claude-plugin/marketplace.json` | Agentic Quality Engineering Platform: autonomous testing lifecycle from repository intelligence to test design, polyglot test generation, isolated execution, self-healing, and release proof pack. |  |  |
+| `plugins/agentic-qe/.claude-plugin/plugin.json` | Full test engineering lifecycle for greenfield and brownfield projects: repository analysis or BA user stories, risk-based planning, test design, test generation, isolated execution, healing, traceabi |  |  |
+| `plugins/agentic-qe/PINNED` | Upstream branch and commit of the bundled agentic-qe plugin |  |  |
+| `plugins/agentic-qe/agents/confidence-reviewer.md` | Independent confidence reviewer scoring test plans, test designs, and generated test code against actual repository evidence. |  |  |
+| `plugins/agentic-qe/agents/coverage-auditor.md` | Independent auditor checking that every designed test case covers the plan scenario it names, and that every generated test exercises its case, against the real repository. |  |  |
+| `plugins/agentic-qe/agents/defect-diagnostician.md` | Analyzes test failure logs, distinguishes genuine application defects from flaky test bugs, and repairs broken selectors and fixtures. |  |  |
+| `plugins/agentic-qe/agents/principal-test-architect.md` | Formulates cross-language test strategies, risk rankings, test plan area decomposition, and level allocations without scenario duplication. |  |  |
+| `plugins/agentic-qe/agents/qa-execution-engineer.md` | Deterministic runner that executes approved test commands in isolated environments and produces evidence-backed JUnit/TAP reports. |  |  |
+| `plugins/agentic-qe/agents/repo-intelligence-analyst.md` | Inspects codebases, identifies stack technology, analyzes AST structures, dependencies, build manifests, and existing test inventory. |  |  |
+| `plugins/agentic-qe/agents/requirements-analyst.md` | Reverse-engineers observable repository requirements, API contracts, and user personas from code and documentation. |  |  |
+| `plugins/agentic-qe/agents/test-automation-engineer.md` | Generates compilable, idiomatic test source code (Playwright, Vitest, PyTest, JUnit 5) strictly mapped 1:1 with approved design cases. |  |  |
+| `plugins/agentic-qe/agents/test-design-architect.md` | Designs structured test cases covering positive, negative, exception, and boundary value scenarios with 4 deterministic test oracles. |  |  |
+| `plugins/agentic-qe/hooks/hooks.json` | Agentic QE quality gates, mutation monitoring, and live terminal progress pane |  |  |
+| `plugins/agentic-qe/hooks/pane.test.tsx` | Run with: npm run test:pane (claude plugin test on a copy that holds only the mod) import { expect, test } from "claude-code/testing"; const PANE = { plugin: "agentic-qe", component: "Pane", requestId |  |  |
+| `plugins/agentic-qe/hooks/pane.tsx` | The QE pane beside the transcript: a Claude Code mod (https://code.claude.com/docs/en/plugins/mods/overview). |  |  |
+| `plugins/agentic-qe/hooks/src/approval-hook.ts` | Validator checks the coverage map already reports in its own words (shown once, not twice). | `plugins/agentic-qe/hooks/src/coverage.ts`, `plugins/agentic-qe/hooks/src/fingerprint.ts`, `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/hooks/src/memory-logger.ts`, `plugins/agentic-qe/hooks/src/on-decision.ts`, `plugins/agentic-qe/hooks/src/phase-lease.ts`, `plugins/agentic-qe/hooks/src/validate.ts` | `plugins/agentic-qe/skills/qe-panel/scripts/dashboard-server.ts`, `plugins/agentic-qe/skills/qe-panel/scripts/panel.ts` |
+| `plugins/agentic-qe/hooks/src/confidence.ts` | Per-case confidence scores from the independent confidence-reviewer agent, and the checks that keep them honest: // the arithmetic and verdict follow the rubric, and every cited file:line exists in th | `plugins/agentic-qe/hooks/src/hook-common.ts` | `plugins/agentic-qe/skills/building-qe-dashboard/scripts/build-trace-report.ts`, `plugins/agentic-qe/skills/building-qe-dashboard/scripts/gate-report-md.ts`, `plugins/agentic-qe/skills/designing-test-cases/scripts/check-confidence.ts` |
+| `plugins/agentic-qe/hooks/src/coverage.ts` | Created 2026-11-03 13:00 IST by agentic-qe 1.5.0. | `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/hooks/src/inventory.ts`, `plugins/agentic-qe/hooks/src/layout.ts`, `plugins/agentic-qe/skills/building-qe-dashboard/scripts/build-trace-report.ts` | `plugins/agentic-qe/hooks/src/approval-hook.ts`, `plugins/agentic-qe/hooks/src/ledger-hook.ts`, `plugins/agentic-qe/hooks/src/review-capture.ts`, `plugins/agentic-qe/hooks/src/validate.ts`, `plugins/agentic-qe/skills/qe-panel/scripts/dashboard-server.ts`, `plugins/agentic-qe/skills/qe-panel/scripts/export-session.ts`, `plugins/agentic-qe/skills/tracing-coverage/scripts/check-gate.ts` |
+| `plugins/agentic-qe/hooks/src/file-changed.ts` | Created 2026-11-03 16:40 IST by agentic-qe 1.6.0. | `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/hooks/src/ledger-hook.ts` |  |
+| `plugins/agentic-qe/hooks/src/fingerprint.ts` | Created 2026-11-03 13:35 IST by agentic-qe 1.5.0. | `plugins/agentic-qe/hooks/src/layout.ts` | `plugins/agentic-qe/hooks/src/approval-hook.ts`, `plugins/agentic-qe/hooks/src/on-decision.ts` |
+| `plugins/agentic-qe/hooks/src/guard-bash.ts` | Shell keywords and grouping words that start a command but are not the command (if x; then rm ...; fi). | `plugins/agentic-qe/hooks/src/guard-write.ts`, `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/hooks/src/memory-logger.ts` |  |
+| `plugins/agentic-qe/hooks/src/guard-write.ts` | True if the target's real path is inside the ledger anchor directory (outside the project, hook-owned). | `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/hooks/src/layout.ts`, `plugins/agentic-qe/hooks/src/memory-logger.ts`, `plugins/agentic-qe/hooks/src/phase-lease.ts` | `plugins/agentic-qe/hooks/src/guard-bash.ts` |
+| `plugins/agentic-qe/hooks/src/hook-common.ts` | Plugin install dir: Claude Code sets CLAUDE_PLUGIN_ROOT, Codex sets PLUGIN_ROOT. | `plugins/agentic-qe/hooks/src/memory-logger.ts` | `plugins/agentic-qe/hooks/src/approval-hook.ts`, `plugins/agentic-qe/hooks/src/confidence.ts`, `plugins/agentic-qe/hooks/src/coverage.ts`, `plugins/agentic-qe/hooks/src/file-changed.ts`, `plugins/agentic-qe/hooks/src/guard-bash.ts`, `plugins/agentic-qe/hooks/src/guard-write.ts`, `plugins/agentic-qe/hooks/src/ledger-hook.ts`, `plugins/agentic-qe/hooks/src/phase-lease.ts`, and 18 more |
+| `plugins/agentic-qe/hooks/src/inventory.ts` | Created 2026-11-03 15:30 IST by agentic-qe 1.6.0. |  | `plugins/agentic-qe/hooks/src/coverage.ts`, `plugins/agentic-qe/hooks/src/phase-lease.ts`, `plugins/agentic-qe/hooks/src/session-check.ts`, `plugins/agentic-qe/skills/qe-panel/scripts/dashboard-server.ts` |
+| `plugins/agentic-qe/hooks/src/layout.ts` | Output layout of a QE run: one folder per phase under docs/qe/<app>/, plus readers that accept every document shape // the plugin has written (bare arrays, {_meta, …} objects, old flat file names, and |  | `plugins/agentic-qe/hooks/src/coverage.ts`, `plugins/agentic-qe/hooks/src/fingerprint.ts`, `plugins/agentic-qe/hooks/src/guard-write.ts`, `plugins/agentic-qe/hooks/src/phase-lease.ts`, `plugins/agentic-qe/hooks/src/review-capture.ts`, `plugins/agentic-qe/skills/building-qe-dashboard/scripts/build-trace-report.ts`, `plugins/agentic-qe/skills/building-qe-dashboard/scripts/gate-report-md.ts`, `plugins/agentic-qe/skills/qe-panel/scripts/dashboard-server.ts`, and 2 more |
+| `plugins/agentic-qe/hooks/src/ledger-hook.ts` | After a change, rebuild the coverage map so the dashboard, the pane and the next phase see what is still missing. | `plugins/agentic-qe/hooks/src/coverage.ts`, `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/hooks/src/memory-logger.ts`, `plugins/agentic-qe/hooks/src/on-decision.ts` | `plugins/agentic-qe/hooks/src/file-changed.ts` |
+| `plugins/agentic-qe/hooks/src/memory-logger.ts` | Ledger lives at <root>/.qe/ledger.jsonl; for any other layout the project root is the ledger's own dir. |  | `plugins/agentic-qe/hooks/src/approval-hook.ts`, `plugins/agentic-qe/hooks/src/guard-bash.ts`, `plugins/agentic-qe/hooks/src/guard-write.ts`, `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/hooks/src/ledger-hook.ts`, `plugins/agentic-qe/hooks/src/on-decision.ts`, `plugins/agentic-qe/hooks/src/session-check.ts`, `plugins/agentic-qe/hooks/src/validate.ts`, and 4 more |
+| `plugins/agentic-qe/hooks/src/on-decision.ts` | Project root for a workspace dir (<root>/.qe, or the dir itself for other layouts), same rule as the ledger. | `plugins/agentic-qe/hooks/src/fingerprint.ts`, `plugins/agentic-qe/hooks/src/memory-logger.ts` | `plugins/agentic-qe/hooks/src/approval-hook.ts`, `plugins/agentic-qe/hooks/src/ledger-hook.ts`, `plugins/agentic-qe/skills/building-qe-dashboard/scripts/build-trace-report.ts`, `plugins/agentic-qe/skills/building-qe-dashboard/scripts/gate-report-md.ts`, `plugins/agentic-qe/skills/qe-panel/scripts/dashboard-server.ts`, `plugins/agentic-qe/skills/qe-panel/scripts/export-session.ts`, `plugins/agentic-qe/skills/qe-panel/scripts/panel.ts` |
+| `plugins/agentic-qe/hooks/src/phase-lease.ts` | Created 2026-11-03 17:10 IST by agentic-qe 1.6.0. | `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/hooks/src/inventory.ts`, `plugins/agentic-qe/hooks/src/layout.ts` | `plugins/agentic-qe/hooks/src/approval-hook.ts`, `plugins/agentic-qe/hooks/src/guard-write.ts` |
+| `plugins/agentic-qe/hooks/src/review-capture.ts` | Created 2026-11-03 13:20 IST by agentic-qe 1.5.0. | `plugins/agentic-qe/hooks/src/coverage.ts`, `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/hooks/src/layout.ts` |  |
+| `plugins/agentic-qe/hooks/src/session-check.mjs` | Plain JavaScript (no TypeScript syntax) so it still runs on Node 16+, where session-check.ts cannot load. |  |  |
+| `plugins/agentic-qe/hooks/src/session-check.ts` | Old Node cannot load this file (no type stripping); hooks.json registers session-check.mjs, which checks the version first. | `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/hooks/src/inventory.ts`, `plugins/agentic-qe/hooks/src/memory-logger.ts`, `plugins/agentic-qe/hooks/src/validate.ts` |  |
+| `plugins/agentic-qe/hooks/src/stamp-metadata.ts` | Strips anything that could break out of a YAML/JSON/HTML-comment context. | `plugins/agentic-qe/hooks/src/hook-common.ts` | `plugins/agentic-qe/skills/authoring-user-stories/scripts/export-cases.ts`, `plugins/agentic-qe/skills/qe-panel/scripts/dashboard-server.ts` |
+| `plugins/agentic-qe/hooks/src/validate.ts` | Created 2026-11-03 16:10 IST by agentic-qe 1.6.0. | `plugins/agentic-qe/hooks/src/coverage.ts`, `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/hooks/src/memory-logger.ts` | `plugins/agentic-qe/hooks/src/approval-hook.ts`, `plugins/agentic-qe/hooks/src/session-check.ts`, `plugins/agentic-qe/skills/qe-doctor/scripts/agentic-qe.ts`, `plugins/agentic-qe/skills/tracing-coverage/scripts/check-gate.ts` |
+| `plugins/agentic-qe/package.json` | Claude Code plugin for the full test engineering lifecycle on greenfield and brownfield projects, with human approval gates and enforced guardrails. |  |  |
+| `plugins/agentic-qe/plugin.json` | Full test engineering lifecycle for greenfield and brownfield projects: repository analysis or BA user stories, risk-based planning, test design, test generation, isolated execution, healing, traceabi |  |  |
+| `plugins/agentic-qe/scripts/agentic-qe.ts` | Wrapper so `node scripts/agentic-qe.ts ...` keeps working; the CLI lives with the qe-doctor skill. |  |  |
+| `plugins/agentic-qe/scripts/parse-junit.ts` | agentic-qe: reads JUnit XML results into the plugin's result format | `plugins/agentic-qe/skills/executing-tests/scripts/parse-junit.ts` | `plugins/agentic-qe/skills/qe-panel/scripts/panel.ts` |
+| `plugins/agentic-qe/scripts/test-pane.ts` | Created 2026-11-03 00:20 IST by agentic-qe 1.4.1. |  |  |
+| `plugins/agentic-qe/scripts/verify-commands.ts` | Claude Code shows plugin commands namespaced (/agentic-qe:qe-start); Codex uses $qe-start. |  |  |
+| `plugins/agentic-qe/skills/analyzing-repositories/SKILL.md` | Analyzes repository structures, detects programming languages, frameworks, package managers, and existing test inventory. |  |  |
+| `plugins/agentic-qe/skills/analyzing-repositories/evals/evals.json` | Evaluation cases |  |  |
+| `plugins/agentic-qe/skills/analyzing-repositories/references/STACK_SIGNALS.md` | Stack Detection Signals & Rules |  |  |
+| `plugins/agentic-qe/skills/analyzing-repositories/scripts/scan-repo.ts` | .NET manifests met while walking: solution files and project files. | `plugins/agentic-qe/hooks/src/hook-common.ts` |  |
+| `plugins/agentic-qe/skills/authoring-user-stories/SKILL.md` | Writes BA-style user stories with Given/When/Then acceptance criteria and a test cases table (positive, negative, exception), exportable to CSV and Jira import format. |  |  |
+| `plugins/agentic-qe/skills/authoring-user-stories/evals/evals.json` | Evaluation cases |  |  |
+| `plugins/agentic-qe/skills/authoring-user-stories/references/TEMPLATE.md` | User Story and Test Case Template |  |  |
+| `plugins/agentic-qe/skills/authoring-user-stories/scripts/export-cases.ts` | Optional test level; kept in JSON only (not a CSV/MD column). | `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/hooks/src/stamp-metadata.ts` |  |
+| `plugins/agentic-qe/skills/building-qe-dashboard/SKILL.md` | Explains and opens the live QE dashboard, the single browser view of every phase document, gate, test result, defect and the next command, with in-browser editing and ZIP download. |  |  |
+| `plugins/agentic-qe/skills/building-qe-dashboard/evals/evals.json` | Evaluation cases |  |  |
+| `plugins/agentic-qe/skills/building-qe-dashboard/scripts/build-trace-report.ts` | Run data for the live dashboard: reads every phase document of docs/qe/<app>/ (phase folders, or the flat names written // before 1.4.0), the results/ folder and the ledger, and returns one normalized | `plugins/agentic-qe/hooks/src/confidence.ts`, `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/hooks/src/layout.ts`, `plugins/agentic-qe/hooks/src/on-decision.ts`, `plugins/agentic-qe/skills/executing-tests/scripts/parse-junit.ts` | `plugins/agentic-qe/hooks/src/coverage.ts`, `plugins/agentic-qe/skills/building-qe-dashboard/scripts/gate-report-md.ts`, `plugins/agentic-qe/skills/qe-panel/scripts/dashboard-server.ts` |
+| `plugins/agentic-qe/skills/building-qe-dashboard/scripts/gate-report-md.ts` | Markdown gate reports: one per gate, written next to the documents it approves (docs/qe/<app>/<phase>/gate-<N>-report.md). | `plugins/agentic-qe/hooks/src/confidence.ts`, `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/hooks/src/layout.ts`, `plugins/agentic-qe/hooks/src/on-decision.ts`, `plugins/agentic-qe/skills/building-qe-dashboard/scripts/build-trace-report.ts` | `plugins/agentic-qe/skills/qe-panel/scripts/dashboard-server.ts` |
+| `plugins/agentic-qe/skills/building-qe-dashboard/scripts/html.ts` | HTML-escapes any value for text and attribute contexts. |  | `plugins/agentic-qe/skills/qe-panel/scripts/dashboard-server.ts` |
+| `plugins/agentic-qe/skills/designing-test-cases/SKILL.md` | Designs structured test cases across positive, negative, exception, and boundary value scenarios with deterministic oracles. |  |  |
+| `plugins/agentic-qe/skills/designing-test-cases/evals/evals.json` | Evaluation cases |  |  |
+| `plugins/agentic-qe/skills/designing-test-cases/references/ORACLE_TYPES.md` | Deterministic Test Oracle Types |  |  |
+| `plugins/agentic-qe/skills/designing-test-cases/scripts/check-confidence.ts` | CLI for the confidence-reviewer's per-case record: checks the arithmetic and the verdict rule, and that every cited // file:line exists in the repository under test. | `plugins/agentic-qe/hooks/src/confidence.ts`, `plugins/agentic-qe/hooks/src/hook-common.ts` |  |
+| `plugins/agentic-qe/skills/designing-test-cases/scripts/generate-cases.ts` | CLI: node generate-cases.ts <cases.json> (array of cases) -> JSON {count, errors} if (isCli) { const file = process.argv[2]; if (!file) { console.error("usage: node generate-cases.ts <cases.json>"); p |  |  |
+| `plugins/agentic-qe/skills/executing-tests/SKILL.md` | Dispatches test execution to local isolated runner adapters, capturing traces, standard streams, and JUnit XML reports. |  |  |
+| `plugins/agentic-qe/skills/executing-tests/evals/evals.json` | Evaluation cases |  |  |
+| `plugins/agentic-qe/skills/executing-tests/references/RUNNER_REGISTRY.md` | Runner Adapter Command Registry |  |  |
+| `plugins/agentic-qe/skills/executing-tests/references/VERSIONS.md` | Pinned versions |  |  |
+| `plugins/agentic-qe/skills/executing-tests/scripts/collect-evidence.ts` | Copies the screenshots of a Playwright JSON report into docs/qe/<app>/06-execution/evidence/e2e/, one file per // image named by case and step, so reports and the dashboard can show them after test-re | `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/skills/executing-tests/scripts/parse-junit.ts` |  |
+| `plugins/agentic-qe/skills/executing-tests/scripts/mcp-evidence.ts` | One JSON-RPC message per line (MCP stdio transport). | `plugins/agentic-qe/hooks/src/hook-common.ts` |  |
+| `plugins/agentic-qe/skills/executing-tests/scripts/parse-junit.ts` | Set when INCONCLUSIVE because the input was refused (too large). |  | `plugins/agentic-qe/scripts/parse-junit.ts`, `plugins/agentic-qe/skills/building-qe-dashboard/scripts/build-trace-report.ts`, `plugins/agentic-qe/skills/executing-tests/scripts/collect-evidence.ts` |
+| `plugins/agentic-qe/skills/executing-tests/scripts/run-isolated.ts` | CLI: node run-isolated.ts <total> <passed> <failed> <durationMs> -> JSON verdict (INCONCLUSIVE when total is 0) if (isCli) { const [t, p, f, d] = process.argv.slice(2).map(Number); if ([t, p, f, d].so |  |  |
+| `plugins/agentic-qe/skills/extracting-requirements/SKILL.md` | Inverts codebases, public interfaces, and documentation into observable, testable requirements with verifiable evidence quotes. |  |  |
+| `plugins/agentic-qe/skills/extracting-requirements/evals/evals.json` | Evaluation cases |  |  |
+| `plugins/agentic-qe/skills/extracting-requirements/references/REQUIREMENT_RULES.md` | Requirements Reverse-Engineering Rules |  |  |
+| `plugins/agentic-qe/skills/extracting-requirements/scripts/extract-contracts.ts` | Brownfield check: the evidence quote must appear verbatim in the cited source file under root. |  |  |
+| `plugins/agentic-qe/skills/generating-test-code/SKILL.md` | Synthesizes compilable, idiomatic test source code (Playwright TS, Vitest, PyTest, JUnit 5, NUnit/xUnit/MSTest) with 1:1 case traceability. |  |  |
+| `plugins/agentic-qe/skills/generating-test-code/assets/playwright.config.ts` | Template: copy to the project root as playwright.config.ts for every generated UI suite. |  |  |
+| `plugins/agentic-qe/skills/generating-test-code/evals/evals.json` | Evaluation cases |  |  |
+| `plugins/agentic-qe/skills/generating-test-code/references/LANGUAGE_RULES.md` | Language & Framework Specific Generation Rules |  |  |
+| `plugins/agentic-qe/skills/generating-test-code/references/VERSIONS.md` | Pinned versions |  |  |
+| `plugins/agentic-qe/skills/generating-test-code/scripts/emit-tests.ts` | Emits a Playwright test. |  |  |
+| `plugins/agentic-qe/skills/generating-test-data/SKILL.md` | Generates deterministic synthetic test fixtures, schema mocks, and boundary edge datasets. |  |  |
+| `plugins/agentic-qe/skills/generating-test-data/assets/schema-templates.json` | schema-templates data |  |  |
+| `plugins/agentic-qe/skills/generating-test-data/evals/evals.json` | Evaluation cases |  |  |
+| `plugins/agentic-qe/skills/generating-test-data/scripts/synthesize-data.ts` | Generates repetitive edge and boundary datasets (strings, numbers, payloads). |  |  |
+| `plugins/agentic-qe/skills/healing-tests/SKILL.md` | Diagnoses execution failures, distinguishes true defects from flaky test bugs, and repairs selectors and fixtures while preserving assertions. |  |  |
+| `plugins/agentic-qe/skills/healing-tests/evals/evals.json` | Evaluation cases |  |  |
+| `plugins/agentic-qe/skills/healing-tests/references/HEALING_PATTERNS.md` | Remediation & Healing Patterns |  |  |
+| `plugins/agentic-qe/skills/healing-tests/scripts/apply-healing.ts` | Surgically replaces fragile/broken selectors in test source code while verifying that assertion statements (expect, assert) remain 100% unaltered. |  |  |
+| `plugins/agentic-qe/skills/healing-tests/scripts/diagnose-failure.ts` | CLI: node diagnose-failure.ts <failure.json> ({errorMessage, stackTrace}) -> JSON classification if (isCli) { const file = process.argv[2]; if (!file) { console.error("usage: node diagnose-failure.ts  |  |  |
+| `plugins/agentic-qe/skills/planning-tests/SKILL.md` | Formulates risk-weighted test strategies, decomposing requirements across Unit, Integration, API, and UI/E2E levels without duplication. |  |  |
+| `plugins/agentic-qe/skills/planning-tests/evals/evals.json` | Evaluation cases |  |  |
+| `plugins/agentic-qe/skills/planning-tests/references/LEVEL_GUIDELINES.md` | Test Level Allocation Guidelines |  |  |
+| `plugins/agentic-qe/skills/planning-tests/scripts/calculate-risk.ts` | CLI: node calculate-risk.ts <scores.json> ({controlsCovered, levelFit, scenariosDerivable}) -> JSON {score, verdict} if (isCli) { const file = process.argv[2]; if (!file) { console.error("usage: node  |  |  |
+| `plugins/agentic-qe/skills/qe-data/SKILL.md` | Generate deterministic synthetic test fixtures, schema mocks, and boundary edge datasets. |  |  |
+| `plugins/agentic-qe/skills/qe-data/agents/openai.yaml` | Codex agent settings for this skill |  |  |
+| `plugins/agentic-qe/skills/qe-data/evals/evals.json` | Evaluation cases |  |  |
+| `plugins/agentic-qe/skills/qe-design/SKILL.md` | Design structured test cases with positive, negative, exception, and boundary value scenarios using 4 deterministic test oracles. |  |  |
+| `plugins/agentic-qe/skills/qe-design/agents/openai.yaml` | Codex agent settings for this skill |  |  |
+| `plugins/agentic-qe/skills/qe-design/evals/evals.json` | Evaluation cases |  |  |
+| `plugins/agentic-qe/skills/qe-discover/SKILL.md` | Perform deep repository intelligence, stack detection, AST parsing, and test inventory analysis. |  |  |
+| `plugins/agentic-qe/skills/qe-discover/agents/openai.yaml` | Codex agent settings for this skill |  |  |
+| `plugins/agentic-qe/skills/qe-discover/evals/evals.json` | Evaluation cases |  |  |
+| `plugins/agentic-qe/skills/qe-doctor/SKILL.md` | Check agentic-qe health: Node version, installed plugin version against this repository, scope, registered hooks, foreign folders in the installed copy, ledger integrity, Playwright and MCP availabili |  |  |
+| `plugins/agentic-qe/skills/qe-doctor/agents/openai.yaml` | Codex agent settings for this skill |  |  |
+| `plugins/agentic-qe/skills/qe-doctor/evals/evals.json` | Evaluation cases |  |  |
+| `plugins/agentic-qe/skills/qe-doctor/scripts/agentic-qe.ts` | Install / update / uninstall / doctor / plan / gitignore for the agentic-qe plugin (Claude Code and Codex). | `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/hooks/src/memory-logger.ts`, `plugins/agentic-qe/hooks/src/validate.ts` |  |
+| `plugins/agentic-qe/skills/qe-execute/SKILL.md` | Execute generated and repository test suites in isolated runner environments, capturing structured logs and evidence. |  |  |
+| `plugins/agentic-qe/skills/qe-execute/agents/openai.yaml` | Codex agent settings for this skill |  |  |
+| `plugins/agentic-qe/skills/qe-execute/evals/evals.json` | Evaluation cases |  |  |
+| `plugins/agentic-qe/skills/qe-generate/SKILL.md` | Synthesize compilable, idiomatic test source code (Playwright TS, Vitest, PyTest, JUnit 5, NUnit/xUnit/MSTest) with 1:1 case traceability. |  |  |
+| `plugins/agentic-qe/skills/qe-generate/agents/openai.yaml` | Codex agent settings for this skill |  |  |
+| `plugins/agentic-qe/skills/qe-generate/evals/evals.json` | Evaluation cases |  |  |
+| `plugins/agentic-qe/skills/qe-heal/SKILL.md` | Automatically diagnose test execution failures and heal broken selectors, fixtures, or mocks while strictly preserving assertions. |  |  |
+| `plugins/agentic-qe/skills/qe-heal/agents/openai.yaml` | Codex agent settings for this skill |  |  |
+| `plugins/agentic-qe/skills/qe-heal/evals/evals.json` | Evaluation cases |  |  |
+| `plugins/agentic-qe/skills/qe-panel/SKILL.md` | Show QE progress in one view: phases in order, gates 0-5, test counts per level, blockers, ledger trust and the next command; with --serve, the link to the live browser dashboard; with --export, a rea |  |  |
+| `plugins/agentic-qe/skills/qe-panel/agents/openai.yaml` | Codex agent settings for this skill |  |  |
+| `plugins/agentic-qe/skills/qe-panel/evals/evals.json` | Evaluation cases |  |  |
+| `plugins/agentic-qe/skills/qe-panel/scripts/dashboard-server.ts` | Live QE dashboard: a local server that shows, edits and exports one project's QE run. | `plugins/agentic-qe/hooks/src/approval-hook.ts`, `plugins/agentic-qe/hooks/src/coverage.ts`, `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/hooks/src/inventory.ts`, `plugins/agentic-qe/hooks/src/layout.ts`, `plugins/agentic-qe/hooks/src/memory-logger.ts`, `plugins/agentic-qe/hooks/src/on-decision.ts`, `plugins/agentic-qe/hooks/src/stamp-metadata.ts`, and 5 more |  |
+| `plugins/agentic-qe/skills/qe-panel/scripts/dashboard-ui.ts` | The dashboard's browser side: page, stylesheet and script as strings, served by dashboard-server.ts. |  | `plugins/agentic-qe/skills/qe-panel/scripts/dashboard-server.ts` |
+| `plugins/agentic-qe/skills/qe-panel/scripts/export-session.ts` | Created 2026-11-03 16:50 IST by agentic-qe 1.6.0. | `plugins/agentic-qe/hooks/src/coverage.ts`, `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/hooks/src/layout.ts`, `plugins/agentic-qe/hooks/src/memory-logger.ts`, `plugins/agentic-qe/hooks/src/on-decision.ts` |  |
+| `plugins/agentic-qe/skills/qe-panel/scripts/panel-split.ts` | every cmd part is AppleScript-quoted and shell-quoted in one pass; app is regex-validated, paths are quoted const sh = cmd.map((c) => `'${c.replace(/'/g, "'\\''")}'`).join(" "); return { strategy: "it | `plugins/agentic-qe/hooks/src/hook-common.ts` |  |
+| `plugins/agentic-qe/skills/qe-panel/scripts/panel.ts` | live dashboard URL, while its server runs | `plugins/agentic-qe/hooks/src/approval-hook.ts`, `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/hooks/src/layout.ts`, `plugins/agentic-qe/hooks/src/memory-logger.ts`, `plugins/agentic-qe/hooks/src/on-decision.ts`, `plugins/agentic-qe/scripts/parse-junit.ts` |  |
+| `plugins/agentic-qe/skills/qe-panel/scripts/zip.ts` | Minimal ZIP writer (deflate, UTF-8 names, no ZIP64): standard library only. |  | `plugins/agentic-qe/skills/qe-panel/scripts/dashboard-server.ts` |
+| `plugins/agentic-qe/skills/qe-plan/SKILL.md` | Formulate a risk-weighted test strategy across Unit, Integration, API, and UI/E2E levels without cross-level duplication. |  |  |
+| `plugins/agentic-qe/skills/qe-plan/agents/openai.yaml` | Codex agent settings for this skill |  |  |
+| `plugins/agentic-qe/skills/qe-plan/evals/evals.json` | Evaluation cases |  |  |
+| `plugins/agentic-qe/skills/qe-requirements/SKILL.md` | Reverse-engineer observable testable requirements, API contracts, and user roles with verifiable source evidence quotes. |  |  |
+| `plugins/agentic-qe/skills/qe-requirements/agents/openai.yaml` | Codex agent settings for this skill |  |  |
+| `plugins/agentic-qe/skills/qe-requirements/evals/evals.json` | Evaluation cases |  |  |
+| `plugins/agentic-qe/skills/qe-sign/SKILL.md` | Formally capture QE Lead and Platform Admin digital sign-off and seal the release verification proof pack. |  |  |
+| `plugins/agentic-qe/skills/qe-sign/agents/openai.yaml` | Codex agent settings for this skill |  |  |
+| `plugins/agentic-qe/skills/qe-sign/evals/evals.json` | Evaluation cases |  |  |
+| `plugins/agentic-qe/skills/qe-start/SKILL.md` | Initialize autonomous Agentic QE intake with explicit scope, boundary rules, and target framework setup. |  |  |
+| `plugins/agentic-qe/skills/qe-start/agents/openai.yaml` | Codex agent settings for this skill |  |  |
+| `plugins/agentic-qe/skills/qe-start/evals/evals.json` | Evaluation cases |  |  |
+| `plugins/agentic-qe/skills/qe-stories/SKILL.md` | Author BA-style user stories with Given/When/Then acceptance criteria and a positive/negative/exception test case table, exportable to CSV and Jira import format. |  |  |
+| `plugins/agentic-qe/skills/qe-stories/agents/openai.yaml` | Codex agent settings for this skill |  |  |
+| `plugins/agentic-qe/skills/qe-stories/evals/evals.json` | Evaluation cases |  |  |
+| `plugins/agentic-qe/skills/qe-sync/SKILL.md` | Bring the run's documents in line with the tests that are in the repository now: map tests added or changed by hand to designed cases, update the generation manifest and the traceability matrix, and r |  |  |
+| `plugins/agentic-qe/skills/qe-sync/agents/openai.yaml` | Codex agent settings for this skill |  |  |
+| `plugins/agentic-qe/skills/qe-sync/evals/evals.json` | Evaluation cases |  |  |
+| `plugins/agentic-qe/skills/qe-trace/SKILL.md` | Build the requirements-to-tests-to-results traceability matrix and flag unmapped P0/P1 requirements and orphan tests. |  |  |
+| `plugins/agentic-qe/skills/qe-trace/agents/openai.yaml` | Codex agent settings for this skill |  |  |
+| `plugins/agentic-qe/skills/qe-trace/evals/evals.json` | Evaluation cases |  |  |
+| `plugins/agentic-qe/skills/tracing-coverage/SKILL.md` | Computes requirements-to-test traceability, surfaces unmapped critical requirements and orphan tests, and reports executed results per case. |  |  |
+| `plugins/agentic-qe/skills/tracing-coverage/evals/evals.json` | Evaluation cases |  |  |
+| `plugins/agentic-qe/skills/tracing-coverage/scripts/build-matrix.ts` | CLI: <requirements.json> <cases.json> <results.json> -> JSON on stdout // requirements: [{id}/string] ; cases: [{caseId/tc_id, requirementId/story_id}] ; results: [{caseId/tc_id, status}] if (isMain(i | `plugins/agentic-qe/hooks/src/hook-common.ts` |  |
+| `plugins/agentic-qe/skills/tracing-coverage/scripts/check-gate.ts` | Created 2026-11-03 14:10 IST by agentic-qe 1.5.0. | `plugins/agentic-qe/hooks/src/coverage.ts`, `plugins/agentic-qe/hooks/src/hook-common.ts`, `plugins/agentic-qe/hooks/src/validate.ts` |  |
+| `plugins/agentic-qe/types/index.d.ts` | Values the pane keeps in $.state (claude plugin validate holds hooks/pane.tsx to this contract). |  |  |
 | `plugins/agentic-qe/validators/qe_validate.py` | Validates a QE run with pandas and numpy: plan, design, generated tests and results, gate by gate. |  |  |
-| `plugins/security-audit/AI-AND-LLM.md` |  |  |  |
-| `plugins/security-audit/ATTACK-CLASSES.md` |  |  |  |
-| `plugins/security-audit/CLIENT-SIDE.md` |  |  |  |
-| `plugins/security-audit/CLOUD-AND-DEPLOYMENT.md` |  |  |  |
-| `plugins/security-audit/DATA-ISOLATION-AND-LIFECYCLE.md` |  |  |  |
-| `plugins/security-audit/DESKTOP-MOBILE-AND-LOCAL-IPC.md` |  |  |  |
-| `plugins/security-audit/HUNTING.md` |  |  |  |
-| `plugins/security-audit/MEMORY-SAFETY-AND-BINARY.md` |  |  |  |
-| `plugins/security-audit/PROTOCOLS-RPC-AND-MESSAGING.md` |  |  |  |
-| `plugins/security-audit/RECONNAISSANCE.md` |  |  |  |
-| `plugins/security-audit/RESOURCE-EXHAUSTION-AND-AVAILABILITY.md` |  |  |  |
-| `plugins/security-audit/SKILL.md` |  |  |  |
-| `plugins/security-audit/SUPPLY-CHAIN-AND-RELEASE.md` |  |  |  |
-| `plugins/security-audit/VALIDATION-AND-REPORTING.md` |  |  |  |
-| `plugins/security-audit/WEB-PROTOCOL-AND-AUTH.md` |  |  |  |
-| `plugins/security-audit/report-schema.json` |  |  |  |
-| `plugins/security-audit/validate-coverage-ledger.cjs` |  |  |  |
-| `plugins/security-audit/validate-coverage-ledger.test.cjs` |  |  |  |
-| `plugins/security-audit/validate-findings.cjs` |  |  |  |
-| `plugins/security-audit/validate-findings.test.cjs` |  |  |  |
+| `plugins/security-audit/AI-AND-LLM.md` | AI, LLM, and Agent Hunting |  |  |
+| `plugins/security-audit/ATTACK-CLASSES.md` | Attack Classes |  |  |
+| `plugins/security-audit/CLIENT-SIDE.md` | Client-Side and Browser Hunting |  |  |
+| `plugins/security-audit/CLOUD-AND-DEPLOYMENT.md` | Cloud and Deployment Hunting |  |  |
+| `plugins/security-audit/DATA-ISOLATION-AND-LIFECYCLE.md` | Data Isolation and Lifecycle Hunting |  |  |
+| `plugins/security-audit/DESKTOP-MOBILE-AND-LOCAL-IPC.md` | Desktop, Mobile, and Local IPC Hunting |  |  |
+| `plugins/security-audit/HUNTING.md` | Vulnerability Hunting |  |  |
+| `plugins/security-audit/MEMORY-SAFETY-AND-BINARY.md` | Memory Safety, Binary, and Kernel Hunting |  |  |
+| `plugins/security-audit/PROTOCOLS-RPC-AND-MESSAGING.md` | Protocols, RPC, and Messaging Hunting |  |  |
+| `plugins/security-audit/RECONNAISSANCE.md` | Reconnaissance |  |  |
+| `plugins/security-audit/RESOURCE-EXHAUSTION-AND-AVAILABILITY.md` | Resource Exhaustion and Availability Hunting |  |  |
+| `plugins/security-audit/SKILL.md` | Security guidance and vulnerability review for codebases, APIs, services, CLI tools, libraries, and daemons. |  |  |
+| `plugins/security-audit/SUPPLY-CHAIN-AND-RELEASE.md` | Supply Chain and Release Hunting |  |  |
+| `plugins/security-audit/VALIDATION-AND-REPORTING.md` | Validation, Structured Output, Verification, and Reporting |  |  |
+| `plugins/security-audit/WEB-PROTOCOL-AND-AUTH.md` | HTTP-Protocol and Authentication Hunting |  |  |
+| `plugins/security-audit/report-schema.json` | A source-grounded vulnerability that was independently demonstrated. |  |  |
+| `plugins/security-audit/validate-coverage-ledger.cjs` | Validates coverage-ledger.json and its canonical coverage IDs. |  |  |
+| `plugins/security-audit/validate-coverage-ledger.test.cjs` | Tests for the security-audit coverage ledger validator |  |  |
+| `plugins/security-audit/validate-findings.cjs` | Validates findings.json against report-schema.json. |  |  |
+| `plugins/security-audit/validate-findings.test.cjs` | Tests for the security-audit findings validator |  |  |
 | `pytest.ini` | Test settings |  |  |
-| `requirements-evals.txt` |  |  |  |
+| `requirements-evals.txt` | Optional. |  |  |
 | `requirements.txt` | Python dependencies |  |  |
-| `run.bat` |  |  |  |
-| `run.sh` |  |  |  |
+| `run.bat` | Run Agentic QE Platform & Harness on Windows (FastAPI on 8000, Next.js on 3000) |  |  |
+| `run.sh` | Kill any existing processes on 8000 and 3000 |  |  |
 | `skills/README.md` | Overview of the plugin skills copied here |  |  |
 | `skills/analyzing-repositories/SKILL.md` | Analyzes repository structures, detects programming languages, frameworks, package managers, and existing test inventory. Use when assessing a new codebase or preparing for test generation. |  |  |
 | `skills/analyzing-repositories/evals/evals.json` | Evaluation cases for the analyzing-repositories skill |  |  |
@@ -1198,4 +1199,4 @@ The project has 1068 files, not counting screenshots.
 | `src/backend/local_postgres.py` | A local PostgreSQL cluster in a folder (MASTER_PLAN Part 3, G5): the desktop app's database, the developer's |  | `apps/desktop/backend_entry.py`, `scripts/pg_local.py` |
 | `src/backend/sql_dialect.py` | The platform's SQL text, made PostgreSQL (MASTER_PLAN Part 3, G5). |  | `db.py` |
 | `tasks.md` | Status of all work |  |  |
-| `tsconfig.json` |  |  |  |
+| `tsconfig.json` | tsconfig data |  |  |

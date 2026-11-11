@@ -48,7 +48,8 @@ def parse(expanded: str) -> dict | None:
     listed = re.sub(r"\([^)]*\)", "", found["list"].split(". ")[0]) if found else ""
     paths = [p.replace("<app-name>", app) for p in re.findall(r"`([^`]+)`", listed)
              if not p.startswith(".qe") and "*" not in p and not p.endswith("/") and (app or "<app-name>" not in p)]
-    return {"name": head["name"], "args": args, "body": body["body"], "paths": paths}
+    after = re.search(r"After the hook confirms Gate (\d+)", body["body"])  # qe-start: its files come only after the human's gate phrase
+    return {"name": head["name"], "args": args, "body": body["body"], "paths": paths, "after_gate": int(after[1]) if after else None}
 
 
 def remember(state_dir: Path, thread_id: str, expanded: str | None) -> dict | None:
@@ -89,6 +90,8 @@ class ActiveCommandContext(ContextProvider):
     async def before_run(self, *, agent, session, context, state) -> None:
         c = self.command
         files = file_state(self.root, c["paths"])
+        if c.get("after_gate") is not None:
+            files = [f"{line} (written only after Gate {c['after_gate']} is approved; never before)" if line.endswith("MISSING") else line for line in files]
         context.extend_instructions(self.source_id, "\n".join([
             f"ACTIVE PLUGIN COMMAND: /{c['name']} {c['args']}".rstrip(),
             "You are carrying out this command until the user types another one. A message like \"continue\" or a gate phrase belongs to it.",
@@ -105,6 +108,7 @@ class ActiveCommandContext(ContextProvider):
             "- Write each file the step produces with file_access_write as soon as you have enough evidence for it; extend it in later calls rather than holding everything back. "
             "Every write shows the user an approval card: that card IS the explicit yes the command asks for, so make the write call instead of asking in chat.",
             "- Add one todo per file to write and per check to run, and complete each when it is done.",
+            "- Never write a file the command says the plugin writes itself (gate reports, confidence, audit, coverage map, hand-off).",
             "- Run the command's check scripts with run_shell. While a check prints FAIL, fix the files; ask for the gate phrase only when it passes.",
             "Files this command may create (checked on disk just now):", *(files or ["- none named"]),
             f"<command name=\"{c['name']}\">\n{c['body']}\n</command>"]))
