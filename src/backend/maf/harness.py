@@ -37,6 +37,7 @@ from backend.core.mcp import mcp_tools_for
 from backend.maf import governance, llm, tools
 from backend.maf.harness_kit import active_command, plugin_agents, specialists, verify, workspace
 from backend.maf.harness_kit.budget import turn_budget
+from backend.maf.harness_kit.errors import error_shape
 from backend.maf.harness_kit.tool_hygiene import tool_hygiene
 from backend.maf.harness_kit.hook_middleware import guarded
 from backend.maf.harness_kit.shell import ShellProvider, WorkspaceShell
@@ -137,7 +138,7 @@ def build(project_id: str, thread_id: str, start_run, *, user_id: str | None = N
         disable_web_search=True,  # no data leaves through a hosted search tool
         context_providers=[ProjectContext(project_id, full=True), loaded, workspace.WorkspaceContext(ws), *providers],
         middleware=[strict_arguments, write_first(thread_id, ws.root if ws else None, command), *([verify.verifier(ws, command)] if ws and command else []),
-                    turn_budget(thread_id), tool_hygiene(), tool_audit(AGENT, project_id, None, "chat"), *([guarded(ws)] if ws else []), telemetry],
+                    turn_budget(thread_id, resume=f"/{command['name']} {command['args']}".rstrip() if command else "continue"), tool_hygiene(), error_shape(), tool_audit(AGENT, project_id, None, "chat"), *([guarded(ws)] if ws else []), telemetry],
         **world,
     )
 

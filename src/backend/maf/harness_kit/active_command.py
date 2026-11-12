@@ -118,5 +118,7 @@ class ActiveCommandContext(ContextProvider):
             "- Add one todo per file to write and per check to run, and complete each when it is done.",
             "- Never write a file the command says the plugin writes itself (gate reports, confidence, audit, coverage map, hand-off).",
             "- Run the command's check scripts with run_shell. While a check prints FAIL, fix the files; ask for the gate phrase only when it passes.",
+            f"- A plugin may open its write window only for its own command (agentic-qe: any other message closes it). If a hook blocks a write because "
+            f"no phase command is running, do not retry the write: stop and ask the user to send `/{c['name']} {c['args']}`".rstrip() + "` again.",
             "Files this command may create (checked on disk just now):", *(files or ["- none named"]),
             f"<command name=\"{c['name']}\">\n{c['body']}\n</command>"]))

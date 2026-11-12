@@ -66,9 +66,10 @@ def test_a_turn_stops_cleanly_when_its_time_budget_is_spent():
     scripted = ScriptedClient([("go", steps({"call": "read_file", "args": {"path": "a.py"}}, "done"))])
     from backend.maf.harness_kit import budget
 
-    asyncio.run(Agent(scripted, tools=[read_file], middleware=[turn_budget("thr_budget", minutes=-1)]).run("go"))
+    asyncio.run(Agent(scripted, tools=[read_file], middleware=[turn_budget("thr_budget", minutes=-1, resume="/agentic-qe:qe-plan app")]).run("go"))
     assert "content" not in "\n".join(scripted.calls)  # the tool never ran
     assert "budget" in budget.stopped["thr_budget"]  # the chat route shows this as the reply
+    assert 'Reply "/agentic-qe:qe-plan app"' in budget.stopped["thr_budget"]  # a plugin closes its write window on "continue"
 
 
 def test_repeated_calls_get_a_reminder_and_huge_results_are_trimmed():
@@ -89,3 +90,23 @@ def test_repeated_calls_get_a_reminder_and_huge_results_are_trimmed():
     assert "This is call 3 of read_file with these same arguments" in seen and "This is call 2 of" not in seen
     assert f"characters cut from the middle of this {LIMIT + 5000}-character result" in scripted.calls[-1]
     assert "x" * (HEAD + 1) not in scripted.calls[-1]  # the model never receives the whole result
+
+
+def test_a_failing_tool_reaches_the_model_as_one_error_shape():
+    import asyncio
+    import json
+
+    from agent_framework import Agent, tool
+
+    from backend.maf.harness_kit.errors import error_shape, shape
+
+    @tool(name="read_file", description="Read a file.")
+    def read_file(path: str) -> str:
+        raise TimeoutError("read took too long")
+
+    scripted = ScriptedClient([("go", steps({"call": "read_file", "args": {"path": "a.py"}}, "done"))])
+    asyncio.run(Agent(scripted, tools=[read_file], middleware=[error_shape()]).run("go"))
+    sent = "\n".join(scripted.calls)
+    assert "Error [timeout]" in sent and '"retryable": true' in sent
+    assert set(shape(FileNotFoundError("x"))) == {"code", "message", "action", "retryable", "trace_id"}
+    assert shape(FileNotFoundError("x"))["code"] == "not_found" and json.dumps(shape(ValueError("bad")))

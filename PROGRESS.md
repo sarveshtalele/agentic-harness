@@ -6,8 +6,8 @@ Written by `scripts/hooks/activity_log.py`. Times are local.
 
 | # | Item (FINAL_PLAN section 13) | Status | Evidence |
 |---|---|---|---|
-| 1 | CI green on 3 OS; D6 test skills removed, tests use a throwaway skills folder | in progress (D6 done, CI Windows pending) | CI run 43157835613: macOS test, Ubuntu+macOS smoke pass; Windows pending |
-| 2 | Harness core: verification oracle and budgets (5.3), read cache, spill, repeat reminder, compaction keep-recent (5.4), error taxonomy (5.5); live agentic-qe cycle to Gate 5 | in progress | Done offline: `harness_kit/verify.py` (check-gate after writes), `budget.py` (30-min turn budget, rounds 200), `tool_hygiene.py` (repeat reminder 3/5/8, trim over 12k), compaction keeps 10 tool groups; read cache skipped (compaction clears old results). Tests: `tests/test_harness_guards.py`. Live attempt 7 running |
+| 1 | CI green on 3 OS; D6 test skills removed, tests use a throwaway skills folder | in progress (D6 done; Windows pg_ctl hang fixed, smoke green on Windows) | Run 43164607468 for 70d5e41: all jobs pass except test (windows-latest): 1 failure, a mixed-slash path compared as text in tests/test_harness_plugin_hooks.py; fixed (compare as Path), awaiting push |
+| 2 | Harness core: verification oracle and budgets (5.3), read cache, spill, repeat reminder, compaction keep-recent (5.4), error taxonomy (5.5); live agentic-qe cycle to Gate 5 | in progress | Done offline: `harness_kit/verify.py` (check-gate after writes), `budget.py` (30-min turn budget, rounds 200), `tool_hygiene.py` (repeat reminder 3/5/8, trim over 12k), compaction keeps 10 tool groups; read cache skipped (compaction clears old results). Tests: `tests/test_harness_guards.py`. Live attempt 7 running; attempt 7 (2026-11-12): Gate 0 passed, then plugin guard-write blocked every requirements write because the runner's "continue" closed agentic-qe's phase lease. Fix: budget notice and pinned instructions tell the user to re-send the phase command; runner resumes with it (tests/test_harness_guards.py 3 passed). Attempt 8 running into docs/evidence/runs/2026-11-12-harness-plugin-cycle3 |
 | 3 | Discovery registry with scopes and trust (5.1, 5.2), `/` menu, MCP scopes UI and CLI | open | |
 | 4 | Sessions: JSONL, resume, fork, rewind (5.7) | open | |
 | 5 | Subagents with routed approvals (5.6); right pane: activity, terminal, files (6) | open | |
@@ -10193,3 +10193,146 @@ Written by `scripts/hooks/activity_log.py`. Times are local.
 | 2026-11-12 11:25:14 | before | Bash: Update the retry assertion and rerun |
 | 2026-11-12 11:25:20 | after | Bash: Update the retry assertion and rerun |
 | 2026-11-12 11:25:29 | before | Bash: Commit, push, and cancel the hung CI run |
+| 2026-11-12 11:25:41 | after | Bash: Commit, push, and cancel the hung CI run |
+| 2026-11-12 11:25:45 | before | Bash: Watch the new CI run to completion |
+| 2026-11-12 11:25:50 | after | Bash: Watch the new CI run to completion |
+| 2026-11-12 11:25:50 | before | Bash: Check live QE attempt 7 progress |
+| 2026-11-12 11:25:50 | failed | Bash: Check live QE attempt 7 progress Exit code 1 10:49:32 USER /agentic-qe:qe-start personal-finance-mcp --m 10:50:30 USER approve gate 0 for personal-financ… |
+| 2026-11-12 11:25:57 | before | Bash: Count writes and check verdicts so far |
+| 2026-11-12 11:25:58 | after | Bash: Count writes and check verdicts so far |
+| 2026-11-12 11:26:06 | before | Bash: Show the results of write calls |
+| 2026-11-12 11:26:06 | after | Bash: Show the results of write calls |
+| 2026-11-12 11:26:15 | before | Bash: Find how the plugin detects a running phase command |
+| 2026-11-12 11:26:15 | after | Bash: Find how the plugin detects a running phase command |
+| 2026-11-12 11:26:18 | before | Bash: Read how a phase command is recognised from the prompt |
+| 2026-11-12 11:26:19 | after | Bash: Read how a phase command is recognised from the prompt |
+| 2026-11-12 11:26:35 | before | Bash: Find where the prompt hook is called |
+| 2026-11-12 11:26:35 | after | Bash: Find where the prompt hook is called |
+| 2026-11-12 11:26:35 | user | <ta[redacted]> <task-id>btj5nhfj5</task-id> <tool-use-id>toolu_01HTAYqAP5rEzTDVJG3Rf4Jn</tool-use-id> <output-file>/private/tmp/claude-501/-Users-sarveshtalele… |
+| 2026-11-12 11:28:39 | before | Bash: Read CI watcher outputs |
+| 2026-11-12 11:28:40 | before | mcp__ccd_turn__update_plan |
+| 2026-11-12 11:28:40 | after | mcp__ccd_turn__update_plan |
+| 2026-11-12 11:28:41 | after | Bash: Read CI watcher outputs |
+| 2026-11-12 11:28:41 | user | <ta[redacted]> <task-id>boowv2ffh</task-id> <tool-use-id>toolu_01GF4hHFj55eY7GfwDtxTdgN</tool-use-id> <output-file>/private/tmp/claude-501/-Users-sarveshtalele… |
+| 2026-11-12 11:28:45 | before | Bash: Check latest CI run status |
+| 2026-11-12 11:28:46 | failed | Bash: Check latest CI run status Exit code 1 cancelled \| test (ubuntu-24.04)=success, test (macos-latest)=success, smoke (windows-latest)=cancelled, smoke (ub… |
+| 2026-11-12 11:28:49 | before | Bash: Check latest CI run status |
+| 2026-11-12 11:28:50 | failed | Bash: Check latest CI run status Exit code 1 failed to get run: Get "https://api.github.com/repos/sarveshtalele/agentic-harness/actions/runs/43164607468?exclud… |
+| 2026-11-12 11:28:55 | before | Bash: Check latest CI run status outside sandbox |
+| 2026-11-12 11:28:58 | after | Bash: Check latest CI run status outside sandbox |
+| 2026-11-12 11:29:03 | before | Bash: Inspect runner prompts and live log |
+| 2026-11-12 11:29:04 | after | Bash: Inspect runner prompts and live log |
+| 2026-11-12 11:29:11 | before | Bash: Read runner loop and cycle progress |
+| 2026-11-12 11:29:11 | after | Bash: Read runner loop and cycle progress |
+| 2026-11-12 11:29:17 | before | Bash: Locate lease blocks relative to prompts |
+| 2026-11-12 11:29:18 | after | Bash: Locate lease blocks relative to prompts |
+| 2026-11-12 11:29:22 | before | Bash: Show prompts sequence and first block reason |
+| 2026-11-12 11:29:23 | after | Bash: Show prompts sequence and first block reason |
+| 2026-11-12 11:29:32 | before | Bash: See how first requirements turn ended |
+| 2026-11-12 11:29:32 | after | Bash: See how first requirements turn ended |
+| 2026-11-12 11:29:42 | before | Bash: See active command record fields |
+| 2026-11-12 11:29:42 | after | Bash: See active command record fields |
+| 2026-11-12 11:29:48 | before | Bash: Read active command parse and remember |
+| 2026-11-12 11:29:48 | after | Bash: Read active command parse and remember |
+| 2026-11-12 11:30:00 | before | Bash: Find instruction text and continue references |
+| 2026-11-12 11:30:01 | after | Bash: Find instruction text and continue references |
+| 2026-11-12 11:30:04 | before | Bash: Read instruction block and BUDGET_NOTICE use |
+| 2026-11-12 11:30:04 | after | Bash: Read instruction block and BUDGET_NOTICE use |
+| 2026-11-12 11:30:15 | before | Bash: Add resume hint to budget and instructions |
+| 2026-11-12 11:30:16 | after | Bash: Add resume hint to budget and instructions |
+| 2026-11-12 11:30:23 | before | Bash: Check write_first read set |
+| 2026-11-12 11:30:23 | after | Bash: Check write_first read set |
+| 2026-11-12 11:30:32 | before | Bash: Make runner resume with phase command |
+| 2026-11-12 11:30:33 | after | Bash: Make runner resume with phase command |
+| 2026-11-12 11:30:40 | before | ToolSearch: select:TaskStop |
+| 2026-11-12 11:30:41 | after | ToolSearch: select:TaskStop |
+| 2026-11-12 11:30:44 | before | TaskStop |
+| 2026-11-12 11:30:44 | after | TaskStop |
+| 2026-11-12 11:30:45 | before | Bash: Run harness guard tests |
+| 2026-11-12 11:30:48 | after | Bash: Run harness guard tests |
+| 2026-11-12 11:30:51 | before | Bash: Run harness guard tests outside sandbox |
+| 2026-11-12 11:30:56 | after | Bash: Run harness guard tests outside sandbox |
+| 2026-11-12 11:31:01 | before | Bash: Find budget test assertions |
+| 2026-11-12 11:31:01 | after | Bash: Find budget test assertions |
+| 2026-11-12 11:31:08 | before | Bash: Read budget test |
+| 2026-11-12 11:31:08 | after | Bash: Read budget test |
+| 2026-11-12 11:31:13 | before | Bash: Assert budget resume hint and run tests |
+| 2026-11-12 11:31:17 | after | Bash: Assert budget resume hint and run tests |
+| 2026-11-12 11:31:25 | before | Bash: Run the live Gates 0 to 5 cycle, attempt 8 |
+| 2026-11-12 11:31:31 | before | Bash: Check CI run status |
+| 2026-11-12 11:31:33 | after | Bash: Check CI run status |
+| 2026-11-12 11:31:43 | before | Bash: Run live QE cycle attempt 8 into new folder |
+| 2026-11-12 11:31:44 | after | Bash: Run live QE cycle attempt 8 into new folder |
+| 2026-11-12 11:31:48 | before | Bash: Watch CI run to completion |
+| 2026-11-12 11:31:50 | after | Bash: Watch CI run to completion |
+| 2026-11-12 11:31:50 | before | Bash: Read tracker items 1 and 2 |
+| 2026-11-12 11:31:50 | after | Bash: Read tracker items 1 and 2 |
+| 2026-11-12 11:31:59 | before | Bash: Update goal tracker and log decision |
+| 2026-11-12 11:32:00 | DECISION | agentic-qe phase lease closes on any non-phase prompt; harness resume hints and live runner re-send the phase command instead of continue |
+| 2026-11-12 11:32:00 | after | Bash: Update goal tracker and log decision |
+| 2026-11-12 11:32:06 | before | Bash: Read plan section 5.5 |
+| 2026-11-12 11:32:07 | after | Bash: Read plan section 5.5 |
+| 2026-11-12 11:32:14 | before | Bash: Find tool error handling |
+| 2026-11-12 11:32:14 | after | Bash: Find tool error handling |
+| 2026-11-12 11:32:17 | before | Bash: Read tool_audit middleware |
+| 2026-11-12 11:32:18 | after | Bash: Read tool_audit middleware |
+| 2026-11-12 11:32:32 | before | Bash: Check tracing helpers |
+| 2026-11-12 11:32:32 | after | Bash: Check tracing helpers |
+| 2026-11-12 11:32:37 | before | Bash: Locate tracing module |
+| 2026-11-12 11:32:37 | after | Bash: Locate tracing module |
+| 2026-11-12 11:32:41 | before | Bash: List tracing package functions |
+| 2026-11-12 11:32:42 | after | Bash: List tracing package functions |
+| 2026-11-12 11:32:44 | before | Bash: Read tracing ids helper |
+| 2026-11-12 11:32:45 | after | Bash: Read tracing ids helper |
+| 2026-11-12 11:32:58 | before | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/backend/maf/harness_kit/errors.py |
+| 2026-11-12 11:32:59 | after | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/backend/maf/harness_kit/errors.py |
+| 2026-11-12 11:33:08 | before | Bash: Wire error shape and test it |
+| 2026-11-12 11:33:13 | after | Bash: Wire error shape and test it |
+| 2026-11-12 11:33:19 | before | Bash: Find docs mentioning harness guards |
+| 2026-11-12 11:33:19 | after | Bash: Find docs mentioning harness guards |
+| 2026-11-12 11:33:24 | before | Bash: Find guard sections in docs |
+| 2026-11-12 11:33:25 | after | Bash: Find guard sections in docs |
+| 2026-11-12 11:33:28 | before | Bash: Find middleware section in MAF spec |
+| 2026-11-12 11:33:28 | after | Bash: Find middleware section in MAF spec |
+| 2026-11-12 11:33:35 | before | Bash: Record error shape in spec and tasks |
+| 2026-11-12 11:33:37 | after | Bash: Record error shape in spec and tasks |
+| 2026-11-12 11:33:40 | before | Bash: Run full backend test suite |
+| 2026-11-12 11:33:41 | after | Bash: Run full backend test suite |
+| 2026-11-12 11:33:46 | before | mcp__ccd_turn__wrap_up |
+| 2026-11-12 11:33:46 | after | mcp__ccd_turn__wrap_up |
+| 2026-11-12 11:33:56 | turn end |  |
+| 2026-11-12 11:36:03 | user | <ta[redacted]> <task-id>bryisrwk2</task-id> <tool-use-id>toolu_0187QGGmKPND6r5cNk4e8vvp</tool-use-id> <output-file>/private/tmp/claude-501/-Users-sarveshtalele… |
+| 2026-11-12 11:36:11 | before | Bash: Read full suite result |
+| 2026-11-12 11:36:12 | after | Bash: Read full suite result |
+| 2026-11-12 11:36:16 | before | Bash: Check CI pytest command |
+| 2026-11-12 11:36:17 | after | Bash: Check CI pytest command |
+| 2026-11-12 11:36:21 | before | Bash: Run suite with CI marker filter |
+| 2026-11-12 11:36:22 | after | Bash: Run suite with CI marker filter |
+| 2026-11-12 11:36:27 | turn end |  |
+| 2026-11-12 11:38:05 | user | <ta[redacted]> <task-id>be1k9gul0</task-id> <tool-use-id>toolu_017o3YD7cgxz7DmweqdnqyEy</tool-use-id> <output-file>/private/tmp/claude-501/-Users-sarveshtalele… |
+| 2026-11-12 11:38:12 | before | Bash: Read CI result |
+| 2026-11-12 11:38:12 | after | Bash: Read CI result |
+| 2026-11-12 11:38:20 | before | Bash: Check CI run conclusion |
+| 2026-11-12 11:38:23 | after | Bash: Check CI run conclusion |
+| 2026-11-12 11:38:28 | before | Bash: Read Windows test job failures |
+| 2026-11-12 11:38:35 | after | Bash: Read Windows test job failures |
+| 2026-11-12 11:38:40 | before | Bash: Show assertion diff and test code |
+| 2026-11-12 11:38:44 | after | Bash: Show assertion diff and test code |
+| 2026-11-12 11:38:44 | user | <ta[redacted]> <task-id>b7pxbekqw</task-id> <tool-use-id>toolu_01MLVAzvmdVNfaq5qDmfXtvH</tool-use-id> <output-file>/private/tmp/claude-501/-Users-sarveshtalele… |
+| 2026-11-12 11:38:49 | before | Bash: Read argv_of |
+| 2026-11-12 11:38:49 | after | Bash: Read argv_of |
+| 2026-11-12 11:38:56 | before | Bash: Compare hook path as Path in test |
+| 2026-11-12 11:38:57 | after | Bash: Compare hook path as Path in test |
+| 2026-11-12 11:39:00 | before | Bash: Add Path import |
+| 2026-11-12 11:39:02 | after | Bash: Add Path import |
+| 2026-11-12 11:39:06 | before | Bash: Run fixed hook test |
+| 2026-11-12 11:39:10 | after | Bash: Run fixed hook test |
+| 2026-11-12 11:39:14 | before | Bash: Check filtered suite output |
+| 2026-11-12 11:39:15 | after | Bash: Check filtered suite output |
+| 2026-11-12 11:39:21 | before | Bash: Update tracker item 1 |
+| 2026-11-12 11:39:22 | after | Bash: Update tracker item 1 |
+| 2026-11-12 11:39:29 | turn end |  |
+| 2026-11-12 11:39:58 | user | <ta[redacted]> <task-id>b4oca8upu</task-id> <tool-use-id>toolu_013dcFEmgVMx6NxvgzRCJwZA</tool-use-id> <output-file>/private/tmp/claude-501/-Users-sarveshtalele… |
+| 2026-11-12 11:40:03 | before | Bash: Read suite result and git status |
+| 2026-11-12 11:40:04 | after | Bash: Read suite result and git status |
+| 2026-11-12 11:40:13 | before | Bash: Commit and push harness fixes |

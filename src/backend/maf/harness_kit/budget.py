@@ -18,15 +18,16 @@ from backend.config import HARNESS_TURN_MINUTES
 stopped: dict[str, str] = {}  # thread -> notice; maf/agui.py shows it as the reply, since the stop ends the loop without model text
 
 
-def turn_budget(thread_id: str = "", minutes: float | None = None):
-    """The middleware for one turn; the clock starts when the turn's agent is built."""
+def turn_budget(thread_id: str = "", minutes: float | None = None, resume: str = "continue"):
+    """The middleware for one turn; the clock starts when the turn's agent is built. `resume` is what the user sends to go on:
+    the active plugin command itself, since a plugin like agentic-qe closes its write window on any other message."""
     limit, started = 60 * (minutes if minutes is not None else HARNESS_TURN_MINUTES), time.monotonic()
     stopped.pop(thread_id, None)
 
     @function_middleware
     async def budget(context: FunctionInvocationContext, call_next) -> None:
         if time.monotonic() - started > limit:
-            notice = f"Stopped: this turn used its {limit / 60:g}-minute budget, so its last tool call did not run. Reply \"continue\" to go on; the todos are kept."
+            notice = f"Stopped: this turn used its {limit / 60:g}-minute budget, so its last tool call did not run. Reply \"{resume}\" to go on; the todos are kept."
             stopped[thread_id] = notice
             context.result = notice
             raise MiddlewareTermination(result=notice)

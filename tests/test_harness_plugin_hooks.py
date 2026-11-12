@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import json
 import os
+from pathlib import Path
 
 import pytest
 from agent_framework import BackgroundAgentsProvider, FileAccessProvider
@@ -37,7 +38,7 @@ def thread(client):
 
 def test_hook_commands_become_argument_lists_with_the_plugin_folder(tmp_path):
     argv = plugin_hooks.argv_of('node "${CLAUDE_PLUGIN_ROOT}/hooks/src/guard-bash.ts"', tmp_path / "my plugin", tmp_path)
-    assert argv[0].lower().endswith(("node", "node.exe")) and argv[1] == str(tmp_path / "my plugin" / "hooks" / "src" / "guard-bash.ts")
+    assert argv[0].lower().endswith(("node", "node.exe")) and Path(argv[1]) == tmp_path / "my plugin" / "hooks" / "src" / "guard-bash.ts"  # Windows: "C:\\…\\my plugin/hooks/…" is the same path
     assert {p.id for p, _ in plugin_hooks.matching("PreToolUse", "Bash")} == {"agentic-qe"}
     assert plugin_hooks.matching("PreToolUse", "file_access_write") == []  # matchers see Claude Code names only
 

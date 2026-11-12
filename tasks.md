@@ -326,3 +326,5 @@
 - [x] G7 Key Vault at startup (managed identity, `backend/keyvault.py`)
 - [x] G8 desktop installers in CI (per-arch DMG, MSI, release on tag); first CI run pending a push
 - [x] G9 standard Azure guide with East US 2 costs
+- [x] FINAL_PLAN 5.5: one error shape for harness tool failures (`harness_kit/errors.py`), 2026-11-12
+- [x] Budget stop and pinned command tell the user to re-send the plugin phase command, not "continue", 2026-11-12
