@@ -110,7 +110,12 @@ def merge(folder: Path) -> None:
     parts = [json.loads(f.read_text(encoding="utf-8")) for f in sorted(folder.rglob("latest-*.json"))]
     if not parts or len({p["version"] for p in parts}) != 1:
         sys.exit(f"Expected latest-*.json files of one version under {folder}, found {[p['version'] for p in parts]}")
-    merged = {"version": parts[0]["version"], "files": [f for p in parts for f in p["files"]]}
+    files = {}
+    for f in (f for p in parts for f in p["files"]):
+        if f["name"] in files and files[f["name"]]["sha256"] != f["sha256"]:
+            sys.exit(f"Two different builds named {f['name']}: each runner must build only its own architecture")
+        files[f["name"]] = f
+    merged = {"version": parts[0]["version"], "files": list(files.values())}
     (folder / "latest.json").write_text(json.dumps(merged, indent=2), encoding="utf-8")
     print(f"Merged {len(merged['files'])} installers into {folder / 'latest.json'}")
 
