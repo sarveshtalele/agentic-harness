@@ -4,6 +4,11 @@ name: desktop
 # with latest.json (SHA-256 per file). A v* tag also publishes them as a GitHub Release. Unsigned unless CSC_LINK is set.
 on:
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Publish these builds as the GitHub Release for this existing tag (for example v0.1.0); empty builds only"
+        required: false
+        default: ""
   push:
     branches: ["feature/maf-harness-platform"]
     tags: ["v*", "desktop-*"]
@@ -58,7 +63,7 @@ jobs:
           if-no-files-found: error
 
   release:
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') || inputs.release_tag != ''
     needs: build
     runs-on: ubuntu-latest
     permissions:
@@ -71,7 +76,20 @@ jobs:
       - name: Publish the GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.release_tag || github.ref_name }}
+        # One upload at a time with retries: `gh release create <files>` uploads in parallel and deletes the draft when
+        # one upload fails, so the others answer 404 and the real error is hidden.
         run: |
           shopt -s nullglob globstar
-          gh release create "${GITHUB_REF_NAME}" installers/**/*.dmg installers/**/*.zip installers/**/*.msi installers/latest.json \
-            --title "Agentic QE Platform ${GITHUB_REF_NAME}" --notes "Desktop installers. SHA-256 values are in latest.json. Unsigned builds unless noted."
+          files=(installers/**/*.dmg installers/**/*.zip installers/**/*.msi installers/latest.json)
+          printf 'asset: %s\n' "${files[@]}"
+          gh release view "$TAG" > /dev/null 2>&1 || gh release create "$TAG" --verify-tag \
+            --title "Agentic QE Platform $TAG" --notes "Desktop installers. SHA-256 values are in latest.json. Unsigned builds unless noted."
+          for f in "${files[@]}"; do
+            for try in 1 2 3; do
+              gh release upload "$TAG" "$f" --clobber && break
+              [ "$try" = 3 ] && { echo "upload failed: $f"; exit 1; }
+              sleep 15
+            done
+          done
+          gh release view "$TAG" --json assets -q '.assets[] | "\(.name) \(.size)"'
