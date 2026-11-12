@@ -1,10 +1,9 @@
-// Admin login and the signing key live in userData as OS-encrypted blobs (safeStorage). Plain text is never written.
+// The server sign-in (grant and server key) and the local data key live in userData as OS-encrypted blobs (safeStorage).
+// Plain text is never written. No password is kept: the grant from central sign-in (central.js) is all the app holds.
 const { safeStorage } = require("electron");
 const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
-
-const MIN_PASSWORD = 12;
 
 function requireEncryption() {
   if (!safeStorage.isEncryptionAvailable()) throw new Error("The operating system keychain is not available, so credentials cannot be stored safely.");
@@ -22,20 +21,20 @@ function write(file, value) {
   fs.writeFileSync(file, safeStorage.encryptString(JSON.stringify(value)), { mode: 0o600 });
 }
 
-function validate({ username, password }) {
-  if (!username || !username.trim()) return "Enter a username.";
-  if (!password || password.length < MIN_PASSWORD) return `The password needs at least ${MIN_PASSWORD} characters.`;
-  return null;
+const files = (userData) => ({ signIn: path.join(userData, "signin.bin"), key: path.join(userData, "secret.bin") });
+
+// The saved sign-in while it is still valid, else null (an ended one means signing in again).
+function loadSignIn(userData) {
+  const saved = read(files(userData).signIn);
+  return saved && saved.expires * 1000 > Date.now() + 60000 ? saved : null;
 }
 
-const files = (userData) => ({ admin: path.join(userData, "admin.bin"), key: path.join(userData, "secret.bin") });
-
-function loadAdmin(userData) {
-  return read(files(userData).admin);
+function saveSignIn(userData, signIn) {
+  write(files(userData).signIn, { server: signIn.server, grant: signIn.grant, public_key: signIn.public_key, expires: signIn.expires });
 }
 
-function saveAdmin(userData, creds) {
-  write(files(userData).admin, { username: creds.username.trim(), password: creds.password });
+function clearSignIn(userData) {
+  fs.rmSync(files(userData).signIn, { force: true }); // sign-out: the grant is gone, the next start asks again
 }
 
 // The signing key is made once and reused, so saved data stays readable after a restart.
@@ -48,4 +47,4 @@ function loadOrCreateKey(userData) {
   return key;
 }
 
-module.exports = { loadAdmin, saveAdmin, loadOrCreateKey, validate };
+module.exports = { loadSignIn, saveSignIn, clearSignIn, loadOrCreateKey };

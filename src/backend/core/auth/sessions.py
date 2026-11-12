@@ -8,7 +8,7 @@ import time
 from datetime import datetime, timedelta, timezone
 
 from backend.core.auth.base import ADMIN_ID, IDLE_MINUTES, LOCK_SECONDS, MAX_FAILURES, SESSION_HOURS, AuthError, _admin_login, _event, _failures, _failures_lock, _inactive_reason, _lookup
-from backend.core.auth.passwords import _DUMMY_HASH, _verify_password
+from backend.core.auth.passwords import _DUMMY_HASH, _verify_password, hash_password, needs_rehash
 from backend.db import db, now, row
 
 
@@ -26,7 +26,8 @@ def login(username: str, password: str) -> str:
     admin_name, admin_password = _admin_login()
     account = None
     if admin_name and admin_password and hmac.compare_digest(username.strip().lower().encode(), admin_name.encode()):
-        ok = hmac.compare_digest(password.encode(), admin_password.encode())
+        ok = (_verify_password(password, admin_password) if admin_password.startswith("scrypt$")  # ATLAS_ADMIN_PASSWORD_HASH
+              else hmac.compare_digest(password.encode(), admin_password.encode()))
         subject = ADMIN_ID
     else:
         with db() as con:
@@ -43,11 +44,19 @@ def login(username: str, password: str) -> str:
         raise AuthError(reason)
     with _failures_lock:
         _failures.pop(key, None)
+    if account and needs_rehash(account["password_hash"]):  # the cost or pepper changed since this hash was made
+        with db() as con:
+            con.execute("UPDATE users SET password_hash=? WHERE id=?", (hash_password(password), account["id"]))
+    return start_session(subject)
+
+
+def start_session(subject: str, hours: float = SESSION_HOURS, event: str = "login") -> str:
+    """A new session token for `subject`; only its hash is stored."""
     token = secrets.token_urlsafe(32)
-    expires = (datetime.now(timezone.utc) + timedelta(hours=SESSION_HOURS)).isoformat(timespec="seconds")
+    expires = (datetime.now(timezone.utc) + timedelta(hours=hours)).isoformat(timespec="seconds")
     with db() as con:
         con.execute("INSERT INTO sessions VALUES (?,?,?,?,?)", (hashlib.sha256(token.encode()).hexdigest(), subject, expires, now(), clock().isoformat(timespec="seconds")))
-    _event(subject, "login")
+    _event(subject, event)
     return token
 
 

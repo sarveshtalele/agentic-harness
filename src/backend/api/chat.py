@@ -84,6 +84,26 @@ async def chat_todos(thread_id: str):
     return {"todos": [{"id": t.id, "title": t.title, "description": t.description, "done": t.is_complete} for t in items]}
 
 
+@router.get("/api/chats/{thread_id}/terminal")
+def chat_terminal(thread_id: str):
+    """For the desktop Terminal pane: the folder this chat's harness works in, and its background tasks with their latest
+    output. Never on the shared web server (D-SHELL-WEB)."""
+    from backend.core.security import redact
+    from backend.maf.harness_kit import bg_tasks, workspace
+
+    if config.PROFILE == "web":
+        raise HTTPException(404, "The terminal is only in the desktop app and the CLI")
+    with db() as con:
+        thread = row(con.execute("SELECT project_id FROM chat_threads WHERE id=?", (thread_id,)))
+    if not thread:
+        raise HTTPException(404, f"Chat thread not found: {thread_id}")
+    ws = workspace.open_workspace(thread["project_id"], thread_id, auth.acting_user(thread["project_id"]))
+    tasks = [{"id": task_id, "description": t.description or t.command[:80], "status": bg_tasks.status(t),
+              "output": redact(bg_tasks._plain(t.log.read_text(encoding="utf-8", errors="replace")))[-20000:] if t.log.is_file() else ""}
+             for task_id, t in bg_tasks._tasks.get(thread_id, {}).items()]
+    return {"cwd": str(ws.root) if ws else None, "tasks": tasks}
+
+
 @router.patch("/api/chats/{thread_id}")
 def patch_chat(thread_id: str, body: ThreadPatch):
     if body.agent and body.agent not in agents.CHAT_AGENTS:

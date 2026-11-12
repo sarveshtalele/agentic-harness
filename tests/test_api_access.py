@@ -17,7 +17,7 @@ from tests.helpers_api import CALC, client, make_user, project, sign_in, unique,
 
 
 def test_every_route_needs_a_session():
-    public = {"/api/health", "/api/auth/login", "/api/auth/status"}
+    public = {"/api/health", "/api/auth/login", "/api/auth/status", "/api/auth/desktop"}  # desktop: a signed grant instead of a session (test_desktop_signin.py)
     anonymous = TestClient(app)
     checked = 0
     for path, methods in app.openapi()["paths"].items():

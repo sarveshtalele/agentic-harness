@@ -231,6 +231,12 @@ Remove-Item Env:ATLAS_ADMIN_PASSWORD
 
    The third secret, `atlas-database-url`, is added in section 7.
 
+   **Stronger, recommended (R6):** keep only a hash of the admin password, and add a pepper.
+   1. On your computer run `python scripts/dev.py admin-password`. It prints a random password once (store it in your password manager) and its hash.
+   2. Add the secret `atlas-admin-password-hash` with that hash (instead of `atlas-admin-password`), and `atlas-password-pepper` with another random value (`python -c "import secrets; print(secrets.token_urlsafe(32))"`). If you set the pepper, run step 1 with `ATLAS_PASSWORD_PEPPER` set to the same value. **If the pepper is lost, every member must have their password reset.**
+   3. In section 10, set `ATLAS_KEY_VAULT_SECRETS` to `atlas-admin-password-hash,atlas-password-pepper,atlas-secret-key,atlas-database-url,atlas-storage-url`.
+   Optional settings: `ATLAS_SCRYPT_N` (password hashing cost; raising it rehashes each account at its next sign-in), `ATLAS_BREACHED_PASSWORDS_FILE` (a list of breached passwords, one per line), `ATLAS_DESKTOP_SESSION_DAYS` (how long a desktop sign-in lasts, 7 by default).
+
 **Verify:** **Objects, Secrets** lists both secrets as **Enabled**.
 
 ---
@@ -513,6 +519,7 @@ To change the hours, edit the two schedules. The cost for any schedule is the nu
 4. **In each project, Members:** add the people who may see it. Approvals show the approver's name, role and email.
 5. **Settings, Gate roles:** choose who may sign gates G0 to G5. Agents never sign.
 6. **MCP:** add remote (HTTP) MCP servers, and grant each tool to roles. stdio servers run only in the desktop app.
+7. **Desktop app:** members sign in to the desktop app with this server's address (`https://aqe-ui-<unique>.azurewebsites.net`), their username and password. The app keeps only a signed sign-in from the server, never the password; **Sign out** in its menu removes it. The admin account works in the browser only.
 
 **Verify, end to end:**
 1. Create a project and attach a repository.

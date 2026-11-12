@@ -29,7 +29,7 @@ def test_a_path_with_no_rule_is_refused_for_everyone_but_the_admin():
 
 ADMIN_ONLY = ("/api/users", "/api/connections", "/api/logs", "/api/auth/events", "/api/models", "/api/usage", "/api/agents/guardrail-events", "/api/capabilities/sync")
 ADMIN_WRITE = ("/api/settings", "/api/prompts", "/api/agents", "/api/evals")
-VIEWER_MAY_WRITE = ("/api/auth/logout", "/api/account/password", "/api/account/email")
+VIEWER_MAY_WRITE = ("/api/auth/logout", "/api/auth/desktop-session", "/api/account/password", "/api/account/email")  # a viewer may use the desktop app, read-only
 
 
 def expected(persona, method, template):

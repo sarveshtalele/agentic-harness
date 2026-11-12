@@ -111,7 +111,7 @@ def create_user(username: str, password: str, model: str = "", token_limit: int 
         raise AuthError("Usernames need 3 to 60 letters, numbers, dots, dashes, or @")
     if username.lower() == _admin_login()[0]:
         raise AuthError("That username is not available")
-    check_password_rules(password)
+    check_password_rules(password, username)
     _check_dates(active_from, active_until)
     allowed_models = allowed_models if allowed_models is not None else ([model.strip()] if model.strip() else [])
     try:

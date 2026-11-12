@@ -23,6 +23,7 @@ from backend import db as database
 from backend.api import ROUTERS
 from backend.core import auth, documents, files, gates, logs, models, prompts, registry, tracing
 from backend.core import skills as skill_lib
+from backend.core.auth import desktop as desktop_auth
 from backend.core.errors import AqeError, classify, stack_of
 from backend.core.security import install_log_mask, redact, PathEscape
 from backend.db import new_id
@@ -50,6 +51,7 @@ def fail(request: Request | None, status: int, message: str, *, code: str | None
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    desktop_auth.startup_grant()  # the desktop backend starts only after sign-in through the server (R6)
     database.migrate()
     # startup seeding removed: seed_database() wrote fabricated data (plan D-04/D-05)
     prompts.seed()
@@ -68,7 +70,7 @@ for _router in ROUTERS:
     app.include_router(_router)
 
 
-PUBLIC_PATHS = {"/api/health", "/api/auth/login", "/api/auth/status"}
+PUBLIC_PATHS = {"/api/health", "/api/auth/login", "/api/auth/status", "/api/auth/desktop"}  # desktop: the grant is checked inside
 
 
 @app.middleware("http")

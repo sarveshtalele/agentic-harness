@@ -14,6 +14,7 @@
   python scripts/dev.py evidence   run tests and smoke (add --e2e for end to end) into JUnit, then write the evidence report
   python scripts/dev.py env-check --env local|azure   report missing or weak settings (no values printed)
   python scripts/dev.py azure-local  run the two Azure zips locally in the web profile (add --check to check and stop)
+  python scripts/dev.py admin-password  a random first-admin password, shown once, and the hash to set as ATLAS_ADMIN_PASSWORD_HASH
 """
 from __future__ import annotations
 
@@ -182,6 +183,7 @@ COMMANDS = {
     "test": lambda: run([str(PYTHON), "-m", "pytest", "tests", "-q", "-m", "not e2e and not live and not smoke"]),
     "smoke": lambda: run([str(PYTHON), "-m", "pytest", "tests/e2e/test_smoke.py", "-v", "-m", "smoke"]),
     "e2e": lambda: run([str(PYTHON), "-m", "pytest", "tests/e2e", "-v", "-m", "e2e", "-s"]),
+    "admin-password": lambda: run([str(PYTHON), str(ROOT / "scripts" / "admin_password.py")]),
     "live": lambda: run([str(PYTHON), str(ROOT / "scripts" / "run_live.py"), *sys.argv[2:]]),  # real model from your local store
 }
 

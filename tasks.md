@@ -340,7 +340,7 @@
 - [x] 5 Settings files; hooks from settings, http hooks, updatedInput, PostToolUseFailure, Stop hooks; checkpoints and /rewind; helper-agent permissions; background tasks (step 2) (2026-11-13). Sessions as JSONL and conversation rewind move to step 6 with the CLI
 - [x] 6 `aqh` CLI: local server with its own PostgreSQL, folder bound in place, headless (`-p`, three formats, approval policy) and interactive, doctor, sessions as JSONL; live headless run on macOS with the real model (2026-11-13). Windows live run: CI tests only; landing-page install section moves to R1 (/home)
 - [x] 7 OS sandbox tier T1: Seatbelt on macOS, bubblewrap on Linux, around persistent and background shells; on in `auto` mode or from trusted settings (`sandbox.enabled`, `sandbox.network`); auto mode skips the card only inside it; Windows keeps cards (2026-11-13). Container tier T2 and per-host network allowlist: when a team asks
-- [ ] 8 R6 credentials and desktop sign-in; desktop Terminal pane
+- [x] 8 R6: pepper, recorded scrypt cost and rehash at sign-in, 12-character minimum, breached-password check, first admin as a hash (`dev.py admin-password`); desktop central sign-in with a signed grant (no local admin or password, sign-out); desktop Terminal pane (node-pty, xterm) with background tasks as tabs (2026-11-13)
 - [ ] 9 R2 features governance; R1 home and gated downloads
 - [x] Playwright UI audit test (tests/e2e/test_ui_audit.py), 2026-11-12
 - [ ] 10 UI audit fixes U1 to U10; audit at zero findings

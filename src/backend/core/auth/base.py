@@ -35,7 +35,12 @@ class Forbidden(AuthError):
 
 
 def _admin_login() -> tuple[str, str]:
-    username, password = os.environ.get("ATLAS_ADMIN_USERNAME", ""), os.environ.get("ATLAS_ADMIN_PASSWORD", "")
+    """(username, password or its hash). ATLAS_ADMIN_PASSWORD_HASH (from `python scripts/dev.py admin-password`) keeps the
+    password itself out of the environment; ATLAS_ADMIN_PASSWORD still works."""
+    username = os.environ.get("ATLAS_ADMIN_USERNAME", "")
+    if hashed := os.environ.get("ATLAS_ADMIN_PASSWORD_HASH", "").strip():
+        return username.strip().lower(), hashed
+    password = os.environ.get("ATLAS_ADMIN_PASSWORD", "")
     register_secret(password)
     if password and (why := weak_secret(password, username)):
         logging.getLogger("aqe.auth").warning("ATLAS_ADMIN_PASSWORD is weak (%s). Change it in .env or the app settings, then restart.", why)
@@ -50,7 +55,7 @@ def admin_email() -> str:
 def admin_password_problem() -> str:
     """Shown to the admin on the Settings page; the password itself is never returned."""
     username, password = os.environ.get("ATLAS_ADMIN_USERNAME", ""), os.environ.get("ATLAS_ADMIN_PASSWORD", "")
-    return weak_secret(password, username) if password else ""
+    return weak_secret(password, username) if password and not os.environ.get("ATLAS_ADMIN_PASSWORD_HASH") else ""
 
 
 def admin_configured() -> bool:

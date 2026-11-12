@@ -6,6 +6,7 @@ import { CheckCircle2, Circle, ListTodo } from "lucide-react";
 import { api } from "../lib/api";
 import { Chat } from "../features/chat/Chat";
 import { Card, Empty, ErrorNote, Spinner, inputClass } from "./ui";
+import { TerminalPane } from "./TerminalPane";
 
 /** The project harness on MAF's create_harness_agent: the MAF chat with the harness agent, beside the thread's own todo list. */
 export function MafHarness({ projectId, onProjectChange }: { projectId: string; onProjectChange: (id: string) => void }) {
@@ -43,6 +44,7 @@ export function MafHarness({ projectId, onProjectChange }: { projectId: string; 
           <TodoPanel thread={thread} />
         </div>
       )}
+      {project && thread?.agent === "harness" && <TerminalPane key={thread.id} threadId={thread.id} />}
     </div>
   );
 }

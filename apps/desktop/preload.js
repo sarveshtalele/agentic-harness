@@ -2,5 +2,5 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("setup", {
-  submit: (username, password) => ipcRenderer.invoke("setup:submit", { username, password }),
+  submit: (server, username, password) => ipcRenderer.invoke("setup:submit", { server, username, password }),
 });

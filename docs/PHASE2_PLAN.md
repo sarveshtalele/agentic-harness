@@ -485,7 +485,7 @@ The audit test itself had one wrong path (`/chat` exists only as `/chat/<id>`); 
 | 5 | Hooks (9.3), settings files (9.4), sessions, checkpoints, rewind, subagents, background tasks (10) | hook and session rows green |
 | 6 | `aqh` CLI interactive and headless (11.1) | golden tests green; live CLI session on macOS and Windows |
 | 7 | OS sandbox tiers (5.3) | sandbox rows green on macOS and Linux; Windows documented as T0 or container (built 2026-11-13: T1 Seatbelt and bubblewrap in `harness_kit/os_sandbox.py`; Windows stays T0 with cards; container T2 not built) |
-| 8 | R6 credentials and desktop sign-in; desktop Terminal pane (11.2) | security tests; desktop story |
+| 8 | R6 credentials and desktop sign-in; desktop Terminal pane (11.2) | security tests; desktop story (built 2026-11-13: tests/test_credentials_r6.py, tests/test_desktop_signin.py, tests/desktop/test_desktop_app.py with real Electron) |
 | 9 | R2 features governance, R1 home and gated downloads | stories and audit |
 | 10 | UI audit fixes (section 14) | audit zero findings |
 | 11 | R3 uploads and brainstorming, R4 Atlassian | stories; live brainstorm |
