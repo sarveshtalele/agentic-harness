@@ -336,7 +336,7 @@
 - [ ] 1 Discovery eval baseline (20 tasks): built; run blocked by the model proxy's daily token quota; run later on commit b76ddbd
 - [x] 2 Persistent Bash and PowerShell (background, new-output notes, spill); permission modes and rules; /mode (2026-11-12). Short tool names moved to step 4 with the capability index
 - [x] 3 Script runtime for Python, TypeScript, JavaScript, Bash, PowerShell and shebang interpreters; health checks and flags (2026-11-12)
-- [ ] 4 Capability index, skill scopes with live reload, MCP list_changed refresh; eval after
+- [x] 4 Skill scopes (personal, repository, plugin) read every turn; tool index with arguments; nearest names for invented tools; MCP list refresh; command substitutions (2026-11-12). Eval after: waits for the model quota
 - [ ] 5 Hooks (Claude Code events and contract), settings files, sessions JSONL, checkpoints and rewind, subagents, background tasks
 - [ ] 6 `aqh` CLI interactive and headless; live CLI session on macOS and Windows
 - [ ] 7 OS sandbox tiers (Seatbelt, bubblewrap; Windows approval or container)

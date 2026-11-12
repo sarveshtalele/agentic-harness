@@ -15,7 +15,7 @@ from pathlib import Path
 import yaml
 
 from backend.config import ROOT, SKILLS_DIR
-from backend.core import auth, plugin_grants
+from backend.core import auth, command_args, plugin_grants
 from backend.core.security import PathEscape, safe_path
 from backend.db import db, now
 
@@ -158,7 +158,7 @@ def slash_entries(root: Path | None = None, role: str | None = None) -> list[dic
     return entries
 
 
-def expand_slash(text: str, root: Path | None = None) -> str | None:
+def expand_slash(text: str, root: Path | None = None, project_dir: Path | None = None) -> str | None:
     """`/plugin:command args` becomes that command's instructions with $ARGUMENTS filled in; `/skill args` asks the
     harness to load that skill. Anything else, including an unknown name, returns None and the text goes as typed."""
     head, _, args = text.strip().partition(" ")
@@ -172,8 +172,8 @@ def expand_slash(text: str, root: Path | None = None) -> str | None:
         return None
     if found["kind"] == "skill":
         return f"Load the skill {found['name']} with load_skill, then use it for this request: {args or 'the current project'}"
-    _, body = _split(found["path"])
-    body = body.replace("$ARGUMENTS", args) if "$ARGUMENTS" in body else f"{body}\n\nARGUMENTS: {args}"
+    front, body = _split(found["path"])
+    body = command_args.substitute(body, args, front.get("arguments"), project_dir)
     # Claude Code's own variables in plugin commands, filled the way Claude Code fills them (the model writes these paths in shell commands)
     plugin_root = next((p.root for p in discover(root) if p.id == found["plugin"]), None)
     body = body.replace("${CLAUDE_SKILL_DIR}", str(found["path"].parent)).replace("${CLAUDE_PLUGIN_ROOT}", str(plugin_root or found["path"].parent))

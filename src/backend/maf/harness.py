@@ -35,6 +35,7 @@ from backend import config
 from backend.config import DATA_DIR, HARNESS_CONTEXT_TOKENS, HARNESS_MAX_ROUNDS, HARNESS_MAX_TOOL_CALLS
 from backend.core import auth, plugin_grants, plugins, prompts
 from backend.core.mcp import mcp_tools_for
+from backend.core.mcp.harness import refresh_stale
 from backend.maf import governance, llm, tools
 from backend.maf.harness_kit import active_command, plugin_agents, specialists, verify, workspace
 from backend.maf.harness_kit.budget import turn_budget
@@ -44,10 +45,11 @@ from backend.maf.harness_kit.hook_middleware import guarded
 from backend.maf.harness_kit.shell import ShellProvider, WorkspaceShell
 from backend.maf.harness_kit.shell_tools import ShellToolsProvider
 from backend.maf.harness_kit.bg_tasks import BackgroundProvider
-from backend.maf.harness_kit import permissions
+from backend.maf.harness_kit import permissions, skill_scopes
 from backend.maf.harness_kit.skill_runner import SkillHealthProvider, runner as skill_runner, skill_dirs  # noqa: F401
 from backend.core.script_runtime import SCRIPT_EXTENSIONS
 from backend.maf.harness_kit.strict_args import strict_arguments
+from backend.maf.harness_kit.unknown_tools import unknown_tool_hints
 from backend.maf.harness_kit.write_first import write_first
 from backend.maf.harness_kit.nudges import while_working
 from backend.maf.harness_kit.catalog import CORE, RISKY, Catalogue, LoadedTools
@@ -68,7 +70,8 @@ def _skills(ws=None) -> SkillsProvider:
 
     A plugin granted to other roles (core/plugin_grants.py) is left out for this user, so its skills never reach the model.
     """
-    paths = plugins.skill_paths(role=plugin_grants.role_of(auth.current_user.get()))
+    # personal, then repository, then plugin and platform skills: the first skill of a name wins (Claude Code's precedence)
+    paths = skill_scopes.ordered(ws.root if ws else None, plugins.skill_paths(role=plugin_grants.role_of(auth.current_user.get())))
     commands = set().union(*(plugins.command_skill_names(path) for path in paths))
     hidden = commands | STUDIO_ONLY  # one way per job: skills are made with the create_skill tool, not the Studio's own instructions
     # every common script language is discovered; the runner picks the interpreter and refuses flagged scripts (step 3)
@@ -111,6 +114,8 @@ def build(project_id: str, thread_id: str, start_run, *, user_id: str | None = N
         if tool.name in RISKY:
             tool.approval_mode = "always_require"  # these objects are built for this turn, so other agents keep theirs
     user = auth.current_user.get()
+    if user:
+        refresh_stale()  # background: tool lists older than 10 minutes are listed again for the next turn
     catalogue = Catalogue([t for t in every if t.name not in CORE], mcp_tools_for(project_id, user) if user else [])
     loaded = LoadedTools(dirs["tools"], project_id, thread_id, catalogue)
     core = [t for t in every if t.name in CORE] + [find_tools.build(catalogue), load_tools.build(catalogue, loaded)]
@@ -119,7 +124,8 @@ def build(project_id: str, thread_id: str, start_run, *, user_id: str | None = N
     client = llm.client(model, max_rounds=HARNESS_MAX_ROUNDS, max_tool_calls=HARNESS_MAX_TOOL_CALLS, detailed_errors=True)
     compaction = _compaction(client, model, HARNESS_CONTEXT_TOKENS - max_output, telemetry)
     world, providers = _world(ws)
-    providers.append(SkillHealthProvider(plugins.skill_paths(role=plugin_grants.role_of(auth.current_user.get()))))
+    providers.append(SkillHealthProvider(skill_scopes.ordered(ws.root if ws else None, plugins.skill_paths(role=plugin_grants.role_of(auth.current_user.get()))),
+                                         note=skill_scopes.note(ws.root if ws else None)))
     mode, rules = permissions.get_mode(dirs["tools"], thread_id), permissions.load_rules(ws.root if ws else None)  # once per turn
     if command:  # without a repository it still says which command runs; WorkspaceContext says there are no file tools
         providers.append(active_command.ActiveCommandContext(command, ws.root if ws else None, thread_id))
@@ -146,7 +152,7 @@ def build(project_id: str, thread_id: str, start_run, *, user_id: str | None = N
         disable_web_search=True,  # no data leaves through a hosted search tool
         context_providers=[ProjectContext(project_id, full=True), loaded, workspace.WorkspaceContext(ws), *providers],
         auto_approval_rules=[permissions.approval_rule(lambda: mode, lambda: rules)],  # allow and deny skip the card
-        middleware=[permissions.enforce(lambda: mode, lambda: rules), strict_arguments, write_first(thread_id, ws.root if ws else None, command), *([verify.verifier(ws, command)] if ws and command else []),
+        middleware=[permissions.enforce(lambda: mode, lambda: rules), strict_arguments, unknown_tool_hints(lambda: list(catalogue.descriptions())), write_first(thread_id, ws.root if ws else None, command), *([verify.verifier(ws, command)] if ws and command else []),
                     turn_budget(thread_id, resume=f"/{command['name']} {command['args']}".rstrip() if command else "continue"), tool_hygiene(), error_shape(), tool_audit(AGENT, project_id, None, "chat"), *([guarded(ws)] if ws else []), telemetry],
         **world,
     )

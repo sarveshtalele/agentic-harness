@@ -31,6 +31,6 @@ def test_first_call_lists_deferred_tools_by_name_and_hides_studio_skill(client):
     first = scripted.calls[0]
     assert "Tools you can load with load_tools" in first
     for name in ("start_workflow", "create_skill", "run_tests", "save_document", "project_status"):
-        assert f"- {name}:" in first, name
-    assert "- start_workflow: Use when the user asks to run a workflow" in first
+        assert f"- {name}(" in first, name  # since step 4 each name shows its arguments: name(a, b?)
+    assert "- start_workflow(" in first and "Use when the user asks to run a workflow" in first
     assert "skill-creator" not in first  # one way to make a skill: the create_skill tool

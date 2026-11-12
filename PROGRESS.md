@@ -16,7 +16,7 @@ Written by `scripts/hooks/activity_log.py`. Times are local.
 | 8 | Harness eval suite (5.9); repository map only if it helps (5.8) | open | |
 | 9 | Azure guide at or under $25/month, first test deployment (9) | in progress (guide done 2026-11-12; test deployment and portal screenshots open) | `docs/AZURE_DEPLOYMENT_GUIDE.md`: prices re-read from prices.azure.com 2026-11-12, $20.70 with the PostgreSQL stop schedule (Automation runbook), zipping, portal steps, UI tour, troubleshooting. Owner approved deleting the 4 old Azure docs |
 | 10 | Desktop bundled PostgreSQL (D4), signing when certificates exist | open | |
-| 11 | Phase 2 (docs/PHASE2_PLAN.md rev 3): Claude Code-class harness on MAF (CLI, desktop, web), then R1 to R6 | approved 2026-11-12; step 1 built, baseline run blocked | Step 1: evals/harness/discovery.json (20 tasks, fixture repo with Python, TS, Bash, PowerShell, .claude and .agents skills), src/backend/maf/evals/discovery.py scorer (tests/test_discovery_eval_scoring.py: 3 passed), tests/test_harness_discovery_eval.py live driver, `python scripts/dev.py live`. Baseline not run: the model proxy answers HTTP 429 'daily token limit exceeded (25,101,895/25,000,000)'; Step 2 done locally (2026-11-12): bash and powershell on MAF LocalShellTool (persistent), background tasks, spill, permission modes and rules, /mode; tests/test_harness_shells.py and tests/test_harness_permissions.py (20 passed, PowerShell skipped on this Mac); full suite 710 passed, 2 skipped; CI green on 3 OS for 3bc0fd5 (after fixing PowerShell escape codes and Git Bash paths). Step 3 done locally: core/script_runtime.py, core/script_health.py, per-turn skill runner, Flagged badge and Check again; full suite 716 passed, 3 skipped; not committed |
+| 11 | Phase 2 (docs/PHASE2_PLAN.md rev 3): Claude Code-class harness on MAF (CLI, desktop, web), then R1 to R6 | approved 2026-11-12; step 1 built, baseline run blocked | Step 1: evals/harness/discovery.json (20 tasks, fixture repo with Python, TS, Bash, PowerShell, .claude and .agents skills), src/backend/maf/evals/discovery.py scorer (tests/test_discovery_eval_scoring.py: 3 passed), tests/test_harness_discovery_eval.py live driver, `python scripts/dev.py live`. Baseline not run: the model proxy answers HTTP 429 'daily token limit exceeded (25,101,895/25,000,000)'; Step 2 done locally (2026-11-12): bash and powershell on MAF LocalShellTool (persistent), background tasks, spill, permission modes and rules, /mode; tests/test_harness_shells.py and tests/test_harness_permissions.py (20 passed, PowerShell skipped on this Mac); full suite 710 passed, 2 skipped; CI green on 3 OS for 3bc0fd5 (after fixing PowerShell escape codes and Git Bash paths). Step 3 done locally: core/script_runtime.py, core/script_health.py, per-turn skill runner, Flagged badge and Check again; full suite 716 passed, 3 skipped; committed 75ecbbb + PowerShell syntax-check fix 8a62ef4; CI green on 3 OS (run 43251382164); Step 4 done locally: skill scopes, tool index with arguments, nearest names for invented tools, MCP refresh, command substitutions; tests/test_harness_discovery_scopes.py 5 passed; full suite 721 passed, 3 skipped; not committed. Eval baseline and after still blocked by the model quota |
 
 | Time | Event | Detail |
 |---|---|---|
@@ -11207,3 +11207,99 @@ Written by `scripts/hooks/activity_log.py`. Times are local.
 | 2026-11-12 21:00:14 | turn end |  |
 | 2026-11-12 21:00:18 | user | Commit and push |
 | 2026-11-12 21:00:24 | before | Bash: Commit and push step 3 |
+| 2026-11-12 21:00:31 | after | Bash: Commit and push step 3 |
+| 2026-11-12 21:00:31 | before | Bash: Watch CI for step 3 |
+| 2026-11-12 21:00:31 | after | Bash: Watch CI for step 3 |
+| 2026-11-12 21:00:35 | turn end |  |
+| 2026-11-12 21:15:47 | user | <ta[redacted]> <task-id>bo2fch573</task-id> <tool-use-id>toolu_016u4AgbX6FcvwpLknM2LxkW</tool-use-id> <output-file>/private/tmp/claude-501/-Users-sarveshtalele… |
+| 2026-11-12 21:15:51 | before | Bash: Read step 3 CI result |
+| 2026-11-12 21:15:53 | after | Bash: Read step 3 CI result |
+| 2026-11-12 21:16:01 | before | Bash: Fix PowerShell syntax check; commit and push |
+| 2026-11-12 21:16:14 | after | Bash: Fix PowerShell syntax check; commit and push |
+| 2026-11-12 21:16:14 | before | Bash: Watch CI for the PowerShell fix |
+| 2026-11-12 21:16:14 | after | Bash: Watch CI for the PowerShell fix |
+| 2026-11-12 21:16:19 | turn end |  |
+| 2026-11-12 21:33:18 | user | <ta[redacted]> <task-id>bwnqasuca</task-id> <tool-use-id>toolu_012fUyaMa5ivSMe5brPDHJuE</tool-use-id> <output-file>/private/tmp/claude-501/-Users-sarveshtalele… |
+| 2026-11-12 21:33:22 | before | Bash: Read CI result for PowerShell fix |
+| 2026-11-12 21:33:24 | after | Bash: Read CI result for PowerShell fix |
+| 2026-11-12 21:33:45 | before | mcp__ccd_turn__update_plan |
+| 2026-11-12 21:33:45 | after | mcp__ccd_turn__update_plan |
+| 2026-11-12 21:33:51 | before | Bash: Update tracker; probe model quota |
+| 2026-11-12 21:33:54 | after | Bash: Update tracker; probe model quota |
+| 2026-11-12 21:33:57 | before | Bash: Read catalogue implementation |
+| 2026-11-12 21:33:58 | after | Bash: Read catalogue implementation |
+| 2026-11-12 21:34:02 | before | Bash: List MCP registry functions |
+| 2026-11-12 21:34:02 | after | Bash: List MCP registry functions |
+| 2026-11-12 21:34:04 | before | Bash: Read MCP connect and store_tools |
+| 2026-11-12 21:34:05 | after | Bash: Read MCP connect and store_tools |
+| 2026-11-12 21:34:19 | before | Bash: Find plugin schemas and templates |
+| 2026-11-12 21:34:19 | after | Bash: Find plugin schemas and templates |
+| 2026-11-12 21:34:21 | before | Bash: Inspect plugin type definitions |
+| 2026-11-12 21:34:22 | after | Bash: Inspect plugin type definitions |
+| 2026-11-12 21:34:33 | before | Bash: See script references in a plugin command |
+| 2026-11-12 21:34:33 | after | Bash: See script references in a plugin command |
+| 2026-11-12 21:34:37 | before | Bash: Check substitutions in slash expansion |
+| 2026-11-12 21:34:38 | after | Bash: Check substitutions in slash expansion |
+| 2026-11-12 21:34:48 | before | Bash: Read MAF deduplication rule |
+| 2026-11-12 21:34:49 | after | Bash: Read MAF deduplication rule |
+| 2026-11-12 21:35:02 | before | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/backend/maf/harness_kit/skill_scopes.py |
+| 2026-11-12 21:35:03 | after | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/backend/maf/harness_kit/skill_scopes.py |
+| 2026-11-12 21:35:04 | before | Bash: Read current _skills function |
+| 2026-11-12 21:35:04 | after | Bash: Read current _skills function |
+| 2026-11-12 21:35:13 | before | Bash: Wire skill scopes into harness |
+| 2026-11-12 21:35:15 | after | Bash: Wire skill scopes into harness |
+| 2026-11-12 21:35:26 | before | Bash: Add argument signatures to the tool index |
+| 2026-11-12 21:35:27 | after | Bash: Add argument signatures to the tool index |
+| 2026-11-12 21:35:34 | before | Bash: Inspect MAF ChatContext fields |
+| 2026-11-12 21:35:34 | after | Bash: Inspect MAF ChatContext fields |
+| 2026-11-12 21:35:36 | before | Bash: Read strict_args chat middleware as a pattern |
+| 2026-11-12 21:35:37 | after | Bash: Read strict_args chat middleware as a pattern |
+| 2026-11-12 21:35:46 | before | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/backend/maf/harness_kit/unknown_tools.py |
+| 2026-11-12 21:35:50 | after | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/backend/maf/harness_kit/unknown_tools.py |
+| 2026-11-12 21:35:50 | before | Bash: Wire hints middleware and spot-check suggestions |
+| 2026-11-12 21:35:51 | after | Bash: Wire hints middleware and spot-check suggestions |
+| 2026-11-12 21:36:02 | before | Bash: Add purpose map to suggestions and recheck |
+| 2026-11-12 21:36:03 | after | Bash: Add purpose map to suggestions and recheck |
+| 2026-11-12 21:36:09 | before | Bash: Check timestamp helpers in MCP registry |
+| 2026-11-12 21:36:09 | after | Bash: Check timestamp helpers in MCP registry |
+| 2026-11-12 21:36:18 | before | Bash: Add background MCP refresh and wire it |
+| 2026-11-12 21:36:20 | after | Bash: Add background MCP refresh and wire it |
+| 2026-11-12 21:36:25 | before | Bash: Read slash expansion |
+| 2026-11-12 21:36:25 | after | Bash: Read slash expansion |
+| 2026-11-12 21:36:41 | before | Bash: Add Claude Code substitutions and spot-check |
+| 2026-11-12 21:36:42 | after | Bash: Add Claude Code substitutions and spot-check |
+| 2026-11-12 21:36:49 | before | Bash: Move substitute to its own module |
+| 2026-11-12 21:36:50 | after | Bash: Move substitute to its own module |
+| 2026-11-12 21:36:56 | before | Bash: Check imports; pass project dir to expansion |
+| 2026-11-12 21:36:58 | after | Bash: Check imports; pass project dir to expansion |
+| 2026-11-12 21:37:00 | before | Bash: Tidy plugins imports |
+| 2026-11-12 21:37:02 | after | Bash: Tidy plugins imports |
+| 2026-11-12 21:37:26 | before | Write: /Users/sarveshtalele/Downloads/agentic-harness/tests/test_harness_discovery.py |
+| 2026-11-12 21:37:28 | after | Write: /Users/sarveshtalele/Downloads/agentic-harness/tests/test_harness_discovery.py |
+| 2026-11-12 21:37:28 | before | Bash: Run step 4 tests |
+| 2026-11-12 21:37:33 | after | Bash: Run step 4 tests |
+| 2026-11-12 21:37:38 | before | Bash: Check whether the test file existed in git |
+| 2026-11-12 21:37:38 | after | Bash: Check whether the test file existed in git |
+| 2026-11-12 21:37:43 | before | Bash: Restore original test file; keep new tests separately |
+| 2026-11-12 21:37:50 | after | Bash: Restore original test file; keep new tests separately |
+| 2026-11-12 21:37:54 | before | Bash: Find the index-format assertion |
+| 2026-11-12 21:37:55 | after | Bash: Find the index-format assertion |
+| 2026-11-12 21:37:59 | before | Bash: Update the format assertion and rerun |
+| 2026-11-12 21:38:04 | after | Bash: Update the format assertion and rerun |
+| 2026-11-12 21:38:12 | before | Write: /Users/sarveshtalele/.claude/projects/-Users-sarveshtalele-Downloads-agentic-harness/memory/check-before-creating-files.md |
+| 2026-11-12 21:38:12 | after | Write: /Users/sarveshtalele/.claude/projects/-Users-sarveshtalele-Downloads-agentic-harness/memory/check-before-creating-files.md |
+| 2026-11-12 21:38:13 | before | Bash: Read memory index |
+| 2026-11-12 21:38:14 | after | Bash: Read memory index |
+| 2026-11-12 21:38:17 | before | Write: /Users/sarveshtalele/.claude/projects/-Users-sarveshtalele-Downloads-agentic-harness/memory/MEMORY.md |
+| 2026-11-12 21:38:17 | after | Write: /Users/sarveshtalele/.claude/projects/-Users-sarveshtalele-Downloads-agentic-harness/memory/MEMORY.md |
+| 2026-11-12 21:38:19 | before | Bash: Full suite with step 4 |
+| 2026-11-12 21:42:58 | after | Bash: Full suite with step 4 |
+| 2026-11-12 21:43:14 | before | Bash: Update spec, architecture, tasks, plan, tracker |
+| 2026-11-12 21:43:15 | after | Bash: Update spec, architecture, tasks, plan, tracker |
+| 2026-11-12 21:43:18 | before | mcp__ccd_turn__wrap_up |
+| 2026-11-12 21:43:18 | after | mcp__ccd_turn__wrap_up |
+| 2026-11-12 21:43:30 | turn end |  |
+| 2026-11-12 21:43:48 | user | <system-reminder> ## The user forked this session from another session The user forked this session at this point to ask something on the side; continue from h… |
+| 2026-11-12 21:44:00 | turn end |  |
+| 2026-11-12 21:44:03 | user | Commit and push |
+| 2026-11-12 21:44:08 | before | Bash: Commit and push step 4 |

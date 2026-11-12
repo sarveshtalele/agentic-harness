@@ -10,6 +10,8 @@ import json
 import logging
 import re
 
+from backend.config import sandbox_dir
+
 from ag_ui.core import RunErrorEvent, TextMessageContentEvent, TextMessageEndEvent, TextMessageStartEvent
 from ag_ui.encoder import EventEncoder
 from agent_framework.ag_ui import AgentFrameworkAgent
@@ -97,7 +99,7 @@ async def agui(agent_key: str, request: Request):
         elif agent_key == harness.AGENT:
             # plan H3: plugins' SessionStart and UserPromptSubmit hooks see the human's own text, before any expansion
             hooked = None if body.get("resume") else await prompt_hooks.submitted(project_id, thread_id, auth.acting_user(project_id), clean, first)
-            command = plugins.expand_slash(clean)  # the model gets the command's instructions; the chat keeps what the user typed
+            command = plugins.expand_slash(clean, project_dir=sandbox_dir(project_id))  # the model gets the command's instructions; the chat keeps what the user typed
             # a plugin command becomes the thread's active command, given in the instructions on every call (never compacted)
             pinned = active_command.remember(harness.state_dirs(project_id, auth.acting_user(project_id))["tools"], thread_id, command)
             text = clean if pinned else (command or clean)

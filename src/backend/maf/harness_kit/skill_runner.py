@@ -120,11 +120,13 @@ class SkillHealthProvider(ContextProvider):
     """Before each run: skills whose scripts cannot run here, with the reason. Uses cached checks; skills not checked yet
     are checked in the background without executing anything."""
 
-    def __init__(self, paths: list):
+    def __init__(self, paths: list, note: str = ""):
         super().__init__("skill_health")
-        self.paths = paths
+        self.paths, self.note = paths, note
 
     async def before_run(self, *, agent, session, context, state) -> None:
+        if self.note:  # repository skills are repository content
+            context.extend_instructions(self.source_id, self.note)
         dirs = skill_dirs(self.paths)
         script_health.refresh_in_background(dirs)
         flagged = [(d.name, r) for d in dirs if (r := script_health.cached_report(d)) and r["verdict"] == "flagged"]

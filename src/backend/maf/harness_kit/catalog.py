@@ -26,6 +26,13 @@ RISKY = frozenset({"start_workflow", "run_tests", "save_document", "remember", "
 THREAD_ID = re.compile(r"^[A-Za-z0-9_-]{1,80}$")
 
 
+def signature(schema: dict | None) -> str:
+    """`(a, b?)` from a JSON schema: argument names, `?` for optional ones, so a deferred tool's call shape is visible."""
+    props = (schema or {}).get("properties") or {}
+    required = set((schema or {}).get("required") or ())
+    return "(" + ", ".join(n if n in required else f"{n}?" for n in props) + ")"
+
+
 def one_line(text: str | None) -> str:
     lines = (text or "").strip().splitlines()
     return lines[0][:160] if lines else ""
@@ -42,13 +49,21 @@ class Catalogue:
             granted = set(server.allowed_tools or ())
             for listed in mcp_registry.tools(server.name):  # stored from the server's real list_tools
                 if listed["name"] in granted and listed["name"] not in self.tools:  # ponytail: a name clash keeps the platform tool
-                    self.mcp[listed["name"]] = (server, one_line(listed.get("description")))
+                    self.mcp[listed["name"]] = (server, one_line(listed.get("description")), signature(listed.get("input_schema")))
 
     def __contains__(self, name: str) -> bool:
         return name in self.tools or name in self.mcp
 
     def descriptions(self) -> dict[str, str]:
-        return {**{n: one_line(t.description) for n, t in self.tools.items()}, **{n: d for n, (_, d) in self.mcp.items()}}
+        return {**{n: one_line(t.description) for n, t in self.tools.items()}, **{n: d for n, (_, d, _s) in self.mcp.items()}}
+
+    def signatures(self) -> dict[str, str]:
+        def of(tool) -> str:
+            try:
+                return signature(tool.parameters())
+            except Exception:  # noqa: BLE001 - a tool without a readable schema is listed without arguments
+                return "()"
+        return {**{n: of(t) for n, t in self.tools.items()}, **{n: sig for n, (_, _d, sig) in self.mcp.items()}}
 
     def search(self, query: str) -> list[dict]:
         words = query.lower().split()
@@ -92,7 +107,8 @@ class LoadedTools(ContextProvider):
     async def before_run(self, *, agent, session, context, state) -> None:
         # The model can only call what it knows exists: list every loadable tool by name and purpose; schemas stay deferred
         loaded = set(self.names())
-        index = [f"- {n}: {d}" for n, d in sorted(self.catalogue.descriptions().items()) if n not in loaded]
+        sigs = self.catalogue.signatures()  # argument names next to each name: the model guessed them before (live run, 2026-11-11)
+        index = [f"- {n}{sigs.get(n, '()')}: {d}" for n, d in sorted(self.catalogue.descriptions().items()) if n not in loaded]
         if index:
             context.extend_instructions(self.source_id, "Tools you can load with load_tools (exact names; each stays loaded for this chat):\n" + "\n".join(index))
         if tools := self.catalogue.resolve(sorted(loaded)):

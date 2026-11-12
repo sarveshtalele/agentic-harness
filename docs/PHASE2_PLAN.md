@@ -481,7 +481,7 @@ The audit test itself had one wrong path (`/chat` exists only as `/chat/<id>`); 
 | 1 | Discovery eval baseline (20 tasks) | numbers recorded before any harness change |
 | 2 | Persistent Bash and PowerShell with background, monitor, spill (section 5), permission modes and rules (9.1, 9.2); short tool names move to step 4 | parity matrix shell and permission rows green on 3 OS |
 | 3 | Script runtime all languages, health flags (section 7) | script rows green; flagged skills shown in `/skills` |
-| 4 | Capability index, skill scopes, live reload, MCP refresh (sections 8, 7.1) | eval after shows the gain |
+| 4 | Capability index, skill scopes, live reload, MCP refresh (sections 8, 7.1). Built without typed per-script tools, `describe_contract` and tool renames: real shells, exact plugin run lines and the after-write check cover them (architecture doc section 14) | eval after shows the gain |
 | 5 | Hooks (9.3), settings files (9.4), sessions, checkpoints, rewind, subagents, background tasks (10) | hook and session rows green |
 | 6 | `aqh` CLI interactive and headless (11.1) | golden tests green; live CLI session on macOS and Windows |
 | 7 | OS sandbox tiers (5.3) | sandbox rows green on macOS and Linux; Windows documented as T0 or container |

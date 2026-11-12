@@ -1158,3 +1158,10 @@ In accordance with the repository documentation policy (**1 Single Doc for Each 
 - **Harness:** MAF discovers every script extension; the per-turn runner (`harness_kit/skill_runner.py`) runs with the conversation's workspace as working directory, refuses flagged scripts, and flags a skill after three failed runs in a row. Flagged skills are listed in the model's instructions and shown with a badge on `/skills`; an admin can check again.
 - **Skill Studio:** publishing also requires "scripts can run here".
 
+## 14. Discovery (Phase 2 step 4, 2026-11-12)
+
+- **Skills:** personal folders (not on web), then the repository's `.claude/skills`, `.github/skills`, `.agents/skills`, then plugins and the platform, the first skill of a name winning (Claude Code's precedence). Read on every turn. Repository skills carry a note that they are repository content.
+- **Tools:** the deferred index shows each tool's arguments; an invented name gets the nearest real names; MCP tool lists older than 10 minutes are refreshed in the background for the next turn.
+- **Commands:** Claude Code's substitutions in plugin commands (`core/command_args.py`).
+- **Not built, on purpose:** typed per-script tools and `describe_contract`. Plugin commands already give exact run lines with real paths, the harness has a real shell since step 2, and the active command's check runs after each write and lists what is missing. Renaming MAF's file tools to Claude Code's short names is left out too: MAF fixes those names and the plugin hooks map them already.
+
