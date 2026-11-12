@@ -116,7 +116,7 @@ def output(thread_id: str, task_id: str, tail_chars: int = 8000) -> str:
     task = _tasks.get(thread_id, {}).get(task_id)
     if task is None:
         return f"No background task {task_id} in this conversation. Known: {', '.join(_tasks.get(thread_id, {})) or 'none'}."
-    text = redact(task.log.read_text(encoding="utf-8", errors="replace")) if task.log.is_file() else ""
+    text = redact(_plain(task.log.read_text(encoding="utf-8", errors="replace"))) if task.log.is_file() else ""
     with task.lock:
         task.seen = task.log.stat().st_size if task.log.is_file() else 0
     shown = text[-tail_chars:]
@@ -144,7 +144,7 @@ def updates(thread_id: str) -> list[str]:
             if size > task.seen:
                 with task.log.open("rb") as f:
                     f.seek(task.seen)
-                    new = redact(f.read().decode("utf-8", errors="replace"))
+                    new = redact(_plain(f.read().decode("utf-8", errors="replace")))
                 task.seen = size
             ended = task.proc.poll() is not None and not task.ended_reported
             if ended:
@@ -154,6 +154,12 @@ def updates(thread_id: str) -> list[str]:
             body = f"\n{new[-UPDATE_CHARS:]}" if new else ""
             notes.append(head + body)
     return notes
+
+
+def _plain(text: str) -> str:
+    from backend.maf.harness_kit.shells import ANSI
+
+    return ANSI.sub("", text)
 
 
 def stop_all(thread_id: str) -> None:

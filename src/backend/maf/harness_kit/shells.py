@@ -32,6 +32,7 @@ KINDS = ("bash", "powershell")
 DEFAULT_MS, MAX_MS = 120_000, 600_000
 INLINE, PREVIEW = 30_000, 2_000
 BENIGN_EXIT1 = frozenset({"grep", "rg", "egrep", "fgrep", "find", "diff", "test", "["})
+ANSI = re.compile(r"\x1b\[[0-9;?]*[A-Za-z]|\x1b\][^\x07]*\x07")  # pwsh starts its output with terminal codes such as ESC[?1l
 CD = re.compile(r"(^|[;&|\s(])(cd|pushd|popd|chdir|Set-Location|Push-Location|Pop-Location|sl)(\s|$|;)", re.I)
 _sessions: dict[tuple[str, str], tuple[LocalShellTool, asyncio.AbstractEventLoop]] = {}
 
@@ -109,7 +110,7 @@ def _spill(ws, text: str) -> str:
 
 
 def render(ws, kind: str, command: str, result, timeout_s: float, note: str = "") -> str:
-    out, err = redact(result.stdout or ""), redact(result.stderr or "")
+    out, err = redact(ANSI.sub("", result.stdout or "")), redact(ANSI.sub("", result.stderr or ""))
     body = out + (f"\n[stderr]\n{err}" if err.strip() else "")
     if len(body) > INLINE:
         saved = _spill(ws, body)
@@ -141,8 +142,8 @@ async def run(ws, kind: str, command: str, timeout_ms: int | None = None) -> str
 
 
 async def _keep_inside(ws, kind: str, shell: LocalShellTool) -> str:
-    probe = "pwd" if kind == "bash" else "(Get-Location).Path"
-    where = (await shell.run(probe, timeout=10)).stdout.strip().splitlines()
+    probe = ("pwd -W 2>/dev/null || pwd" if os.name == "nt" else "pwd") if kind == "bash" else "(Get-Location).Path"  # Git Bash: -W gives C:/...
+    where = ANSI.sub("", (await shell.run(probe, timeout=10)).stdout).strip().splitlines()
     root = Path(ws.root).resolve()
     try:
         inside = bool(where) and (Path(where[-1]).resolve() == root or root in Path(where[-1]).resolve().parents)
