@@ -6,16 +6,14 @@ person switches back; `auto` is `acceptEdits` until the OS sandbox exists (plan 
 allows everything, refused on the web profile.
 Rules use Claude Code's syntax: `Bash(npm run *)`, `PowerShell(Get-ChildItem *)`, `Read(docs/**)`, `Edit(src/**)`,
 `mcp__server__tool`, or a bare tool name; lists `allow`, `ask`, `deny`; deny wins, then ask, then allow. A shell rule
-must hold for every part of a compound command (`a && b | c`). Sources: the user's `~/.aqh/settings.json` (not on web),
-then the workspace's `.claude/settings.json`, `.claude/settings.local.json` and `.aqh/settings.json`. Repository files
-are untrusted (CLAUDE.md), so their `deny` and `ask` rules apply but their `allow` rules are ignored until a folder
-can be marked trusted (plan step 6). Decisions plug into MAF: `approval_rule` auto-approves allow and deny decisions so
+must hold for every part of a compound command (`a && b | c`). Sources: the settings files (`core/settings_files.py`):
+managed, the user's own, then the workspace's; repository files are untrusted (CLAUDE.md), so only their `deny` and
+`ask` rules apply until a folder can be marked trusted (plan step 6). Decisions plug into MAF: `approval_rule` auto-approves allow and deny decisions so
 no card shows, and `enforce` (function middleware) refuses the denied calls with the reason.
 """
 from __future__ import annotations
 
 import fnmatch
-import json
 import re
 from pathlib import Path
 
@@ -23,6 +21,7 @@ from agent_framework import FunctionInvocationContext, function_middleware
 from pydantic import BaseModel
 
 from backend import config
+from backend.core import settings_files
 
 MODES = ("default", "acceptEdits", "plan", "auto", "bypass")
 CLAUDE_NAME = {"bash": "Bash", "run_shell": "Bash", "powershell": "PowerShell", "file_access_write": "Write", "file_access_replace": "Edit",
@@ -58,20 +57,8 @@ def set_mode(state_dir: Path, thread_id: str, mode: str) -> str:
 
 
 def load_rules(root: Path | None) -> dict[str, list[str]]:
-    rules = {"allow": [], "ask": [], "deny": []}
-    sources: list[tuple[Path, bool]] = []
-    if config.PROFILE != "web":
-        sources.append((Path.home() / ".aqh" / "settings.json", True))
-    if root is not None:
-        sources += [(Path(root) / rel, False) for rel in (".claude/settings.json", ".claude/settings.local.json", ".aqh/settings.json")]
-    for path, trusted in sources:
-        try:
-            block = json.loads(path.read_text(encoding="utf-8")).get("permissions", {}) if path.is_file() else {}
-        except (OSError, ValueError, AttributeError):
-            continue
-        for kind in ("deny", "ask") + (("allow",) if trusted else ()):
-            rules[kind] += [r for r in block.get(kind, []) if isinstance(r, str)]
-    return rules
+    """Rules from the settings files (`core/settings_files.py`): managed and user files may allow; project files only tighten."""
+    return settings_files.permission_rules(root)
 
 
 def _matches(rule: str, tool: str, args: dict, any_part: bool = False) -> bool:
@@ -149,3 +136,22 @@ def enforce(mode_of, rules_of):
         await call_next()
 
     return permissions
+
+
+def subagent_gate(mode_of, rules_of):
+    """For helper agents, which have no approval channel: only what the rules or the mode already allow runs."""
+
+    @function_middleware
+    async def gate(context: FunctionInvocationContext, call_next) -> None:
+        args = context.arguments.model_dump() if isinstance(context.arguments, BaseModel) else dict(context.arguments or {})
+        verdict, reason = decide(context.function.name, args, mode_of(), rules_of())
+        if verdict == "deny":
+            context.result = f"Refused: {reason}. Nothing ran."
+        elif verdict == "ask":
+            context.result = ("Not run: this needs the user's approval, and a helper agent cannot ask for it. Report what to run or "
+                              "write; the main agent will do it with an approval card.")
+        else:
+            await call_next()
+
+    return gate
+

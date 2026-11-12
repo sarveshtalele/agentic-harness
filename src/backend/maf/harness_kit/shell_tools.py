@@ -45,7 +45,8 @@ def note(ws) -> str:
     if v := versions():
         lines.append("Tools: " + "; ".join(f"{k} {val}" for k, val in v.items()))
     lines.append(f"Working directory: the workspace {ws.root}. Shells keep `cd` and variables between calls. Run skill scripts with the "
-                 "interpreter their SKILL.md names (python, node for .ts/.js, bash for .sh, pwsh for .ps1). Use run_in_background for "
+                 "interpreter their SKILL.md names (python, node for .ts/.js, bash for .sh, pwsh for .ps1); Node 22.18 or newer runs a .ts "
+                 "file directly (`node scripts/x.ts`), so no tsx, npx or install is needed. Use run_in_background for "
                  "servers and watchers, then task_output and task_stop.")
     return "\n".join(lines)
 

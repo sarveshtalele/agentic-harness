@@ -3,7 +3,6 @@ import asyncio
 import os
 import shutil
 from pathlib import Path
-from types import SimpleNamespace
 
 import pytest
 from fastapi.testclient import TestClient
@@ -24,6 +23,17 @@ def skill(root: Path, name: str, md_body: str, files: dict) -> Path:
     for rel, text in files.items():
         (folder / rel).write_text(text, encoding="utf-8")
     return folder
+
+
+def real(folder, script: str):
+    """MAF's own FileSkill and FileSkillScript for a folder: the runner must work with what MAF really hands it."""
+    from agent_framework import FileSkillsSource
+
+    skill = next(s for s in asyncio.run(FileSkillsSource([str(folder.parent)], script_runner=lambda *a: None,
+                                                                                   script_extensions=rt.SCRIPT_EXTENSIONS).get_skills(None))
+                 if Path(s.path).name == folder.name)
+    found = skill.get_script(script)
+    return skill, asyncio.run(found) if asyncio.iscoroutine(found) else found
 
 
 def test_language_detection_order(tmp_path):
@@ -65,7 +75,7 @@ def test_a_typescript_script_runs_with_arguments_through_the_harness_runner(tmp_
                    {"scripts/sum.ts": "const nums: number[] = process.argv.slice(2).map(Number);\nconsole.log(`sum ${nums.reduce((a, b) => a + b, 0)}`);\n"})
     monkeypatch.setattr(skill_runner.testing, "check_profile", lambda: None)
     run = skill_runner.runner(None)
-    out = asyncio.run(run(SimpleNamespace(path=str(folder), name="ts-skill"), SimpleNamespace(full_path=str(folder / "scripts" / "sum.ts")), ["2", "3"]))
+    out = asyncio.run(run(*real(folder, "scripts/sum.ts"), ["2", "3"]))
     assert "sum 5" in out and "typescript script scripts/sum.ts: exit code 0" in out
 
 
@@ -73,13 +83,13 @@ def test_a_flagged_script_is_refused_and_three_failures_flag_a_skill(tmp_path, m
     monkeypatch.setattr(skill_runner.testing, "check_profile", lambda: None)
     run = skill_runner.runner(None)
     broken = skill(tmp_path, "broken", "", {"scripts/b.py": "def (:\n"})
-    out = asyncio.run(run(SimpleNamespace(path=str(broken), name="broken"), SimpleNamespace(full_path=str(broken / "scripts" / "b.py")), []))
+    out = asyncio.run(run(*real(broken, "scripts/b.py"), []))
     assert out.startswith("Refused: the skill broken is flagged") and "SyntaxError" in out
     failing = skill(tmp_path, "failing", "", {"scripts/f.py": "import sys\nsys.exit(0 if '--help' in sys.argv else 3)\n"})
     for _ in range(skill_runner.FAILS_TO_FLAG):
-        out = asyncio.run(run(SimpleNamespace(path=str(failing), name="failing"), SimpleNamespace(full_path=str(failing / "scripts" / "f.py")), []))
+        out = asyncio.run(run(*real(failing, "scripts/f.py"), []))
         assert "exit code 3" in out
-    out = asyncio.run(run(SimpleNamespace(path=str(failing), name="failing"), SimpleNamespace(full_path=str(failing / "scripts" / "f.py")), []))
+    out = asyncio.run(run(*real(failing, "scripts/f.py"), []))
     assert "failed 3 runs in a row" in out and out.startswith("Refused")
 
 
@@ -87,8 +97,7 @@ def test_a_flagged_script_is_refused_and_three_failures_flag_a_skill(tmp_path, m
 def test_a_powershell_script_runs(tmp_path, monkeypatch):
     folder = skill(tmp_path, "ps-skill", "", {"scripts/hello.ps1": "param([string]$Name = 'x')\nWrite-Output \"hello $Name\"\n"})
     monkeypatch.setattr(skill_runner.testing, "check_profile", lambda: None)
-    out = asyncio.run(skill_runner.runner(None)(SimpleNamespace(path=str(folder), name="ps-skill"),
-                                                SimpleNamespace(full_path=str(folder / "scripts" / "hello.ps1")), ["-Name", "shop"]))
+    out = asyncio.run(skill_runner.runner(None)(*real(folder, "scripts/hello.ps1"), ["-Name", "shop"]))
     assert "hello shop" in out
 
 

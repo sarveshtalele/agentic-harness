@@ -43,9 +43,10 @@ def score(task: dict, calls: list[dict], answer: str, root: Path | None) -> dict
 
 def _check(checks: dict, answer: str, root: Path | None) -> tuple[bool, str]:
     text = answer.lower()
-    if any_of := checks.get("answer_any"):
-        if not any(a.lower() in text for a in any_of):
-            return False, f"answer has none of {any_of}"
+    any_of, patterns = checks.get("answer_any") or [], checks.get("answer_regex") or []
+    if any_of or patterns:  # one fact, stated in any of these words or patterns (a table row counts as much as a sentence)
+        if not (any(a.lower() in text for a in any_of) or any(re.search(r, answer, re.I) for r in patterns)):
+            return False, f"answer has none of {any_of + patterns}"
     if all_of := checks.get("answer_all"):
         missing = [a for a in all_of if a.lower() not in text]
         if missing:

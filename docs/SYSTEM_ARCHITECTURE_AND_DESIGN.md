@@ -1165,3 +1165,10 @@ In accordance with the repository documentation policy (**1 Single Doc for Each 
 - **Commands:** Claude Code's substitutions in plugin commands (`core/command_args.py`).
 - **Not built, on purpose:** typed per-script tools and `describe_contract`. Plugin commands already give exact run lines with real paths, the harness has a real shell since step 2, and the active command's check runs after each write and lists what is missing. Renaming MAF's file tools to Claude Code's short names is left out too: MAF fixes those names and the plugin hooks map them already.
 
+## 15. Settings, hooks, checkpoints and helper permissions (Phase 2 step 5, 2026-11-13)
+
+- **Settings files** (`core/settings_files.py`): managed, the person's own (`~/.aqh/settings.json`, `~/.claude/settings.json`; not on web), then the project's. Project files are repository content: only their deny and ask rules count until a folder can be trusted (CLI, step 6).
+- **Hooks:** plugin hooks plus managed and user settings hooks; `command` and `http` types; `updatedInput` rewrites a call (never a write's path); PostToolUseFailure on a failed tool; Stop hooks keep a turn going when they block, at most three times.
+- **Checkpoints:** each harness write, edit or delete keeps the file's earlier content per turn; `/rewind` lists turns and `/rewind <n>` restores files to before that turn (the conversation stays). Shell changes are not tracked.
+- **Helper agents:** a plugin agent that declares Write, Edit or Bash may use them only where rules or mode allow without a card; anything else goes back to the main agent. Sessions as JSONL and conversation rewind come with the CLI (step 6).
+

@@ -1,0 +1,433 @@
+{
+ "summary": {
+  "label": "baseline",
+  "tasks": 20,
+  "passed": 13,
+  "pass_rate": 0.65,
+  "selection_rate": 0.85,
+  "first_try_rate": 0.55,
+  "arg_validity": 1.0,
+  "invented_names": 6,
+  "refused_calls": 0,
+  "calls_per_task": 10.8,
+  "rescored": [
+   "run-tests",
+   "use-agents-skill"
+  ],
+  "note": "answer checks for these tasks widened to patterns on 2026-11-13; file checks kept"
+ },
+ "tasks": [
+  {
+   "id": "find-function",
+   "kind": "read",
+   "calls": 2,
+   "tools_used": [
+    "grep"
+   ],
+   "selected": true,
+   "first_ok": true,
+   "invalid_args": 0,
+   "invented": 0,
+   "refused": 0,
+   "passed": true,
+   "why": "ok",
+   "seconds": 7,
+   "error": ""
+  },
+  {
+   "id": "list-scripts",
+   "kind": "read",
+   "calls": 2,
+   "tools_used": [
+    "file_access_ls",
+    "list_files"
+   ],
+   "selected": true,
+   "first_ok": true,
+   "invalid_args": 0,
+   "invented": 0,
+   "refused": 0,
+   "passed": true,
+   "why": "ok",
+   "seconds": 30,
+   "error": ""
+  },
+  {
+   "id": "read-requirements",
+   "kind": "read",
+   "calls": 1,
+   "tools_used": [
+    "read_file"
+   ],
+   "selected": true,
+   "first_ok": true,
+   "invalid_args": 0,
+   "invented": 0,
+   "refused": 0,
+   "passed": true,
+   "why": "ok",
+   "seconds": 9,
+   "error": ""
+  },
+  {
+   "id": "todo-search",
+   "kind": "read",
+   "calls": 1,
+   "tools_used": [
+    "grep"
+   ],
+   "selected": true,
+   "first_ok": true,
+   "invalid_args": 0,
+   "invented": 0,
+   "refused": 0,
+   "passed": true,
+   "why": "ok",
+   "seconds": 7,
+   "error": ""
+  },
+  {
+   "id": "run-tests",
+   "kind": "run",
+   "calls": 11,
+   "tools_used": [
+    "file_access_read_lines",
+    "file_access_replace",
+    "list_files",
+    "list_findings",
+    "read_file",
+    "run_tests",
+    "scan_repository"
+   ],
+   "selected": true,
+   "first_ok": true,
+   "invalid_args": 0,
+   "invented": 1,
+   "refused": 0,
+   "passed": false,
+   "why": "answer has none of ['1 fail', 'one fail', '1 test fail', 'one test fail', '1 failed', '\\\\b1\\\\b[^\\\\n]{0,40}fail', 'fail[^\\\\n]{0,40}\\\\b1\\\\b']",
+   "seconds": 32,
+   "error": ""
+  },
+  {
+   "id": "fix-bug",
+   "kind": "edit",
+   "calls": 5,
+   "tools_used": [
+    "grep",
+    "list_files",
+    "read_file",
+    "run_shell"
+   ],
+   "selected": false,
+   "first_ok": false,
+   "invalid_args": 0,
+   "invented": 0,
+   "refused": 0,
+   "passed": false,
+   "why": "app/pricing.py still has '0.6'",
+   "seconds": 15,
+   "error": ""
+  },
+  {
+   "id": "create-file",
+   "kind": "edit",
+   "calls": 10,
+   "tools_used": [
+    "find_tools",
+    "list_files",
+    "load_tools",
+    "read_file",
+    "run_tests"
+   ],
+   "selected": false,
+   "first_ok": false,
+   "invalid_args": 0,
+   "invented": 1,
+   "refused": 0,
+   "passed": false,
+   "why": "docs/notes.md missing",
+   "seconds": 28,
+   "error": ""
+  },
+  {
+   "id": "run-ts",
+   "kind": "script",
+   "calls": 15,
+   "tools_used": [
+    "list_files",
+    "read_file",
+    "run_shell"
+   ],
+   "selected": true,
+   "first_ok": false,
+   "invalid_args": 0,
+   "invented": 0,
+   "refused": 0,
+   "passed": true,
+   "why": "ok",
+   "seconds": 79,
+   "error": ""
+  },
+  {
+   "id": "npm-script",
+   "kind": "script",
+   "calls": 4,
+   "tools_used": [
+    "list_files",
+    "read_file",
+    "run_shell"
+   ],
+   "selected": true,
+   "first_ok": false,
+   "invalid_args": 0,
+   "invented": 0,
+   "refused": 0,
+   "passed": true,
+   "why": "ok",
+   "seconds": 18,
+   "error": ""
+  },
+  {
+   "id": "run-bash",
+   "kind": "script",
+   "calls": 5,
+   "tools_used": [
+    "file_access_ls",
+    "read_file",
+    "run_shell"
+   ],
+   "selected": true,
+   "first_ok": false,
+   "invalid_args": 0,
+   "invented": 0,
+   "refused": 0,
+   "passed": true,
+   "why": "ok",
+   "seconds": 26,
+   "error": ""
+  },
+  {
+   "id": "run-powershell",
+   "kind": "script",
+   "calls": 4,
+   "tools_used": [
+    "find_tools",
+    "grep",
+    "list_files",
+    "read_file"
+   ],
+   "selected": false,
+   "first_ok": false,
+   "invalid_args": 0,
+   "invented": 0,
+   "refused": 0,
+   "passed": true,
+   "why": "ok",
+   "seconds": 15,
+   "error": ""
+  },
+  {
+   "id": "pipeline",
+   "kind": "shell",
+   "calls": 3,
+   "tools_used": [
+    "grep",
+    "run_shell"
+   ],
+   "selected": true,
+   "first_ok": false,
+   "invalid_args": 0,
+   "invented": 0,
+   "refused": 0,
+   "passed": true,
+   "why": "ok",
+   "seconds": 203,
+   "error": ""
+  },
+  {
+   "id": "persistent-env",
+   "kind": "shell",
+   "calls": 5,
+   "tools_used": [
+    "run_shell",
+    "todos_add"
+   ],
+   "selected": true,
+   "first_ok": true,
+   "invalid_args": 0,
+   "invented": 0,
+   "refused": 0,
+   "passed": true,
+   "why": "ok",
+   "seconds": 29,
+   "error": ""
+  },
+  {
+   "id": "git-log",
+   "kind": "shell",
+   "calls": 1,
+   "tools_used": [
+    "run_shell"
+   ],
+   "selected": true,
+   "first_ok": true,
+   "invalid_args": 0,
+   "invented": 0,
+   "refused": 0,
+   "passed": true,
+   "why": "ok",
+   "seconds": 7,
+   "error": ""
+  },
+  {
+   "id": "skills-listed",
+   "kind": "skill",
+   "calls": 24,
+   "tools_used": [
+    "file_access_replace_lines",
+    "find_tools",
+    "list_documents",
+    "list_files",
+    "list_findings",
+    "load_tools",
+    "read_file",
+    "run_tests",
+    "sandbox_status",
+    "scan_repository",
+    "todos_add",
+    "todos_complete"
+   ],
+   "selected": true,
+   "first_ok": true,
+   "invalid_args": 0,
+   "invented": 0,
+   "refused": 0,
+   "passed": false,
+   "why": "answer lacks ['release-notes', 'changelog-lint']",
+   "seconds": 63,
+   "error": ""
+  },
+  {
+   "id": "use-claude-skill",
+   "kind": "skill",
+   "calls": 71,
+   "tools_used": [
+    "file_access_ls",
+    "file_access_read",
+    "find_tools",
+    "grep",
+    "list_documents",
+    "list_files",
+    "load_skill",
+    "load_tools",
+    "mode_get",
+    "project_status",
+    "read_file",
+    "run_tests",
+    "sandbox_status"
+   ],
+   "selected": true,
+   "first_ok": false,
+   "invalid_args": 0,
+   "invented": 2,
+   "refused": 0,
+   "passed": false,
+   "why": "answer has none of ['shop-notes-ready']",
+   "seconds": 100,
+   "error": ""
+  },
+  {
+   "id": "use-agents-skill",
+   "kind": "skill",
+   "calls": 7,
+   "tools_used": [
+    "find_tools",
+    "list_files",
+    "load_skill",
+    "read_file",
+    "run_shell"
+   ],
+   "selected": true,
+   "first_ok": true,
+   "invalid_args": 0,
+   "invented": 0,
+   "refused": 0,
+   "passed": true,
+   "why": "ok",
+   "seconds": 18,
+   "error": ""
+  },
+  {
+   "id": "no-mcp",
+   "kind": "discovery",
+   "calls": 2,
+   "tools_used": [
+    "find_tools"
+   ],
+   "selected": true,
+   "first_ok": true,
+   "invalid_args": 0,
+   "invented": 0,
+   "refused": 0,
+   "passed": true,
+   "why": "ok",
+   "seconds": 11,
+   "error": ""
+  },
+  {
+   "id": "background-server",
+   "kind": "shell",
+   "calls": 33,
+   "tools_used": [
+    "file_access_ls",
+    "file_memory_read",
+    "find_tools",
+    "list_documents",
+    "list_files",
+    "list_findings",
+    "load_tools",
+    "mode_get",
+    "project_status",
+    "read_file",
+    "run_shell",
+    "run_tests",
+    "sandbox_status",
+    "todos_add"
+   ],
+   "selected": true,
+   "first_ok": true,
+   "invalid_args": 0,
+   "invented": 2,
+   "refused": 0,
+   "passed": false,
+   "why": "answer has none of ['200']",
+   "seconds": 89,
+   "error": ""
+  },
+  {
+   "id": "delegate",
+   "kind": "agent",
+   "calls": 10,
+   "tools_used": [
+    "background_agents_clear_completed_task",
+    "background_agents_get_task_results",
+    "background_agents_start_task",
+    "background_agents_wait_for_first_completion",
+    "file_access_replace",
+    "read_file",
+    "run_shell",
+    "todos_complete"
+   ],
+   "selected": true,
+   "first_ok": false,
+   "invalid_args": 0,
+   "invented": 0,
+   "refused": 0,
+   "passed": false,
+   "why": "answer has none of ['discount']",
+   "seconds": 43,
+   "error": ""
+  }
+ ]
+}

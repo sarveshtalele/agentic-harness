@@ -86,3 +86,39 @@ def test_a_repository_skill_reaches_the_harness_and_a_wrong_tool_name_gets_a_hin
             assert any("Closest real tools:" in call for call in scripted.calls[1:])  # the invented shell_exec got real names back
     finally:
         llm.set_client_override(None)
+
+
+def test_run_shell_is_the_primary_shell_where_real_shells_exist(tmp_path):
+    from types import SimpleNamespace
+
+    from backend.maf.harness_kit import shells
+
+    if not shells.available():
+        import pytest
+
+        pytest.skip("no bash or PowerShell on this machine")
+    ws = SimpleNamespace(root=tmp_path, project_id="p", thread_id="t", user_id="u", env=lambda: {})
+    names = [t.name for t in shells.tools(ws)]
+    assert "run_shell" in names and set(shells.available()) <= set(names)
+
+
+def test_a_deferred_tool_called_by_name_is_loaded_on_the_spot():
+    import asyncio
+    from types import SimpleNamespace
+
+    from backend.maf.harness_kit.unknown_tools import unknown_tool_hints
+
+    run_tests = SimpleNamespace(name="run_tests")
+    added = []
+    catalogue = SimpleNamespace(tools={"run_tests": run_tests}, descriptions=lambda: {"run_tests": "Run the tests."},
+                                resolve=lambda names: [run_tests])
+    loaded = SimpleNamespace(add=added.extend)
+    result = SimpleNamespace(type="function_result", result='Error: Requested function "run_tests" not found.')
+    context = SimpleNamespace(options={"tools": [SimpleNamespace(name="bash")]}, messages=[SimpleNamespace(contents=[result])])
+
+    async def nothing():
+        return None
+
+    asyncio.run(unknown_tool_hints(catalogue, loaded)(context, nothing))
+    assert added == ["run_tests"] and run_tests in context.options["tools"]
+    assert "loaded now, so call it again" in result.result

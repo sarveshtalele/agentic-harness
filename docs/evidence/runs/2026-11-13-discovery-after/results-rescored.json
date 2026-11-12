@@ -1,0 +1,438 @@
+{
+ "summary": {
+  "label": "after",
+  "tasks": 20,
+  "passed": 16,
+  "pass_rate": 0.8,
+  "selection_rate": 0.95,
+  "first_try_rate": 0.6,
+  "arg_validity": 1.0,
+  "invented_names": 36,
+  "refused_calls": 0,
+  "calls_per_task": 11.8,
+  "rescored": [
+   "run-tests",
+   "use-agents-skill"
+  ],
+  "note": "answer checks for these tasks widened to patterns on 2026-11-13; file checks kept"
+ },
+ "tasks": [
+  {
+   "id": "find-function",
+   "kind": "read",
+   "calls": 2,
+   "tools_used": [
+    "grep"
+   ],
+   "selected": true,
+   "first_ok": true,
+   "invalid_args": 0,
+   "invented": 0,
+   "refused": 0,
+   "passed": true,
+   "why": "ok",
+   "seconds": 8,
+   "error": ""
+  },
+  {
+   "id": "list-scripts",
+   "kind": "read",
+   "calls": 1,
+   "tools_used": [
+    "file_access_ls"
+   ],
+   "selected": true,
+   "first_ok": true,
+   "invalid_args": 0,
+   "invented": 0,
+   "refused": 0,
+   "passed": true,
+   "why": "ok",
+   "seconds": 5,
+   "error": ""
+  },
+  {
+   "id": "read-requirements",
+   "kind": "read",
+   "calls": 1,
+   "tools_used": [
+    "read_file"
+   ],
+   "selected": true,
+   "first_ok": true,
+   "invalid_args": 0,
+   "invented": 0,
+   "refused": 0,
+   "passed": true,
+   "why": "ok",
+   "seconds": 7,
+   "error": ""
+  },
+  {
+   "id": "todo-search",
+   "kind": "read",
+   "calls": 1,
+   "tools_used": [
+    "grep"
+   ],
+   "selected": true,
+   "first_ok": true,
+   "invalid_args": 0,
+   "invented": 0,
+   "refused": 0,
+   "passed": true,
+   "why": "ok",
+   "seconds": 10,
+   "error": ""
+  },
+  {
+   "id": "run-tests",
+   "kind": "run",
+   "calls": 5,
+   "tools_used": [
+    "find_tools",
+    "load_tools",
+    "run_tests",
+    "todos_add"
+   ],
+   "selected": true,
+   "first_ok": true,
+   "invalid_args": 0,
+   "invented": 1,
+   "refused": 0,
+   "passed": true,
+   "why": "ok",
+   "seconds": 20,
+   "error": ""
+  },
+  {
+   "id": "fix-bug",
+   "kind": "edit",
+   "calls": 10,
+   "tools_used": [
+    "file_access_replace",
+    "find_tools",
+    "list_files",
+    "load_tools",
+    "read_file",
+    "run_tests",
+    "todos_add",
+    "todos_complete"
+   ],
+   "selected": true,
+   "first_ok": false,
+   "invalid_args": 0,
+   "invented": 1,
+   "refused": 0,
+   "passed": true,
+   "why": "ok",
+   "seconds": 37,
+   "error": ""
+  },
+  {
+   "id": "create-file",
+   "kind": "edit",
+   "calls": 12,
+   "tools_used": [
+    "find_tools",
+    "list_files",
+    "load_tools",
+    "read_file",
+    "run_shell",
+    "run_tests"
+   ],
+   "selected": false,
+   "first_ok": false,
+   "invalid_args": 0,
+   "invented": 3,
+   "refused": 0,
+   "passed": false,
+   "why": "docs/notes.md missing",
+   "seconds": 43,
+   "error": ""
+  },
+  {
+   "id": "run-ts",
+   "kind": "script",
+   "calls": 7,
+   "tools_used": [
+    "bash",
+    "file_access_ls",
+    "file_access_read",
+    "read_file",
+    "run_shell"
+   ],
+   "selected": true,
+   "first_ok": false,
+   "invalid_args": 0,
+   "invented": 2,
+   "refused": 0,
+   "passed": true,
+   "why": "ok",
+   "seconds": 25,
+   "error": ""
+  },
+  {
+   "id": "npm-script",
+   "kind": "script",
+   "calls": 4,
+   "tools_used": [
+    "bash",
+    "read_file",
+    "run_shell"
+   ],
+   "selected": true,
+   "first_ok": false,
+   "invalid_args": 0,
+   "invented": 1,
+   "refused": 0,
+   "passed": true,
+   "why": "ok",
+   "seconds": 16,
+   "error": ""
+  },
+  {
+   "id": "run-bash",
+   "kind": "script",
+   "calls": 4,
+   "tools_used": [
+    "bash",
+    "list_files",
+    "read_file",
+    "run_shell"
+   ],
+   "selected": true,
+   "first_ok": false,
+   "invalid_args": 0,
+   "invented": 1,
+   "refused": 0,
+   "passed": true,
+   "why": "ok",
+   "seconds": 18,
+   "error": ""
+  },
+  {
+   "id": "run-powershell",
+   "kind": "script",
+   "calls": 5,
+   "tools_used": [
+    "file_access_read",
+    "list_files",
+    "run_shell"
+   ],
+   "selected": true,
+   "first_ok": false,
+   "invalid_args": 0,
+   "invented": 3,
+   "refused": 0,
+   "passed": false,
+   "why": "answer has none of ['shop-env-ok', 'not installed', \"isn't installed\", 'is not available', 'not available']",
+   "seconds": 19,
+   "error": ""
+  },
+  {
+   "id": "pipeline",
+   "kind": "shell",
+   "calls": 2,
+   "tools_used": [
+    "bash",
+    "run_shell"
+   ],
+   "selected": true,
+   "first_ok": true,
+   "invalid_args": 0,
+   "invented": 1,
+   "refused": 0,
+   "passed": true,
+   "why": "ok",
+   "seconds": 13,
+   "error": ""
+  },
+  {
+   "id": "persistent-env",
+   "kind": "shell",
+   "calls": 4,
+   "tools_used": [
+    "bash",
+    "mode_get",
+    "run_shell"
+   ],
+   "selected": true,
+   "first_ok": false,
+   "invalid_args": 0,
+   "invented": 1,
+   "refused": 0,
+   "passed": true,
+   "why": "ok",
+   "seconds": 19,
+   "error": ""
+  },
+  {
+   "id": "git-log",
+   "kind": "shell",
+   "calls": 41,
+   "tools_used": [
+    "bash",
+    "file_access_ls",
+    "grep",
+    "list_files",
+    "load_skill",
+    "project_status",
+    "read_file",
+    "read_skill_resource",
+    "run_shell",
+    "run_skill_script",
+    "sandbox_status"
+   ],
+   "selected": true,
+   "first_ok": true,
+   "invalid_args": 0,
+   "invented": 4,
+   "refused": 0,
+   "passed": false,
+   "why": "answer has none of ['commit', 'upload', 'import', 'initial']",
+   "seconds": 108,
+   "error": ""
+  },
+  {
+   "id": "skills-listed",
+   "kind": "skill",
+   "calls": 2,
+   "tools_used": [
+    "list_files"
+   ],
+   "selected": true,
+   "first_ok": true,
+   "invalid_args": 0,
+   "invented": 0,
+   "refused": 0,
+   "passed": true,
+   "why": "ok",
+   "seconds": 8,
+   "error": ""
+  },
+  {
+   "id": "use-claude-skill",
+   "kind": "skill",
+   "calls": 29,
+   "tools_used": [
+    "bash",
+    "file_access_ls",
+    "file_access_read",
+    "grep",
+    "list_files",
+    "load_skill",
+    "read_file",
+    "run_shell",
+    "run_skill_script"
+   ],
+   "selected": true,
+   "first_ok": true,
+   "invalid_args": 0,
+   "invented": 5,
+   "refused": 0,
+   "passed": false,
+   "why": "answer has none of ['shop-notes-ready']",
+   "seconds": 101,
+   "error": ""
+  },
+  {
+   "id": "use-agents-skill",
+   "kind": "skill",
+   "calls": 28,
+   "tools_used": [
+    "bash",
+    "grep",
+    "list_files",
+    "load_skill",
+    "read_file",
+    "run_shell",
+    "run_skill_script"
+   ],
+   "selected": true,
+   "first_ok": true,
+   "invalid_args": 0,
+   "invented": 5,
+   "refused": 0,
+   "passed": true,
+   "why": "ok",
+   "seconds": 93,
+   "error": ""
+  },
+  {
+   "id": "no-mcp",
+   "kind": "discovery",
+   "calls": 2,
+   "tools_used": [
+    "find_tools"
+   ],
+   "selected": true,
+   "first_ok": true,
+   "invalid_args": 0,
+   "invented": 0,
+   "refused": 0,
+   "passed": true,
+   "why": "ok",
+   "seconds": 11,
+   "error": ""
+  },
+  {
+   "id": "background-server",
+   "kind": "shell",
+   "calls": 11,
+   "tools_used": [
+    "bash",
+    "find_tools",
+    "run_in_background",
+    "todos_add",
+    "todos_complete",
+    "todos_get_all",
+    "todos_get_remaining"
+   ],
+   "selected": true,
+   "first_ok": false,
+   "invalid_args": 0,
+   "invented": 2,
+   "refused": 0,
+   "passed": true,
+   "why": "ok",
+   "seconds": 51,
+   "error": ""
+  },
+  {
+   "id": "delegate",
+   "kind": "agent",
+   "calls": 66,
+   "tools_used": [
+    "background_agents_clear_completed_task",
+    "background_agents_get_all_tasks",
+    "background_agents_get_task_results",
+    "background_agents_start_task",
+    "background_agents_wait_for_first_completion",
+    "file_access_ls",
+    "file_access_read",
+    "find_tools",
+    "list_files",
+    "list_findings",
+    "load_tools",
+    "project_status",
+    "read_file",
+    "run_shell",
+    "run_tests",
+    "sandbox_status",
+    "scan_repository",
+    "todos_add",
+    "todos_get_all"
+   ],
+   "selected": true,
+   "first_ok": true,
+   "invalid_args": 0,
+   "invented": 6,
+   "refused": 0,
+   "passed": true,
+   "why": "ok",
+   "seconds": 146,
+   "error": ""
+  }
+ ]
+}

@@ -16,7 +16,7 @@ MARK = "Closest real tools:"
 
 
 # words models use for a tool's purpose -> the real tools for it (the first that exist are suggested)
-PURPOSE = {("shell", "exec", "command", "terminal", "cmd", "bash", "sh", "run_command", "powershell", "pwsh"): ("bash", "powershell", "run_shell"),
+PURPOSE = {("shell", "exec", "command", "terminal", "cmd", "bash", "sh", "run_command", "powershell", "pwsh", "background", "run_in_background"): ("bash", "powershell", "run_shell"),
            ("read", "open", "cat", "view", "get_file"): ("file_access_read", "read_file"),
            ("write", "create", "save", "put_file"): ("file_access_write",),
            ("edit", "replace", "patch", "modify", "update_file"): ("file_access_replace", "file_access_replace_lines"),
@@ -36,18 +36,27 @@ def suggest(name: str, offered: set[str], deferred: set[str]) -> str:
     return f" {MARK} {', '.join(near)}." + (f" Load {', '.join(loading)} with load_tools first." if loading else "")
 
 
-def unknown_tool_hints(deferred_names):
-    """`deferred_names`: a callable returning the catalogue's loadable names for this turn."""
+def unknown_tool_hints(catalogue, loaded=None):
+    """`catalogue`: this turn's deferred tools; `loaded`: the thread's LoadedTools, so a deferred platform tool the model
+    called by name is loaded on the spot (the 2026-11-13 eval: run_tests and project_status were called unloaded 9 times)."""
 
     @chat_middleware
     async def hints(context, call_next) -> None:
-        offered = {getattr(t, "name", "") for t in context.options.get("tools") or []}
+        tools = context.options.get("tools")
+        offered = {getattr(t, "name", "") for t in tools or []}
         for message in context.messages or []:
             for content in getattr(message, "contents", None) or []:
                 result = getattr(content, "result", None)
                 if getattr(content, "type", "") == "function_result" and isinstance(result, str) and MARK not in result:
                     if found := NOT_FOUND.search(result):
-                        content.result = result + suggest(found[1], offered, set(deferred_names()))
+                        name = found[1]
+                        if loaded is not None and name in getattr(catalogue, "tools", {}) and name not in offered and tools is not None:
+                            loaded.add([name])
+                            tools.extend(catalogue.resolve([name]))
+                            offered.add(name)
+                            content.result = result + f" {MARK} {name} was not loaded yet; it is loaded now, so call it again."
+                        else:
+                            content.result = result + suggest(name, offered, set(catalogue.descriptions()))
         await call_next()
 
     return hints

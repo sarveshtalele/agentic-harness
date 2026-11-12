@@ -19,7 +19,7 @@ import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from backend.core import auth, ledger, plugin_grants, plugins
+from backend.core import auth, ledger, plugin_grants, plugins, settings_files, settings_http
 from backend.core.security import PathEscape, redact, safe_path
 from backend.qe.execution.runners import clean_env
 
@@ -35,6 +35,7 @@ class Outcome:
     context: list[str] = field(default_factory=list)  # additionalContext from each hook, for the model
     errors: list[str] = field(default_factory=list)  # hooks that failed; reported, never fatal
     ran: list[dict] = field(default_factory=list)  # one row per hook run, as audited
+    updated_input: dict | None = None  # a PreToolUse hook's `updatedInput`: the tool runs with this input instead
 
 
 def _hooks_json(plugin) -> dict:
@@ -47,7 +48,7 @@ def _hooks_json(plugin) -> dict:
     return data.get("hooks", {}) if isinstance(data, dict) and isinstance(data.get("hooks"), dict) else {}
 
 
-def matching(event: str, tool_name: str = "") -> list[tuple]:
+def matching(event: str, tool_name: str = "", project_dir=None) -> list[tuple]:
     """(plugin, hook) pairs for this event, in plugin order. A matcher is a regex on the Claude Code tool name; none matches all."""
     granted = plugin_grants.allowed(plugin_grants.role_of(auth.current_user.get()))
     found = []
@@ -59,6 +60,20 @@ def matching(event: str, tool_name: str = "") -> list[tuple]:
             if matcher and matcher != "*" and not re.fullmatch(matcher, tool_name or ""):
                 continue
             found += [(plugin, hook) for hook in group.get("hooks", []) if hook.get("type") == "command" and hook.get("command")]
+    return found + settings_matching(event, tool_name, project_dir)
+
+
+def settings_matching(event: str, tool_name: str = "", project_dir=None) -> list[tuple]:
+    """Hooks from the managed and user settings files (`core/settings_files.py`), after the plugins' (Claude Code runs both)."""
+    from types import SimpleNamespace
+
+    found = []
+    for layer, hook in settings_files.hooks(event, project_dir):
+        matcher = hook.pop("_matcher", "")
+        if matcher and matcher != "*" and not re.fullmatch(matcher, tool_name or ""):
+            continue
+        if (hook.get("type") == "command" and hook.get("command")) or (hook.get("type") == "http" and hook.get("url")):
+            found.append((SimpleNamespace(id=f"settings-{layer.name}", root=layer.path.parent), hook))
     return found
 
 
@@ -85,11 +100,15 @@ def _parse(stdout: str) -> dict:
 
 def _run_one(plugin, hook: dict, payload: dict, project_dir: Path, env_extra: dict, outcome: Outcome) -> None:
     timeout = int(hook.get("timeout") or DEFAULT_TIMEOUT)
-    argv = argv_of(str(hook["command"]), plugin.root, project_dir)
-    env = clean_env({**env_extra, "CLAUDE_PLUGIN_ROOT": str(plugin.root), "CLAUDE_PROJECT_DIR": str(project_dir)})
-    row = {"plugin": plugin.id, "event": payload.get("hook_event_name"), "tool": payload.get("tool_name", ""), "command": redact(str(hook["command"]))}
+    row = {"plugin": plugin.id, "event": payload.get("hook_event_name"), "tool": payload.get("tool_name", ""),
+           "command": redact(str(hook.get("command") or hook.get("url")))}
     try:
-        proc = subprocess.run(argv, input=json.dumps(payload), capture_output=True, text=True, timeout=timeout, cwd=project_dir, env=env, shell=False)
+        if hook.get("type") == "http":
+            proc = settings_http.post(str(hook["url"]), payload, hook.get("headers"), timeout)
+        else:
+            argv = argv_of(str(hook["command"]), plugin.root, project_dir)
+            env = clean_env({**env_extra, "CLAUDE_PLUGIN_ROOT": str(plugin.root), "CLAUDE_PROJECT_DIR": str(project_dir)})
+            proc = subprocess.run(argv, input=json.dumps(payload), capture_output=True, text=True, timeout=timeout, cwd=project_dir, env=env, shell=False)
     except (OSError, subprocess.TimeoutExpired, ValueError) as exc:
         error = f"{plugin.id} {row['event']} hook did not run: {type(exc).__name__}: {exc}"
         outcome.errors.append(redact(error))
@@ -101,6 +120,8 @@ def _run_one(plugin, hook: dict, payload: dict, project_dir: Path, env_extra: di
     blocked = proc.returncode == 2 or out.get("decision") == "block" or specific.get("permissionDecision") == "deny" or out.get("continue") is False
     if blocked and not outcome.blocked:
         outcome.blocked, outcome.reason = True, reason or f"{plugin.id} hook blocked this"
+    if isinstance(specific.get("updatedInput"), dict) and not blocked:
+        outcome.updated_input = {**(outcome.updated_input or {}), **specific["updatedInput"]}
     if text := str(specific.get("additionalContext") or "").strip():
         outcome.context.append(text)
     if proc.returncode not in (0, 2):
@@ -112,7 +133,7 @@ def _run_one(plugin, hook: dict, payload: dict, project_dir: Path, env_extra: di
 def dispatch(event: str, payload: dict, *, project_id: str, project_dir: Path, tool_name: str = "", env_extra: dict | None = None) -> Outcome:
     """Runs every matching hook in order (all of them, as Claude Code does) and audits each run in the project's ledger."""
     outcome = Outcome()
-    hooks = matching(event, tool_name)
+    hooks = matching(event, tool_name, project_dir)
     body = {"hook_event_name": event, "cwd": str(project_dir), **payload}
     for plugin, hook in hooks:
         _run_one(plugin, hook, body, project_dir, env_extra or {}, outcome)

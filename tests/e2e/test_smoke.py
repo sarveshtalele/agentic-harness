@@ -117,7 +117,7 @@ def test_main_pages_open_and_show_their_empty_state(browser):
     expect(tab.get_by_text("No users yet").or_(tab.locator("table, tr").first)).to_be_visible(timeout=15_000)
     tab.locator("a[href='/settings']").first.click()
     expect(tab.get_by_role("heading", name=re.compile("Settings|Configuration")).first).to_be_visible(timeout=15_000)
-    expect(tab.get_by_text("Model missing").or_(tab.locator("h1, h2, h3").first)).to_be_visible(timeout=15_000)
+    expect(tab.get_by_text("Model missing").or_(tab.locator("h1, h2, h3").first).first).to_be_visible(timeout=15_000)  # both can match: strict mode needs one
     assert not errors, errors
     tab.context.close()
 

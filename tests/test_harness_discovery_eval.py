@@ -77,6 +77,7 @@ def _run(client, project_id: str, prompt: str) -> tuple[list[dict], str, str]:
         events = _send(client, thread["id"], None, f"r{n}", resume=[{"interruptId": i["id"], "status": "resolved", "payload": {"approved": True}} for i in interrupts])
     messages = client.get(f"/api/chats/{thread['id']}").json()["messages"]
     answer = messages[-1]["content"] if messages and messages[-1]["role"] == "assistant" else ""
+    _run.last_messages = [{"role": m["role"], "content": str(m["content"])[:1500]} for m in messages]  # the whole thread, for review
     return [calls[c] for c in order], answer, error
 
 
@@ -94,7 +95,7 @@ def test_discovery_eval():
                 calls, answer, error = _run(client, project_id, task["prompt"])
                 rate_limited = "429" in error or "busy" in error.lower()
                 log.write(json.dumps({"task": task["id"], "attempt": attempt, "seconds": round(time.monotonic() - started), "error": error,
-                                      "calls": calls, "answer": answer[:3000]}) + "\n")
+                                      "calls": calls, "answer": answer[:3000], "thread": getattr(_run, "last_messages", [])}) + "\n")
                 log.flush()
                 if not (rate_limited and not calls):
                     break

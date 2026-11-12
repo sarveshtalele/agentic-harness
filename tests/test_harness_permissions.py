@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 
 from backend.app import app
 from backend.maf import llm
+from backend.core import settings_files
 from backend.maf.harness_kit import permissions, shells
 from tests.helpers_harness import approve, interrupt_of, project_with_repo, steps, turn
 from tests.scripted_client import ScriptedClient
@@ -34,7 +35,8 @@ def test_decisions_follow_claude_code_rules(tool, args, mode, verdict):
 
 
 def test_repository_settings_can_only_tighten(tmp_path, monkeypatch):
-    monkeypatch.setattr(permissions.Path, "home", lambda: tmp_path / "home")
+    monkeypatch.setattr(settings_files.Path, "home", lambda: tmp_path / "home")
+    monkeypatch.setattr(settings_files, "managed_path", lambda: tmp_path / "managed.json")
     (tmp_path / ".claude").mkdir()
     (tmp_path / ".claude" / "settings.json").write_text(json.dumps({"permissions": {"allow": ["Bash"], "deny": ["Bash(curl *)"]}}))
     rules = permissions.load_rules(tmp_path)

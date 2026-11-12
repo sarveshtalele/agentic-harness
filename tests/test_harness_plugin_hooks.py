@@ -72,17 +72,20 @@ def test_a_message_that_is_not_a_phrase_records_nothing(client, thread):
     assert not (sandbox_dir(thread["project_id"]) / ".qe").exists()  # the whole message must be the phrase
 
 
-def test_plugin_agents_are_read_only_background_agents(client, thread):
+def test_plugin_agents_read_and_only_declared_writers_get_gated_writes(client, thread):
     llm.set_client_override(ScriptedClient([]))
     agent = harness.build(thread["project_id"], thread["id"], engine.start, user_id="admin")
     background = next(p for p in agent.context_providers if isinstance(p, BackgroundAgentsProvider))._agents
     plugin = {k: a for k, a in background.items() if k.startswith("agentic-qe:")}
     assert len(plugin) == 9 and "agentic-qe:coverage-auditor" in plugin and "test-design-architect" in background
-    for child in plugin.values():
+    routed = {k for k, a in plugin.items() if "approval card" in a.description}
+    assert routed == {"agentic-qe:defect-diagnostician", "agentic-qe:qa-execution-engineer"}  # their files declare Bash (and Edit/Write)
+    shells_of = lambda child: {getattr(t, "name", "") for t in child.default_options.get("tools") or []} & {"bash", "powershell"}
+    for name, child in plugin.items():
         access = [p for p in child.context_providers if isinstance(p, FileAccessProvider)]
-        assert len(access) == 1 and access[0].disable_write_tools is True
-        assert not [t for t in child.default_options.get("tools") or []]  # no shell or write tool of its own
-    assert "Bash" in plugin["agentic-qe:defect-diagnostician"].description  # it says the harness keeps Write, Edit and Bash
+        assert len(access) == 1
+        assert access[0].disable_write_tools is (name != "agentic-qe:defect-diagnostician")  # only it declares Write and Edit
+        assert bool(shells_of(child)) is (name in routed)  # the rest get no shell; the routed ones get one behind the gate
 
 
 def test_subagent_stop_runs_when_a_plugin_agent_finishes(client, thread):

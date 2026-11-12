@@ -525,3 +525,15 @@ The audit test itself had one wrong path (`/chat` exists only as `/chat/<id>`); 
 - Atlassian: Cloud only (remote server).
 - LSP and notebook editing come after the core.
 - CodeAct (the model writing programs that call tools) is not planned.
+
+## 20. Discovery eval results (2026-11-13)
+
+Same 20 tasks, real model (deepseek-v4-flash-global), every approval approved; scored by `backend/maf/evals/discovery.py`. Two answer checks were widened to patterns after the runs (a table row "Failed | 1" states the same fact as "1 failed"), and all three runs were re-scored with the same rule (`results-rescored.json` in each folder).
+
+| Run | Code | Passed | Right tool used | Right tool first | Valid arguments | Invented tool names |
+|---|---|---|---|---|---|---|
+| Baseline | `b76ddbd` (before steps 2 to 4) | 13/20 (65%) | 85% | 55% | 100% | 6 |
+| After steps 2 to 4 | `c6897c7` | 16/20 (80%) | 95% | 60% | 100% | 36 |
+| After the eval fixes | working tree, 2026-11-13 | 18/20 (90%) | 95% | 55% | 99% | 4 |
+
+The eval found: `run_skill_script` crashed on MAF's real skill objects (fixed); the model kept calling the web-only `run_shell` (now the primary shell's alias on local and desktop); deferred tools were called unloaded (now loaded on the spot). Still failing: `create-file` (the model explored and never wrote) and `run-ts` (the model tried `npx tsx`; the shell note now says Node runs .ts directly). Evidence: `docs/evidence/runs/2026-11-13-discovery-{baseline,after,after-fixes}/`.

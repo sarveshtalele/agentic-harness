@@ -143,17 +143,19 @@ async def _keep_inside(ws, kind: str, shell: LocalShellTool) -> str:
     return f"\nShell cwd was reset to {root} (commands stay inside the workspace)."
 
 
-def tools(ws) -> list:
+def tools(ws, approval: str = "always_require") -> list:
     """`bash` and `powershell` for this workspace, only for the shells installed here. Each asks for approval."""
     from backend.maf.harness_kit import bg_tasks
 
-    made = []
-    for kind, program in available().items():
-        made.append(_tool(ws, kind, program, bg_tasks))
+    found = available()
+    made = [_tool(ws, kind, program, bg_tasks, approval) for kind, program in found.items()]
+    if found:  # the web runner's name, which models keep using (25 calls in the 2026-11-13 eval): the primary shell under it
+        kind = "bash" if "bash" in found else "powershell"
+        made.append(_tool(ws, kind, found[kind], bg_tasks, approval, name="run_shell"))
     return made
 
 
-def _tool(ws, kind: str, program: str, bg_tasks):
+def _tool(ws, kind: str, program: str, bg_tasks, approval: str = "always_require", name: str | None = None):
     label = "Bash" if kind == "bash" else "PowerShell"
     where = f"{program} ({sys.platform})"
 
@@ -165,7 +167,8 @@ def _tool(ws, kind: str, program: str, bg_tasks):
             return bg_tasks.start(ws, kind, program, command, description, timeout_ms)
         return await run(ws, kind, command, timeout_ms)
 
-    return tool(func=call, name=kind, approval_mode="always_require",
+    alias = f" `run_shell` is this same {label} session." if name else ""
+    return tool(func=call, name=name or kind, approval_mode=approval,
                 description=(f"Run a {label} command in a persistent {label} session in the project workspace ({where}). `cd` and variables "
                              "carry to the next call; pipes, &&, redirects and scripts work. Output over 30,000 characters is saved to a file. "
-                             "Use run_in_background for servers and long jobs, then task_output and task_stop."))
+                             "Use run_in_background for servers and long jobs, then task_output and task_stop." + alias))

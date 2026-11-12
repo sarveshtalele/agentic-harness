@@ -45,13 +45,14 @@ from backend.maf.harness_kit.hook_middleware import guarded
 from backend.maf.harness_kit.shell import ShellProvider, WorkspaceShell
 from backend.maf.harness_kit.shell_tools import ShellToolsProvider
 from backend.maf.harness_kit.bg_tasks import BackgroundProvider
-from backend.maf.harness_kit import permissions, skill_scopes
+from backend.maf.harness_kit import checkpoints, permissions, skill_scopes
 from backend.maf.harness_kit.skill_runner import SkillHealthProvider, runner as skill_runner, skill_dirs  # noqa: F401
 from backend.core.script_runtime import SCRIPT_EXTENSIONS
 from backend.maf.harness_kit.strict_args import strict_arguments
 from backend.maf.harness_kit.unknown_tools import unknown_tool_hints
 from backend.maf.harness_kit.write_first import write_first
 from backend.maf.harness_kit.nudges import while_working
+from backend.maf.harness_kit.stop_hooks import with_stop_hooks
 from backend.maf.harness_kit.catalog import CORE, RISKY, Catalogue, LoadedTools
 from backend.maf.harness_kit.snapshots import APPROVALS, SNAPSHOTS, scope, session_id  # noqa: F401 - used by maf/agui.py and api/chat.py
 from backend.maf.runtime import ProjectContext, tool_audit
@@ -123,6 +124,7 @@ def build(project_id: str, thread_id: str, start_run, *, user_id: str | None = N
     telemetry = governance.telemetry(AGENT, project_id, None, "chat", model, user_id, ref, json.dumps([]), also_allowed=frozenset(catalogue.mcp))
     client = llm.client(model, max_rounds=HARNESS_MAX_ROUNDS, max_tool_calls=HARNESS_MAX_TOOL_CALLS, detailed_errors=True)
     compaction = _compaction(client, model, HARNESS_CONTEXT_TOKENS - max_output, telemetry)
+    keep_going, next_message = with_stop_hooks(ws, while_working(todos_remaining(looping_modes=["execute"])), todos_remaining_message)
     world, providers = _world(ws)
     providers.append(SkillHealthProvider(skill_scopes.ordered(ws.root if ws else None, plugins.skill_paths(role=plugin_grants.role_of(auth.current_user.get()))),
                                          note=skill_scopes.note(ws.root if ws else None)))
@@ -144,16 +146,17 @@ def build(project_id: str, thread_id: str, start_run, *, user_id: str | None = N
         skills_provider=_skills(ws),
         # like Claude Code and Codex the harness does the work; risky tools still stop for an approval card. /plan switches mode
         mode_provider=AgentModeProvider(default_mode="execute"),
-        background_agents=specialists.build(project_id, user_id) + plugin_agents.build(project_id, user_id, model, ws) or None,
+        background_agents=specialists.build(project_id, user_id) + plugin_agents.build(project_id, user_id, model, ws, mode, rules) or None,
         # in execute mode MAF re-runs the turn while todos stay open; a pending approval always stops it
-        loop_should_continue=while_working(todos_remaining(looping_modes=["execute"])),
-        loop_next_message=todos_remaining_message,
+        loop_should_continue=keep_going,  # open todos, then the Stop hooks (stop_hooks.py)
+        loop_next_message=next_message,
         loop_max_iterations=HARNESS_MAX_ROUNDS,
         disable_web_search=True,  # no data leaves through a hosted search tool
         context_providers=[ProjectContext(project_id, full=True), loaded, workspace.WorkspaceContext(ws), *providers],
         auto_approval_rules=[permissions.approval_rule(lambda: mode, lambda: rules)],  # allow and deny skip the card
-        middleware=[permissions.enforce(lambda: mode, lambda: rules), strict_arguments, unknown_tool_hints(lambda: list(catalogue.descriptions())), write_first(thread_id, ws.root if ws else None, command), *([verify.verifier(ws, command)] if ws and command else []),
-                    turn_budget(thread_id, resume=f"/{command['name']} {command['args']}".rstrip() if command else "continue"), tool_hygiene(), error_shape(), tool_audit(AGENT, project_id, None, "chat"), *([guarded(ws)] if ws else []), telemetry],
+        middleware=[permissions.enforce(lambda: mode, lambda: rules), strict_arguments, unknown_tool_hints(catalogue, loaded), write_first(thread_id, ws.root if ws else None, command), *([verify.verifier(ws, command)] if ws and command else []),
+                    turn_budget(thread_id, resume=f"/{command['name']} {command['args']}".rstrip() if command else "continue"), tool_hygiene(), error_shape(), tool_audit(AGENT, project_id, None, "chat"), *([guarded(ws), checkpoints.checkpoint(ws, checkpoints.folder(dirs["tools"], thread_id), checkpoints.new_turn())] if ws else []),
+                    telemetry],
         **world,
     )
 

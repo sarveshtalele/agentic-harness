@@ -44,6 +44,24 @@ def claude_call(name: str, args: dict, root) -> tuple[str, dict]:
     return "Bash", {"command": f"rm {shlex.quote(path)}"}
 
 
+def _args(context) -> dict:
+    return context.arguments.model_dump() if isinstance(context.arguments, BaseModel) else dict(context.arguments or {})
+
+
+CLAUDE_KEYS = {"command": "command", "file_path": "file_name", "content": "content", "old_string": "old_string", "new_string": "new_string"}
+
+
+def _apply(context, name: str, updated: dict) -> None:
+    """Merge a hook's updatedInput (Claude Code's field names) into this call's arguments."""
+    mapped = {CLAUDE_KEYS.get(k, k): v for k, v in updated.items() if CLAUDE_KEYS.get(k, k) in _args(context)}
+    if name in WRITES and "file_name" in mapped:
+        mapped.pop("file_name")  # a hook may not redirect a write to another path
+    if isinstance(context.arguments, BaseModel):
+        context.arguments = context.arguments.model_copy(update=mapped)
+    else:
+        context.arguments = {**dict(context.arguments or {}), **mapped}
+
+
 def guarded(workspace):
     """The middleware for one harness turn; `workspace` is the thread's workspace (hooks get it as CLAUDE_PROJECT_DIR)."""
 
@@ -57,7 +75,7 @@ def guarded(workspace):
         if name not in SHELL_NAMES and name not in WRITES:
             await call_next()
             return
-        args = context.arguments.model_dump() if isinstance(context.arguments, BaseModel) else dict(context.arguments)
+        args = _args(context)
         tool, tool_input = claude_call(name, args, workspace.root)
         target = str(args.get("file_name", "")) if name in WRITES else ""
         earlier = refused.get(workspace.thread_id, {}).get(target) if target else None
@@ -73,8 +91,18 @@ def guarded(workspace):
                         refused.setdefault(workspace.thread_id, {})[target] = before.reason
                     context.result = f"Blocked by a plugin hook before {name} ran. Nothing ran. Reason: {before.reason}"
                     return
-                await call_next()
-                after = await hooks("PostToolUse", tool, {"tool_input": tool_input, "tool_response": {"result": _text(context.result)[:20000]}})
+                if before.updated_input:  # Claude Code's updatedInput: a hook rewrote the call, e.g. added a flag
+                    _apply(context, name, before.updated_input)
+                    tool, tool_input = claude_call(name, _args(context), workspace.root)
+                try:
+                    await call_next()
+                except Exception as exc:
+                    await hooks("PostToolUseFailure", tool, {"tool_input": tool_input, "error": str(exc)[:4000]})
+                    raise
+                failed = _text(context.result).lstrip().startswith(("Error", "Refused"))
+                after = await hooks("PostToolUseFailure" if failed else "PostToolUse", tool,
+                                    {"tool_input": tool_input, **({"error": _text(context.result)[:4000]} if failed else
+                                                                  {"tool_response": {"result": _text(context.result)[:20000]}})})
         except leases.SandboxBusy as exc:
             context.result = exc.message
             return

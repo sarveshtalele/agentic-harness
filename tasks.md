@@ -337,7 +337,7 @@
 - [x] 2 Persistent Bash and PowerShell (background, new-output notes, spill); permission modes and rules; /mode (2026-11-12). Short tool names moved to step 4 with the capability index
 - [x] 3 Script runtime for Python, TypeScript, JavaScript, Bash, PowerShell and shebang interpreters; health checks and flags (2026-11-12)
 - [x] 4 Skill scopes (personal, repository, plugin) read every turn; tool index with arguments; nearest names for invented tools; MCP list refresh; command substitutions (2026-11-12). Eval after: waits for the model quota
-- [ ] 5 Hooks (Claude Code events and contract), settings files, sessions JSONL, checkpoints and rewind, subagents, background tasks
+- [x] 5 Settings files; hooks from settings, http hooks, updatedInput, PostToolUseFailure, Stop hooks; checkpoints and /rewind; helper-agent permissions; background tasks (step 2) (2026-11-13). Sessions as JSONL and conversation rewind move to step 6 with the CLI
 - [ ] 6 `aqh` CLI interactive and headless; live CLI session on macOS and Windows
 - [ ] 7 OS sandbox tiers (Seatbelt, bubblewrap; Windows approval or container)
 - [ ] 8 R6 credentials and desktop sign-in; desktop Terminal pane

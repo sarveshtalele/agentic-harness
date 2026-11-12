@@ -62,6 +62,7 @@ def runner(ws=None):
 
     async def run_skill_script(skill, script, args) -> str:
         folder = Path(skill.path)
+        name = _name(skill)
         target = Path(script.full_path).resolve()
         relative = target.relative_to(folder.resolve()).as_posix()
         try:
@@ -77,7 +78,7 @@ def runner(ws=None):
         mine = next((r for r in report["scripts"] if r["script"] == relative), None)
         if mine is None or mine["verdict"] == "flagged" or report.get("runtime_flag"):
             why = report.get("runtime_flag") or (mine["reason"] if mine else "not a script of this skill")
-            return f"Refused: the skill {skill.name} is flagged ({relative}: {why}). Nothing ran. Tell the user why; do not work around it."
+            return f"Refused: the skill {name} is flagged ({relative}: {why}). Nothing ran. Tell the user why; do not work around it."
         md = (folder / "SKILL.md").read_text(encoding="utf-8", errors="replace") if (folder / "SKILL.md").is_file() else ""
         plan = rt.plan(target, folder, md)
         extra, stdin = _argv(args)
@@ -86,7 +87,7 @@ def runner(ws=None):
         done = await asyncio.to_thread(rt.run, [*plan.argv, *extra], cwd=ws.root if ws else folder, env=env, stdin=stdin)
         _count(report, folder, done["exit_code"], relative)
         if ws is not None:
-            ledger.append(ws.project_id, "agent:harness", "harness.skill_script", f"{skill.name}/{relative}",
+            ledger.append(ws.project_id, "agent:harness", "harness.skill_script", f"{name}/{relative}",
                           {"language": plan.language, "exit_code": done["exit_code"], "args": redact(" ".join(extra))[:500], "user": ws.user_id})
         out = redact(done["stdout"] or "")
         err = redact(done["stderr"] or "")
@@ -94,6 +95,12 @@ def runner(ws=None):
         return f"{out[-30000:]}{tail}\n\n{plan.language} script {relative}: exit code {done['exit_code']}".strip()
 
     return run_skill_script
+
+
+def _name(skill) -> str:
+    """MAF's FileSkill keeps its name in the frontmatter (found in the 2026-11-13 eval: `.name` does not exist)."""
+    front = getattr(skill, "frontmatter", None)
+    return str(getattr(front, "name", None) or getattr(skill, "name", None) or Path(skill.path).name)
 
 
 def _count(report: dict, folder: Path, exit_code, relative: str) -> None:

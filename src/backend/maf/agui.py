@@ -25,7 +25,7 @@ from backend.core.security import redact, sha256
 from backend.db import db, new_id, now, row, rows
 from backend.maf import engine, governance, harness, llm, skill_chat, tools
 from backend.maf import runtime as agents
-from backend.maf.harness_kit import active_command, budget, permissions, prompt_hooks
+from backend.maf.harness_kit import active_command, budget, local_commands, prompt_hooks
 from backend.maf.harness_kit.nudges import HideLoopNudges
 
 router = APIRouter()
@@ -91,11 +91,9 @@ async def agui(agent_key: str, request: Request):
             last_user["content"] = clean
         first = not thread_messages(thread_id)
         _append(thread_id, "user", clean, agent_key, last_user.get("id"))
-        mode_cmd = re.match(r"^/mode(?:\s+(\S+))?\s*$", clean) if agent_key == harness.AGENT and not body.get("resume") else None
-        if mode_cmd:  # answered here, without the model and without plugin prompt hooks (they would close a plugin's write window)
-            tools_dir = harness.state_dirs(project_id, auth.acting_user(project_id))["tools"]
-            mode_reply = (permissions.set_mode(tools_dir, thread_id, mode_cmd[1]) if mode_cmd[1] else
-                          f"Permission mode for this conversation: {permissions.get_mode(tools_dir, thread_id)}. Modes: {', '.join(permissions.MODES)}.")
+        local_cmd = re.match(r"^/(mode|rewind)(?:\s+(\S+))?\s*$", clean) if agent_key == harness.AGENT and not body.get("resume") else None
+        if local_cmd:  # answered here, without the model and without plugin prompt hooks (they would close a plugin's write window)
+            mode_reply = local_commands.answer(project_id, thread_id, local_cmd[1], local_cmd[2])
         elif agent_key == harness.AGENT:
             # plan H3: plugins' SessionStart and UserPromptSubmit hooks see the human's own text, before any expansion
             hooked = None if body.get("resume") else await prompt_hooks.submitted(project_id, thread_id, auth.acting_user(project_id), clean, first)
