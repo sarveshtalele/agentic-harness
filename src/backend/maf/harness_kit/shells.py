@@ -25,6 +25,7 @@ from agent_framework_tools.shell import LocalShellTool
 from pydantic import Field
 
 from backend.core import ledger
+from backend.maf.harness_kit import os_sandbox
 from backend.core.script_runtime import find_bash, find_powershell  # noqa: F401 - also used through this module
 from backend.core.security import redact
 from backend.repos.sandbox import clean_sandbox_env
@@ -56,16 +57,17 @@ def environment(ws) -> dict[str, str]:
     return clean_sandbox_env({**ws.env(), "AQH_PROJECT_DIR": str(ws.root), "CLAUDE_PROJECT_DIR": str(ws.root)})
 
 
-async def session(ws, kind: str) -> LocalShellTool:
+async def session(ws, kind: str, sandbox: dict | None = None) -> LocalShellTool:
     """This conversation's shell of this kind, started on first use (and again if its event loop changed)."""
-    key, loop = (ws.thread_id, kind), asyncio.get_running_loop()
+    key, loop = (ws.thread_id, kind, bool(sandbox)), asyncio.get_running_loop()  # a sandboxed session is a separate process
     found = _sessions.get(key)
     if found and found[1] is loop:
         return found[0]
     program = available().get(kind)
     if not program:
         raise FileNotFoundError(f"No {kind} on this machine" + (" (install Git for Windows for bash)" if kind == "bash" and os.name == "nt" else ""))
-    shell = LocalShellTool(mode="persistent", shell=argv(kind, program), workdir=str(ws.root), confine_workdir=False, env=environment(ws),
+    command = os_sandbox.wrap(argv(kind, program), ws, sandbox["network"]) if sandbox else argv(kind, program)
+    shell = LocalShellTool(mode="persistent", shell=command, workdir=str(ws.root), confine_workdir=False, env=environment(ws),
                            timeout=None, max_stdout_bytes=1 << 20, max_stderr_bytes=256 << 10, approval_mode="always_require")
     await shell.start()
     _sessions[key] = (shell, loop)
@@ -115,8 +117,8 @@ def render(ws, kind: str, command: str, result, timeout_s: float, note: str = ""
     return f"{body.rstrip()}\n\n{status}{note}".lstrip()
 
 
-async def run(ws, kind: str, command: str, timeout_ms: int | None = None) -> str:
-    shell = await session(ws, kind)
+async def run(ws, kind: str, command: str, timeout_ms: int | None = None, sandbox: dict | None = None) -> str:
+    shell = await session(ws, kind, sandbox)
     timeout_s = min(max(timeout_ms or DEFAULT_MS, 1000), MAX_MS) / 1000
     started = time.perf_counter()
     result = await shell.run(command, timeout=timeout_s)
@@ -143,19 +145,20 @@ async def _keep_inside(ws, kind: str, shell: LocalShellTool) -> str:
     return f"\nShell cwd was reset to {root} (commands stay inside the workspace)."
 
 
-def tools(ws, approval: str = "always_require") -> list:
+def tools(ws, approval: str = "always_require", sandbox: dict | None = None) -> list:
+    """`sandbox`: {"network": bool} to run every command inside the OS sandbox (os_sandbox.py), or None."""
     """`bash` and `powershell` for this workspace, only for the shells installed here. Each asks for approval."""
     from backend.maf.harness_kit import bg_tasks
 
     found = available()
-    made = [_tool(ws, kind, program, bg_tasks, approval) for kind, program in found.items()]
+    made = [_tool(ws, kind, program, bg_tasks, approval, sandbox=sandbox) for kind, program in found.items()]
     if found:  # the web runner's name, which models keep using (25 calls in the 2026-11-13 eval): the primary shell under it
         kind = "bash" if "bash" in found else "powershell"
-        made.append(_tool(ws, kind, found[kind], bg_tasks, approval, name="run_shell"))
+        made.append(_tool(ws, kind, found[kind], bg_tasks, approval, name="run_shell", sandbox=sandbox))
     return made
 
 
-def _tool(ws, kind: str, program: str, bg_tasks, approval: str = "always_require", name: str | None = None):
+def _tool(ws, kind: str, program: str, bg_tasks, approval: str = "always_require", name: str | None = None, sandbox: dict | None = None):
     label = "Bash" if kind == "bash" else "PowerShell"
     where = f"{program} ({sys.platform})"
 
@@ -164,8 +167,8 @@ def _tool(ws, kind: str, program: str, bg_tasks, approval: str = "always_require
                    timeout_ms: Annotated[int | None, Field(description="Timeout in milliseconds, default 120000, at most 600000.", ge=1000, le=MAX_MS)] = None,
                    run_in_background: Annotated[bool, Field(description="Start it in the background (servers, watchers, long jobs) and return at once.")] = False) -> str:
         if run_in_background:
-            return bg_tasks.start(ws, kind, program, command, description, timeout_ms)
-        return await run(ws, kind, command, timeout_ms)
+            return bg_tasks.start(ws, kind, program, command, description, timeout_ms, sandbox)
+        return await run(ws, kind, command, timeout_ms, sandbox)
 
     alias = f" `run_shell` is this same {label} session." if name else ""
     return tool(func=call, name=name or kind, approval_mode=approval,

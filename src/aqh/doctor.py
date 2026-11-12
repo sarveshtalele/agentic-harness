@@ -21,6 +21,11 @@ def report() -> str:
     lines.append(f"PowerShell: {ps or 'not found (optional on macOS and Linux)'}")
     node = rt.node_version()
     lines.append(f"Node.js: {'.'.join(map(str, node)) if node else 'not found'}" + ("" if not node or node >= (22, 18) else " (TypeScript needs 22.18+, or tsx)"))
+    from backend.maf.harness_kit import os_sandbox
+
+    box = os_sandbox.kind()
+    lines.append(f"OS sandbox: {box or 'none'}" + (" (auto mode runs commands inside it)" if box else
+                 " (Windows has none; on Linux install bubblewrap; every command asks)"))
     for tool in ("git", "npm", "npx", "pg_ctl", "initdb"):
         lines.append(f"{tool}: {shutil.which(tool) or 'not found'}")
     model = settings.model()

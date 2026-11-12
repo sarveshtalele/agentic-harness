@@ -45,7 +45,7 @@ from backend.maf.harness_kit.hook_middleware import guarded
 from backend.maf.harness_kit.shell import ShellProvider, WorkspaceShell
 from backend.maf.harness_kit.shell_tools import ShellToolsProvider
 from backend.maf.harness_kit.bg_tasks import BackgroundProvider
-from backend.maf.harness_kit import checkpoints, permissions, skill_scopes
+from backend.maf.harness_kit import checkpoints, os_sandbox, permissions, skill_scopes
 from backend.maf.harness_kit.skill_runner import SkillHealthProvider, runner as skill_runner, skill_dirs  # noqa: F401
 from backend.core.script_runtime import SCRIPT_EXTENSIONS
 from backend.maf.harness_kit.strict_args import strict_arguments
@@ -125,10 +125,11 @@ def build(project_id: str, thread_id: str, start_run, *, user_id: str | None = N
     client = llm.client(model, max_rounds=HARNESS_MAX_ROUNDS, max_tool_calls=HARNESS_MAX_TOOL_CALLS, detailed_errors=True)
     compaction = _compaction(client, model, HARNESS_CONTEXT_TOKENS - max_output, telemetry)
     keep_going, next_message = with_stop_hooks(ws, while_working(todos_remaining(looping_modes=["execute"])), todos_remaining_message)
-    world, providers = _world(ws)
+    mode, rules = permissions.get_mode(dirs["tools"], thread_id), permissions.load_rules(ws.root if ws else None)  # once per turn
+    sandbox = {"network": os_sandbox.settings(ws.root)["network"]} if ws and os_sandbox.active(mode, ws.root) else None
+    world, providers = _world(ws, sandbox)
     providers.append(SkillHealthProvider(skill_scopes.ordered(ws.root if ws else None, plugins.skill_paths(role=plugin_grants.role_of(auth.current_user.get()))),
                                          note=skill_scopes.note(ws.root if ws else None)))
-    mode, rules = permissions.get_mode(dirs["tools"], thread_id), permissions.load_rules(ws.root if ws else None)  # once per turn
     if command:  # without a repository it still says which command runs; WorkspaceContext says there are no file tools
         providers.append(active_command.ActiveCommandContext(command, ws.root if ws else None, thread_id))
     return create_harness_agent(
@@ -153,19 +154,19 @@ def build(project_id: str, thread_id: str, start_run, *, user_id: str | None = N
         loop_max_iterations=HARNESS_MAX_ROUNDS,
         disable_web_search=True,  # no data leaves through a hosted search tool
         context_providers=[ProjectContext(project_id, full=True), loaded, workspace.WorkspaceContext(ws), *providers],
-        auto_approval_rules=[permissions.approval_rule(lambda: mode, lambda: rules)],  # allow and deny skip the card
-        middleware=[permissions.enforce(lambda: mode, lambda: rules), strict_arguments, unknown_tool_hints(catalogue, loaded), write_first(thread_id, ws.root if ws else None, command), *([verify.verifier(ws, command)] if ws and command else []),
+        auto_approval_rules=[permissions.approval_rule(lambda: mode, lambda: rules, sandbox is not None)],  # allow and deny skip the card
+        middleware=[permissions.enforce(lambda: mode, lambda: rules, sandbox is not None), strict_arguments, unknown_tool_hints(catalogue, loaded), write_first(thread_id, ws.root if ws else None, command), *([verify.verifier(ws, command)] if ws and command else []),
                     turn_budget(thread_id, resume=f"/{command['name']} {command['args']}".rstrip() if command else "continue"), tool_hygiene(), error_shape(), tool_audit(AGENT, project_id, None, "chat"), *([guarded(ws), checkpoints.checkpoint(ws, checkpoints.folder(dirs["tools"], thread_id), checkpoints.new_turn())] if ws else []),
                     telemetry],
         **world,
     )
 
 
-def _world(ws) -> tuple[dict, list]:
+def _world(ws, sandbox: dict | None = None) -> tuple[dict, list]:
     """Plan H2: MAF file access on the workspace (reads free, writes approved) and MAF's shell tool confined to it."""
     if ws is None:
         return {}, []
     world = {"file_access_store": workspace.WorkspaceStore(ws.root), "file_access_disable_readonly_tool_approval": True}
     if config.PROFILE == "web":  # D-SHELL-WEB: the shared server keeps the allowlisted runner
         return world, [ShellProvider(WorkspaceShell(ws))]  # the shell comes through a provider: see harness_kit/shell.py
-    return world, [ShellToolsProvider(ws), BackgroundProvider(ws.thread_id)]  # real bash and powershell (D-SHELL)
+    return world, [ShellToolsProvider(ws, sandbox), BackgroundProvider(ws.thread_id)]  # real bash and powershell (D-SHELL)

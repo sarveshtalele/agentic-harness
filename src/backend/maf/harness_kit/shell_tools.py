@@ -52,11 +52,15 @@ def note(ws) -> str:
 
 
 class ShellToolsProvider(ContextProvider):
-    def __init__(self, ws):
+    def __init__(self, ws, sandbox: dict | None = None):
         super().__init__("shell_tools")
         self.ws = ws
-        self.tools = shells.tools(ws) + bg_tasks.tools(ws)
+        self.sandbox = sandbox
+        self.tools = shells.tools(ws, sandbox=sandbox) + bg_tasks.tools(ws)
 
     async def before_run(self, *, agent, session, context, state) -> None:
         context.extend_tools(self.source_id, self.tools)
-        context.extend_instructions(self.source_id, note(self.ws))
+        boxed = ("\nCommands run inside the OS sandbox: they write only in the workspace and temp folders"
+                 + ("" if self.sandbox["network"] else " and have no network") + ". If a command is refused for that, tell the user;"
+                 " they can leave auto mode with /mode default.") if self.sandbox else ""
+        context.extend_instructions(self.source_id, note(self.ws) + boxed)

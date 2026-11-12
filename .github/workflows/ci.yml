@@ -22,6 +22,11 @@ jobs:
         run: |
           brew list postgresql@17 >/dev/null 2>&1 || brew install postgresql@17
           echo "PGBIN=$(brew --prefix postgresql@17)/bin" >> "$GITHUB_ENV"
+      - name: bubblewrap for the OS sandbox tests (Ubuntu 24.04 blocks unprivileged user namespaces through AppArmor)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get install -y bubblewrap
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
       - run: pytest tests -q -m "not e2e and not live and not smoke"
       - run: npm ci
         working-directory: src/frontend

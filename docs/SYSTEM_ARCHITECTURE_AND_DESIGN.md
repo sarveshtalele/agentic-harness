@@ -1179,3 +1179,10 @@ In accordance with the repository documentation policy (**1 Single Doc for Each 
 - **Modes:** interactive (`repl.py`) and headless `aqh -p` with Claude Code's output formats; in headless mode a card is approved only by `--allowedTools` rules or `--permission-mode`. `--server` drives a remote platform instead.
 - **Sessions:** platform threads, also written as JSON lines per session under `~/.aqh/projects/<folder>/`; `--continue`, `--resume`.
 
+## 17. OS sandbox (Phase 2 step 7, 2026-11-13)
+
+- **Tier T1:** `harness_kit/os_sandbox.py` wraps the persistent shell process and each background task: Seatbelt (`sandbox-exec`) on macOS, bubblewrap (`bwrap`) on Linux. Writes are allowed only in the workspace, the conversation's scratch folder and the temp folder; outbound network is blocked (Seatbelt allows localhost) unless `sandbox.network` is true. Every child process inherits it.
+- **When:** in `auto` mode, or when a trusted settings file (managed or user) sets `"sandbox": {"enabled": true}`. A repository's settings cannot turn it on or open the network. A sandboxed session is a separate shell process.
+- **Approval:** in `auto` mode a sandboxed shell command runs without a card (`permissions.decide(..., sandboxed=True)`); deny and ask rules and hooks still apply. Without a sandbox (Windows, or Linux without bwrap) commands keep asking (D-SANDBOX). `aqh doctor` says which sandbox the machine has.
+- **Limits:** network is all or nothing; no container tier (T2) yet.
+

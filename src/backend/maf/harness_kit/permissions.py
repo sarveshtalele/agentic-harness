@@ -2,7 +2,8 @@
 
 Modes (per conversation, `/mode <name>`): `default` asks for every write, shell command and script; `acceptEdits` lets
 file writes and edits inside the workspace through without a card; `plan` refuses writes and shell commands until the
-person switches back; `auto` is `acceptEdits` until the OS sandbox exists (plan step 7), so shells still ask; `bypass`
+person switches back; `auto` is `acceptEdits` plus shell commands inside the OS sandbox without a card (os_sandbox.py;
+where none exists, as on Windows, shells still ask); `bypass`
 allows everything, refused on the web profile.
 Rules use Claude Code's syntax: `Bash(npm run *)`, `PowerShell(Get-ChildItem *)`, `Read(docs/**)`, `Edit(src/**)`,
 `mcp__server__tool`, or a bare tool name; lists `allow`, `ask`, `deny`; deny wins, then ask, then allow. A shell rule
@@ -88,7 +89,7 @@ def _path_ok(spec: str | None, args: dict) -> bool:
     return fnmatch.fnmatch(path.removeprefix("./"), pattern) or fnmatch.fnmatch(path.removeprefix("./"), pattern.replace("**/", ""))
 
 
-def decide(tool: str, args: dict, mode: str, rules: dict[str, list[str]]) -> tuple[str, str]:
+def decide(tool: str, args: dict, mode: str, rules: dict[str, list[str]], sandboxed: bool = False) -> tuple[str, str]:
     """("allow" | "ask" | "deny", reason)."""
     claude = CLAUDE_NAME.get(tool, tool)
     for rule in rules.get("deny", []):
@@ -103,6 +104,8 @@ def decide(tool: str, args: dict, mode: str, rules: dict[str, list[str]]) -> tup
         return "allow", "bypass mode"
     if mode in ("acceptEdits", "auto") and claude in EDITS:
         return "allow", f"{mode} mode allows edits in the workspace"
+    if mode == "auto" and sandboxed and claude in SHELLS:
+        return "allow", "auto mode: the command runs inside the OS sandbox"
     if claude in SHELLS:  # each part of a compound command needs an allow rule of its own
         parts = [p for p in SPLIT.split(str(args.get("command", "")).strip()) if p]
         covering = [next((r for r in rules.get("allow", []) if _matches(r, tool, {"command": part})), None) for part in parts]
@@ -115,21 +118,21 @@ def decide(tool: str, args: dict, mode: str, rules: dict[str, list[str]]) -> tup
     return "ask", ""
 
 
-def approval_rule(mode_of, rules_of):
+def approval_rule(mode_of, rules_of, sandboxed: bool = False):
     """A MAF auto-approval callback: allow and deny pass without a card (deny is refused by `enforce`); ask shows one."""
 
     def rule(function_call) -> bool:
-        verdict, _ = decide(function_call.name, dict(function_call.parse_arguments() or {}), mode_of(), rules_of())
+        verdict, _ = decide(function_call.name, dict(function_call.parse_arguments() or {}), mode_of(), rules_of(), sandboxed)
         return verdict in ("allow", "deny")
 
     return rule
 
 
-def enforce(mode_of, rules_of):
+def enforce(mode_of, rules_of, sandboxed: bool = False):
     @function_middleware
     async def permissions(context: FunctionInvocationContext, call_next) -> None:
         args = context.arguments.model_dump() if isinstance(context.arguments, BaseModel) else dict(context.arguments or {})
-        verdict, reason = decide(context.function.name, args, mode_of(), rules_of())
+        verdict, reason = decide(context.function.name, args, mode_of(), rules_of(), sandboxed)
         if verdict == "deny":
             context.result = f"Refused: {reason}. Nothing ran."
             return
@@ -138,13 +141,13 @@ def enforce(mode_of, rules_of):
     return permissions
 
 
-def subagent_gate(mode_of, rules_of):
+def subagent_gate(mode_of, rules_of, sandboxed: bool = False):
     """For helper agents, which have no approval channel: only what the rules or the mode already allow runs."""
 
     @function_middleware
     async def gate(context: FunctionInvocationContext, call_next) -> None:
         args = context.arguments.model_dump() if isinstance(context.arguments, BaseModel) else dict(context.arguments or {})
-        verdict, reason = decide(context.function.name, args, mode_of(), rules_of())
+        verdict, reason = decide(context.function.name, args, mode_of(), rules_of(), sandboxed)
         if verdict == "deny":
             context.result = f"Refused: {reason}. Nothing ran."
         elif verdict == "ask":

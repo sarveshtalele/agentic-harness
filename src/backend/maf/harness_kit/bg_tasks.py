@@ -48,7 +48,7 @@ class Task:
 _tasks: dict[str, dict[str, Task]] = {}
 
 
-def start(ws, kind: str, program: str, command: str, description: str = "", timeout_ms: int | None = None) -> str:
+def start(ws, kind: str, program: str, command: str, description: str = "", timeout_ms: int | None = None, sandbox: dict | None = None) -> str:
     from backend.maf.harness_kit import shells
 
     folder = Path(ws.root) / ".aqh" / "tasks"
@@ -57,7 +57,8 @@ def start(ws, kind: str, program: str, command: str, description: str = "", time
     log = folder / f"{task_id}.log"
     group = {"creationflags": subprocess.CREATE_NEW_PROCESS_GROUP} if os.name == "nt" else {"start_new_session": True}
     with log.open("wb") as out:
-        proc = subprocess.Popen(shells.argv(kind, program, command), cwd=ws.root, env=shells.environment(ws), stdin=subprocess.DEVNULL,
+        argv = shells.argv(kind, program, command)
+        proc = subprocess.Popen(shells.os_sandbox.wrap(argv, ws, sandbox["network"]) if sandbox else argv, cwd=ws.root, env=shells.environment(ws), stdin=subprocess.DEVNULL,
                                 stdout=out, stderr=subprocess.STDOUT, **group)
     limit = min(max((timeout_ms or DEFAULT_S * 1000) / 1000, 1), MAX_S)
     task = Task(task_id, kind, command, description, log, proc, time.monotonic(), limit)

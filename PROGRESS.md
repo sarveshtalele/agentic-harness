@@ -16,7 +16,7 @@ Written by `scripts/hooks/activity_log.py`. Times are local.
 | 8 | Harness eval suite (5.9); repository map only if it helps (5.8) | open | |
 | 9 | Azure guide at or under $25/month, first test deployment (9) | in progress (guide done 2026-11-12; test deployment and portal screenshots open) | `docs/AZURE_DEPLOYMENT_GUIDE.md`: prices re-read from prices.azure.com 2026-11-12, $20.70 with the PostgreSQL stop schedule (Automation runbook), zipping, portal steps, UI tour, troubleshooting. Owner approved deleting the 4 old Azure docs |
 | 10 | Desktop bundled PostgreSQL (D4), signing when certificates exist | open | |
-| 11 | Phase 2 (docs/PHASE2_PLAN.md rev 3): Claude Code-class harness on MAF (CLI, desktop, web), then R1 to R6 | approved 2026-11-12; step 1 built, baseline run blocked | Step 1: evals/harness/discovery.json (20 tasks, fixture repo with Python, TS, Bash, PowerShell, .claude and .agents skills), src/backend/maf/evals/discovery.py scorer (tests/test_discovery_eval_scoring.py: 3 passed), tests/test_harness_discovery_eval.py live driver, `python scripts/dev.py live`. Baseline not run: the model proxy answers HTTP 429 'daily token limit exceeded (25,101,895/25,000,000)'; Step 2 done locally (2026-11-12): bash and powershell on MAF LocalShellTool (persistent), background tasks, spill, permission modes and rules, /mode; tests/test_harness_shells.py and tests/test_harness_permissions.py (20 passed, PowerShell skipped on this Mac); full suite 710 passed, 2 skipped; CI green on 3 OS for 3bc0fd5 (after fixing PowerShell escape codes and Git Bash paths). Step 3 done locally: core/script_runtime.py, core/script_health.py, per-turn skill runner, Flagged badge and Check again; full suite 716 passed, 3 skipped; committed 75ecbbb + PowerShell syntax-check fix 8a62ef4; CI green on 3 OS (run 43251382164); Step 4 done locally: skill scopes, tool index with arguments, nearest names for invented tools, MCP refresh, command substitutions; tests/test_harness_discovery_scopes.py 5 passed; committed c6897c7; CI: tests green on 3 OS, macOS smoke failed on an ambiguous test locator (fixed, smoke 4 passed locally). Step 5 done locally (2026-11-13): settings files, settings and http hooks, updatedInput, PostToolUseFailure, Stop hooks, checkpoints and /rewind, routed helper-agent permissions; full suite 729 passed before one contract test update (now 5 passed); not committed. Discovery eval running (quota reset); Discovery eval after (current code, docs/evidence/runs/2026-11-13-discovery-after): 15/20 passed, selection 0.95, first try 0.6, argument validity 1.0, 36 invented names. Found and fixed: run_skill_script crashed on MAF's FileSkill (.name), run_shell alias for the primary shell, deferred tools called by name are loaded on the spot; full suite 732 passed, 3 skipped. Baseline (b76ddbd, docs/evidence/runs/2026-11-13-discovery-baseline): 12/20 passed, selection 0.85, first try 0.55, argument validity 1.0, 6 invented names. Eval after the fixes (docs/evidence/runs/2026-11-13-discovery-after-fixes): 18/20 passed, 4 invented names. Re-scored all three runs uniformly after widening two answer checks to patterns (results-rescored.json): baseline 13/20 (65%), steps 2-4 16/20 (80%), with fixes 18/20 (90%). Full threads recorded: no task mix-up, the model wandered. Full suite 732 passed, 3 skipped. Committed e5944aa. Step 6 (aqh CLI) built: tests/test_aqh_cli.py 4 passed; live `aqh -p` with the real model on macOS created notes.txt in the bound folder (data/aqh-demo) |
+| 11 | Phase 2 (docs/PHASE2_PLAN.md rev 3): Claude Code-class harness on MAF (CLI, desktop, web), then R1 to R6 | approved 2026-11-12; step 1 built, baseline run blocked | Step 1: evals/harness/discovery.json (20 tasks, fixture repo with Python, TS, Bash, PowerShell, .claude and .agents skills), src/backend/maf/evals/discovery.py scorer (tests/test_discovery_eval_scoring.py: 3 passed), tests/test_harness_discovery_eval.py live driver, `python scripts/dev.py live`. Baseline not run: the model proxy answers HTTP 429 'daily token limit exceeded (25,101,895/25,000,000)'; Step 2 done locally (2026-11-12): bash and powershell on MAF LocalShellTool (persistent), background tasks, spill, permission modes and rules, /mode; tests/test_harness_shells.py and tests/test_harness_permissions.py (20 passed, PowerShell skipped on this Mac); full suite 710 passed, 2 skipped; CI green on 3 OS for 3bc0fd5 (after fixing PowerShell escape codes and Git Bash paths). Step 3 done locally: core/script_runtime.py, core/script_health.py, per-turn skill runner, Flagged badge and Check again; full suite 716 passed, 3 skipped; committed 75ecbbb + PowerShell syntax-check fix 8a62ef4; CI green on 3 OS (run 43251382164); Step 4 done locally: skill scopes, tool index with arguments, nearest names for invented tools, MCP refresh, command substitutions; tests/test_harness_discovery_scopes.py 5 passed; committed c6897c7; CI: tests green on 3 OS, macOS smoke failed on an ambiguous test locator (fixed, smoke 4 passed locally). Step 5 done locally (2026-11-13): settings files, settings and http hooks, updatedInput, PostToolUseFailure, Stop hooks, checkpoints and /rewind, routed helper-agent permissions; full suite 729 passed before one contract test update (now 5 passed); not committed. Discovery eval running (quota reset); Discovery eval after (current code, docs/evidence/runs/2026-11-13-discovery-after): 15/20 passed, selection 0.95, first try 0.6, argument validity 1.0, 36 invented names. Found and fixed: run_skill_script crashed on MAF's FileSkill (.name), run_shell alias for the primary shell, deferred tools called by name are loaded on the spot; full suite 732 passed, 3 skipped. Baseline (b76ddbd, docs/evidence/runs/2026-11-13-discovery-baseline): 12/20 passed, selection 0.85, first try 0.55, argument validity 1.0, 6 invented names. Eval after the fixes (docs/evidence/runs/2026-11-13-discovery-after-fixes): 18/20 passed, 4 invented names. Re-scored all three runs uniformly after widening two answer checks to patterns (results-rescored.json): baseline 13/20 (65%), steps 2-4 16/20 (80%), with fixes 18/20 (90%). Full threads recorded: no task mix-up, the model wandered. Full suite 732 passed, 3 skipped. Committed e5944aa. Step 6 (aqh CLI) built: tests/test_aqh_cli.py 4 passed; live `aqh -p` with the real model on macOS created notes.txt in the bound folder (data/aqh-demo); committed 00c27f9; CI green on 3 OS (run 43294669803). Step 7 (OS sandbox T1) built: harness_kit/os_sandbox.py (Seatbelt, bubblewrap) around persistent and background shells, auto mode skips the card only when sandboxed, Linux CI installs bubblewrap; tests/test_os_sandbox.py 3 passed on macOS with real Seatbelt (write outside the workspace refused, network blocked); full suite 740 passed, 3 skipped |
 
 | Time | Event | Detail |
 |---|---|---|
@@ -11603,3 +11603,87 @@ Written by `scripts/hooks/activity_log.py`. Times are local.
 | 2026-11-13 01:22:40 | before | Bash: Read step 5 CI result |
 | 2026-11-13 01:22:41 | after | Bash: Read step 5 CI result |
 | 2026-11-13 01:22:47 | before | Bash: Commit and push step 6 |
+| 2026-11-13 01:22:54 | after | Bash: Commit and push step 6 |
+| 2026-11-13 01:22:54 | before | Bash: Watch CI for step 6 |
+| 2026-11-13 01:22:54 | after | Bash: Watch CI for step 6 |
+| 2026-11-13 01:23:05 | before | Bash: Check OS sandbox tools locally |
+| 2026-11-13 01:23:05 | after | Bash: Check OS sandbox tools locally |
+| 2026-11-13 01:23:21 | before | Bash: Confirm paths are free |
+| 2026-11-13 01:23:22 | after | Bash: Confirm paths are free |
+| 2026-11-13 01:23:35 | before | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/backend/maf/harness_kit/os_sandbox.py |
+| 2026-11-13 01:23:35 | after | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/backend/maf/harness_kit/os_sandbox.py |
+| 2026-11-13 01:23:44 | before | Bash: Locate wiring points |
+| 2026-11-13 01:23:44 | after | Bash: Locate wiring points |
+| 2026-11-13 01:24:01 | before | Bash: Thread the sandbox through shells, tasks, permissions |
+| 2026-11-13 01:24:02 | after | Bash: Thread the sandbox through shells, tasks, permissions |
+| 2026-11-13 01:24:15 | before | Bash: Pass sandbox through harness build and shell tools |
+| 2026-11-13 01:24:16 | after | Bash: Pass sandbox through harness build and shell tools |
+| 2026-11-13 01:25:45 | before | mcp__ccd_turn__update_plan |
+| 2026-11-13 01:25:45 | after | mcp__ccd_turn__update_plan |
+| 2026-11-13 01:25:46 | before | Bash: Find wiring points in harness and shell tools |
+| 2026-11-13 01:25:47 | after | Bash: Find wiring points in harness and shell tools |
+| 2026-11-13 01:25:50 | before | Bash: Show the harness build lines around mode |
+| 2026-11-13 01:25:51 | after | Bash: Show the harness build lines around mode |
+| 2026-11-13 01:26:05 | before | Bash: Apply sandbox wiring edits |
+| 2026-11-13 01:26:06 | after | Bash: Apply sandbox wiring edits |
+| 2026-11-13 01:26:09 | before | Bash: Check sandbox threading in shells.py |
+| 2026-11-13 01:26:10 | after | Bash: Check sandbox threading in shells.py |
+| 2026-11-13 01:26:18 | before | Bash: Check test path free, probe sandbox, view shell tests |
+| 2026-11-13 01:26:18 | after | Bash: Check test path free, probe sandbox, view shell tests |
+| 2026-11-13 01:26:23 | before | Bash: Probe Seatbelt directly |
+| 2026-11-13 01:26:24 | after | Bash: Probe Seatbelt directly |
+| 2026-11-13 01:26:29 | before | Bash: Read decide and shell test fixture |
+| 2026-11-13 01:26:29 | after | Bash: Read decide and shell test fixture |
+| 2026-11-13 01:26:44 | before | Bash: Check settings layer trust and paths |
+| 2026-11-13 01:26:44 | after | Bash: Check settings layer trust and paths |
+| 2026-11-13 01:26:58 | before | Write: /Users/sarveshtalele/Downloads/agentic-harness/tests/test_os_sandbox.py |
+| 2026-11-13 01:26:58 | after | Write: /Users/sarveshtalele/Downloads/agentic-harness/tests/test_os_sandbox.py |
+| 2026-11-13 01:27:05 | before | Bash: Run sandbox tests outside Claude's sandbox |
+| 2026-11-13 01:27:08 | after | Bash: Run sandbox tests outside Claude's sandbox |
+| 2026-11-13 01:27:12 | before | Bash: Show the failing assertion detail |
+| 2026-11-13 01:27:16 | after | Bash: Show the failing assertion detail |
+| 2026-11-13 01:27:21 | before | Bash: Fix network assertion and rerun related tests |
+| 2026-11-13 01:27:34 | after | Bash: Fix network assertion and rerun related tests |
+| 2026-11-13 01:27:40 | before | Bash: Inspect CI workflow and step 6 CI watcher output |
+| 2026-11-13 01:27:40 | after | Bash: Inspect CI workflow and step 6 CI watcher output |
+| 2026-11-13 01:27:42 | before | Bash: Read the CI test job |
+| 2026-11-13 01:27:43 | after | Bash: Read the CI test job |
+| 2026-11-13 01:27:48 | before | Edit: /Users/sarveshtalele/Downloads/agentic-harness/.github/workflows/ci.yml |
+| 2026-11-13 01:27:49 | after | Edit: /Users/sarveshtalele/Downloads/agentic-harness/.github/workflows/ci.yml |
+| 2026-11-13 01:27:49 | before | Bash: Check step 6 CI status |
+| 2026-11-13 01:27:50 | failed | Bash: Check step 6 CI status Exit code 1 failed to get run: Get "https://api.github.com/repos/sarveshtalele/agentic-harness/actions/runs/43294669803?exclude_pu… |
+| 2026-11-13 01:27:53 | before | Bash: Check step 6 CI status |
+| 2026-11-13 01:27:54 | failed | Bash: Check step 6 CI status Exit code 1 failed to get run: Get "https://api.github.com/repos/sarveshtalele/agentic-harness/actions/runs/43294669803?exclude_pu… |
+| 2026-11-13 01:27:58 | before | Bash: Check step 6 CI status |
+| 2026-11-13 01:28:01 | after | Bash: Check step 6 CI status |
+| 2026-11-13 01:28:04 | before | mcp__ccd_turn__update_plan |
+| 2026-11-13 01:28:04 | after | mcp__ccd_turn__update_plan |
+| 2026-11-13 01:28:06 | before | Bash: Locate doc spots for step 7 notes |
+| 2026-11-13 01:28:06 | after | Bash: Locate doc spots for step 7 notes |
+| 2026-11-13 01:28:11 | before | Bash: Find section ends and task lines |
+| 2026-11-13 01:28:11 | after | Bash: Find section ends and task lines |
+| 2026-11-13 01:28:14 | before | Bash: Read tasks list and section boundary |
+| 2026-11-13 01:28:15 | after | Bash: Read tasks list and section boundary |
+| 2026-11-13 01:28:19 | before | Bash: Read aqh doctor report |
+| 2026-11-13 01:28:20 | after | Bash: Read aqh doctor report |
+| 2026-11-13 01:28:35 | before | Bash: Update doctor, tasks, architecture and MAF spec docs |
+| 2026-11-13 01:28:36 | after | Bash: Update doctor, tasks, architecture and MAF spec docs |
+| 2026-11-13 01:28:44 | before | Bash: Reorder spec rows, note step 7 in plan, check doctor |
+| 2026-11-13 01:28:46 | after | Bash: Reorder spec rows, note step 7 in plan, check doctor |
+| 2026-11-13 01:28:52 | before | mcp__ccd_turn__update_plan |
+| 2026-11-13 01:28:52 | after | mcp__ccd_turn__update_plan |
+| 2026-11-13 01:28:53 | before | Bash: Run full offline test suite |
+| 2026-11-13 01:32:43 | after | Bash: Run full offline test suite |
+| 2026-11-13 01:32:47 | before | Bash: Check file sizes and step 6 CI |
+| 2026-11-13 01:32:50 | after | Bash: Check file sizes and step 6 CI |
+| 2026-11-13 01:32:56 | before | Bash: Update Goal tracker and list changes |
+| 2026-11-13 01:32:57 | after | Bash: Update Goal tracker and list changes |
+| 2026-11-13 01:33:01 | before | mcp__ccd_turn__update_plan |
+| 2026-11-13 01:33:01 | after | mcp__ccd_turn__update_plan |
+| 2026-11-13 01:33:15 | turn end |  |
+| 2026-11-13 01:39:24 | user | <system-reminder> ## The user forked this session from another session The user forked this session at this point to ask something on the side; continue from h… |
+| 2026-11-13 01:39:37 | turn end |  |
+| 2026-11-13 01:41:58 | user | <ta[redacted]> <task-id>bshws7hiy</task-id> <tool-use-id>toolu_01GY2GFVaGc7Gfj1D3xazDMC</tool-use-id> <output-file>/private/tmp/claude-501/-Users-sarveshtalele… |
+| 2026-11-13 01:42:01 | before | Bash: Read step 6 CI watcher result |
+| 2026-11-13 01:42:02 | after | Bash: Read step 6 CI watcher result |
+| 2026-11-13 01:42:09 | before | Bash: Commit and push step 7 |
