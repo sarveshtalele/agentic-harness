@@ -86,24 +86,20 @@ Put these in \`.env\`, or in Azure's environment variables. They keep the \`ATLA
       {
         slug: "azure",
         title: "Deploy to Azure",
-        summary: "Run on App Service for about ₹1,182 a month.",
-        body: `## Cost
+        summary: "Run on App Service, PostgreSQL, Blob and Key Vault for about $20.70 a month.",
+        body: `## Cost (East US 2, under the $25 cap)
 
-Two Linux web apps share one Basic B1 plan in East US 2: ₹1.6189 an hour, or about ₹1,182 for a 730-hour month, from Azure's retail prices on 1 November 2026. Taxes and your model provider are extra.
+One Linux App Service plan B1 holds both web apps ($12.41 a month). PostgreSQL Flexible Server B1ms runs 12 hours on weekdays ($4.49 compute, $3.68 for 32 GiB storage). Blob Storage and Key Vault cost under $0.11. The total is about $20.70 a month; always on, it is about $28.60. Prices are pay-as-you-go from Azure's retail prices on 12 November 2026. Model tokens are extra.
 
 ## Steps
 
-1. Run \`python scripts/package_azure.py\` to make the two ZIP files.
-2. Create the plan and both apps in the Azure portal.
-3. Add the settings and startup commands.
-4. Upload each ZIP. The server builds its own environment on first start.
-5. Add the admin login to the backend settings, and an access restriction so only the frontend can reach the backend.
+1. Run \`python scripts/package_azure_kudu.py\`, then \`python scripts/dev.py azure-local --check\`. It must print \`API health: 200; UI /login: 200\`.
+2. In the Azure portal, create the resource group, Key Vault (three secrets), PostgreSQL, the storage account with the \`downloads\` container, the B1 plan and the two web apps.
+3. Give the API's managed identity the role Key Vault Secrets User, and add the app settings and startup commands.
+4. Upload each zip through Kudu's ZipDeployUI. The server builds its own environment on first start.
+5. Open the PostgreSQL firewall to the API, lock the API to the UI, and schedule PostgreSQL to stop outside working hours.
 
-The complete click-by-click guide is in \`docs/AZURE_ENTERPRISE_DEPLOYMENT_GUIDE.md\`.
-
-## For several users
-
-That setup suits one person or a small trusted team. \`docs/AZURE_ENTERPRISE_DEPLOYMENT_GUIDE.md\` has the design for several users: PostgreSQL for records, Blob Storage for files, Key Vault for secrets, and Container Apps Jobs so repository code never runs beside the app. It comes to about ₹3,905 a month for 5 users, before model costs.
+The complete click-by-click guide is in \`docs/AZURE_DEPLOYMENT_GUIDE.md\`.
 
 Azure has not been deployed for real yet, so treat the steps as untested until you try them.`,
       },

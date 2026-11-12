@@ -24,30 +24,27 @@ See the complete production specification in \`docs/SYSTEM_ARCHITECTURE_AND_DESI
       },
       {
         slug: "azure-enterprise-deployment-guide",
-        title: "Azure Enterprise Cloud Deployment",
-        summary: "Production Azure architecture: App Service, PostgreSQL, Blob Storage, Key Vault, Container Apps Sandboxes, and Kudu zero-downtime deployment.",
-        body: `## Azure Enterprise Deployment Guide
+        title: "Azure Deployment Architecture",
+        summary: "What runs on Azure: two App Service web apps on one B1 plan, PostgreSQL Flexible Server, Blob Storage and Key Vault in East US 2.",
+        body: `## What runs where
 
-This canonical specification provides an exhaustive, production-grade deployment roadmap for hosting the Agentic QE Platform on **Microsoft Azure**.
+- **UI web app:** Azure App Service (Linux, Node.js 20 LTS) serving the Next.js app.
+- **API web app:** Azure App Service (Linux, Python 3.12) serving FastAPI and Microsoft Agent Framework. Both apps share one Basic B1 plan.
+- **Database:** Azure Database for PostgreSQL Flexible Server, Burstable B1ms, 32 GiB, with 7 days of point-in-time restore. PostgreSQL is the only database the app supports.
+- **Secrets:** Azure Key Vault. The API reads the admin password, the secret key and the database URL at startup with its managed identity.
+- **Files:** Azure Blob Storage, with a public-read \`downloads\` container for the desktop installers. Workspaces and documents stay on the App Service \`/home\` share for now.
+- **Access:** the API accepts requests only from the UI (an App Service access restriction), and PostgreSQL only from the API's outbound addresses.
 
-### Architectural Deployment Topology
+## Limits
 
-- **Web Tier (Frontend):** Azure App Service (Linux, Node.js 20 LTS) serving Next.js 16 App Router.
-- **API & Orchestration Tier (Backend):** Azure App Service (Linux, Python 3.12 LTS) serving FastAPI and Microsoft Agent Framework (MAF).
-- **Relational Data Tier:** Azure Database for PostgreSQL Flexible Server (Zone-Redundant HA, Private Endpoint).
-- **Blob & Artifact Tier:** Azure Blob Storage with immutability policies, lifecycle archiving, and customer-managed keys (CMK).
-- **Secrets & Configuration:** Azure Key Vault with Managed Identities and Azure App Configuration.
-- **Untrusted Code Sandbox:** Azure Container Apps (ACA) Dynamic Sessions providing ephemeral gVisor-isolated container sandboxes for repository cloning, AST analysis, and test runners.
-- **Security & Edge (target design, not deployed):** Azure Front Door with WAF rules in front of the backend.
+- Repository code runs on the same machine as the API until isolated sandbox jobs exist, so admit only trusted people.
+- stdio MCP servers, \`npx\` installs and plugin installs run only in the desktop app.
 
-### Zero-Downtime Deployment via Kudu
+## Deployment
 
-Deployments utilize Azure App Service Deployment Slots (Blue/Green) with Kudu zip deployment:
-\`\`\`bash
-az webapp deployment source config-zip --resource-group rg-agentic-qe-prod --name app-agentic-qe-backend-prod --src backend.zip
-\`\`\`
+You build two zips on your machine with \`python scripts/package_azure_kudu.py\`, check them with \`python scripts/dev.py azure-local --check\`, and upload them through Kudu's ZipDeployUI. Kudu's own build is off; each startup script builds once on first start.
 
-See the complete deployment guide in \`docs/AZURE_ENTERPRISE_DEPLOYMENT_GUIDE.md\`.`,
+See the complete deployment guide in \`docs/AZURE_DEPLOYMENT_GUIDE.md\`.`,
       },
       {
         slug: "security-governance-audit",

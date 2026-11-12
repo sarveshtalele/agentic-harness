@@ -47,7 +47,7 @@ PURPOSE = {
     "deploy/azure/frontend_startup.js": "App Service startup for the frontend: builds when needed, then serves", "docs/ARCHITECTURE.md": "Architecture pointer and inventory index", "docs/AZURE_DEPLOYMENT_GUIDE.md": "Enterprise Azure deployment guide with pricing and container sandbox design",
     "src/frontend/app/error.tsx": "Page error screen with its error id and a retry button",
     "src/frontend/app/global-error.tsx": "Last-resort error screen for a failure in the root layout",
-    "docs/AZURE_ENTERPRISE_DEPLOYMENT_GUIDE.md": "Canonical Azure guide: pricing, storage, sandbox, RBAC", "src/frontend/components/AuthGate.tsx": "Sends people to sign in, and holds the sign-out menu", "src/frontend/app/agents/[key]/page.tsx": "Page for one agent: details table, controls, evaluations", "src/backend/__init__.py": "Marks the backend package", "src/frontend/.gitignore": "Frontend files kept out of Git",
+    "docs/AZURE_DEPLOYMENT_GUIDE.md": "The one Azure guide: cost, zipping, portal steps, UI tour", "src/frontend/components/AuthGate.tsx": "Sends people to sign in, and holds the sign-out menu", "src/frontend/app/agents/[key]/page.tsx": "Page for one agent: details table, controls, evaluations", "src/backend/__init__.py": "Marks the backend package", "src/frontend/.gitignore": "Frontend files kept out of Git",
     "src/frontend/AGENTS.md": "Notes for coding agents about this Next.js version", "src/frontend/app/projects/[id]/layout.tsx": "Wraps project pages in the project sidebar", "tests/__init__.py": "Marks the tests package", "tests/e2e/__init__.py": "Marks the end-to-end tests package",
     "src/frontend/app/docs/layout.tsx": "Documentation site frame: search and sidebar", "docs/PROJECT_STRUCTURE.md": "This file",
 }

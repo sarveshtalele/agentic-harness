@@ -6,7 +6,7 @@ Written by `scripts/hooks/activity_log.py`. Times are local.
 
 | # | Item (FINAL_PLAN section 13) | Status | Evidence |
 |---|---|---|---|
-| 1 | CI green on 3 OS; D6 test skills removed, tests use a throwaway skills folder | in progress (D6 done; Windows pg_ctl hang fixed, smoke green on Windows) | Run 43164607468 for 70d5e41: all jobs pass except test (windows-latest): 1 failure, a mixed-slash path compared as text in tests/test_harness_plugin_hooks.py; fixed (compare as Path), awaiting push |
+| 1 | CI green on 3 OS; D6 test skills removed, tests use a throwaway skills folder | done 2026-11-12 | CI run 43166261872 for 74eebf9: test and smoke pass on ubuntu-24.04, macos-latest, windows-latest; evals-install pass. Local: 684 passed, 1 skipped |
 | 2 | Harness core: verification oracle and budgets (5.3), read cache, spill, repeat reminder, compaction keep-recent (5.4), error taxonomy (5.5); live agentic-qe cycle to Gate 5 | in progress | Done offline: `harness_kit/verify.py` (check-gate after writes), `budget.py` (30-min turn budget, rounds 200), `tool_hygiene.py` (repeat reminder 3/5/8, trim over 12k), compaction keeps 10 tool groups; read cache skipped (compaction clears old results). Tests: `tests/test_harness_guards.py`. Live attempt 7 running; attempt 7 (2026-11-12): Gate 0 passed, then plugin guard-write blocked every requirements write because the runner's "continue" closed agentic-qe's phase lease. Fix: budget notice and pinned instructions tell the user to re-send the phase command; runner resumes with it (tests/test_harness_guards.py 3 passed). Attempt 8 running into docs/evidence/runs/2026-11-12-harness-plugin-cycle3 |
 | 3 | Discovery registry with scopes and trust (5.1, 5.2), `/` menu, MCP scopes UI and CLI | open | |
 | 4 | Sessions: JSONL, resume, fork, rewind (5.7) | open | |
@@ -14,7 +14,7 @@ Written by `scripts/hooks/activity_log.py`. Times are local.
 | 6 | `aqh` CLI (8) and landing page install | open | |
 | 7 | Skill Studio: skill-creator skill, requirements page, dependencies (7) | open | |
 | 8 | Harness eval suite (5.9); repository map only if it helps (5.8) | open | |
-| 9 | Azure guide at or under $25/month, first test deployment (9) | open | |
+| 9 | Azure guide at or under $25/month, first test deployment (9) | in progress (guide done 2026-11-12; test deployment and portal screenshots open) | `docs/AZURE_DEPLOYMENT_GUIDE.md`: prices re-read from prices.azure.com 2026-11-12, $20.70 with the PostgreSQL stop schedule (Automation runbook), zipping, portal steps, UI tour, troubleshooting. Owner approved deleting the 4 old Azure docs |
 | 10 | Desktop bundled PostgreSQL (D4), signing when certificates exist | open | |
 
 | Time | Event | Detail |
@@ -10336,3 +10336,115 @@ Written by `scripts/hooks/activity_log.py`. Times are local.
 | 2026-11-12 11:40:03 | before | Bash: Read suite result and git status |
 | 2026-11-12 11:40:04 | after | Bash: Read suite result and git status |
 | 2026-11-12 11:40:13 | before | Bash: Commit and push harness fixes |
+| 2026-11-12 11:40:21 | after | Bash: Commit and push harness fixes |
+| 2026-11-12 11:40:25 | before | Bash: Watch CI for 74eebf9 |
+| 2026-11-12 11:40:26 | after | Bash: Watch CI for 74eebf9 |
+| 2026-11-12 11:40:32 | turn end |  |
+| 2026-11-12 11:55:27 | user | <ta[redacted]> <task-id>bke7cwial</task-id> <tool-use-id>toolu_01T1tvfkY3W9BEGTpk48zmvj</tool-use-id> <output-file>/private/tmp/claude-501/-Users-sarveshtalele… |
+| 2026-11-12 11:55:31 | before | Bash: Read CI result |
+| 2026-11-12 11:55:31 | after | Bash: Read CI result |
+| 2026-11-12 11:55:39 | before | Bash: Mark item 1 done, peek attempt 8 |
+| 2026-11-12 11:55:42 | after | Bash: Mark item 1 done, peek attempt 8 |
+| 2026-11-12 11:55:45 | before | mcp__ccd_turn__wrap_up |
+| 2026-11-12 11:55:45 | after | mcp__ccd_turn__wrap_up |
+| 2026-11-12 11:55:56 | turn end |  |
+| 2026-11-12 11:57:38 | user | why packages are not showing for downlaod in github for macos and windows msi both to test it in any machine build them too |
+| 2026-11-12 11:57:44 | before | mcp__ccd_turn__update_plan |
+| 2026-11-12 11:57:44 | after | mcp__ccd_turn__update_plan |
+| 2026-11-12 11:57:46 | before | Bash: Inspect desktop workflow, runs and releases |
+| 2026-11-12 11:57:50 | after | Bash: Inspect desktop workflow, runs and releases |
+| 2026-11-12 11:58:05 | before | Bash: Check desktop run, artifacts, tags, version |
+| 2026-11-12 11:58:08 | after | Bash: Check desktop run, artifacts, tags, version |
+| 2026-11-12 11:58:15 | before | mcp__ccd_turn__wrap_up |
+| 2026-11-12 11:58:15 | after | mcp__ccd_turn__wrap_up |
+| 2026-11-12 11:58:25 | turn end |  |
+| 2026-11-12 11:58:42 | user | Yes, release v0.1.0 |
+| 2026-11-12 11:58:47 | before | mcp__ccd_turn__update_plan |
+| 2026-11-12 11:58:47 | after | mcp__ccd_turn__update_plan |
+| 2026-11-12 11:58:49 | before | Bash: Create and push tag v0.1.0 |
+| 2026-11-12 11:58:56 | after | Bash: Create and push tag v0.1.0 |
+| 2026-11-12 11:58:59 | before | Bash: Confirm tag triggered desktop workflow |
+| 2026-11-12 11:59:21 | after | Bash: Confirm tag triggered desktop workflow |
+| 2026-11-12 11:59:26 | before | Bash: Watch release workflow and list assets |
+| 2026-11-12 11:59:27 | after | Bash: Watch release workflow and list assets |
+| 2026-11-12 11:59:32 | turn end |  |
+| 2026-11-12 12:02:34 | user | Based on all the docs create a single docs file for compelte Azure deployment with price and UI guide step by step end ot end and remove other whihc are not re… |
+| 2026-11-12 12:02:40 | before | mcp__ccd_turn__update_plan |
+| 2026-11-12 12:02:40 | after | mcp__ccd_turn__update_plan |
+| 2026-11-12 12:02:42 | before | Bash: List Azure docs and deploy scripts |
+| 2026-11-12 12:02:43 | after | Bash: List Azure docs and deploy scripts |
+| 2026-11-12 12:02:46 | before | Bash: List Azure docs with mention counts |
+| 2026-11-12 12:02:47 | after | Bash: List Azure docs with mention counts |
+| 2026-11-12 12:02:55 | before | Bash: Show headings of Azure docs |
+| 2026-11-12 12:02:55 | after | Bash: Show headings of Azure docs |
+| 2026-11-12 12:03:03 | before | Read: /Users/sarveshtalele/Downloads/agentic-harness/docs/AZURE_DESKTOP_TARGET_ARCHITECTURE.md |
+| 2026-11-12 12:03:03 | after | Read: /Users/sarveshtalele/Downloads/agentic-harness/docs/AZURE_DESKTOP_TARGET_ARCHITECTURE.md |
+| 2026-11-12 12:03:04 | before | Bash: Read FINAL_PLAN Azure section |
+| 2026-11-12 12:03:04 | after | Bash: Read FINAL_PLAN Azure section |
+| 2026-11-12 12:03:17 | before | Bash: Check schedule feature, files, README deploy section |
+| 2026-11-12 12:03:18 | after | Bash: Check schedule feature, files, README deploy section |
+| 2026-11-12 12:03:25 | before | Bash: Read README Azure section and settings example |
+| 2026-11-12 12:03:25 | after | Bash: Read README Azure section and settings example |
+| 2026-11-12 12:03:31 | before | Bash: Check infra scripts and doc references |
+| 2026-11-12 12:03:31 | after | Bash: Check infra scripts and doc references |
+| 2026-11-12 12:03:42 | before | Bash: Query Azure Retail Prices for East US 2 |
+| 2026-11-12 12:03:42 | failed | Bash: Query Azure Retail Prices for East US 2 Exit code 1 Traceback (most recent call last): File "/Library/Frameworks/Python.framework/Versions/3.14/lib/pytho… |
+| 2026-11-12 12:03:51 | before | Bash: Query Azure Retail Prices outside sandbox |
+| 2026-11-12 12:03:52 | failed | Bash: Query Azure Retail Prices outside sandbox Exit code 1 Traceback (most recent call last): File "/Library/Frameworks/Python.framework/Versions/3.14/lib/pyt… |
+| 2026-11-12 12:03:58 | before | Bash: Query Azure prices with curl |
+| 2026-11-12 12:04:03 | after | Bash: Query Azure prices with curl |
+| 2026-11-12 12:04:12 | before | Bash: Query remaining Azure prices |
+| 2026-11-12 12:04:16 | after | Bash: Query remaining Azure prices |
+| 2026-11-12 12:04:34 | before | Bash: Check landing downloads and release guide |
+| 2026-11-12 12:04:34 | after | Bash: Check landing downloads and release guide |
+| 2026-11-12 12:04:37 | before | Bash: Read blob upload section of release guide |
+| 2026-11-12 12:04:38 | after | Bash: Read blob upload section of release guide |
+| 2026-11-12 12:04:43 | before | Bash: Check zip packaging script |
+| 2026-11-12 12:04:43 | after | Bash: Check zip packaging script |
+| 2026-11-12 12:04:48 | before | Bash: Confirm zip top-level files |
+| 2026-11-12 12:04:49 | after | Bash: Confirm zip top-level files |
+| 2026-11-12 12:06:41 | before | Write: /Users/sarveshtalele/Downloads/agentic-harness/docs/AZURE_DEPLOYMENT_GUIDE.md |
+| 2026-11-12 12:06:41 | after | Write: /Users/sarveshtalele/Downloads/agentic-harness/docs/AZURE_DEPLOYMENT_GUIDE.md |
+| 2026-11-12 12:06:47 | before | Bash: Verify links, health route, env_check flag |
+| 2026-11-12 12:06:48 | after | Bash: Verify links, health route, env_check flag |
+| 2026-11-12 12:06:51 | before | Bash: Find health endpoint |
+| 2026-11-12 12:06:52 | after | Bash: Find health endpoint |
+| 2026-11-12 12:06:55 | before | Bash: Find health endpoint |
+| 2026-11-12 12:06:56 | after | Bash: Find health endpoint |
+| 2026-11-12 12:07:06 | before | Bash: List references in current files |
+| 2026-11-12 12:07:06 | after | Bash: List references in current files |
+| 2026-11-12 12:07:18 | before | Bash: Repoint Azure guide references |
+| 2026-11-12 12:07:19 | after | Bash: Repoint Azure guide references |
+| 2026-11-12 12:07:25 | before | Bash: Read in-app Azure doc sections |
+| 2026-11-12 12:07:25 | after | Bash: Read in-app Azure doc sections |
+| 2026-11-12 12:07:29 | before | Bash: Read architecture.ts section header |
+| 2026-11-12 12:07:29 | after | Bash: Read architecture.ts section header |
+| 2026-11-12 12:07:41 | before | Bash: Rewrite in-app Azure reference page |
+| 2026-11-12 12:07:42 | after | Bash: Rewrite in-app Azure reference page |
+| 2026-11-12 12:07:53 | before | Bash: Rewrite in-app Azure architecture page and typecheck |
+| 2026-11-12 12:07:57 | after | Bash: Rewrite in-app Azure architecture page and typecheck |
+| 2026-11-12 12:08:02 | before | Bash: Typecheck frontend and check generator refs |
+| 2026-11-12 12:08:04 | after | Bash: Typecheck frontend and check generator refs |
+| 2026-11-12 12:08:15 | before | mcp__ccd_turn__wrap_up |
+| 2026-11-12 12:08:15 | after | mcp__ccd_turn__wrap_up |
+| 2026-11-12 12:08:37 | turn end |  |
+| 2026-11-12 12:11:16 | user | Yes, delete the 4 |
+| 2026-11-12 12:11:20 | before | mcp__ccd_turn__update_plan |
+| 2026-11-12 12:11:20 | after | mcp__ccd_turn__update_plan |
+| 2026-11-12 12:11:22 | before | Bash: Delete approved docs and find structure entries |
+| 2026-11-12 12:11:24 | after | Bash: Delete approved docs and find structure entries |
+| 2026-11-12 12:11:34 | before | Bash: Update structure docs and list remaining refs |
+| 2026-11-12 12:11:35 | after | Bash: Update structure docs and list remaining refs |
+| 2026-11-12 12:11:43 | before | Bash: Repoint plan doc links, read tracker item 9 |
+| 2026-11-12 12:11:44 | after | Bash: Repoint plan doc links, read tracker item 9 |
+| 2026-11-12 12:11:50 | before | Bash: Update tracker item 9 and show status |
+| 2026-11-12 12:11:51 | after | Bash: Update tracker item 9 and show status |
+| 2026-11-12 12:12:00 | before | mcp__ccd_turn__wrap_up |
+| 2026-11-12 12:12:00 | failed | mcp__ccd_turn__wrap_up Not shown: commit does not hold right now (app actions available: none), so the app could not draw that button and would drop your quest… |
+| 2026-11-12 12:12:03 | before | mcp__ccd_turn__wrap_up |
+| 2026-11-12 12:12:03 | after | mcp__ccd_turn__wrap_up |
+| 2026-11-12 12:12:16 | turn end |  |
+| 2026-11-12 12:13:14 | user | yes commit and push and review where at which gate attempt 8 is |
+| 2026-11-12 12:13:19 | before | mcp__ccd_turn__update_plan |
+| 2026-11-12 12:13:19 | after | mcp__ccd_turn__update_plan |
+| 2026-11-12 12:13:24 | before | Bash: Commit and push Azure guide changes |

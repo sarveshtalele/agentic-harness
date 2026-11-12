@@ -7,7 +7,7 @@ The older plans keep their findings but no longer set the order of work:
 - `docs/HARNESS_REBUILD_PLAN.md`;
 - `docs/MODULARIZATION_PLAN.md`;
 - `docs/HARNESS_GAP_ANALYSIS.md`;
-- `docs/AZURE_DESKTOP_TARGET_ARCHITECTURE.md`;
+- `docs/AZURE_DEPLOYMENT_GUIDE.md`;
 - `docs/DATA_ARCHITECTURE.md`.
 
 ## 1. Owner decisions recorded
@@ -146,7 +146,7 @@ Every step below is enforced in code, not only in the UI.
 - **Access.** Everyone signs in. Project members and roles (`core/auth.py`) decide what each person sees. The API accepts traffic only from the UI app (access restriction).
 - **Guide.** `docs/AZURE_POC_PORTAL_GUIDE.md` gives every portal step in order: resource group, plan, two web apps, configuration, zip deploy through Kudu, the access restriction, the first admin, adding members, backup, and cost.
 - **Local proof first.** The `web` profile runs locally from the same zips through `startup.py` and `startup.js`, and is checked in Playwright.
-- **Upgrade path.** The path to PostgreSQL and Container Apps Jobs stays in `docs/AZURE_DESKTOP_TARGET_ARCHITECTURE.md`.
+- **Upgrade path.** The path to PostgreSQL and Container Apps Jobs stays in `docs/AZURE_DEPLOYMENT_GUIDE.md`.
 
 ### M7. Desktop app
 
@@ -595,7 +595,7 @@ The deployment standard becomes **PostgreSQL plus Blob Storage in East US 2**. S
 - Code signing waits for the owner's certificates (unsigned builds are labelled so).
 
 ## G9. Azure standard guide (East US 2)
-- **What it covers:** `docs/AZURE_DESKTOP_TARGET_ARCHITECTURE.md` becomes the one standard: App Service plan B1 (two apps), PostgreSQL Flexible Server Burstable B1ms with 32 GiB, Blob Storage (Standard LRS, Hot), Key Vault Standard, and optional Application Insights.
+- **What it covers:** `docs/AZURE_DEPLOYMENT_GUIDE.md` becomes the one standard: App Service plan B1 (two apps), PostgreSQL Flexible Server Burstable B1ms with 32 GiB, Blob Storage (Standard LRS, Hot), Key Vault Standard, and optional Application Insights.
 - **Format:** every portal step, settings from Key Vault, zip deployment only, and a monthly cost table from the Azure pricing calculator for East US 2, with the date the prices were read.
 
 ## Order

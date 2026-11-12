@@ -28,7 +28,7 @@ The **Status** column says what a command or run showed, not what the code is me
 | Skill creation in chat | - | Skill Creator Studio pages only; no harness tool | Missing (HS-10) | `create_skill` tool that drafts to `data/skill-drafts/` and needs the user's approval (P6) |
 | Skill evaluation | Benchmarks | Studio `evaluate` endpoint; see the live HS-09 result | See evidence | evaluator plugin + NVIDIA SkillSpector (P6) |
 | Observability | Telemetry plugin | `agent_calls`, `tool_calls`, ledger, observability page | Working | OpenTelemetry exporter to Application Insights on Azure |
-| Desktop app | Electron app + private desktop host running the same web app | None | Missing | Electron shell (P9; see `docs/AZURE_DESKTOP_TARGET_ARCHITECTURE.md`) |
+| Desktop app | Electron app + private desktop host running the same web app | None | Missing | Electron shell (P9; see `docs/AZURE_DEPLOYMENT_GUIDE.md`) |
 | Headless / SDK | `headless`, `sdk` profiles | `bin/harness` CLI (legacy engine) | Partial | A CLI that drives `/agui/harness` |
 | Safety statement | `SAFETY.md` | `CLAUDE.md` security rules, sign-in, deny-by-default routes | Working | Add a `SAFETY.md` for operators |
 
@@ -45,4 +45,4 @@ The **Status** column says what a command or run showed, not what the code is me
 3. **P5:** admin grants for plugins, skills and MCP (HS-12).
 4. **P6:** harness `create_skill` and evaluation with SkillSpector (HS-10, HS-09).
 5. **Mode persistence and compaction tuning:** thread snapshot store, model context windows.
-6. **Azure and desktop:** see `docs/AZURE_DESKTOP_TARGET_ARCHITECTURE.md`.
+6. **Azure and desktop:** see `docs/AZURE_DEPLOYMENT_GUIDE.md`.

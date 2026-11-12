@@ -83,7 +83,7 @@ Still to do for real agent scores:
 - **CI fixes:**
   - `mcp>=2.2,<3` added to `requirements.txt`. agent-framework-core lists it only as an extra, so CI had no `mcp` and every stdio MCP test failed.
   - The branch-isolation test runs its `.sh` script through bash, Git's own on Windows, which fixes WinError 193.
-- **Azure guide:** `docs/AZURE_DESKTOP_TARGET_ARCHITECTURE.md` is now the end-to-end portal guide, with a UI tour.
+- **Azure guide:** `docs/AZURE_DEPLOYMENT_GUIDE.md` is now the end-to-end portal guide, with a UI tour.
 - **Owner cleanup (not deleted):** an early registry probe created an `atlas.sqlite3` at the repo root and the empty folders `checkpoints/`, `logs/`, `projects/` and `runs/`. Git ignores or skips them all.
 
 ## Part 3 progress (owner goal 2026-11-11: accurate harness, PostgreSQL only, Azure standard)
@@ -101,7 +101,7 @@ Still to do for real agent scores:
   - Offline suite on PostgreSQL: 672 passed. The failures left are the SQLite-upgrade tests listed below.
 - **G7 Key Vault:** `backend/keyvault.py` reads secrets with the managed identity (`ATLAS_KEY_VAULT_URL`); `tests/test_keyvault.py`.
 - **G8 desktop CI:** `desktop.yml` builds the DMG (arm64 and x64, each on its own runner) and the MSI on every push that changes the app, and a `v*` tag makes a GitHub Release.
-- **G9 guide:** `docs/AZURE_DESKTOP_TARGET_ARCHITECTURE.md` is the standard: PostgreSQL B1ms, Blob, Key Vault, East US 2, about $28.50 a month (prices read 2026-11-11).
+- **G9 guide:** `docs/AZURE_DEPLOYMENT_GUIDE.md` is the standard: PostgreSQL B1ms, Blob, Key Vault, East US 2, about $28.50 a month (prices read 2026-11-11).
 - **CI fixes:** the evals job ran a deleted test file; a Windows path case; macOS runners get PostgreSQL.
 - **Waiting on the owner's yes to delete:**
   - the SQLite-only tests: `tests/test_migration_006.py`, `test_access_account.py::test_migration_010_…`, `test_models_usage.py::test_migration_009_…`, `test_core_platform.py::test_sqlite_journal_mode_is_a_setting`;

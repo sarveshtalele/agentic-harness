@@ -179,7 +179,7 @@ Remove-Item Env:ATLAS_ADMIN_PASSWORD
 2. Do the same for `dist\azure_frontend.zip` on `https://<ui app>.scm.azurewebsites.net/ZipDeployUI`.
 3. Restart both apps in the portal.
 
-The full setup is in **`docs/AZURE_DESKTOP_TARGET_ARCHITECTURE.md`**, the standard guide: East US 2, one B1 plan with two web apps, PostgreSQL Flexible Server B1ms, Blob Storage, Key Vault, about $28.50 a month.
+The full setup is in **`docs/AZURE_DEPLOYMENT_GUIDE.md`**, the one Azure guide: East US 2, one B1 plan with two web apps, PostgreSQL Flexible Server B1ms, Blob Storage and Key Vault, about $20.70 a month with PostgreSQL stopped outside working hours (about $28.60 always on).
 
 ## Desktop app
 
@@ -215,7 +215,7 @@ Then `cd apps/desktop`, `npm install` and `npx electron .`.
 | `docs/PROJECT_STRUCTURE.md` | Every file in a table: what it does, what it uses and what uses it (generated from the real imports by `python scripts/gen_structure.py`) |
 | `docs/SECURITY_REVIEW_2026-11-11.md` | Dependency audits, code scan, fixes and accepted risks, with the commands to repeat them |
 | `docs/MASTER_PLAN.md` | The approved plan: Part 2 (H1 to H9), Phase Q (QE correctness), Phase R (capability registry) |
-| `docs/AZURE_DESKTOP_TARGET_ARCHITECTURE.md` | The standard Azure deployment (PostgreSQL, Blob, Key Vault, East US 2) with costs and a UI tour |
+| `docs/AZURE_DEPLOYMENT_GUIDE.md` | The one Azure deployment guide (PostgreSQL, Blob, Key Vault, East US 2): costs, zipping, portal steps, UI tour |
 | `docs/DESKTOP_RELEASE_GUIDE.md` | Building and publishing the desktop installers |
 | `docs/AGENT_SKILLS_AND_MAF_SPECIFICATION.md` | How MAF is used: agents, harness, skills, observability |
 | `docs/USER_STORIES.md`, `docs/HARNESS_USER_STORIES.md` | The stories the end-to-end tests prove |

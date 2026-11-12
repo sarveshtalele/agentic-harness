@@ -1,5 +1,5 @@
 # AZURE environment (web profile): enter these as App Service "Environment variables" in the portal.
-# Never put them in a file inside the zip. See docs/AZURE_POC_PORTAL_GUIDE.md.
+# Never put them in a file inside the zip. See docs/AZURE_DEPLOYMENT_GUIDE.md.
 
 # --- API web app ---
 ATLAS_PROFILE=web

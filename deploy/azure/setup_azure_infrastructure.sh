@@ -11,7 +11,7 @@ APP_PLAN="asp-agentic-harness-b1"
 BACKEND_APP="agentic-backend"
 FRONTEND_APP="agentic-frontend"
 SKU="B1"
-KEY_VAULT="kv-agentic-harness"  # holds atlas-admin-password, atlas-secret-key, atlas-database-url (docs/AZURE_DESKTOP_TARGET_ARCHITECTURE.md)
+KEY_VAULT="kv-agentic-harness"  # holds atlas-admin-password, atlas-secret-key, atlas-database-url (docs/AZURE_DEPLOYMENT_GUIDE.md)
 
 echo "=================================================================="
 echo " 1-Time Azure Infrastructure Setup"

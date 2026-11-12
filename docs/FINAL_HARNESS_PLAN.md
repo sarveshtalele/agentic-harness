@@ -10,7 +10,7 @@ This plan supersedes the phase order in:
 - `docs/HARNESS_REBUILD_PLAN.md` (its findings stay valid);
 - `docs/MODULARIZATION_PLAN.md`;
 - `docs/HARNESS_GAP_ANALYSIS.md`;
-- `docs/AZURE_DESKTOP_TARGET_ARCHITECTURE.md`.
+- `docs/AZURE_DEPLOYMENT_GUIDE.md`.
 
 ## 1. Goal and definition of done
 
@@ -90,6 +90,6 @@ Each phase ends with:
 | 1 | Yes to the Section 4 deletion list | Nothing removed |
 | 2 | Purge F-04 rows from the existing database | Kept |
 | 3 | F-09 skill scripts: mark NOT_IMPLEMENTED or implement | Mark |
-| 4 | Azure decisions A to E in `docs/AZURE_DESKTOP_TARGET_ARCHITECTURE.md` | - |
+| 4 | Azure decisions A to E in `docs/AZURE_DEPLOYMENT_GUIDE.md` | - |
 | 5 | Marketplace licensing (TCS proprietary skills): runtime install only? | Runtime install only |
 | 6 | NVIDIA SkillSpector install (`uv tool install`) | Not installed |

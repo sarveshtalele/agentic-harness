@@ -831,7 +831,7 @@ The project has 1069 files, not counting screenshots.
 | `scripts/azure/setup_script.py` | The one-time Azure infrastructure setup script (bash) that azure_convert_and_deploy.py prints or writes. |  | `scripts/azure_convert_and_deploy.py` |
 | `scripts/azure_convert_and_deploy.py` | azure_convert_and_deploy.py - End-to-End Azure App Service / Kudu Conversion & Deployment Automation | `scripts/azure/archive.py`, `scripts/azure/deploy.py`, `scripts/azure/files.py`, `scripts/azure/logs.py`, `scripts/azure/preflight.py`, `scripts/azure/setup_script.py` | `tests/test_azure_kudu_packaging.py`, `tests/test_azure_package_runs.py` |
 | `scripts/azure_convert_and_deploy.sh` | ============================================================================== |  |  |
-| `scripts/azure_local.py` | Run the two Azure zips locally, through their own startup scripts, in the web profile (docs/AZURE_POC_PORTAL_GUIDE.md section 10). | `scripts/pg_local.py` |  |
+| `scripts/azure_local.py` | Run the two Azure zips locally, through their own startup scripts, in the web profile (docs/AZURE_DEPLOYMENT_GUIDE.md section 4). | `scripts/pg_local.py` |  |
 | `scripts/capture_evidence.py` | Captures UI screenshots for the evidence folder |  |  |
 | `scripts/desktop_build.py` | Build the desktop app: UI standalone, backend with PyInstaller, then installers with electron-builder. |  |  |
 | `scripts/dev.py` | One cross-platform entry point. Standard library only, so it runs before any install. |  |  |
@@ -857,9 +857,7 @@ The project has 1069 files, not counting screenshots.
 |---|---|---|---|
 | `docs/AGENT_SKILLS_AND_MAF_SPECIFICATION.md` | Master canonical guide: MAF 2.0 conformance, Progressive Disclosure, Harness Patterns, Skill Studio, and 13 skills inventory |  |  |
 | `docs/ARCHITECTURE.md` | Architecture pointer and inventory index |  |  |
-| `docs/AZURE_DESKTOP_TARGET_ARCHITECTURE.md` | Azure and desktop: the standard deployment guide (East US 2) |  |  |
-| `docs/AZURE_ENTERPRISE_DEPLOYMENT_GUIDE.md` | Canonical Azure guide: pricing, storage, sandbox, RBAC |  |  |
-| `docs/AZURE_POC_PORTAL_GUIDE.md` | Azure proof of concept: step-by-step in the Azure portal |  |  |
+| `docs/AZURE_DEPLOYMENT_GUIDE.md` | The one Azure guide: cost, zipping, portal steps, UI tour |  |  |
 | `docs/CAPABILITY_REGISTRY.md` | Capability registry |  |  |
 | `docs/CODEBASE_DUPLICATION_AND_MAPPING_REPORT.md` | Codebase Duplication, Component Consolidation & Architecture Mapping Report |  |  |
 | `docs/DATA_ARCHITECTURE.md` | Data architecture |  |  |
@@ -879,7 +877,6 @@ The project has 1069 files, not counting screenshots.
 | `docs/SECURITY_REVIEW_2026-11-11.md` | Security and dependency review, 2026-11-11 |  |  |
 | `docs/SKILL_STUDIO_AUDIT.md` | Skill Studio audit |  |  |
 | `docs/SYSTEM_ARCHITECTURE_AND_DESIGN.md` | Canonical architecture, Next.js/FastAPI full-stack design, MAF 2.0 orchestration, AST code packs, and QE specifications |  |  |
-| `docs/UI_GUIDE_AND_COSTING.md` | 🖥️ Platform UI Operational Guide & Comprehensive Cloud Costing Analysis |  |  |
 | `docs/USER_STORIES.md` | User stories for the whole application |  |  |
 | `docs/analysis/2026-11-11-markdown-html-converter-trace.md` | Trace and root-cause analysis: project "Markdown-HTML-converter" (`prj_015c85df23f2`) |  |  |
 

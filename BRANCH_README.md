@@ -111,7 +111,7 @@ python3 scripts/azure_convert_and_deploy.py --deploy \
 | [`.github/workflows/branch-lock-check.yml`](.github/workflows/branch-lock-check.yml) | GitHub Actions pull request gate preventing merge into `main` or other branches. |
 | [`.github/BRANCH_PROTECTION.md`](.github/BRANCH_PROTECTION.md) | Policy documentation explaining the strict branch protection rule. |
 | [`tests/test_azure_kudu_packaging.py`](tests/test_azure_kudu_packaging.py) | Unit test suite verifying packaging logic, CRC checks, and setup generators. |
-| [`docs/UI_GUIDE_AND_COSTING.md`](docs/UI_GUIDE_AND_COSTING.md) | Step-by-step UI operational guide and comprehensive cloud costing analysis. |
+| [`docs/AZURE_DEPLOYMENT_GUIDE.md`](docs/AZURE_DEPLOYMENT_GUIDE.md) | Azure deployment with costs, portal steps and a UI tour. |
 
 ---
 

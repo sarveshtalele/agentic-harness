@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the two Azure zips locally, through their own startup scripts, in the web profile (docs/AZURE_POC_PORTAL_GUIDE.md section 10).
+"""Run the two Azure zips locally, through their own startup scripts, in the web profile (docs/AZURE_DEPLOYMENT_GUIDE.md section 4).
 
   python scripts/dev.py azure-local            build the zips, start both apps, keep running until Ctrl+C
   python scripts/dev.py azure-local --check    same, then check the pages answer and stop

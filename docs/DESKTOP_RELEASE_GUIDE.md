@@ -43,7 +43,7 @@ CI already merged the manifests into `latest.json`. To merge them yourself, put 
 
 ## 3. Publish to the Blob `downloads` container (Azure portal, eastus2)
 
-The Storage account comes from the Azure guide, `docs/AZURE_POSTGRES_BLOB_PORTAL_GUIDE.md`.
+The Storage account comes from the Azure guide, `docs/AZURE_DEPLOYMENT_GUIDE.md` (section 8).
 
 ### Create the container once
 
