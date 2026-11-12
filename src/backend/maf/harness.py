@@ -31,6 +31,7 @@ from agent_framework import (
     todos_remaining_message,
 )
 
+from backend import config
 from backend.config import DATA_DIR, HARNESS_CONTEXT_TOKENS, HARNESS_MAX_ROUNDS, HARNESS_MAX_TOOL_CALLS
 from backend.core import auth, plugin_grants, plugins, prompts
 from backend.core.mcp import mcp_tools_for
@@ -41,6 +42,9 @@ from backend.maf.harness_kit.errors import error_shape
 from backend.maf.harness_kit.tool_hygiene import tool_hygiene
 from backend.maf.harness_kit.hook_middleware import guarded
 from backend.maf.harness_kit.shell import ShellProvider, WorkspaceShell
+from backend.maf.harness_kit.shell_tools import ShellToolsProvider
+from backend.maf.harness_kit.bg_tasks import BackgroundProvider
+from backend.maf.harness_kit import permissions
 from backend.maf.harness_kit.skill_runner import run_skill_script
 from backend.maf.harness_kit.strict_args import strict_arguments
 from backend.maf.harness_kit.write_first import write_first
@@ -113,6 +117,7 @@ def build(project_id: str, thread_id: str, start_run, *, user_id: str | None = N
     client = llm.client(model, max_rounds=HARNESS_MAX_ROUNDS, max_tool_calls=HARNESS_MAX_TOOL_CALLS, detailed_errors=True)
     compaction = _compaction(client, model, HARNESS_CONTEXT_TOKENS - max_output, telemetry)
     world, providers = _world(ws)
+    mode, rules = permissions.get_mode(dirs["tools"], thread_id), permissions.load_rules(ws.root if ws else None)  # once per turn
     if command:  # without a repository it still says which command runs; WorkspaceContext says there are no file tools
         providers.append(active_command.ActiveCommandContext(command, ws.root if ws else None, thread_id))
     return create_harness_agent(
@@ -137,7 +142,8 @@ def build(project_id: str, thread_id: str, start_run, *, user_id: str | None = N
         loop_max_iterations=HARNESS_MAX_ROUNDS,
         disable_web_search=True,  # no data leaves through a hosted search tool
         context_providers=[ProjectContext(project_id, full=True), loaded, workspace.WorkspaceContext(ws), *providers],
-        middleware=[strict_arguments, write_first(thread_id, ws.root if ws else None, command), *([verify.verifier(ws, command)] if ws and command else []),
+        auto_approval_rules=[permissions.approval_rule(lambda: mode, lambda: rules)],  # allow and deny skip the card
+        middleware=[permissions.enforce(lambda: mode, lambda: rules), strict_arguments, write_first(thread_id, ws.root if ws else None, command), *([verify.verifier(ws, command)] if ws and command else []),
                     turn_budget(thread_id, resume=f"/{command['name']} {command['args']}".rstrip() if command else "continue"), tool_hygiene(), error_shape(), tool_audit(AGENT, project_id, None, "chat"), *([guarded(ws)] if ws else []), telemetry],
         **world,
     )
@@ -148,4 +154,6 @@ def _world(ws) -> tuple[dict, list]:
     if ws is None:
         return {}, []
     world = {"file_access_store": workspace.WorkspaceStore(ws.root), "file_access_disable_readonly_tool_approval": True}
-    return world, [ShellProvider(WorkspaceShell(ws))]  # the shell comes through a provider: see harness_kit/shell.py
+    if config.PROFILE == "web":  # D-SHELL-WEB: the shared server keeps the allowlisted runner
+        return world, [ShellProvider(WorkspaceShell(ws))]  # the shell comes through a provider: see harness_kit/shell.py
+    return world, [ShellToolsProvider(ws), BackgroundProvider(ws.thread_id)]  # real bash and powershell (D-SHELL)

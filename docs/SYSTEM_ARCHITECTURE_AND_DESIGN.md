@@ -1143,3 +1143,11 @@ In accordance with the repository documentation policy (**1 Single Doc for Each 
 ### Active plugin command (2026-11-11)
 
 `maf/agui.py` records a typed plugin command (`/plugin:command args`) as the thread's active command (`harness_kit/active_command.py`, a JSON file beside the thread's tool state). `harness.build` reads it each turn: the command's instructions and the on-disk state of the files it may create go into the instructions through a MAF `ContextProvider`, and the platform's own QE, document and repository tools are left out while it is active. A later slash command replaces it; `/harness` text without a command keeps it.
+
+## 12. Harness shells and permissions (Phase 2 step 2, 2026-11-12)
+
+- **Shells:** outside the web profile the harness has `bash` and `powershell` (`maf/harness_kit/shells.py`), each a persistent MAF `LocalShellTool` per conversation, so `cd` and variables carry over. Windows uses Git for Windows' bash and pwsh (or Windows PowerShell 5.1). The web profile keeps the allowlisted `run_shell` (owner decision D-SHELL-WEB).
+- **Background work:** `run_in_background` starts a command in its own process group with its log in `.aqh/tasks/`; `task_output` and `task_stop` read and end it; new output reaches the model at its next turn (`bg_tasks.py`).
+- **Permissions:** per-conversation modes and Claude Code rules from the person's `~/.aqh/settings.json` and the workspace's `.claude/settings*.json` (repository files may only tighten) decide allow, ask or deny before MAF's approval card (`permissions.py`). `/mode <name>` is answered without the model and without plugin prompt hooks.
+- **Hooks:** plugins see these tools as `Bash` and `PowerShell`, with Claude Code's `tool_input.command`.
+

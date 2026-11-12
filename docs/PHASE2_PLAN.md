@@ -479,7 +479,7 @@ The audit test itself had one wrong path (`/chat` exists only as `/chat/<id>`); 
 | Step | What | Done means |
 |---|---|---|
 | 1 | Discovery eval baseline (20 tasks) | numbers recorded before any harness change |
-| 2 | Tool pipeline and short tool names (section 4), persistent Bash and PowerShell with background, monitor, spill (section 5), permission modes and rules (9.1, 9.2) | parity matrix shell and permission rows green on 3 OS |
+| 2 | Persistent Bash and PowerShell with background, monitor, spill (section 5), permission modes and rules (9.1, 9.2); short tool names move to step 4 | parity matrix shell and permission rows green on 3 OS |
 | 3 | Script runtime all languages, health flags (section 7) | script rows green; flagged skills shown in `/skills` |
 | 4 | Capability index, skill scopes, live reload, MCP refresh (sections 8, 7.1) | eval after shows the gain |
 | 5 | Hooks (9.3), settings files (9.4), sessions, checkpoints, rewind, subagents, background tasks (10) | hook and session rows green |

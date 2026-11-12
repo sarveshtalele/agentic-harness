@@ -34,6 +34,12 @@ def thread(client):
     return client.post(f"/api/projects/{project['id']}/chats", json={"agent": "harness"}).json()
 
 
+@pytest.fixture
+def web_profile(monkeypatch):
+    """run_shell, the allowlisted runner, is the web profile's shell (D-SHELL-WEB); other profiles get bash and powershell."""
+    monkeypatch.setattr(config, "PROFILE", "web")
+
+
 def test_allowlist_rules():
     assert shell.refusal(["git", "status", "--short"]) is None and shell.refusal(["node", "x.ts"]) is None
     assert "not allowed" in shell.refusal(["rm", "-rf", "/"]) and "not allowed" in shell.refusal(["/usr/bin/node", "x"])
@@ -41,7 +47,7 @@ def test_allowlist_rules():
     assert "--output" in shell.refusal(["git", "diff", "--output=/tmp/x"]) and "only lists" in shell.refusal(["git", "branch", "-D", "main"])
 
 
-def test_command_outside_the_allowlist_is_refused_and_nothing_runs(client, thread):
+def test_command_outside_the_allowlist_is_refused_and_nothing_runs(web_profile, client, thread):
     scripted = ScriptedClient([(NEEDLE, steps({"call": "run_shell", "args": {"command": "curl https://example.com"}}, "Refused."))])
     llm.set_client_override(scripted)
     first = turn(client, thread["id"], "Fetch the page", "r1")
@@ -51,7 +57,7 @@ def test_command_outside_the_allowlist_is_refused_and_nothing_runs(client, threa
     assert ledger_rows(thread["project_id"], "harness.shell") == []  # nothing ran, so no command row
 
 
-def test_allowed_command_waits_for_approval_then_runs_in_the_workspace_and_is_audited(client, thread):
+def test_allowed_command_waits_for_approval_then_runs_in_the_workspace_and_is_audited(web_profile, client, thread):
     command = 'python3 -c "import os; print(os.getcwd()); print(os.environ.get(\'ATLAS_ADMIN_PASSWORD\'))"'
     scripted = ScriptedClient([(NEEDLE, steps({"call": "run_shell", "args": {"command": command}}, "Ran it."))])
     llm.set_client_override(scripted)
@@ -68,7 +74,7 @@ def test_allowed_command_waits_for_approval_then_runs_in_the_workspace_and_is_au
     assert "exit_code: 0" in history  # the shell result is kept in the per-call history like any other tool result
 
 
-def test_rejected_command_never_runs(client, thread):
+def test_rejected_command_never_runs(web_profile, client, thread):
     llm.set_client_override(ScriptedClient([(NEEDLE, steps({"call": "run_shell", "args": {"command": "git status"}}, "Not run."))]))
     approve(client, thread["id"], turn(client, thread["id"], "Status?", "r1"), "r2", approved=False)
     assert ledger_rows(thread["project_id"], "harness.shell") == []

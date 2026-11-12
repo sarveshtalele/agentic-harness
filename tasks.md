@@ -333,8 +333,8 @@
 
 ## Phase 2 (docs/PHASE2_PLAN.md revision 3, 2026-11-12), awaiting approval
 - [x] Owner decisions D-SHELL, D-SHELL-WEB, D-SANDBOX, D-CLI (plan section 17), 2026-11-12
-- [ ] 1 Discovery eval baseline (20 tasks)
-- [ ] 2 Tool pipeline, short tool names; persistent Bash and PowerShell (background, monitor, spill); permission modes and rules
+- [ ] 1 Discovery eval baseline (20 tasks): built; run blocked by the model proxy's daily token quota; run later on commit b76ddbd
+- [x] 2 Persistent Bash and PowerShell (background, new-output notes, spill); permission modes and rules; /mode (2026-11-12). Short tool names moved to step 4 with the capability index
 - [ ] 3 Script runtime for Python, TypeScript, JavaScript, Bash, PowerShell and declared interpreters; health flags
 - [ ] 4 Capability index, skill scopes with live reload, MCP list_changed refresh; eval after
 - [ ] 5 Hooks (Claude Code events and contract), settings files, sessions JSONL, checkpoints and rewind, subagents, background tasks

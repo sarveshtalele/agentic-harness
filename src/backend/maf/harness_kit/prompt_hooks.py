@@ -46,7 +46,12 @@ def for_model(text: str, outcome: plugin_hooks.Outcome) -> str:
 
 def blocked_events(thread_id: str, run_id: str, reason: str) -> list:
     """A whole AG-UI run that only says the plugin blocked the message; the model is not called."""
+    return reply_events(thread_id, run_id, f"A plugin hook blocked this message: {reason}")
+
+
+def reply_events(thread_id: str, run_id: str, text: str) -> list:
+    """A whole AG-UI run whose only content is `text` (no model call)."""
     message_id = new_id("msg")
     return [RunStartedEvent(thread_id=thread_id, run_id=run_id), TextMessageStartEvent(message_id=message_id, role="assistant"),
-            TextMessageContentEvent(message_id=message_id, delta=f"A plugin hook blocked this message: {reason}"),
-            TextMessageEndEvent(message_id=message_id), RunFinishedEvent(thread_id=thread_id, run_id=run_id)]
+            TextMessageContentEvent(message_id=message_id, delta=text), TextMessageEndEvent(message_id=message_id),
+            RunFinishedEvent(thread_id=thread_id, run_id=run_id)]

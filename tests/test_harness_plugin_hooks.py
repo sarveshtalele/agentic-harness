@@ -56,10 +56,10 @@ def test_typed_gate_phrase_is_recorded_by_the_plugin_and_guard_bash_blocks_rm(cl
     events = [r for r in ledger_rows(thread["project_id"], "plugin.hook") if r["target"] == "UserPromptSubmit"]
     assert events and events[0]["actor"] == "plugin:agentic-qe" and events[0]["data"]["exit_code"] == 0
 
-    scripted = ScriptedClient([(NEEDLE, steps({"call": "run_shell", "args": {"command": "rm -rf /"}}, "Blocked."))])
+    scripted = ScriptedClient([(NEEDLE, steps({"call": "bash", "args": {"command": "rm -rf /"}}, "Blocked."))])  # hooks see it as Bash
     llm.set_client_override(scripted)
     approve(client, thread["id"], turn(client, thread["id"], "Clean everything", "r2"), "r3")
-    assert "Blocked by a plugin hook before run_shell ran. Nothing ran." in scripted.calls[-1]
+    assert "Blocked by a plugin hook before bash ran. Nothing ran." in scripted.calls[-1]
     assert "agentic-qe: deleting / is blocked (outside the project)" in scripted.calls[-1]  # guard-bash.ts's own reason
     blocked = [r for r in ledger_rows(thread["project_id"], "plugin.hook") if r["target"] == "PreToolUse"]
     assert blocked[-1]["data"]["blocked"] is True and blocked[-1]["data"]["tool"] == "Bash"

@@ -108,7 +108,7 @@ class ActiveCommandContext(ContextProvider):
             "- Do its steps in order. The plugin's gates are the only gates.",
             "- The repository facts in your instructions (languages, frameworks, test runners, file counts) are already measured: use them, do not re-derive them.",
             "- Tools while it runs: list_files, read_file, grep, file_access_ls, file_access_read, file_access_grep (read, no approval); file_access_write, "
-            "file_access_replace, file_access_replace_lines (change it, one approval card each); run_shell (the plugin's scripts, tests, git); "
+            "file_access_replace, file_access_replace_lines (change it, one approval card each); bash or powershell (run_shell on the web) for the plugin's scripts, tests and git; "
             "todos_*; load_skill and read_skill_resource (the plugin's skills); background_agents_* (the plugin's specialists). "
             f"These platform tools do not exist now, so never call them: {', '.join(sorted(PLATFORM_QE_TOOLS))}.",
             "- File tool paths are relative to the workspace root (for example `src/app.py` or `docs/qe/<app>/...`), never absolute. "
@@ -118,7 +118,7 @@ class ActiveCommandContext(ContextProvider):
             "Every write shows the user an approval card: that card IS the explicit yes the command asks for, so make the write call instead of asking in chat.",
             "- Add one todo per file to write and per check to run, and complete each when it is done.",
             "- Never write a file the command says the plugin writes itself (gate reports, confidence, audit, coverage map, hand-off).",
-            "- Run the command's check scripts with run_shell. While a check prints FAIL, fix the files; ask for the gate phrase only when it passes.",
+            "- Run the command's check scripts with the shell tool (bash, powershell, or run_shell on the web). While a check prints FAIL, fix the files; ask for the gate phrase only when it passes.",
             f"- A plugin may open its write window only for its own command (agentic-qe: any other message closes it). If a hook blocks a write because "
             f"no phase command is running, do not retry the write: stop and ask the user to send `/{c['name']} {c['args']}`".rstrip() + "` again.",
             "Files this command may create (checked on disk just now):", *(files or ["- none named"]),

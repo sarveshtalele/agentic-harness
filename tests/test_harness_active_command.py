@@ -56,7 +56,7 @@ def test_the_active_command_is_pinned_and_the_platform_qe_tools_step_aside(clien
     seen, offered = scripted.calls[-1], scripted.tools[-1]
     assert f"ACTIVE PLUGIN COMMAND: /agentic-qe:qe-requirements {APP}" in seen and f"- {REQS}: MISSING" in seen
     assert seen.count('<command name="agentic-qe:qe-requirements">') == 1  # in the instructions only, not again in the history
-    assert {"file_access_write", "run_shell"} <= set(offered)
+    assert "file_access_write" in offered and {"bash", "powershell", "run_shell"} & set(offered)  # a shell is offered
     assert not set(offered) & active_command.PLATFORM_QE_TOOLS
     assert thread_messages(thread["id"])[-2]["content"] == f"/agentic-qe:qe-requirements {APP}"  # the chat keeps what was typed
 

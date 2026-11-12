@@ -26,10 +26,13 @@ WRITES = {"file_access_write": "Write", "file_access_replace": "Edit", "file_acc
 refused: dict[str, dict[str, str]] = {}
 
 
+SHELL_NAMES = {SHELL: "Bash", "bash": "Bash", "powershell": "PowerShell"}  # hooks that inspect shells match Bash|PowerShell
+
+
 def claude_call(name: str, args: dict, root) -> tuple[str, dict]:
     """The Claude Code tool name and tool_input for one harness call. A delete is shown to hooks as the `rm` it is."""
-    if name == SHELL:
-        return "Bash", {"command": str(args.get("command", ""))}
+    if name in SHELL_NAMES:
+        return SHELL_NAMES[name], {"command": str(args.get("command", "")), "description": str(args.get("description", ""))}
     path = str(root / str(args.get("file_name", "")))
     if name == "file_access_write":
         return "Write", {"file_path": path, "content": str(args.get("content", ""))}
@@ -51,7 +54,7 @@ def guarded(workspace):
     @function_middleware
     async def guard(context: FunctionInvocationContext, call_next) -> None:
         name = context.function.name
-        if name != SHELL and name not in WRITES:
+        if name not in SHELL_NAMES and name not in WRITES:
             await call_next()
             return
         args = context.arguments.model_dump() if isinstance(context.arguments, BaseModel) else dict(context.arguments)
@@ -63,7 +66,7 @@ def guarded(workspace):
                               f"block it again. Do not write this file. The hook said: {earlier}")
             return
         try:
-            with leases.lease("shell" if name == SHELL else "write", workspace.project_id, workspace.thread_id, workspace.user_id):
+            with leases.lease("shell" if name in SHELL_NAMES else "write", workspace.project_id, workspace.thread_id, workspace.user_id):
                 before = await hooks("PreToolUse", tool, {"tool_input": tool_input})
                 if before.blocked:
                     if target:

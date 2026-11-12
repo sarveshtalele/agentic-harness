@@ -16,7 +16,7 @@ Written by `scripts/hooks/activity_log.py`. Times are local.
 | 8 | Harness eval suite (5.9); repository map only if it helps (5.8) | open | |
 | 9 | Azure guide at or under $25/month, first test deployment (9) | in progress (guide done 2026-11-12; test deployment and portal screenshots open) | `docs/AZURE_DEPLOYMENT_GUIDE.md`: prices re-read from prices.azure.com 2026-11-12, $20.70 with the PostgreSQL stop schedule (Automation runbook), zipping, portal steps, UI tour, troubleshooting. Owner approved deleting the 4 old Azure docs |
 | 10 | Desktop bundled PostgreSQL (D4), signing when certificates exist | open | |
-| 11 | Phase 2 (docs/PHASE2_PLAN.md rev 3): Claude Code-class harness on MAF (CLI, desktop, web), then R1 to R6 | approved 2026-11-12; step 1 built, baseline run blocked | Step 1: evals/harness/discovery.json (20 tasks, fixture repo with Python, TS, Bash, PowerShell, .claude and .agents skills), src/backend/maf/evals/discovery.py scorer (tests/test_discovery_eval_scoring.py: 3 passed), tests/test_harness_discovery_eval.py live driver, `python scripts/dev.py live`. Baseline not run: the model proxy answers HTTP 429 'daily token limit exceeded (25,101,895/25,000,000)' |
+| 11 | Phase 2 (docs/PHASE2_PLAN.md rev 3): Claude Code-class harness on MAF (CLI, desktop, web), then R1 to R6 | approved 2026-11-12; step 1 built, baseline run blocked | Step 1: evals/harness/discovery.json (20 tasks, fixture repo with Python, TS, Bash, PowerShell, .claude and .agents skills), src/backend/maf/evals/discovery.py scorer (tests/test_discovery_eval_scoring.py: 3 passed), tests/test_harness_discovery_eval.py live driver, `python scripts/dev.py live`. Baseline not run: the model proxy answers HTTP 429 'daily token limit exceeded (25,101,895/25,000,000)'; Step 2 done locally (2026-11-12): bash and powershell on MAF LocalShellTool (persistent), background tasks, spill, permission modes and rules, /mode; tests/test_harness_shells.py and tests/test_harness_permissions.py (20 passed, PowerShell skipped on this Mac); full suite 710 passed, 2 skipped; Windows and Linux CI not run yet |
 
 | Time | Event | Detail |
 |---|---|---|
@@ -10965,3 +10965,107 @@ Written by `scripts/hooks/activity_log.py`. Times are local.
 | 2026-11-12 20:05:53 | before | Bash: Run full suite before commit |
 | 2026-11-12 20:09:33 | after | Bash: Run full suite before commit |
 | 2026-11-12 20:09:38 | before | Bash: Stage all except smoke folder |
+| 2026-11-12 20:09:40 | after | Bash: Stage all except smoke folder |
+| 2026-11-12 20:09:43 | before | Bash: Review staged files for anything sensitive |
+| 2026-11-12 20:09:44 | after | Bash: Review staged files for anything sensitive |
+| 2026-11-12 20:09:48 | before | Bash: Scan staged evidence for secrets |
+| 2026-11-12 20:09:49 | after | Bash: Scan staged evidence for secrets |
+| 2026-11-12 20:09:55 | before | Bash: Commit and push |
+| 2026-11-12 20:10:11 | after | Bash: Commit and push |
+| 2026-11-12 20:10:14 | before | mcp__ccd_turn__update_plan |
+| 2026-11-12 20:10:14 | after | mcp__ccd_turn__update_plan |
+| 2026-11-12 20:10:15 | before | Bash: Read rest of current shell tool |
+| 2026-11-12 20:10:16 | before | Bash: Read world wiring and shell users |
+| 2026-11-12 20:10:16 | after | Bash: Read rest of current shell tool |
+| 2026-11-12 20:10:16 | after | Bash: Read world wiring and shell users |
+| 2026-11-12 20:10:21 | before | Bash: Inspect MAF shell package structure |
+| 2026-11-12 20:10:22 | after | Bash: Inspect MAF shell package structure |
+| 2026-11-12 20:10:24 | before | Bash: List MAF shell functions |
+| 2026-11-12 20:10:25 | after | Bash: List MAF shell functions |
+| 2026-11-12 20:10:28 | before | Bash: Read MAF shell resolve and tool run |
+| 2026-11-12 20:10:29 | after | Bash: Read MAF shell resolve and tool run |
+| 2026-11-12 20:10:51 | before | Bash: Find MAF auto-approval rule API |
+| 2026-11-12 20:10:52 | after | Bash: Find MAF auto-approval rule API |
+| 2026-11-12 20:10:54 | before | Bash: Read MAF ToolApprovalMiddleware design |
+| 2026-11-12 20:10:55 | after | Bash: Read MAF ToolApprovalMiddleware design |
+| 2026-11-12 20:11:16 | before | Bash: Check profile configuration |
+| 2026-11-12 20:11:16 | after | Bash: Check profile configuration |
+| 2026-11-12 20:11:19 | before | Bash: See how profile and workspace env are used |
+| 2026-11-12 20:11:20 | after | Bash: See how profile and workspace env are used |
+| 2026-11-12 20:11:27 | before | Bash: Read sandbox env helper and MAF session init |
+| 2026-11-12 20:11:27 | after | Bash: Read sandbox env helper and MAF session init |
+| 2026-11-12 20:11:31 | before | Bash: Read MAF persistent session run and result type |
+| 2026-11-12 20:11:31 | after | Bash: Read MAF persistent session run and result type |
+| 2026-11-12 20:11:42 | before | Bash: Read MAF environment snapshot and options |
+| 2026-11-12 20:11:43 | after | Bash: Read MAF environment snapshot and options |
+| 2026-11-12 20:12:11 | before | Bash: Inspect kill-tree helper and unsafe flag |
+| 2026-11-12 20:12:12 | after | Bash: Inspect kill-tree helper and unsafe flag |
+| 2026-11-12 20:12:15 | before | Bash: Check psutil and kill helper signature |
+| 2026-11-12 20:12:16 | after | Bash: Check psutil and kill helper signature |
+| 2026-11-12 20:12:49 | before | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/backend/maf/harness_kit/shells.py |
+| 2026-11-12 20:12:49 | after | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/backend/maf/harness_kit/shells.py |
+| 2026-11-12 20:13:17 | before | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/backend/maf/harness_kit/bg_tasks.py |
+| 2026-11-12 20:13:17 | after | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/backend/maf/harness_kit/bg_tasks.py |
+| 2026-11-12 20:13:25 | before | Bash: Simplify kill, declare psutil, check imports |
+| 2026-11-12 20:13:27 | after | Bash: Simplify kill, declare psutil, check imports |
+| 2026-11-12 20:13:44 | before | Bash: Find slash command handling in AG-UI route |
+| 2026-11-12 20:13:44 | after | Bash: Find slash command handling in AG-UI route |
+| 2026-11-12 20:13:48 | before | Bash: Read blocked_events helper |
+| 2026-11-12 20:13:49 | after | Bash: Read blocked_events helper |
+| 2026-11-12 20:14:17 | before | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/backend/maf/harness_kit/permissions.py |
+| 2026-11-12 20:14:17 | after | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/backend/maf/harness_kit/permissions.py |
+| 2026-11-12 20:14:30 | before | Bash: Simplify matcher and spot-check decisions |
+| 2026-11-12 20:14:31 | after | Bash: Simplify matcher and spot-check decisions |
+| 2026-11-12 20:14:38 | before | Bash: Fix compound allow rule and recheck |
+| 2026-11-12 20:14:39 | after | Bash: Fix compound allow rule and recheck |
+| 2026-11-12 20:14:58 | before | Bash: Map bash and powershell for plugin hooks |
+| 2026-11-12 20:14:59 | after | Bash: Map bash and powershell for plugin hooks |
+| 2026-11-12 20:15:10 | before | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/backend/maf/harness_kit/shell_tools.py |
+| 2026-11-12 20:15:10 | after | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/backend/maf/harness_kit/shell_tools.py |
+| 2026-11-12 20:15:15 | before | Bash: Fix note wording; read _world and imports |
+| 2026-11-12 20:15:16 | after | Bash: Fix note wording; read _world and imports |
+| 2026-11-12 20:15:26 | before | Bash: Wire shells, background, permissions into harness |
+| 2026-11-12 20:15:27 | after | Bash: Wire shells, background, permissions into harness |
+| 2026-11-12 20:15:34 | before | Bash: Read agui imports and stream start |
+| 2026-11-12 20:15:34 | after | Bash: Read agui imports and stream start |
+| 2026-11-12 20:15:46 | before | Bash: Add /mode handling and reply events |
+| 2026-11-12 20:15:48 | after | Bash: Add /mode handling and reply events |
+| 2026-11-12 20:15:52 | before | Bash: Find run_shell mentions in instructions |
+| 2026-11-12 20:15:53 | after | Bash: Find run_shell mentions in instructions |
+| 2026-11-12 20:15:56 | before | Bash: Read harness prompt tool lines |
+| 2026-11-12 20:15:57 | after | Bash: Read harness prompt tool lines |
+| 2026-11-12 20:16:04 | before | Bash: Update harness prompt and pinned instructions |
+| 2026-11-12 20:16:05 | after | Bash: Update harness prompt and pinned instructions |
+| 2026-11-12 20:16:33 | before | Write: /Users/sarveshtalele/Downloads/agentic-harness/tests/test_harness_shells.py |
+| 2026-11-12 20:16:34 | after | Write: /Users/sarveshtalele/Downloads/agentic-harness/tests/test_harness_shells.py |
+| 2026-11-12 20:16:35 | before | Bash: Run shell tests |
+| 2026-11-12 20:16:42 | after | Bash: Run shell tests |
+| 2026-11-12 20:17:01 | before | Write: /Users/sarveshtalele/Downloads/agentic-harness/tests/test_harness_permissions.py |
+| 2026-11-12 20:17:02 | after | Write: /Users/sarveshtalele/Downloads/agentic-harness/tests/test_harness_permissions.py |
+| 2026-11-12 20:17:02 | before | Bash: Find ScriptedClient import path |
+| 2026-11-12 20:17:03 | after | Bash: Find ScriptedClient import path |
+| 2026-11-12 20:17:05 | before | Bash: Run permission tests |
+| 2026-11-12 20:17:09 | after | Bash: Run permission tests |
+| 2026-11-12 20:17:15 | before | Bash: Drop future import and rerun tests |
+| 2026-11-12 20:17:24 | after | Bash: Drop future import and rerun tests |
+| 2026-11-12 20:17:28 | before | Bash: Run full suite after shell changes |
+| 2026-11-12 20:21:06 | after | Bash: Run full suite after shell changes |
+| 2026-11-12 20:21:10 | before | Bash: See why five tests fail |
+| 2026-11-12 20:21:19 | after | Bash: See why five tests fail |
+| 2026-11-12 20:21:26 | before | Bash: Inspect failing tests' setup |
+| 2026-11-12 20:21:26 | after | Bash: Inspect failing tests' setup |
+| 2026-11-12 20:21:30 | before | Bash: Read guard-bash and world test bodies |
+| 2026-11-12 20:21:30 | after | Bash: Read guard-bash and world test bodies |
+| 2026-11-12 20:21:41 | before | Bash: Update the five tests and rerun |
+| 2026-11-12 20:21:52 | after | Bash: Update the five tests and rerun |
+| 2026-11-12 20:22:07 | before | Bash: Update MAF spec, architecture doc and tasks |
+| 2026-11-12 20:22:08 | after | Bash: Update MAF spec, architecture doc and tasks |
+| 2026-11-12 20:22:15 | before | Bash: Update plan row and run full suite |
+| 2026-11-12 20:25:59 | after | Bash: Update plan row and run full suite |
+| 2026-11-12 20:26:03 | before | Bash: Update tracker and list changes |
+| 2026-11-12 20:26:04 | after | Bash: Update tracker and list changes |
+| 2026-11-12 20:26:08 | before | mcp__ccd_turn__wrap_up |
+| 2026-11-12 20:26:08 | after | mcp__ccd_turn__wrap_up |
+| 2026-11-12 20:26:23 | turn end |  |
+| 2026-11-12 20:26:34 | user | Commit and push |
+| 2026-11-12 20:26:41 | before | Bash: Commit and push step 2 |
