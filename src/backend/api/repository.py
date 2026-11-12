@@ -14,6 +14,7 @@ from pydantic import BaseModel, Field
 
 from backend.api.common import _project, _save_upload
 from backend.config import project_dir, repo_dir, sandbox_dir
+from backend.core import cli_workspaces
 from backend.core import auth
 from backend.core.security import safe_path
 from backend.maf import agui, engine, evals, governance, llm, workflows  # noqa: F401 - workflows registers definitions
@@ -78,6 +79,18 @@ async def import_local(project_id: str, body: LocalIn):
     try:
         return await asyncio.to_thread(ingest.from_local, project_id, body.path, auth.signer())
     except (FileNotFoundError, KeyError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+@router.post("/api/projects/{project_id}/workspace")
+async def bind_workspace(project_id: str, body: LocalIn):
+    """aqh CLI only: work directly in a folder on this machine (core/cli_workspaces.py)."""
+    _project(project_id)
+    try:
+        return {"project_id": project_id, "path": str(cli_workspaces.bind(project_id, body.path))}
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail=str(exc))
+    except FileNotFoundError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
 
 

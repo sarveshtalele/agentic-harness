@@ -1,0 +1,2 @@
+[console_scripts]
+aqh = aqh.cli:main

@@ -181,6 +181,32 @@ Remove-Item Env:ATLAS_ADMIN_PASSWORD
 
 The full setup is in **`docs/AZURE_DEPLOYMENT_GUIDE.md`**, the one Azure guide: East US 2, one B1 plan with two web apps, PostgreSQL Flexible Server B1ms, Blob Storage and Key Vault, about $20.62 (₹1,963) a month with PostgreSQL stopped outside working hours (about $28.54, ₹2,718, always on).
 
+## aqh: the harness in your terminal
+
+`aqh` runs the same harness as the web and desktop apps in the folder you start it in, editing your files in place (macOS, Windows, Linux). It starts a local server with its own PostgreSQL under `~/.aqh` the first time and reuses it after.
+
+```bash
+python -m pip install -e .
+```
+
+```bash
+aqh config model --base-url https://your-proxy/v1 --name your-model
+```
+
+```bash
+aqh config set-key
+```
+
+```bash
+aqh doctor
+```
+
+- **Interactive:** `aqh` (or `aqh "first request"`). Every shell command and file write shows an approval prompt; `/mode acceptEdits` lets edits through, `/rewind` puts files back, `/resume` picks a session, `/exit` leaves.
+- **Scripts and CI:** `aqh -p "prompt" --output-format json`. Nobody can approve here, so allow what may run: `--allowedTools "Bash(npm test)"`, or `--permission-mode acceptEdits` / `bypass`.
+- **Sessions:** `aqh --continue` or `aqh --resume <session>`; each session is also saved as JSON lines under `~/.aqh/projects/`.
+- **A team server instead:** `aqh --server https://your-platform` (sign in with `AQH_USERNAME` and `AQH_PASSWORD`, or at the prompt).
+- `aqh server stop` stops the local server and its PostgreSQL. The key is kept in the OS keychain (or `OPENAI_API_KEY`) and never printed.
+
 ## Desktop app
 
 Windows MSI and macOS DMG. CI builds them; you publish them to the Blob `downloads` container, and the login page offers them. See **`docs/DESKTOP_RELEASE_GUIDE.md`**.

@@ -27,3 +27,6 @@ pytest-asyncio>=0.24
 playwright>=1.48
 defusedxml>=0.7.1
 psutil>=5.9,<8
+prompt_toolkit>=3.0,<4
+keyring>=25,<26
+rich>=13

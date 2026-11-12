@@ -16,7 +16,7 @@ Written by `scripts/hooks/activity_log.py`. Times are local.
 | 8 | Harness eval suite (5.9); repository map only if it helps (5.8) | open | |
 | 9 | Azure guide at or under $25/month, first test deployment (9) | in progress (guide done 2026-11-12; test deployment and portal screenshots open) | `docs/AZURE_DEPLOYMENT_GUIDE.md`: prices re-read from prices.azure.com 2026-11-12, $20.70 with the PostgreSQL stop schedule (Automation runbook), zipping, portal steps, UI tour, troubleshooting. Owner approved deleting the 4 old Azure docs |
 | 10 | Desktop bundled PostgreSQL (D4), signing when certificates exist | open | |
-| 11 | Phase 2 (docs/PHASE2_PLAN.md rev 3): Claude Code-class harness on MAF (CLI, desktop, web), then R1 to R6 | approved 2026-11-12; step 1 built, baseline run blocked | Step 1: evals/harness/discovery.json (20 tasks, fixture repo with Python, TS, Bash, PowerShell, .claude and .agents skills), src/backend/maf/evals/discovery.py scorer (tests/test_discovery_eval_scoring.py: 3 passed), tests/test_harness_discovery_eval.py live driver, `python scripts/dev.py live`. Baseline not run: the model proxy answers HTTP 429 'daily token limit exceeded (25,101,895/25,000,000)'; Step 2 done locally (2026-11-12): bash and powershell on MAF LocalShellTool (persistent), background tasks, spill, permission modes and rules, /mode; tests/test_harness_shells.py and tests/test_harness_permissions.py (20 passed, PowerShell skipped on this Mac); full suite 710 passed, 2 skipped; CI green on 3 OS for 3bc0fd5 (after fixing PowerShell escape codes and Git Bash paths). Step 3 done locally: core/script_runtime.py, core/script_health.py, per-turn skill runner, Flagged badge and Check again; full suite 716 passed, 3 skipped; committed 75ecbbb + PowerShell syntax-check fix 8a62ef4; CI green on 3 OS (run 43251382164); Step 4 done locally: skill scopes, tool index with arguments, nearest names for invented tools, MCP refresh, command substitutions; tests/test_harness_discovery_scopes.py 5 passed; committed c6897c7; CI: tests green on 3 OS, macOS smoke failed on an ambiguous test locator (fixed, smoke 4 passed locally). Step 5 done locally (2026-11-13): settings files, settings and http hooks, updatedInput, PostToolUseFailure, Stop hooks, checkpoints and /rewind, routed helper-agent permissions; full suite 729 passed before one contract test update (now 5 passed); not committed. Discovery eval running (quota reset); Discovery eval after (current code, docs/evidence/runs/2026-11-13-discovery-after): 15/20 passed, selection 0.95, first try 0.6, argument validity 1.0, 36 invented names. Found and fixed: run_skill_script crashed on MAF's FileSkill (.name), run_shell alias for the primary shell, deferred tools called by name are loaded on the spot; full suite 732 passed, 3 skipped. Baseline (b76ddbd, docs/evidence/runs/2026-11-13-discovery-baseline): 12/20 passed, selection 0.85, first try 0.55, argument validity 1.0, 6 invented names. Eval after the fixes (docs/evidence/runs/2026-11-13-discovery-after-fixes): 18/20 passed, 4 invented names. Re-scored all three runs uniformly after widening two answer checks to patterns (results-rescored.json): baseline 13/20 (65%), steps 2-4 16/20 (80%), with fixes 18/20 (90%). Full threads recorded: no task mix-up, the model wandered. Full suite 732 passed, 3 skipped. Not committed |
+| 11 | Phase 2 (docs/PHASE2_PLAN.md rev 3): Claude Code-class harness on MAF (CLI, desktop, web), then R1 to R6 | approved 2026-11-12; step 1 built, baseline run blocked | Step 1: evals/harness/discovery.json (20 tasks, fixture repo with Python, TS, Bash, PowerShell, .claude and .agents skills), src/backend/maf/evals/discovery.py scorer (tests/test_discovery_eval_scoring.py: 3 passed), tests/test_harness_discovery_eval.py live driver, `python scripts/dev.py live`. Baseline not run: the model proxy answers HTTP 429 'daily token limit exceeded (25,101,895/25,000,000)'; Step 2 done locally (2026-11-12): bash and powershell on MAF LocalShellTool (persistent), background tasks, spill, permission modes and rules, /mode; tests/test_harness_shells.py and tests/test_harness_permissions.py (20 passed, PowerShell skipped on this Mac); full suite 710 passed, 2 skipped; CI green on 3 OS for 3bc0fd5 (after fixing PowerShell escape codes and Git Bash paths). Step 3 done locally: core/script_runtime.py, core/script_health.py, per-turn skill runner, Flagged badge and Check again; full suite 716 passed, 3 skipped; committed 75ecbbb + PowerShell syntax-check fix 8a62ef4; CI green on 3 OS (run 43251382164); Step 4 done locally: skill scopes, tool index with arguments, nearest names for invented tools, MCP refresh, command substitutions; tests/test_harness_discovery_scopes.py 5 passed; committed c6897c7; CI: tests green on 3 OS, macOS smoke failed on an ambiguous test locator (fixed, smoke 4 passed locally). Step 5 done locally (2026-11-13): settings files, settings and http hooks, updatedInput, PostToolUseFailure, Stop hooks, checkpoints and /rewind, routed helper-agent permissions; full suite 729 passed before one contract test update (now 5 passed); not committed. Discovery eval running (quota reset); Discovery eval after (current code, docs/evidence/runs/2026-11-13-discovery-after): 15/20 passed, selection 0.95, first try 0.6, argument validity 1.0, 36 invented names. Found and fixed: run_skill_script crashed on MAF's FileSkill (.name), run_shell alias for the primary shell, deferred tools called by name are loaded on the spot; full suite 732 passed, 3 skipped. Baseline (b76ddbd, docs/evidence/runs/2026-11-13-discovery-baseline): 12/20 passed, selection 0.85, first try 0.55, argument validity 1.0, 6 invented names. Eval after the fixes (docs/evidence/runs/2026-11-13-discovery-after-fixes): 18/20 passed, 4 invented names. Re-scored all three runs uniformly after widening two answer checks to patterns (results-rescored.json): baseline 13/20 (65%), steps 2-4 16/20 (80%), with fixes 18/20 (90%). Full threads recorded: no task mix-up, the model wandered. Full suite 732 passed, 3 skipped. Committed e5944aa. Step 6 (aqh CLI) built: tests/test_aqh_cli.py 4 passed; live `aqh -p` with the real model on macOS created notes.txt in the bound folder (data/aqh-demo) |
 
 | Time | Event | Detail |
 |---|---|---|
@@ -11523,3 +11523,83 @@ Written by `scripts/hooks/activity_log.py`. Times are local.
 | 2026-11-13 01:05:25 | turn end |  |
 | 2026-11-13 01:07:15 | user | Commit and push |
 | 2026-11-13 01:07:22 | before | Bash: Commit and push step 5 and eval work |
+| 2026-11-13 01:07:30 | after | Bash: Commit and push step 5 and eval work |
+| 2026-11-13 01:07:30 | before | Bash: Watch CI for step 5 commit |
+| 2026-11-13 01:07:30 | after | Bash: Watch CI for step 5 commit |
+| 2026-11-13 01:07:35 | turn end |  |
+| 2026-11-13 01:08:54 | user | proceed with step 6 once CI is green and ont ask again for comit and push if the ci cd is succcessfull proceed for furhter |
+| 2026-11-13 01:09:03 | before | Write: /Users/sarveshtalele/.claude/projects/-Users-sarveshtalele-Downloads-agentic-harness/memory/commit-after-green-ci.md |
+| 2026-11-13 01:09:03 | after | Write: /Users/sarveshtalele/.claude/projects/-Users-sarveshtalele-Downloads-agentic-harness/memory/commit-after-green-ci.md |
+| 2026-11-13 01:09:05 | before | Write: /Users/sarveshtalele/.claude/projects/-Users-sarveshtalele-Downloads-agentic-harness/memory/MEMORY.md |
+| 2026-11-13 01:09:05 | after | Write: /Users/sarveshtalele/.claude/projects/-Users-sarveshtalele-Downloads-agentic-harness/memory/MEMORY.md |
+| 2026-11-13 01:09:07 | before | Bash: Read CLI plan section and current deps |
+| 2026-11-13 01:09:09 | after | Bash: Read CLI plan section and current deps |
+| 2026-11-13 01:09:23 | before | Bash: Check local workspace support |
+| 2026-11-13 01:09:23 | after | Bash: Check local workspace support |
+| 2026-11-13 01:09:25 | before | Bash: Read local ingest and sandbox init |
+| 2026-11-13 01:09:26 | after | Bash: Read local ingest and sandbox init |
+| 2026-11-13 01:09:48 | before | Bash: Check CLI library availability and packaging |
+| 2026-11-13 01:09:49 | after | Bash: Check CLI library availability and packaging |
+| 2026-11-13 01:09:56 | before | Bash: Check paths; install CLI libraries |
+| 2026-11-13 01:10:03 | after | Bash: Check paths; install CLI libraries |
+| 2026-11-13 01:10:10 | before | Bash: Read workspace module |
+| 2026-11-13 01:10:17 | after | Bash: Read workspace module |
+| 2026-11-13 01:10:41 | before | Bash: Add CLI folder binding to backend |
+| 2026-11-13 01:10:42 | after | Bash: Add CLI folder binding to backend |
+| 2026-11-13 01:10:47 | before | Bash: Update access test; check CI |
+| 2026-11-13 01:10:49 | after | Bash: Update access test; check CI |
+| 2026-11-13 01:11:24 | before | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/aqh/settings.py |
+| 2026-11-13 01:11:24 | after | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/aqh/settings.py |
+| 2026-11-13 01:11:34 | before | Bash: Check local_postgres start contract |
+| 2026-11-13 01:11:35 | after | Bash: Check local_postgres start contract |
+| 2026-11-13 01:11:52 | before | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/aqh/server.py |
+| 2026-11-13 01:11:52 | after | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/aqh/server.py |
+| 2026-11-13 01:11:56 | before | Bash: List chat API routes |
+| 2026-11-13 01:11:57 | after | Bash: List chat API routes |
+| 2026-11-13 01:11:59 | before | Bash: Read chat list/create routes |
+| 2026-11-13 01:12:00 | after | Bash: Read chat list/create routes |
+| 2026-11-13 01:12:15 | before | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/aqh/client.py |
+| 2026-11-13 01:12:15 | after | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/aqh/client.py |
+| 2026-11-13 01:12:30 | before | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/aqh/headless.py |
+| 2026-11-13 01:12:30 | after | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/aqh/headless.py |
+| 2026-11-13 01:12:54 | before | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/aqh/repl.py |
+| 2026-11-13 01:12:54 | after | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/aqh/repl.py |
+| 2026-11-13 01:13:02 | before | Bash: Show the command in approval prompts |
+| 2026-11-13 01:13:02 | after | Bash: Show the command in approval prompts |
+| 2026-11-13 01:13:10 | before | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/aqh/doctor.py |
+| 2026-11-13 01:13:24 | after | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/aqh/doctor.py |
+| 2026-11-13 01:13:24 | before | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/aqh/cli.py |
+| 2026-11-13 01:13:24 | after | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/aqh/cli.py |
+| 2026-11-13 01:13:32 | before | Bash: Add package files, pyproject and requirements |
+| 2026-11-13 01:13:34 | after | Bash: Add package files, pyproject and requirements |
+| 2026-11-13 01:13:56 | before | Write: /Users/sarveshtalele/Downloads/agentic-harness/tests/test_aqh_cli.py |
+| 2026-11-13 01:13:57 | after | Write: /Users/sarveshtalele/Downloads/agentic-harness/tests/test_aqh_cli.py |
+| 2026-11-13 01:13:57 | before | Bash: Run CLI tests |
+| 2026-11-13 01:14:03 | after | Bash: Run CLI tests |
+| 2026-11-13 01:14:10 | before | Bash: Keep USER_TEXT in the session file only |
+| 2026-11-13 01:14:16 | after | Bash: Keep USER_TEXT in the session file only |
+| 2026-11-13 01:14:21 | before | Bash: Check step 5 CI |
+| 2026-11-13 01:14:22 | after | Bash: Check step 5 CI |
+| 2026-11-13 01:14:24 | before | Bash: Check CI run status directly |
+| 2026-11-13 01:14:27 | after | Bash: Check CI run status directly |
+| 2026-11-13 01:14:32 | before | Bash: Install aqh editable and run doctor |
+| 2026-11-13 01:14:37 | after | Bash: Install aqh editable and run doctor |
+| 2026-11-13 01:14:47 | before | Bash: Live aqh headless run with real model |
+| 2026-11-13 01:15:09 | after | Bash: Live aqh headless run with real model |
+| 2026-11-13 01:15:21 | before | Bash: Stop PostgreSQL with the server; stop demo |
+| 2026-11-13 01:15:22 | after | Bash: Stop PostgreSQL with the server; stop demo |
+| 2026-11-13 01:15:26 | before | Bash: Find README insertion point |
+| 2026-11-13 01:15:42 | after | Bash: Find README insertion point |
+| 2026-11-13 01:15:43 | before | Bash: Document aqh in README, spec, architecture, tasks, tracker |
+| 2026-11-13 01:15:43 | after | Bash: Document aqh in README, spec, architecture, tasks, tracker |
+| 2026-11-13 01:15:50 | before | Bash: Add interactive prompt test and run |
+| 2026-11-13 01:15:56 | after | Bash: Add interactive prompt test and run |
+| 2026-11-13 01:16:00 | before | Bash: Check step 5 CI; full suite with step 6 |
+| 2026-11-13 01:19:58 | after | Bash: Check step 5 CI; full suite with step 6 |
+| 2026-11-13 01:20:04 | before | mcp__ccd_turn__wrap_up |
+| 2026-11-13 01:20:04 | after | mcp__ccd_turn__wrap_up |
+| 2026-11-13 01:20:17 | turn end |  |
+| 2026-11-13 01:22:36 | user | <ta[redacted]> <task-id>bhe3gl3fk</task-id> <tool-use-id>toolu_01Pb4P4j24Jp6fenQ1sESzLK</tool-use-id> <output-file>/private/tmp/claude-501/-Users-sarveshtalele… |
+| 2026-11-13 01:22:40 | before | Bash: Read step 5 CI result |
+| 2026-11-13 01:22:41 | after | Bash: Read step 5 CI result |
+| 2026-11-13 01:22:47 | before | Bash: Commit and push step 6 |

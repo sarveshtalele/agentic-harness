@@ -1172,3 +1172,10 @@ In accordance with the repository documentation policy (**1 Single Doc for Each 
 - **Checkpoints:** each harness write, edit or delete keeps the file's earlier content per turn; `/rewind` lists turns and `/rewind <n>` restores files to before that turn (the conversation stays). Shell changes are not tracked.
 - **Helper agents:** a plugin agent that declares Write, Edit or Bash may use them only where rules or mode allow without a card; anything else goes back to the main agent. Sessions as JSONL and conversation rewind come with the CLI (step 6).
 
+## 16. The aqh CLI (Phase 2 step 6, 2026-11-13)
+
+- **One core:** `aqh` starts (once) the platform's API on 127.0.0.1 with `ATLAS_PROFILE=cli`, data and PostgreSQL in `~/.aqh`, a random local admin and secret key in the OS keychain, and the model settings from `~/.aqh/settings.json` and the keychain passed by environment. It drives harness turns over the same AG-UI stream as the web and desktop apps.
+- **In place:** the project for the current folder is bound to that folder (`core/cli_workspaces.py`), so the harness edits your files, as Claude Code does; shells keep your real HOME. Only the `cli` profile binds folders.
+- **Modes:** interactive (`repl.py`) and headless `aqh -p` with Claude Code's output formats; in headless mode a card is approved only by `--allowedTools` rules or `--permission-mode`. `--server` drives a remote platform instead.
+- **Sessions:** platform threads, also written as JSON lines per session under `~/.aqh/projects/<folder>/`; `--continue`, `--resume`.
+

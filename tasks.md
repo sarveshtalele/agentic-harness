@@ -338,7 +338,7 @@
 - [x] 3 Script runtime for Python, TypeScript, JavaScript, Bash, PowerShell and shebang interpreters; health checks and flags (2026-11-12)
 - [x] 4 Skill scopes (personal, repository, plugin) read every turn; tool index with arguments; nearest names for invented tools; MCP list refresh; command substitutions (2026-11-12). Eval after: waits for the model quota
 - [x] 5 Settings files; hooks from settings, http hooks, updatedInput, PostToolUseFailure, Stop hooks; checkpoints and /rewind; helper-agent permissions; background tasks (step 2) (2026-11-13). Sessions as JSONL and conversation rewind move to step 6 with the CLI
-- [ ] 6 `aqh` CLI interactive and headless; live CLI session on macOS and Windows
+- [x] 6 `aqh` CLI: local server with its own PostgreSQL, folder bound in place, headless (`-p`, three formats, approval policy) and interactive, doctor, sessions as JSONL; live headless run on macOS with the real model (2026-11-13). Windows live run: CI tests only; landing-page install section moves to R1 (/home)
 - [ ] 7 OS sandbox tiers (Seatbelt, bubblewrap; Windows approval or container)
 - [ ] 8 R6 credentials and desktop sign-in; desktop Terminal pane
 - [ ] 9 R2 features governance; R1 home and gated downloads

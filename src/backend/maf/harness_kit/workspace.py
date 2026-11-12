@@ -19,7 +19,7 @@ from pathlib import Path
 from agent_framework import ContextProvider, FileSystemAgentFileStore
 
 from backend.config import DATA_DIR
-from backend.core import plugins
+from backend.core import cli_workspaces, plugins
 from backend.core.errors import RepoError
 from backend.core.security import safe_path
 from backend.maf.harness_kit.catalog import THREAD_ID
@@ -35,11 +35,13 @@ class Workspace:
     user_id: str | None
     root: Path
     scratch: Path
+    direct: bool = False  # a folder on the person's own machine (aqh CLI), not a sandbox clone
 
     def env(self) -> dict[str, str]:
         """What hooks and shell commands see besides the clean environment."""
         temp = str(self.scratch)
-        return {"HOME": str(PLUGIN_HOME), "USERPROFILE": str(PLUGIN_HOME), "TMPDIR": temp, "TMP": temp, "TEMP": temp,
+        home = {} if self.direct else {"HOME": str(PLUGIN_HOME), "USERPROFILE": str(PLUGIN_HOME)}  # the CLI keeps the person's own HOME
+        return {**home, "TMPDIR": temp, "TMP": temp, "TEMP": temp,
                 "CLAUDE_PROJECT_DIR": str(self.root), "CLAUDECODE": "1",  # plugins detect Claude Code by this variable
                 "AGENTIC_QE_DASHBOARD": "off"}  # the plugin's live dashboard opens a browser window: not on a server
 
@@ -48,14 +50,18 @@ def open_workspace(project_id: str, thread_id: str, user_id: str | None) -> Work
     """The thread's workspace, or None when the project has no repository (the harness then has no write or shell tools)."""
     if not THREAD_ID.match(thread_id):
         raise ValueError("Unexpected thread id")
-    try:
-        root = sandbox.initialize_sandbox(project_id).resolve()
-    except RepoError:
-        return None
+    bound = cli_workspaces.path_of(project_id)
+    if bound is None:
+        try:
+            root = sandbox.initialize_sandbox(project_id).resolve()
+        except RepoError:
+            return None
+    else:
+        root = bound.resolve()
     scratch = DATA_DIR / "harness" / project_id / "scratch" / thread_id
     scratch.mkdir(parents=True, exist_ok=True)
     PLUGIN_HOME.mkdir(parents=True, exist_ok=True)
-    return Workspace(project_id, thread_id, user_id, root, scratch.resolve())
+    return Workspace(project_id, thread_id, user_id, root, scratch.resolve(), direct=bound is not None)
 
 
 class WorkspaceStore(FileSystemAgentFileStore):

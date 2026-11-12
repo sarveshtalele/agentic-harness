@@ -38,7 +38,7 @@ def expected(persona, method, template):
     scoped = any("{" + i + "}" in template for i in IDS)
     if persona == "admin":
         return None
-    if template.startswith(ADMIN_ONLY) or template.endswith(("/repo/local", "/transfer")):
+    if template.startswith(ADMIN_ONLY) or template.endswith(("/repo/local", "/transfer", "/workspace")):
         return 403
     if write and (template.startswith(ADMIN_WRITE) or template == "/api/skills/{name}/health"):  # checking runs skill scripts
         return 403
