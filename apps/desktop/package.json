@@ -17,6 +17,7 @@
   "build": {
     "appId": "com.agenticqe.platform",
     "productName": "Agentic QE Platform",
+    "artifactName": "agentic-qe-${version}-${os}-${arch}.${ext}",
     "directories": {
       "output": "dist"
     },

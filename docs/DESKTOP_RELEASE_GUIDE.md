@@ -22,8 +22,8 @@ This guide puts a new version of the desktop app where users can download it fro
    Then the `manifest` job merges their manifests into one `latest.json`.
 4. Open the finished run. Under **Artifacts**, download the three `desktop-…` artifacts and `desktop-latest-json`.
 5. Unzip them. You now have:
-   - macOS: `Agentic QE Platform-<version>-arm64.dmg`, `...-x64.dmg`, and the zips;
-   - Windows: `Agentic QE Platform <version>.msi`;
+   - macOS: `agentic-qe-<version>-mac-arm64.dmg`, `agentic-qe-<version>-mac-x64.dmg`, and the zips (`...-mac-arm64.zip`, `...-mac-x64.zip`). The names have no spaces, so GitHub Releases, Blob Storage and `latest.json` all use the same name;
+   - Windows: `agentic-qe-<version>-win-x64.msi`;
    - `latest.json`, listing every installer with its size and SHA-256.
 
 **A `v*` tag** (for example `git tag v0.2.0 && git push origin v0.2.0`) also runs the `release` job, which publishes the installers and `latest.json` as a GitHub Release with the same name.
@@ -34,8 +34,8 @@ This guide puts a new version of the desktop app where users can download it fro
 
 Every `latest-*.json` lists each installer's name, size and SHA-256. Compare them before you upload.
 
-- **macOS or Linux:** `shasum -a 256 "Agentic QE Platform-0.1.0-arm64.dmg"`
-- **Windows (PowerShell):** `Get-FileHash "Agentic QE Platform 0.1.0.msi" -Algorithm SHA256`
+- **macOS or Linux:** `shasum -a 256 agentic-qe-0.1.0-mac-arm64.dmg`
+- **Windows (PowerShell):** `Get-FileHash agentic-qe-0.1.0-win-x64.msi -Algorithm SHA256`
 
 If a value differs, do not publish. Download the artifact again.
 
@@ -99,9 +99,9 @@ Anyone with the link can download from a GitHub Release, so this works with or w
   1. On GitHub, open the repository, then **Releases**, then **Draft a new release**.
   2. Choose or create a tag (for example `v0.2.0`) on `feature/maf-harness-platform`.
   3. Drag in the files from the run's artifacts:
-     - `Agentic QE Platform-<version>-arm64.dmg`;
-     - `Agentic QE Platform-<version>-x64.dmg`;
-     - `Agentic QE Platform <version>.msi`;
+     - `agentic-qe-<version>-mac-arm64.dmg`;
+     - `agentic-qe-<version>-mac-x64.dmg`;
+     - `agentic-qe-<version>-win-x64.msi`;
      - `latest.json`.
   4. In the description, paste the SHA-256 values from `latest.json`.
   5. Select **Publish release**.
@@ -116,13 +116,13 @@ Anyone with the link can download from a GitHub Release, so this works with or w
 
 | Your computer | File |
 |---|---|
-| Mac with Apple silicon (Apple menu, **About This Mac**, Chip: Apple M1 or later) | `Agentic QE Platform-<version>-arm64.dmg` |
-| Mac with an Intel processor (Processor: Intel) | `Agentic QE Platform-<version>-x64.dmg` |
-| Windows 10 or 11, 64-bit | `Agentic QE Platform <version>.msi` |
+| Mac with Apple silicon (Apple menu, **About This Mac**, Chip: Apple M1 or later) | `agentic-qe-<version>-mac-arm64.dmg` |
+| Mac with an Intel processor (Processor: Intel) | `agentic-qe-<version>-mac-x64.dmg` |
+| Windows 10 or 11, 64-bit | `agentic-qe-<version>-win-x64.msi` |
 
 **2. Check the file** (recommended). Its SHA-256 must equal the value on the download page or in `latest.json`:
-- macOS: `shasum -a 256 ~/Downloads/"Agentic QE Platform-<version>-arm64.dmg"`;
-- Windows PowerShell: `Get-FileHash "$env:USERPROFILE\Downloads\Agentic QE Platform <version>.msi" -Algorithm SHA256`.
+- macOS: `shasum -a 256 ~/Downloads/agentic-qe-<version>-mac-arm64.dmg`;
+- Windows PowerShell: `Get-FileHash "$env:USERPROFILE\Downloads\agentic-qe-<version>-win-x64.msi" -Algorithm SHA256`.
 
 **3. Install PostgreSQL once** (version 16 or newer). The app keeps its data in its own local PostgreSQL cluster and starts it by itself. It needs the PostgreSQL programs on the computer:
 - macOS: `brew install postgresql@17` (with Homebrew), or the installer from postgresql.org;
