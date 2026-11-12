@@ -10,7 +10,7 @@ import httpx
 from agent_framework.openai import OpenAIChatCompletionClient
 from openai import AsyncOpenAI
 
-from backend.config import MODEL_TIMEOUT
+from backend.config import MODEL_RETRIES, MODEL_TIMEOUT
 from backend.core import models
 from backend.core.errors import ModelEndpointError
 from backend.core.security import decrypt, encrypt, redact
@@ -77,7 +77,7 @@ def client(model: str = "", *, max_rounds: int = 10, max_tool_calls: int = 30, d
         raise LLMNotConfigured("No model configured. Open Settings and set the base URL, model, and API key.")
     # MAF allows 100 tool rounds by default. Long tool loops outgrow model context, so agents get a hard limit.
     # a hung model call must fail the run with a clear error, not leave it running forever
-    http = AsyncOpenAI(api_key=cfg["api_key"], base_url=cfg["base_url"] or None, timeout=MODEL_TIMEOUT, max_retries=1)
+    http = AsyncOpenAI(api_key=cfg["api_key"], base_url=cfg["base_url"] or None, timeout=MODEL_TIMEOUT, max_retries=MODEL_RETRIES)  # the OpenAI client backs off on 429 and 5xx
     return OpenAIChatCompletionClient(model=cfg["model"], async_client=http,
                                       function_invocation_configuration={"max_iterations": max_rounds, "max_function_calls": max_tool_calls,
                                                                                          # the harness: a tool error's text reaches the model, so it can fix its call

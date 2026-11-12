@@ -35,7 +35,9 @@ from backend.config import DATA_DIR, HARNESS_CONTEXT_TOKENS, HARNESS_MAX_ROUNDS,
 from backend.core import auth, plugin_grants, plugins, prompts
 from backend.core.mcp import mcp_tools_for
 from backend.maf import governance, llm, tools
-from backend.maf.harness_kit import active_command, plugin_agents, specialists, workspace
+from backend.maf.harness_kit import active_command, plugin_agents, specialists, verify, workspace
+from backend.maf.harness_kit.budget import turn_budget
+from backend.maf.harness_kit.tool_hygiene import tool_hygiene
 from backend.maf.harness_kit.hook_middleware import guarded
 from backend.maf.harness_kit.shell import ShellProvider, WorkspaceShell
 from backend.maf.harness_kit.skill_runner import run_skill_script
@@ -83,7 +85,7 @@ def _compaction(client, model: str, budget: int, telemetry) -> TokenBudgetCompos
     if summarizer is not client:  # a fresh client per call in production; the summary round is recorded like any other
         summarizer.chat_middleware.append(telemetry)
     return TokenBudgetComposedStrategy(token_budget=budget, tokenizer=CharacterEstimatorTokenizer(), strategies=[
-        ToolResultCompactionStrategy(keep_last_tool_call_groups=4), SummarizationStrategy(client=summarizer, target_count=8)])
+        ToolResultCompactionStrategy(keep_last_tool_call_groups=10), SummarizationStrategy(client=summarizer, target_count=8)])  # keep recent reads (FINAL_PLAN 5.4)
 
 
 def build(project_id: str, thread_id: str, start_run, *, user_id: str | None = None, model: str = "") -> Agent:
@@ -111,7 +113,7 @@ def build(project_id: str, thread_id: str, start_run, *, user_id: str | None = N
     compaction = _compaction(client, model, HARNESS_CONTEXT_TOKENS - max_output, telemetry)
     world, providers = _world(ws)
     if command:  # without a repository it still says which command runs; WorkspaceContext says there are no file tools
-        providers.append(active_command.ActiveCommandContext(command, ws.root if ws else None))
+        providers.append(active_command.ActiveCommandContext(command, ws.root if ws else None, thread_id))
     return create_harness_agent(
         client,
         name=AGENT,
@@ -134,7 +136,8 @@ def build(project_id: str, thread_id: str, start_run, *, user_id: str | None = N
         loop_max_iterations=HARNESS_MAX_ROUNDS,
         disable_web_search=True,  # no data leaves through a hosted search tool
         context_providers=[ProjectContext(project_id, full=True), loaded, workspace.WorkspaceContext(ws), *providers],
-        middleware=[strict_arguments, write_first(thread_id, ws.root if ws else None, command), tool_audit(AGENT, project_id, None, "chat"), *([guarded(ws)] if ws else []), telemetry],
+        middleware=[strict_arguments, write_first(thread_id, ws.root if ws else None, command), *([verify.verifier(ws, command)] if ws and command else []),
+                    turn_budget(thread_id), tool_hygiene(), tool_audit(AGENT, project_id, None, "chat"), *([guarded(ws)] if ws else []), telemetry],
         **world,
     )
 

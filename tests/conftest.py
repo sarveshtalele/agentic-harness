@@ -8,6 +8,9 @@ import tempfile
 
 _store = tempfile.mkdtemp(prefix="atlas-test-")
 os.environ["ATLAS_DATA_DIR"] = _store
+# a copy of the repository's skills: a skill a test publishes lands here, never in the repository's own skills/ (D6)
+os.environ["ATLAS_SKILLS_DIR"] = os.path.join(_store, "skills")
+shutil.copytree(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "skills"), os.environ["ATLAS_SKILLS_DIR"])
 if os.environ.get("ATLAS_TEST_DATABASE_URL"):
     os.environ["ATLAS_DATABASE_URL"] = os.environ["ATLAS_TEST_DATABASE_URL"]
 else:

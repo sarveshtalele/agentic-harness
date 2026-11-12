@@ -101,8 +101,9 @@ py scripts\dev.py env-check --env local
 py scripts\dev.py up
 ```
 
-- `setup` creates `.venv`, installs the Python and Node packages, and installs Playwright's Chromium (used for browser tests and QE screenshots).
-- `db` starts PostgreSQL in `data\postgres` and adds `ATLAS_DATABASE_URL` to `.env`. After a restart of Windows, run `db` again before `up`.
+- `setup` always creates and uses the project's own `.venv` (never the global Python), installs the Python and Node packages, and installs Playwright's Chromium (used for browser tests and QE screenshots). It prints one line per step with the elapsed time, `[setup 2/4 |   95s] …`, so a slow step looks slow, not stuck. `npm ci` takes 5 to 10 minutes on Windows the first time.
+- `db` starts PostgreSQL in `data\postgres` and adds `ATLAS_DATABASE_URL` to `.env`. It prints each step (`[db] Creating a new cluster…`, `[db] Starting PostgreSQL on 127.0.0.1:<port> (server log: …)`, `[db] Ready…`) and takes under a minute. If it fails, it prints the end of `data\postgres\server.log`. After a restart of Windows, run `db` again before `up`.
+- If an earlier `setup` printed warnings about `pythoncore-3.14-64\Scripts` not being on `PATH`, it had installed into the global Python (fixed). Run `setup` again: it creates `.venv` and installs there. The global copies are harmless.
 - `up` builds the UI and opens <http://127.0.0.1:3000>.
 
 You can also double-click `start-windows.bat`.

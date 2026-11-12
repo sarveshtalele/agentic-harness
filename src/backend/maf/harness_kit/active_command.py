@@ -12,11 +12,13 @@ from __future__ import annotations
 
 import json
 import re
+import shlex
 from pathlib import Path
 
 from agent_framework import ContextProvider
 
 from backend.core.security import safe_path
+from backend.maf.harness_kit import verify
 from backend.maf.harness_kit.catalog import THREAD_ID
 
 # The platform's own QE workflow, gates and documents. A plugin command does that work itself, with its own gates and files.
@@ -27,6 +29,7 @@ PLATFORM_QE_TOOLS = frozenset({"start_workflow", "project_status", "run_tests", 
 HEAD = re.compile(r"^The user ran the command /(?P<name>[\w.-]+:[\w.-]+)(?P<args>[^\n]*?)\. Carry out")
 BODY = re.compile(r"<command name=\"[^\"]+\">\n(?P<body>.*)\n</command>\s*$", re.S)
 PATHS = re.compile(r"Paths this command may create:(?P<list>[^\n]*)")
+CHECK = re.compile(r"`(node \"[^\"`]+/check-gate\.ts\" --gate \d+ --app <app-name>)`")
 
 
 def _file(state_dir: Path, thread_id: str) -> Path:
@@ -49,7 +52,9 @@ def parse(expanded: str) -> dict | None:
     paths = [p.replace("<app-name>", app) for p in re.findall(r"`([^`]+)`", listed)
              if not p.startswith(".qe") and "*" not in p and not p.endswith("/") and (app or "<app-name>" not in p)]
     after = re.search(r"After the hook confirms Gate (\d+)", body["body"])  # qe-start: its files come only after the human's gate phrase
-    return {"name": head["name"], "args": args, "body": body["body"], "paths": paths, "after_gate": int(after[1]) if after else None}
+    check = CHECK.search(body["body"])  # the command's own done-check (agentic-qe: check-gate.ts), run after each write
+    return {"name": head["name"], "args": args, "body": body["body"], "paths": paths, "after_gate": int(after[1]) if after else None,
+            "check": shlex.split(check[1].replace("<app-name>", app)) if check and app else None}
 
 
 def remember(state_dir: Path, thread_id: str, expanded: str | None) -> dict | None:
@@ -83,13 +88,16 @@ def file_state(root: Path | None, paths: list[str]) -> list[str]:
 class ActiveCommandContext(ContextProvider):
     """Puts the active plugin command and the state of its files into the instructions before every model call."""
 
-    def __init__(self, command: dict, root: Path | None):
+    def __init__(self, command: dict, root: Path | None, thread_id: str = ""):
         super().__init__("harness-active-command")
-        self.command, self.root = command, root
+        self.command, self.root, self.thread_id = command, root, thread_id
 
     async def before_run(self, *, agent, session, context, state) -> None:
         c = self.command
         files = file_state(self.root, c["paths"])
+        checked = verify.last(self.thread_id) if c.get("check") else None
+        if checked:
+            files.append(f"- the command's check, last run: {'PASS' if checked['passed'] else 'FAIL'}" + ("" if checked["passed"] else f" ({checked['output'][-300:]})"))
         if c.get("after_gate") is not None:
             files = [f"{line} (written only after Gate {c['after_gate']} is approved; never before)" if line.endswith("MISSING") else line for line in files]
         context.extend_instructions(self.source_id, "\n".join([

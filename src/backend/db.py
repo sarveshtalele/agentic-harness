@@ -16,7 +16,7 @@ from typing import Iterator
 
 import psycopg
 from psycopg.adapt import Dumper
-from psycopg_pool import ConnectionPool
+from psycopg_pool import ConnectionPool, PoolTimeout
 
 from backend import sql_dialect
 from backend.config import DATABASE_URL, DB_POOL_SIZE
@@ -76,8 +76,14 @@ def pool() -> ConnectionPool:
             if not DATABASE_URL:
                 raise DatabaseNotConfigured("ATLAS_DATABASE_URL is not set. Locally run `python scripts/dev.py db` and put the URL it prints in .env; "
                                             "on Azure it comes from Key Vault (atlas-database-url).")
-            _pool = ConnectionPool(DATABASE_URL, min_size=1, max_size=DB_POOL_SIZE, kwargs={"row_factory": _rows}, configure=_configure, open=False)
-            _pool.open(wait=True, timeout=30)
+            made = ConnectionPool(DATABASE_URL, min_size=1, max_size=DB_POOL_SIZE, kwargs={"row_factory": _rows}, configure=_configure, open=False)
+            try:
+                made.open(wait=True, timeout=30)
+            except PoolTimeout:
+                made.close()
+                raise DatabaseNotConfigured("PostgreSQL at ATLAS_DATABASE_URL did not answer within 30 seconds. Locally run `python scripts/dev.py db` "
+                                            "to start it; on Azure check the server is running and its firewall allows this app.") from None
+            _pool = made
         return _pool
 
 

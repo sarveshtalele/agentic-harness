@@ -16,6 +16,8 @@ from pathlib import Path
 
 from agent_framework import FunctionInvocationContext, function_middleware
 
+from backend.maf.harness_kit import verify
+
 
 READS = frozenset({"read_file", "list_files", "grep", "file_access_read", "file_access_read_lines", "file_access_ls", "file_access_grep", "read_skill_resource"})
 WRITES = frozenset({"file_access_write", "file_access_replace", "file_access_replace_lines"})
@@ -31,6 +33,9 @@ def write_first(thread_id: str, root: Path | None, command: dict | None):
         name = context.function.name
         deferred = (command or {}).get("after_gate") is not None  # files that wait for a gate phrase must not be pushed out early
         missing = [] if deferred else [p for p in (command or {}).get("paths", []) if root is not None and not (root / p).is_file()]
+        checked = verify.last(thread_id)
+        if not deferred and not missing and checked and not checked["passed"]:  # written but not done: the command's check fails
+            missing = [f"the fixes its check lists ({checked['output'][-200:]})"]
         if name in WRITES:
             await call_next()
             _reads[thread_id] = 0

@@ -39,12 +39,12 @@ def test_compare_to_baseline_verdicts():
 
 
 def test_model_calls_have_a_bounded_timeout():
-    from backend.config import MODEL_TIMEOUT
+    from backend.config import MODEL_RETRIES, MODEL_TIMEOUT
     from backend.maf import llm
 
     llm.update("https://models.example/v1", "m", "k" * 12)
     sdk = llm.client().client
-    assert sdk.timeout == MODEL_TIMEOUT and sdk.max_retries == 1
+    assert sdk.timeout == MODEL_TIMEOUT and sdk.max_retries == MODEL_RETRIES == 3  # bounded retries with the client's backoff
 
 
 def test_each_agent_tool_and_workflow_lives_in_its_own_file():

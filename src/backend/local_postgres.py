@@ -50,7 +50,11 @@ def free_port() -> int:
         return s.getsockname()[1]
 
 
-def start(folder: Path, port: int | None = None, database: str = "agentic_qe") -> str:
+def _say(text: str) -> None:
+    print(f"[db] {text}", flush=True)  # live progress: a slow step shows as slow, not stuck
+
+
+def start(folder: Path, port: int | None = None, database: str = "agentic_qe", say=_say) -> str:
     """Create the cluster if needed, start it, make the database; returns the connection URL.
 
     A new cluster is made with loopback-only trust, given its random password over SQL, and switched to SCRAM before
@@ -63,6 +67,7 @@ def start(folder: Path, port: int | None = None, database: str = "agentic_qe") -
     secret, data = folder / ".atlas-password", folder / "data"
     fresh = not (data / "PG_VERSION").is_file()
     if fresh:
+        say(f"Creating a new cluster in {data} (first run only)")
         folder.mkdir(parents=True, exist_ok=True)
         if os.name == "nt" and os.environ.get("USERNAME"):  # initdb drops the Administrators group; the user itself must own the folder
             _run([shutil.which("icacls") or "icacls", str(folder), "/grant", f"{os.environ['USERNAME']}:(OI)(CI)F", "/Q"])
@@ -75,22 +80,33 @@ def start(folder: Path, port: int | None = None, database: str = "agentic_qe") -
     saved.write_text(str(port), encoding="utf-8")
     # TCP on loopback only; no Unix socket, whose path has a 103-byte limit a deep app-data folder can exceed (Windows has none by default)
     options = f"-p {port} -c listen_addresses=127.0.0.1" + ("" if os.name == "nt" else " -c unix_socket_directories=''")
+    log = folder / "server.log"
     if subprocess.run([binary("pg_ctl"), "-D", str(data), "status"], capture_output=True, timeout=30, check=False, env=_env()).returncode != 0:
-        _run([binary("pg_ctl"), "-D", str(data), "-o", options, "-l", str(folder / "server.log"), "-w", "-t", "60", "start"])
+        say(f"Starting PostgreSQL on 127.0.0.1:{port} (server log: {log})")
+        # no captured pipes: on Windows the server inherits them and keeps them open, so a captured run never returns
+        # (found 2026-11-12: `dev.py db` stuck for 10+ minutes). Its output goes to the -l log file instead.
+        done = subprocess.run([binary("pg_ctl"), "-D", str(data), "-o", options, "-l", str(log), "-w", "-t", "60", "start"],
+                              stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=120, check=False, env=_env())
+        if done.returncode:
+            tail = log.read_text(encoding="utf-8", errors="replace")[-1500:] if log.is_file() else "(no server log)"
+            sys.exit(f"PostgreSQL did not start (pg_ctl exit {done.returncode}). Last lines of {log}:\n{tail}")
     if fresh:
         password = secrets.token_urlsafe(24)
-        with psycopg.connect(f"postgresql://{USER}@127.0.0.1:{port}/postgres", autocommit=True) as con:
+        say("Setting the cluster's random password and switching to password sign-in")
+        with psycopg.connect(f"postgresql://{USER}@127.0.0.1:{port}/postgres", autocommit=True, connect_timeout=10) as con:
             con.execute(sql.SQL("ALTER USER {} PASSWORD {}").format(sql.Identifier(USER), sql.Literal(password)))
         hba = data / "pg_hba.conf"
         hba.write_text(hba.read_text(encoding="utf-8").replace(" trust", " scram-sha-256"), encoding="utf-8")
-        _run([binary("pg_ctl"), "-D", str(data), "reload"])
+        subprocess.run([binary("pg_ctl"), "-D", str(data), "reload"], stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                       timeout=60, check=True, env=_env())
         secret.write_text(password, encoding="utf-8")
         os.chmod(secret, 0o600)
     password = secret.read_text(encoding="utf-8").strip()
     admin = f"postgresql://{USER}:{password}@127.0.0.1:{port}/postgres"
-    with psycopg.connect(admin, autocommit=True) as con:
+    with psycopg.connect(admin, autocommit=True, connect_timeout=10) as con:
         if not con.execute("SELECT 1 FROM pg_database WHERE datname=%s", (database,)).fetchone():
             con.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(database)))
+    say(f"Ready: database {database} on 127.0.0.1:{port}")
     return f"postgresql://{USER}:{password}@127.0.0.1:{port}/{database}"
 
 

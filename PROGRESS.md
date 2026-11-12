@@ -2,6 +2,21 @@
 
 Written by `scripts/hooks/activity_log.py`. Times are local.
 
+## Goal tracker (docs/FINAL_PLAN.md, approved 2026-11-12 with defaults D1-D6; Azure cap $25/month)
+
+| # | Item (FINAL_PLAN section 13) | Status | Evidence |
+|---|---|---|---|
+| 1 | CI green on 3 OS; D6 test skills removed, tests use a throwaway skills folder | in progress (D6 done, CI Windows pending) | CI run 43157835613: macOS test, Ubuntu+macOS smoke pass; Windows pending |
+| 2 | Harness core: verification oracle and budgets (5.3), read cache, spill, repeat reminder, compaction keep-recent (5.4), error taxonomy (5.5); live agentic-qe cycle to Gate 5 | in progress | Done offline: `harness_kit/verify.py` (check-gate after writes), `budget.py` (30-min turn budget, rounds 200), `tool_hygiene.py` (repeat reminder 3/5/8, trim over 12k), compaction keeps 10 tool groups; read cache skipped (compaction clears old results). Tests: `tests/test_harness_guards.py`. Live attempt 7 running |
+| 3 | Discovery registry with scopes and trust (5.1, 5.2), `/` menu, MCP scopes UI and CLI | open | |
+| 4 | Sessions: JSONL, resume, fork, rewind (5.7) | open | |
+| 5 | Subagents with routed approvals (5.6); right pane: activity, terminal, files (6) | open | |
+| 6 | `aqh` CLI (8) and landing page install | open | |
+| 7 | Skill Studio: skill-creator skill, requirements page, dependencies (7) | open | |
+| 8 | Harness eval suite (5.9); repository map only if it helps (5.8) | open | |
+| 9 | Azure guide at or under $25/month, first test deployment (9) | open | |
+| 10 | Desktop bundled PostgreSQL (D4), signing when certificates exist | open | |
+
 | Time | Event | Detail |
 |---|---|---|
 | 2026-11-05 20:30:00 | MILESTONE | Unified Agentic QE Platform & Claude Code Desktop Harness deployed to https://github.com/sarveshtalele/agentic-harness.git with SQLite WAL project knowledge persistence, headless CLI (bin/harness), 58 local skills, and 13 Ashish Patel harness patterns. |
@@ -9984,3 +9999,197 @@ Written by `scripts/hooks/activity_log.py`. Times are local.
 | 2026-11-12 10:24:21 | before | Bash: Read the Gate 1 refusals and the requirements file |
 | 2026-11-12 10:24:21 | after | Bash: Read the Gate 1 refusals and the requirements file |
 | 2026-11-12 10:24:34 | before | Bash: Commit and push the CI and deploy fixes |
+| 2026-11-12 10:24:37 | after | Bash: Commit and push the CI and deploy fixes |
+| 2026-11-12 10:24:42 | before | Bash: Watch the new CI run to completion |
+| 2026-11-12 10:24:43 | after | Bash: Watch the new CI run to completion |
+| 2026-11-12 10:24:43 | before | mcp__ccd_turn__update_plan |
+| 2026-11-12 10:24:43 | after | mcp__ccd_turn__update_plan |
+| 2026-11-12 10:24:52 | before | mcp__firecrawl__firecrawl_scrape: https://huggingface.co/spaces/joelniklaus/harness-leaderboard |
+| 2026-11-12 10:24:55 | failed | mcp__firecrawl__firecrawl_scrape: https://huggingface.co/spaces/joelniklaus/harness-leaderboard Tool 'firecrawl_scrape' execution failed: Unauthorized: Invalid… |
+| 2026-11-12 10:24:55 | before | Bash: Read the DeepSeek harness repository layout |
+| 2026-11-12 10:24:58 | after | Bash: Read the DeepSeek harness repository layout |
+| 2026-11-12 10:24:58 | user | <ta[redacted]> <task-id>bp3skn6bp</task-id> <tool-use-id>toolu_015McMz5GqATMMmQTk62exff</tool-use-id> <output-file>/private/tmp/claude-501/-Users-sarveshtalele… |
+| 2026-11-12 10:25:02 | before | Bash: Read the local Azure zip check result |
+| 2026-11-12 10:25:03 | after | Bash: Read the local Azure zip check result |
+| 2026-11-12 10:25:12 | before | Bash: Map the DeepSeek harness package layout |
+| 2026-11-12 10:25:14 | after | Bash: Map the DeepSeek harness package layout |
+| 2026-11-12 10:25:19 | before | Bash: List the DeepSeek harness packages and feature areas |
+| 2026-11-12 10:25:21 | after | Bash: List the DeepSeek harness packages and feature areas |
+| 2026-11-12 10:25:28 | before | Bash: Fetch the DeepSeek harness README and subsystem docs |
+| 2026-11-12 10:25:32 | after | Bash: Fetch the DeepSeek harness README and subsystem docs |
+| 2026-11-12 10:25:37 | before | Bash: Fetch more DeepSeek harness design docs and read the README |
+| 2026-11-12 10:25:45 | after | Bash: Fetch more DeepSeek harness design docs and read the README |
+| 2026-11-12 10:25:50 | before | Bash: Extract skill discovery rules from the DeepSeek harness docs |
+| 2026-11-12 10:25:51 | after | Bash: Extract skill discovery rules from the DeepSeek harness docs |
+| 2026-11-12 10:25:55 | before | Bash: Read skill priority table and MCP design highlights |
+| 2026-11-12 10:25:55 | failed | Bash: Read skill priority table and MCP design highlights Exit code 1 ## Local discovery priority The shipped local provider scans roots in rank order: \| Rank… |
+| 2026-11-12 10:25:59 | before | Bash: Read MCP design and the tool execution pipeline |
+| 2026-11-12 10:26:00 | after | Bash: Read MCP design and the tool execution pipeline |
+| 2026-11-12 10:26:06 | before | Bash: Summarise compaction, spill, goal, plan, todo docs |
+| 2026-11-12 10:26:06 | after | Bash: Summarise compaction, spill, goal, plan, todo docs |
+| 2026-11-12 10:26:11 | before | Bash: Read the intros of compaction, spill, goal and the repeat-tool guard |
+| 2026-11-12 10:26:13 | after | Bash: Read the intros of compaction, spill, goal and the repeat-tool guard |
+| 2026-11-12 10:26:19 | before | ToolSearch: select:WebFetch,mcp__context7__resolve-library-id,mcp__context7__query-docs |
+| 2026-11-12 10:26:19 | after | ToolSearch: select:WebFetch,mcp__context7__resolve-library-id,mcp__context7__query-docs |
+| 2026-11-12 10:26:22 | before | WebFetch: https://huggingface.co/spaces/joelniklaus/harness-leaderboard |
+| 2026-11-12 10:26:22 | before | mcp__context7__resolve-library-id: Skills discovery folders, subagents, MCP server scopes local project user, settings precedence, session transcripts |
+| 2026-11-12 10:26:23 | before | mcp__context7__resolve-library-id: Python harness agent skills providers background agents compaction MCP tools |
+| 2026-11-12 10:26:26 | after | mcp__context7__resolve-library-id: Python harness agent skills providers background agents compaction MCP tools |
+| 2026-11-12 10:26:26 | after | mcp__context7__resolve-library-id: Skills discovery folders, subagents, MCP server scopes local project user, settings precedence, session transcripts |
+| 2026-11-12 10:26:27 | after | WebFetch: https://huggingface.co/spaces/joelniklaus/harness-leaderboard |
+| 2026-11-12 10:26:31 | before | WebFetch: https://huggingface.co/spaces/joelniklaus/harness-leaderboard/raw/main/README.md |
+| 2026-11-12 10:26:32 | before | WebFetch: https://huggingface.co/api/spaces/joelniklaus/harness-leaderboard |
+| 2026-11-12 10:26:33 | before | mcp__context7__query-docs: Where Claude Code discovers skills (.claude/skills project and ~/.claude/skills personal, plugin skills), precedence when names coll… |
+| 2026-11-12 10:26:35 | after | mcp__context7__query-docs: Where Claude Code discovers skills (.claude/skills project and ~/.claude/skills personal, plugin skills), precedence when names coll… |
+| 2026-11-12 10:26:43 | after | WebFetch: https://huggingface.co/spaces/joelniklaus/harness-leaderboard/raw/main/README.md |
+| 2026-11-12 10:27:06 | after | WebFetch: https://huggingface.co/api/spaces/joelniklaus/harness-leaderboard |
+| 2026-11-12 10:27:14 | before | WebFetch: https://huggingface.co/spaces/joelniklaus/harness-leaderboard/raw/main/docs/blog/post.md |
+| 2026-11-12 10:27:15 | before | WebFetch: https://huggingface.co/spaces/joelniklaus/harness-leaderboard/raw/main/docs/harness-settings.md |
+| 2026-11-12 10:27:22 | after | WebFetch: https://huggingface.co/spaces/joelniklaus/harness-leaderboard/raw/main/docs/blog/post.md |
+| 2026-11-12 10:27:32 | after | WebFetch: https://huggingface.co/spaces/joelniklaus/harness-leaderboard/raw/main/docs/harness-settings.md |
+| 2026-11-12 10:27:41 | before | mcp__context7__query-docs: Python create_harness_agent: skills sources from multiple directories, compaction strategies, file access, shell, background agents,… |
+| 2026-11-12 10:27:44 | after | mcp__context7__query-docs: Python create_harness_agent: skills sources from multiple directories, compaction strategies, file access, shell, background agents,… |
+| 2026-11-12 10:27:50 | before | mcp__context7__query-docs: MCP server installation scopes local project user, .mcp.json, precedence; subagent definition locations .claude/agents; settings pre… |
+| 2026-11-12 10:27:52 | before | WebFetch: https://code.claude.com/docs/en/how-claude-code-works |
+| 2026-11-12 10:27:53 | after | WebFetch: https://code.claude.com/docs/en/how-claude-code-works |
+| 2026-11-12 10:27:54 | after | mcp__context7__query-docs: MCP server installation scopes local project user, .mcp.json, precedence; subagent definition locations .claude/agents; settings pre… |
+| 2026-11-12 10:28:00 | before | WebFetch: https://docs.github.com/en/copilot/concepts/agents/about-agent-skills |
+| 2026-11-12 10:28:01 | before | WebFetch: https://antigravity.google/docs/skills |
+| 2026-11-12 10:28:03 | before | Bash: Check whether Skill Studio uses a skill-creator skill |
+| 2026-11-12 10:28:03 | after | Bash: Check whether Skill Studio uses a skill-creator skill |
+| 2026-11-12 10:28:07 | after | WebFetch: https://docs.github.com/en/copilot/concepts/agents/about-agent-skills |
+| 2026-11-12 10:28:08 | after | WebFetch: https://antigravity.google/docs/skills |
+| 2026-11-12 10:28:17 | before | Bash: Check whether test-made skills were committed |
+| 2026-11-12 10:28:17 | after | Bash: Check whether test-made skills were committed |
+| 2026-11-12 10:28:28 | before | Bash: Check the CI run for the latest push |
+| 2026-11-12 10:28:30 | after | Bash: Check the CI run for the latest push |
+| 2026-11-12 10:30:47 | before | Write: /Users/sarveshtalele/Downloads/agentic-harness/docs/FINAL_PLAN.md |
+| 2026-11-12 10:30:47 | after | Write: /Users/sarveshtalele/Downloads/agentic-harness/docs/FINAL_PLAN.md |
+| 2026-11-12 10:30:47 | before | mcp__ccd_turn__update_plan |
+| 2026-11-12 10:30:47 | after | mcp__ccd_turn__update_plan |
+| 2026-11-12 10:30:51 | before | Bash: Check the current CI run |
+| 2026-11-12 10:30:53 | after | Bash: Check the current CI run |
+| 2026-11-12 10:30:58 | before | mcp__ccd_turn__wrap_up |
+| 2026-11-12 10:30:58 | after | mcp__ccd_turn__wrap_up |
+| 2026-11-12 10:31:21 | turn end |  |
+| 2026-11-12 10:41:56 | user | keep the azure cost minimum not more than 25$ a month and proceed for above plan with token optimisation ponytaila nd caveman and use tokens effiecinetly with … |
+| 2026-11-12 10:42:16 | before | mcp__ccd_turn__update_plan |
+| 2026-11-12 10:42:16 | after | mcp__ccd_turn__update_plan |
+| 2026-11-12 10:42:17 | before | Bash: Read PROGRESS.md head and the plan memory |
+| 2026-11-12 10:42:17 | after | Bash: Read PROGRESS.md head and the plan memory |
+| 2026-11-12 10:42:23 | before | Bash: Check how the activity hook writes PROGRESS.md |
+| 2026-11-12 10:42:23 | after | Bash: Check how the activity hook writes PROGRESS.md |
+| 2026-11-12 10:42:37 | before | Bash: Add the working rules to CLAUDE.md and the goal tracker to PROGRESS.md |
+| 2026-11-12 10:42:43 | after | Bash: Add the working rules to CLAUDE.md and the goal tracker to PROGRESS.md |
+| 2026-11-12 10:42:43 | before | Write: /Users/sarveshtalele/.claude/projects/-Users-sarveshtalele-Downloads-agentic-harness/memory/harness-rebuild-plan.md |
+| 2026-11-12 10:42:43 | after | Write: /Users/sarveshtalele/.claude/projects/-Users-sarveshtalele-Downloads-agentic-harness/memory/harness-rebuild-plan.md |
+| 2026-11-12 10:42:47 | before | Bash: Update the memory index line |
+| 2026-11-12 10:42:49 | after | Bash: Update the memory index line |
+| 2026-11-12 10:42:49 | before | mcp__ccd_turn__update_plan |
+| 2026-11-12 10:42:49 | after | mcp__ccd_turn__update_plan |
+| 2026-11-12 10:42:52 | before | Write: /Users/sarveshtalele/.claude/projects/-Users-sarveshtalele-Downloads-agentic-harness/memory/MEMORY.md |
+| 2026-11-12 10:42:52 | after | Write: /Users/sarveshtalele/.claude/projects/-Users-sarveshtalele-Downloads-agentic-harness/memory/MEMORY.md |
+| 2026-11-12 10:43:06 | before | Edit: /Users/sarveshtalele/Downloads/agentic-harness/docs/FINAL_PLAN.md |
+| 2026-11-12 10:43:10 | after | Edit: /Users/sarveshtalele/Downloads/agentic-harness/docs/FINAL_PLAN.md |
+| 2026-11-12 10:43:10 | before | Bash: Log the approval decision and check CI |
+| 2026-11-12 10:43:10 | DECISION | Owner approved docs/FINAL_PLAN.md with defaults D1-D6 (2026-11-12). Azure cap $25/month: PostgreSQL B1ms stopped outside working hours (~$20.70). Rules in CLAU… |
+| 2026-11-12 10:43:12 | after | Bash: Log the approval decision and check CI |
+| 2026-11-12 10:43:12 | before | mcp__ccd_turn__update_plan |
+| 2026-11-12 10:43:12 | after | mcp__ccd_turn__update_plan |
+| 2026-11-12 10:43:19 | before | Bash: Remove the three test skills and isolate the skills folder in tests |
+| 2026-11-12 10:43:21 | after | Bash: Remove the three test skills and isolate the skills folder in tests |
+| 2026-11-12 10:43:25 | before | Bash: Run skill, plugin, harness and registry tests with the isolated skills folder |
+| 2026-11-12 10:44:09 | after | Bash: Run skill, plugin, harness and registry tests with the isolated skills folder |
+| 2026-11-12 10:44:25 | before | Bash: Find MAF's way to stop a run from middleware |
+| 2026-11-12 10:44:25 | after | Bash: Find MAF's way to stop a run from middleware |
+| 2026-11-12 10:44:28 | before | Bash: Read MiddlewareTermination and how the tool loop handles it |
+| 2026-11-12 10:44:29 | after | Bash: Read MiddlewareTermination and how the tool loop handles it |
+| 2026-11-12 10:44:39 | before | Bash: Find the gate-check command in each plugin command |
+| 2026-11-12 10:44:39 | after | Bash: Find the gate-check command in each plugin command |
+| 2026-11-12 10:44:51 | before | Bash: Read execute_command's signature and result |
+| 2026-11-12 10:44:51 | after | Bash: Read execute_command's signature and result |
+| 2026-11-12 10:45:02 | before | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/backend/maf/harness_kit/verify.py |
+| 2026-11-12 10:45:02 | after | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/backend/maf/harness_kit/verify.py |
+| 2026-11-12 10:45:07 | before | Bash: Read check-gate's output and exit codes |
+| 2026-11-12 10:45:07 | after | Bash: Read check-gate's output and exit codes |
+| 2026-11-12 10:45:12 | before | Edit: /Users/sarveshtalele/Downloads/agentic-harness/src/backend/maf/harness_kit/verify.py |
+| 2026-11-12 10:45:23 | after | Edit: /Users/sarveshtalele/Downloads/agentic-harness/src/backend/maf/harness_kit/verify.py |
+| 2026-11-12 10:45:24 | before | Bash: Wire the check into the active command, write guard and harness |
+| 2026-11-12 10:45:24 | after | Bash: Wire the check into the active command, write guard and harness |
+| 2026-11-12 10:45:32 | before | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/backend/maf/harness_kit/budget.py |
+| 2026-11-12 10:45:36 | after | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/backend/maf/harness_kit/budget.py |
+| 2026-11-12 10:45:36 | before | Bash: Raise the round cap to a safety limit and add the turn budget setting |
+| 2026-11-12 10:45:38 | after | Bash: Raise the round cap to a safety limit and add the turn budget setting |
+| 2026-11-12 10:45:54 | before | Bash: Test the verifier, the guard on FAIL, and the turn budget |
+| 2026-11-12 10:45:58 | after | Bash: Test the verifier, the guard on FAIL, and the turn budget |
+| 2026-11-12 10:46:06 | before | Bash: Read how the tool loop handles MiddlewareTermination |
+| 2026-11-12 10:46:07 | after | Bash: Read how the tool loop handles MiddlewareTermination |
+| 2026-11-12 10:46:25 | before | Bash: Record budget stops per thread and update the tests |
+| 2026-11-12 10:46:25 | after | Bash: Record budget stops per thread and update the tests |
+| 2026-11-12 10:46:28 | before | Bash: Read the end of the AG-UI stream loop |
+| 2026-11-12 10:46:28 | after | Bash: Read the end of the AG-UI stream loop |
+| 2026-11-12 10:46:38 | before | Bash: Show the budget notice as a reply; run the harness tests |
+| 2026-11-12 10:46:57 | after | Bash: Show the budget notice as a reply; run the harness tests |
+| 2026-11-12 10:47:22 | before | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/backend/maf/harness_kit/tool_hygiene.py |
+| 2026-11-12 10:47:29 | after | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/backend/maf/harness_kit/tool_hygiene.py |
+| 2026-11-12 10:47:29 | before | Bash: Wire hygiene and compaction keep-recent; test it |
+| 2026-11-12 10:47:48 | after | Bash: Wire hygiene and compaction keep-recent; test it |
+| 2026-11-12 10:47:55 | before | Bash: Split the guard tests into their own file and rerun |
+| 2026-11-12 10:48:00 | after | Bash: Split the guard tests into their own file and rerun |
+| 2026-11-12 10:48:11 | before | Bash: Update the tracker and archive attempt 6 |
+| 2026-11-12 10:48:13 | failed | Bash: Update the tracker and archive attempt 6 Exit code 1 attempt1 attempt2 attempt3 attempt4 attempt5 attempt6 cp: /private/tmp/claude-501/-Users-sarveshtale… |
+| 2026-11-12 10:48:24 | before | Bash: Restore the live runner scripts |
+| 2026-11-12 10:48:27 | after | Bash: Restore the live runner scripts |
+| 2026-11-12 10:48:32 | before | Bash: Run the live Gates 0 to 5 cycle, attempt 7 |
+| 2026-11-12 10:48:36 | after | Bash: Run the live Gates 0 to 5 cycle, attempt 7 |
+| 2026-11-12 10:48:36 | before | Bash: Check CI |
+| 2026-11-12 10:48:38 | after | Bash: Check CI |
+| 2026-11-12 10:48:48 | before | Bash: Retry model calls 3 times with backoff |
+| 2026-11-12 10:48:49 | after | Bash: Retry model calls 3 times with backoff |
+| 2026-11-12 10:48:52 | before | Bash: Import the retry setting and check llm.py |
+| 2026-11-12 10:48:54 | after | Bash: Import the retry setting and check llm.py |
+| 2026-11-12 10:48:59 | before | Bash: Wait for the CI run to finish |
+| 2026-11-12 10:48:59 | after | Bash: Wait for the CI run to finish |
+| 2026-11-12 10:49:02 | turn end |  |
+| 2026-11-12 10:49:06 | user | <ta[redacted]> <task-id>b3108xoog</task-id> <tool-use-id>toolu_01E1DSfyb7Ygff3BKfX57EbP</tool-use-id> <output-file>/private/tmp/claude-501/-Users-sarveshtalele… |
+| 2026-11-12 10:49:10 | before | Bash: Read live attempt 7 result |
+| 2026-11-12 10:49:11 | after | Bash: Read live attempt 7 result |
+| 2026-11-12 10:49:21 | before | Bash: Give a clear database-unreachable error; start the local cluster |
+| 2026-11-12 10:49:22 | after | Bash: Give a clear database-unreachable error; start the local cluster |
+| 2026-11-12 10:49:27 | before | Bash: Run the live Gates 0 to 5 cycle, attempt 7 |
+| 2026-11-12 10:49:29 | after | Bash: Run the live Gates 0 to 5 cycle, attempt 7 |
+| 2026-11-12 10:49:32 | turn end |  |
+| 2026-11-12 11:19:54 | user | continue with the plan and push once CI is green and for setup it is not working accuraltey and taking lot of time to setup and db command is stuck for moer th… |
+| 2026-11-12 11:20:10 | before | mcp__ccd_turn__update_plan |
+| 2026-11-12 11:20:10 | after | mcp__ccd_turn__update_plan |
+| 2026-11-12 11:20:10 | before | Bash: Read dev.py setup and its Python selection |
+| 2026-11-12 11:20:11 | after | Bash: Read dev.py setup and its Python selection |
+| 2026-11-12 11:20:31 | before | Bash: Make setup always use .venv, with live step lines |
+| 2026-11-12 11:20:32 | after | Bash: Make setup always use .venv, with live step lines |
+| 2026-11-12 11:20:32 | before | mcp__ccd_turn__update_plan |
+| 2026-11-12 11:20:32 | after | mcp__ccd_turn__update_plan |
+| 2026-11-12 11:20:35 | before | Bash: Read the current start function |
+| 2026-11-12 11:20:36 | after | Bash: Read the current start function |
+| 2026-11-12 11:20:48 | before | Bash: Start PostgreSQL without captured pipes; add live step lines and timeouts |
+| 2026-11-12 11:20:49 | after | Bash: Start PostgreSQL without captured pipes; add live step lines and timeouts |
+| 2026-11-12 11:20:57 | before | Bash: Verify a fresh start and a restart with live logging |
+| 2026-11-12 11:21:00 | after | Bash: Verify a fresh start and a restart with live logging |
+| 2026-11-12 11:21:00 | before | mcp__ccd_turn__update_plan |
+| 2026-11-12 11:21:00 | after | mcp__ccd_turn__update_plan |
+| 2026-11-12 11:21:11 | before | Bash: Document the live setup output in the README |
+| 2026-11-12 11:21:12 | after | Bash: Document the live setup output in the README |
+| 2026-11-12 11:21:12 | before | mcp__ccd_turn__update_plan |
+| 2026-11-12 11:21:12 | after | mcp__ccd_turn__update_plan |
+| 2026-11-12 11:21:18 | before | Bash: Check the previous CI run |
+| 2026-11-12 11:21:23 | after | Bash: Check the previous CI run |
+| 2026-11-12 11:21:23 | before | Bash: Run the full offline suite |
+| 2026-11-12 11:21:23 | after | Bash: Run the full offline suite |
+| 2026-11-12 11:21:28 | turn end |  |
+| 2026-11-12 11:25:00 | user | <ta[redacted]> <task-id>bxk63ktod</task-id> <tool-use-id>toolu_01SCm7rWxsYDwBdStCnHvbnT</tool-use-id> <output-file>/private/tmp/claude-501/-Users-sarveshtalele… |
+| 2026-11-12 11:25:04 | before | Bash: Read the suite result |
+| 2026-11-12 11:25:04 | after | Bash: Read the suite result |
+| 2026-11-12 11:25:07 | before | Bash: Read the failing timeout test |
+| 2026-11-12 11:25:07 | after | Bash: Read the failing timeout test |
+| 2026-11-12 11:25:14 | before | Bash: Update the retry assertion and rerun |
+| 2026-11-12 11:25:20 | after | Bash: Update the retry assertion and rerun |
+| 2026-11-12 11:25:29 | before | Bash: Commit, push, and cancel the hung CI run |

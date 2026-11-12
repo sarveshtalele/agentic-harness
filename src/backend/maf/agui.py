@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 import logging
 
-from ag_ui.core import RunErrorEvent
+from ag_ui.core import RunErrorEvent, TextMessageContentEvent, TextMessageEndEvent, TextMessageStartEvent
 from ag_ui.encoder import EventEncoder
 from agent_framework.ag_ui import AgentFrameworkAgent
 from fastapi import APIRouter, HTTPException, Request
@@ -22,7 +22,7 @@ from backend.core.security import redact, sha256
 from backend.db import db, new_id, now, row, rows
 from backend.maf import engine, governance, harness, llm, skill_chat, tools
 from backend.maf import runtime as agents
-from backend.maf.harness_kit import active_command, prompt_hooks
+from backend.maf.harness_kit import active_command, budget, prompt_hooks
 from backend.maf.harness_kit.nudges import HideLoopNudges
 
 router = APIRouter()
@@ -148,6 +148,11 @@ async def agui(agent_key: str, request: Request):
                     answer.append(event.delta)
                 if markup and kind == "MESSAGES_SNAPSHOT":
                     continue  # the snapshot still holds the markup; the streamed text above is the clean copy
+                if kind == "RUN_FINISHED" and (notice := budget.stopped.pop(thread_id, None)):  # a budget stop ends the loop without model text
+                    message_id = new_id("msg")
+                    for extra in (TextMessageStartEvent(message_id=message_id, role="assistant"), TextMessageContentEvent(message_id=message_id, delta=notice), TextMessageEndEvent(message_id=message_id)):
+                        yield encoder.encode(extra)
+                    answer.append(notice)
                 # every event type is redacted, including the final message snapshot
                 # ponytail: a secret split across two deltas passes in the live stream; the snapshot and stored copy are clean
                 yield redact(encoder.encode(event))

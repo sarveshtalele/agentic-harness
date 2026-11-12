@@ -2,6 +2,13 @@
 
 Agentic QE Platform is a Python and Next.js workspace for BAs and developers, built on Microsoft Agent Framework (MAF). These rules are strict.
 
+## Goal and working rules (owner, 2026-11-12)
+
+- **Restart point:** after any compaction, read `docs/FINAL_PLAN.md` (the approved plan, its order in section 13) and the **Goal tracker** at the top of `PROGRESS.md`, then continue the first open item. Do not start work outside that order without the owner's word.
+- **Keep the tracker true:** update the Goal tracker in `PROGRESS.md` when an item starts, finishes or is blocked, with the evidence (test command, run folder, commit).
+- **Token efficiency:** ponytail (smallest change that works) and caveman (terse replies). Read only what a change needs; no repeated reads; no long narration.
+- **Azure cost cap:** the standard deployment costs at most **$25 a month** in East US 2. Any change that raises it needs the owner's yes.
+
 ## Never without the owner's explicit permission
 
 - Delete, move, or overwrite files, directories, or branches. List what you propose to remove and wait for a yes.

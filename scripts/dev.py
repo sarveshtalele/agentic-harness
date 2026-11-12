@@ -31,15 +31,19 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 FRONTEND = ROOT / "src" / "frontend"
 VENV = ROOT / ".venv"
-PYTHON = VENV / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
-if not PYTHON.exists():
-    PYTHON = Path(sys.executable)
+VENV_PYTHON = VENV / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
+PYTHON = VENV_PYTHON if VENV_PYTHON.exists() else Path(sys.executable)  # setup makes .venv; before it, this Python
 ENV = {**os.environ, "PYTHONPATH": str(ROOT / "src") + os.pathsep + str(ROOT)}
 BACKEND = [str(PYTHON), "-m", "uvicorn", "backend.app:app", "--host", os.environ.get("ATLAS_HOST", "127.0.0.1"), "--port", os.environ.get("ATLAS_PORT", "8000")]
 
 
 def run(command: list[str], cwd: Path = ROOT) -> None:
     subprocess.run(command, cwd=cwd, env=ENV, check=True)
+
+
+def step(number: int, total: int, text: str, started: float) -> None:
+    """One live progress line, so a slow step is visible as slow, not stuck."""
+    print(f"[setup {number}/{total} | {time.monotonic() - started:5.0f}s] {text}", flush=True)
 
 
 def npm() -> str:
@@ -54,11 +58,19 @@ def setup() -> None:
         sys.exit(f"Python 3.12+ is required, found {sys.version.split()[0]}")
     if not shutil.which("git"):
         sys.exit("Git is required: https://git-scm.com")
-    if not PYTHON.exists():
+    global PYTHON
+    started = time.monotonic()
+    if not VENV_PYTHON.exists():  # always the project's own environment, never the global Python (found on Windows 2026-11-12)
+        step(1, 4, f"Creating the Python environment in {VENV}", started)
         venv.create(VENV, with_pip=True)
-    run([str(PYTHON), "-m", "pip", "install", "-q", "-r", "requirements.txt"])
+    PYTHON = VENV_PYTHON
+    step(2, 4, "Installing Python packages into .venv (several minutes the first time)", started)
+    run([str(PYTHON), "-m", "pip", "install", "--disable-pip-version-check", "-r", "requirements.txt"])
+    step(3, 4, "Installing Playwright's Chromium (browser tests and QE screenshots)", started)
     run([str(PYTHON), "-m", "playwright", "install", "chromium"])
-    run([npm(), "ci"], FRONTEND)
+    step(4, 4, "Installing UI packages with npm ci (5 to 10 minutes on Windows the first time)", started)
+    run([npm(), "ci", "--no-audit", "--no-fund"], FRONTEND)
+    step(4, 4, "Done. Next: python scripts/dev.py db", started)
     if not (ROOT / ".env").exists():
         shutil.copy(ROOT / ".env.example", ROOT / ".env")
         print("Created .env from .env.example. Add your model settings there or in the Settings page.")
