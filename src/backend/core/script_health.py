@@ -75,9 +75,10 @@ def _syntax(language: str, argv: list[str], script: Path) -> list[str] | None:
     if language == "bash":
         return [argv[0], "-n", s]
     if language == "powershell":
-        parse = ("$e = $null; [void][System.Management.Automation.Language.Parser]::ParseFile($args[0], [ref]$null, [ref]$e); "
+        quoted = "'" + s.replace("'", "''") + "'"  # -Command joins extra arguments into the text, so the path goes inside it
+        parse = (f"$e = $null; [void][System.Management.Automation.Language.Parser]::ParseFile({quoted}, [ref]$null, [ref]$e); "
                  "if ($e) { $e | ForEach-Object { $_.ToString() }; exit 1 }")
-        return [argv[0], "-NoProfile", "-NonInteractive", "-Command", parse, s]
+        return [argv[0], "-NoProfile", "-NonInteractive", "-Command", parse]
     if language == "ruby":
         return [argv[0], "-c", s]
     return None
