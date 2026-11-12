@@ -32,7 +32,7 @@ export interface TestRow { path: string; caseIds: string[]; exists: boolean; mar
 export interface Review { id: string; total: number; scores: Record<string, number> }
 export interface Coverage {
   app: string;
-  requirements: { id: string; priority?: string; evidence: boolean; text: string }[];
+  requirements: { id: string; priority?: string; evidence: boolean; quoteFound?: boolean; text: string }[];
   reviews: { design: Review[]; code: Review[] };
   inventory: InventorySummary;
   scenarios: Scenario[];
@@ -53,6 +53,12 @@ function capturedBy(doc: any, agent: string): string | null {
 
 export { markersOf };
 
+function quoteInFile(root: string, file: string, quote: string): boolean {
+  const path = resolve(root, file);
+  if (!isInside(resolve(root), path)) return false;
+  try { return readFileSync(path, "utf-8").includes(quote.trim()); } catch { return false; }
+}
+
 export function buildCoverage(root: string, app: string): Coverage {
   const docs = join(root, "docs", "qe", app);
   const j = (key: string) => readJsonDoc(findDoc(docs, key));
@@ -60,7 +66,9 @@ export function buildCoverage(root: string, app: string): Coverage {
 
   const requirements = docItems(j("requirements.requirements"), "requirements").map((r: any) => {
     const n = normalizeRequirement(r);
-    return n ? { id: n.id, priority: n.priority, evidence: !!n.evidence, text: [n.title, n.text, n.action].filter(Boolean).join(" ") } : null;
+    // a cited file and quote are checked on disk: the quote must appear verbatim in that file inside the repository
+    const quoteFound = n && n.sourceFile && n.quote ? quoteInFile(root, n.sourceFile, n.quote) : undefined;
+    return n ? { id: n.id, priority: n.priority, evidence: !!n.evidence, quoteFound, text: [n.title, n.text, n.action].filter(Boolean).join(" ") } : null;
   }).filter((r): r is NonNullable<typeof r> => !!r);
 
   const plan = j("plan.plan");
@@ -140,7 +148,9 @@ export function checkGate(cov: Coverage, gate: number, opts: { host?: "claude" |
   if (gate >= 1) {
     if (!cov.requirements.length) gap("02-requirements/requirements.json lists no requirements");
     const noEv = cov.requirements.filter((r) => !r.evidence).map((r) => r.id);
-    if (noEv.length) gap("requirements without source evidence", noEv);
+    if (noEv.length) gap("requirements without source evidence (give each source_file, line_number and a verbatim quote)", noEv);
+    const notFound = cov.requirements.filter((r) => r.quoteFound === false).map((r) => r.id);
+    if (notFound.length) gap("requirements whose quote is not found verbatim in their source_file", notFound);
   }
   if (gate >= 2) {
     if (!cov.scenarios.length) gap('03-plan/plan.json has no "scenarios" list with ids (SC-<AREA>-NNN), so nothing later can be checked against the plan');

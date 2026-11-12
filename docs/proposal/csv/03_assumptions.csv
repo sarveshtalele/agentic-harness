@@ -1,0 +1,16 @@
+﻿Assumptions (blue cells are inputs; change them to re-price)
+
+Assumption,Value,Unit,Basis
+Hours in a billing month,730,hours,Azure pricing convention (365 x 24 / 12).
+"PostgreSQL running hours, standard schedule",264,hours,"12 hours a day on 22 weekdays, started and stopped by Azure Automation (deployment step 13)."
+"PostgreSQL running hours, 8-hour weekdays",176,hours,8 hours a day on 22 weekdays.
+PostgreSQL provisioned storage,32,GB,Smallest Flexible Server size; billed while the server is stopped.
+Backup storage above provisioned size,0,GB,7-day retention; backup up to the provisioned size is included at no charge.
+"Blob data stored (installers, versions kept)",2,GB,"One release is about 0.93 GB (2 DMGs, 2 zips, 1 MSI); versioning keeps the previous one."
+Blob write operations,0.01,"x 10,000",About 100 uploads a month.
+Blob read operations,0.1,"x 10,000","About 1,000 downloads and latest.json reads a month."
+Key Vault operations,0.01,"x 10,000","3 secret reads per API start, about 30 starts a month, plus portal use."
+Automation runbook minutes,44,minutes,"2 jobs a weekday x 22 days, about 1 minute each."
+Outbound data to the internet,20,GB,About 100 installer downloads of 0.19 GB plus web traffic.
+Application Insights / Log Analytics ingestion,0,GB,Optional; 0 means not enabled. First 5 GB a month are free.
+People using the web app,5,people,Small trusted team (repository code shares the API machine).

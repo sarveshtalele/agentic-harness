@@ -1,0 +1,405 @@
+{
+  "_meta": {
+    "doc_id": "02-requirements/requirements",
+    "created_at": "2026-11-12T11:46:01+05:30",
+    "created_by": "agentic-qe v1.6.0",
+    "mode": "brownfield",
+    "source_commit": "aff44ea"
+  },
+  "doc_id": "personal-finance-mcp-requirements-001",
+  "created_at": "2025-07-18T00:00:00Z",
+  "created_by": "agentic-qe-harness",
+  "mode": "brownfield",
+  "source_commit": "aff44ea06ffa10090954b66e35d6b0426fe3eea8",
+  "requirements": [
+    {
+      "id": "REQ-PFM-001",
+      "title": "Account balance retrieval",
+      "description": "The system must retrieve the current balance of a specified account.",
+      "tier": "component",
+      "actors": [
+        "cli_user"
+      ],
+      "priority": "P0",
+      "source_evidence": "BalanceTool._run in mcp_finance_tools/balance.py:45-50: return f\"The current balance in account {account_name} is ${balance:.2f}\" queries the balance by account name and returns a formatted string."
+    },
+    {
+      "id": "REQ-PFM-002",
+      "title": "Account balance retrieval for default account",
+      "description": "The system must retrieve the current balance using a default account when no account name is specified.",
+      "tier": "component",
+      "actors": [
+        "cli_user"
+      ],
+      "priority": "P0",
+      "source_evidence": "BalanceTool._run in mcp_finance_tools/balance.py:44: account_name = account_name or \"default\" — falls back to 'default' when account_name is None."
+    },
+    {
+      "id": "REQ-PFM-003",
+      "title": "Account not found error",
+      "description": "The system must raise a ValueError when the specified account does not exist in the data source.",
+      "tier": "component",
+      "actors": [
+        "cli_user"
+      ],
+      "priority": "P0",
+      "source_evidence": "BalanceTool._run in mcp_finance_tools/balance.py:47: if account_name not in self.data['balances']: raise ValueError(f\"Account '{account_name}' not found\")"
+    },
+    {
+      "id": "REQ-PFM-004",
+      "title": "Withholdings retrieval per account",
+      "description": "The system must return a formatted breakdown of withholdings (federal, state, local, Social Security, Medicare, 401k) for a given account.",
+      "tier": "component",
+      "actors": [
+        "cli_user"
+      ],
+      "priority": "P0",
+      "source_evidence": "WithholdingsTool._run in mcp_finance_tools/withholdings.py:37-47: iterates self.data['withholdings'][account_name] and builds a formatted string for each withholding type."
+    },
+    {
+      "id": "REQ-PFM-005",
+      "title": "Withholdings retrieval for default account",
+      "description": "The system must retrieve withholdings using a default account when no account name is specified.",
+      "tier": "component",
+      "actors": [
+        "cli_user"
+      ],
+      "priority": "P0",
+      "source_evidence": "WithholdingsTool._run in mcp_finance_tools/withholdings.py:36: account_name = account_name or \"default\""
+    },
+    {
+      "id": "REQ-PFM-006",
+      "title": "Withholdings not found error",
+      "description": "The system must raise a ValueError when the specified account has no withholdings records.",
+      "tier": "component",
+      "actors": [
+        "cli_user"
+      ],
+      "priority": "P0",
+      "source_evidence": "WithholdingsTool._run in mcp_finance_tools/withholdings.py:38: if account_name not in self.data['withholdings']: raise ValueError(f\"Account '{account_name}' not found\")"
+    },
+    {
+      "id": "REQ-PFM-007",
+      "title": "Stock price retrieval",
+      "description": "The system must return the current price of a named stock ticker.",
+      "tier": "component",
+      "actors": [
+        "cli_user"
+      ],
+      "priority": "P0",
+      "source_evidence": "StockPriceTool._run in mcp_finance_tools/stock_price.py:30-31: return f\"The current price of {ticker} is ${price:.2f}\" gets price from data source by ticker."
+    },
+    {
+      "id": "REQ-PFM-008",
+      "title": "Stock price ticker not found error",
+      "description": "The system must raise a ValueError when the specified ticker symbol does not exist.",
+      "tier": "component",
+      "actors": [
+        "cli_user"
+      ],
+      "priority": "P0",
+      "source_evidence": "StockPriceTool._run in mcp_finance_tools/stock_price.py:28: if ticker not in self.data['stock_prices']: raise ValueError(f\"Ticker '{ticker}' not found\")"
+    },
+    {
+      "id": "REQ-PFM-009",
+      "title": "Investment portfolio retrieval",
+      "description": "The system must return the complete investment portfolio for a given account, listing each holding with ticker, shares, and current price.",
+      "tier": "component",
+      "actors": [
+        "cli_user"
+      ],
+      "priority": "P0",
+      "source_evidence": "InvestmentPortfolioTool._run in mcp_finance_tools/investment_portfolio.py:39-52: iterates self.data['investment_portfolios'][account_name] and builds formatted lines per holding with ticker, shares and price."
+    },
+    {
+      "id": "REQ-PFM-010",
+      "title": "Investment portfolio for default account",
+      "description": "The system must retrieve the investment portfolio using a default account when no account name is specified.",
+      "tier": "component",
+      "actors": [
+        "cli_user"
+      ],
+      "priority": "P0",
+      "source_evidence": "InvestmentPortfolioTool._run in mcp_finance_tools/investment_portfolio.py:38: account_name = account_name or \"default\""
+    },
+    {
+      "id": "REQ-PFM-011",
+      "title": "Investment portfolio not found error",
+      "description": "The system must raise a ValueError when the specified account has no investment portfolio.",
+      "tier": "component",
+      "actors": [
+        "cli_user"
+      ],
+      "priority": "P0",
+      "source_evidence": "InvestmentPortfolioTool._run in mcp_finance_tools/investment_portfolio.py:40: if account_name not in self.data['investment_portfolios']: raise ValueError(f\"Account '{account_name}' not found\")"
+    },
+    {
+      "id": "REQ-PFM-012",
+      "title": "Income records retrieval",
+      "description": "The system must return all income records (type, amount, frequency) for a given account.",
+      "tier": "component",
+      "actors": [
+        "cli_user"
+      ],
+      "priority": "P0",
+      "source_evidence": "IncomeTool._run in mcp_finance_tools/income.py:37-47: iterates self.data['income'][account_name] and formats each income entry."
+    },
+    {
+      "id": "REQ-PFM-013",
+      "title": "Income records for default account",
+      "description": "The system must retrieve income records using a default account when no account name is specified.",
+      "tier": "component",
+      "actors": [
+        "cli_user"
+      ],
+      "priority": "P0",
+      "source_evidence": "IncomeTool._run in mcp_finance_tools/income.py:36: account_name = account_name or \"default\""
+    },
+    {
+      "id": "REQ-PFM-014",
+      "title": "Income records not found error",
+      "description": "The system must raise a ValueError when the specified account has no income records.",
+      "tier": "component",
+      "actors": [
+        "cli_user"
+      ],
+      "priority": "P0",
+      "source_evidence": "IncomeTool._run in mcp_finance_tools/income.py:38: if account_name not in self.data['income']: raise ValueError(f\"Account '{account_name}' not found\")"
+    },
+    {
+      "id": "REQ-PFM-015",
+      "title": "Expense records retrieval",
+      "description": "The system must return all expense records (type, amount, frequency) for a given account.",
+      "tier": "component",
+      "actors": [
+        "cli_user"
+      ],
+      "priority": "P0",
+      "source_evidence": "ExpensesTool._run in mcp_finance_tools/expenses.py:37-47: iterates self.data['expenses'][account_name] and formats each expense entry."
+    },
+    {
+      "id": "REQ-PFM-016",
+      "title": "Expense records for default account",
+      "description": "The system must retrieve expense records using a default account when no account name is specified.",
+      "tier": "component",
+      "actors": [
+        "cli_user"
+      ],
+      "priority": "P0",
+      "source_evidence": "ExpensesTool._run in mcp_finance_tools/expenses.py:36: account_name = account_name or \"default\""
+    },
+    {
+      "id": "REQ-PFM-017",
+      "title": "Expense records not found error",
+      "description": "The system must raise a ValueError when the specified account has no expense records.",
+      "tier": "component",
+      "actors": [
+        "cli_user"
+      ],
+      "priority": "P0",
+      "source_evidence": "ExpensesTool._run in mcp_finance_tools/expenses.py:38: if account_name not in self.data['expenses']: raise ValueError(f\"Account '{account_name}' not found\")"
+    },
+    {
+      "id": "REQ-PFM-018",
+      "title": "Deductions retrieval",
+      "description": "The system must return a formatted list of deductions (type, amount, frequency) for a given account.",
+      "tier": "component",
+      "actors": [
+        "cli_user"
+      ],
+      "priority": "P0",
+      "source_evidence": "DeductionsTool._run in mcp_finance_tools/deductions.py:37-47: iterates self.data['deductions'][account_name] and formats each deduction entry."
+    },
+    {
+      "id": "REQ-PFM-019",
+      "title": "Deductions for default account",
+      "description": "The system must retrieve deductions using a default account when no account name is specified.",
+      "tier": "component",
+      "actors": [
+        "cli_user"
+      ],
+      "priority": "P0",
+      "source_evidence": "DeductionsTool._run in mcp_finance_tools/deductions.py:36: account_name = account_name or \"default\""
+    },
+    {
+      "id": "REQ-PFM-020",
+      "title": "Deductions not found error",
+      "description": "The system must raise a ValueError when the specified account has no deductions records.",
+      "tier": "component",
+      "actors": [
+        "cli_user"
+      ],
+      "priority": "P0",
+      "source_evidence": "DeductionsTool._run in mcp_finance_tools/deductions.py:38: if account_name not in self.data['deductions']: raise ValueError(f\"Account '{account_name}' not found\")"
+    },
+    {
+      "id": "REQ-PFM-021",
+      "title": "Data seeding on first access",
+      "description": "The system must seed initial financial data files for an account on first access if they do not already exist.",
+      "tier": "component",
+      "actors": [
+        "cli_user",
+        "system"
+      ],
+      "priority": "P0",
+      "source_evidence": "FinanceDataTool.__init__ in mcp_finance_tools/finance_data.py:148: calls self._seed_data_files() within _ensure_data_dir() to create initial JSON data files."
+    },
+    {
+      "id": "REQ-PFM-022",
+      "title": "Configuration via CLI arguments and environment variables",
+      "description": "The system must accept configuration for data directory, port, transport type, and allowed users via CLI arguments with fallback to environment variables.",
+      "tier": "component",
+      "actors": [
+        "cli_user",
+        "system"
+      ],
+      "priority": "P0",
+      "source_evidence": "server.py:68-79: argparse configured with --data-dir, --port, --transport (stdio/sse), --allowed-users with env var defaults from FINANCE_DATA_DIR, FINANCE_PORT, FINANCE_TRANSPORT, FINANCE_ALLOWED_USERS."
+    },
+    {
+      "id": "REQ-PFM-023",
+      "title": "MCP SSE transport mode",
+      "description": "The system must support SSE (Server-Sent Events) transport mode for HTTP-based MCP communication.",
+      "tier": "component",
+      "actors": [
+        "cli_user",
+        "system"
+      ],
+      "priority": "P0",
+      "source_evidence": "server.py:124-129: if args.transport == 'sse': runs SSE server with Starlette app at /messages/ endpoint."
+    },
+    {
+      "id": "REQ-PFM-024",
+      "title": "MCP stdio transport mode",
+      "description": "The system must support stdio transport mode for CLI-based MCP communication.",
+      "tier": "component",
+      "actors": [
+        "cli_user",
+        "system"
+      ],
+      "priority": "P0",
+      "source_evidence": "server.py:121-123: if args.transport == 'stdio': runs server using stdio_server on asyncio."
+    },
+    {
+      "id": "REQ-PFM-025",
+      "title": "Tool registration in MCP server",
+      "description": "The system must register all six finance tools (balance, withholdings, stock_price, investment_portfolio, income, expenses, deductions) as MCP tools.",
+      "tier": "component",
+      "actors": [
+        "system"
+      ],
+      "priority": "P0",
+      "source_evidence": "server.py:92-108: FastMCP(mcp) registers tools via @mcp.tool() decorators for all 7 tool classes."
+    },
+    {
+      "id": "REQ-PFM-026",
+      "title": "Negative balances accepted",
+      "description": "The system must accept and return negative balance values.",
+      "tier": "component",
+      "actors": [
+        "cli_user"
+      ],
+      "priority": "P1",
+      "source_evidence": "mcp_finance_tools/balance.py:49: return f\"The current balance in account {account_name} is ${balance:.2f}\" — the format does not restrict the sign of the balance."
+    },
+    {
+      "id": "REQ-PFM-027",
+      "title": "README promises: CLI personal finance assistant via MCP",
+      "description": "The system must act as a personal finance CLI assistant exposing account data through the Model Context Protocol.",
+      "tier": "product",
+      "actors": [
+        "cli_user"
+      ],
+      "priority": "P0",
+      "source_evidence": "README.md:1-5: title 'Personal Finance MCP' and description 'A personal finance CLI assistant built with MCP...'"
+    },
+    {
+      "id": "REQ-PFM-028",
+      "title": "Configuration port range validation",
+      "description": "The system should validate that the port argument falls within the valid range of 1024-65535.",
+      "tier": "component",
+      "actors": [
+        "cli_user"
+      ],
+      "priority": "P2",
+      "source_evidence": "server.py:68-79: argparse accepts any integer via --port with type=int and no explicit range check."
+    },
+    {
+      "id": "REQ-PFM-029",
+      "title": "Fitness score computation",
+      "description": "The system must compute and return a fitness score based on financial data (balance, income, expenses, withholdings) for a given account.",
+      "tier": "component",
+      "actors": [
+        "cli_user"
+      ],
+      "priority": "P0",
+      "source_evidence": "FitnessTool._run in mcp_finance_tools/fitness.py:47-71: computes total_income, total_expenses, balance, withholdings and returns a fitness_score with breakdown."
+    },
+    {
+      "id": "REQ-PFM-030",
+      "title": "Fitness score for default account",
+      "description": "The system must compute the fitness score using a default account when no account name is specified.",
+      "tier": "component",
+      "actors": [
+        "cli_user"
+      ],
+      "priority": "P0",
+      "source_evidence": "FitnessTool._run in mcp_finance_tools/fitness.py:39: account_name = account_name or \"default\""
+    },
+    {
+      "id": "REQ-PFM-031",
+      "title": "Fitness score account not found error",
+      "description": "The system must raise a ValueError when the specified account is not found in the data for fitness computation.",
+      "tier": "component",
+      "actors": [
+        "cli_user"
+      ],
+      "priority": "P0",
+      "source_evidence": "FitnessTool._run in mcp_finance_tools/fitness.py:45: if account_name not in self.data['balances']: raise ValueError(f\"Account '{account_name}' not found\")"
+    },
+    {
+      "id": "REQ-PFM-032",
+      "title": "Monthly spending breakdown",
+      "description": "The system must return a monthly spending breakdown (buildup) for a given account showing expenses categorized by type.",
+      "tier": "component",
+      "actors": [
+        "cli_user"
+      ],
+      "priority": "P0",
+      "source_evidence": "BuildupTool._run in mcp_finance_tools/buildup.py:50-62: calculates monthly spending from expenses and returns per-category breakdown as a formatted string."
+    },
+    {
+      "id": "REQ-PFM-033",
+      "title": "Monthly spending breakdown for default account",
+      "description": "The system must compute the monthly spending breakdown using a default account when no account name is specified.",
+      "tier": "component",
+      "actors": [
+        "cli_user"
+      ],
+      "priority": "P0",
+      "source_evidence": "BuildupTool._run in mcp_finance_tools/buildup.py:42: account_name = account_name or \"default\""
+    },
+    {
+      "id": "REQ-PFM-034",
+      "title": "Monthly spending breakdown account not found error",
+      "description": "The system must raise a ValueError when the specified account has no balances or expenses data for the monthly breakdown.",
+      "tier": "component",
+      "actors": [
+        "cli_user"
+      ],
+      "priority": "P0",
+      "source_evidence": "BuildupTool._run in mcp_finance_tools/buildup.py:48: if account_name not in self.data['balances']: raise ValueError(f\"Account '{account_name}' not found\")"
+    },
+    {
+      "id": "REQ-PFM-035",
+      "title": "Data file backup before overwrite",
+      "description": "The system should create a backup of existing data files before overwriting them with seed data.",
+      "tier": "component",
+      "actors": [
+        "system"
+      ],
+      "priority": "P2",
+      "source_evidence": "mcp_finance_tools/finance_data.py:148-173: _seed_data_files writes seed JSON files without checking for existing files or creating backups first."
+    }
+  ]
+}

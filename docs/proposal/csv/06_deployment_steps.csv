@@ -1,0 +1,36 @@
+﻿"Deployment steps (Azure portal), in order"
+Replace <unique> with your own short tag. Full text: docs/AZURE_DEPLOYMENT_GUIDE.md in the repository.
+
+Step,Phase,Where (portal path),Action and values,Verify
+1,Prepare,Your computer,"Install the repository (python scripts/dev.py setup) and PostgreSQL 16 or newer. Make two random values: python -c ""import secrets; print(secrets.token_urlsafe(48))"".",Two values saved safely.
+2,Package,Terminal / PowerShell,Run python scripts/package_azure_kudu.py. Never zip with Explorer or Finder.,dist/azure_backend.zip and dist/azure_frontend.zip exist.
+3,Package,Terminal / PowerShell,"Set ATLAS_ADMIN_USERNAME and ATLAS_ADMIN_PASSWORD, then run python scripts/dev.py azure-local --check.",Prints 'API health: 200; UI /login: 200'.
+4,Resource group,Resource groups > Create,"Name rg-agentic-qe, Region East US 2. Review + create, Create.",Listed in East US 2.
+5,Key Vault,Key vaults > Create,"Name kv-agentic-qe-<unique>, East US 2, Pricing tier Standard, Permission model: Azure role-based access control.",Vault created.
+6,Key Vault,Vault > Access control (IAM) > Add role assignment,Role Key Vault Secrets Officer for your own account.,You can add secrets.
+7,Key Vault,Vault > Objects > Secrets > Generate/Import,Add atlas-admin-password (12+ characters) and atlas-secret-key (the random value).,Both secrets Enabled.
+8,PostgreSQL,Azure Database for PostgreSQL flexible servers > Create,"Name pg-agentic-qe-<unique>, East US 2, version 17, Workload Development, Configure server: Burstable, Standard_B1ms, 32 GiB, backup 7 days. PostgreSQL authentication only. Networking: Public access (allowed IP addresses), Azure services access off.",Status Ready.
+9,PostgreSQL,Server > Settings > Databases > + Add,Name agentic_qe.,Database listed.
+10,PostgreSQL,Vault > Secrets > Generate/Import,atlas-database-url = postgresql://<user>:<password>@pg-agentic-qe-<unique>.postgres.database.azure.com:5432/agentic_qe?sslmode=require (percent-encode @ : / ? # in the password).,Secret Enabled.
+11,Storage,Storage accounts > Create,"Name stagenticqe<unique>, East US 2, Standard, LRS. Data protection: blob versioning on, soft delete 7 days.",Account created.
+12,Storage,Account > Settings > Configuration,Allow Blob anonymous access: Enabled. Save.,Setting saved.
+13,Storage,Account > Data storage > Containers > + Container,"Name downloads, Anonymous access level: Blob (never Container).",Container listed.
+14,Storage,Container > Upload,"Upload the DMGs, zips, MSI and latest.json from GitHub Release v0.1.0 with Overwrite on. Set latest.json Cache-Control to no-cache. Copy the container URL.",<container URL>/latest.json opens in a private window.
+15,App Service plan,App Service plans > Create,"Name plan-agentic-qe, Linux, East US 2, Pricing plan Basic B1.","Overview shows Basic (B1), Linux."
+16,API app,App Services > Create > Web App,"Name aqe-api-<unique>, Publish Code, Python 3.12, Linux, East US 2, plan plan-agentic-qe.",App created.
+17,API app,App > Settings > Identity,"System assigned: On. Then on the vault, role Key Vault Secrets User for this managed identity.",Role assignment listed on the vault.
+18,API app,App > Settings > Configuration > General settings,Startup Command python /home/site/wwwroot/startup.py; Always on On; HTTPS Only On.,Saved.
+19,API app,App > Settings > Environment variables,"ATLAS_KEY_VAULT_URL, ATLAS_PROFILE=web, ATLAS_DATA_DIR=/home/atlas/data, ATLAS_ADMIN_USERNAME, ATLAS_ALLOWED_HOSTS, ATLAS_ALLOWED_ORIGINS, ATLAS_MAX_SANDBOXES=5, WEBSITES_ENABLE_APP_SERVICE_STORAGE=true, WEBSITES_PORT=8000, SCM_DO_BUILD_DURING_DEPLOYMENT=false, ENABLE_ORYX_BUILD=false.",Applied.
+20,API app,https://aqe-api-<unique>.scm.azurewebsites.net/ZipDeployUI,"Drag dist/azure_backend.zip onto the page, then Restart the app.","Log stream: 'Environment built', then 'Starting API on port 8000'."
+21,Database firewall,API app > Settings > Properties,Copy all outbound and additional outbound IP addresses.,Address list copied.
+22,Database firewall,PostgreSQL > Settings > Networking,"Add one firewall rule per address (start = end), Save, restart the API app.",/api/health returns status ok.
+23,UI app,App Services > Create > Web App,"Name aqe-ui-<unique>, Node 20 LTS, Linux, East US 2, plan plan-agentic-qe. Startup Command node /home/site/wwwroot/startup.js; Always on and HTTPS Only On.",App created.
+24,UI app,App > Settings > Environment variables,"ATLAS_BACKEND_URL, ATLAS_DOWNLOADS_URL (container URL, no trailing slash), WEBSITES_ENABLE_APP_SERVICE_STORAGE=true, WEBSITES_PORT=3000, SCM_DO_BUILD_DURING_DEPLOYMENT=false, ENABLE_ORYX_BUILD=false.",Applied.
+25,UI app,https://aqe-ui-<unique>.scm.azurewebsites.net/ZipDeployUI,"Drag dist/azure_frontend.zip onto the page, then Restart.",Log stream ends with 'Starting UI on port 3000'; landing page shows downloads.
+26,Lock the API,API app > Settings > Networking > Access restriction,Unmatched rule action Deny; one Allow rule per UI outbound address; Advanced tool site: allow only your IP.,API health answers 403 in your browser; the UI still works.
+27,Cost schedule,Automation Accounts > Create,"Name aa-agentic-qe, East US 2, system-assigned identity on.",Account created.
+28,Cost schedule,PostgreSQL > Access control (IAM),Role Contributor (scoped to this server) for the Automation account's managed identity.,Role assignment listed.
+29,Cost schedule,Automation > Runbooks > Create a runbook,"pg-start-stop, PowerShell 7.2, code from the guide section 13 (Invoke-AzRestMethod start/stop). Save, Publish. Test with ACTION=stop then start.","Job output 'HTTP 202'; server Stopped, then Ready."
+30,Cost schedule,Runbook > Schedules > Add a schedule,pg-start-weekdays 08:00 Mon-Fri ACTION=start; pg-stop-weekdays 20:00 Mon-Fri ACTION=stop.,Two schedules linked.
+31,Check,API app > Development Tools > SSH,python /home/site/wwwroot/scripts/env_check.py --env azure,Prints 'azure: OK'.
+32,First sign-in,https://aqe-ui-<unique>.azurewebsites.net,Sign in as the admin; set the model on Settings and Test connection; add users.,Harness answers a message in a project.

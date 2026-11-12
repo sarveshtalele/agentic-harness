@@ -22,6 +22,9 @@ from backend.maf.harness_kit import verify
 READS = frozenset({"read_file", "list_files", "grep", "file_access_read", "file_access_read_lines", "file_access_ls", "file_access_grep", "read_skill_resource"})
 WRITES = frozenset({"file_access_write", "file_access_replace", "file_access_replace_lines"})
 NUDGE, LIMIT = 15, 25
+# the 2026-11-12 cycle wrote requirements citing 10 files that do not exist after being told to write "from what you know"
+HONEST = ("with only what the files you have read support: cite only files you opened in this conversation and copy quotes "
+          "verbatim from them; leave anything you have not read out for now.")
 _reads: dict[str, int] = defaultdict(int)  # ponytail: per process; a restart forgets the count, which only delays the nudge
 
 
@@ -47,10 +50,10 @@ def write_first(thread_id: str, root: Path | None, command: dict | None):
         count, todo = _reads[thread_id], ", ".join(missing)
         if count > LIMIT:
             context.result = (f"Refused: {count - 1} reads in a row and nothing written while {todo} is missing. Write it now with "
-                              "file_access_write from what you already know; you can extend it in later calls. Reads work again after a write.")
+                              f"file_access_write, {HONEST} Reads work again after a write, so you can extend it in later calls.")
             return
         await call_next()
         if count >= NUDGE:
-            context.result = f"{context.result}\n\n[harness] {count} reads in a row without a write. Write {todo} now with file_access_write; extend it later."
+            context.result = f"{context.result}\n\n[harness] {count} reads in a row without a write. Write {todo} now with file_access_write, {HONEST} Extend it later."
 
     return guard

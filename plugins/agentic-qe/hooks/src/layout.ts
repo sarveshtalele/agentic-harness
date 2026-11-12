@@ -114,13 +114,15 @@ export function normalizeCase(c: any): Case | null {
 }
 
 /** A requirement in one schema: id, a readable statement, actor and action when known, evidence as text. */
-export interface Requirement { id: string; text: string; title?: string; role?: string; action?: string; evidence?: string; priority?: string }
+export interface Requirement { id: string; text: string; title?: string; role?: string; action?: string; evidence?: string; priority?: string; sourceFile?: string; quote?: string }
 
 export function normalizeRequirement(r: any): Requirement | null {
   const id = str(r?.id ?? r?.requirementId);
   if (!id) return null;
   const role = str(r.role ?? r.actor), action = str(r.action);
-  const ev = r.evidence ?? (r.sourceFile ? `${r.sourceFile}${r.lineNumber ? `:${r.lineNumber}` : ""}${r.evidenceQuote ? ` "${r.evidenceQuote}"` : ""}` : undefined);
+  // REQUIREMENT_RULES.md names source_file, line_number and quote; extract-contracts.ts uses the camelCase forms
+  const sourceFile = str(r.sourceFile ?? r.source_file), line = r.lineNumber ?? r.line_number, quote = str(r.evidenceQuote ?? r.quote);
+  const ev = r.evidence ?? (sourceFile ? `${sourceFile}${line ? `:${line}` : ""}${quote ? ` "${quote}"` : ""}` : undefined);
   const text = str(r.text ?? r.statement ?? r.behavior ?? r.description) ?? (role && action ? `As a ${role}, I want to ${action}` : str(r.title) ?? "");
-  return { id, text, title: str(r.title), role, action, evidence: typeof ev === "object" && ev ? Object.values(ev).filter(Boolean).join(" · ") : str(ev), priority: str(r.priority) };
+  return { id, text, title: str(r.title), role, action, evidence: typeof ev === "object" && ev ? Object.values(ev).filter(Boolean).join(" · ") : str(ev), priority: str(r.priority), sourceFile, quote };
 }

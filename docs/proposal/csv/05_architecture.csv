@@ -1,0 +1,13 @@
+﻿Architecture: what we use and why
+
+Component,Azure service,Size / SKU,Why we use it,Alternatives considered
+UI web app,"App Service (Linux), Node 20 LTS",Shares plan B1,Serves the Next.js app and the CopilotKit runtime route; the landing page lists desktop downloads.,Static Web Apps (cannot run the server-side runtime route).
+API web app,"App Service (Linux), Python 3.12",Shares plan B1,"Runs FastAPI and Microsoft Agent Framework: agents, harness, workflows, gates and ledger.","Container Apps (more moving parts; owner chose App Service, 2026-11-11)."
+App Service plan,App Service plan,"Basic B1, Linux",Cheapest plan that runs both apps with Always On and a /home share.,B2 or P0v3 when more memory or CPU is needed (see Cost Estimate).
+Database,Azure Database for PostgreSQL Flexible Server,"Burstable B1ms, 32 GB, PostgreSQL 17","The only database the app supports. Point-in-time restore for 7 days, many writers, and it can be stopped to save cost.","SQLite (removed: one writer, no managed backup)."
+Secrets,Key Vault,Standard,"Holds the admin password, secret key and database URL; the API reads them with its managed identity, so no secret sits in app settings.",App settings (secrets visible to anyone with portal access).
+Files,"Storage account, Blob","Standard LRS, Hot","Public-read 'downloads' container for the desktop installers and latest.json, with versioning and soft delete.",GitHub Release only (no link from the app's own landing page).
+Workspaces,App Service /home share,Included with the plan,"Repository workspaces, documents and evidence until the Blob storage layer is built.",Blob containers (planned).
+Start/stop schedule,Azure Automation,"Basic, within free minutes",Starts PostgreSQL at 08:00 and stops it at 20:00 on weekdays to stay under the USD 25 cap.,"Leave it always on (about USD 28.60, above the cap)."
+Monitoring (optional),Application Insights / Log Analytics,Pay per GB after 5 GB free,OpenTelemetry traces from the API; the app also has its own /traces page and log downloads.,In-app traces and logs only.
+Desktop app,"GitHub Actions build, Blob download","macOS DMG (Apple silicon, Intel), Windows MSI","Each person can run the full platform locally, including stdio MCP and plugin installs, with a local PostgreSQL.",Web app only.

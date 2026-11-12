@@ -1,0 +1,26 @@
+﻿"Price evidence: Azure Retail Prices API, East US 2, pay-as-you-go"
+Retrieved 2026-11-12 07:43 UTC from https://prices.azure.com/api/retail/prices with currencyCode=USD and currencyCode=INR. Prices exclude taxes (GST in India).
+
+Key,Service,Product,SKU,Meter,Unit,Tier from,USD price,INR price,INR per USD,Effective from
+APP_B1,Azure App Service,Azure App Service Basic Plan - Linux,B1,B1,1 Hour,0,0.017,1.6189,95.2294,2019-06-01
+APP_B2,Azure App Service,Azure App Service Basic Plan - Linux,B2,B2,1 Hour,0,0.034,3.2378,95.2294,2019-06-01
+APP_B3,Azure App Service,Azure App Service Basic Plan - Linux,B3,B3,1 Hour,0,0.067,6.3803,95.2284,2019-06-01
+APP_P0V3,Azure App Service,Azure App Service Premium v3 Plan - Linux,P0v3,P0v3 App,1 Hour,0,0.0775,7.3802,95.2284,2024-08-01
+PG_B1MS,Azure Database for PostgreSQL,Azure Database for PostgreSQL Flexible Server Burstable BS Series Compute,B1MS,B1MS,1 Hour,0,0.017,1.6189,95.2294,2021-12-01
+PG_B2S,Azure Database for PostgreSQL,Azure Database for PostgreSQL Flexible Server Burstable BS Series Compute,B2S,B2S,1 Hour,0,0.068,6.4756,95.2294,2021-06-01
+PG_STORAGE,Azure Database for PostgreSQL,Azure Database for PostgreSQL Flex Server Storage,Storage,Storage Data Stored,1 GB/Month,0,0.115,10.9513,95.2287,2021-06-01
+PG_BACKUP,Azure Database for PostgreSQL,Azure Database for PostgreSQL Flexible Server Backup Storage,Backup Storage LRS,Backup Storage LRS Data Stored,1 GB/Month,0,0.095,9.0467,95.2284,2021-06-01
+BLOB_STORED,Storage,Blob Storage,Hot LRS,Hot LRS Data Stored,1 GB/Month,0,0.0184,1.7522,95.2283,2017-02-03
+BLOB_WRITE,Storage,Blob Storage,Hot LRS,Hot LRS Write Operations,10K,0,0.05,4.7614,95.228,2016-05-09
+BLOB_READ,Storage,Blob Storage,Hot LRS,Hot Read Operations,10K,0,0.004,0.3809,95.225,2016-05-09
+KV_OPS,Key Vault,Key Vault,Standard,Operations,10K,0,0.03,2.8569,95.23,2015-08-01
+AUTO_FREE,Automation,Process Automation,Basic,Basic Runtime,1 Minute,0,0,0,-,2017-10-01
+AUTO_PAID,Automation,Process Automation,Basic,Basic Runtime,1 Minute,500,0.002,0.1905,95.25,2017-10-01
+EGRESS_FREE,Bandwidth,Rtn Preference: MGN,Standard,Standard Data Transfer Out,1 GB,0,0,0,-,2022-05-01
+EGRESS_PAID,Bandwidth,Rtn Preference: MGN,Standard,Standard Data Transfer Out,1 GB,100,0.087,8.2849,95.2287,2022-05-01
+LOGS_FREE,Log Analytics,Log Analytics,Analytics Logs,Analytics Logs Data Ingestion,1 GB,0,0,0,-,2018-02-01
+LOGS_PAID,Log Analytics,Log Analytics,Analytics Logs,Analytics Logs Data Ingestion,1 GB,5,2.76,262.8314,95.2288,2018-02-01
+
+How to re-check
+Query: GET https://prices.azure.com/api/retail/prices?$filter=armRegionName eq 'eastus2' and priceType eq 'Consumption' and skuName eq 'B1'&currencyCode=INR
+"Blue figures are the API's unit prices as retrieved; replace them to re-price the whole workbook. INR per USD is implied by Azure's own two price lists, not a bank rate."

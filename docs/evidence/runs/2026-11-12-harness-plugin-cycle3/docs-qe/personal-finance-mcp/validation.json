@@ -1,0 +1,30 @@
+{
+ "validator": "1.6.0",
+ "gate": 1,
+ "ok": false,
+ "errors": [
+  {
+   "check": "requirements.evidence",
+   "message": "requirements without source evidence",
+   "ids": [
+    "REQ-PFM-001..REQ-PFM-035"
+   ]
+  }
+ ],
+ "warnings": [],
+ "metrics": {
+  "requirements": 35,
+  "scenarios": 0,
+  "cases": 0,
+  "test_files": 0,
+  "results": 0,
+  "repo_test_files": 11,
+  "repo_tests": 137,
+  "existing": 11,
+  "generated": 0,
+  "manual": 0
+ },
+ "suspects": [],
+ "duplicates": [],
+ "brief": "Gate 1 validation: FAIL (1 errors, 0 warnings).\n- requirements without source evidence: REQ-PFM-001..REQ-PFM-035"
+}

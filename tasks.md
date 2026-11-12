@@ -328,3 +328,22 @@
 - [x] G9 standard Azure guide with East US 2 costs
 - [x] FINAL_PLAN 5.5: one error shape for harness tool failures (`harness_kit/errors.py`), 2026-11-12
 - [x] Budget stop and pinned command tell the user to re-send the plugin phase command, not "continue", 2026-11-12
+- [x] agentic-qe Gate 1: documented evidence fields accepted, quotes checked on disk (`tests/test_agentic_qe_evidence.py`), 2026-11-12
+- [x] Harness: files a plugin hook refused are not written again in the thread; write-first nudge cites only files read, 2026-11-12
+
+## Phase 2 (docs/PHASE2_PLAN.md revision 3, 2026-11-12), awaiting approval
+- [x] Owner decisions D-SHELL, D-SHELL-WEB, D-SANDBOX, D-CLI (plan section 17), 2026-11-12
+- [ ] 1 Discovery eval baseline (20 tasks)
+- [ ] 2 Tool pipeline, short tool names; persistent Bash and PowerShell (background, monitor, spill); permission modes and rules
+- [ ] 3 Script runtime for Python, TypeScript, JavaScript, Bash, PowerShell and declared interpreters; health flags
+- [ ] 4 Capability index, skill scopes with live reload, MCP list_changed refresh; eval after
+- [ ] 5 Hooks (Claude Code events and contract), settings files, sessions JSONL, checkpoints and rewind, subagents, background tasks
+- [ ] 6 `aqh` CLI interactive and headless; live CLI session on macOS and Windows
+- [ ] 7 OS sandbox tiers (Seatbelt, bubblewrap; Windows approval or container)
+- [ ] 8 R6 credentials and desktop sign-in; desktop Terminal pane
+- [ ] 9 R2 features governance; R1 home and gated downloads
+- [x] Playwright UI audit test (tests/e2e/test_ui_audit.py), 2026-11-12
+- [ ] 10 UI audit fixes U1 to U10; audit at zero findings
+- [ ] 11 R3 uploads and brainstorming; R4 Atlassian (optional)
+- [ ] 12 R5 QE cycle to Gate 5 with traceability
+- [ ] 13 Azure guide, proposal workbook, docs refresh

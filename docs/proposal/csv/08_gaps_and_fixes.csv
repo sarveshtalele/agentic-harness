@@ -1,0 +1,13 @@
+﻿Review of the Azure guide against live prices (2026-11-12)
+
+#,Gap found,Fix,State
+1,No INR prices; the team is billed in India.,Every unit price retrieved in USD and INR from the API (Price Evidence); Cost Estimate shows both; INR column added to the guide.,Fixed
+2,Guide said installers are 160 to 760 MB.,Measured release v0.1.0: 164 to 195 MB per file; guide corrected.,Fixed
+3,Taxes not mentioned.,Proposal and guide state prices exclude taxes (for example 18% GST in India).,Fixed
+4,PostgreSQL storage price was from 2026-11-11 only.,"Re-read live: USD 0.115 / INR 10.9513 per GB a month, the 'Storage Data Stored' meter.",Fixed
+5,Not stated that storage is billed while PostgreSQL is stopped.,Stated in Cost Estimate and the guide.,Fixed
+6,Free allowances were stated without proof.,"API tiers confirm: egress free to 100 GB, Automation free to 500 min, Log Analytics free to 5 GB.",Fixed
+7,Installer names with spaces did not match latest.json on GitHub Release.,Installers now named agentic-qe-<version>-<os>-<arch>; old dotted files removed from v0.1.0.,Fixed
+8,No screenshots of the Azure portal steps.,Needs a real subscription (owner decision D5).,Open
+9,No 'database stopped (outside working hours)' page.,Planned in the platform; until then the app shows a database error naming PostgreSQL.,Open
+10,Not yet deployed to a real Azure subscription.,"First test deployment with evidence (health, sign-in, harness turn, QE run) is the next plan item.",Open

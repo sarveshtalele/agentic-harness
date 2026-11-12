@@ -21,6 +21,9 @@ from backend.maf.harness_kit.shell import NAME as SHELL
 from backend.maf.runtime.factory import _text
 
 WRITES = {"file_access_write": "Write", "file_access_replace": "Edit", "file_access_replace_lines": "Edit", "file_access_delete": "Bash"}
+# thread -> {file: hook reason}. A file a hook refused stays refused for the thread: the live cycle retried plugin-owned
+# files 14 times across turns, each with an approval card. ponytail: per process; a restart lets one retry through.
+refused: dict[str, dict[str, str]] = {}
 
 
 def claude_call(name: str, args: dict, root) -> tuple[str, dict]:
@@ -53,10 +56,18 @@ def guarded(workspace):
             return
         args = context.arguments.model_dump() if isinstance(context.arguments, BaseModel) else dict(context.arguments)
         tool, tool_input = claude_call(name, args, workspace.root)
+        target = str(args.get("file_name", "")) if name in WRITES else ""
+        earlier = refused.get(workspace.thread_id, {}).get(target) if target else None
+        if earlier:
+            context.result = (f"Refused without running: a plugin hook already blocked writing {target} in this conversation, and it will "
+                              f"block it again. Do not write this file. The hook said: {earlier}")
+            return
         try:
             with leases.lease("shell" if name == SHELL else "write", workspace.project_id, workspace.thread_id, workspace.user_id):
                 before = await hooks("PreToolUse", tool, {"tool_input": tool_input})
                 if before.blocked:
+                    if target:
+                        refused.setdefault(workspace.thread_id, {})[target] = before.reason
                     context.result = f"Blocked by a plugin hook before {name} ran. Nothing ran. Reason: {before.reason}"
                     return
                 await call_next()

@@ -1,0 +1,22 @@
+﻿UI guide: step by step for each person
+"The same pages run on Azure, locally and in the desktop app. Screenshots: docs/evidence in the repository."
+
+Step,Page,Who,What to do,You should see
+1,Landing page /,Everyone,Open the UI address. Read what the platform does; download the desktop app for macOS or Windows if you want it; select Sign in.,Login page opens.
+2,Login /login,Everyone,"Enter the username and password the admin gave you, then sign in. Change the temporary password on /account.",Projects list opens.
+3,Settings /settings,Admin,"Enter the model endpoint, model name and key; select Test connection; tick the models people may use; grant plugins to roles.",Test connection succeeds.
+4,Users /users,Admin,"Add user: username, temporary password, email and role (qe_lead, ba, developer or viewer).",User appears in the list.
+5,"Settings, Gate roles",Admin,Choose who may sign gates G0 to G5. Agents never sign.,Roles saved.
+6,Projects /projects,Members,"Create a project, then attach a repository: upload a zip or paste a GitHub URL. Add Members who may see it.",Repository files and facts appear.
+7,"Project, Harness",Members,"Type a request, or '/' to pick a command or skill (for example /agentic-qe:qe-start <app>). Watch the status lines; approve or reject each file write and shell command on its card. A plugin command stays active until you send another; to resume it, send the same command again.","Answer, todos and written files appear; each write shows the command's check result."
+8,"Project, BA","BA, QE lead",Write or generate requirements documents (BRD) and Gherkin; every save is a new version with history. Sign gate G1 when ready.,Version history lists each save.
+9,"Project, QE",QE lead,Run the QE cycle gate by gate (G0 to G5). Each gate needs its check to pass and a named person to sign.,"Gate shows signed with name, role and time."
+10,"Project, Bugs and Feature",Developers,"Run a bug scan and review findings; generated changes land on a separate branch, shown as a diff.",Findings list and diff.
+11,"Project, Approvals and Governance",Approvers,Approve or reject pending items; review the hash-chained ledger.,Ledger verifies.
+12,Skill Studio /skills/studio,"Admin, QE lead","Choose source and kind, write the request, review the plan, approve, generate, test (Repair from test failures if needed), evaluate, publish.",Skill listed on /skills with a version.
+13,MCP /mcp,Admin,"Add a remote (HTTP) MCP server, Connect, then grant each tool to roles. stdio servers run only in the desktop app.",Tools listed as granted.
+14,Agents /agents,Everyone,"See the governed agents and their evaluation scores (n and judge, or why blank).",Agent list.
+15,Traces /traces,Admin: all; member: own,Open a run to see its span tree and timings.,Trace detail.
+16,Usage,Admin,Check token use per person and model; set allowances.,Usage table.
+17,Account /account,Each person,Change your own password and email.,Saved.
+18,Desktop app,Each person,"Install PostgreSQL 16+ first; install the DMG (right-click, Open the first time) or the MSI (SmartScreen: More info, Run anyway). It runs its own API, UI and local database.","Same pages as the web app, plus stdio MCP and plugin installs."

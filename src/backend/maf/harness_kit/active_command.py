@@ -18,7 +18,7 @@ from pathlib import Path
 from agent_framework import ContextProvider
 
 from backend.core.security import safe_path
-from backend.maf.harness_kit import verify
+from backend.maf.harness_kit import hook_middleware, verify
 from backend.maf.harness_kit.catalog import THREAD_ID
 
 # The platform's own QE workflow, gates and documents. A plugin command does that work itself, with its own gates and files.
@@ -96,6 +96,7 @@ class ActiveCommandContext(ContextProvider):
         c = self.command
         files = file_state(self.root, c["paths"])
         checked = verify.last(self.thread_id) if c.get("check") else None
+        blocked = hook_middleware.refused.get(self.thread_id, {})
         if checked:
             files.append(f"- the command's check, last run: {'PASS' if checked['passed'] else 'FAIL'}" + ("" if checked["passed"] else f" ({checked['output'][-300:]})"))
         if c.get("after_gate") is not None:
@@ -121,4 +122,5 @@ class ActiveCommandContext(ContextProvider):
             f"- A plugin may open its write window only for its own command (agentic-qe: any other message closes it). If a hook blocks a write because "
             f"no phase command is running, do not retry the write: stop and ask the user to send `/{c['name']} {c['args']}`".rstrip() + "` again.",
             "Files this command may create (checked on disk just now):", *(files or ["- none named"]),
+            *([f"Files a plugin hook refused in this conversation (never write them): {', '.join(sorted(blocked))}"] if blocked else []),
             f"<command name=\"{c['name']}\">\n{c['body']}\n</command>"]))

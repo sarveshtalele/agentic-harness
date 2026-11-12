@@ -1,0 +1,19 @@
+﻿Agentic QE Platform: Azure hosting proposal (East US 2)
+Prepared 2026-11-12. Prices verified live against the Azure Retail Prices API at 2026-11-12 07:43 UTC.
+
+Purpose,"Host the Agentic QE Platform for a small trusted team as a browser app on Azure, with a desktop app for each person, at no more than USD 25 a month."
+What the platform does,"BAs and developers run governed AI agents (Microsoft Agent Framework) over real repositories: requirements and Gherkin, test plans, test design, generated tests, execution with Playwright evidence, healing, traceability and gate sign-off (G0 to G5) by named people. Every change is versioned and recorded in a hash-chained ledger."
+Recommendation,"One Linux App Service plan B1 running two web apps (API and UI), Azure Database for PostgreSQL Flexible Server B1ms stopped outside working hours, Blob Storage for desktop installers, and Key Vault for secrets, all in East US 2, deployed by uploading zip packages through Kudu."
+Monthly cost (USD),20.616
+Monthly cost (INR),1963.2469
+Yearly cost (USD),247.392
+Yearly cost (INR),23558.9625
+Within the USD 25 cap,Yes
+Always-on alternative (USD),28.538
+Region,"East US 2 (owner decision, 2026-11-11)."
+Not included,"Taxes (for example 18% GST when billed in India), model tokens from the model provider, support plans, and Azure reservations or credits."
+Deployment model,"Zip packages built and checked on a laptop (python scripts/package_azure_kudu.py, then azure-local --check), uploaded through Kudu ZipDeployUI. GitHub never connects to Azure."
+Security,"Secrets only in Key Vault, read by the API's managed identity. The API accepts traffic only from the UI. PostgreSQL accepts only the API's outbound addresses. Everyone signs in; every API path is denied by default."
+Known limits,"Repository code runs on the API machine until isolated sandbox jobs exist, so admit only trusted people. stdio MCP servers, npx and plugin installs are desktop-only. While PostgreSQL is stopped the app shows a database error (a friendly 'outside working hours' page is planned)."
+Status,"Packages verified locally (API health 200, UI login 200) and the full test suite passes on PostgreSQL. Desktop installers are published as GitHub Release v0.1.0. Not yet deployed to a real Azure subscription."
+Workbook contents,"Proposal; Cost Estimate; Assumptions; Price Evidence (live API rows, USD and INR); Architecture (what and why); Deployment Steps (portal, step by step); UI Guide (step by step); Gaps and Fixes (review findings)."

@@ -164,3 +164,7 @@ Fix (`maf/harness_kit/active_command.py`):
 - A slash command becomes the thread's **active command**, kept beside the thread and given to the model in the instructions on every call (MAF `ContextProvider`), never compacted. The chat history keeps only what the user typed.
 - While a plugin command is active, the platform's QE, document and repository tools are hidden; the model works only on the workspace (MAF file access, the shell) with the plugin's hooks.
 - The instructions list the files the command may create (`Paths this command may create`, `<app-name>` filled in), each marked written or missing on disk, and say that the approval card on each write is the yes the command asks for.
+
+## Phase 2 (owner request, 2026-11-12), awaiting approval
+
+See `docs/FINAL_PLAN.md` section 14: a live capability index for the harness, then a home page with gated downloads, a governance page for features, BA Studio uploads and a brainstorming workflow, Confluence import through MCP, the QE cycle traced end to end, and admin-issued desktop credentials.

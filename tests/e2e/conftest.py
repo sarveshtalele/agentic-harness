@@ -45,7 +45,9 @@ def servers():
     EVIDENCE.mkdir(parents=True, exist_ok=True)
     frontend_dir = ROOT / "src" / "frontend"
     npm = shutil.which("npm")
-    subprocess.run([npm, "run", "build"], cwd=frontend_dir, env=env, check=True, capture_output=True)
+    built = subprocess.run([npm, "run", "build"], cwd=frontend_dir, env=env, capture_output=True, check=False)
+    if built.returncode:  # Turbopack's PostCSS worker cannot open its helper port on some macOS setups; webpack builds the same app
+        subprocess.run([npm, "run", "build", "--", "--webpack"], cwd=frontend_dir, env=env, check=True, capture_output=True)
     log = (EVIDENCE / "server.log").open("w")
     backend = subprocess.Popen([sys.executable, "-m", "uvicorn", "backend.app:app", "--port", "8010"], cwd=ROOT, env=env, stdout=log, stderr=log)
     frontend = subprocess.Popen([npm, "run", "start", "--", "--hostname", "127.0.0.1", "--port", "3010"], cwd=frontend_dir, env=env, stdout=log, stderr=log)

@@ -367,3 +367,11 @@ Every feature gets:
 8. **The harness eval suite** (5.9), and the repository map only if the eval shows a gain (5.8).
 9. **The Azure guide refresh,** and a first deployment to a test subscription with evidence (9).
 10. **Desktop with bundled PostgreSQL** (D4), and signed installers once certificates exist.
+
+## 14. Phase 2 (owner request, 2026-11-12)
+
+**Status: draft awaiting the owner's approval (revision 3). Nothing is built.** The detailed plan is **`docs/PHASE2_PLAN.md`**: a Claude Code-class harness on MAF (Bash and PowerShell, skill scripts in every common language with health flags, hooks, permission modes, sessions, subagents, MCP) with three front ends (the `aqh` CLI on macOS, Windows and Linux, the desktop app, the web app), then the product changes R1 to R6, the UI audit fixes and the QE cycle to Gate 5.
+
+Owner decisions taken: desktop central sign-in; the Atlassian remote MCP with OAuth (optional, the only outside source in BA Studio); feature permissions as role defaults plus member overrides; harness first. Also taken (`docs/PHASE2_PLAN.md` section 17): D-SHELL yes (CLAUDE.md updated); web keeps the allowlisted runner; every shell command asks by default; the CLI uses the proxy base URL, key and model from settings (key in env or the OS keychain).
+
+Order: `docs/PHASE2_PLAN.md` section 16 (13 steps, discovery eval baseline first).

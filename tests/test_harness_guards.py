@@ -110,3 +110,26 @@ def test_a_failing_tool_reaches_the_model_as_one_error_shape():
     assert "Error [timeout]" in sent and '"retryable": true' in sent
     assert set(shape(FileNotFoundError("x"))) == {"code", "message", "action", "retryable", "trace_id"}
     assert shape(FileNotFoundError("x"))["code"] == "not_found" and json.dumps(shape(ValueError("bad")))
+
+
+def test_a_file_a_plugin_hook_refused_is_not_written_again(tmp_path):
+    import asyncio
+    from types import SimpleNamespace
+
+    from agent_framework import Agent, tool
+
+    from backend.maf.harness_kit import hook_middleware
+
+    ran = []
+
+    @tool(name="file_access_write", description="Write a file.")
+    def file_access_write(file_name: str, content: str) -> str:
+        ran.append(file_name)
+        return "written"
+
+    ws = SimpleNamespace(thread_id="thr_refused", project_id="prj_x", user_id="u", root=tmp_path, env=lambda: {})
+    hook_middleware.refused["thr_refused"] = {"docs/qe/app/coverage-map.md": "written by the plugin's hooks only"}
+    scripted = ScriptedClient([("go", steps({"call": "file_access_write", "args": {"file_name": "docs/qe/app/coverage-map.md", "content": "x"}}, "done"))])
+    asyncio.run(Agent(scripted, tools=[file_access_write], middleware=[hook_middleware.guarded(ws)]).run("go"))
+    assert ran == []  # neither the hook nor the tool ran
+    assert "Refused without running" in "\n".join(scripted.calls) and "written by the plugin's hooks only" in "\n".join(scripted.calls)

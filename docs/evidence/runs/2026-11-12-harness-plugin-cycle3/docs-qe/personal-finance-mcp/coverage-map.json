@@ -1,0 +1,511 @@
+{
+ "app": "personal-finance-mcp",
+ "approvedUpTo": 0,
+ "checks": [
+  {
+   "gate": 1,
+   "ok": false,
+   "gaps": [
+    "requirements without source evidence: REQ-PFM-001, REQ-PFM-002, REQ-PFM-003, REQ-PFM-004, REQ-PFM-005, REQ-PFM-006, REQ-PFM-007, REQ-PFM-008, REQ-PFM-009, REQ-PFM-010, REQ-PFM-011, REQ-PFM-012, REQ-PFM-013, REQ-PFM-014, REQ-PFM-015, REQ-PFM-016, REQ-PFM-017, REQ-PFM-018, REQ-PFM-019, REQ-PFM-020, REQ-PFM-021, REQ-PFM-022, REQ-PFM-023, REQ-PFM-024, REQ-PFM-025 and 10 more"
+   ],
+   "missing": [
+    "REQ-PFM-001",
+    "REQ-PFM-002",
+    "REQ-PFM-003",
+    "REQ-PFM-004",
+    "REQ-PFM-005",
+    "REQ-PFM-006",
+    "REQ-PFM-007",
+    "REQ-PFM-008",
+    "REQ-PFM-009",
+    "REQ-PFM-010",
+    "REQ-PFM-011",
+    "REQ-PFM-012",
+    "REQ-PFM-013",
+    "REQ-PFM-014",
+    "REQ-PFM-015",
+    "REQ-PFM-016",
+    "REQ-PFM-017",
+    "REQ-PFM-018",
+    "REQ-PFM-019",
+    "REQ-PFM-020",
+    "REQ-PFM-021",
+    "REQ-PFM-022",
+    "REQ-PFM-023",
+    "REQ-PFM-024",
+    "REQ-PFM-025",
+    "REQ-PFM-026",
+    "REQ-PFM-027",
+    "REQ-PFM-028",
+    "REQ-PFM-029",
+    "REQ-PFM-030",
+    "REQ-PFM-031",
+    "REQ-PFM-032",
+    "REQ-PFM-033",
+    "REQ-PFM-034",
+    "REQ-PFM-035"
+   ],
+   "counts": {
+    "requirements": 35,
+    "scenarios": 0,
+    "cases": 0,
+    "tests": 0,
+    "results": 0
+   }
+  },
+  {
+   "gate": 2,
+   "ok": false,
+   "gaps": [
+    "requirements without source evidence: REQ-PFM-001, REQ-PFM-002, REQ-PFM-003, REQ-PFM-004, REQ-PFM-005, REQ-PFM-006, REQ-PFM-007, REQ-PFM-008, REQ-PFM-009, REQ-PFM-010, REQ-PFM-011, REQ-PFM-012, REQ-PFM-013, REQ-PFM-014, REQ-PFM-015, REQ-PFM-016, REQ-PFM-017, REQ-PFM-018, REQ-PFM-019, REQ-PFM-020, REQ-PFM-021, REQ-PFM-022, REQ-PFM-023, REQ-PFM-024, REQ-PFM-025 and 10 more",
+    "03-plan/plan.json has no \"scenarios\" list with ids (SC-<AREA>-NNN), so nothing later can be checked against the plan"
+   ],
+   "missing": [
+    "REQ-PFM-001",
+    "REQ-PFM-002",
+    "REQ-PFM-003",
+    "REQ-PFM-004",
+    "REQ-PFM-005",
+    "REQ-PFM-006",
+    "REQ-PFM-007",
+    "REQ-PFM-008",
+    "REQ-PFM-009",
+    "REQ-PFM-010",
+    "REQ-PFM-011",
+    "REQ-PFM-012",
+    "REQ-PFM-013",
+    "REQ-PFM-014",
+    "REQ-PFM-015",
+    "REQ-PFM-016",
+    "REQ-PFM-017",
+    "REQ-PFM-018",
+    "REQ-PFM-019",
+    "REQ-PFM-020",
+    "REQ-PFM-021",
+    "REQ-PFM-022",
+    "REQ-PFM-023",
+    "REQ-PFM-024",
+    "REQ-PFM-025",
+    "REQ-PFM-026",
+    "REQ-PFM-027",
+    "REQ-PFM-028",
+    "REQ-PFM-029",
+    "REQ-PFM-030",
+    "REQ-PFM-031",
+    "REQ-PFM-032",
+    "REQ-PFM-033",
+    "REQ-PFM-034",
+    "REQ-PFM-035"
+   ],
+   "counts": {
+    "requirements": 35,
+    "scenarios": 0,
+    "cases": 0,
+    "tests": 0,
+    "results": 0
+   }
+  },
+  {
+   "gate": 3,
+   "ok": false,
+   "gaps": [
+    "requirements without source evidence: REQ-PFM-001, REQ-PFM-002, REQ-PFM-003, REQ-PFM-004, REQ-PFM-005, REQ-PFM-006, REQ-PFM-007, REQ-PFM-008, REQ-PFM-009, REQ-PFM-010, REQ-PFM-011, REQ-PFM-012, REQ-PFM-013, REQ-PFM-014, REQ-PFM-015, REQ-PFM-016, REQ-PFM-017, REQ-PFM-018, REQ-PFM-019, REQ-PFM-020, REQ-PFM-021, REQ-PFM-022, REQ-PFM-023, REQ-PFM-024, REQ-PFM-025 and 10 more",
+    "03-plan/plan.json has no \"scenarios\" list with ids (SC-<AREA>-NNN), so nothing later can be checked against the plan"
+   ],
+   "missing": [
+    "REQ-PFM-001",
+    "REQ-PFM-002",
+    "REQ-PFM-003",
+    "REQ-PFM-004",
+    "REQ-PFM-005",
+    "REQ-PFM-006",
+    "REQ-PFM-007",
+    "REQ-PFM-008",
+    "REQ-PFM-009",
+    "REQ-PFM-010",
+    "REQ-PFM-011",
+    "REQ-PFM-012",
+    "REQ-PFM-013",
+    "REQ-PFM-014",
+    "REQ-PFM-015",
+    "REQ-PFM-016",
+    "REQ-PFM-017",
+    "REQ-PFM-018",
+    "REQ-PFM-019",
+    "REQ-PFM-020",
+    "REQ-PFM-021",
+    "REQ-PFM-022",
+    "REQ-PFM-023",
+    "REQ-PFM-024",
+    "REQ-PFM-025",
+    "REQ-PFM-026",
+    "REQ-PFM-027",
+    "REQ-PFM-028",
+    "REQ-PFM-029",
+    "REQ-PFM-030",
+    "REQ-PFM-031",
+    "REQ-PFM-032",
+    "REQ-PFM-033",
+    "REQ-PFM-034",
+    "REQ-PFM-035"
+   ],
+   "counts": {
+    "requirements": 35,
+    "scenarios": 0,
+    "cases": 0,
+    "tests": 0,
+    "results": 0
+   }
+  },
+  {
+   "gate": 4,
+   "ok": false,
+   "gaps": [
+    "requirements without source evidence: REQ-PFM-001, REQ-PFM-002, REQ-PFM-003, REQ-PFM-004, REQ-PFM-005, REQ-PFM-006, REQ-PFM-007, REQ-PFM-008, REQ-PFM-009, REQ-PFM-010, REQ-PFM-011, REQ-PFM-012, REQ-PFM-013, REQ-PFM-014, REQ-PFM-015, REQ-PFM-016, REQ-PFM-017, REQ-PFM-018, REQ-PFM-019, REQ-PFM-020, REQ-PFM-021, REQ-PFM-022, REQ-PFM-023, REQ-PFM-024, REQ-PFM-025 and 10 more",
+    "03-plan/plan.json has no \"scenarios\" list with ids (SC-<AREA>-NNN), so nothing later can be checked against the plan"
+   ],
+   "missing": [
+    "REQ-PFM-001",
+    "REQ-PFM-002",
+    "REQ-PFM-003",
+    "REQ-PFM-004",
+    "REQ-PFM-005",
+    "REQ-PFM-006",
+    "REQ-PFM-007",
+    "REQ-PFM-008",
+    "REQ-PFM-009",
+    "REQ-PFM-010",
+    "REQ-PFM-011",
+    "REQ-PFM-012",
+    "REQ-PFM-013",
+    "REQ-PFM-014",
+    "REQ-PFM-015",
+    "REQ-PFM-016",
+    "REQ-PFM-017",
+    "REQ-PFM-018",
+    "REQ-PFM-019",
+    "REQ-PFM-020",
+    "REQ-PFM-021",
+    "REQ-PFM-022",
+    "REQ-PFM-023",
+    "REQ-PFM-024",
+    "REQ-PFM-025",
+    "REQ-PFM-026",
+    "REQ-PFM-027",
+    "REQ-PFM-028",
+    "REQ-PFM-029",
+    "REQ-PFM-030",
+    "REQ-PFM-031",
+    "REQ-PFM-032",
+    "REQ-PFM-033",
+    "REQ-PFM-034",
+    "REQ-PFM-035"
+   ],
+   "counts": {
+    "requirements": 35,
+    "scenarios": 0,
+    "cases": 0,
+    "tests": 0,
+    "results": 0
+   }
+  },
+  {
+   "gate": 5,
+   "ok": false,
+   "gaps": [
+    "requirements without source evidence: REQ-PFM-001, REQ-PFM-002, REQ-PFM-003, REQ-PFM-004, REQ-PFM-005, REQ-PFM-006, REQ-PFM-007, REQ-PFM-008, REQ-PFM-009, REQ-PFM-010, REQ-PFM-011, REQ-PFM-012, REQ-PFM-013, REQ-PFM-014, REQ-PFM-015, REQ-PFM-016, REQ-PFM-017, REQ-PFM-018, REQ-PFM-019, REQ-PFM-020, REQ-PFM-021, REQ-PFM-022, REQ-PFM-023, REQ-PFM-024, REQ-PFM-025 and 10 more",
+    "03-plan/plan.json has no \"scenarios\" list with ids (SC-<AREA>-NNN), so nothing later can be checked against the plan"
+   ],
+   "missing": [
+    "REQ-PFM-001",
+    "REQ-PFM-002",
+    "REQ-PFM-003",
+    "REQ-PFM-004",
+    "REQ-PFM-005",
+    "REQ-PFM-006",
+    "REQ-PFM-007",
+    "REQ-PFM-008",
+    "REQ-PFM-009",
+    "REQ-PFM-010",
+    "REQ-PFM-011",
+    "REQ-PFM-012",
+    "REQ-PFM-013",
+    "REQ-PFM-014",
+    "REQ-PFM-015",
+    "REQ-PFM-016",
+    "REQ-PFM-017",
+    "REQ-PFM-018",
+    "REQ-PFM-019",
+    "REQ-PFM-020",
+    "REQ-PFM-021",
+    "REQ-PFM-022",
+    "REQ-PFM-023",
+    "REQ-PFM-024",
+    "REQ-PFM-025",
+    "REQ-PFM-026",
+    "REQ-PFM-027",
+    "REQ-PFM-028",
+    "REQ-PFM-029",
+    "REQ-PFM-030",
+    "REQ-PFM-031",
+    "REQ-PFM-032",
+    "REQ-PFM-033",
+    "REQ-PFM-034",
+    "REQ-PFM-035"
+   ],
+   "counts": {
+    "requirements": 35,
+    "scenarios": 0,
+    "cases": 0,
+    "tests": 0,
+    "results": 0
+   }
+  }
+ ],
+ "coverage": {
+  "app": "personal-finance-mcp",
+  "requirements": [
+   {
+    "id": "REQ-PFM-001",
+    "priority": "P0",
+    "evidence": false,
+    "text": "Account balance retrieval The system must retrieve the current balance of a specified account."
+   },
+   {
+    "id": "REQ-PFM-002",
+    "priority": "P0",
+    "evidence": false,
+    "text": "Account balance retrieval for default account The system must retrieve the current balance using a default account when no account name is specified."
+   },
+   {
+    "id": "REQ-PFM-003",
+    "priority": "P0",
+    "evidence": false,
+    "text": "Account not found error The system must raise a ValueError when the specified account does not exist in the data source."
+   },
+   {
+    "id": "REQ-PFM-004",
+    "priority": "P0",
+    "evidence": false,
+    "text": "Withholdings retrieval per account The system must return a formatted breakdown of withholdings (federal, state, local, Social Security, Medicare, 401k) for a given account."
+   },
+   {
+    "id": "REQ-PFM-005",
+    "priority": "P0",
+    "evidence": false,
+    "text": "Withholdings retrieval for default account The system must retrieve withholdings using a default account when no account name is specified."
+   },
+   {
+    "id": "REQ-PFM-006",
+    "priority": "P0",
+    "evidence": false,
+    "text": "Withholdings not found error The system must raise a ValueError when the specified account has no withholdings records."
+   },
+   {
+    "id": "REQ-PFM-007",
+    "priority": "P0",
+    "evidence": false,
+    "text": "Stock price retrieval The system must return the current price of a named stock ticker."
+   },
+   {
+    "id": "REQ-PFM-008",
+    "priority": "P0",
+    "evidence": false,
+    "text": "Stock price ticker not found error The system must raise a ValueError when the specified ticker symbol does not exist."
+   },
+   {
+    "id": "REQ-PFM-009",
+    "priority": "P0",
+    "evidence": false,
+    "text": "Investment portfolio retrieval The system must return the complete investment portfolio for a given account, listing each holding with ticker, shares, and current price."
+   },
+   {
+    "id": "REQ-PFM-010",
+    "priority": "P0",
+    "evidence": false,
+    "text": "Investment portfolio for default account The system must retrieve the investment portfolio using a default account when no account name is specified."
+   },
+   {
+    "id": "REQ-PFM-011",
+    "priority": "P0",
+    "evidence": false,
+    "text": "Investment portfolio not found error The system must raise a ValueError when the specified account has no investment portfolio."
+   },
+   {
+    "id": "REQ-PFM-012",
+    "priority": "P0",
+    "evidence": false,
+    "text": "Income records retrieval The system must return all income records (type, amount, frequency) for a given account."
+   },
+   {
+    "id": "REQ-PFM-013",
+    "priority": "P0",
+    "evidence": false,
+    "text": "Income records for default account The system must retrieve income records using a default account when no account name is specified."
+   },
+   {
+    "id": "REQ-PFM-014",
+    "priority": "P0",
+    "evidence": false,
+    "text": "Income records not found error The system must raise a ValueError when the specified account has no income records."
+   },
+   {
+    "id": "REQ-PFM-015",
+    "priority": "P0",
+    "evidence": false,
+    "text": "Expense records retrieval The system must return all expense records (type, amount, frequency) for a given account."
+   },
+   {
+    "id": "REQ-PFM-016",
+    "priority": "P0",
+    "evidence": false,
+    "text": "Expense records for default account The system must retrieve expense records using a default account when no account name is specified."
+   },
+   {
+    "id": "REQ-PFM-017",
+    "priority": "P0",
+    "evidence": false,
+    "text": "Expense records not found error The system must raise a ValueError when the specified account has no expense records."
+   },
+   {
+    "id": "REQ-PFM-018",
+    "priority": "P0",
+    "evidence": false,
+    "text": "Deductions retrieval The system must return a formatted list of deductions (type, amount, frequency) for a given account."
+   },
+   {
+    "id": "REQ-PFM-019",
+    "priority": "P0",
+    "evidence": false,
+    "text": "Deductions for default account The system must retrieve deductions using a default account when no account name is specified."
+   },
+   {
+    "id": "REQ-PFM-020",
+    "priority": "P0",
+    "evidence": false,
+    "text": "Deductions not found error The system must raise a ValueError when the specified account has no deductions records."
+   },
+   {
+    "id": "REQ-PFM-021",
+    "priority": "P0",
+    "evidence": false,
+    "text": "Data seeding on first access The system must seed initial financial data files for an account on first access if they do not already exist."
+   },
+   {
+    "id": "REQ-PFM-022",
+    "priority": "P0",
+    "evidence": false,
+    "text": "Configuration via CLI arguments and environment variables The system must accept configuration for data directory, port, transport type, and allowed users via CLI arguments with fallback to environment variables."
+   },
+   {
+    "id": "REQ-PFM-023",
+    "priority": "P0",
+    "evidence": false,
+    "text": "MCP SSE transport mode The system must support SSE (Server-Sent Events) transport mode for HTTP-based MCP communication."
+   },
+   {
+    "id": "REQ-PFM-024",
+    "priority": "P0",
+    "evidence": false,
+    "text": "MCP stdio transport mode The system must support stdio transport mode for CLI-based MCP communication."
+   },
+   {
+    "id": "REQ-PFM-025",
+    "priority": "P0",
+    "evidence": false,
+    "text": "Tool registration in MCP server The system must register all six finance tools (balance, withholdings, stock_price, investment_portfolio, income, expenses, deductions) as MCP tools."
+   },
+   {
+    "id": "REQ-PFM-026",
+    "priority": "P1",
+    "evidence": false,
+    "text": "Negative balances accepted The system must accept and return negative balance values."
+   },
+   {
+    "id": "REQ-PFM-027",
+    "priority": "P0",
+    "evidence": false,
+    "text": "README promises: CLI personal finance assistant via MCP The system must act as a personal finance CLI assistant exposing account data through the Model Context Protocol."
+   },
+   {
+    "id": "REQ-PFM-028",
+    "priority": "P2",
+    "evidence": false,
+    "text": "Configuration port range validation The system should validate that the port argument falls within the valid range of 1024-65535."
+   },
+   {
+    "id": "REQ-PFM-029",
+    "priority": "P0",
+    "evidence": false,
+    "text": "Fitness score computation The system must compute and return a fitness score based on financial data (balance, income, expenses, withholdings) for a given account."
+   },
+   {
+    "id": "REQ-PFM-030",
+    "priority": "P0",
+    "evidence": false,
+    "text": "Fitness score for default account The system must compute the fitness score using a default account when no account name is specified."
+   },
+   {
+    "id": "REQ-PFM-031",
+    "priority": "P0",
+    "evidence": false,
+    "text": "Fitness score account not found error The system must raise a ValueError when the specified account is not found in the data for fitness computation."
+   },
+   {
+    "id": "REQ-PFM-032",
+    "priority": "P0",
+    "evidence": false,
+    "text": "Monthly spending breakdown The system must return a monthly spending breakdown (buildup) for a given account showing expenses categorized by type."
+   },
+   {
+    "id": "REQ-PFM-033",
+    "priority": "P0",
+    "evidence": false,
+    "text": "Monthly spending breakdown for default account The system must compute the monthly spending breakdown using a default account when no account name is specified."
+   },
+   {
+    "id": "REQ-PFM-034",
+    "priority": "P0",
+    "evidence": false,
+    "text": "Monthly spending breakdown account not found error The system must raise a ValueError when the specified account has no balances or expenses data for the monthly breakdown."
+   },
+   {
+    "id": "REQ-PFM-035",
+    "priority": "P2",
+    "evidence": false,
+    "text": "Data file backup before overwrite The system should create a backup of existing data files before overwriting them with seed data."
+   }
+  ],
+  "reviews": {
+   "design": [],
+   "code": []
+  },
+  "inventory": {
+   "files": 11,
+   "tests": 137,
+   "byLevel": {
+    "Unit": 137,
+    "Integration": 0,
+    "E2E": 0
+   },
+   "existing": 11,
+   "generated": 0,
+   "manual": 0,
+   "markedNotInManifest": [],
+   "truncated": false
+  },
+  "scenarios": [],
+  "skippedLevels": [],
+  "declaredScenarios": null,
+  "cases": [],
+  "tests": [],
+  "results": {},
+  "provenance": {
+   "design": null,
+   "code": null,
+   "designAudit": null,
+   "codeAudit": null
+  },
+  "problems": []
+ }
+}

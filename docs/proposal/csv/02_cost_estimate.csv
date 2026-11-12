@@ -1,0 +1,27 @@
+﻿"Monthly cost estimate, East US 2 (standard deployment)"
+Unit prices link to 'Price Evidence' (retrieved 2026-11-12 07:43 UTC); quantities link to 'Assumptions'. Excludes taxes and model tokens.
+
+Resource,Meter,USD per unit,INR per unit,Quantity,Unit,USD per month,INR per month,Note
+"App Service plan B1, Linux (API + UI)",B1,0.017,1.6189,730,hours,12.41,1181.797,"Billed while the plan exists, even if both apps are stopped."
+PostgreSQL Flexible Server B1ms compute,B1MS,0.017,1.6189,264,hours,4.488,427.3896,Billed only while the server runs.
+PostgreSQL storage,Storage Data Stored,0.115,10.9513,32,GB,3.68,350.4416,Billed while stopped too.
+PostgreSQL backup above provisioned size,Backup Storage LRS,0.095,9.0467,0,GB,0,0,Usually 0.
+"Blob Storage Hot LRS, data",Hot LRS Data Stored,0.0184,1.7522,2,GB,0.0368,3.5044,downloads container (desktop installers).
+Blob Storage writes,Hot LRS Write Operations,0.05,4.7614,0.01,"x 10,000",0.0005,0.0476
+Blob Storage reads,Hot Read Operations,0.004,0.3809,0.1,"x 10,000",0.0004,0.0381
+Key Vault Standard,Operations,0.03,2.8569,0.01,"x 10,000",0.0003,0.0286,Secrets read at API start.
+Azure Automation (start/stop schedule),"Basic Runtime, above 500 min",0.002,0.1905,0,minutes,0,0,First 500 minutes a month free.
+Outbound data (internet egress),"Data Transfer Out, above 100 GB",0.087,8.2849,0,GB,0,0,First 100 GB a month free.
+Application Insights (optional),"Log ingestion, above 5 GB",2.76,262.8314,0,GB,0,0,First 5 GB a month free.
+Total per month,,,,,,20.616,1963.2469,Owner cap: USD 25 a month.
+Per year,,,,,,247.392,23558.9625
+Within the USD 25 cap?,,,,,,Yes
+Per person per month,,,,,,4.1232,392.6494,Divided by 'People using the web app'.
+
+"Options compared (same storage, Blob and Key Vault lines)"
+Option,Plan,USD plan,USD database,USD other,,USD per month,INR per month,Within cap?
+Standard: B1 + PostgreSQL 12 h weekdays (recommended),B1 / B1ms,12.41,4.488,3.718,,20.616,1963.2469,Yes
+Lower: B1 + PostgreSQL 8 h weekdays,B1 / B1ms,12.41,2.992,3.718,,19.12,1820.7837,Yes
+Always on: B1 + PostgreSQL 24 x 7,B1 / B1ms,12.41,12.41,3.718,,28.538,2717.6543,No (needs owner's yes)
+Upgrade: B2 plan + PostgreSQL 12 h weekdays,B2 / B1ms,24.82,4.488,3.718,,33.026,3145.0439,No (needs owner's yes)
+Upgrade: P0v3 plan + PostgreSQL B2s 24 x 7,P0v3 / B2s,56.575,49.64,3.718,,109.933,10468.7943,No (needs owner's yes)

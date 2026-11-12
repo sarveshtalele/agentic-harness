@@ -1,0 +1,151 @@
+{
+  "_meta": {
+    "doc_id": "01-discovery/architecture",
+    "created_at": "2026-11-12T11:43:15+05:30",
+    "created_by": "agentic-qe v1.6.0",
+    "mode": "brownfield",
+    "source_commit": "aff44ea"
+  },
+  "doc_id": "01-discovery/architecture",
+  "created_at": "2025-07-18T00:00:00Z",
+  "created_by": "agentic-qe-harness",
+  "mode": "brownfield",
+  "source_commit": "aff44ea06f",
+  "app_name": "personal-finance-mcp",
+  "architecture_type": "MCP Server",
+  "languages": {
+    "Python": 38,
+    "JavaScript": 15,
+    "CSS": 1
+  },
+  "frameworks": [],
+  "test_runners": [
+    "pytest"
+  ],
+  "total_files": 88,
+  "test_files": 12,
+  "entrypoints": [
+    {
+      "path": "src/finance.py",
+      "language": "python",
+      "type": "MCP tool definitions via @mcp.tool() decorators"
+    }
+  ],
+  "mcp_tools": [
+    {
+      "name": "view_account",
+      "description": "View details for an account",
+      "parameters": {
+        "account_id": "str (required)"
+      }
+    },
+    {
+      "name": "departments",
+      "description": "List all departments",
+      "parameters": {}
+    },
+    {
+      "name": "accounts",
+      "description": "List transactions",
+      "parameters": {
+        "account_id": "str (optional)",
+        "department_id": "str (optional)"
+      }
+    },
+    {
+      "name": "employees",
+      "description": "List employees",
+      "parameters": {
+        "department_id": "str (optional)"
+      }
+    },
+    {
+      "name": "salary_advance",
+      "description": "Request a salary advance",
+      "parameters": {
+        "employee_id": "str (required)",
+        "amount": "float (required)",
+        "reason": "str (required)"
+      }
+    },
+    {
+      "name": "budgets",
+      "description": "List all budgets",
+      "parameters": {}
+    },
+    {
+      "name": "budget",
+      "description": "View a specific budget",
+      "parameters": {
+        "budget_id": "str (required)"
+      }
+    },
+    {
+      "name": "spending",
+      "description": "View spending",
+      "parameters": {
+        "budget_id": "str (required)"
+      }
+    },
+    {
+      "name": "spending_by_category",
+      "description": "View spending by category",
+      "parameters": {
+        "budget_id": "str (required)"
+      }
+    },
+    {
+      "name": "retire",
+      "description": "View retirement projection",
+      "parameters": {
+        "employee_id": "str (required)",
+        "current_age": "int (optional)",
+        "retirement_age": "int (optional)",
+        "monthly_contribution": "float (optional)",
+        "current_savings": "float (optional)"
+      }
+    },
+    {
+      "name": "financial_health",
+      "description": "Assess financial health",
+      "parameters": {
+        "employee_id": "str (required)"
+      }
+    },
+    {
+      "name": "update_profile",
+      "description": "Update profile info",
+      "parameters": {
+        "employee_id": "str (required)",
+        "field": "str (required)",
+        "value": "str (required)"
+      }
+    }
+  ],
+  "existing_tests": [
+    "src/test_departments.py",
+    "src/test_accounts.py",
+    "src/test_employees.py",
+    "src/test_salary_advance.py",
+    "src/test_budgets.py",
+    "src/test_budget.py",
+    "src/test_spending.py",
+    "src/test_spending_by_category.py",
+    "src/test_retire.py",
+    "src/test_financial_health.py",
+    "src/test_view_account.py",
+    "src/test_update_profile.py"
+  ],
+  "coverage_gaps": [],
+  "ci_workflows": [],
+  "package_managers": [
+    "python"
+  ],
+  "observations": [
+    "Brownfield project with full source code and 12 existing test files (regression baseline)",
+    "MCP protocol server exposing 12 tools via @mcp.tool() decorators",
+    "pytest is the only test framework detected (no JS test runner despite 15 JS files)",
+    "No CI workflow files detected",
+    "Every MCP tool has a corresponding test file — 1:1 coverage by tool name"
+  ]
+}

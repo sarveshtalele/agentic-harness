@@ -71,37 +71,40 @@ The deployment runs on one App Service plan with two web apps, plus PostgreSQL, 
 
 ## 2. Monthly cost (East US 2)
 
-Prices are pay-as-you-go, in US dollars, for 730 hours a month. They were read from the Azure Retail Prices API (`prices.azure.com`) on **2026-11-12**; the PostgreSQL storage price was read on 2026-11-11. Prices change, so check them before you create anything (the command is at the end of this section).
+Prices are pay-as-you-go for 730 hours a month, in US dollars and Indian rupees. Both price lists were read live from the Azure Retail Prices API (`prices.azure.com`, `currencyCode=USD` and `currencyCode=INR`) on **2026-11-12 at 07:43 UTC**. They **exclude taxes**: for example, 18% GST applies when you are billed in India. Prices change, so check them before you create anything (the command is at the end of this section).
+
+The proposal workbook `docs/proposal/Agentic_QE_Azure_Proposal.xlsx` has the same figures as live formulas. Its sheets are: cost per line, assumptions you can change, the raw API rows, architecture, deployment steps, UI guide, and review gaps. The same sheets are also saved as plain CSVs in `docs/proposal/csv/`.
 
 ### The standard deployment: under the $25 cap
 
-PostgreSQL compute is billed only while the server runs. The standard stops it outside working hours: it runs 12 hours a day on 22 weekdays, which is 264 hours a month (section 13).
+PostgreSQL compute is billed only while the server runs. The standard stops it outside working hours: it runs 12 hours a day on 22 weekdays, which is 264 hours a month (section 13). Its storage is still billed while it is stopped.
 
-| Resource | Meter | Price | Per month |
-|---|---|---|---|
-| App Service plan B1, Linux (both web apps share it) | B1 | $0.017 an hour | **$12.41** |
-| PostgreSQL B1ms compute, 264 hours | B1MS | $0.017 an hour | **$4.49** |
-| PostgreSQL storage, 32 GiB | Storage Data Stored | $0.115 per GB a month | **$3.68** |
-| PostgreSQL backups, 7 days | Backup Storage LRS | Included up to the provisioned size | **$0** |
-| Blob Storage, Hot LRS (installers, about 2 GB) | Hot LRS Data Stored | $0.0184 per GB a month; writes $0.05 and reads $0.004 per 10,000 | **under $0.10** |
-| Key Vault Standard | Operations | $0.03 per 10,000 (the API reads 3 secrets at each start) | **under $0.01** |
-| Azure Automation (the start and stop jobs) | Basic Runtime | The first 500 minutes a month are free; about 44 one-minute jobs are used | **$0** |
-| **Total** | | | **about $20.70** |
+| Resource | Meter | Price (USD / INR) | Per month (USD) | Per month (INR) |
+|---|---|---|---|---|
+| App Service plan B1, Linux (both web apps share it) | B1 | $0.017 / ₹1.6189 an hour | **$12.41** | **₹1,181.80** |
+| PostgreSQL B1ms compute, 264 hours | B1MS | $0.017 / ₹1.6189 an hour | **$4.49** | **₹427.39** |
+| PostgreSQL storage, 32 GiB | Storage Data Stored | $0.115 / ₹10.9513 per GB a month | **$3.68** | **₹350.44** |
+| PostgreSQL backups, 7 days | Backup Storage LRS | Included up to the provisioned size; above it $0.095 / ₹9.0467 per GB | **$0** | **₹0** |
+| Blob Storage, Hot LRS (installers, about 2 GB) | Hot LRS Data Stored, writes, reads | $0.0184 / ₹1.7522 per GB a month; writes $0.05 / ₹4.7614 and reads $0.004 / ₹0.3809 per 10,000 | **$0.04** | **₹3.59** |
+| Key Vault Standard | Operations | $0.03 / ₹2.8569 per 10,000 (the API reads 3 secrets at each start) | **under $0.01** | **₹0.03** |
+| Azure Automation (the start and stop jobs) | Basic Runtime | First 500 minutes a month free, then $0.002 / ₹0.1905 a minute; about 44 minutes are used | **$0** | **₹0** |
+| **Total** | | | **$20.62** | **₹1,963.25** |
+
+That is $247.39 (₹23,558.96) a year before taxes.
 
 ### Other choices
 
-| Choice | Per month | Within the $25 cap? |
-|---|---|---|
-| PostgreSQL always on (730 hours): $12.41 + $12.41 + $3.68 + $0.10 | about $28.60 | No |
-| PostgreSQL 8 hours on weekdays (176 hours, $2.99) | about $19.20 | Yes |
-| Upgrade: App Service plan **B2** (2 cores, 3.5 GB), $0.034 an hour | $24.82 for the plan | No, needs the owner's yes |
-| Upgrade: App Service plan **P0v3**, $0.0775 an hour | $56.58 for the plan | No, needs the owner's yes |
-| Upgrade: PostgreSQL **B2s**, $0.068 an hour, always on | $49.64 for compute | No, needs the owner's yes |
+| Choice | Per month (USD) | Per month (INR) | Within the $25 cap? |
+|---|---|---|---|
+| PostgreSQL 8 hours on weekdays (176 hours) | $19.12 | ₹1,820.78 | Yes |
+| PostgreSQL always on (730 hours) | $28.54 | ₹2,717.65 | No |
+| Upgrade: App Service plan **B2** (2 cores, 3.5 GB) at $0.034 / ₹3.2378 an hour, PostgreSQL 12 hours on weekdays | $33.03 | ₹3,145.04 | No, needs the owner's yes |
+| Upgrade: App Service plan **P0v3** at $0.0775 / ₹7.3802 an hour, PostgreSQL **B2s** at $0.068 / ₹6.4756 an hour, always on | $109.93 | ₹10,468.79 | No, needs the owner's yes |
 
 ### Costs that depend on use
 
-- **Outbound data.** The first 100 GB a month are free. After that, $0.087 per GB (Microsoft network routing). A desktop installer download is 160 to 760 MB, so the downloads count here.
-- **Application Insights** (optional). The first 5 GB of logs a month are free. After that, $2.76 per GB ingested.
+- **Outbound data.** The first 100 GB a month are free. After that, $0.087 (₹8.2849) per GB with Microsoft network routing. A desktop installer download is 164 to 195 MB (release v0.1.0), so about 500 downloads a month stay inside the free 100 GB.
+- **Application Insights** (optional). The first 5 GB of logs a month are free. After that, $2.76 (₹262.83) per GB ingested.
 - **Model tokens** are billed by your model provider, not by Azure. The **Usage** page limits tokens per person and model.
 
 **Two things that do not save money:**

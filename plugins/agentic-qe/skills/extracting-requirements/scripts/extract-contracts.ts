@@ -46,7 +46,10 @@ export function quoteInSource(root: string, req: { sourceFile: string; evidenceQ
 if (isCli) {
   const [file, flag, root] = process.argv.slice(2);
   if (!file) { console.error("usage: node extract-contracts.ts <requirements.json> [--root <repo>]"); process.exit(2); }
-  const reqs: Requirement[] = JSON.parse(readFileSync(file, "utf-8"));
+  const doc = JSON.parse(readFileSync(file, "utf-8"));
+  // requirements.json is {"requirements": [...]}; the rules' snake_case names are read too
+  const reqs: Requirement[] = (Array.isArray(doc) ? doc : doc.requirements ?? []).map((r: any) => ({
+    ...r, sourceFile: r.sourceFile ?? r.source_file, lineNumber: r.lineNumber ?? r.line_number, evidenceQuote: r.evidenceQuote ?? r.quote }));
   const rejected: { id: string; error: string }[] = [];
   let accepted = 0;
   for (const r of reqs) {

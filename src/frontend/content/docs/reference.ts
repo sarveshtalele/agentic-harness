@@ -86,10 +86,10 @@ Put these in \`.env\`, or in Azure's environment variables. They keep the \`ATLA
       {
         slug: "azure",
         title: "Deploy to Azure",
-        summary: "Run on App Service, PostgreSQL, Blob and Key Vault for about $20.70 a month.",
+        summary: "Run on App Service, PostgreSQL, Blob and Key Vault for about $20.62 (₹1,963) a month.",
         body: `## Cost (East US 2, under the $25 cap)
 
-One Linux App Service plan B1 holds both web apps ($12.41 a month). PostgreSQL Flexible Server B1ms runs 12 hours on weekdays ($4.49 compute, $3.68 for 32 GiB storage). Blob Storage and Key Vault cost under $0.11. The total is about $20.70 a month; always on, it is about $28.60. Prices are pay-as-you-go from Azure's retail prices on 12 November 2026. Model tokens are extra.
+One Linux App Service plan B1 holds both web apps ($12.41 a month). PostgreSQL Flexible Server B1ms runs 12 hours on weekdays ($4.49 compute, $3.68 for 32 GiB storage). Blob Storage and Key Vault cost under $0.11. The total is about $20.62 (₹1,963) a month before taxes; always on, it is about $28.54 (₹2,718). Prices are pay-as-you-go from Azure's retail prices on 12 November 2026. Model tokens are extra.
 
 ## Steps
 

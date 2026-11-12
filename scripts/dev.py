@@ -10,6 +10,7 @@
   python scripts/dev.py test       unit and integration tests (no network, no model)
   python scripts/dev.py smoke      browser smoke test on its own ports with no model (used by CI)
   python scripts/dev.py e2e        Playwright end-to-end tests against real servers and the real model
+  python scripts/dev.py live [tests] live tests with the model from your local store (key never printed)
   python scripts/dev.py evidence   run tests and smoke (add --e2e for end to end) into JUnit, then write the evidence report
   python scripts/dev.py env-check --env local|azure   report missing or weak settings (no values printed)
   python scripts/dev.py azure-local  run the two Azure zips locally in the web profile (add --check to check and stop)
@@ -181,6 +182,7 @@ COMMANDS = {
     "test": lambda: run([str(PYTHON), "-m", "pytest", "tests", "-q", "-m", "not e2e and not live and not smoke"]),
     "smoke": lambda: run([str(PYTHON), "-m", "pytest", "tests/e2e/test_smoke.py", "-v", "-m", "smoke"]),
     "e2e": lambda: run([str(PYTHON), "-m", "pytest", "tests/e2e", "-v", "-m", "e2e", "-s"]),
+    "live": lambda: run([str(PYTHON), str(ROOT / "scripts" / "run_live.py"), *sys.argv[2:]]),  # real model from your local store
 }
 
 if __name__ == "__main__":
