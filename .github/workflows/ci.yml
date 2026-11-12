@@ -5,7 +5,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-24.04, macos-latest, windows-latest]  # ubuntu-latest moved to the 26 beta, whose apt mirror failed
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -34,7 +34,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-24.04, macos-latest, windows-latest]  # ubuntu-latest moved to the 26 beta, whose apt mirror failed
     runs-on: ${{ matrix.os }}
     timeout-minutes: 25  # on Windows, installing the browser and npm packages alone takes about 8 minutes
     steps:

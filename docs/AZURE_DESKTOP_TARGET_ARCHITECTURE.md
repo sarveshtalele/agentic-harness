@@ -183,6 +183,7 @@ The app creates its tables on first start (`backend/migrations/postgres/`, appli
    | `ATLAS_INSTALL_EVALS` | `1` to install RAGAS on first start (optional; a few minutes more) |
    | `WEBSITES_ENABLE_APP_SERVICE_STORAGE` | `true` |
    | `WEBSITES_PORT` | `8000` |
+   | `SCM_DO_BUILD_DURING_DEPLOYMENT` | `false`. Kudu only unzips; `startup.py` builds the Python environment once (the `.deployment` file in the zip says the same) |
 
 5. **Deploy the zip.**
    1. Open `https://aqe-api-<unique>.scm.azurewebsites.net/ZipDeployUI` and drag `dist/azure_backend.zip` onto it.
@@ -204,7 +205,7 @@ The app creates its tables on first start (`backend/migrations/postgres/`, appli
 
    Then set:
    - **Startup Command:** `node /home/site/wwwroot/startup.js`, with **Always on** and **HTTPS Only** both On;
-   - app settings `ATLAS_BACKEND_URL=https://aqe-api-<unique>.azurewebsites.net`, `ATLAS_DOWNLOADS_URL=<the downloads container URL>`, `WEBSITES_ENABLE_APP_SERVICE_STORAGE=true` and `WEBSITES_PORT=3000`.
+   - app settings `ATLAS_BACKEND_URL=https://aqe-api-<unique>.azurewebsites.net`, `ATLAS_DOWNLOADS_URL=<the downloads container URL>`, `WEBSITES_ENABLE_APP_SERVICE_STORAGE=true`, `WEBSITES_PORT=3000` and `SCM_DO_BUILD_DURING_DEPLOYMENT=false` (`startup.js` runs `npm ci` and the build itself, on local disk).
 
    Deploy `dist/azure_frontend.zip` through `https://aqe-ui-<unique>.scm.azurewebsites.net/ZipDeployUI`, then **Restart**. **Log stream** ends with "Starting UI on port 3000".
 4. **Lock the API to the UI.**

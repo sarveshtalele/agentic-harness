@@ -58,8 +58,8 @@ az webapp config appsettings set \
     ATLAS_KEY_VAULT_URL="https://$KEY_VAULT.vault.azure.net" \
     ATLAS_ALLOWED_HOSTS="$BACKEND_APP.azurewebsites.net" \
     ATLAS_ALLOWED_ORIGINS="https://$FRONTEND_APP.azurewebsites.net" \
-    SCM_DO_BUILD_DURING_DEPLOYMENT="true" \
-    ENABLE_ORYX_BUILD="true"
+    SCM_DO_BUILD_DURING_DEPLOYMENT="false" \
+    ENABLE_ORYX_BUILD="false"
 
 # Sign-in: the admin account lives in App Settings (the package never ships .env). Asked once, sent from a private
 # temp file so the password is never on a command line.
@@ -90,7 +90,7 @@ az webapp config appsettings set \
     WEBSITES_ENABLE_APP_SERVICE_STORAGE="true" \
     ATLAS_BACKEND_URL="https://$BACKEND_APP.azurewebsites.net" \
     NEXT_TELEMETRY_DISABLED="1" \
-    SCM_DO_BUILD_DURING_DEPLOYMENT="true"
+    SCM_DO_BUILD_DURING_DEPLOYMENT="false"
 
 # Enable CORS on Backend for Frontend Origin
 az webapp cors add \

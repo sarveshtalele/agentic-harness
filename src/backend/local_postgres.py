@@ -64,6 +64,8 @@ def start(folder: Path, port: int | None = None, database: str = "agentic_qe") -
     fresh = not (data / "PG_VERSION").is_file()
     if fresh:
         folder.mkdir(parents=True, exist_ok=True)
+        if os.name == "nt" and os.environ.get("USERNAME"):  # initdb drops the Administrators group; the user itself must own the folder
+            _run([shutil.which("icacls") or "icacls", str(folder), "/grant", f"{os.environ['USERNAME']}:(OI)(CI)F", "/Q"])
         _run([binary("initdb"), "-D", str(data), "-U", USER, "--auth=trust", "-E", "UTF8", "--locale=C"])
     elif not secret.is_file():
         sys.exit(f"{data} exists but its password file {secret} is missing. Move the folder away to start a new cluster.")

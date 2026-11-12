@@ -1,2 +1,5 @@
 [config]
-SCM_DO_BUILD_DURING_DEPLOYMENT=true
+; Kudu only unzips. The startup scripts build once, themselves (startup.py: Python venv in /home/atlas/venv;
+; startup.js: npm ci + next build on local disk). An Oryx build on top would build twice and can leave only
+; output.tar.gz in wwwroot, which the startup scripts do not read.
+SCM_DO_BUILD_DURING_DEPLOYMENT=false

@@ -150,7 +150,7 @@ stages:
                       -ATLAS_DATA_DIR /home/atlas/data
                       -ATLAS_KEY_VAULT_URL https://kv-agentic-harness.vault.azure.net
                       -ATLAS_RUN_TOKEN_LIMIT 50000000
-                      -SCM_DO_BUILD_DURING_DEPLOYMENT true
+                      -SCM_DO_BUILD_DURING_DEPLOYMENT false
 
       - deployment: DeployFrontend
         displayName: 'Deploy Frontend App Service'
@@ -175,4 +175,4 @@ stages:
                     deploymentMethod: 'zipDeploy'
                     appSettings: |
                       -PORT 3000
-                      -SCM_DO_BUILD_DURING_DEPLOYMENT true
+                      -SCM_DO_BUILD_DURING_DEPLOYMENT false

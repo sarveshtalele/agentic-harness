@@ -1,0 +1,474 @@
+[
+ {
+  "seq": 3,
+  "ts": "2026-11-11T14:34:51+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "SessionStart",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/session-check.mjs\\\"\", \"decision\": \"\", \"event\": \"SessionStart\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"\"}"
+ },
+ {
+  "seq": 4,
+  "ts": "2026-11-11T14:34:51+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "UserPromptSubmit",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/approval-hook.ts\\\"\", \"decision\": \"\", \"event\": \"UserPromptSubmit\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"\"}"
+ },
+ {
+  "seq": 6,
+  "ts": "2026-11-11T14:36:13+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "UserPromptSubmit",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/approval-hook.ts\\\"\", \"decision\": \"\", \"event\": \"UserPromptSubmit\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"{\\\"hookSpecificOutput\\\":{\\\"hookEventName\\\":\\\"UserPromptSubmit\\\",\\\"additionalContext\\\":\\\"agentic-qe recorded: run started for personal-finance-mcp; Gate 0 APPROVED\\\\nGate 0 approved. Report: docs/qe/personal-finance-mcp/00-intake/gate-0-report.md\\\\nLive dashboard already running; it updates itself and the user has its link. Do not run --serve, and do not repeat the link.\\\"}}\\n\", \"tool\": \"\"}"
+ },
+ {
+  "seq": 8,
+  "ts": "2026-11-11T14:36:17+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "PreToolUse",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/guard-bash.ts\\\"\", \"decision\": \"\", \"event\": \"PreToolUse\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"Bash\"}"
+ },
+ {
+  "seq": 9,
+  "ts": "2026-11-11T14:36:17+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "PreToolUse",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/guard-bash.ts\\\"\", \"decision\": \"\", \"event\": \"PreToolUse\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"Bash\"}"
+ },
+ {
+  "seq": 11,
+  "ts": "2026-11-11T14:36:17+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "PostToolUse",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/ledger-hook.ts\\\"\", \"decision\": \"\", \"event\": \"PostToolUse\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"Bash\"}"
+ },
+ {
+  "seq": 12,
+  "ts": "2026-11-11T14:36:17+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "PostToolUse",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/ledger-hook.ts\\\"\", \"decision\": \"\", \"event\": \"PostToolUse\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"Bash\"}"
+ },
+ {
+  "seq": 14,
+  "ts": "2026-11-11T14:37:43+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "UserPromptSubmit",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/approval-hook.ts\\\"\", \"decision\": \"\", \"event\": \"UserPromptSubmit\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"\"}"
+ },
+ {
+  "seq": 16,
+  "ts": "2026-11-11T14:37:51+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "PreToolUse",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/guard-bash.ts\\\"\", \"decision\": \"\", \"event\": \"PreToolUse\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"Bash\"}"
+ },
+ {
+  "seq": 18,
+  "ts": "2026-11-11T14:37:53+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "PostToolUse",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/ledger-hook.ts\\\"\", \"decision\": \"\", \"event\": \"PostToolUse\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"Bash\"}"
+ },
+ {
+  "seq": 20,
+  "ts": "2026-11-11T14:37:57+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "UserPromptSubmit",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/approval-hook.ts\\\"\", \"decision\": \"\", \"event\": \"UserPromptSubmit\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"\"}"
+ },
+ {
+  "seq": 22,
+  "ts": "2026-11-11T14:38:02+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "PreToolUse",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/guard-bash.ts\\\"\", \"decision\": \"\", \"event\": \"PreToolUse\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"Bash\"}"
+ },
+ {
+  "seq": 24,
+  "ts": "2026-11-11T14:38:18+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "PostToolUse",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/ledger-hook.ts\\\"\", \"decision\": \"\", \"event\": \"PostToolUse\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"Bash\"}"
+ },
+ {
+  "seq": 26,
+  "ts": "2026-11-11T14:38:21+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "PreToolUse",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/guard-bash.ts\\\"\", \"decision\": \"\", \"event\": \"PreToolUse\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"Bash\"}"
+ },
+ {
+  "seq": 28,
+  "ts": "2026-11-11T14:38:23+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "PostToolUse",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/ledger-hook.ts\\\"\", \"decision\": \"\", \"event\": \"PostToolUse\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"Bash\"}"
+ },
+ {
+  "seq": 30,
+  "ts": "2026-11-11T14:38:27+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "UserPromptSubmit",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/approval-hook.ts\\\"\", \"decision\": \"\", \"event\": \"UserPromptSubmit\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"{\\\"hookSpecificOutput\\\":{\\\"hookEventName\\\":\\\"UserPromptSubmit\\\",\\\"additionalContext\\\":\\\"agentic-qe coverage for personal-finance-mcp: 0 requirements, 0 plan scenarios, 0 designed cases, 0 test files, 0 results. Gate 1 will refuse approval until these are done (docs/qe/personal-finance-mcp/coverage-map.md lists them all):\\\\n- 02-requirements/requirements.json lists no requirements\\\\nTests in the repo: 137 in 11 files (existing 11, generated 0, added by hand 0).\\\\nBefore you ask the user to approve Gate 1, run node \\\\\\\"<plugin>/skills/tracing-coverage/scripts/check-gate.ts\\\\\\\" --gate 1 --app personal-finance-mcp and show its output. While it says FAIL, do the missing work; do not ask for approval. Report counts only as that script or panel.ts --json prints them; never state numbers of your own. This command may write only its own phase's documents; the plugin refuses the rest. Never write gate reports, coverage-map, handoff, validation.json, confidence.json or audit.json yourself.\\\"}}\\n\", \"tool\": \"\"}"
+ },
+ {
+  "seq": 32,
+  "ts": "2026-11-11T14:38:46+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "PreToolUse",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/guard-bash.ts\\\"\", \"decision\": \"\", \"event\": \"PreToolUse\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"Bash\"}"
+ },
+ {
+  "seq": 33,
+  "ts": "2026-11-11T14:38:46+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "PostToolUse",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/ledger-hook.ts\\\"\", \"decision\": \"\", \"event\": \"PostToolUse\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"Bash\"}"
+ },
+ {
+  "seq": 35,
+  "ts": "2026-11-11T14:39:05+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "PreToolUse",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/guard-bash.ts\\\"\", \"decision\": \"\", \"event\": \"PreToolUse\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"Bash\"}"
+ },
+ {
+  "seq": 36,
+  "ts": "2026-11-11T14:39:06+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "PostToolUse",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/ledger-hook.ts\\\"\", \"decision\": \"\", \"event\": \"PostToolUse\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"Bash\"}"
+ },
+ {
+  "seq": 37,
+  "ts": "2026-11-11T14:39:09+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "PreToolUse",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/guard-bash.ts\\\"\", \"decision\": \"\", \"event\": \"PreToolUse\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"Bash\"}"
+ },
+ {
+  "seq": 39,
+  "ts": "2026-11-11T14:39:09+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "PostToolUse",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/ledger-hook.ts\\\"\", \"decision\": \"\", \"event\": \"PostToolUse\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"Bash\"}"
+ },
+ {
+  "seq": 40,
+  "ts": "2026-11-11T14:39:39+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "SubagentStop",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/review-capture.ts\\\"\", \"decision\": \"\", \"event\": \"SubagentStop\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"\"}"
+ },
+ {
+  "seq": 42,
+  "ts": "2026-11-11T14:39:40+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "PreToolUse",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/guard-write.ts\\\"\", \"decision\": \"ask\", \"event\": \"PreToolUse\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"agentic-qe: approve creating folder docs/qe/personal-finance-mcp/01-discovery and file summary.md?\", \"stderr\": \"\", \"stdout\": \"{\\\"hookSpecificOutput\\\":{\\\"hookEventName\\\":\\\"PreToolUse\\\",\\\"permissionDecision\\\":\\\"ask\\\",\\\"permissionDecisionReason\\\":\\\"agentic-qe: approve creating folder docs/qe/personal-finance-mcp/01-discovery and file summary.md?\\\"}}\\n\", \"tool\": \"Write\"}"
+ },
+ {
+  "seq": 43,
+  "ts": "2026-11-11T14:39:40+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "PreToolUse",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/guard-write.ts\\\"\", \"decision\": \"ask\", \"event\": \"PreToolUse\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"agentic-qe: approve creating folder docs/qe/personal-finance-mcp/01-discovery and file architecture.json?\", \"stderr\": \"\", \"stdout\": \"{\\\"hookSpecificOutput\\\":{\\\"hookEventName\\\":\\\"PreToolUse\\\",\\\"permissionDecision\\\":\\\"ask\\\",\\\"permissionDecisionReason\\\":\\\"agentic-qe: approve creating folder docs/qe/personal-finance-mcp/01-discovery and file architecture.json?\\\"}}\\n\", \"tool\": \"Write\"}"
+ },
+ {
+  "seq": 44,
+  "ts": "2026-11-11T14:39:41+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "PostToolUse",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/stamp-metadata.ts\\\"\", \"decision\": \"\", \"event\": \"PostToolUse\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"Write\"}"
+ },
+ {
+  "seq": 45,
+  "ts": "2026-11-11T14:39:41+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "PostToolUse",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/ledger-hook.ts\\\"\", \"decision\": \"\", \"event\": \"PostToolUse\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"Write\"}"
+ },
+ {
+  "seq": 46,
+  "ts": "2026-11-11T14:39:41+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "PostToolUse",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/stamp-metadata.ts\\\"\", \"decision\": \"\", \"event\": \"PostToolUse\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"Write\"}"
+ },
+ {
+  "seq": 47,
+  "ts": "2026-11-11T14:39:41+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "PostToolUse",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/ledger-hook.ts\\\"\", \"decision\": \"\", \"event\": \"PostToolUse\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"Write\"}"
+ },
+ {
+  "seq": 49,
+  "ts": "2026-11-11T14:40:08+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "UserPromptSubmit",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/approval-hook.ts\\\"\", \"decision\": \"\", \"event\": \"UserPromptSubmit\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"\"}"
+ },
+ {
+  "seq": 51,
+  "ts": "2026-11-11T14:41:32+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "UserPromptSubmit",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/approval-hook.ts\\\"\", \"decision\": \"\", \"event\": \"UserPromptSubmit\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"\"}"
+ },
+ {
+  "seq": 53,
+  "ts": "2026-11-11T14:43:23+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "UserPromptSubmit",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/approval-hook.ts\\\"\", \"decision\": \"\", \"event\": \"UserPromptSubmit\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"\"}"
+ },
+ {
+  "seq": 55,
+  "ts": "2026-11-11T14:45:24+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "UserPromptSubmit",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/approval-hook.ts\\\"\", \"decision\": \"\", \"event\": \"UserPromptSubmit\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"\"}"
+ },
+ {
+  "seq": 57,
+  "ts": "2026-11-11T14:45:33+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "PreToolUse",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/guard-bash.ts\\\"\", \"decision\": \"ask\", \"event\": \"PreToolUse\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"agentic-qe: approve? python3 -c code that deletes, writes or runs processes, which the guard cannot inspect.\", \"stderr\": \"\", \"stdout\": \"{\\\"hookSpecificOutput\\\":{\\\"hookEventName\\\":\\\"PreToolUse\\\",\\\"permissionDecision\\\":\\\"ask\\\",\\\"permissionDecisionReason\\\":\\\"agentic-qe: approve? python3 -c code that deletes, writes or runs processes, which the guard cannot inspect.\\\"}}\\n\", \"tool\": \"Bash\"}"
+ },
+ {
+  "seq": 59,
+  "ts": "2026-11-11T14:45:34+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "PostToolUse",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/ledger-hook.ts\\\"\", \"decision\": \"\", \"event\": \"PostToolUse\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"Bash\"}"
+ },
+ {
+  "seq": 61,
+  "ts": "2026-11-11T14:46:58+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "UserPromptSubmit",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/approval-hook.ts\\\"\", \"decision\": \"\", \"event\": \"UserPromptSubmit\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"{\\\"hookSpecificOutput\\\":{\\\"hookEventName\\\":\\\"UserPromptSubmit\\\",\\\"additionalContext\\\":\\\"agentic-qe coverage for personal-finance-mcp: 0 requirements, 0 plan scenarios, 0 designed cases, 0 test files, 0 results. Gate 1 will refuse approval until these are done (docs/qe/personal-finance-mcp/coverage-map.md lists them all):\\\\n- 02-requirements/requirements.json lists no requirements\\\\nTests in the repo: 137 in 11 files (existing 11, generated 0, added by hand 0).\\\\nBefore you ask the user to approve Gate 1, run node \\\\\\\"<plugin>/skills/tracing-coverage/scripts/check-gate.ts\\\\\\\" --gate 1 --app personal-finance-mcp and show its output. While it says FAIL, do the missing work; do not ask for approval. Report counts only as that script or panel.ts --json prints them; never state numbers of your own. This command may write only its own phase's documents; the plugin refuses the rest. Never write gate reports, coverage-map, handoff, validation.json, confidence.json or audit.json yourself.\\\"}}\\n\", \"tool\": \"\"}"
+ },
+ {
+  "seq": 63,
+  "ts": "2026-11-11T14:48:06+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "PreToolUse",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/guard-write.ts\\\"\", \"decision\": \"ask\", \"event\": \"PreToolUse\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"agentic-qe: approve creating folder docs/qe/personal-finance-mcp/02-requirements and file requirements.md?\", \"stderr\": \"\", \"stdout\": \"{\\\"hookSpecificOutput\\\":{\\\"hookEventName\\\":\\\"PreToolUse\\\",\\\"permissionDecision\\\":\\\"ask\\\",\\\"permissionDecisionReason\\\":\\\"agentic-qe: approve creating folder docs/qe/personal-finance-mcp/02-requirements and file requirements.md?\\\"}}\\n\", \"tool\": \"Write\"}"
+ },
+ {
+  "seq": 64,
+  "ts": "2026-11-11T14:48:06+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "PreToolUse",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/guard-write.ts\\\"\", \"decision\": \"ask\", \"event\": \"PreToolUse\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"agentic-qe: approve creating folder docs/qe/personal-finance-mcp/02-requirements and file requirements.json?\", \"stderr\": \"\", \"stdout\": \"{\\\"hookSpecificOutput\\\":{\\\"hookEventName\\\":\\\"PreToolUse\\\",\\\"permissionDecision\\\":\\\"ask\\\",\\\"permissionDecisionReason\\\":\\\"agentic-qe: approve creating folder docs/qe/personal-finance-mcp/02-requirements and file requirements.json?\\\"}}\\n\", \"tool\": \"Write\"}"
+ },
+ {
+  "seq": 65,
+  "ts": "2026-11-11T14:48:07+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "PostToolUse",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/stamp-metadata.ts\\\"\", \"decision\": \"\", \"event\": \"PostToolUse\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"Write\"}"
+ },
+ {
+  "seq": 66,
+  "ts": "2026-11-11T14:48:07+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "PostToolUse",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/ledger-hook.ts\\\"\", \"decision\": \"\", \"event\": \"PostToolUse\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"Write\"}"
+ },
+ {
+  "seq": 67,
+  "ts": "2026-11-11T14:48:07+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "PostToolUse",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/stamp-metadata.ts\\\"\", \"decision\": \"\", \"event\": \"PostToolUse\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"Write\"}"
+ },
+ {
+  "seq": 68,
+  "ts": "2026-11-11T14:48:07+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "PostToolUse",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/ledger-hook.ts\\\"\", \"decision\": \"\", \"event\": \"PostToolUse\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"Write\"}"
+ },
+ {
+  "seq": 70,
+  "ts": "2026-11-11T14:48:38+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "UserPromptSubmit",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/approval-hook.ts\\\"\", \"decision\": \"\", \"event\": \"UserPromptSubmit\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"\"}"
+ },
+ {
+  "seq": 72,
+  "ts": "2026-11-11T14:50:58+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "UserPromptSubmit",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/approval-hook.ts\\\"\", \"decision\": \"\", \"event\": \"UserPromptSubmit\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"\"}"
+ },
+ {
+  "seq": 74,
+  "ts": "2026-11-11T14:52:48+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "UserPromptSubmit",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/approval-hook.ts\\\"\", \"decision\": \"\", \"event\": \"UserPromptSubmit\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"\"}"
+ },
+ {
+  "seq": 76,
+  "ts": "2026-11-11T14:54:36+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "UserPromptSubmit",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/approval-hook.ts\\\"\", \"decision\": \"\", \"event\": \"UserPromptSubmit\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"\"}"
+ },
+ {
+  "seq": 78,
+  "ts": "2026-11-11T14:56:23+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "UserPromptSubmit",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/approval-hook.ts\\\"\", \"decision\": \"\", \"event\": \"UserPromptSubmit\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"{\\\"hookSpecificOutput\\\":{\\\"hookEventName\\\":\\\"UserPromptSubmit\\\",\\\"additionalContext\\\":\\\"Nothing recorded: Gate 1 is not complete. 1 gap(s):\\\\n- 02-requirements/requirements.json lists no requirements\\\\nFix them and approve again, or accept them by name: approve gate 1 with gaps: <reason>. docs/qe/personal-finance-mcp/coverage-map.md and validation.json list every row.\\\"}}\\n\", \"tool\": \"\"}"
+ },
+ {
+  "seq": 79,
+  "ts": "2026-11-11T14:57:16+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "SubagentStop",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/review-capture.ts\\\"\", \"decision\": \"\", \"event\": \"SubagentStop\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"\"}"
+ },
+ {
+  "seq": 81,
+  "ts": "2026-11-11T14:58:18+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "UserPromptSubmit",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/approval-hook.ts\\\"\", \"decision\": \"\", \"event\": \"UserPromptSubmit\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"\"}"
+ },
+ {
+  "seq": 83,
+  "ts": "2026-11-11T14:58:27+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "PreToolUse",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/guard-bash.ts\\\"\", \"decision\": \"\", \"event\": \"PreToolUse\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"Bash\"}"
+ },
+ {
+  "seq": 85,
+  "ts": "2026-11-11T14:58:28+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "PostToolUse",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/ledger-hook.ts\\\"\", \"decision\": \"\", \"event\": \"PostToolUse\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"Bash\"}"
+ },
+ {
+  "seq": 87,
+  "ts": "2026-11-11T15:00:12+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "UserPromptSubmit",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/approval-hook.ts\\\"\", \"decision\": \"\", \"event\": \"UserPromptSubmit\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"{\\\"hookSpecificOutput\\\":{\\\"hookEventName\\\":\\\"UserPromptSubmit\\\",\\\"additionalContext\\\":\\\"Nothing recorded: Gate 1 is not complete. 1 gap(s):\\\\n- 02-requirements/requirements.json lists no requirements\\\\nFix them and approve again, or accept them by name: approve gate 1 with gaps: <reason>. docs/qe/personal-finance-mcp/coverage-map.md and validation.json list every row.\\\"}}\\n\", \"tool\": \"\"}"
+ },
+ {
+  "seq": 89,
+  "ts": "2026-11-11T15:01:55+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "UserPromptSubmit",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/approval-hook.ts\\\"\", \"decision\": \"\", \"event\": \"UserPromptSubmit\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"\"}"
+ },
+ {
+  "seq": 91,
+  "ts": "2026-11-11T15:02:06+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "PreToolUse",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/guard-bash.ts\\\"\", \"decision\": \"\", \"event\": \"PreToolUse\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"Bash\"}"
+ },
+ {
+  "seq": 93,
+  "ts": "2026-11-11T15:02:07+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "PostToolUse",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/ledger-hook.ts\\\"\", \"decision\": \"\", \"event\": \"PostToolUse\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"Bash\"}"
+ },
+ {
+  "seq": 95,
+  "ts": "2026-11-11T15:03:52+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "UserPromptSubmit",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/approval-hook.ts\\\"\", \"decision\": \"\", \"event\": \"UserPromptSubmit\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"{\\\"hookSpecificOutput\\\":{\\\"hookEventName\\\":\\\"UserPromptSubmit\\\",\\\"additionalContext\\\":\\\"Nothing recorded: Gate 1 is not complete. 1 gap(s):\\\\n- 02-requirements/requirements.json lists no requirements\\\\nFix them and approve again, or accept them by name: approve gate 1 with gaps: <reason>. docs/qe/personal-finance-mcp/coverage-map.md and validation.json list every row.\\\"}}\\n\", \"tool\": \"\"}"
+ },
+ {
+  "seq": 97,
+  "ts": "2026-11-11T15:05:50+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "UserPromptSubmit",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/approval-hook.ts\\\"\", \"decision\": \"\", \"event\": \"UserPromptSubmit\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"\"}"
+ },
+ {
+  "seq": 99,
+  "ts": "2026-11-11T15:06:03+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "PreToolUse",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/guard-bash.ts\\\"\", \"decision\": \"\", \"event\": \"PreToolUse\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"Bash\"}"
+ },
+ {
+  "seq": 101,
+  "ts": "2026-11-11T15:06:03+00:00",
+  "actor": "plugin:agentic-qe",
+  "action": "plugin.hook",
+  "target": "PostToolUse",
+  "data": "{\"blocked\": false, \"command\": \"node \\\"${CLAUDE_PLUGIN_ROOT}/hooks/src/ledger-hook.ts\\\"\", \"decision\": \"\", \"event\": \"PostToolUse\", \"exit_code\": 0, \"plugin\": \"agentic-qe\", \"reason\": \"\", \"stderr\": \"\", \"stdout\": \"\", \"tool\": \"Bash\"}"
+ }
+]

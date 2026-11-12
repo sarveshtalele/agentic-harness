@@ -1,0 +1,16 @@
+{
+  "_meta": {
+    "doc_id": "02-requirements/requirements",
+    "created_at": "2026-11-11T20:18:06+05:30",
+    "created_by": "agentic-qe v1.6.0",
+    "mode": "brownfield",
+    "source_commit": "aff44ea"
+  },
+  "doc_id": "requirements-personal-finance-mcp",
+  "created_at": "2025-07-18T00:00:00Z",
+  "created_by": "agentic-qe-harness",
+  "mode": "brownfield",
+  "source_commit": "aff44ea06f",
+  "app_name": "personal-finance-mcp",
+  "requirements": []
+}
