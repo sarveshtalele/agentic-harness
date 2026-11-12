@@ -1,7 +1,7 @@
 import { Terminal, Trash2 } from "lucide-react";
 import { SkillItem } from "./lib";
 
-export function SkillCard({ s, onOpen, onDelete }: { s: SkillItem; onOpen: () => void; onDelete?: (e: React.MouseEvent) => void }) {
+export function SkillCard({ s, onOpen, onDelete, onRecheck }: { s: SkillItem; onOpen: () => void; onDelete?: (e: React.MouseEvent) => void; onRecheck?: (e: React.MouseEvent) => void }) {
   return (
     <div
           data-testid="skill-card"
@@ -33,6 +33,25 @@ export function SkillCard({ s, onOpen, onDelete }: { s: SkillItem; onOpen: () =>
             <span className="text-[9px] uppercase tracking-wider text-slate-400 font-semibold mt-0.5">Security scan: not run</span>
           </div>
         </div>
+
+        {s.health && s.health.verdict !== "ok" && (
+          <div
+            data-testid="skill-health"
+            role="status"
+            title={s.health.reason}
+            className={`mt-3 rounded-lg border px-2 py-1.5 text-[11px] leading-snug ${s.health.verdict === "flagged"
+              ? "border-red-200 bg-red-50 text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300"
+              : "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-300"}`}
+          >
+            <span className="font-semibold">{s.health.verdict === "flagged" ? "Flagged: cannot run here" : "Warning"}</span>
+            <span className="block break-words">{s.health.reason}</span>
+            {onRecheck && (
+              <button type="button" onClick={onRecheck} className="mt-1 font-semibold underline underline-offset-2">
+                Check again
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Description */}
         <p className="mt-3 text-xs leading-relaxed text-slate-600 dark:text-slate-400 line-clamp-3">

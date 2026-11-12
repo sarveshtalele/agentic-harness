@@ -54,6 +54,17 @@ export default function SkillsPage() {
     setDetail(null);
   };
 
+  const handleRecheck = async (skillName: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      const health = await api<SkillItem["health"]>(`/skills/${encodeURIComponent(skillName)}/health`, { method: "POST" });
+      setData((prev) => prev ? { ...prev, skills: prev.skills.map((s) => s.name === skillName ? { ...s, health } : s) } : null);
+      toast(health?.verdict === "ok" ? `Skill '${skillName}' can run here` : `Skill '${skillName}': ${health?.verdict}`, health?.verdict === "ok" ? "ok" : "error");
+    } catch (err) {
+      toast(`Could not check '${skillName}': ${(err as Error).message}`, "error");
+    }
+  };
+
   const handleDeleteSkill = (skillName: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     setConfirmDeleteSkill(skillName);
@@ -140,7 +151,8 @@ export default function SkillsPage() {
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" data-testid="skill-cards-grid">
               {filteredSkills.map((s) => (
-                <SkillCard key={s.name} s={s} onOpen={() => openSkillModal(s)} onDelete={admin ? (e) => handleDeleteSkill(s.name, e) : undefined} />
+                <SkillCard key={s.name} s={s} onOpen={() => openSkillModal(s)} onDelete={admin ? (e) => handleDeleteSkill(s.name, e) : undefined}
+                  onRecheck={admin ? (e) => handleRecheck(s.name, e) : undefined} />
               ))}
             </div>
           )}

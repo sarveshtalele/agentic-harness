@@ -1151,3 +1151,10 @@ In accordance with the repository documentation policy (**1 Single Doc for Each 
 - **Permissions:** per-conversation modes and Claude Code rules from the person's `~/.aqh/settings.json` and the workspace's `.claude/settings*.json` (repository files may only tighten) decide allow, ask or deny before MAF's approval card (`permissions.py`). `/mode <name>` is answered without the model and without plugin prompt hooks.
 - **Hooks:** plugins see these tools as `Bash` and `PowerShell`, with Claude Code's `tool_input.command`.
 
+## 13. Skill scripts in every language (Phase 2 step 3, 2026-11-12)
+
+- **Detection and interpreters:** `core/script_runtime.py` (SKILL.md declaration, shebang, extension; Python, TypeScript, JavaScript, Bash, PowerShell, Ruby, Go, or a shebang program on PATH). A missing interpreter is a reason, never a guess.
+- **Health:** `core/script_health.py`. Static checks never execute a script and run for every skill in a background thread; the `--help` smoke run executes code, so it runs only right before a script's first approved run, in a temporary copy, never on the web profile. Verdicts ok, warning, flagged; cached by a hash of the skill's files and the interpreters found.
+- **Harness:** MAF discovers every script extension; the per-turn runner (`harness_kit/skill_runner.py`) runs with the conversation's workspace as working directory, refuses flagged scripts, and flags a skill after three failed runs in a row. Flagged skills are listed in the model's instructions and shown with a badge on `/skills`; an admin can check again.
+- **Skill Studio:** publishing also requires "scripts can run here".
+

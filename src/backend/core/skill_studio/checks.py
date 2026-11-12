@@ -81,6 +81,12 @@ def run(skill_dir: Path) -> list[dict]:
     if code:  # a script skill runs only through its entry point, in evaluation and in the harness (found live 2026-11-11)
         check("scripts/run.py entry point", (skill_dir / "scripts" / "run.py").is_file(),
               "present" if (skill_dir / "scripts" / "run.py").is_file() else "this skill has scripts but no scripts/run.py: read the input on standard input, print the output")
+    if any((skill_dir / "scripts").glob("*")) if (skill_dir / "scripts").is_dir() else False:  # every language: interpreter and syntax
+        from backend.core import script_health
+
+        health = script_health.check_skill(skill_dir)
+        check("scripts can run here", health["verdict"] != "flagged",
+              "each script has its interpreter and valid syntax" if health["verdict"] != "flagged" else script_health.reason(health))
     for script in sorted(p for p in skill_dir.rglob("*.py") if p.is_file()):
         rel = script.relative_to(skill_dir).as_posix()
         try:

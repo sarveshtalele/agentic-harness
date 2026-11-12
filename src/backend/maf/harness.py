@@ -45,7 +45,8 @@ from backend.maf.harness_kit.shell import ShellProvider, WorkspaceShell
 from backend.maf.harness_kit.shell_tools import ShellToolsProvider
 from backend.maf.harness_kit.bg_tasks import BackgroundProvider
 from backend.maf.harness_kit import permissions
-from backend.maf.harness_kit.skill_runner import run_skill_script
+from backend.maf.harness_kit.skill_runner import SkillHealthProvider, runner as skill_runner, skill_dirs  # noqa: F401
+from backend.core.script_runtime import SCRIPT_EXTENSIONS
 from backend.maf.harness_kit.strict_args import strict_arguments
 from backend.maf.harness_kit.write_first import write_first
 from backend.maf.harness_kit.nudges import while_working
@@ -59,7 +60,7 @@ HARNESS_DIR = DATA_DIR / "harness"
 STUDIO_ONLY = frozenset({"skill-creator"})  # Skill Studio's model instructions; the harness uses create_skill
 
 
-def _skills() -> SkillsProvider:
+def _skills(ws=None) -> SkillsProvider:
     """Skills from every discovered plugin (plus skills/ as local-skills), read fresh each turn so a new plugin folder
     shows up without a restart. Command skills (disable-model-invocation: true, like agentic-qe's qe-*) are user
     commands, so the model never sees them. Platform skills are trusted content: reading one needs no pause. Running a
@@ -70,7 +71,8 @@ def _skills() -> SkillsProvider:
     paths = plugins.skill_paths(role=plugin_grants.role_of(auth.current_user.get()))
     commands = set().union(*(plugins.command_skill_names(path) for path in paths))
     hidden = commands | STUDIO_ONLY  # one way per job: skills are made with the create_skill tool, not the Studio's own instructions
-    files = FileSkillsSource(paths, script_runner=run_skill_script)  # scripts/run.py of a Studio skill runs after the approval card
+    # every common script language is discovered; the runner picks the interpreter and refuses flagged scripts (step 3)
+    files = FileSkillsSource(paths, script_runner=skill_runner(ws), script_extensions=SCRIPT_EXTENSIONS)
     source = DeduplicatingSkillsSource(FilteringSkillsSource(files, lambda skill, _ctx: skill.frontmatter.name not in hidden))
     return SkillsProvider(source, disable_load_skill_approval=True, disable_read_skill_resource_approval=True)
 
@@ -117,6 +119,7 @@ def build(project_id: str, thread_id: str, start_run, *, user_id: str | None = N
     client = llm.client(model, max_rounds=HARNESS_MAX_ROUNDS, max_tool_calls=HARNESS_MAX_TOOL_CALLS, detailed_errors=True)
     compaction = _compaction(client, model, HARNESS_CONTEXT_TOKENS - max_output, telemetry)
     world, providers = _world(ws)
+    providers.append(SkillHealthProvider(plugins.skill_paths(role=plugin_grants.role_of(auth.current_user.get()))))
     mode, rules = permissions.get_mode(dirs["tools"], thread_id), permissions.load_rules(ws.root if ws else None)  # once per turn
     if command:  # without a repository it still says which command runs; WorkspaceContext says there are no file tools
         providers.append(active_command.ActiveCommandContext(command, ws.root if ws else None, thread_id))
@@ -132,7 +135,7 @@ def build(project_id: str, thread_id: str, start_run, *, user_id: str | None = N
         history_provider=FileHistoryProvider(dirs["history"], load_messages=False),  # AG-UI sends the thread; this keeps what the model saw
         todo_provider=TodoProvider(store=TodoFileStore(dirs["todos"])),
         file_memory_store=FileSystemAgentFileStore(dirs["memory"]),
-        skills_provider=_skills(),
+        skills_provider=_skills(ws),
         # like Claude Code and Codex the harness does the work; risky tools still stop for an approval card. /plan switches mode
         mode_provider=AgentModeProvider(default_mode="execute"),
         background_agents=specialists.build(project_id, user_id) + plugin_agents.build(project_id, user_id, model, ws) or None,

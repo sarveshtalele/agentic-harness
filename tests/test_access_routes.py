@@ -40,7 +40,7 @@ def expected(persona, method, template):
         return None
     if template.startswith(ADMIN_ONLY) or template.endswith(("/repo/local", "/transfer")):
         return 403
-    if write and template.startswith(ADMIN_WRITE):
+    if write and (template.startswith(ADMIN_WRITE) or template == "/api/skills/{name}/health"):  # checking runs skill scripts
         return 403
     if write and persona == "viewer" and template not in VIEWER_MAY_WRITE:
         return 403

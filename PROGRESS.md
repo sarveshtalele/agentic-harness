@@ -16,7 +16,7 @@ Written by `scripts/hooks/activity_log.py`. Times are local.
 | 8 | Harness eval suite (5.9); repository map only if it helps (5.8) | open | |
 | 9 | Azure guide at or under $25/month, first test deployment (9) | in progress (guide done 2026-11-12; test deployment and portal screenshots open) | `docs/AZURE_DEPLOYMENT_GUIDE.md`: prices re-read from prices.azure.com 2026-11-12, $20.70 with the PostgreSQL stop schedule (Automation runbook), zipping, portal steps, UI tour, troubleshooting. Owner approved deleting the 4 old Azure docs |
 | 10 | Desktop bundled PostgreSQL (D4), signing when certificates exist | open | |
-| 11 | Phase 2 (docs/PHASE2_PLAN.md rev 3): Claude Code-class harness on MAF (CLI, desktop, web), then R1 to R6 | approved 2026-11-12; step 1 built, baseline run blocked | Step 1: evals/harness/discovery.json (20 tasks, fixture repo with Python, TS, Bash, PowerShell, .claude and .agents skills), src/backend/maf/evals/discovery.py scorer (tests/test_discovery_eval_scoring.py: 3 passed), tests/test_harness_discovery_eval.py live driver, `python scripts/dev.py live`. Baseline not run: the model proxy answers HTTP 429 'daily token limit exceeded (25,101,895/25,000,000)'; Step 2 done locally (2026-11-12): bash and powershell on MAF LocalShellTool (persistent), background tasks, spill, permission modes and rules, /mode; tests/test_harness_shells.py and tests/test_harness_permissions.py (20 passed, PowerShell skipped on this Mac); full suite 710 passed, 2 skipped; Windows and Linux CI not run yet |
+| 11 | Phase 2 (docs/PHASE2_PLAN.md rev 3): Claude Code-class harness on MAF (CLI, desktop, web), then R1 to R6 | approved 2026-11-12; step 1 built, baseline run blocked | Step 1: evals/harness/discovery.json (20 tasks, fixture repo with Python, TS, Bash, PowerShell, .claude and .agents skills), src/backend/maf/evals/discovery.py scorer (tests/test_discovery_eval_scoring.py: 3 passed), tests/test_harness_discovery_eval.py live driver, `python scripts/dev.py live`. Baseline not run: the model proxy answers HTTP 429 'daily token limit exceeded (25,101,895/25,000,000)'; Step 2 done locally (2026-11-12): bash and powershell on MAF LocalShellTool (persistent), background tasks, spill, permission modes and rules, /mode; tests/test_harness_shells.py and tests/test_harness_permissions.py (20 passed, PowerShell skipped on this Mac); full suite 710 passed, 2 skipped; CI green on 3 OS for 3bc0fd5 (after fixing PowerShell escape codes and Git Bash paths). Step 3 done locally: core/script_runtime.py, core/script_health.py, per-turn skill runner, Flagged badge and Check again; full suite 716 passed, 3 skipped; not committed |
 
 | Time | Event | Detail |
 |---|---|---|
@@ -11069,3 +11069,141 @@ Written by `scripts/hooks/activity_log.py`. Times are local.
 | 2026-11-12 20:26:23 | turn end |  |
 | 2026-11-12 20:26:34 | user | Commit and push |
 | 2026-11-12 20:26:41 | before | Bash: Commit and push step 2 |
+| 2026-11-12 20:26:50 | after | Bash: Commit and push step 2 |
+| 2026-11-12 20:26:50 | before | Bash: Watch CI for step 2 commit |
+| 2026-11-12 20:26:50 | after | Bash: Watch CI for step 2 commit |
+| 2026-11-12 20:26:53 | turn end |  |
+| 2026-11-12 20:27:03 | user | proceed with step 3 once CI is green |
+| 2026-11-12 20:27:07 | before | mcp__ccd_turn__update_plan |
+| 2026-11-12 20:27:07 | after | mcp__ccd_turn__update_plan |
+| 2026-11-12 20:27:08 | before | Bash: Read current skill runner and Studio test runner |
+| 2026-11-12 20:27:09 | after | Bash: Read current skill runner and Studio test runner |
+| 2026-11-12 20:27:23 | before | Bash: Read MAF FileSkillScript runner call |
+| 2026-11-12 20:27:24 | after | Bash: Read MAF FileSkillScript runner call |
+| 2026-11-12 20:27:26 | before | Bash: Read runner invocation with context |
+| 2026-11-12 20:27:27 | after | Bash: Read runner invocation with context |
+| 2026-11-12 20:27:36 | before | Bash: Check ledger append for global entries |
+| 2026-11-12 20:27:36 | after | Bash: Check ledger append for global entries |
+| 2026-11-12 20:27:39 | before | Bash: See which ledger id skill events use |
+| 2026-11-12 20:27:40 | after | Bash: See which ledger id skill events use |
+| 2026-11-12 20:27:44 | before | Bash: Check ledger table constraints |
+| 2026-11-12 20:27:44 | after | Bash: Check ledger table constraints |
+| 2026-11-12 20:27:49 | before | mcp__ccd_turn__wrap_up |
+| 2026-11-12 20:27:50 | after | mcp__ccd_turn__wrap_up |
+| 2026-11-12 20:27:57 | turn end |  |
+| 2026-11-12 20:39:49 | user | <ta[redacted]> <task-id>bw2m9qvdk</task-id> <tool-use-id>toolu_01Lof5BMMjCW5JLajTGAm8zT</tool-use-id> <output-file>/private/tmp/claude-501/-Users-sarveshtalele… |
+| 2026-11-12 20:39:52 | before | Bash: Read CI result |
+| 2026-11-12 20:39:53 | after | Bash: Read CI result |
+| 2026-11-12 20:39:57 | before | Bash: Read failing CI tests per OS |
+| 2026-11-12 20:40:09 | after | Bash: Read failing CI tests per OS |
+| 2026-11-12 20:40:23 | before | Bash: Strip escape codes, Windows path probe; rerun |
+| 2026-11-12 20:40:31 | after | Bash: Strip escape codes, Windows path probe; rerun |
+| 2026-11-12 20:40:41 | before | Bash: Strip codes in background output; commit and push fix |
+| 2026-11-12 20:40:52 | after | Bash: Strip codes in background output; commit and push fix |
+| 2026-11-12 20:40:56 | before | Bash: Watch CI for the fix |
+| 2026-11-12 20:40:57 | after | Bash: Watch CI for the fix |
+| 2026-11-12 20:41:22 | before | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/backend/core/script_runtime.py |
+| 2026-11-12 20:41:22 | after | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/backend/core/script_runtime.py |
+| 2026-11-12 20:41:30 | before | Bash: Move shell finders to core and check |
+| 2026-11-12 20:41:31 | after | Bash: Move shell finders to core and check |
+| 2026-11-12 20:42:13 | before | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/backend/core/script_health.py |
+| 2026-11-12 20:42:19 | after | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/backend/core/script_health.py |
+| 2026-11-12 20:42:19 | before | Bash: Try health checks on sample skills |
+| 2026-11-12 20:42:21 | after | Bash: Try health checks on sample skills |
+| 2026-11-12 20:42:29 | before | Bash: Fix node language detection and recheck |
+| 2026-11-12 20:42:30 | after | Bash: Fix node language detection and recheck |
+| 2026-11-12 20:42:33 | before | Bash: Test node --check on a TypeScript file |
+| 2026-11-12 20:42:35 | after | Bash: Test node --check on a TypeScript file |
+| 2026-11-12 20:42:45 | before | Bash: Use TypeScript-aware syntax check and recheck |
+| 2026-11-12 20:42:47 | after | Bash: Use TypeScript-aware syntax check and recheck |
+| 2026-11-12 20:42:58 | before | Bash: Add failure gist and recheck reasons |
+| 2026-11-12 20:42:59 | after | Bash: Add failure gist and recheck reasons |
+| 2026-11-12 20:43:08 | before | Bash: Prefer script-relative line numbers |
+| 2026-11-12 20:43:09 | after | Bash: Prefer script-relative line numbers |
+| 2026-11-12 20:43:36 | before | Bash: Count skills and scripts the static check covers |
+| 2026-11-12 20:44:07 | failed | Bash: Count skills and scripts the static check covers Exit code 1 error connecting in 'pool-1': connection is bad: connection to server at "127.0.0.1", port 5… |
+| 2026-11-12 20:44:10 | before | Bash: Count skill scripts on disk |
+| 2026-11-12 20:44:10 | after | Bash: Count skill scripts on disk |
+| 2026-11-12 20:44:14 | before | Bash: Check CI status for the fix |
+| 2026-11-12 20:44:14 | after | Bash: Check CI status for the fix |
+| 2026-11-12 20:44:32 | before | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/backend/maf/harness_kit/skill_runner.py |
+| 2026-11-12 20:44:32 | after | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/backend/maf/harness_kit/skill_runner.py |
+| 2026-11-12 20:44:44 | before | Bash: Add smoke switch, runtime flags, background pass |
+| 2026-11-12 20:44:45 | after | Bash: Add smoke switch, runtime flags, background pass |
+| 2026-11-12 20:44:58 | before | Bash: Add health provider and wire into harness |
+| 2026-11-12 20:44:59 | after | Bash: Add health provider and wire into harness |
+| 2026-11-12 20:45:06 | before | Bash: Make the health provider a plain class |
+| 2026-11-12 20:45:08 | after | Bash: Make the health provider a plain class |
+| 2026-11-12 20:45:17 | before | Bash: Memoize digest; time static checks on real skills |
+| 2026-11-12 20:45:21 | after | Bash: Memoize digest; time static checks on real skills |
+| 2026-11-12 20:45:27 | before | Bash: Resolve skill paths; rerun static checks on real skills |
+| 2026-11-12 20:45:32 | after | Bash: Resolve skill paths; rerun static checks on real skills |
+| 2026-11-12 20:45:37 | before | Bash: Read Studio checks; check CI status |
+| 2026-11-12 20:45:37 | after | Bash: Read Studio checks; check CI status |
+| 2026-11-12 20:45:43 | before | Bash: Add runnable-scripts check to Skill Studio |
+| 2026-11-12 20:45:44 | after | Bash: Add runnable-scripts check to Skill Studio |
+| 2026-11-12 20:45:47 | before | Bash: Read skills API and page |
+| 2026-11-12 20:45:47 | after | Bash: Read skills API and page |
+| 2026-11-12 20:45:50 | before | Bash: Read skill summary and list rendering |
+| 2026-11-12 20:45:50 | after | Bash: Read skill summary and list rendering |
+| 2026-11-12 20:45:55 | before | Bash: Find auth rules and SkillCard rendering |
+| 2026-11-12 20:45:55 | after | Bash: Find auth rules and SkillCard rendering |
+| 2026-11-12 20:45:58 | before | Bash: Find skills route rules and SkillCard file |
+| 2026-11-12 20:45:58 | after | Bash: Find skills route rules and SkillCard file |
+| 2026-11-12 20:46:01 | before | Bash: Read auth rule patterns and SkillCard location |
+| 2026-11-12 20:46:01 | after | Bash: Read auth rule patterns and SkillCard location |
+| 2026-11-12 20:46:06 | before | Bash: Read SkillCard component |
+| 2026-11-12 20:46:07 | after | Bash: Read SkillCard component |
+| 2026-11-12 20:46:10 | before | Bash: Read SkillItem type and skill routes |
+| 2026-11-12 20:46:10 | after | Bash: Read SkillItem type and skill routes |
+| 2026-11-12 20:46:22 | before | Bash: Add health to skills API, admin recheck, card badge |
+| 2026-11-12 20:46:24 | after | Bash: Add health to skills API, admin recheck, card badge |
+| 2026-11-12 20:46:30 | before | Bash: Read delete handler and data loading |
+| 2026-11-12 20:46:30 | after | Bash: Read delete handler and data loading |
+| 2026-11-12 20:46:39 | before | Bash: Wire Check again button and typecheck |
+| 2026-11-12 20:46:41 | after | Bash: Wire Check again button and typecheck |
+| 2026-11-12 20:47:08 | before | Write: /Users/sarveshtalele/Downloads/agentic-harness/tests/test_script_runtime.py |
+| 2026-11-12 20:47:10 | after | Write: /Users/sarveshtalele/Downloads/agentic-harness/tests/test_script_runtime.py |
+| 2026-11-12 20:47:10 | before | Bash: Run step 3 tests |
+| 2026-11-12 20:47:16 | after | Bash: Run step 3 tests |
+| 2026-11-12 20:47:28 | before | Bash: Treat shebang files as scripts; adjust test |
+| 2026-11-12 20:47:29 | after | Bash: Treat shebang files as scripts; adjust test |
+| 2026-11-12 20:47:33 | before | Bash: Name the shebang interpreter; rerun tests |
+| 2026-11-12 20:47:39 | after | Bash: Name the shebang interpreter; rerun tests |
+| 2026-11-12 20:47:42 | before | Bash: Check CI status for step 2 fix |
+| 2026-11-12 20:47:43 | after | Bash: Check CI status for step 2 fix |
+| 2026-11-12 20:47:47 | before | Bash: Run full suite with step 3 |
+| 2026-11-12 20:47:56 | after | Bash: Run full suite with step 3 |
+| 2026-11-12 20:47:56 | before | Bash: Update MAF spec, architecture doc and tasks |
+| 2026-11-12 20:47:57 | after | Bash: Update MAF spec, architecture doc and tasks |
+| 2026-11-12 20:47:59 | before | mcp__ccd_turn__wrap_up |
+| 2026-11-12 20:47:59 | after | mcp__ccd_turn__wrap_up |
+| 2026-11-12 20:48:14 | turn end |  |
+| 2026-11-12 20:51:38 | user | <ta[redacted]> <task-id>b1ylseplw</task-id> <tool-use-id>toolu_014R6agbg9r2542uVECaY7H3</tool-use-id> <output-file>/private/tmp/claude-501/-Users-sarveshtalele… |
+| 2026-11-12 20:51:42 | before | Bash: Read full suite and CI status |
+| 2026-11-12 20:51:43 | after | Bash: Read full suite and CI status |
+| 2026-11-12 20:51:47 | before | Bash: See the five failures |
+| 2026-11-12 20:51:55 | after | Bash: See the five failures |
+| 2026-11-12 20:52:00 | before | Bash: Find how admin routes are listed in access test |
+| 2026-11-12 20:52:00 | after | Bash: Find how admin routes are listed in access test |
+| 2026-11-12 20:52:03 | before | Bash: Read expected access function |
+| 2026-11-12 20:52:10 | after | Bash: Read expected access function |
+| 2026-11-12 20:52:11 | before | Bash: Update both tests and rerun |
+| 2026-11-12 20:52:18 | after | Bash: Update both tests and rerun |
+| 2026-11-12 20:52:21 | before | Bash: Check CI status |
+| 2026-11-12 20:52:22 | after | Bash: Check CI status |
+| 2026-11-12 20:52:25 | before | mcp__ccd_turn__wrap_up |
+| 2026-11-12 20:52:25 | after | mcp__ccd_turn__wrap_up |
+| 2026-11-12 20:52:31 | turn end |  |
+| 2026-11-12 20:56:03 | user | <ta[redacted]> <task-id>bpgud43p5</task-id> <tool-use-id>toolu_01GLLuMPPzwCacc8ZYGGeSG6</tool-use-id> <output-file>/private/tmp/claude-501/-Users-sarveshtalele… |
+| 2026-11-12 20:56:06 | before | Bash: Read CI result for the fix |
+| 2026-11-12 20:56:07 | after | Bash: Read CI result for the fix |
+| 2026-11-12 20:56:11 | before | Bash: Full suite with step 3 and fixes |
+| 2026-11-12 21:00:00 | after | Bash: Full suite with step 3 and fixes |
+| 2026-11-12 21:00:04 | before | Bash: Update tracker |
+| 2026-11-12 21:00:05 | after | Bash: Update tracker |
+| 2026-11-12 21:00:08 | before | mcp__ccd_turn__wrap_up |
+| 2026-11-12 21:00:09 | after | mcp__ccd_turn__wrap_up |
+| 2026-11-12 21:00:14 | turn end |  |
+| 2026-11-12 21:00:18 | user | Commit and push |
+| 2026-11-12 21:00:24 | before | Bash: Commit and push step 3 |

@@ -16,7 +16,7 @@ OWNED_PATHS = [
     (re.compile(r"^/api/memories/([^/]+)"), "SELECT project_id FROM memories WHERE id=?"),
 ]
 ADMIN_ONLY = re.compile(r"^/api/(users|connections|logs|auth/events|models|usage|capabilities/sync)(/|$)|^/api/agents/guardrail-events$|^/api/projects/[^/]+/(repo/local|transfer)$")
-ADMIN_WRITES = re.compile(r"^/api/(settings|prompts|agents|evals)(/|$)")
+ADMIN_WRITES = re.compile(r"^/api/(settings|prompts|agents|evals|skills/[^/]+/health)(/|$)")
 OWNER_ONLY = re.compile(r"^/api/projects/[^/]+/members(/|$)")  # also the admin
 OWNER_DELETE = re.compile(r"^/api/projects/[^/]+$")
 # /api/traces is session-only here; core/tracing/queries.py limits each answer to the caller's own runs (404 otherwise).

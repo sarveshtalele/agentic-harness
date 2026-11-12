@@ -23,10 +23,11 @@ def test_run_py_gets_the_input_on_stdin_and_its_output_comes_back(tmp_path, monk
     assert "failed (exit code 1)" in failed and "JSONDecodeError" in failed  # a crash is reported with its error, never hidden
 
 
-def test_other_scripts_and_the_web_profile_are_refused(tmp_path, monkeypatch):
+def test_other_scripts_run_with_their_interpreter_and_the_web_profile_is_refused(tmp_path, monkeypatch):
     skill, folder = _skill(tmp_path)
     monkeypatch.setattr(config, "PROFILE", "desktop")
-    assert "Only scripts/run.py runs here" in asyncio.run(run_skill_script(skill, SimpleNamespace(full_path=str(folder / "scripts" / "other.py")), None))
+    out = asyncio.run(run_skill_script(skill, SimpleNamespace(full_path=str(folder / "scripts" / "other.py")), None))
+    assert "python script scripts/other.py: exit code 0" in out  # every script language runs since Phase 2 step 3
     monkeypatch.setattr(config, "PROFILE", "web")
     assert "off on the shared web server" in asyncio.run(run_skill_script(skill, SimpleNamespace(full_path=str(folder / "scripts" / "run.py")), {"input": "{}"}))
 

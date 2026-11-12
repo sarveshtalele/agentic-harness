@@ -25,6 +25,7 @@ from agent_framework_tools.shell import LocalShellTool
 from pydantic import Field
 
 from backend.core import ledger
+from backend.core.script_runtime import find_bash, find_powershell  # noqa: F401 - also used through this module
 from backend.core.security import redact
 from backend.repos.sandbox import clean_sandbox_env
 
@@ -35,20 +36,6 @@ BENIGN_EXIT1 = frozenset({"grep", "rg", "egrep", "fgrep", "find", "diff", "test"
 ANSI = re.compile(r"\x1b\[[0-9;?]*[A-Za-z]|\x1b\][^\x07]*\x07")  # pwsh starts its output with terminal codes such as ESC[?1l
 CD = re.compile(r"(^|[;&|\s(])(cd|pushd|popd|chdir|Set-Location|Push-Location|Pop-Location|sl)(\s|$|;)", re.I)
 _sessions: dict[tuple[str, str], tuple[LocalShellTool, asyncio.AbstractEventLoop]] = {}
-
-
-def find_bash() -> str | None:
-    if os.name != "nt":
-        return next((p for p in ("/bin/bash", "/usr/bin/bash") if Path(p).exists()), None) or shutil.which("bash")
-    git = shutil.which("git")
-    roots = [Path(git).resolve().parent.parent] if git else []
-    roots += [Path(os.environ[v]) / "Git" for v in ("ProgramFiles", "ProgramFiles(x86)") if os.environ.get(v)]
-    roots += [Path(os.environ["LOCALAPPDATA"]) / "Programs" / "Git"] if os.environ.get("LOCALAPPDATA") else []
-    return next((str(r / "bin" / "bash.exe") for r in roots if (r / "bin" / "bash.exe").is_file()), None)
-
-
-def find_powershell() -> str | None:
-    return shutil.which("pwsh") or (shutil.which("powershell") if os.name == "nt" else None)
 
 
 def available() -> dict[str, str]:
