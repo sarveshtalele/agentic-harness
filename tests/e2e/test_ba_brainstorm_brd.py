@@ -2,13 +2,15 @@
 
 Upload a slide deck, describe the need, pass Gate 0, answer the first question, let the model propose the rest, choose an
 approach, answer the builder check, sign Gate 1, then open the BRD and check it: the template's sections are there and
-the analyst's answer (500 EUR, 30 days) is in it. Run with  python scripts/dev.py live tests/e2e/test_ba_brainstorm_brd.py"""
+the analyst's answer (500 EUR, 30 days) is in it; it downloads as Markdown and as Word with the same content. Run with  python scripts/dev.py live tests/e2e/test_ba_brainstorm_brd.py"""
 import time
+import zipfile
+from pathlib import Path
 
 import pytest
 from playwright.sync_api import expect
 
-from tests.e2e.helpers_app import LLM_TIMEOUT, UI, approve, shot
+from tests.e2e.helpers_app import EVIDENCE, LLM_TIMEOUT, UI, approve, shot
 from tests.test_brainstorm_r3 import _pptx
 
 pytestmark = [pytest.mark.e2e, pytest.mark.live]
@@ -28,7 +30,9 @@ def _next(page):
         if status.count():
             text = status.first.inner_text()
             if "failed" in text:
-                raise AssertionError(f"Run failed: {page.locator('p[role=alert]').first.inner_text()}")
+                alert = page.locator("p[role=alert]")
+                why = alert.first.inner_text(timeout=5_000) if alert.count() else page.inner_text("body")[-600:]
+                raise AssertionError(f"Run failed: {why}")
             if "completed" in text:
                 return None
         page.wait_for_timeout(1000)
@@ -88,3 +92,15 @@ def test_a_brd_from_brainstorming_in_ba_studio(page):
     page.goto(f"{UI}/projects/{project['id']}/documents/{brd['id']}")
     expect(page.get_by_role("heading", name="Functional Requirements", exact=False).first).to_be_visible(timeout=30_000)
     shot(page, "brd-document")
+
+    # the signed BRD leaves the platform as Markdown and as Word, with the same content
+    with page.expect_download() as md:
+        page.locator(f'a[href$="/export/md"]').click()
+    exported = Path(md.value.path()).read_text(encoding="utf-8")
+    assert "Functional Requirements" in exported and "500" in exported
+    with page.expect_download() as word:
+        page.locator(f'a[href$="/export/docx"]').click()
+    with zipfile.ZipFile(word.value.path()) as docx:  # a real .docx is a zip with the body in word/document.xml
+        body_xml = docx.read("word/document.xml").decode("utf-8")
+    assert "Functional Requirements" in body_xml and "500" in body_xml
+    (EVIDENCE / "brd-export.md").write_text(exported, encoding="utf-8")
