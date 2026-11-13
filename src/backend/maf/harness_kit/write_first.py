@@ -14,7 +14,7 @@ from __future__ import annotations
 from collections import defaultdict
 from pathlib import Path
 
-from agent_framework import FunctionInvocationContext, function_middleware
+from agent_framework import FunctionInvocationContext, MiddlewareTermination, function_middleware
 
 from backend.maf.harness_kit import active_command, verify
 
@@ -25,15 +25,28 @@ NUDGE, LIMIT = 15, 25
 # the 2026-11-12 cycle wrote requirements citing 10 files that do not exist after being told to write "from what you know"
 HONEST = ("with only what the files you have read support: cite only files you opened in this conversation and copy quotes "
           "verbatim from them; leave anything you have not read out for now.")
+CHECKS = frozenset({"check_gate", "describe_contract"})  # the plugin's own checks stay open, for a gate the plugin refused
+DONE = ("Not run: this step is done. Every file the command writes is on disk and its check passes (or it has none). Call no more "
+        "tools; reply with a short summary of what you wrote and what the user types next.")
 _reads: dict[str, int] = defaultdict(int)  # ponytail: per process; a restart forgets the count, which only delays the nudge
 
 
 def write_first(thread_id: str, root: Path | None, command: dict | None):
     """The middleware for one turn. `command` is the thread's active command, `root` its workspace."""
 
+    after_done = {"calls": 0}
+
     @function_middleware
     async def guard(context: FunctionInvocationContext, call_next) -> None:
         name = context.function.name
+        if command and name not in WRITES | CHECKS and active_command.step_done(command, root, thread_id):
+            # the step's files are written and its check passes: one reminder, then the tool loop ends (live QE cycle
+            # 2026-11-13: discovery wrote both files at 132 seconds and was still reading at 257)
+            after_done["calls"] += 1
+            if after_done["calls"] > 1:
+                raise MiddlewareTermination("The step is done.", result=DONE)
+            context.result = DONE
+            return
         gate = (command or {}).get("after_gate")  # files that wait for a gate phrase must not be pushed out early; once approved they are owed
         deferred = gate is not None and gate not in active_command.approved_gates(root, next((a for a in command["args"].split() if not a.startswith("-")), ""))
         missing = [] if deferred else [p for p in (command or {}).get("paths", []) if root is not None and not (root / p).is_file()]

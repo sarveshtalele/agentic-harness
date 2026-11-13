@@ -30,3 +30,29 @@ def test_a_step_with_its_files_written_and_its_check_passing_ends_the_turn(tmp_p
     verify._last["thr_done"] = {"passed": True, "output": "PASS"}
     assert active_command.step_done(checked, tmp_path, "thr_done")
     assert not active_command.step_done({**discover, "paths": []}, tmp_path, "thr_done")  # a command that names no files (doctor)
+
+
+def test_inside_a_round_tool_calls_after_the_step_is_done_get_one_reminder_then_end(tmp_path):
+    """Run 5 of the live cycle: discovery wrote both files at 132 seconds and was still reading at 257, all in one round."""
+    from agent_framework import Agent, tool
+
+    from backend.maf.harness_kit import write_first
+    from tests.helpers_harness import steps
+    from tests.scripted_client import ScriptedClient
+
+    for rel in FILES:
+        (tmp_path / rel).parent.mkdir(parents=True, exist_ok=True)
+        (tmp_path / rel).write_text("written", encoding="utf-8")
+    ran = []
+
+    @tool(name="file_access_read", description="Read a file.")
+    def file_access_read(file_name: str) -> str:
+        ran.append(file_name)
+        return "content"
+
+    reads = [{"call": "file_access_read", "args": {"file_name": f"f{i}.py"}} for i in range(6)]
+    scripted = ScriptedClient([("go", steps(*reads, "done"))])
+    discover = {"name": "agentic-qe:qe-discover", "args": "app", "paths": FILES, "check": None}
+    asyncio.run(Agent(scripted, tools=[file_access_read], middleware=[write_first.write_first("thr_done2", tmp_path, discover)]).run("go"))
+    assert ran == [] and len(scripted.calls) == 2  # nothing more read; the second call after the step ended the loop
+    assert write_first.DONE in scripted.calls[1]  # the model was told the step is done before that
