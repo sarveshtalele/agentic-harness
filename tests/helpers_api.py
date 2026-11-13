@@ -3,7 +3,6 @@
 import io
 import json
 import os
-
 import secrets
 import time
 import zipfile
@@ -176,7 +175,7 @@ TESTS = json.dumps({"framework": "pytest", "files": [
 USER_PASSWORD = secrets.token_urlsafe(15)
 
 
-def make_user(admin, name="priya.tester", **extra):
+def make_user(admin, name="priya.tester", features=(), **extra):
     """A user may use only ticked models, so tests give each one the listed test models unless they say otherwise."""
     from backend.core import models
 
@@ -186,6 +185,8 @@ def make_user(admin, name="priya.tester", **extra):
     extra = {"models": ["test-model", *([extra["model"]] if extra.get("model") else [])], **extra}
     made = admin.post("/api/users", json={"username": name, "password": USER_PASSWORD, **extra})
     assert made.status_code == 201, made.text
+    for feature in features:  # allowed on top of the role's defaults (R2), as the admin would
+        assert admin.put(f"/api/features/overrides/{made.json()['id']}", json={"feature": feature, "allowed": True}).status_code == 200
     return made.json()
 
 

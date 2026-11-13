@@ -70,7 +70,7 @@ def test_developer_needs_a_grant_for_their_role(client, echo, project):
     sid, _ = echo
     client.post(f"/api/mcp/servers/{sid}/connect")
     name = unique("mcpcaller")
-    user = make_user(client, name, role="developer")
+    user = make_user(client, name, role="developer", features=["mcp"])
     dev, _ = sign_in(name)
     assert client.post(f"/api/projects/{project}/members", json={"username": name, "role": "developer"}).status_code == 201
     body = {"project_id": project, "arguments": {"text": "x"}}

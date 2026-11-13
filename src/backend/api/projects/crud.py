@@ -65,7 +65,7 @@ def _project_summary(item: dict) -> dict:
 @router.get("/api/projects")
 def list_projects(archived: bool = False):
     with db() as con:
-        items = rows(con.execute("SELECT * FROM projects WHERE archived=? AND id!='prj_agent_evals' ORDER BY updated_at DESC", (int(archived),)))
+        items = rows(con.execute("SELECT * FROM projects WHERE archived=? AND id NOT IN ('prj_agent_evals', 'prj_platform') ORDER BY updated_at DESC", (int(archived),)))
     return [_project_summary(i) for i in items if auth.can_see_project(i["id"])]
 
 

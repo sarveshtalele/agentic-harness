@@ -341,7 +341,7 @@
 - [x] 6 `aqh` CLI: local server with its own PostgreSQL, folder bound in place, headless (`-p`, three formats, approval policy) and interactive, doctor, sessions as JSONL; live headless run on macOS with the real model (2026-11-13). Windows live run: CI tests only; landing-page install section moves to R1 (/home)
 - [x] 7 OS sandbox tier T1: Seatbelt on macOS, bubblewrap on Linux, around persistent and background shells; on in `auto` mode or from trusted settings (`sandbox.enabled`, `sandbox.network`); auto mode skips the card only inside it; Windows keeps cards (2026-11-13). Container tier T2 and per-host network allowlist: when a team asks
 - [x] 8 R6: pepper, recorded scrypt cost and rehash at sign-in, 12-character minimum, breached-password check, first admin as a hash (`dev.py admin-password`); desktop central sign-in with a signed grant (no local admin or password, sign-out); desktop Terminal pane (node-pty, xterm) with background tasks as tabs (2026-11-13)
-- [ ] 9 R2 features governance; R1 home and gated downloads
+- [x] 9 R2: features (Harness, BA Studio, QE cycle, Bugs, Skill Studio, MCP, Documents, Desktop downloads, Traces, Usage) as role defaults plus member overrides, enforced per route (every route named or core), ledgered with before and after, Settings > Features editor with effective preview, navigation hides denied; R1: /home after sign-in, landing page without installers, /api/downloads only with the Downloads feature (2026-11-13). BA Studio tile and routes join with R3
 - [x] Playwright UI audit test (tests/e2e/test_ui_audit.py), 2026-11-12
 - [ ] 10 UI audit fixes U1 to U10; audit at zero findings
 - [ ] 11 R3 uploads and brainstorming; R4 Atlassian (optional)

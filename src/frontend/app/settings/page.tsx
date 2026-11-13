@@ -4,6 +4,7 @@ import { PageTitle } from "../../components/ui";
 import { AppShell } from "../../components/AppShell";
 import { useAuth } from "../../components/AuthGate";
 import { ConnectionsCard } from "../../features/settings/ConnectionsCard";
+import { FeatureAccess } from "../../features/settings/FeatureAccess";
 import { GateRoles } from "../../features/settings/GateRoles";
 import { HealthCard } from "../../features/settings/HealthCard";
 import { LogCard } from "../../features/settings/LogCard";
@@ -20,6 +21,7 @@ export default function SettingsPage() {
         <HealthCard />
         <ModelProviderCard />
         {user?.role === "admin" && <ModelList />}
+        {user?.role === "admin" && <FeatureAccess />}
         {user?.role === "admin" && <GateRoles />}
         {user?.role === "admin" && <LogCard />}
         <PluginsCard />

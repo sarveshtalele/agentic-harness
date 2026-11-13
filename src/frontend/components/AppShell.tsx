@@ -1,10 +1,11 @@
 "use client";
 
-import { Activity, BarChart3, BookOpen, ChevronLeft, ChevronRight, Cpu, UsersRound, Bot, Sparkles, CheckSquare, FileText, FolderKanban, ListTree, Settings, ShieldCheck, Terminal, Wand2 } from "lucide-react";
+import { Activity, BarChart3, BookOpen, House, ChevronLeft, ChevronRight, Cpu, UsersRound, Bot, Sparkles, CheckSquare, FileText, FolderKanban, ListTree, Settings, ShieldCheck, Terminal, Wand2 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
 import { api } from "../lib/api";
+import { useFeatures } from "../lib/features";
 import { useAuth, UserMenu } from "./AuthGate";
 import { ThemeToggle } from "./ui";
 
@@ -16,6 +17,7 @@ interface NavSection {
     icon: any;
     admin?: boolean;
     badge?: boolean;
+    feature?: string; // hidden when the member lacks this feature (R2)
   }>;
 }
 
@@ -23,8 +25,9 @@ const navSections: NavSection[] = [
   {
     title: "WORKSPACE & AGENTS",
     items: [
+      { href: "/home", label: "Home", icon: House },
       { href: "/projects", label: "Projects", icon: FolderKanban },
-      { href: "/harness", label: "Autonomous QE Harness", icon: Terminal },
+      { href: "/harness", label: "Autonomous QE Harness", icon: Terminal, feature: "harness" },
       { href: "/approvals", label: "Gate Approvals", icon: CheckSquare, badge: true },
       { href: "/agents", label: "AI Specialist Roster", icon: Bot },
     ],
@@ -32,17 +35,17 @@ const navSections: NavSection[] = [
   {
     title: "STUDIOS & ECOSYSTEM",
     items: [
-      { href: "/skills/studio", label: "Skill Creator Studio", icon: Wand2 },
+      { href: "/skills/studio", label: "Skill Creator Studio", icon: Wand2, feature: "skills" },
       { href: "/skills", label: "Project Skills & Tools", icon: Sparkles },
-      { href: "/mcp", label: "MCP Server Registry", icon: Cpu },
-      { href: "/templates", label: "Specification Templates", icon: FileText },
+      { href: "/mcp", label: "MCP Server Registry", icon: Cpu, feature: "mcp" },
+      { href: "/templates", label: "Specification Templates", icon: FileText, feature: "docs" },
     ],
   },
   {
     title: "GOVERNANCE & INSIGHTS",
     items: [
-      { href: "/observability", label: "Observability & Telemetry", icon: Activity },
-      { href: "/traces", label: "Trace Explorer", icon: ListTree },
+      { href: "/observability", label: "Observability & Telemetry", icon: Activity, feature: "traces" },
+      { href: "/traces", label: "Trace Explorer", icon: ListTree, feature: "traces" },
       { href: "/capabilities", label: "Capability Registry", icon: Cpu },
       { href: "/docs", label: "Platform Documentation", icon: BookOpen },
     ],
@@ -51,7 +54,7 @@ const navSections: NavSection[] = [
     title: "ENTERPRISE ADMIN",
     items: [
       { href: "/users", label: "User Access & Accounts", icon: UsersRound, admin: true },
-      { href: "/usage", label: "Token Budget & Usage", icon: BarChart3, admin: true },
+      { href: "/usage", label: "Token Budget & Usage", icon: BarChart3, admin: true, feature: "usage" },
       { href: "/settings", label: "System Configuration", icon: Settings, admin: true },
     ],
   },
@@ -61,6 +64,7 @@ const navSections: NavSection[] = [
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { user } = useAuth();
+  const features = useFeatures();
   const [pending, setPending] = useState(0);
   const [collapsed, setCollapsed] = useState(false);
 
@@ -76,7 +80,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <aside className={`sticky top-0 flex h-screen shrink-0 flex-col border-r border-slate-200 bg-white p-3 transition-all dark:border-slate-800 dark:bg-[#060a17] ${collapsed ? "w-16" : "w-60"}`}>
         <div className="mb-4 flex items-center justify-between border-b border-slate-200 pb-3 dark:border-slate-800">
           {!collapsed && (
-            <Link href="/projects" className="flex items-center gap-2.5 px-1">
+            <Link href="/home" className="flex items-center gap-2.5 px-1">
               <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white"><ShieldCheck className="h-4 w-4" /></span>
               <span className="text-base font-bold">Agentic QE Platform</span>
             </Link>
@@ -99,7 +103,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             return navSections.map((sec, secIdx) => {
               // inside a project the Studio is out of place: skills are made for the whole platform, not for one project
               const inProject = pathname.startsWith("/projects/");
-              const visibleItems = sec.items.filter((item) => (!item.admin || user?.role === "admin") && !(inProject && item.href === "/skills/studio"));
+              const visibleItems = sec.items.filter((item) => (!item.admin || user?.role === "admin") && (!item.feature || !!features?.includes(item.feature)) && !(inProject && item.href === "/skills/studio"));
               if (visibleItems.length === 0) return null;
               return (
                 <div key={sec.title || secIdx} className="space-y-0.5">

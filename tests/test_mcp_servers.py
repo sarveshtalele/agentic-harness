@@ -69,7 +69,7 @@ def test_old_fake_routes_are_gone(client):
 @pytest.fixture
 def developer(client):
     name = unique("mcpdev")
-    make_user(client, name, role="developer")
+    make_user(client, name, role="developer", features=["mcp"])  # MCP is not in a developer's defaults (R2)
     other, response = sign_in(name)
     assert response.status_code == 200
     return other

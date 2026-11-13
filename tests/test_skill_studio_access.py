@@ -18,7 +18,7 @@ from tests.helpers_api import client, make_user, project, sign_in, unique  # noq
 
 def _account(admin, role: str):
     name = unique(role)
-    make_user(admin, name, role=role)
+    make_user(admin, name, role=role, features=["skills"])  # the rules under test here are roles and projects, not R2
     other, signed = sign_in(name)
     assert signed.status_code == 200
     return other

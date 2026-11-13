@@ -93,7 +93,7 @@ def test_a_wrong_password_is_refused_and_the_right_one_signs_in(browser):
     expect(tab.get_by_test_id("signed-in-user")).to_have_count(0)
     tab.get_by_label("Password").fill(ADMIN["password"])
     tab.get_by_role("button", name="Sign in").click()
-    expect(tab.get_by_role("heading", name="Projects")).to_be_visible(timeout=30_000)
+    expect(tab.get_by_role("heading", name="Home")).to_be_visible(timeout=30_000)  # sign-in lands on Home (R1)
     expect(tab.get_by_test_id("signed-in-user")).to_contain_text("smoke-admin")
     tab.context.close()
 
@@ -102,6 +102,9 @@ def test_main_pages_open_and_show_their_empty_state(browser):
     tab = sign_in(browser, ADMIN)
     errors = []
     tab.on("pageerror", lambda e: errors.append(str(e)))
+    expect(tab.get_by_role("heading", name="Home")).to_be_visible(timeout=30_000)
+    expect(tab.get_by_test_id("home-tiles")).to_contain_text("Skill Studio", timeout=15_000)  # the admin has every feature
+    tab.goto(f"{UI}/projects")
     expect(tab.get_by_role("heading", name="Projects")).to_be_visible(timeout=30_000)
     expect(tab.locator("article").first.or_(tab.get_by_text("No projects yet"))).to_be_visible(timeout=10_000)
     nav = tab.get_by_role("navigation", name="Workspace")
@@ -117,6 +120,12 @@ def test_main_pages_open_and_show_their_empty_state(browser):
     expect(tab.get_by_text("No users yet").or_(tab.locator("table, tr").first)).to_be_visible(timeout=15_000)
     tab.locator("a[href='/settings']").first.click()
     expect(tab.get_by_role("heading", name=re.compile("Settings|Configuration")).first).to_be_visible(timeout=15_000)
+    roles = tab.get_by_test_id("feature-roles")  # R2: the admin's Features editor
+    expect(roles).to_be_visible(timeout=15_000)
+    expect(roles.get_by_label("viewer may use Documents")).to_be_checked()
+    expect(roles.get_by_label("viewer may use Harness")).not_to_be_checked()
+    roles.scroll_into_view_if_needed()
+    tab.screenshot(path=str(Path(tempfile.gettempdir()) / "aqe-feature-access.png"))
     expect(tab.get_by_text("Model missing").or_(tab.locator("h1, h2, h3").first).first).to_be_visible(timeout=15_000)  # both can match: strict mode needs one
     assert not errors, errors
     tab.context.close()
@@ -129,8 +138,11 @@ def test_a_non_admin_is_refused_on_users(browser, app):
     made = urllib.request.Request(f"{API}/api/users", data=json.dumps(MEMBER).encode(), headers={"Content-Type": "application/json", "Cookie": cookie})
     assert urllib.request.urlopen(made).status == 201
     tab = sign_in(browser, MEMBER)
-    expect(tab.get_by_role("heading", name="Projects")).to_be_visible(timeout=30_000)
+    expect(tab.get_by_role("heading", name="Home")).to_be_visible(timeout=30_000)
     nav = tab.get_by_role("navigation", name="Workspace")
+    expect(nav.get_by_role("link", name="Projects")).to_be_visible(timeout=15_000)
+    expect(nav.get_by_role("link", name="MCP Server Registry")).to_have_count(0)  # not in a developer's default features (R2)
+    assert tab.evaluate("fetch('/api/mcp/servers').then(r => r.status)") == 403
     expect(nav.get_by_role("link", name="Users")).to_have_count(0)
     expect(nav.get_by_role("link", name="Settings")).to_have_count(0)
     tab.goto(f"{UI}/users")
@@ -142,20 +154,22 @@ def test_a_non_admin_is_refused_on_users(browser, app):
     tab.context.close()
 
 
-def test_the_home_page_is_a_public_landing_page_with_downloads_and_sign_in(browser):
+def test_the_landing_page_has_only_sign_in_and_downloads_wait_for_home(browser):
     context = browser.new_context(viewport={"width": 1440, "height": 900})
     tab = context.new_page()
     tab.goto(UI)
     expect(tab).not_to_have_url(re.compile(r"/login$"))
     expect(tab.get_by_role("heading", level=1)).to_be_visible(timeout=30_000)
-    for os_name in ("macos", "windows"):  # no installer is published in this test, so each says so instead of linking
-        expect(tab.get_by_test_id(f"download-{os_name}")).to_contain_text("installer is published yet")
+    expect(tab.get_by_test_id("desktop-downloads")).to_have_count(0)  # no installers before sign-in (R1)
+    assert tab.evaluate("fetch('/api/downloads').then(r => r.status)") == 401
     tab.get_by_test_id("landing-sign-in").first.click()
     expect(tab).to_have_url(re.compile(r"/login$"))
     tab.get_by_label("Username").fill(ADMIN["username"])
     tab.get_by_label("Password").fill(ADMIN["password"])
     tab.get_by_role("button", name="Sign in").click()
-    expect(tab).to_have_url(re.compile(r"/projects$"), timeout=30_000)
+    expect(tab).to_have_url(re.compile(r"/home$"), timeout=30_000)
+    for os_name in ("macos", "windows"):  # no installer is published in this test, so each says so instead of linking
+        expect(tab.get_by_test_id(f"download-{os_name}")).to_contain_text("installer is published yet", timeout=15_000)
     tab.goto(UI)
     expect(tab.get_by_test_id("landing-open").first).to_be_visible(timeout=15_000)
     context.close()

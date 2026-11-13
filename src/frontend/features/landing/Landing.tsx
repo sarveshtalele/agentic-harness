@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ThemeToggle } from "../../components/ui";
 import { api } from "../../lib/api";
-import { DesktopDownloads } from "../login/DesktopDownloads";
 
 const FEATURES = [
   { icon: Bot, title: "Project harness", text: "An agent on Microsoft Agent Framework that plans, reads your repository, runs approved commands in a sandbox and uses skills, plugins and MCP tools." },
@@ -23,7 +22,7 @@ export function Landing() {
     api("/auth/me").then(() => setSignedIn(true)).catch(() => setSignedIn(false));
   }, []);
   const enter = signedIn ? (
-    <Link href="/projects" data-testid="landing-open" className={`${button} bg-indigo-600 text-white hover:bg-indigo-500`}>Open workspace <ArrowRight className="h-4 w-4" /></Link>
+    <Link href="/home" data-testid="landing-open" className={`${button} bg-indigo-600 text-white hover:bg-indigo-500`}>Open workspace <ArrowRight className="h-4 w-4" /></Link>
   ) : (
     <Link href="/login" data-testid="landing-sign-in" className={`${button} bg-indigo-600 text-white hover:bg-indigo-500`}><LogIn className="h-4 w-4" /> Sign in</Link>
   );
@@ -48,7 +47,6 @@ export function Landing() {
           </p>
           <div className="flex flex-wrap gap-3">
             {signedIn !== null && enter}
-            <a href="#download" className={`${button} border border-slate-300 hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800`}>Get the desktop app</a>
           </div>
         </section>
 
@@ -60,11 +58,6 @@ export function Landing() {
               <p className="text-sm text-slate-600 dark:text-slate-400">{text}</p>
             </article>
           ))}
-        </section>
-
-        <section id="download" className="space-y-3">
-          <h2 className="text-xl font-bold">Download</h2>
-          <DesktopDownloads className="w-full" />
         </section>
       </main>
     </div>

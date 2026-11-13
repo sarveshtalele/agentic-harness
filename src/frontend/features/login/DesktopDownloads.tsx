@@ -14,9 +14,10 @@ const label = (f: File) => (f.os === "windows" ? "Windows (MSI)" : `macOS (${f.k
 
 /** Desktop installers from the published manifest only. Each platform says plainly when nothing is published for it. */
 export function DesktopDownloads({ className = "w-full max-w-sm" }: { className?: string }) {
-  const [manifest, setManifest] = useState<Manifest | null>(null);
+  const [manifest, setManifest] = useState<Manifest | null>(null);  // null: loading or not allowed
   useEffect(() => {
-    fetch("/api/downloads", { cache: "no-store" }).then((r) => r.json()).then(setManifest).catch(() => setManifest({ configured: false, files: [] }));
+    // 401 or 403: this member has no "Desktop downloads" feature (R2), so the panel is absent, not greyed
+    fetch("/api/downloads", { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then(setManifest).catch(() => setManifest(null));
   }, []);
   if (!manifest) return null;
   return (

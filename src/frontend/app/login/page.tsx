@@ -4,7 +4,6 @@ import { LogIn, ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button, ErrorNote, Field, inputClass, ThemeToggle } from "../../components/ui";
 import { api } from "../../lib/api";
-import { DesktopDownloads } from "../../features/login/DesktopDownloads";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -22,7 +21,7 @@ export default function LoginPage() {
     try {
       await api("/auth/login", { json: { username, password } });
       setPassword("");
-      window.location.href = "/projects"; // a full load, so every page starts from the new session
+      window.location.href = "/home"; // a full load, so every page starts from the new session
     } catch (e: any) {
       setPassword("");
       setError(e.message);
@@ -43,7 +42,6 @@ export default function LoginPage() {
         <ErrorNote message={error} />
         <Button type="submit" busy={busy} disabled={!configured} className="w-full justify-center"><LogIn className="h-4 w-4" /> Sign in</Button>
       </form>
-      <DesktopDownloads />
     </div>
   );
 }

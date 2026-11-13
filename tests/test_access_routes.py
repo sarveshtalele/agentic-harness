@@ -21,6 +21,13 @@ def test_every_route_has_an_access_rule():
     assert len(routes()) > 70
 
 
+def test_every_route_names_its_feature_or_is_core():
+    from backend.core.auth import features
+
+    loose = [f"{m} {p}" for m, p in routes() if not features.feature_of(p) and not features.CORE.match(p)]
+    assert not loose, f"Name a feature for {loose} in core/auth/features.py (ROUTES), or list it in CORE"
+
+
 def test_a_path_with_no_rule_is_refused_for_everyone_but_the_admin():
     user = {"id": "usr_x", "role": "user", "account_role": "developer"}
     assert auth.access_problem("GET", "/api/brand-new-thing", user)[0] == 403
@@ -29,6 +36,14 @@ def test_a_path_with_no_rule_is_refused_for_everyone_but_the_admin():
 
 ADMIN_ONLY = ("/api/users", "/api/connections", "/api/logs", "/api/auth/events", "/api/models", "/api/usage", "/api/agents/guardrail-events", "/api/capabilities/sync")
 ADMIN_WRITE = ("/api/settings", "/api/prompts", "/api/agents", "/api/evals")
+# R2 features, written out from the plan's table (12.3): which routes need which feature, and each role's defaults
+FEATURE_ROUTES = (("/agui/harness", "harness"), ("/api/chats/{thread_id}/todos", "harness"), ("/api/chats/{thread_id}/terminal", "harness"),
+                  ("/api/runs", "qe"), ("/api/projects/{project_id}/runs", "qe"), ("/api/findings", "bugs"), ("/api/projects/{project_id}/findings", "bugs"),
+                  ("/api/skill-studio", "skills"), ("/api/mcp", "mcp"), ("/api/documents", "docs"), ("/api/projects/{project_id}/documents", "docs"),
+                  ("/api/templates", "docs"), ("/api/projects/{project_id}/templates", "docs"), ("/api/traces", "traces"), ("/api/observability", "traces"),
+                  ("/api/projects/{project_id}/observability", "traces"), ("/api/usage", "usage"))
+ROLE_FEATURES = {"developer": {"harness", "qe", "bugs", "docs", "downloads", "traces"}, "viewer": {"docs"}}
+PERSONA_ROLE = {"viewer": "viewer"}  # every other persona is a developer account
 VIEWER_MAY_WRITE = ("/api/auth/logout", "/api/auth/desktop-session", "/api/account/password", "/api/account/email")  # a viewer may use the desktop app, read-only
 
 
@@ -38,6 +53,11 @@ def expected(persona, method, template):
     scoped = any("{" + i + "}" in template for i in IDS)
     if persona == "admin":
         return None
+    feature = next((f for prefix, f in FEATURE_ROUTES if template == prefix or template.startswith(prefix + "/")), None)
+    if feature and feature not in ROLE_FEATURES[PERSONA_ROLE.get(persona, "developer")]:
+        return 403
+    if template.startswith("/api/features") and template != "/api/features/me":
+        return 403
     if template.startswith(ADMIN_ONLY) or template.endswith(("/repo/local", "/transfer", "/workspace")):
         return 403
     if write and (template.startswith(ADMIN_WRITE) or template == "/api/skills/{name}/health"):  # checking runs skill scripts
@@ -79,7 +99,7 @@ def test_viewer_reads_but_cannot_write_and_the_message_names_the_role(world):
     pid = world.project["id"]
     assert world.viewer.get(f"/api/projects/{pid}/overview").status_code == 200
     refused = world.viewer.post(f"/api/projects/{pid}/runs", json={"workflow": "ba", "input": {}})
-    assert refused.status_code == 403 and "viewer" in refused.json()["message"]
+    assert refused.status_code == 403 and "QE cycle" in refused.json()["message"]  # a viewer's role has no QE cycle (R2)
     assert world.viewer.post("/api/projects", json={"name": "Mine"}).status_code == 403
     assert world.viewer.post(f"/api/approvals/{world.ids['approval_id']}/decide", json={"approved": True}).status_code == 403
     assert world.viewer.post(f"/api/projects/{pid}/gates/0/decision", json={"approved": True}).status_code == 403
