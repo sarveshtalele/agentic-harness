@@ -61,7 +61,7 @@ def account(client, models_=("m-a",), **extra):
     """A signed-in user with the given models ticked and the first as default. Returns (user record, client, project)."""
     listed(*models_)
     name = unique()
-    user = make_user(client, name, models=list(models_), model=models_[0], **extra)
+    user = make_user(client, name, models=list(models_), model=models_[0], features=["ba"], **extra)  # these tests start BA runs (R2)
     other = As(client, name)
     return user, other, other.post("/api/projects", json={"name": "Mine", "description": ""}).json()
 

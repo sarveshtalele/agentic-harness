@@ -25,7 +25,7 @@ DEFAULTS = {  # the plan's table (12.3); traces with the roles that run agents
 # (path pattern, feature). BA Studio routes join with R3; usage is admin-only by its own rule as well.
 ROUTES = [
     (re.compile(r"^/agui/harness$|^/api/harness(/|$)|^/api/chats/[^/]+/(todos|terminal)$"), "harness"),
-    (re.compile(r"^/api/(projects/[^/]+/)?runs(/|$)"), "qe"),
+    (re.compile(r"^/api/projects/[^/]+/sources(/|$)"), "ba"),
     (re.compile(r"^/api/(projects/[^/]+/)?findings(/|$)"), "bugs"),
     (re.compile(r"^/api/skill-studio(/|$)"), "skills"),
     (re.compile(r"^/api/mcp(/|$)"), "mcp"),
@@ -36,7 +36,9 @@ ROUTES = [
 ]
 # Everyone signed in (access still limited by role and project rules): sign-in, accounts, projects and their repository,
 # gates, approvals, chat with the platform agents, and the admin's own areas.
-CORE = re.compile(r"^/api/(health|auth|account|profile|features|users|settings|models|connections|logs|prompts|agents|evals|plugins|skills|capabilities|"
+# A run's feature is its workflow's (`WORKFLOWS`, checked when it starts); reading a run follows the project rules.
+WORKFLOWS = {"ba": "ba", "brainstorm": "ba", "qe": "qe", "bug_scan": "bugs", "change": "bugs"}
+CORE = re.compile(r"^/api/(health|auth|account|profile|features|users|settings|models|connections|logs|prompts|agents|evals|plugins|skills|capabilities|runs|"
                   r"approvals|chat|chats|memories|projects)(/|$)|^/agui/[^/]+$")
 
 
@@ -72,6 +74,15 @@ def effective(user: dict | None) -> list[str]:
 
 def allows(user: dict | None, feature: str) -> bool:
     return feature in effective(user)
+
+
+def workflow_problem(user: dict | None, workflow: str) -> str:
+    """Why this member may not start this workflow (R2), or "". An unknown name is left to the engine's own refusal; a test
+    checks every registered workflow is listed in WORKFLOWS."""
+    feature = WORKFLOWS.get(workflow)
+    if not feature:
+        return ""
+    return "" if allows(user, feature) else f"Your access does not include {FEATURES[feature]}. Ask your administrator"
 
 
 def _check(features) -> list[str]:

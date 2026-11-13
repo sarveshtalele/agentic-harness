@@ -16,7 +16,7 @@ Written by `scripts/hooks/activity_log.py`. Times are local.
 | 8 | Harness eval suite (5.9); repository map only if it helps (5.8) | open | |
 | 9 | Azure guide at or under $25/month, first test deployment (9) | in progress (guide done 2026-11-12; test deployment and portal screenshots open) | `docs/AZURE_DEPLOYMENT_GUIDE.md`: prices re-read from prices.azure.com 2026-11-12, $20.70 with the PostgreSQL stop schedule (Automation runbook), zipping, portal steps, UI tour, troubleshooting. Owner approved deleting the 4 old Azure docs |
 | 10 | Desktop bundled PostgreSQL (D4), signing when certificates exist | open | |
-| 11 | Phase 2 (docs/PHASE2_PLAN.md rev 3): Claude Code-class harness on MAF (CLI, desktop, web), then R1 to R6 | approved 2026-11-12; step 1 built, baseline run blocked | Step 1: evals/harness/discovery.json (20 tasks, fixture repo with Python, TS, Bash, PowerShell, .claude and .agents skills), src/backend/maf/evals/discovery.py scorer (tests/test_discovery_eval_scoring.py: 3 passed), tests/test_harness_discovery_eval.py live driver, `python scripts/dev.py live`. Baseline not run: the model proxy answers HTTP 429 'daily token limit exceeded (25,101,895/25,000,000)'; Step 2 done locally (2026-11-12): bash and powershell on MAF LocalShellTool (persistent), background tasks, spill, permission modes and rules, /mode; tests/test_harness_shells.py and tests/test_harness_permissions.py (20 passed, PowerShell skipped on this Mac); full suite 710 passed, 2 skipped; CI green on 3 OS for 3bc0fd5 (after fixing PowerShell escape codes and Git Bash paths). Step 3 done locally: core/script_runtime.py, core/script_health.py, per-turn skill runner, Flagged badge and Check again; full suite 716 passed, 3 skipped; committed 75ecbbb + PowerShell syntax-check fix 8a62ef4; CI green on 3 OS (run 43251382164); Step 4 done locally: skill scopes, tool index with arguments, nearest names for invented tools, MCP refresh, command substitutions; tests/test_harness_discovery_scopes.py 5 passed; committed c6897c7; CI: tests green on 3 OS, macOS smoke failed on an ambiguous test locator (fixed, smoke 4 passed locally). Step 5 done locally (2026-11-13): settings files, settings and http hooks, updatedInput, PostToolUseFailure, Stop hooks, checkpoints and /rewind, routed helper-agent permissions; full suite 729 passed before one contract test update (now 5 passed); not committed. Discovery eval running (quota reset); Discovery eval after (current code, docs/evidence/runs/2026-11-13-discovery-after): 15/20 passed, selection 0.95, first try 0.6, argument validity 1.0, 36 invented names. Found and fixed: run_skill_script crashed on MAF's FileSkill (.name), run_shell alias for the primary shell, deferred tools called by name are loaded on the spot; full suite 732 passed, 3 skipped. Baseline (b76ddbd, docs/evidence/runs/2026-11-13-discovery-baseline): 12/20 passed, selection 0.85, first try 0.55, argument validity 1.0, 6 invented names. Eval after the fixes (docs/evidence/runs/2026-11-13-discovery-after-fixes): 18/20 passed, 4 invented names. Re-scored all three runs uniformly after widening two answer checks to patterns (results-rescored.json): baseline 13/20 (65%), steps 2-4 16/20 (80%), with fixes 18/20 (90%). Full threads recorded: no task mix-up, the model wandered. Full suite 732 passed, 3 skipped. Committed e5944aa. Step 6 (aqh CLI) built: tests/test_aqh_cli.py 4 passed; live `aqh -p` with the real model on macOS created notes.txt in the bound folder (data/aqh-demo); committed 00c27f9; CI green on 3 OS (run 43294669803). Step 7 (OS sandbox T1) built: harness_kit/os_sandbox.py (Seatbelt, bubblewrap) around persistent and background shells, auto mode skips the card only when sandboxed, Linux CI installs bubblewrap; tests/test_os_sandbox.py 3 passed on macOS with real Seatbelt (write outside the workspace refused, network blocked); full suite 740 passed, 3 skipped; committed 33ac060; CI green on 3 OS (run 43297921200). Step 8 (R6, Terminal pane) built: tests/test_credentials_r6.py 7 passed, tests/test_desktop_signin.py 2 passed, tests/desktop/test_desktop_app.py 2 passed with the real Electron app against a real server on macOS (sign-in, wrong password refused, signed in as the member; a zsh PTY in the project workspace echoed through the pane); full suite 749 passed, 4 skipped; committed 31649b5 + race-test fix ddc1f2c; CI green on 3 OS (run 43365289968); desktop installers built (macOS arm64, x64, Windows). Step 9 (R2 features, R1 Home) built: tests/test_features_r2.py 2 passed, access matrix with features 6 passed, smoke 4 passed (Home after sign-in, no installers on the landing page, /api/downloads 401 signed out, developer without MCP, Features editor); full suite 752 passed, 4 skipped; committed 08d6dd3; CI green on 3 OS (run 43368548741). Windows setup fix (owner report 2026-11-13: `dev.py up` failed, PostgreSQL did not answer): `dev.py up` now starts the local database every time, then waits for the backend, then starts the UI; `dev.py db` replaces a stale local URL in .env; the backend names the real connection error; Next's lockfile warning silenced; a fresh .env gets a strong admin password; CI runs `dev.py up` on all 3 OS. Local: database stopped, then `up` recovered; full suite 753 passed; committed e10f83d; CI green on 3 OS (run 43371279329), `dev.py up` passed on Windows, macOS and Linux. Step 10 (UI audit U1-U10) built: tests/e2e/test_ui_audit.py 0 findings (37 pages x desktop light, desktop dark, phone), smoke 4 passed in the same session, full suite 753 passed |
+| 11 | Phase 2 (docs/PHASE2_PLAN.md rev 3): Claude Code-class harness on MAF (CLI, desktop, web), then R1 to R6 | approved 2026-11-12; step 1 built, baseline run blocked | Step 1: evals/harness/discovery.json (20 tasks, fixture repo with Python, TS, Bash, PowerShell, .claude and .agents skills), src/backend/maf/evals/discovery.py scorer (tests/test_discovery_eval_scoring.py: 3 passed), tests/test_harness_discovery_eval.py live driver, `python scripts/dev.py live`. Baseline not run: the model proxy answers HTTP 429 'daily token limit exceeded (25,101,895/25,000,000)'; Step 2 done locally (2026-11-12): bash and powershell on MAF LocalShellTool (persistent), background tasks, spill, permission modes and rules, /mode; tests/test_harness_shells.py and tests/test_harness_permissions.py (20 passed, PowerShell skipped on this Mac); full suite 710 passed, 2 skipped; CI green on 3 OS for 3bc0fd5 (after fixing PowerShell escape codes and Git Bash paths). Step 3 done locally: core/script_runtime.py, core/script_health.py, per-turn skill runner, Flagged badge and Check again; full suite 716 passed, 3 skipped; committed 75ecbbb + PowerShell syntax-check fix 8a62ef4; CI green on 3 OS (run 43251382164); Step 4 done locally: skill scopes, tool index with arguments, nearest names for invented tools, MCP refresh, command substitutions; tests/test_harness_discovery_scopes.py 5 passed; committed c6897c7; CI: tests green on 3 OS, macOS smoke failed on an ambiguous test locator (fixed, smoke 4 passed locally). Step 5 done locally (2026-11-13): settings files, settings and http hooks, updatedInput, PostToolUseFailure, Stop hooks, checkpoints and /rewind, routed helper-agent permissions; full suite 729 passed before one contract test update (now 5 passed); not committed. Discovery eval running (quota reset); Discovery eval after (current code, docs/evidence/runs/2026-11-13-discovery-after): 15/20 passed, selection 0.95, first try 0.6, argument validity 1.0, 36 invented names. Found and fixed: run_skill_script crashed on MAF's FileSkill (.name), run_shell alias for the primary shell, deferred tools called by name are loaded on the spot; full suite 732 passed, 3 skipped. Baseline (b76ddbd, docs/evidence/runs/2026-11-13-discovery-baseline): 12/20 passed, selection 0.85, first try 0.55, argument validity 1.0, 6 invented names. Eval after the fixes (docs/evidence/runs/2026-11-13-discovery-after-fixes): 18/20 passed, 4 invented names. Re-scored all three runs uniformly after widening two answer checks to patterns (results-rescored.json): baseline 13/20 (65%), steps 2-4 16/20 (80%), with fixes 18/20 (90%). Full threads recorded: no task mix-up, the model wandered. Full suite 732 passed, 3 skipped. Committed e5944aa. Step 6 (aqh CLI) built: tests/test_aqh_cli.py 4 passed; live `aqh -p` with the real model on macOS created notes.txt in the bound folder (data/aqh-demo); committed 00c27f9; CI green on 3 OS (run 43294669803). Step 7 (OS sandbox T1) built: harness_kit/os_sandbox.py (Seatbelt, bubblewrap) around persistent and background shells, auto mode skips the card only when sandboxed, Linux CI installs bubblewrap; tests/test_os_sandbox.py 3 passed on macOS with real Seatbelt (write outside the workspace refused, network blocked); full suite 740 passed, 3 skipped; committed 33ac060; CI green on 3 OS (run 43297921200). Step 8 (R6, Terminal pane) built: tests/test_credentials_r6.py 7 passed, tests/test_desktop_signin.py 2 passed, tests/desktop/test_desktop_app.py 2 passed with the real Electron app against a real server on macOS (sign-in, wrong password refused, signed in as the member; a zsh PTY in the project workspace echoed through the pane); full suite 749 passed, 4 skipped; committed 31649b5 + race-test fix ddc1f2c; CI green on 3 OS (run 43365289968); desktop installers built (macOS arm64, x64, Windows). Step 9 (R2 features, R1 Home) built: tests/test_features_r2.py 2 passed, access matrix with features 6 passed, smoke 4 passed (Home after sign-in, no installers on the landing page, /api/downloads 401 signed out, developer without MCP, Features editor); full suite 752 passed, 4 skipped; committed 08d6dd3; CI green on 3 OS (run 43368548741). Windows setup fix (owner report 2026-11-13: `dev.py up` failed, PostgreSQL did not answer): `dev.py up` now starts the local database every time, then waits for the backend, then starts the UI; `dev.py db` replaces a stale local URL in .env; the backend names the real connection error; Next's lockfile warning silenced; a fresh .env gets a strong admin password; CI runs `dev.py up` on all 3 OS. Local: database stopped, then `up` recovered; full suite 753 passed; committed e10f83d; CI green on 3 OS (run 43371279329), `dev.py up` passed on Windows, macOS and Linux. Step 10 (UI audit U1-U10) built: tests/e2e/test_ui_audit.py 0 findings (37 pages x desktop light, desktop dark, phone), smoke 4 passed in the same session, full suite 753 passed; committed 551b61b; CI green on 3 OS (run 43376002863). Step 11 R3 built: tests/test_brainstorm_r3.py 5 passed (sources with slides and notes, .ppt refused without LibreOffice, size limit; brainstorm from question to G1 through the approvals API); live run on deepseek-v4-flash-global (tests/test_brainstorm_live.py, 1 passed: G0, 8 distinct questions, approaches, builder check with 5 questions, G1) after a code check for repeated questions; runs gated by their workflow's feature |
 
 | Time | Event | Detail |
 |---|---|---|
@@ -12282,3 +12282,181 @@ Written by `scripts/hooks/activity_log.py`. Times are local.
 | 2026-11-13 11:30:08 | before | Bash: Stable screenshot names; rerun audit |
 | 2026-11-13 11:32:51 | after | Bash: Stable screenshot names; rerun audit |
 | 2026-11-13 11:32:59 | before | Bash: Commit and push step 10 |
+| 2026-11-13 11:33:04 | after | Bash: Commit and push step 10 |
+| 2026-11-13 11:33:10 | before | Bash: Watch CI for step 10 |
+| 2026-11-13 11:33:10 | after | Bash: Watch CI for step 10 |
+| 2026-11-13 11:33:14 | before | mcp__ccd_turn__wrap_up |
+| 2026-11-13 11:33:14 | after | mcp__ccd_turn__wrap_up |
+| 2026-11-13 11:33:24 | turn end |  |
+| 2026-11-13 11:50:27 | user | <ta[redacted]> <task-id>b2f8kt15s</task-id> <tool-use-id>toolu_01WGpFxhUToA3fjeN2jDDZVv</tool-use-id> <output-file>/private/tmp/claude-501/-Users-sarveshtalele… |
+| 2026-11-13 11:50:31 | before | Bash: Read step 10 CI result |
+| 2026-11-13 11:50:32 | after | Bash: Read step 10 CI result |
+| 2026-11-13 11:50:36 | before | Bash: Record CI; read R3/R4 plan sections |
+| 2026-11-13 11:50:37 | after | Bash: Record CI; read R3/R4 plan sections |
+| 2026-11-13 11:50:42 | before | mcp__ccd_turn__update_plan |
+| 2026-11-13 11:50:42 | after | mcp__ccd_turn__update_plan |
+| 2026-11-13 11:50:44 | before | Bash: Survey BA sources API, UI, workflows and parsers |
+| 2026-11-13 11:50:44 | after | Bash: Survey BA sources API, UI, workflows and parsers |
+| 2026-11-13 11:50:46 | before | Bash: Read parser dispatch and sources API |
+| 2026-11-13 11:50:47 | after | Bash: Read parser dispatch and sources API |
+| 2026-11-13 11:50:49 | before | Bash: Read files.extract_text |
+| 2026-11-13 11:50:49 | after | Bash: Read files.extract_text |
+| 2026-11-13 11:50:55 | before | Bash: Read BA workflow |
+| 2026-11-13 11:50:56 | before | Bash: List shared workflow helpers |
+| 2026-11-13 11:50:58 | before | Bash: Read engine step primitives |
+| 2026-11-13 11:50:58 | after | Bash: Read BA workflow |
+| 2026-11-13 11:50:58 | after | Bash: List shared workflow helpers |
+| 2026-11-13 11:50:58 | after | Bash: Read engine step primitives |
+| 2026-11-13 11:51:00 | before | Bash: Read stage specs and BA workflow definition |
+| 2026-11-13 11:51:01 | before | Bash: Read approval handling and decide |
+| 2026-11-13 11:51:02 | after | Bash: Read stage specs and BA workflow definition |
+| 2026-11-13 11:51:02 | after | Bash: Read approval handling and decide |
+| 2026-11-13 11:51:17 | before | Bash: Read approval decide API and prompts layout |
+| 2026-11-13 11:51:17 | after | Bash: Read approval decide API and prompts layout |
+| 2026-11-13 11:51:20 | before | Bash: Read BA prompt and agent definitions |
+| 2026-11-13 11:51:21 | before | Bash: Read BA agent definition and registry |
+| 2026-11-13 11:51:21 | after | Bash: Read BA agent definition and registry |
+| 2026-11-13 11:51:21 | after | Bash: Read BA prompt and agent definitions |
+| 2026-11-13 11:51:31 | before | Bash: Read stage advance and edges |
+| 2026-11-13 11:51:31 | after | Bash: Read stage advance and edges |
+| 2026-11-13 11:51:34 | before | Bash: Find how routes become edges |
+| 2026-11-13 11:51:35 | before | Bash: Read compile_workflow |
+| 2026-11-13 11:51:35 | after | Bash: Read compile_workflow |
+| 2026-11-13 11:51:35 | after | Bash: Find how routes become edges |
+| 2026-11-13 11:51:38 | before | Bash: Read compile edges code |
+| 2026-11-13 11:51:39 | after | Bash: Read compile edges code |
+| 2026-11-13 11:51:52 | before | Bash: Check reviewer prompt and attribution files |
+| 2026-11-13 11:51:52 | after | Bash: Check reviewer prompt and attribution files |
+| 2026-11-13 11:51:56 | before | mcp__firecrawl__firecrawl_scrape: https://raw.githubusercontent.com/obra/superpowers/main/skills/brainstorming/SKILL.md |
+| 2026-11-13 11:51:58 | failed | mcp__firecrawl__firecrawl_scrape: https://raw.githubusercontent.com/obra/superpowers/main/skills/brainstorming/SKILL.md Tool 'firecrawl_scrape' execution faile… |
+| 2026-11-13 11:51:58 | before | mcp__firecrawl__firecrawl_scrape: https://raw.githubusercontent.com/obra/superpowers/main/LICENSE |
+| 2026-11-13 11:51:59 | failed | mcp__firecrawl__firecrawl_scrape: https://raw.githubusercontent.com/obra/superpowers/main/LICENSE Tool 'firecrawl_scrape' execution failed: Unauthorized: Inval… |
+| 2026-11-13 11:52:01 | before | Bash: Fetch superpowers licence and brainstorming skill |
+| 2026-11-13 11:52:04 | after | Bash: Fetch superpowers licence and brainstorming skill |
+| 2026-11-13 11:52:09 | before | mcp__ccd_turn__update_plan |
+| 2026-11-13 11:52:09 | after | mcp__ccd_turn__update_plan |
+| 2026-11-13 11:52:10 | before | Bash: Read files.py header and extract_text users |
+| 2026-11-13 11:52:11 | after | Bash: Read files.py header and extract_text users |
+| 2026-11-13 11:52:17 | before | Bash: Check path and find clean_env |
+| 2026-11-13 11:52:17 | after | Bash: Check path and find clean_env |
+| 2026-11-13 11:52:19 | before | Bash: Read clean_env |
+| 2026-11-13 11:52:20 | after | Bash: Read clean_env |
+| 2026-11-13 11:52:35 | before | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/backend/core/source_text.py |
+| 2026-11-13 11:52:39 | after | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/backend/core/source_text.py |
+| 2026-11-13 11:52:39 | before | Bash: Move extraction out of files.py |
+| 2026-11-13 11:52:40 | after | Bash: Move extraction out of files.py |
+| 2026-11-13 11:52:44 | before | Bash: Size limit, redact and clear refusal on source upload |
+| 2026-11-13 11:52:45 | after | Bash: Size limit, redact and clear refusal on source upload |
+| 2026-11-13 11:52:50 | before | Bash: Import redact; run upload-related tests |
+| 2026-11-13 11:53:06 | after | Bash: Import redact; run upload-related tests |
+| 2026-11-13 11:53:19 | before | Bash: Add brainstorm, approaches and builder-check prompt sections |
+| 2026-11-13 11:53:20 | after | Bash: Add brainstorm, approaches and builder-check prompt sections |
+| 2026-11-13 11:53:42 | before | Bash: Read intake stage, gate handling and workflow registry |
+| 2026-11-13 11:53:42 | after | Bash: Read intake stage, gate handling and workflow registry |
+| 2026-11-13 11:54:08 | before | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/backend/maf/workflows/brainstorm.py |
+| 2026-11-13 11:54:08 | after | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/backend/maf/workflows/brainstorm.py |
+| 2026-11-13 11:54:13 | before | Bash: Read decide route |
+| 2026-11-13 11:54:13 | after | Bash: Read decide route |
+| 2026-11-13 11:54:19 | before | Bash: Carry brainstorm answers through the decide API |
+| 2026-11-13 11:54:20 | after | Bash: Carry brainstorm answers through the decide API |
+| 2026-11-13 11:54:22 | before | Bash: Import redact; find BA workflow tests to model on |
+| 2026-11-13 11:54:23 | after | Bash: Import redact; find BA workflow tests to model on |
+| 2026-11-13 11:54:27 | before | Bash: Check runs.py size baseline and structure |
+| 2026-11-13 11:54:27 | after | Bash: Check runs.py size baseline and structure |
+| 2026-11-13 11:54:33 | before | Bash: Check candidate homes for the decision model |
+| 2026-11-13 11:54:33 | after | Bash: Check candidate homes for the decision model |
+| 2026-11-13 11:54:42 | before | Bash: Move the answer model to api/common.py |
+| 2026-11-13 11:54:43 | after | Bash: Move the answer model to api/common.py |
+| 2026-11-13 11:54:46 | before | Bash: Fix imports and check the workflow registers |
+| 2026-11-13 11:54:48 | after | Bash: Fix imports and check the workflow registers |
+| 2026-11-13 11:54:53 | before | Bash: Find BA run tests and wait helpers |
+| 2026-11-13 11:54:56 | after | Bash: Find BA run tests and wait helpers |
+| 2026-11-13 11:54:56 | before | Bash: Locate BA workflow tests and approval helpers |
+| 2026-11-13 11:54:56 | after | Bash: Locate BA workflow tests and approval helpers |
+| 2026-11-13 11:54:56 | before | Bash: Find BA workflow test helpers |
+| 2026-11-13 11:54:57 | after | Bash: Find BA workflow test helpers |
+| 2026-11-13 11:54:59 | before | Bash: Read run helpers and the BA API test |
+| 2026-11-13 11:55:00 | after | Bash: Read run helpers and the BA API test |
+| 2026-11-13 11:55:02 | before | Bash: Read scripted rules helper |
+| 2026-11-13 11:55:02 | failed | Bash: Read scripted rules helper Exit code 1 GOOD_REVIEW = '{"score": 90, "verdict": "APPROVED", "issues": []}' def rules(): return [ ("Review type: requiremen… |
+| 2026-11-13 11:55:27 | before | Write: /Users/sarveshtalele/Downloads/agentic-harness/tests/test_brainstorm_r3.py |
+| 2026-11-13 11:55:29 | after | Write: /Users/sarveshtalele/Downloads/agentic-harness/tests/test_brainstorm_r3.py |
+| 2026-11-13 11:55:29 | before | Bash: Run brainstorm tests |
+| 2026-11-13 11:55:33 | after | Bash: Run brainstorm tests |
+| 2026-11-13 11:55:41 | before | Bash: Use request-only match strings and rerun |
+| 2026-11-13 11:55:45 | after | Bash: Use request-only match strings and rerun |
+| 2026-11-13 11:55:55 | before | Bash: Carry builder answers in their own key; rerun |
+| 2026-11-13 11:56:00 | after | Bash: Carry builder answers in their own key; rerun |
+| 2026-11-13 11:56:04 | before | mcp__ccd_turn__update_plan |
+| 2026-11-13 11:56:04 | after | mcp__ccd_turn__update_plan |
+| 2026-11-13 11:56:05 | before | Bash: Read BA page and data hook |
+| 2026-11-13 11:56:05 | after | Bash: Read BA page and data hook |
+| 2026-11-13 11:56:09 | before | Bash: Read ApprovalCard |
+| 2026-11-13 11:56:10 | after | Bash: Read ApprovalCard |
+| 2026-11-13 11:56:12 | before | Bash: Read run ApprovalCard |
+| 2026-11-13 11:56:12 | after | Bash: Read run ApprovalCard |
+| 2026-11-13 11:56:31 | before | Bash: Add brainstorm step UI to approval cards |
+| 2026-11-13 11:56:32 | after | Bash: Add brainstorm step UI to approval cards |
+| 2026-11-13 11:56:46 | before | Bash: Add brainstorm start to BA Studio; typecheck and lint |
+| 2026-11-13 11:56:48 | after | Bash: Add brainstorm start to BA Studio; typecheck and lint |
+| 2026-11-13 11:56:52 | before | Bash: Accept .doc and .ppt in the sources picker |
+| 2026-11-13 11:56:52 | after | Bash: Accept .doc and .ppt in the sources picker |
+| 2026-11-13 11:57:01 | before | Bash: List workflows and current feature routes |
+| 2026-11-13 11:57:02 | after | Bash: List workflows and current feature routes |
+| 2026-11-13 11:57:10 | before | Bash: Gate runs by workflow feature; sources under BA |
+| 2026-11-13 11:57:11 | after | Bash: Gate runs by workflow feature; sources under BA |
+| 2026-11-13 11:57:23 | before | Bash: Leave unknown workflows to the engine; update access tests |
+| 2026-11-13 11:57:34 | after | Bash: Leave unknown workflows to the engine; update access tests |
+| 2026-11-13 11:57:42 | before | Bash: Restore viewer assertion; test workflow feature gate |
+| 2026-11-13 11:57:50 | after | Bash: Restore viewer assertion; test workflow feature gate |
+| 2026-11-13 11:58:00 | before | Bash: Full suite, smoke and UI audit |
+| 2026-11-13 12:04:48 | after | Bash: Full suite, smoke and UI audit |
+| 2026-11-13 12:04:52 | before | Bash: Show the failing tests' errors |
+| 2026-11-13 12:04:55 | after | Bash: Show the failing tests' errors |
+| 2026-11-13 12:04:58 | before | Bash: See workflow-set tests and limits failures |
+| 2026-11-13 12:05:03 | after | Bash: See workflow-set tests and limits failures |
+| 2026-11-13 12:05:09 | before | Bash: Add brainstorm to workflow sets; debug limits tests |
+| 2026-11-13 12:05:19 | after | Bash: Add brainstorm to workflow sets; debug limits tests |
+| 2026-11-13 12:05:22 | before | Bash: Read limits test setup |
+| 2026-11-13 12:05:22 | after | Bash: Read limits test setup |
+| 2026-11-13 12:05:24 | before | Bash: Read the failing limits test body |
+| 2026-11-13 12:05:25 | after | Bash: Read the failing limits test body |
+| 2026-11-13 12:05:29 | before | Bash: Read the models test account helper |
+| 2026-11-13 12:05:29 | after | Bash: Read the models test account helper |
+| 2026-11-13 12:05:33 | before | Bash: Give the limits test account BA Studio; rerun the suite |
+| 2026-11-13 12:09:27 | after | Bash: Give the limits test account BA Studio; rerun the suite |
+| 2026-11-13 12:09:30 | before | Bash: Read models access test setup |
+| 2026-11-13 12:09:31 | before | Bash: Inspect failing access tests |
+| 2026-11-13 12:09:33 | before | Bash: Find how failing tests create users and start runs |
+| 2026-11-13 12:09:33 | after | Bash: Read models access test setup |
+| 2026-11-13 12:09:33 | after | Bash: Inspect failing access tests |
+| 2026-11-13 12:09:33 | after | Bash: Find how failing tests create users and start runs |
+| 2026-11-13 12:09:38 | before | Bash: Grant BA Studio in model access tests; rerun |
+| 2026-11-13 12:09:44 | after | Bash: Grant BA Studio in model access tests; rerun |
+| 2026-11-13 12:09:48 | before | Bash: Fetch the full MIT licence text |
+| 2026-11-13 12:09:49 | after | Bash: Fetch the full MIT licence text |
+| 2026-11-13 12:09:53 | before | Bash: Write the third-party notices file |
+| 2026-11-13 12:09:55 | after | Bash: Write the third-party notices file |
+| 2026-11-13 12:10:02 | before | Bash: Read live test runner and examples |
+| 2026-11-13 12:10:03 | before | Bash: Read rest of run_live script |
+| 2026-11-13 12:10:03 | before | Bash: Read an existing live test |
+| 2026-11-13 12:10:04 | after | Bash: Read rest of run_live script |
+| 2026-11-13 12:10:04 | failed | Bash: Read an existing live test Exit code 1 sed: tests/test_live_model.py: No such file or directory ls: tests/test_brainstorm_live.py: No such file or direct… |
+| 2026-11-13 12:10:04 | after | Bash: Read live test runner and examples |
+| 2026-11-13 12:10:06 | before | Bash: Read a live test pattern |
+| 2026-11-13 12:10:07 | after | Bash: Read a live test pattern |
+| 2026-11-13 12:10:16 | before | Write: /Users/sarveshtalele/Downloads/agentic-harness/tests/test_brainstorm_live.py |
+| 2026-11-13 12:10:18 | after | Write: /Users/sarveshtalele/Downloads/agentic-harness/tests/test_brainstorm_live.py |
+| 2026-11-13 12:10:18 | before | Bash: Run live brainstorm on the real model |
+| 2026-11-13 12:12:07 | after | Bash: Run live brainstorm on the real model |
+| 2026-11-13 12:12:18 | before | Bash: Tell the model a delegated question is settled; rerun live |
+| 2026-11-13 12:14:38 | after | Bash: Tell the model a delegated question is settled; rerun live |
+| 2026-11-13 12:14:56 | before | Bash: Add a deterministic repeat check and probe it |
+| 2026-11-13 12:14:57 | after | Bash: Add a deterministic repeat check and probe it |
+| 2026-11-13 12:15:04 | before | Bash: Measure similarity scores for tuning |
+| 2026-11-13 12:15:05 | after | Bash: Measure similarity scores for tuning |
+| 2026-11-13 12:15:10 | before | Bash: Tune thresholds; rerun scripted and live brainstorm |
+| 2026-11-13 12:16:59 | after | Bash: Tune thresholds; rerun scripted and live brainstorm |
+| 2026-11-13 12:17:19 | before | Bash: Update docs and tracker; run full suite |
+| 2026-11-13 12:21:15 | after | Bash: Update docs and tracker; run full suite |
+| 2026-11-13 12:21:21 | before | Bash: Commit and push R3 |

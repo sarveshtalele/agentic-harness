@@ -55,7 +55,7 @@ def test_each_agent_tool_and_workflow_lives_in_its_own_file():
     root = Path(__file__).resolve().parent.parent
     assert {p.stem for p in (root / "prompts").glob("*.md")} == set(POLICIES) == {p.stem for p in (root / "evals").glob("*.json")}
     assert next(iter(POLICIES)) == "project-copilot", "the chat offers the first agent by default"
-    assert set(REGISTRY) == {"ba", "bug_scan", "change", "qe"}
+    assert set(REGISTRY) == {"ba", "brainstorm", "bug_scan", "change", "qe"}
     assert all((root / "src/backend/maf/workflows" / f"{name}.py").is_file() or (root / "src/backend/maf/workflows" / name / "__init__.py").is_file() for name in REGISTRY)
     names = [t.name for t in tools.repo_tools("p", root) + tools.document_tools("p") + tools.chat_tools("p", "t", None)]
     assert len(names) == 12 and all((root / "src/backend/maf/tools" / f"{name}.py").is_file() for name in names)

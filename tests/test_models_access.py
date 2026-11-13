@@ -54,7 +54,7 @@ def test_a_model_the_user_was_not_given_is_refused_by_run_chat_and_agent_and_log
 def test_a_user_with_no_model_ticked_cannot_run_or_chat(client):
     llm.set_client_override(ScriptedClient(rules()))
     name = unique()
-    make_user(client, name, models=[])
+    make_user(client, name, models=[], features=["ba"])  # BA Studio, so the model check is what refuses (R2)
     mine = As(client, name)
     project = mine.post("/api/projects", json={"name": "None", "description": ""}).json()
     refused = start_ba(mine, project)
@@ -141,7 +141,7 @@ def test_model_order_is_run_then_agent_then_user_then_system_and_each_call_recor
     listed("m-run", "m-agent", "m-user", "m-system")
     models.update("m-system", {"is_default": True})
     name = unique()
-    user = make_user(client, name, models=["m-run", "m-agent", "m-user"], model="m-user")
+    user = make_user(client, name, models=["m-run", "m-agent", "m-user"], model="m-user", features=["ba"])
     mine = As(client, name)
     assert client.put("/api/agents/business-analyst/settings", json={"enabled": True, "max_tokens": None, "reason": "cheaper", "model": "m-agent"}).status_code == 200
 

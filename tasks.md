@@ -344,6 +344,6 @@
 - [x] 9 R2: features (Harness, BA Studio, QE cycle, Bugs, Skill Studio, MCP, Documents, Desktop downloads, Traces, Usage) as role defaults plus member overrides, enforced per route (every route named or core), ledgered with before and after, Settings > Features editor with effective preview, navigation hides denied; R1: /home after sign-in, landing page without installers, /api/downloads only with the Downloads feature (2026-11-13). BA Studio tile and routes join with R3
 - [x] Playwright UI audit test (tests/e2e/test_ui_audit.py), 2026-11-12
 - [x] 10 UI audit fixes U1 to U10; audit at zero findings in desktop light, desktop dark and phone (2026-11-13): phone drawer, theme follows the system, plain short names, one QE download, landing without a 401, capabilities grouped by kind
-- [ ] 11 R3 uploads and brainstorming; R4 Atlassian (optional)
+- [ ] 11 R3 uploads and brainstorming; R4 Atlassian (optional). R3 done (2026-11-13): sources with page, slide and notes markers, .doc/.ppt through LibreOffice, size limit, redacted; brainstorm workflow (one question at a time with reason and source, editable play-back, skip or propose, approaches, BRD, builder check, G1) on the real model; runs gated by their workflow's feature. R4 next
 - [ ] 12 R5 QE cycle to Gate 5 with traceability
 - [ ] 13 Azure guide, proposal workbook, docs refresh

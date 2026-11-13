@@ -28,7 +28,7 @@ def test_sync_finds_every_tool_file_agent_and_workflow_with_its_stages():
     assert by[("tool", "run_tests")]["needs_approval"] and not by[("tool", "grep")]["needs_approval"]
     assert {"todos_add", "mode_set", "load_skill", "run_shell"} <= {c["name"] for c in caps.values() if c["kind"] == "tool"}
     assert all(("agent", key) in by for key in POLICIES)
-    assert {c["name"] for c in caps.values() if c["kind"] == "workflow"} == {"ba", "qe", "bug_scan", "change"}
+    assert {c["name"] for c in caps.values() if c["kind"] == "workflow"} == {"ba", "brainstorm", "qe", "bug_scan", "change"}
     for stage, agent in QE_STAGES.items():
         assert ("qe", "contains", f"qe.{stage}") in links
         assert (f"qe.{stage}", "performed_by", agent) in links

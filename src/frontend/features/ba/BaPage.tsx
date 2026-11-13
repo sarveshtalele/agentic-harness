@@ -8,6 +8,7 @@ import { RunDocuments } from "../runs/RunDocuments";
 import { RunList } from "../runs/RunList";
 import { RunPanel } from "../runs/RunPanel";
 import { LifecyclePipeline } from "./LifecyclePipeline";
+import { BrainstormStart } from "./BrainstormStart";
 import { getDomainPresets } from "./lib";
 import { RecentDocs } from "./RecentDocs";
 import { RequirementsForm } from "./RequirementsForm";
@@ -35,11 +36,12 @@ export function BaPage() {
   const template = safeTemplates.find((t) => t?.id === templateId);
   const presets = getDomainPresets(project.name || "Project", project.repo?.url || "");
   
-  const start = async () => {
+  const start = async (need?: string) => {
     setBusy(true);
     setError("");
     try {
-      const run = await api(`/projects/${project.id}/runs`, { json: { workflow: "ba", model, input: { brief, title: title || template?.name, template_id: templateId, source_ids: selected } } });
+      const input = need ? { need, title: title || template?.name, template_id: templateId, source_ids: selected } : { brief, title: title || template?.name, template_id: templateId, source_ids: selected };
+      const run = await api(`/projects/${project.id}/runs`, { json: { workflow: need ? "brainstorm" : "ba", model, input } });
       setRunId(run.id);
     } catch (e: any) {
       setError(e.message);
@@ -80,14 +82,15 @@ export function BaPage() {
 
   return (
     <>
-      <PageTitle title="BA Studio" subtitle="Turn a brief and source documents into a domain-grounded 10-section requirements document and validated Gherkin scenarios." />
+      <PageTitle title="BA Studio" subtitle="Brainstorm from your sources one question at a time, or write straight from a brief: a requirements document and checked Gherkin scenarios, signed at Gate 1." />
 
       {/* Autonomous Multi-Agent BA Lifecycle Flowchart */}
       <LifecyclePipeline />
 
       <div className="grid gap-4 lg:grid-cols-[1fr_320px] [&>*]:min-w-0">
         <div className="space-y-4">
-          <RequirementsForm project={project} presets={presets} brief={brief} setBrief={setBrief} title={title} setTitle={setTitle} template={template} templateId={templateId} setTemplateId={setTemplateId} safeTemplates={safeTemplates} error={error} model={model} setModel={setModel} busy={busy} disabled={!brief.trim() && !selected.length} onStart={start} onTemplateFile={addTemplate} />
+          <BrainstormStart busy={busy} sources={selected.length} onStart={(need) => start(need)} />
+          <RequirementsForm project={project} presets={presets} brief={brief} setBrief={setBrief} title={title} setTitle={setTitle} template={template} templateId={templateId} setTemplateId={setTemplateId} safeTemplates={safeTemplates} error={error} model={model} setModel={setModel} busy={busy} disabled={!brief.trim() && !selected.length} onStart={() => start()} onTemplateFile={addTemplate} />
 
           {runId && (
             <RunPanel
@@ -111,7 +114,7 @@ export function BaPage() {
           <Card title="Past runs">
             <RunList
               projectId={project.id}
-              workflow={["ba"]}
+              workflow={["ba", "brainstorm"]}
               activeId={runId}
               onPick={setRunId}
               refreshKey={runId}

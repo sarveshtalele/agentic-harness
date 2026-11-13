@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { api } from "../../lib/api";
 import { useAuth } from "../../components/AuthGate";
 import { Badge, Button, ErrorNote, Field, inputClass } from "../../components/ui";
+import { BrainstormStep } from "./BrainstormStep";
 import { ConfidenceNote } from "./ConfidenceNote";
 import { cleanTestName } from "./lib";
 
@@ -32,6 +33,7 @@ export function ApprovalCard({ approval, projectId, onDecided }: { approval: any
       setBusy(false);
     }
   };
+  if (["brainstorm_question", "brainstorm_approaches", "builder_check"].includes(payload.kind)) return <BrainstormStep approval={approval} onDecided={onDecided} />;
   return (
     <article className="space-y-3 rounded-xl border border-amber-500/50 bg-amber-500/5 p-4" data-testid="approval-card">
       <div className="flex items-center gap-2">

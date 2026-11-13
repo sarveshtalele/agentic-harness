@@ -28,6 +28,14 @@ def test_every_route_names_its_feature_or_is_core():
     assert not loose, f"Name a feature for {loose} in core/auth/features.py (ROUTES), or list it in CORE"
 
 
+def test_every_workflow_names_its_feature():
+    from backend.core.auth import features
+    from backend.maf.engine import REGISTRY
+    from backend.maf import workflows  # noqa: F401 - registers them
+
+    assert set(REGISTRY) <= set(features.WORKFLOWS), f"Name a feature for {set(REGISTRY) - set(features.WORKFLOWS)} in features.WORKFLOWS"
+
+
 def test_a_path_with_no_rule_is_refused_for_everyone_but_the_admin():
     user = {"id": "usr_x", "role": "user", "account_role": "developer"}
     assert auth.access_problem("GET", "/api/brand-new-thing", user)[0] == 403
@@ -38,11 +46,11 @@ ADMIN_ONLY = ("/api/users", "/api/connections", "/api/logs", "/api/auth/events",
 ADMIN_WRITE = ("/api/settings", "/api/prompts", "/api/agents", "/api/evals")
 # R2 features, written out from the plan's table (12.3): which routes need which feature, and each role's defaults
 FEATURE_ROUTES = (("/agui/harness", "harness"), ("/api/chats/{thread_id}/todos", "harness"), ("/api/chats/{thread_id}/terminal", "harness"),
-                  ("/api/runs", "qe"), ("/api/projects/{project_id}/runs", "qe"), ("/api/findings", "bugs"), ("/api/projects/{project_id}/findings", "bugs"),
+                  ("/api/projects/{project_id}/sources", "ba"), ("/api/findings", "bugs"), ("/api/projects/{project_id}/findings", "bugs"),
                   ("/api/skill-studio", "skills"), ("/api/mcp", "mcp"), ("/api/documents", "docs"), ("/api/projects/{project_id}/documents", "docs"),
                   ("/api/templates", "docs"), ("/api/projects/{project_id}/templates", "docs"), ("/api/traces", "traces"), ("/api/observability", "traces"),
                   ("/api/projects/{project_id}/observability", "traces"), ("/api/usage", "usage"))
-ROLE_FEATURES = {"developer": {"harness", "qe", "bugs", "docs", "downloads", "traces"}, "viewer": {"docs"}}
+ROLE_FEATURES = {"developer": {"harness", "qe", "bugs", "docs", "downloads", "traces"}, "viewer": {"docs"}}  # runs: by workflow, in the handler
 PERSONA_ROLE = {"viewer": "viewer"}  # every other persona is a developer account
 VIEWER_MAY_WRITE = ("/api/auth/logout", "/api/auth/desktop-session", "/api/account/password", "/api/account/email")  # a viewer may use the desktop app, read-only
 
@@ -99,7 +107,7 @@ def test_viewer_reads_but_cannot_write_and_the_message_names_the_role(world):
     pid = world.project["id"]
     assert world.viewer.get(f"/api/projects/{pid}/overview").status_code == 200
     refused = world.viewer.post(f"/api/projects/{pid}/runs", json={"workflow": "ba", "input": {}})
-    assert refused.status_code == 403 and "QE cycle" in refused.json()["message"]  # a viewer's role has no QE cycle (R2)
+    assert refused.status_code == 403 and "viewer" in refused.json()["message"]
     assert world.viewer.post("/api/projects", json={"name": "Mine"}).status_code == 403
     assert world.viewer.post(f"/api/approvals/{world.ids['approval_id']}/decide", json={"approved": True}).status_code == 403
     assert world.viewer.post(f"/api/projects/{pid}/gates/0/decision", json={"approved": True}).status_code == 403

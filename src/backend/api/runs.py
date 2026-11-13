@@ -14,8 +14,9 @@ from fastapi.responses import (
 )
 from pydantic import BaseModel, Field
 
-from backend.api.common import _project
 from backend.core import auth, ledger
+from backend.core.auth import features
+from backend.api.common import BrainstormAnswer, _project
 from backend.core.security import safe_path
 from backend.db import db, row, rows
 from backend.maf import agui, engine, evals, governance, llm, workflows  # noqa: F401 - workflows registers definitions
@@ -30,7 +31,7 @@ class RunIn(BaseModel):
     model: str = ""
 
 
-class DecisionIn(BaseModel):
+class DecisionIn(BrainstormAnswer):
     approved: bool
     feedback: str = ""
     open_pr: bool = False
@@ -39,6 +40,8 @@ class DecisionIn(BaseModel):
 @router.post("/api/projects/{project_id}/runs", status_code=201)
 async def start_run(project_id: str, body: RunIn):
     _project(project_id)
+    if problem := features.workflow_problem(auth.current_user.get(), body.workflow):  # R2: a run needs its workflow's feature
+        raise HTTPException(403, problem)
     if body.model:
         auth.permit_model(auth.signer(), body.model)
     try:
@@ -180,7 +183,7 @@ async def decide(approval_id: str, body: DecisionIn):
         raise HTTPException(404, f"Approval not found: {approval_id}")
 
     try:
-        return await engine.decide(approval_id, body.approved, auth.signer(), body.feedback, {"open_pr": body.open_pr})
+        return await engine.decide(approval_id, body.approved, auth.signer(), body.feedback, {"open_pr": body.open_pr, **body.redacted()})
     except auth.Forbidden:
         raise  # a role refusal is 403, not a bad request
     except ValueError as exc:

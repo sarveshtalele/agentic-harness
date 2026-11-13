@@ -2,7 +2,7 @@
 ledger with before and after, and that only the admin changes any of it."""
 from backend.core import ledger
 from backend.core.auth import features
-from tests.helpers_api import client, make_user, sign_in, unique  # noqa: F401 - fixtures
+from tests.helpers_api import client, make_user, project, sign_in, unique  # noqa: F401 - fixtures
 
 
 def test_role_defaults_decide_and_a_member_override_wins(client):
@@ -37,3 +37,13 @@ def test_changes_are_ledgered_with_before_and_after_and_only_the_admin_changes(c
     assert client.put("/api/features/roles", json={"developer": ["teleport"]}).status_code == 400
     assert client.put("/api/features/roles", json={"admin": ["docs"]}).status_code == 400
     assert all(p["id"] != features.PLATFORM_PROJECT for p in client.get("/api/projects", params={"archived": True}).json())
+
+
+def test_a_run_needs_its_workflows_feature(client, project):
+    name = unique("ba")
+    make_user(client, name, role="ba")
+    other, _ = sign_in(name)
+    assert client.post(f"/api/projects/{project['id']}/members", json={"username": name, "role": "developer"}).status_code == 201
+    refused = other.post(f"/api/projects/{project['id']}/runs", json={"workflow": "bug_scan", "input": {}})
+    assert refused.status_code == 403 and "Bugs and Feature" in refused.json()["message"]
+    assert other.post(f"/api/projects/{project['id']}/runs", json={"workflow": "brainstorm", "input": {}}).status_code != 403  # a BA may brainstorm

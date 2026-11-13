@@ -12,12 +12,8 @@ from backend.config import TEMPLATES_DIR
 from backend.core.security import sha256
 from backend.db import db, new_id, now, rows
 
-TEXT_SUFFIXES = {".md", ".txt", ".csv", ".json", ".yaml", ".yml", ".feature", ".rst"}
-
-
-class UnsupportedFile(ValueError):
-    pass
-
+from backend.core import source_text  # noqa: F401 - files.source_text.MAX_BYTES
+from backend.core.source_text import TEXT_SUFFIXES, UnsupportedFile, extract_text  # noqa: F401 - kept here for existing callers
 
 def markdown_template(filename: str, blob: bytes) -> str:
     """Templates are Markdown only (owner rule 2026-11-11): a .md file of UTF-8 text, or a clear refusal."""
@@ -32,34 +28,6 @@ def markdown_template(filename: str, blob: bytes) -> str:
     if not text.strip():
         raise HTTPException(400, "Uploaded template file is empty")
     return text
-
-
-def extract_text(filename: str, blob: bytes) -> str:
-    suffix = "." + filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
-    if suffix in TEXT_SUFFIXES:
-        return blob.decode("utf-8", errors="replace")
-    if suffix == ".pdf":
-        from pypdf import PdfReader
-
-        return "\n\n".join(page.extract_text() or "" for page in PdfReader(io.BytesIO(blob)).pages)
-    if suffix == ".docx":
-        return _docx_to_markdown(blob)
-    if suffix == ".xlsx":
-        from openpyxl import load_workbook
-
-        book = load_workbook(io.BytesIO(blob), read_only=True, data_only=True)
-        return "\n\n".join(f"## {sheet.title}\n" + "\n".join(" | ".join("" if c is None else str(c) for c in row) for row in sheet.iter_rows(values_only=True)) for sheet in book)
-    if suffix == ".pptx":
-        from pptx import Presentation
-
-        slides = Presentation(io.BytesIO(blob)).slides
-        return "\n\n".join(f"## Slide {i}\n" + "\n".join(s.text_frame.text for s in slide.shapes if s.has_text_frame) for i, slide in enumerate(slides, 1))
-    raise UnsupportedFile(f"Unsupported file type {suffix or filename}. Use .md, .txt, .pdf, .docx, .xlsx, .pptx, .csv, .json, .yaml")
-
-
-def _docx_to_markdown(blob: bytes) -> str:
-    from backend.repos.doc_parser import parse_docx_to_markdown
-    return parse_docx_to_markdown(blob)
 
 
 def seed_templates() -> None:

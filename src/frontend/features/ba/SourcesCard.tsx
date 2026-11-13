@@ -12,7 +12,7 @@ export function SourcesCard({ safeSources, selected, setSelected, onUpload }: Pr
         <input
           type="file"
           name="source-file"
-          accept=".md,.txt,.pdf,.docx,.xlsx,.pptx,.csv,.json,.yaml,.yml"
+          accept=".md,.txt,.pdf,.docx,.doc,.xlsx,.pptx,.ppt,.csv,.json,.yaml,.yml"
           className="hidden"
           onChange={(e) => onUpload(e.target.files?.[0])}
         />

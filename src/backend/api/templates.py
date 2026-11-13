@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 from backend.api.common import _project
 from backend.config import project_dir
 from backend.core import files
-from backend.core.security import sha256
+from backend.core.security import redact, sha256
 from backend.db import db, new_id, now, row, rows
 from backend.maf import agui, engine, evals, governance, llm, workflows  # noqa: F401 - workflows registers definitions
 
@@ -61,8 +61,11 @@ def sources(project_id: str):
 @router.post("/api/projects/{project_id}/sources", status_code=201)
 async def upload_source(project_id: str, file: UploadFile = File(...)):
     _project(project_id)
-    blob = await file.read()
-    text = files.extract_text(file.filename or "", blob)
+    blob = await file.read(files.source_text.MAX_BYTES + 1)
+    try:
+        text = redact(files.extract_text(file.filename or "", blob))  # a secret in a source never reaches the database or a prompt
+    except files.UnsupportedFile as exc:
+        raise HTTPException(415, str(exc)) from exc
     if not text.strip():
         raise HTTPException(400, "No text could be extracted. Scanned PDFs need OCR before upload")
     digest = sha256(blob)
