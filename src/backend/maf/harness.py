@@ -45,6 +45,7 @@ from backend.maf.harness_kit.hook_middleware import guarded
 from backend.maf.harness_kit.shell import ShellProvider, WorkspaceShell
 from backend.maf.harness_kit.shell_tools import ShellToolsProvider
 from backend.maf.harness_kit.bg_tasks import BackgroundProvider
+from backend.maf.harness_kit.plugin_contract import PluginContractProvider
 from backend.maf.harness_kit import checkpoints, os_sandbox, permissions, skill_scopes
 from backend.maf.harness_kit.skill_runner import SkillHealthProvider, runner as skill_runner, skill_dirs  # noqa: F401
 from backend.core.script_runtime import SCRIPT_EXTENSIONS
@@ -169,4 +170,4 @@ def _world(ws, sandbox: dict | None = None) -> tuple[dict, list]:
     world = {"file_access_store": workspace.WorkspaceStore(ws.root), "file_access_disable_readonly_tool_approval": True}
     if config.PROFILE == "web":  # D-SHELL-WEB: the shared server keeps the allowlisted runner
         return world, [ShellProvider(WorkspaceShell(ws))]  # the shell comes through a provider: see harness_kit/shell.py
-    return world, [ShellToolsProvider(ws, sandbox), BackgroundProvider(ws.thread_id)]  # real bash and powershell (D-SHELL)
+    return world, [ShellToolsProvider(ws, sandbox), BackgroundProvider(ws.thread_id), PluginContractProvider(ws)]  # real shells (D-SHELL); plugin contracts (R5)

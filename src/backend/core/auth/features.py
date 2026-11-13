@@ -26,6 +26,7 @@ DEFAULTS = {  # the plan's table (12.3); traces with the roles that run agents
 ROUTES = [
     (re.compile(r"^/agui/harness$|^/api/harness(/|$)|^/api/chats/[^/]+/(todos|terminal)$"), "harness"),
     (re.compile(r"^/api/projects/[^/]+/(sources|atlassian)(/|$)"), "ba"),
+    (re.compile(r"^/api/projects/[^/]+/qe(/|$)"), "qe"),
     (re.compile(r"^/api/(projects/[^/]+/)?findings(/|$)"), "bugs"),
     (re.compile(r"^/api/skill-studio(/|$)"), "skills"),
     (re.compile(r"^/api/mcp(/|$)"), "mcp"),

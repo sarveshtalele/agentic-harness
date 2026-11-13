@@ -16,7 +16,7 @@ Written by `scripts/hooks/activity_log.py`. Times are local.
 | 8 | Harness eval suite (5.9); repository map only if it helps (5.8) | open | |
 | 9 | Azure guide at or under $25/month, first test deployment (9) | in progress (guide done 2026-11-12; test deployment and portal screenshots open) | `docs/AZURE_DEPLOYMENT_GUIDE.md`: prices re-read from prices.azure.com 2026-11-12, $20.70 with the PostgreSQL stop schedule (Automation runbook), zipping, portal steps, UI tour, troubleshooting. Owner approved deleting the 4 old Azure docs |
 | 10 | Desktop bundled PostgreSQL (D4), signing when certificates exist | open | |
-| 11 | Phase 2 (docs/PHASE2_PLAN.md rev 3): Claude Code-class harness on MAF (CLI, desktop, web), then R1 to R6 | approved 2026-11-12; step 1 built, baseline run blocked | Step 1: evals/harness/discovery.json (20 tasks, fixture repo with Python, TS, Bash, PowerShell, .claude and .agents skills), src/backend/maf/evals/discovery.py scorer (tests/test_discovery_eval_scoring.py: 3 passed), tests/test_harness_discovery_eval.py live driver, `python scripts/dev.py live`. Baseline not run: the model proxy answers HTTP 429 'daily token limit exceeded (25,101,895/25,000,000)'; Step 2 done locally (2026-11-12): bash and powershell on MAF LocalShellTool (persistent), background tasks, spill, permission modes and rules, /mode; tests/test_harness_shells.py and tests/test_harness_permissions.py (20 passed, PowerShell skipped on this Mac); full suite 710 passed, 2 skipped; CI green on 3 OS for 3bc0fd5 (after fixing PowerShell escape codes and Git Bash paths). Step 3 done locally: core/script_runtime.py, core/script_health.py, per-turn skill runner, Flagged badge and Check again; full suite 716 passed, 3 skipped; committed 75ecbbb + PowerShell syntax-check fix 8a62ef4; CI green on 3 OS (run 43251382164); Step 4 done locally: skill scopes, tool index with arguments, nearest names for invented tools, MCP refresh, command substitutions; tests/test_harness_discovery_scopes.py 5 passed; committed c6897c7; CI: tests green on 3 OS, macOS smoke failed on an ambiguous test locator (fixed, smoke 4 passed locally). Step 5 done locally (2026-11-13): settings files, settings and http hooks, updatedInput, PostToolUseFailure, Stop hooks, checkpoints and /rewind, routed helper-agent permissions; full suite 729 passed before one contract test update (now 5 passed); not committed. Discovery eval running (quota reset); Discovery eval after (current code, docs/evidence/runs/2026-11-13-discovery-after): 15/20 passed, selection 0.95, first try 0.6, argument validity 1.0, 36 invented names. Found and fixed: run_skill_script crashed on MAF's FileSkill (.name), run_shell alias for the primary shell, deferred tools called by name are loaded on the spot; full suite 732 passed, 3 skipped. Baseline (b76ddbd, docs/evidence/runs/2026-11-13-discovery-baseline): 12/20 passed, selection 0.85, first try 0.55, argument validity 1.0, 6 invented names. Eval after the fixes (docs/evidence/runs/2026-11-13-discovery-after-fixes): 18/20 passed, 4 invented names. Re-scored all three runs uniformly after widening two answer checks to patterns (results-rescored.json): baseline 13/20 (65%), steps 2-4 16/20 (80%), with fixes 18/20 (90%). Full threads recorded: no task mix-up, the model wandered. Full suite 732 passed, 3 skipped. Committed e5944aa. Step 6 (aqh CLI) built: tests/test_aqh_cli.py 4 passed; live `aqh -p` with the real model on macOS created notes.txt in the bound folder (data/aqh-demo); committed 00c27f9; CI green on 3 OS (run 43294669803). Step 7 (OS sandbox T1) built: harness_kit/os_sandbox.py (Seatbelt, bubblewrap) around persistent and background shells, auto mode skips the card only when sandboxed, Linux CI installs bubblewrap; tests/test_os_sandbox.py 3 passed on macOS with real Seatbelt (write outside the workspace refused, network blocked); full suite 740 passed, 3 skipped; committed 33ac060; CI green on 3 OS (run 43297921200). Step 8 (R6, Terminal pane) built: tests/test_credentials_r6.py 7 passed, tests/test_desktop_signin.py 2 passed, tests/desktop/test_desktop_app.py 2 passed with the real Electron app against a real server on macOS (sign-in, wrong password refused, signed in as the member; a zsh PTY in the project workspace echoed through the pane); full suite 749 passed, 4 skipped; committed 31649b5 + race-test fix ddc1f2c; CI green on 3 OS (run 43365289968); desktop installers built (macOS arm64, x64, Windows). Step 9 (R2 features, R1 Home) built: tests/test_features_r2.py 2 passed, access matrix with features 6 passed, smoke 4 passed (Home after sign-in, no installers on the landing page, /api/downloads 401 signed out, developer without MCP, Features editor); full suite 752 passed, 4 skipped; committed 08d6dd3; CI green on 3 OS (run 43368548741). Windows setup fix (owner report 2026-11-13: `dev.py up` failed, PostgreSQL did not answer): `dev.py up` now starts the local database every time, then waits for the backend, then starts the UI; `dev.py db` replaces a stale local URL in .env; the backend names the real connection error; Next's lockfile warning silenced; a fresh .env gets a strong admin password; CI runs `dev.py up` on all 3 OS. Local: database stopped, then `up` recovered; full suite 753 passed; committed e10f83d; CI green on 3 OS (run 43371279329), `dev.py up` passed on Windows, macOS and Linux. Step 10 (UI audit U1-U10) built: tests/e2e/test_ui_audit.py 0 findings (37 pages x desktop light, desktop dark, phone), smoke 4 passed in the same session, full suite 753 passed; committed 551b61b; CI green on 3 OS (run 43376002863). Step 11 R3 built: tests/test_brainstorm_r3.py 5 passed (sources with slides and notes, .ppt refused without LibreOffice, size limit; brainstorm from question to G1 through the approvals API); live run on deepseek-v4-flash-global (tests/test_brainstorm_live.py, 1 passed: G0, 8 distinct questions, approaches, builder check with 5 questions, G1) after a code check for repeated questions; runs gated by their workflow's feature; committed c8c6239, CI green on 3 OS (run for c8c6239) (+ UI e2e 36f5686: tests/e2e/test_ba_brainstorm.py on the real model, 1 passed). R4 built: tests/test_atlassian_r4.py 3 passed (OAuth 2.1 + PKCE with discovery, registration, single-use state, encrypted tokens, refresh; BA member's own sign-in, search, attach, dedupe), tests/e2e/test_ba_atlassian.py 1 passed (sign-in round trip through the browser, search and attach in BA Studio); against a local OAuth + MCP stand-in, not Atlassian itself |
+| 11 | Phase 2 (docs/PHASE2_PLAN.md rev 3): Claude Code-class harness on MAF (CLI, desktop, web), then R1 to R6 | approved 2026-11-12; step 1 built, baseline run blocked | Step 1: evals/harness/discovery.json (20 tasks, fixture repo with Python, TS, Bash, PowerShell, .claude and .agents skills), src/backend/maf/evals/discovery.py scorer (tests/test_discovery_eval_scoring.py: 3 passed), tests/test_harness_discovery_eval.py live driver, `python scripts/dev.py live`. Baseline not run: the model proxy answers HTTP 429 'daily token limit exceeded (25,101,895/25,000,000)'; Step 2 done locally (2026-11-12): bash and powershell on MAF LocalShellTool (persistent), background tasks, spill, permission modes and rules, /mode; tests/test_harness_shells.py and tests/test_harness_permissions.py (20 passed, PowerShell skipped on this Mac); full suite 710 passed, 2 skipped; CI green on 3 OS for 3bc0fd5 (after fixing PowerShell escape codes and Git Bash paths). Step 3 done locally: core/script_runtime.py, core/script_health.py, per-turn skill runner, Flagged badge and Check again; full suite 716 passed, 3 skipped; committed 75ecbbb + PowerShell syntax-check fix 8a62ef4; CI green on 3 OS (run 43251382164); Step 4 done locally: skill scopes, tool index with arguments, nearest names for invented tools, MCP refresh, command substitutions; tests/test_harness_discovery_scopes.py 5 passed; committed c6897c7; CI: tests green on 3 OS, macOS smoke failed on an ambiguous test locator (fixed, smoke 4 passed locally). Step 5 done locally (2026-11-13): settings files, settings and http hooks, updatedInput, PostToolUseFailure, Stop hooks, checkpoints and /rewind, routed helper-agent permissions; full suite 729 passed before one contract test update (now 5 passed); not committed. Discovery eval running (quota reset); Discovery eval after (current code, docs/evidence/runs/2026-11-13-discovery-after): 15/20 passed, selection 0.95, first try 0.6, argument validity 1.0, 36 invented names. Found and fixed: run_skill_script crashed on MAF's FileSkill (.name), run_shell alias for the primary shell, deferred tools called by name are loaded on the spot; full suite 732 passed, 3 skipped. Baseline (b76ddbd, docs/evidence/runs/2026-11-13-discovery-baseline): 12/20 passed, selection 0.85, first try 0.55, argument validity 1.0, 6 invented names. Eval after the fixes (docs/evidence/runs/2026-11-13-discovery-after-fixes): 18/20 passed, 4 invented names. Re-scored all three runs uniformly after widening two answer checks to patterns (results-rescored.json): baseline 13/20 (65%), steps 2-4 16/20 (80%), with fixes 18/20 (90%). Full threads recorded: no task mix-up, the model wandered. Full suite 732 passed, 3 skipped. Committed e5944aa. Step 6 (aqh CLI) built: tests/test_aqh_cli.py 4 passed; live `aqh -p` with the real model on macOS created notes.txt in the bound folder (data/aqh-demo); committed 00c27f9; CI green on 3 OS (run 43294669803). Step 7 (OS sandbox T1) built: harness_kit/os_sandbox.py (Seatbelt, bubblewrap) around persistent and background shells, auto mode skips the card only when sandboxed, Linux CI installs bubblewrap; tests/test_os_sandbox.py 3 passed on macOS with real Seatbelt (write outside the workspace refused, network blocked); full suite 740 passed, 3 skipped; committed 33ac060; CI green on 3 OS (run 43297921200). Step 8 (R6, Terminal pane) built: tests/test_credentials_r6.py 7 passed, tests/test_desktop_signin.py 2 passed, tests/desktop/test_desktop_app.py 2 passed with the real Electron app against a real server on macOS (sign-in, wrong password refused, signed in as the member; a zsh PTY in the project workspace echoed through the pane); full suite 749 passed, 4 skipped; committed 31649b5 + race-test fix ddc1f2c; CI green on 3 OS (run 43365289968); desktop installers built (macOS arm64, x64, Windows). Step 9 (R2 features, R1 Home) built: tests/test_features_r2.py 2 passed, access matrix with features 6 passed, smoke 4 passed (Home after sign-in, no installers on the landing page, /api/downloads 401 signed out, developer without MCP, Features editor); full suite 752 passed, 4 skipped; committed 08d6dd3; CI green on 3 OS (run 43368548741). Windows setup fix (owner report 2026-11-13: `dev.py up` failed, PostgreSQL did not answer): `dev.py up` now starts the local database every time, then waits for the backend, then starts the UI; `dev.py db` replaces a stale local URL in .env; the backend names the real connection error; Next's lockfile warning silenced; a fresh .env gets a strong admin password; CI runs `dev.py up` on all 3 OS. Local: database stopped, then `up` recovered; full suite 753 passed; committed e10f83d; CI green on 3 OS (run 43371279329), `dev.py up` passed on Windows, macOS and Linux. Step 10 (UI audit U1-U10) built: tests/e2e/test_ui_audit.py 0 findings (37 pages x desktop light, desktop dark, phone), smoke 4 passed in the same session, full suite 753 passed; committed 551b61b; CI green on 3 OS (run 43376002863). Step 11 R3 built: tests/test_brainstorm_r3.py 5 passed (sources with slides and notes, .ppt refused without LibreOffice, size limit; brainstorm from question to G1 through the approvals API); live run on deepseek-v4-flash-global (tests/test_brainstorm_live.py, 1 passed: G0, 8 distinct questions, approaches, builder check with 5 questions, G1) after a code check for repeated questions; runs gated by their workflow's feature; committed c8c6239, CI green on 3 OS (run for c8c6239) (+ UI e2e 36f5686: tests/e2e/test_ba_brainstorm.py on the real model, 1 passed). R4 built: tests/test_atlassian_r4.py 3 passed (OAuth 2.1 + PKCE with discovery, registration, single-use state, encrypted tokens, refresh; BA member's own sign-in, search, attach, dedupe), tests/e2e/test_ba_atlassian.py 1 passed (sign-in round trip through the browser, search and attach in BA Studio); against a local OAuth + MCP stand-in, not Atlassian itself; committed 9e119f2; CI green on 3 OS (run 43383981389). Step 12 (R5) in progress: traceability view from the plugin's coverage-map.json (tests/test_qe_trace_r5.py 1 passed), describe_contract and check_gate tools (tests/test_plugin_contract_r5.py 2 passed, against the real plugin); full suite 766 passed, smoke and UI audit 5 passed. Live cycle to Gate 5: next |
 
 | Time | Event | Detail |
 |---|---|---|
@@ -12585,3 +12585,116 @@ Written by `scripts/hooks/activity_log.py`. Times are local.
 | 2026-11-13 12:41:29 | after | Bash: Full suite; read R3 CI result |
 | 2026-11-13 12:41:29 | user | <ta[redacted]> <task-id>baqhse9k7</task-id> <tool-use-id>toolu_012PcK2TYyLUvLuBgxR4oSVV</tool-use-id> <output-file>/private/tmp/claude-501/-Users-sarveshtalele… |
 | 2026-11-13 12:41:36 | before | Bash: Commit and push R4 (and the R3 UI test) |
+| 2026-11-13 12:41:43 | after | Bash: Commit and push R4 (and the R3 UI test) |
+| 2026-11-13 12:41:47 | before | Bash: Watch CI for R4 |
+| 2026-11-13 12:41:48 | after | Bash: Watch CI for R4 |
+| 2026-11-13 12:41:51 | before | mcp__ccd_turn__wrap_up |
+| 2026-11-13 12:41:51 | after | mcp__ccd_turn__wrap_up |
+| 2026-11-13 12:42:05 | turn end |  |
+| 2026-11-13 12:56:52 | user | <ta[redacted]> <task-id>bx6lz5h5k</task-id> <tool-use-id>toolu_011U7sWTks1ZrQaVabsedzni</tool-use-id> <output-file>/private/tmp/claude-501/-Users-sarveshtalele… |
+| 2026-11-13 12:56:55 | before | Bash: Read R4 CI result |
+| 2026-11-13 12:56:56 | after | Bash: Read R4 CI result |
+| 2026-11-13 12:57:00 | before | Bash: Record CI; read R5 plan sections |
+| 2026-11-13 12:57:01 | after | Bash: Record CI; read R5 plan sections |
+| 2026-11-13 12:57:06 | before | mcp__ccd_turn__update_plan |
+| 2026-11-13 12:57:06 | after | mcp__ccd_turn__update_plan |
+| 2026-11-13 12:57:07 | before | Bash: Survey QE workflow and qe package |
+| 2026-11-13 12:57:07 | after | Bash: Survey QE workflow and qe package |
+| 2026-11-13 12:57:12 | before | Bash: Check traceability UI and prior Gate 5 runs |
+| 2026-11-13 12:57:12 | after | Bash: Check traceability UI and prior Gate 5 runs |
+| 2026-11-13 12:57:15 | before | Bash: Read FINAL_PLAN item 2 goal and tracker row |
+| 2026-11-13 12:57:15 | after | Bash: Read FINAL_PLAN item 2 goal and tracker row |
+| 2026-11-13 12:57:22 | before | Bash: Find the plugin cycle runner and evidence |
+| 2026-11-13 12:57:22 | after | Bash: Find the plugin cycle runner and evidence |
+| 2026-11-13 12:57:25 | before | Bash: Locate the runner and the plugin commands |
+| 2026-11-13 12:57:26 | before | Bash: Read the live plugin cycle test |
+| 2026-11-13 12:57:27 | before | Bash: Read the rest of the live cycle test and check the repo |
+| 2026-11-13 12:57:28 | failed | Bash: Read the live plugin cycle test Exit code 1 head: tests/test_harness_plugin_cycle_live.py: No such file or directory wc: tests/test_harness_plugin_cycle_… |
+| 2026-11-13 12:57:28 | after | Bash: Read the rest of the live cycle test and check the repo |
+| 2026-11-13 12:57:28 | after | Bash: Locate the runner and the plugin commands |
+| 2026-11-13 12:57:31 | before | Bash: Find references to the target repo and run metadata |
+| 2026-11-13 12:57:31 | after | Bash: Find references to the target repo and run metadata |
+| 2026-11-13 12:57:34 | before | Bash: Locate references and transcript start |
+| 2026-11-13 12:57:35 | after | Bash: Locate references and transcript start |
+| 2026-11-13 12:57:38 | before | Bash: Find target repo URL and plugin skills |
+| 2026-11-13 12:57:38 | after | Bash: Find target repo URL and plugin skills |
+| 2026-11-13 12:57:42 | before | Bash: Read plan section 8 |
+| 2026-11-13 12:57:43 | after | Bash: Read plan section 8 |
+| 2026-11-13 12:57:48 | before | Bash: Check for contract tools and plugin validators |
+| 2026-11-13 12:57:49 | before | Bash: Read plugin CLI commands |
+| 2026-11-13 12:57:49 | after | Bash: Read plugin CLI commands |
+| 2026-11-13 12:57:49 | after | Bash: Check for contract tools and plugin validators |
+| 2026-11-13 12:57:52 | before | Bash: Read plugin script entry, validators |
+| 2026-11-13 12:57:52 | after | Bash: Read plugin script entry, validators |
+| 2026-11-13 12:57:55 | before | Bash: Read the plugin CLI commands |
+| 2026-11-13 12:57:56 | before | Bash: Read the plugin CLI entry |
+| 2026-11-13 12:57:56 | failed | Bash: Read the plugin CLI entry Exit code 1 // Install / update / uninstall / doctor / plan / gitignore for the agentic-qe plugin (Claude Code and Codex). Stdl… |
+| 2026-11-13 12:57:56 | after | Bash: Read the plugin CLI commands |
+| 2026-11-13 12:58:00 | before | Bash: Find plugin normalizers for requirement evidence |
+| 2026-11-13 12:58:00 | after | Bash: Find plugin normalizers for requirement evidence |
+| 2026-11-13 12:58:07 | before | Bash: List requirement skill files and pin |
+| 2026-11-13 12:58:07 | after | Bash: List requirement skill files and pin |
+| 2026-11-13 12:58:10 | before | Bash: Read what the skills ask the agent to write |
+| 2026-11-13 12:58:10 | after | Bash: Read what the skills ask the agent to write |
+| 2026-11-13 12:58:25 | before | Bash: Read built-in trace and plugin coverage output |
+| 2026-11-13 12:58:25 | after | Bash: Read built-in trace and plugin coverage output |
+| 2026-11-13 12:58:40 | before | Bash: Read the user turns of attempt 8 |
+| 2026-11-13 12:58:40 | after | Bash: Read the user turns of attempt 8 |
+| 2026-11-13 12:58:48 | before | Bash: Read the plugin's Coverage shape |
+| 2026-11-13 12:58:48 | after | Bash: Read the plugin's Coverage shape |
+| 2026-11-13 12:58:50 | before | Bash: Read where coverage is written |
+| 2026-11-13 12:58:51 | after | Bash: Read where coverage is written |
+| 2026-11-13 12:59:00 | before | Bash: Find workspace root helpers |
+| 2026-11-13 12:59:00 | after | Bash: Find workspace root helpers |
+| 2026-11-13 12:59:02 | before | Bash: Read initialize_sandbox |
+| 2026-11-13 12:59:02 | after | Bash: Read initialize_sandbox |
+| 2026-11-13 12:59:11 | before | Bash: Check repository page deep links and sandbox_dir |
+| 2026-11-13 12:59:12 | after | Bash: Check repository page deep links and sandbox_dir |
+| 2026-11-13 12:59:14 | before | Bash: Read repository page params and sandbox_dir location |
+| 2026-11-13 12:59:15 | before | Bash: Locate sandbox_dir definition |
+| 2026-11-13 12:59:15 | after | Bash: Read repository page params and sandbox_dir location |
+| 2026-11-13 12:59:15 | after | Bash: Locate sandbox_dir definition |
+| 2026-11-13 12:59:22 | before | mcp__ccd_turn__update_plan |
+| 2026-11-13 12:59:22 | after | mcp__ccd_turn__update_plan |
+| 2026-11-13 12:59:23 | before | Bash: Check path and helpers for the trace endpoint |
+| 2026-11-13 12:59:23 | after | Bash: Check path and helpers for the trace endpoint |
+| 2026-11-13 12:59:41 | before | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/backend/api/qe_trace.py |
+| 2026-11-13 12:59:45 | after | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/backend/api/qe_trace.py |
+| 2026-11-13 12:59:46 | before | Bash: Register trace routes under the QE cycle feature |
+| 2026-11-13 12:59:47 | after | Bash: Register trace routes under the QE cycle feature |
+| 2026-11-13 13:00:03 | before | Bash: Write and run trace view tests |
+| 2026-11-13 13:00:10 | after | Bash: Write and run trace view tests |
+| 2026-11-13 13:00:27 | before | Bash: Create the traceability card |
+| 2026-11-13 13:00:28 | after | Bash: Create the traceability card |
+| 2026-11-13 13:00:32 | before | Bash: Add trace card to QE page; typecheck and lint |
+| 2026-11-13 13:00:34 | after | Bash: Add trace card to QE page; typecheck and lint |
+| 2026-11-13 13:00:38 | before | Bash: List harness tools and catalogue sets |
+| 2026-11-13 13:00:38 | after | Bash: List harness tools and catalogue sets |
+| 2026-11-13 13:00:40 | before | Bash: Read a simple tool and the tool registry |
+| 2026-11-13 13:00:41 | after | Bash: Read a simple tool and the tool registry |
+| 2026-11-13 13:00:44 | before | Bash: Read harness world assembly and plugin helpers |
+| 2026-11-13 13:00:44 | after | Bash: Read harness world assembly and plugin helpers |
+| 2026-11-13 13:00:46 | before | Bash: Read plugin enumeration and shell tools note |
+| 2026-11-13 13:00:47 | after | Bash: Read plugin enumeration and shell tools note |
+| 2026-11-13 13:00:58 | before | Bash: Read script runtime run and plugin normalizers |
+| 2026-11-13 13:00:58 | after | Bash: Read script runtime run and plugin normalizers |
+| 2026-11-13 13:01:00 | before | Bash: Read normalizers and runtime helpers |
+| 2026-11-13 13:01:01 | after | Bash: Read normalizers and runtime helpers |
+| 2026-11-13 13:01:20 | before | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/backend/maf/harness_kit/plugin_contract.py |
+| 2026-11-13 13:01:22 | after | Write: /Users/sarveshtalele/Downloads/agentic-harness/src/backend/maf/harness_kit/plugin_contract.py |
+| 2026-11-13 13:01:22 | before | Bash: Check Plan fields; try describe_contract on the real plugin |
+| 2026-11-13 13:01:52 | failed | Bash: Check Plan fields; try describe_contract on the real plugin Exit code 1 35:class Plan: 37: argv: list[str] \| None # the interpreter command for this scr… |
+| 2026-11-13 13:02:03 | before | Bash: Fix Plan fields; test contract and gate tools |
+| 2026-11-13 13:02:07 | after | Bash: Fix Plan fields; test contract and gate tools |
+| 2026-11-13 13:02:19 | before | Bash: Prefer plugin roots with hooks; rerun |
+| 2026-11-13 13:02:22 | after | Bash: Prefer plugin roots with hooks; rerun |
+| 2026-11-13 13:02:29 | before | Bash: Register plugin contract tools; run full suite |
+| 2026-11-13 13:06:27 | after | Bash: Register plugin contract tools; run full suite |
+| 2026-11-13 14:52:56 | user | Yes, delete them |
+| 2026-11-13 14:53:04 | before | Bash: List untracked old audit screenshots to delete |
+| 2026-11-13 14:53:05 | after | Bash: List untracked old audit screenshots to delete |
+| 2026-11-13 14:53:11 | before | Bash: Delete the 195 untracked old screenshots |
+| 2026-11-13 14:53:12 | after | Bash: Delete the 195 untracked old screenshots |
+| 2026-11-13 14:53:17 | before | Bash: Run smoke and UI audit |
+| 2026-11-13 14:56:15 | after | Bash: Run smoke and UI audit |
+| 2026-11-13 14:56:27 | before | Bash: Docs, tracker, commit and push R5 part 1 |

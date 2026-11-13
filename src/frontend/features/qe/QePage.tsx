@@ -11,6 +11,7 @@ import { RunPanel } from "../runs/RunPanel";
 import { usePersistedRunId } from "../runs/usePersistedRunId";
 import { ModeSelector } from "./ModeSelector";
 import { SandboxStatus } from "./SandboxStatus";
+import { TraceView } from "./TraceView";
 import { SetupPackageCard } from "./SetupPackageCard";
 import { StagePipeline } from "./StagePipeline";
 import { useActiveRun, useQeDocs } from "./useQeData";
@@ -51,6 +52,8 @@ export function QePage() {
       <ModeSelector projectMode={projectMode} setProjectMode={setProjectMode} />
 
       <StagePipeline project={project} safeDocs={safeDocs} safeGates={safeGates} model={model} setModel={setModel} install={install} setInstall={setInstall} error={error} onStart={start} />
+
+      <TraceView projectId={project.id} />
 
       <SetupPackageCard project={project} />
 
