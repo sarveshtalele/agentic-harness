@@ -9,8 +9,23 @@ the same id across the chunks of one streamed response keeps one suffix, so argu
 from __future__ import annotations
 
 import itertools
+import os
+from pathlib import Path
 
 from agent_framework.openai import OpenAIChatCompletionClient
+
+
+def _capture(item) -> None:
+    """Live-run diagnostics: with AQE_CAPTURE_MODEL_IO set to a folder, every raw model response and stream chunk is kept
+    there as JSON lines (redacted), so an empty or wrong turn can be traced to exactly what the model sent back."""
+    folder = os.environ.get("AQE_CAPTURE_MODEL_IO")
+    if not folder:
+        return
+    from backend.core.security import redact
+
+    Path(folder).mkdir(parents=True, exist_ok=True)
+    with (Path(folder) / "model-io.jsonl").open("a", encoding="utf-8") as out:
+        out.write(redact(item.model_dump_json(exclude_none=True)) + "\n")
 
 
 class UniqueCallIdClient(OpenAIChatCompletionClient):
@@ -31,11 +46,13 @@ class UniqueCallIdClient(OpenAIChatCompletionClient):
         return contents
 
     def _parse_response_from_openai(self, response, options):
+        _capture(response)
         self._response_key = getattr(response, "id", "") or f"r{next(self._counter)}"
         return super()._parse_response_from_openai(response, options)
 
     def _parse_response_update_from_openai(self, chunk):
         self._response_key = getattr(chunk, "id", "") or self._response_key
+        _capture(chunk)
         return super()._parse_response_update_from_openai(chunk)
 
     def _parse_tool_calls_from_openai(self, choice):

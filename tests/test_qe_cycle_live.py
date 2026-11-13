@@ -49,6 +49,7 @@ def test_the_agentic_qe_cycle_reaches_gate_5_on_a_real_repository(monkeypatch):
     assert os.environ.get("DEFAULT_MODEL") and os.environ.get("OPENAI_API_KEY"), "live test needs a real model in the environment"
     OUT.mkdir(parents=True, exist_ok=True)
     monkeypatch.setenv("AQH_HOME", str(OUT / "aqh"))  # the session's JSON lines land in the evidence folder
+    monkeypatch.setenv("AQE_CAPTURE_MODEL_IO", str(OUT / "model"))  # every raw model response, to trace an empty turn
     from aqh.client import Session
 
     log = (OUT / "steps.jsonl").open("a", encoding="utf-8")

@@ -34,8 +34,10 @@ class ScriptedClient(FunctionInvocationLayer, ChatMiddlewareLayer, BaseChatClien
                 return ChatResponse(messages=[Message(role="assistant", contents=[Content.from_text(reply["cut_off"])])], finish_reason="length")
 
             return cut_off()
-        if isinstance(reply, dict):  # a tool call, for agents that act through tools
-            contents = [Content.from_function_call(call_id="call_1", name=reply["call"], arguments=reply["args"])]
+        if isinstance(reply, dict):  # a tool call (or several in one response: {"calls": [...]}), for agents that act through tools
+            self.turns = getattr(self, "turns", 0) + 1
+            contents = ([Content.from_function_call(call_id=f"call_{self.turns}_{i}", name=c["call"], arguments=c["args"]) for i, c in enumerate(reply["calls"])]
+                        if "calls" in reply else [Content.from_function_call(call_id="call_1", name=reply["call"], arguments=reply["args"])])
             if stream:  # AG-UI and the harness stream, so the call arrives as one streamed update
                 async def call_updates():
                     yield ChatResponseUpdate(contents=contents, role="assistant")

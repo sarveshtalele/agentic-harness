@@ -1,6 +1,6 @@
 agent-framework-core>=1.24,<2
 agent-framework-openai>=1.18,<2
-agent-framework-ag-ui>=1.7,<2
+agent-framework-ag-ui>=1.8,<2
 mcp>=2.2,<3  # MCPStdioTool/MCPStreamableHTTPTool need it; agent-framework-core lists it only as an extra
 tenacity>=8.2  # MAF's MCP tools need it at connect time but do not declare it (chromadb used to pull it in)
 agent-framework-tools==1.0.0b261030  # MAF's shell tooling (agent_framework_tools.shell), released with core 1.24.0
