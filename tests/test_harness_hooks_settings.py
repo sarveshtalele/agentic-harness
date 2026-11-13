@@ -102,6 +102,18 @@ def test_stop_hooks_keep_the_loop_going_at_most_three_times(monkeypatch):
     assert "todo note" == asyncio.run(message())  # after the limit the todo loop's own message applies again
 
 
+def test_a_chat_approval_ask_during_a_plugin_command_goes_on_to_the_write(monkeypatch):
+    """Live QE cycle 2026-11-13: deepseek ended discovery with 'Say "approve create both"' and wrote nothing."""
+    monkeypatch.setattr(stop_hooks.plugin_hooks, "dispatch", lambda *a, **k: plugin_hooks.Outcome(blocked=False, reason=""))
+    ws = SimpleNamespace(thread_id="t", project_id="p", root=".", env=lambda: {})
+    ask = SimpleNamespace(text='I will create docs/qe/app/01-discovery/summary.md. Say "approve create both" to proceed.')
+    check, message = stop_hooks.with_stop_hooks(ws, lambda **k: False, lambda **k: "todo note", command={"name": "agentic-qe:qe-discover"})
+    assert asyncio.run(check(last_result=ask)) and "file_access_write" in asyncio.run(message())
+    assert not asyncio.run(check(last_result=SimpleNamespace(text="Checks pass. Type `approve gate 1 for app`.")))  # the gate phrase is the real ask
+    plain, _ = stop_hooks.with_stop_hooks(ws, lambda **k: False, lambda **k: "todo note")
+    assert not asyncio.run(plain(last_result=ask))  # outside a plugin command nothing changes
+
+
 def test_a_failed_tool_fires_post_tool_use_failure(tmp_path, monkeypatch):
     from agent_framework import Agent, tool
 

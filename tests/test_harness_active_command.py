@@ -134,3 +134,33 @@ def test_files_that_wait_for_a_gate_are_never_pushed_out_early(tmp_path):
     scripted.function_invocation_configuration["max_iterations"] = write_first.LIMIT + 5
     asyncio.run(Agent(scripted, tools=[read_file], middleware=[write_first.write_first("thr_gate", tmp_path, start)]).run("go"))
     assert "Refused:" not in "\n".join(scripted.calls) and "[harness]" not in "\n".join(scripted.calls)
+
+
+def test_once_the_plugin_ledger_approves_the_gate_its_files_are_owed(tmp_path):
+    """Live QE cycle 2026-11-13: after `approve gate 0` the hook recorded the gate, but the model still waited and never wrote
+    scope.md and manifest.json. The ledger now says the gate is approved, and the waiting files are pushed for."""
+    import json
+
+    start = active_command.parse(plugins.expand_slash(f"/agentic-qe:qe-start {APP} --mode brownfield"))
+    assert active_command.approved_gates(tmp_path, APP) == []
+    (tmp_path / ".qe").mkdir()
+    rows = [{"type": "gate_decision", "gate": 0, "decision": "APPROVED", "app": APP, "source": "user_prompt"},
+            {"type": "gate_decision", "gate": 1, "decision": "APPROVED", "app": "other", "source": "user_prompt"},
+            {"type": "gate_decision", "gate": 2, "decision": "APPROVED", "app": APP, "source": "agent"}]
+    (tmp_path / ".qe" / "ledger.jsonl").write_text("\n".join(map(json.dumps, rows)) + "\nnot json\n", encoding="utf-8")
+    assert active_command.approved_gates(tmp_path, APP) == [0]  # only a person's phrase, only this app
+    import asyncio
+
+    from agent_framework import Agent, tool
+
+    from backend.maf.harness_kit import write_first
+
+    @tool(name="read_file", description="Read a file.")
+    def read_file(path: str) -> str:
+        return f"content of {path}"
+
+    reads = [{"call": "read_file", "args": {"path": f"f{i}.py"}} for i in range(write_first.LIMIT + 2)]
+    scripted = ScriptedClient([("go", steps(*reads, "done"))])
+    scripted.function_invocation_configuration["max_iterations"] = write_first.LIMIT + 5
+    asyncio.run(Agent(scripted, tools=[read_file], middleware=[write_first.write_first("thr_gate2", tmp_path, start)]).run("go"))
+    assert "00-intake/scope.md" in "\n".join(scripted.calls)  # the guard now asks for the owed intake files

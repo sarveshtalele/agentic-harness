@@ -85,6 +85,20 @@ def file_state(root: Path | None, paths: list[str]) -> list[str]:
     return lines
 
 
+def approved_gates(root: Path | None, app: str) -> list[int]:
+    """Gates a person approved for this app, from the plugin's own ledger (`.qe/ledger.jsonl`, written by its hook)."""
+    ledger = root / ".qe" / "ledger.jsonl" if root else None
+    decisions: dict[int, str] = {}
+    for line in ledger.read_text(encoding="utf-8").splitlines() if ledger and ledger.is_file() else []:
+        try:
+            r = json.loads(line)
+        except ValueError:
+            continue
+        if r.get("type") == "gate_decision" and r.get("source") == "user_prompt" and r.get("app") == app and isinstance(r.get("gate"), int):
+            decisions[r["gate"]] = r.get("decision", "")
+    return sorted(g for g, d in decisions.items() if d == "APPROVED")
+
+
 class ActiveCommandContext(ContextProvider):
     """Puts the active plugin command and the state of its files into the instructions before every model call."""
 
@@ -99,8 +113,12 @@ class ActiveCommandContext(ContextProvider):
         blocked = hook_middleware.refused.get(self.thread_id, {})
         if checked:
             files.append(f"- the command's check, last run: {'PASS' if checked['passed'] else 'FAIL'}" + ("" if checked["passed"] else f" ({checked['output'][-300:]})"))
-        if c.get("after_gate") is not None:
-            files = [f"{line} (written only after Gate {c['after_gate']} is approved; never before)" if line.endswith("MISSING") else line for line in files]
+        app = next((a for a in c["args"].split() if not a.startswith("-")), "")
+        gates = approved_gates(self.root, app)
+        if c.get("after_gate") is not None:  # the model cannot see the plugin's hook record the gate phrase, so the ledger says it
+            note = (f"Gate {c['after_gate']} is approved: write it now" if c["after_gate"] in gates
+                    else f"written only after Gate {c['after_gate']} is approved; never before")
+            files = [f"{line} ({note})" if line.endswith("MISSING") else line for line in files]
         context.extend_instructions(self.source_id, "\n".join([
             f"ACTIVE PLUGIN COMMAND: /{c['name']} {c['args']}".rstrip(),
             "You are carrying out this command until the user types another one. A message like \"continue\" or a gate phrase belongs to it.",
@@ -117,12 +135,14 @@ class ActiveCommandContext(ContextProvider):
             "file_access_ls takes `directory`; file_access_read and file_access_write take `file_name`. An unknown argument is an error, not ignored.",
             "- Read only what the current step needs, and do not read a file twice.",
             "- Write each file the step produces with file_access_write as soon as you have enough evidence for it; extend it in later calls rather than holding everything back. "
-            "Every write shows the user an approval card: that card IS the explicit yes the command asks for, so make the write call instead of asking in chat.",
+            "Every write shows the user an approval card: that card IS the explicit yes the command asks for. This harness is the plugin's Claude Code path "
+            "(\"Claude Code shows its own permission prompt instead\"): never list paths and wait, never ask for `approve create` in chat; make the write call.",
             "- Add one todo per file to write and per check to run, and complete each when it is done.",
             "- Never write a file the command says the plugin writes itself (gate reports, confidence, audit, coverage map, hand-off).",
             "- Run the command's check scripts with the shell tool (bash, powershell, or run_shell on the web). While a check prints FAIL, fix the files; ask for the gate phrase only when it passes.",
             f"- A plugin may open its write window only for its own command (agentic-qe: any other message closes it). If a hook blocks a write because "
             f"no phase command is running, do not retry the write: stop and ask the user to send `/{c['name']} {c['args']}`".rstrip() + "` again.",
+            f"Gates a person approved for {app or 'this app'} (the plugin's ledger, read just now): {', '.join(map(str, gates)) or 'none yet'}.",
             "Files this command may create (checked on disk just now):", *(files or ["- none named"]),
             *([f"Files a plugin hook refused in this conversation (never write them): {', '.join(sorted(blocked))}"] if blocked else []),
             f"<command name=\"{c['name']}\">\n{c['body']}\n</command>"]))

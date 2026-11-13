@@ -127,7 +127,7 @@ def build(project_id: str, thread_id: str, start_run, *, user_id: str | None = N
     telemetry = governance.telemetry(AGENT, project_id, None, "chat", model, user_id, ref, json.dumps([]), also_allowed=frozenset(catalogue.mcp))
     client = llm.client(model, max_rounds=HARNESS_MAX_ROUNDS, max_tool_calls=HARNESS_MAX_TOOL_CALLS, detailed_errors=True)
     compaction = _compaction(client, model, HARNESS_CONTEXT_TOKENS - max_output, telemetry)
-    keep_going, next_message = with_stop_hooks(ws, while_working(todos_remaining(looping_modes=["execute"])), todos_remaining_message)
+    keep_going, next_message = with_stop_hooks(ws, while_working(todos_remaining(looping_modes=["execute"])), todos_remaining_message, command=command)
     mode, rules = permissions.get_mode(dirs["tools"], thread_id), permissions.load_rules(ws.root if ws else None)  # once per turn
     sandbox = {"network": os_sandbox.settings(ws.root)["network"]} if ws and os_sandbox.active(mode, ws.root) else None
     world, providers = _world(ws, sandbox)

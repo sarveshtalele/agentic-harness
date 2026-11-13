@@ -24,8 +24,10 @@ from backend.app import app as platform
 from backend.config import sandbox_dir
 
 pytestmark = pytest.mark.live
-REPO, APP = "sarveshtalele/personal-finance-mcp", "personal-finance-mcp"
-OUT = Path(__file__).resolve().parents[1] / "docs" / "evidence" / "runs" / f"{date.today().isoformat()}-qe-cycle-g5-{os.environ.get('DEFAULT_MODEL', 'model')}"
+# AQE_LIVE_REPO: an owner/name cloned from GitHub (default) or a folder on this machine, bound as a local folder
+REPO = os.environ.get("AQE_LIVE_REPO", "sarveshtalele/personal-finance-mcp")
+APP = Path(REPO).name
+OUT = Path(__file__).resolve().parents[1] / "docs" / "evidence" / "runs" / f"{date.today().isoformat()}-qe-cycle-g5-{APP}-{os.environ.get('DEFAULT_MODEL', 'model')}-{time.strftime('%H%M')}"
 FIX = "/agentic-qe:qe-{phase} {app} the plugin refused gate {gate}: run check_gate({gate}, \"{app}\") and describe_contract on each file it names, fix exactly the gaps it reports, run check_gate again, and tell me when it passes."
 # (command, gate it ends with or None, phase name for a fix turn)
 STEPS = [("/agentic-qe:qe-start {app} --mode brownfield", 0, "start"), ("/agentic-qe:qe-doctor", None, "doctor"),
@@ -58,7 +60,8 @@ def test_the_agentic_qe_cycle_reaches_gate_5_on_a_real_repository(monkeypatch):
         session = Session(http, local=False)
         session.login("qa-admin", os.environ["ATLAS_ADMIN_PASSWORD"])
         project = http.post("/api/projects", json={"name": APP, "description": "Live agentic-qe cycle to Gate 5"}).json()
-        clone = http.post(f"/api/projects/{project['id']}/repo/git", json={"url": REPO})
+        local = Path(REPO).is_dir()
+        clone = http.post(f"/api/projects/{project['id']}/repo/{'local' if local else 'git'}", json={"path": REPO} if local else {"url": REPO})
         assert clone.status_code == 200, clone.text
         thread = session.new_thread(project["id"])
         root = sandbox_dir(project["id"])
@@ -88,7 +91,7 @@ def test_the_agentic_qe_cycle_reaches_gate_5_on_a_real_repository(monkeypatch):
         planned = script_runtime.plan(installer, installer.parent.parent)
         PLUGIN_HOME.mkdir(parents=True, exist_ok=True)
         setup = script_runtime.run([*planned.argv, "validator", "--yes"], cwd=installer.parents[3], timeout=900,
-                                   env={**os.environ, "HOME": str(PLUGIN_HOME), "USERPROFILE": str(PLUGIN_HOME)})
+                                   env={**{k: v for k, v in os.environ.items() if k != "PYTHONPATH"}, "HOME": str(PLUGIN_HOME), "USERPROFILE": str(PLUGIN_HOME)})
         note(kind="validator", exit_code=setup["exit_code"], output=(setup["stdout"] + setup["stderr"])[-1500:])
         assert setup["exit_code"] == 0, setup["stderr"][-800:]
         reached = -1
