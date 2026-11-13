@@ -9,7 +9,7 @@ from typing import Optional
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
 
-from backend.api.mcp import calls, grant_routes
+from backend.api.mcp import calls, grant_routes, oauth_routes
 from backend.api.mcp.common import answered, require_admin
 from backend.core.mcp import CONNECTED, grants, registry
 from backend.core.mcp.catalog import TEMPLATES
@@ -25,6 +25,7 @@ class ServerIn(BaseModel):
     url: Optional[str] = None
     env: Optional[dict[str, str]] = None  # stdio only, encrypted at rest, never returned
     headers: Optional[dict[str, str]] = None  # http only, encrypted at rest, never returned
+    auth: Optional[str] = Field(None, pattern=r"^(none|oauth)$")  # oauth: each member signs in (R4)
 
 
 def _shown(server: dict) -> dict:
@@ -75,3 +76,4 @@ def delete_server(server_id: str):
 
 router.include_router(calls.router)
 router.include_router(grant_routes.router)
+router.include_router(oauth_routes.router)

@@ -70,7 +70,7 @@ for _router in ROUTERS:
     app.include_router(_router)
 
 
-PUBLIC_PATHS = {"/api/health", "/api/auth/login", "/api/auth/status", "/api/auth/desktop"}  # desktop: the grant is checked inside
+PUBLIC_PATHS = {"/api/health", "/api/auth/login", "/api/auth/status", "/api/auth/desktop", "/api/mcp/oauth/callback"}  # desktop: the grant is checked inside
 
 
 @app.middleware("http")

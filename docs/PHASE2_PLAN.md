@@ -490,7 +490,7 @@ The audit test itself had one wrong path (`/chat` exists only as `/chat/<id>`); 
 | 8 | R6 credentials and desktop sign-in; desktop Terminal pane (11.2) | security tests; desktop story (built 2026-11-13: tests/test_credentials_r6.py, tests/test_desktop_signin.py, tests/desktop/test_desktop_app.py with real Electron) |
 | 9 | R2 features governance, R1 home and gated downloads | stories and audit (built 2026-11-13: tests/test_features_r2.py, access matrix with features, smoke on Home, landing and the Features editor) |
 | 10 | UI audit fixes (section 14) | audit zero findings |
-| 11 | R3 uploads and brainstorming, R4 Atlassian | stories; live brainstorm |
+| 11 | R3 uploads and brainstorming, R4 Atlassian | stories; live brainstorm (built 2026-11-13: brainstorm live on the real model through the API and in BA Studio; Atlassian through per-member OAuth MCP, verified against a local OAuth + MCP stand-in) |
 | 12 | R5 QE cycle to Gate 5 with traceability | live evidence |
 | 13 | Azure guide, proposal workbook, docs | updated with real numbers |
 

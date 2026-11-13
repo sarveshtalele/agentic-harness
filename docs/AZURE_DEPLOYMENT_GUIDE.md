@@ -520,6 +520,7 @@ To change the hours, edit the two schedules. The cost for any schedule is the nu
 5. **Settings, Gate roles:** choose who may sign gates G0 to G5. Agents never sign.
    **Settings, Features:** choose what each role may use (Harness, BA Studio, QE cycle, Skill Studio, MCP, Documents, Desktop downloads and more), and allow or deny one feature for one member. Members without **Desktop downloads** do not see the installers on their Home page.
 6. **MCP:** add remote (HTTP) MCP servers, and grant each tool to roles. stdio servers run only in the desktop app.
+   **Jira and Confluence (optional):** add `https://mcp.atlassian.com/v2/mcp` (transport http) and tick "Each member signs in with OAuth". Select **Sign in** (your Atlassian account), then **Connect** to list its tools, and grant them to the roles that use BA Studio. Each member then connects their own Atlassian account from BA Studio; the platform never sees their password and keeps their token encrypted.
 7. **Desktop app:** members sign in to the desktop app with this server's address (`https://aqe-ui-<unique>.azurewebsites.net`), their username and password. The app keeps only a signed sign-in from the server, never the password; **Sign out** in its menu removes it. The admin account works in the browser only.
 
 **Verify, end to end:**

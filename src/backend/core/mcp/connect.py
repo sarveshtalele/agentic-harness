@@ -26,7 +26,7 @@ def timeout_seconds() -> int:
         return DEFAULT_TIMEOUT
 
 
-def build(server: dict, allowed: list[str] | None = None):
+def build(server: dict, allowed: list[str] | None = None, user_id: str | None = None):
     """An unconnected MAF MCP tool for a server row. stdio gets the clean sandbox env plus the server's own env."""
     common = {"name": server["id"], "load_prompts": False, "request_timeout": timeout_seconds(), "allowed_tools": allowed, "description": server["name"]}
     if server["transport"] == "stdio":
@@ -35,7 +35,14 @@ def build(server: dict, allowed: list[str] | None = None):
         return MCPStdioTool(command=registry.resolve_command(server["command"]), args=json.loads(server["args"] or "[]"), env=env, **common)
     if server["transport"] == "websocket":
         return MCPWebsocketTool(url=server["url"], **common)
-    return MCPStreamableHTTPTool(url=server["url"], static_headers=registry.secrets(server) or None, **common)
+    headers = registry.secrets(server)
+    if server.get("auth") == "oauth":  # the member's own token: each person reaches the service as themselves (R4)
+        from backend.core.mcp import oauth
+
+        if not user_id:
+            raise McpProblem(401, "This server signs in each member; there is no member here")
+        headers = {**headers, "Authorization": f"Bearer {oauth.bearer(server['id'], user_id)}"}
+    return MCPStreamableHTTPTool(url=server["url"], static_headers=headers or None, **common)
 
 
 def _message(exc: BaseException) -> str:
@@ -55,7 +62,9 @@ async def connect(server_id: str) -> dict:
     if server["transport"] == "stdio":
         registry.require_stdio_allowed()
     try:
-        tool = build(server)
+        from backend.core import auth
+
+        tool = build(server, user_id=(auth.current_user.get() or {}).get("id"))
         async with asyncio.timeout(timeout_seconds()):
             async with tool:
                 listed = [{"name": (f.additional_properties or {}).get("_mcp_remote_name", f.name), "description": f.description or "",
@@ -94,7 +103,7 @@ async def call(server_id: str, tool_name: str, arguments: dict, user: dict) -> d
     if "tool_name" in arguments:
         raise McpProblem(400, "An argument may not be named tool_name")  # ponytail: MAF's call_tool takes tool_name positionally
     started = time.monotonic()
-    tool = build(server, allowed=[tool_name])
+    tool = build(server, allowed=[tool_name], user_id=user["id"])
     try:
         async with asyncio.timeout(timeout_seconds()):
             async with tool:

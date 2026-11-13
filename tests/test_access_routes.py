@@ -46,7 +46,7 @@ ADMIN_ONLY = ("/api/users", "/api/connections", "/api/logs", "/api/auth/events",
 ADMIN_WRITE = ("/api/settings", "/api/prompts", "/api/agents", "/api/evals")
 # R2 features, written out from the plan's table (12.3): which routes need which feature, and each role's defaults
 FEATURE_ROUTES = (("/agui/harness", "harness"), ("/api/chats/{thread_id}/todos", "harness"), ("/api/chats/{thread_id}/terminal", "harness"),
-                  ("/api/projects/{project_id}/sources", "ba"), ("/api/findings", "bugs"), ("/api/projects/{project_id}/findings", "bugs"),
+                  ("/api/projects/{project_id}/sources", "ba"), ("/api/projects/{project_id}/atlassian", "ba"), ("/api/findings", "bugs"), ("/api/projects/{project_id}/findings", "bugs"),
                   ("/api/skill-studio", "skills"), ("/api/mcp", "mcp"), ("/api/documents", "docs"), ("/api/projects/{project_id}/documents", "docs"),
                   ("/api/templates", "docs"), ("/api/projects/{project_id}/templates", "docs"), ("/api/traces", "traces"), ("/api/observability", "traces"),
                   ("/api/projects/{project_id}/observability", "traces"), ("/api/usage", "usage"))

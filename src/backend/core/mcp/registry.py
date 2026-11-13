@@ -68,7 +68,7 @@ def _secret_map(values: dict | None) -> dict[str, str]:
 
 def public(server: dict, tools: list[dict] | None = None) -> dict:
     """What any signed-in user may see: never a secret value, only the names."""
-    keep = ("id", "name", "transport", "command", "url", "status", "error_message", "last_connected_at", "tools_listed_at", "owner", "plugin_id", "created_at", "updated_at")
+    keep = ("id", "name", "transport", "auth", "command", "url", "status", "error_message", "last_connected_at", "tools_listed_at", "owner", "plugin_id", "created_at", "updated_at")
     out = {k: server.get(k) for k in keep}
     out["args"] = json.loads(server.get("args") or "[]")
     out["secret_names"] = json.loads(server.get("secret_names") or "[]")
@@ -118,7 +118,10 @@ def _validated(body: dict) -> dict:
     else:
         _check_url(str(body.get("url") or ""), transport)
         found = {"command": None, "args": [], "url": body["url"], "secrets": _secret_map(body.get("headers"))}
-    return {"name": name, "transport": transport, **found}
+    auth = body.get("auth") or "none"  # "oauth": each member signs in with OAuth 2.1 (core/mcp/oauth.py, R4)
+    if auth not in ("none", "oauth") or (auth == "oauth" and transport != "http"):
+        raise McpProblem(400, "auth is none, or oauth for an http server")
+    return {"name": name, "transport": transport, "auth": auth, **found}
 
 
 def _sealed(values: dict) -> tuple[str, str]:
@@ -130,16 +133,16 @@ def add(body: dict, owner: str, plugin_id: str | None = None) -> dict:
     server_id, stamp = new_id("mcp"), now()
     enc, names = _sealed(v["secrets"])
     with db() as con:
-        con.execute("INSERT INTO mcp_servers (id, name, type, transport, command, args, url, status, error_message, secrets_enc, secret_names, owner, plugin_id, created_at, updated_at) "
-                    "VALUES (?,?,?,?,?,?,?,?,'',?,?,?,?,?,?)",
-                    (server_id, v["name"], v["transport"], v["transport"], v["command"], json.dumps(v["args"]), v["url"], NOT_CONNECTED, enc, names, owner, plugin_id, stamp, stamp))
+        con.execute("INSERT INTO mcp_servers (id, name, type, transport, auth, command, args, url, status, error_message, secrets_enc, secret_names, owner, plugin_id, created_at, updated_at) "
+                    "VALUES (?,?,?,?,?,?,?,?,?,'',?,?,?,?,?,?)",
+                    (server_id, v["name"], v["transport"], v["transport"], v["auth"], v["command"], json.dumps(v["args"]), v["url"], NOT_CONNECTED, enc, names, owner, plugin_id, stamp, stamp))
     return get(server_id)
 
 
 def edit(server_id: str, body: dict) -> dict:
     """A changed server is a different server: its listed tools go and it must connect again. Grants stay."""
     old = get(server_id)
-    merged = {"name": old["name"], "transport": old["transport"], "command": old["command"], "args": json.loads(old["args"]), "url": old["url"], **{k: v for k, v in body.items() if v is not None}}
+    merged = {"name": old["name"], "transport": old["transport"], "auth": old.get("auth") or "none", "command": old["command"], "args": json.loads(old["args"]), "url": old["url"], **{k: v for k, v in body.items() if v is not None}}
     secret_key = "env" if merged["transport"] == "stdio" else "headers"
     if merged.get(secret_key) is None:
         merged[secret_key] = secrets(old)
@@ -147,8 +150,8 @@ def edit(server_id: str, body: dict) -> dict:
     enc, names = _sealed(v["secrets"])
     with db() as con:
         con.execute("DELETE FROM mcp_tools WHERE server_id=?", (server_id,))
-        con.execute("UPDATE mcp_servers SET name=?, type=?, transport=?, command=?, args=?, url=?, secrets_enc=?, secret_names=?, status=?, error_message='', tools_listed_at=NULL, updated_at=? WHERE id=?",
-                    (v["name"], v["transport"], v["transport"], v["command"], json.dumps(v["args"]), v["url"], enc, names, NOT_CONNECTED, now(), server_id))
+        con.execute("UPDATE mcp_servers SET name=?, type=?, transport=?, auth=?, oauth_client='', command=?, args=?, url=?, secrets_enc=?, secret_names=?, status=?, error_message='', tools_listed_at=NULL, updated_at=? WHERE id=?",
+                    (v["name"], v["transport"], v["transport"], v["auth"], v["command"], json.dumps(v["args"]), v["url"], enc, names, NOT_CONNECTED, now(), server_id))
     return get(server_id)
 
 

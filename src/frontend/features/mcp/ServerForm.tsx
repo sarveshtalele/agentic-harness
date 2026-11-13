@@ -16,6 +16,7 @@ export function ServerForm({ prefill, stdioAllowed, onAdded, onCancel }: { prefi
   const [url, setUrl] = useState("");
   const [env, setEnv] = useState<Row[]>([]);
   const [headers, setHeaders] = useState<Row[]>([]);
+  const [oauth, setOauth] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   useEffect(() => {
@@ -27,7 +28,7 @@ export function ServerForm({ prefill, stdioAllowed, onAdded, onCancel }: { prefi
   const submit = async (e: React.FormEvent) => {
     e.preventDefault(); setBusy(true); setError("");
     try {
-      await api("/mcp/servers", { json: stdio ? { name, transport, command, args, env: toMap(env) } : { name, transport, url, headers: toMap(headers) } });
+      await api("/mcp/servers", { json: stdio ? { name, transport, command, args, env: toMap(env) } : { name, transport, url, headers: toMap(headers), auth: oauth && transport === "http" ? "oauth" : "none" } });
       onAdded();
     } catch (err: any) { setError(err.message); } finally { setBusy(false); }
   };
@@ -59,6 +60,12 @@ export function ServerForm({ prefill, stdioAllowed, onAdded, onCancel }: { prefi
           <>
             <Field label="URL"><input className={inputClass} required value={url} onChange={(e) => setUrl(e.target.value)} /></Field>
             <KeyValueRows label="Header" rows={headers} onChange={setHeaders} secret />
+            {transport === "http" && (
+              <label className="flex items-center gap-2 text-xs">
+                <input type="checkbox" checked={oauth} onChange={(e) => setOauth(e.target.checked)} />
+                Each member signs in with OAuth (for example the Atlassian remote MCP, https://mcp.atlassian.com/v2/mcp)
+              </label>
+            )}
           </>
         )}
         <ErrorNote message={error} />

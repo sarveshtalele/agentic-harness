@@ -21,7 +21,7 @@ def mcp_tools_for(project_id: str, user: dict) -> list:
         if not names:
             continue
         try:
-            found.append(build(server, allowed=names))
+            found.append(build(server, allowed=names, user_id=user["id"]))  # an OAuth server needs this member signed in (R4)
         except registry.McpProblem:
             continue  # e.g. the command left PATH since it connected; the server page shows it on the next connect
     return found
@@ -46,6 +46,8 @@ def refresh_stale(minutes: int = STALE_MINUTES) -> list[str]:
     for server in registry.all_servers():
         if server["status"] != registry.CONNECTED or server["id"] in _refreshing or (server["transport"] == "stdio" and not registry.stdio_allowed()):
             continue
+        if server.get("auth") == "oauth":
+            continue  # its tools are listed with a member's own sign-in; the admin's Connect refreshes them
         try:
             listed = datetime.fromisoformat(server.get("tools_listed_at") or "")
         except ValueError:

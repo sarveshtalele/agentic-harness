@@ -8,6 +8,7 @@ import { RunDocuments } from "../runs/RunDocuments";
 import { RunList } from "../runs/RunList";
 import { RunPanel } from "../runs/RunPanel";
 import { LifecyclePipeline } from "./LifecyclePipeline";
+import { AtlassianCard } from "./AtlassianCard";
 import { BrainstormStart } from "./BrainstormStart";
 import { getDomainPresets } from "./lib";
 import { RecentDocs } from "./RecentDocs";
@@ -108,6 +109,8 @@ export function BaPage() {
           <RunDocuments projectId={project.id} runId={runId} />
 
           <SourcesCard safeSources={safeSources} selected={selected} setSelected={setSelected} onUpload={addSource} />
+
+          <AtlassianCard projectId={project.id} onAttached={(ids) => { setSelected((s) => [...new Set([...s, ...ids])]); loadSources(); }} />
 
           <RecentDocs recent={recent} projectId={project.id} />
 

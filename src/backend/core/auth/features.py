@@ -25,7 +25,7 @@ DEFAULTS = {  # the plan's table (12.3); traces with the roles that run agents
 # (path pattern, feature). BA Studio routes join with R3; usage is admin-only by its own rule as well.
 ROUTES = [
     (re.compile(r"^/agui/harness$|^/api/harness(/|$)|^/api/chats/[^/]+/(todos|terminal)$"), "harness"),
-    (re.compile(r"^/api/projects/[^/]+/sources(/|$)"), "ba"),
+    (re.compile(r"^/api/projects/[^/]+/(sources|atlassian)(/|$)"), "ba"),
     (re.compile(r"^/api/(projects/[^/]+/)?findings(/|$)"), "bugs"),
     (re.compile(r"^/api/skill-studio(/|$)"), "skills"),
     (re.compile(r"^/api/mcp(/|$)"), "mcp"),

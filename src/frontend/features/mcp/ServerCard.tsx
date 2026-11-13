@@ -15,15 +15,20 @@ export function ServerCard({ server, admin, grants, roles, onChange }: { server:
     setBusy(true); setError("");
     try { await api(`/mcp/servers/${server.id}/connect`, { method: "POST" }); } catch (e: any) { setError(e.message); } finally { setBusy(false); onChange(); }
   };
+  const signIn = async () => {  // an OAuth server: this person signs in at the provider, then comes back here (R4)
+    setError("");
+    try { window.location.href = (await api(`/mcp/servers/${server.id}/oauth/start`, { json: { return_to: "/mcp" } })).url; } catch (e: any) { setError(e.message); }
+  };
   const remove = async () => {
     setBusy(true);
     try { await api(`/mcp/servers/${server.id}`, { method: "DELETE" }); toast("Server deleted"); setConfirm(false); onChange(); } catch (e: any) { setError(e.message); setConfirm(false); } finally { setBusy(false); }
   };
   return (
     <div data-testid="mcp-server-card"><Card title={<span className="flex items-center gap-2">{server.name} <span data-testid="mcp-status"><Badge tone={server.status === "connected" ? "emerald" : server.status === "error" ? "rose" : "slate"}>{server.status}</Badge></span></span>}
-      actions={admin && <div className="flex gap-2"><Button data-testid="mcp-connect" variant="secondary" busy={busy} onClick={connect}>{busy ? "Connecting" : "Connect"}</Button><Button variant="danger" onClick={() => setConfirm(true)}>Delete</Button></div>}>
+      actions={admin && <div className="flex gap-2">{server.auth === "oauth" && <Button variant="secondary" onClick={signIn}>Sign in</Button>}<Button data-testid="mcp-connect" variant="secondary" busy={busy} onClick={connect}>{busy ? "Connecting" : "Connect"}</Button><Button variant="danger" onClick={() => setConfirm(true)}>Delete</Button></div>}>
       <div className="space-y-2 text-xs text-slate-500">
         <p className="mono">{server.transport} {server.transport === "stdio" ? [server.command, ...server.args].join(" ") : server.url}</p>
+        {server.auth === "oauth" && <p>Each member signs in with OAuth. Sign in, then Connect to list the tools with your own sign-in.</p>}
         {server.secret_names.length > 0 && <p>Secrets set: {server.secret_names.join(", ")} (values are never shown)</p>}
         {server.plugin_id && <p>From plugin {server.plugin_id}</p>}
         <p>Last connected: {when(server.last_connected_at) || "never"}. Tools listed: {when(server.tools_listed_at) || "never"}.</p>
