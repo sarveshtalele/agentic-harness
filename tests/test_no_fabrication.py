@@ -1,4 +1,4 @@
-"""CI gate 1 from docs/HARNESS_REBUILD_PLAN.md Section 3.2: no fabricated values in production code.
+"""CI gate 1 (CLAUDE.md, "No fabricated data"): no fabricated values in production code.
 
 Production code under src/ may not gain new literal scores, "connected" statuses, mock content, brand claims,
 fake project fallbacks, fake latency, or success=True returned from an except block. Known cases are a ratchet in

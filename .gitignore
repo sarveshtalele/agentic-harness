@@ -67,3 +67,6 @@ scratch/
 apps/desktop/build/
 apps/desktop/dist/
 apps/desktop/node_modules/
+
+# pip build output (pip install -e .)
+*.egg-info/

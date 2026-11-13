@@ -46,7 +46,7 @@ export function RunPanel({ runId, projectId, onFinished }: { runId: string; proj
   const cancel = () => {
     setConfirmDialog({
       open: true,
-      title: "Stop Autonomous Run?",
+      title: "Stop this run?",
       message: "Are you sure you want to stop and cancel this run?",
       confirmLabel: "Stop Run",
       variant: "danger",

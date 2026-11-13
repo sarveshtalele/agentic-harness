@@ -9,7 +9,7 @@ export const architecture: DocGroup = {
         summary: "Production architecture: 6-gate state machine, micro-agent roster, AST parsing, and zero-trust sandbox execution.",
         body: `## Canonical Architecture & System Design
 
-The **Agentic Quality Engineering (QE) Platform** is an enterprise-grade autonomous testing and verification ecosystem built on **Microsoft Agent Framework (MAF)**, **Next.js 16 App Router**, and **FastAPI**. It transforms raw repository code, specifications, or business requirements into comprehensive, level-allocated, deterministic, and self-healing test suites with complete cryptographic traceability.
+**Agentic QE Platform** is a testing and verification platform built on **Microsoft Agent Framework (MAF)**, **Next.js 16 App Router**, and **FastAPI**. It transforms raw repository code, specifications, or business requirements into comprehensive, level-allocated, deterministic, and self-healing test suites with complete cryptographic traceability.
 
 ### Core Architectural Tenets
 
@@ -17,7 +17,7 @@ The **Agentic Quality Engineering (QE) Platform** is an enterprise-grade autonom
 2. **Dual-Layer Sandbox Isolation & Credential Scrubbing:** Untrusted repository code and test execution run in isolated Git worktrees (\`atlas/qe-*\` branches) under a scrubbed environment (\`clean_env()\`). Ambient platform secrets, API tokens, passwords, and cloud credentials matching \`(?i)(key|secret|token|password|auth|cred|atlas|openai|anthropic)\` are purged prior to any subprocess execution.
 3. **Deterministic Token Predictability over Open-Ended Tool Loops:** Workflow agents receive structured line-numbered context packs (\`code_pack\`) directly in their conversation turn and possess zero tools. Structured code packing achieves superior test suite compilation within ~86,000 tokens compared to drifting tool loops (170k-955k tokens).
 4. **Durable Human-in-the-Loop Quality Gates (G0–G7):** Workflows progress through formal quality gates requiring HMAC-signed decisions by authenticated, role-authorized human reviewers. Stages persist intermediate states to SQLite WAL and file-backed checkpoints (\`FileCheckpointStorage\`), surviving process interruptions and server restarts.
-5. **Assertion-Preserving Self-Healing:** Autonomous self-healing is strictly bounded to repairing test selectors and fixture definitions. Code guardrails (\`guarded_apply\`) reject any automated repair that modifies, removes, or weakens test assertions, introduces test skips, or touches application production code.
+5. **Assertion-Preserving Self-Healing:** Self-healing is strictly bounded to repairing test selectors and fixture definitions. Code guardrails (\`guarded_apply\`) reject any automated repair that modifies, removes, or weakens test assertions, introduces test skips, or touches application production code.
 6. **Single Source of Truth:** One single canonical document governs each architectural concern. Redundant, divergent, or dead specification files are eliminated.
 
 See the complete production specification in \`docs/SYSTEM_ARCHITECTURE_AND_DESIGN.md\`.`,

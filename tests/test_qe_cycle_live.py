@@ -64,19 +64,35 @@ def test_the_agentic_qe_cycle_reaches_gate_5_on_a_real_repository(monkeypatch):
         cards = []
 
         def turn(text: str) -> str:
-            reply = []
+            reply, errors = [], []
             started = time.monotonic()
-            session.turn(thread, text, lambda card: cards.append(card.get("message", "")) or True,
-                         lambda e: reply.append(e.get("delta", "")) if e.get("type") == "TEXT_MESSAGE_CONTENT" else None, OUT)
+
+            def seen(e: dict) -> None:
+                if e.get("type") == "TEXT_MESSAGE_CONTENT":
+                    reply.append(e.get("delta", ""))
+                elif e.get("type") == "RUN_ERROR":
+                    errors.append(f"{e.get('code')}: {e.get('message')}")
+
+            session.turn(thread, text, lambda card: cards.append(card.get("message", "")) or True, seen, OUT)
             said = "".join(reply)
-            note(kind="turn", text=text, seconds=int(time.monotonic() - started), reply=said[-3000:])
+            note(kind="turn", text=text, seconds=int(time.monotonic() - started), reply=said[-3000:], errors=errors)
+            assert not errors, f"the harness failed on {text!r}: {errors}; see {OUT}"  # stop: later messages would only be refused
             return said
 
+        # One-time machine setup, as a person does it: the plugin's own validator installer (pandas and numpy) in the
+        # harness's plugin home, which is HOME for its hooks and shells. A gpt-5 run skipped it when asked in chat.
+        from backend.core import script_runtime
+        from backend.maf.harness_kit.workspace import PLUGIN_HOME
+        installer = Path(__file__).resolve().parents[1] / "plugins" / "agentic-qe" / "skills" / "qe-doctor" / "scripts" / "agentic-qe.ts"
+        planned = script_runtime.plan(installer, installer.parent.parent)
+        PLUGIN_HOME.mkdir(parents=True, exist_ok=True)
+        setup = script_runtime.run([*planned.argv, "validator", "--yes"], cwd=installer.parents[3], timeout=900,
+                                   env={**os.environ, "HOME": str(PLUGIN_HOME), "USERPROFILE": str(PLUGIN_HOME)})
+        note(kind="validator", exit_code=setup["exit_code"], output=(setup["stdout"] + setup["stderr"])[-1500:])
+        assert setup["exit_code"] == 0, setup["stderr"][-800:]
         reached = -1
         for command, gate, phase in STEPS:
-            said = turn(command.format(app=APP))
-            if phase == "doctor" and "not set up" in said.lower():
-                turn("Set up the pandas/numpy validator that qe-doctor reports as not set up: run its validator command with --yes, then run qe-doctor's check again.")
+            turn(command.format(app=APP))
             if gate is None:
                 continue
             phrase = f"approve gate 0 for {APP} mode brownfield" if gate == 0 else f"approve gate {gate} for {APP}"

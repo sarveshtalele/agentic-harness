@@ -5,12 +5,12 @@ export function getDomainPresets(projectName: string, repoUrl: string) {
       {
         name: "MCP Gateway & Registry",
         title: "Model Context Protocol (MCP) Server Gateway & Discovered Tools Specification",
-        brief: "Author an enterprise-grade Business Requirements Document (BRD) for a Model Context Protocol (MCP) Gateway and Server Registry. Must specify dynamic STDIO and SSE transports, automated tool authorization flags, AST schema validation for tool input/output, rate limiting, and cryptographic execution logs.",
+        brief: "Author a Business Requirements Document (BRD) for a Model Context Protocol (MCP) Gateway and Server Registry. Must specify dynamic STDIO and SSE transports, automated tool authorization flags, AST schema validation for tool input/output, rate limiting, and cryptographic execution logs.",
       },
       {
         name: "Remote SSE Client",
-        title: "Enterprise MCP Remote SSE Streaming & Proxy Client Specification",
-        brief: "Author a comprehensive Business Requirements Document (BRD) for an enterprise Remote MCP SSE Proxy and Client. Includes HTTP/HTTPS token authentication, streaming event-source keep-alives, automatic reconnect with exponential backoff, and sandboxed isolated tool execution.",
+        title: "MCP Remote SSE Streaming and Proxy Client Specification",
+        brief: "Author a comprehensive Business Requirements Document (BRD) for a remote MCP SSE proxy and Client. Includes HTTP/HTTPS token authentication, streaming event-source keep-alives, automatic reconnect with exponential backoff, and sandboxed isolated tool execution.",
       },
       {
         name: "Tool Sandbox Isolation",
@@ -28,7 +28,7 @@ export function getDomainPresets(projectName: string, repoUrl: string) {
     {
       name: "Core Service & API",
       title: `${projectName} Core Service & REST/GraphQL API Specification`,
-      brief: `Author an enterprise-grade Business Requirements Document (BRD) for ${projectName} defining core domain workflows, RESTful and streaming endpoints, payload validation schemas, idempotent transaction processing, and observability hooks.`,
+      brief: `Author a Business Requirements Document (BRD) for ${projectName} defining core domain workflows, RESTful and streaming endpoints, payload validation schemas, idempotent transaction processing, and observability hooks.`,
     },
     {
       name: "Auth & Access Control",

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Append timestamped activity to progress.md. Stdlib only; works on Windows, macOS, Linux.
+"""Append timestamped activity to data/activity-log.md. Stdlib only; works on Windows, macOS, Linux.
 
 Hook use:     activity_log.py pre|post|fail|prompt|stop   (Claude Code JSON on stdin)
 Manual use:   activity_log.py decision "why we chose X"
@@ -13,7 +13,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-PROGRESS = Path(__file__).resolve().parents[2] / "progress.md"
+PROGRESS = Path(__file__).resolve().parents[2] / "data" / "activity-log.md"  # not in git; PROGRESS.md keeps the Goal tracker only
 HEADER = "# Progress and activity log\n\nWritten by `scripts/hooks/activity_log.py`. Times are local.\n\n| Time | Event | Detail |\n|---|---|---|\n"
 SECRET = re.compile(r"(sk-[\w-]{8,}|gh[pousr]_\w{8,}|github_pat_\w{8,}|(?i:(?:api[_-]?key|token|password|secret)\s*[=:]\s*)\S+)")
 
@@ -63,6 +63,7 @@ def main() -> None:
     row = entry(event, payload, sys.argv[2:])
     if not row:
         return
+    PROGRESS.parent.mkdir(parents=True, exist_ok=True)  # data/ is not in git, so a fresh checkout makes it here
     if not PROGRESS.exists():
         PROGRESS.write_text(HEADER, encoding="utf-8")
     stamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")

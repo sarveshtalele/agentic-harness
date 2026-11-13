@@ -86,4 +86,4 @@ Every change must work on Windows, macOS, and Linux. Use `pathlib`, `shutil.whic
 | `docs/` | Architecture, system design, Azure guide, test evidence |
 | `data/` | Runtime state, not in git |
 
-`progress.md` is written by the hooks in `.claude/settings.json`. Log decisions with `python scripts/hooks/activity_log.py decision "text"`.
+The hooks in `.claude/settings.json` write the activity log to `data/activity-log.md` (not in git); `PROGRESS.md` holds the Goal tracker. Log decisions with `python scripts/hooks/activity_log.py decision "text"`.

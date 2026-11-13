@@ -85,7 +85,6 @@ export function BaPage() {
     <>
       <PageTitle title="BA Studio" subtitle="Brainstorm from your sources one question at a time, or write straight from a brief: a requirements document and checked Gherkin scenarios, signed at Gate 1." />
 
-      {/* Autonomous Multi-Agent BA Lifecycle Flowchart */}
       <LifecyclePipeline />
 
       <div className="grid gap-4 lg:grid-cols-[1fr_320px] [&>*]:min-w-0">

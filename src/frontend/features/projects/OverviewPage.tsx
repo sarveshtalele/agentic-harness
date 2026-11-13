@@ -44,7 +44,7 @@ export function OverviewPage() {
     <div className="space-y-6">
       <PageTitle
         title={project?.name || "Project"}
-        subtitle={project?.description || "Enterprise autonomous quality engineering platform"}
+        subtitle={project?.description || "No description"}
         actions={
           <div className="flex items-center gap-2">
             <Link href={`/harness?project=${project.id}`}>

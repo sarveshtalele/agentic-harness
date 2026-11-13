@@ -18,7 +18,7 @@ export function ModeSelector({ projectMode, setProjectMode }: { projectMode: "br
             }`}
           >
             <Building2 className="h-3.5 w-3.5" />
-            <span>Brownfield (Scan Existing Codebase & Evolve)</span>
+            <span>Brownfield (existing repository)</span>
           </button>
           <button
             type="button"
@@ -30,12 +30,12 @@ export function ModeSelector({ projectMode, setProjectMode }: { projectMode: "br
             }`}
           >
             <Sprout className="h-3.5 w-3.5" />
-            <span>Greenfield (Generate Complete App from BRD & Scratch)</span>
+            <span>Greenfield (new application from the requirements)</span>
           </button>
         </div>
       </div>
       <span className="text-xs text-slate-500 font-medium">
-        {projectMode === "brownfield" ? "AST & static analysis scans active repository sandbox" : "AI SDLC generates complete application modules, suites, and runners"}
+        {projectMode === "brownfield" ? "Reads the existing code in the project's workspace with static analysis" : "Builds the application, its tests and runners from the approved requirements"}
       </span>
     </div>
   );

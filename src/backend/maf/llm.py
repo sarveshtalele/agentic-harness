@@ -7,7 +7,7 @@ import secrets
 import time
 
 import httpx
-from agent_framework.openai import OpenAIChatCompletionClient
+from backend.maf.unique_calls import UniqueCallIdClient
 from openai import AsyncOpenAI
 
 from backend.config import MODEL_RETRIES, MODEL_TIMEOUT
@@ -78,7 +78,7 @@ def client(model: str = "", *, max_rounds: int = 10, max_tool_calls: int = 30, d
     # MAF allows 100 tool rounds by default. Long tool loops outgrow model context, so agents get a hard limit.
     # a hung model call must fail the run with a clear error, not leave it running forever
     http = AsyncOpenAI(api_key=cfg["api_key"], base_url=cfg["base_url"] or None, timeout=MODEL_TIMEOUT, max_retries=MODEL_RETRIES)  # the OpenAI client backs off on 429 and 5xx
-    return OpenAIChatCompletionClient(model=cfg["model"], async_client=http,
+    return UniqueCallIdClient(model=cfg["model"], async_client=http,  # tool call ids unique per turn (see unique_calls.py)
                                       function_invocation_configuration={"max_iterations": max_rounds, "max_function_calls": max_tool_calls,
                                                                                          # the harness: a tool error's text reaches the model, so it can fix its call
                                                                                          "include_detailed_errors": detailed_errors})

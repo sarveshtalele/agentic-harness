@@ -10,7 +10,7 @@ import { AssignMemberForm } from "./AssignMemberForm";
 import { MembersTable } from "./MembersTable";
 import { OwnershipTransfer } from "./OwnershipTransfer";
 
-/** Enterprise Governance & RBAC Access Control. Governed by Admin user directory & cryptographic ledger. */
+/** Who may do what in this project: members and their roles, recorded in the ledger. */
 export function ProjectGovernanceAccess({ project, refresh }: { project: any; refresh: () => void }) {
   const { user } = useAuth();
   const [items, setItems] = useState<any[] | null>(null);
@@ -44,7 +44,7 @@ export function ProjectGovernanceAccess({ project, refresh }: { project: any; re
         <div className="flex items-center justify-between gap-2">
           <span className="flex items-center gap-2">
             <ShieldCheck className="h-4 w-4 text-indigo-500" />
-            Governance & Enterprise RBAC Access
+            Access and roles
           </span>
           <Badge tone="indigo">Policy Enforced</Badge>
         </div>
