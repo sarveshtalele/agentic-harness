@@ -8,7 +8,7 @@ export function SourcesCard({ safeSources, selected, setSelected, onUpload }: Pr
   return (
     <Card title="Source documents">
       <label className="mb-2 inline-flex cursor-pointer items-center gap-1.5 text-xs font-semibold text-indigo-500 hover:underline">
-        <Upload className="h-3.5 w-3.5" /> Upload (.md, .txt, .pdf, .docx, .xlsx)
+        <Upload className="h-3.5 w-3.5" /> Upload (.docx, .pptx, .pdf, .md, .txt, .xlsx; .doc and .ppt with LibreOffice)
         <input
           type="file"
           name="source-file"
