@@ -99,6 +99,15 @@ def approved_gates(root: Path | None, app: str) -> list[int]:
     return sorted(g for g, d in decisions.items() if d == "APPROVED")
 
 
+def step_done(command: dict, root: Path | None, thread_id: str) -> bool:
+    """Every file the command names is written and its own check passes (or it has none). Live QE cycle 2026-11-13: discovery
+    wrote both files at 82 seconds, then kept adding todos and restarting the same analyst for another 1,000 seconds."""
+    if root is None or not command.get("paths") or not all(line.endswith(")") and "written" in line for line in file_state(root, command["paths"])):
+        return False
+    checked = verify.last(thread_id) if command.get("check") else {"passed": True}
+    return bool(checked and checked["passed"])
+
+
 class ActiveCommandContext(ContextProvider):
     """Puts the active plugin command and the state of its files into the instructions before every model call."""
 

@@ -67,7 +67,7 @@ def test_the_agentic_qe_cycle_reaches_gate_5_on_a_real_repository(monkeypatch):
         root = sandbox_dir(project["id"])
         cards = []
 
-        def turn(text: str) -> str:
+        def turn(text: str, stalls: int = 0) -> str:
             reply, errors = [], []
             started = time.monotonic()
 
@@ -80,6 +80,9 @@ def test_the_agentic_qe_cycle_reaches_gate_5_on_a_real_repository(monkeypatch):
             session.turn(thread, text, lambda card: cards.append(card.get("message", "")) or True, seen, OUT)
             said = "".join(reply)
             note(kind="turn", text=text, seconds=int(time.monotonic() - started), reply=said[-3000:], errors=errors)
+            if errors and all(e.startswith("AQE-MODEL-004") for e in errors) and stalls < 2:  # the stream stalled; the thread is intact
+                note(kind="continue_after_stall", attempt=stalls + 1)
+                return said + turn("continue", stalls + 1)  # what a person types; the active command keeps it on the same step
             assert not errors, f"the harness failed on {text!r}: {errors}; see {OUT}"  # stop: later messages would only be refused
             return said
 

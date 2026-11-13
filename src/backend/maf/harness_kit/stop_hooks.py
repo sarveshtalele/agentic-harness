@@ -12,6 +12,7 @@ import inspect
 import re
 
 from backend.core import plugin_hooks
+from backend.maf.harness_kit import active_command
 
 LIMIT = 3
 # The agentic-qe skills tell Codex to ask for `approve create <path>` in chat and say Claude Code shows its own permission
@@ -34,6 +35,8 @@ def with_stop_hooks(ws, should_continue, next_message, limit: int = LIMIT, comma
 
     async def check(**kwargs) -> bool:
         state["reason"] = ""
+        if command and ws is not None and active_command.step_done(command, ws.root, ws.thread_id):
+            return False  # the step's files are written and its check passes: open todos do not keep the turn going
         if await _call(should_continue, **kwargs):
             return True
         if ws is None or state["count"] >= limit:
