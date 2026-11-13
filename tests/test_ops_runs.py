@@ -87,8 +87,13 @@ def test_a_second_run_of_the_same_kind_answers_409_naming_the_active_run(client,
     assert client.post(f"/api/projects/{project['id']}/runs", json={"workflow": "bug_scan"}).status_code != 409, "a finished run frees the slot"
 
 
-def test_concurrent_starts_cannot_both_win(client, project):
+def test_concurrent_starts_cannot_both_win(client, project, monkeypatch):
+    from backend.maf import engine
+
     llm.set_client_override(ScriptedClient([("x", "ok")]))
+    # the winner stays running: otherwise it fails at once (no repository), frees the slot, and a slow late request on a
+    # busy runner may rightly start a second run, which is not the race this test is about
+    monkeypatch.setattr(engine, "_spawn", lambda run_id, work: work.close())
     gate = threading.Barrier(8)
 
     def go(_):
