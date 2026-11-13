@@ -123,7 +123,7 @@ def test_main_pages_open_and_show_their_empty_state(browser):
     roles = tab.get_by_test_id("feature-roles")  # R2: the admin's Features editor
     expect(roles).to_be_visible(timeout=15_000)
     expect(roles.get_by_label("viewer may use Documents")).to_be_checked()
-    expect(roles.get_by_label("viewer may use Harness")).not_to_be_checked()
+    expect(roles.get_by_label("viewer may use QE cycle")).not_to_be_checked()
     roles.scroll_into_view_if_needed()
     tab.screenshot(path=str(Path(tempfile.gettempdir()) / "aqe-feature-access.png"))
     expect(tab.get_by_text("Model missing").or_(tab.locator("h1, h2, h3").first).first).to_be_visible(timeout=15_000)  # both can match: strict mode needs one
@@ -154,22 +154,21 @@ def test_a_non_admin_is_refused_on_users(browser, app):
     tab.context.close()
 
 
-def test_the_landing_page_has_only_sign_in_and_downloads_wait_for_home(browser):
+def test_the_landing_page_has_only_sign_in_and_home_follows(browser):
     context = browser.new_context(viewport={"width": 1440, "height": 900})
     tab = context.new_page()
     tab.goto(UI)
     expect(tab).not_to_have_url(re.compile(r"/login$"))
     expect(tab.get_by_role("heading", level=1)).to_be_visible(timeout=30_000)
-    expect(tab.get_by_test_id("desktop-downloads")).to_have_count(0)  # no installers before sign-in (R1)
-    assert tab.evaluate("fetch('/api/downloads').then(r => r.status)") == 401
+    expect(tab.get_by_test_id("desktop-downloads")).to_have_count(0)  # cloud only: no desktop app (STABLE_BUILD_PLAN)
     tab.get_by_test_id("landing-sign-in").first.click()
     expect(tab).to_have_url(re.compile(r"/login$"))
     tab.get_by_label("Username").fill(ADMIN["username"])
     tab.get_by_label("Password").fill(ADMIN["password"])
     tab.get_by_role("button", name="Sign in").click()
     expect(tab).to_have_url(re.compile(r"/home$"), timeout=30_000)
-    for os_name in ("macos", "windows"):  # no installer is published in this test, so each says so instead of linking
-        expect(tab.get_by_test_id(f"download-{os_name}")).to_contain_text("installer is published yet", timeout=15_000)
+    expect(tab.get_by_test_id("desktop-downloads")).to_have_count(0)
+    expect(tab.locator("a[href='/harness']")).to_have_count(0)  # the harness moved to its own application
     tab.goto(UI)
     expect(tab.get_by_test_id("landing-open").first).to_be_visible(timeout=15_000)
     context.close()
