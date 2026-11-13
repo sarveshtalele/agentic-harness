@@ -41,7 +41,7 @@ jobs:
       matrix:
         os: [ubuntu-24.04, macos-latest, windows-latest]  # ubuntu-latest moved to the 26 beta, whose apt mirror failed
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 25  # on Windows, installing the browser and npm packages alone takes about 8 minutes
+    timeout-minutes: 35  # on Windows, installing the browser and npm packages alone takes about 8 minutes; dev.py up builds the UI again
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -61,6 +61,13 @@ jobs:
       - run: npm ci
         working-directory: src/frontend
       - run: python -m pytest tests/e2e/test_smoke.py -v -m smoke
+      - name: The documented start, end to end (dev.py up starts PostgreSQL, the backend, then the UI)
+        run: python scripts/dev.py up
+        env:
+          ATLAS_UP_CHECK: "1"
+          ATLAS_NO_BROWSER: "1"
+          ATLAS_ADMIN_USERNAME: ci-admin
+          ATLAS_ADMIN_PASSWORD: ci-start-check-${{ github.run_id }}
 
   evals-install:
     # RAGAS is optional (requirements-evals.txt). This job only shows whether it installs and imports on Windows, and may fail without failing the build.

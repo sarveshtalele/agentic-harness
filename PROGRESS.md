@@ -16,7 +16,7 @@ Written by `scripts/hooks/activity_log.py`. Times are local.
 | 8 | Harness eval suite (5.9); repository map only if it helps (5.8) | open | |
 | 9 | Azure guide at or under $25/month, first test deployment (9) | in progress (guide done 2026-11-12; test deployment and portal screenshots open) | `docs/AZURE_DEPLOYMENT_GUIDE.md`: prices re-read from prices.azure.com 2026-11-12, $20.70 with the PostgreSQL stop schedule (Automation runbook), zipping, portal steps, UI tour, troubleshooting. Owner approved deleting the 4 old Azure docs |
 | 10 | Desktop bundled PostgreSQL (D4), signing when certificates exist | open | |
-| 11 | Phase 2 (docs/PHASE2_PLAN.md rev 3): Claude Code-class harness on MAF (CLI, desktop, web), then R1 to R6 | approved 2026-11-12; step 1 built, baseline run blocked | Step 1: evals/harness/discovery.json (20 tasks, fixture repo with Python, TS, Bash, PowerShell, .claude and .agents skills), src/backend/maf/evals/discovery.py scorer (tests/test_discovery_eval_scoring.py: 3 passed), tests/test_harness_discovery_eval.py live driver, `python scripts/dev.py live`. Baseline not run: the model proxy answers HTTP 429 'daily token limit exceeded (25,101,895/25,000,000)'; Step 2 done locally (2026-11-12): bash and powershell on MAF LocalShellTool (persistent), background tasks, spill, permission modes and rules, /mode; tests/test_harness_shells.py and tests/test_harness_permissions.py (20 passed, PowerShell skipped on this Mac); full suite 710 passed, 2 skipped; CI green on 3 OS for 3bc0fd5 (after fixing PowerShell escape codes and Git Bash paths). Step 3 done locally: core/script_runtime.py, core/script_health.py, per-turn skill runner, Flagged badge and Check again; full suite 716 passed, 3 skipped; committed 75ecbbb + PowerShell syntax-check fix 8a62ef4; CI green on 3 OS (run 43251382164); Step 4 done locally: skill scopes, tool index with arguments, nearest names for invented tools, MCP refresh, command substitutions; tests/test_harness_discovery_scopes.py 5 passed; committed c6897c7; CI: tests green on 3 OS, macOS smoke failed on an ambiguous test locator (fixed, smoke 4 passed locally). Step 5 done locally (2026-11-13): settings files, settings and http hooks, updatedInput, PostToolUseFailure, Stop hooks, checkpoints and /rewind, routed helper-agent permissions; full suite 729 passed before one contract test update (now 5 passed); not committed. Discovery eval running (quota reset); Discovery eval after (current code, docs/evidence/runs/2026-11-13-discovery-after): 15/20 passed, selection 0.95, first try 0.6, argument validity 1.0, 36 invented names. Found and fixed: run_skill_script crashed on MAF's FileSkill (.name), run_shell alias for the primary shell, deferred tools called by name are loaded on the spot; full suite 732 passed, 3 skipped. Baseline (b76ddbd, docs/evidence/runs/2026-11-13-discovery-baseline): 12/20 passed, selection 0.85, first try 0.55, argument validity 1.0, 6 invented names. Eval after the fixes (docs/evidence/runs/2026-11-13-discovery-after-fixes): 18/20 passed, 4 invented names. Re-scored all three runs uniformly after widening two answer checks to patterns (results-rescored.json): baseline 13/20 (65%), steps 2-4 16/20 (80%), with fixes 18/20 (90%). Full threads recorded: no task mix-up, the model wandered. Full suite 732 passed, 3 skipped. Committed e5944aa. Step 6 (aqh CLI) built: tests/test_aqh_cli.py 4 passed; live `aqh -p` with the real model on macOS created notes.txt in the bound folder (data/aqh-demo); committed 00c27f9; CI green on 3 OS (run 43294669803). Step 7 (OS sandbox T1) built: harness_kit/os_sandbox.py (Seatbelt, bubblewrap) around persistent and background shells, auto mode skips the card only when sandboxed, Linux CI installs bubblewrap; tests/test_os_sandbox.py 3 passed on macOS with real Seatbelt (write outside the workspace refused, network blocked); full suite 740 passed, 3 skipped; committed 33ac060; CI green on 3 OS (run 43297921200). Step 8 (R6, Terminal pane) built: tests/test_credentials_r6.py 7 passed, tests/test_desktop_signin.py 2 passed, tests/desktop/test_desktop_app.py 2 passed with the real Electron app against a real server on macOS (sign-in, wrong password refused, signed in as the member; a zsh PTY in the project workspace echoed through the pane); full suite 749 passed, 4 skipped; committed 31649b5 + race-test fix ddc1f2c; CI green on 3 OS (run 43365289968); desktop installers built (macOS arm64, x64, Windows). Step 9 (R2 features, R1 Home) built: tests/test_features_r2.py 2 passed, access matrix with features 6 passed, smoke 4 passed (Home after sign-in, no installers on the landing page, /api/downloads 401 signed out, developer without MCP, Features editor); full suite 752 passed, 4 skipped |
+| 11 | Phase 2 (docs/PHASE2_PLAN.md rev 3): Claude Code-class harness on MAF (CLI, desktop, web), then R1 to R6 | approved 2026-11-12; step 1 built, baseline run blocked | Step 1: evals/harness/discovery.json (20 tasks, fixture repo with Python, TS, Bash, PowerShell, .claude and .agents skills), src/backend/maf/evals/discovery.py scorer (tests/test_discovery_eval_scoring.py: 3 passed), tests/test_harness_discovery_eval.py live driver, `python scripts/dev.py live`. Baseline not run: the model proxy answers HTTP 429 'daily token limit exceeded (25,101,895/25,000,000)'; Step 2 done locally (2026-11-12): bash and powershell on MAF LocalShellTool (persistent), background tasks, spill, permission modes and rules, /mode; tests/test_harness_shells.py and tests/test_harness_permissions.py (20 passed, PowerShell skipped on this Mac); full suite 710 passed, 2 skipped; CI green on 3 OS for 3bc0fd5 (after fixing PowerShell escape codes and Git Bash paths). Step 3 done locally: core/script_runtime.py, core/script_health.py, per-turn skill runner, Flagged badge and Check again; full suite 716 passed, 3 skipped; committed 75ecbbb + PowerShell syntax-check fix 8a62ef4; CI green on 3 OS (run 43251382164); Step 4 done locally: skill scopes, tool index with arguments, nearest names for invented tools, MCP refresh, command substitutions; tests/test_harness_discovery_scopes.py 5 passed; committed c6897c7; CI: tests green on 3 OS, macOS smoke failed on an ambiguous test locator (fixed, smoke 4 passed locally). Step 5 done locally (2026-11-13): settings files, settings and http hooks, updatedInput, PostToolUseFailure, Stop hooks, checkpoints and /rewind, routed helper-agent permissions; full suite 729 passed before one contract test update (now 5 passed); not committed. Discovery eval running (quota reset); Discovery eval after (current code, docs/evidence/runs/2026-11-13-discovery-after): 15/20 passed, selection 0.95, first try 0.6, argument validity 1.0, 36 invented names. Found and fixed: run_skill_script crashed on MAF's FileSkill (.name), run_shell alias for the primary shell, deferred tools called by name are loaded on the spot; full suite 732 passed, 3 skipped. Baseline (b76ddbd, docs/evidence/runs/2026-11-13-discovery-baseline): 12/20 passed, selection 0.85, first try 0.55, argument validity 1.0, 6 invented names. Eval after the fixes (docs/evidence/runs/2026-11-13-discovery-after-fixes): 18/20 passed, 4 invented names. Re-scored all three runs uniformly after widening two answer checks to patterns (results-rescored.json): baseline 13/20 (65%), steps 2-4 16/20 (80%), with fixes 18/20 (90%). Full threads recorded: no task mix-up, the model wandered. Full suite 732 passed, 3 skipped. Committed e5944aa. Step 6 (aqh CLI) built: tests/test_aqh_cli.py 4 passed; live `aqh -p` with the real model on macOS created notes.txt in the bound folder (data/aqh-demo); committed 00c27f9; CI green on 3 OS (run 43294669803). Step 7 (OS sandbox T1) built: harness_kit/os_sandbox.py (Seatbelt, bubblewrap) around persistent and background shells, auto mode skips the card only when sandboxed, Linux CI installs bubblewrap; tests/test_os_sandbox.py 3 passed on macOS with real Seatbelt (write outside the workspace refused, network blocked); full suite 740 passed, 3 skipped; committed 33ac060; CI green on 3 OS (run 43297921200). Step 8 (R6, Terminal pane) built: tests/test_credentials_r6.py 7 passed, tests/test_desktop_signin.py 2 passed, tests/desktop/test_desktop_app.py 2 passed with the real Electron app against a real server on macOS (sign-in, wrong password refused, signed in as the member; a zsh PTY in the project workspace echoed through the pane); full suite 749 passed, 4 skipped; committed 31649b5 + race-test fix ddc1f2c; CI green on 3 OS (run 43365289968); desktop installers built (macOS arm64, x64, Windows). Step 9 (R2 features, R1 Home) built: tests/test_features_r2.py 2 passed, access matrix with features 6 passed, smoke 4 passed (Home after sign-in, no installers on the landing page, /api/downloads 401 signed out, developer without MCP, Features editor); full suite 752 passed, 4 skipped; committed 08d6dd3; CI green on 3 OS (run 43368548741). Windows setup fix (owner report 2026-11-13: `dev.py up` failed, PostgreSQL did not answer): `dev.py up` now starts the local database every time, then waits for the backend, then starts the UI; `dev.py db` replaces a stale local URL in .env; the backend names the real connection error; Next's lockfile warning silenced; a fresh .env gets a strong admin password; CI runs `dev.py up` on all 3 OS. Local: database stopped, then `up` recovered; full suite 753 passed |
 
 | Time | Event | Detail |
 |---|---|---|
@@ -12071,3 +12071,86 @@ Written by `scripts/hooks/activity_log.py`. Times are local.
 | 2026-11-13 10:24:32 | before | Bash: Note step 9 in plan, Azure guide and tracker |
 | 2026-11-13 10:24:33 | after | Bash: Note step 9 in plan, Azure guide and tracker |
 | 2026-11-13 10:24:38 | before | Bash: Commit and push step 9 |
+| 2026-11-13 10:24:46 | after | Bash: Commit and push step 9 |
+| 2026-11-13 10:24:51 | before | Bash: Watch CI for step 9 |
+| 2026-11-13 10:24:51 | after | Bash: Watch CI for step 9 |
+| 2026-11-13 10:24:54 | before | mcp__ccd_turn__wrap_up |
+| 2026-11-13 10:24:54 | after | mcp__ccd_turn__wrap_up |
+| 2026-11-13 10:25:04 | turn end |  |
+| 2026-11-13 10:35:18 | user | <pasted_content id="177c"> Microsoft Windows [Version 10.0.26200.9457] (c) Microsoft Corporation. All rights reserved. C:\Users\SarveshTalele\Downloads\agentic… |
+| 2026-11-13 10:35:27 | before | mcp__ccd_turn__update_plan |
+| 2026-11-13 10:35:27 | after | mcp__ccd_turn__update_plan |
+| 2026-11-13 10:35:27 | before | Bash: Read dev.py setup, up and db commands |
+| 2026-11-13 10:35:28 | after | Bash: Read dev.py setup, up and db commands |
+| 2026-11-13 10:35:30 | before | Bash: Read pg_local script and local_postgres module |
+| 2026-11-13 10:35:31 | after | Bash: Read pg_local script and local_postgres module |
+| 2026-11-13 10:35:32 | before | Bash: Read local_postgres start/stop |
+| 2026-11-13 10:35:33 | after | Bash: Read local_postgres start/stop |
+| 2026-11-13 10:35:44 | before | Bash: Check .env.example and db pool config |
+| 2026-11-13 10:35:44 | after | Bash: Check .env.example and db pool config |
+| 2026-11-13 10:36:19 | before | Bash: Check standalone path use, root package, env loading |
+| 2026-11-13 10:36:19 | after | Bash: Check standalone path use, root package, env loading |
+| 2026-11-13 10:36:28 | before | Bash: Read env example admin lines and env_check parser |
+| 2026-11-13 10:36:28 | after | Bash: Read env example admin lines and env_check parser |
+| 2026-11-13 10:36:44 | before | mcp__ccd_turn__update_plan |
+| 2026-11-13 10:36:44 | after | mcp__ccd_turn__update_plan |
+| 2026-11-13 10:36:55 | before | Bash: Make dev.py db refresh a stale local URL and check it |
+| 2026-11-13 10:36:56 | after | Bash: Make dev.py db refresh a stale local URL and check it |
+| 2026-11-13 10:37:14 | before | Bash: Make up start the DB, then backend, then UI |
+| 2026-11-13 10:37:15 | after | Bash: Make up start the DB, then backend, then UI |
+| 2026-11-13 10:37:18 | before | Bash: Check dev.py size baseline |
+| 2026-11-13 10:37:18 | after | Bash: Check dev.py size baseline |
+| 2026-11-13 10:37:26 | before | Bash: Check new script path and evidence command entry |
+| 2026-11-13 10:37:26 | after | Bash: Check new script path and evidence command entry |
+| 2026-11-13 10:37:31 | before | Bash: Move evidence command into its own script |
+| 2026-11-13 10:37:32 | after | Bash: Move evidence command into its own script |
+| 2026-11-13 10:37:37 | before | Bash: Fix evidence runner call; view dev.py helpers |
+| 2026-11-13 10:37:37 | after | Bash: Fix evidence runner call; view dev.py helpers |
+| 2026-11-13 10:37:49 | before | Bash: Trim dev.py, reuse up for start, watch features |
+| 2026-11-13 10:37:50 | after | Bash: Trim dev.py, reuse up for start, watch features |
+| 2026-11-13 10:37:59 | before | Bash: Report the real database connection error |
+| 2026-11-13 10:38:30 | after | Bash: Report the real database connection error |
+| 2026-11-13 10:38:30 | user | <ta[redacted]> <task-id>b53y7aid1</task-id> <tool-use-id>toolu_01Sxs3KwcUvXRm9iBC38BtMj</tool-use-id> <output-file>/private/tmp/claude-501/-Users-sarveshtalele… |
+| 2026-11-13 10:38:33 | before | Bash: Read step 9 CI result |
+| 2026-11-13 10:38:33 | after | Bash: Read step 9 CI result |
+| 2026-11-13 10:38:36 | before | Bash: Read rest of next.config |
+| 2026-11-13 10:38:36 | after | Bash: Read rest of next.config |
+| 2026-11-13 10:38:42 | before | Bash: Check Next docs for root config and outside imports |
+| 2026-11-13 10:38:43 | after | Bash: Check Next docs for root config and outside imports |
+| 2026-11-13 10:38:45 | before | Bash: Check the deep relative imports stay inside frontend |
+| 2026-11-13 10:38:46 | after | Bash: Check the deep relative imports stay inside frontend |
+| 2026-11-13 10:38:52 | before | Bash: Set the Next root and build to confirm the warning is gone |
+| 2026-11-13 10:39:05 | after | Bash: Set the Next root and build to confirm the warning is gone |
+| 2026-11-13 10:39:12 | before | Bash: Lint, rebuild desktop UI, check server.js location |
+| 2026-11-13 10:39:33 | failed | Bash: Lint, rebuild desktop UI, check server.js location Exit code 1 .gitignore:9:.next-*/ src/frontend/.next-check UI built: /Users/sarveshtalele/Downloads/ag… |
+| 2026-11-13 10:39:37 | before | Bash: Run desktop and smoke tests |
+| 2026-11-13 10:40:16 | after | Bash: Run desktop and smoke tests |
+| 2026-11-13 10:40:22 | before | Bash: Check ports and local cluster state |
+| 2026-11-13 10:40:23 | after | Bash: Check ports and local cluster state |
+| 2026-11-13 10:40:27 | before | Bash: Stop the DB, then run dev.py up and watch it start |
+| 2026-11-13 10:43:32 | after | Bash: Stop the DB, then run dev.py up and watch it start |
+| 2026-11-13 10:43:35 | before | Bash: Confirm UI is up with no proxy errors, then stop servers |
+| 2026-11-13 10:43:44 | after | Bash: Confirm UI is up with no proxy errors, then stop servers |
+| 2026-11-13 10:44:11 | before | Bash: Find print and .env creation in dev.py |
+| 2026-11-13 10:44:11 | after | Bash: Find print and .env creation in dev.py |
+| 2026-11-13 10:44:17 | before | Bash: Flush status line; strong admin password in fresh .env |
+| 2026-11-13 10:44:18 | after | Bash: Flush status line; strong admin password in fresh .env |
+| 2026-11-13 10:44:21 | before | Bash: Check test path; find docs mentioning dev.py db |
+| 2026-11-13 10:44:21 | after | Bash: Check test path; find docs mentioning dev.py db |
+| 2026-11-13 10:44:23 | before | Bash: Read README setup sections |
+| 2026-11-13 10:44:23 | after | Bash: Read README setup sections |
+| 2026-11-13 10:44:35 | before | Bash: Update README and add launcher test |
+| 2026-11-13 10:44:37 | after | Bash: Update README and add launcher test |
+| 2026-11-13 10:44:46 | before | Bash: Read CI smoke job |
+| 2026-11-13 10:44:47 | after | Bash: Read CI smoke job |
+| 2026-11-13 10:44:53 | before | Bash: View end of up() |
+| 2026-11-13 10:44:53 | after | Bash: View end of up() |
+| 2026-11-13 10:45:01 | before | Bash: Add CI start check; run it locally |
+| 2026-11-13 10:45:04 | after | Bash: Add CI start check; run it locally |
+| 2026-11-13 10:45:12 | before | Bash: Raise smoke timeout; run full suite |
+| 2026-11-13 10:49:13 | after | Bash: Raise smoke timeout; run full suite |
+| 2026-11-13 10:49:18 | before | Bash: Note the Windows fix in the tracker; list changes |
+| 2026-11-13 10:49:19 | after | Bash: Note the Windows fix in the tracker; list changes |
+| 2026-11-13 10:49:22 | before | Bash: Inspect tsconfig change and new script status |
+| 2026-11-13 10:49:22 | after | Bash: Inspect tsconfig change and new script status |
+| 2026-11-13 10:49:29 | before | Bash: Commit and push the setup fix |

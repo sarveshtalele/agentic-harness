@@ -29,6 +29,7 @@ import urllib.request
 import venv
 import webbrowser
 from pathlib import Path
+from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 FRONTEND = ROOT / "src" / "frontend"
@@ -74,17 +75,11 @@ def setup() -> None:
     run([npm(), "ci", "--no-audit", "--no-fund"], FRONTEND)
     step(4, 4, "Done. Next: python scripts/dev.py db", started)
     if not (ROOT / ".env").exists():
-        shutil.copy(ROOT / ".env.example", ROOT / ".env")
-        print("Created .env from .env.example. Add your model settings there or in the Settings page.")
-
-
-def start() -> None:
-    run([npm(), "run", "build"], FRONTEND)
-    backend = subprocess.Popen(BACKEND, cwd=ROOT, env=ENV)
-    try:
-        run([npm(), "run", "start", "--", "--hostname", "127.0.0.1"], FRONTEND)
-    finally:
-        backend.terminate()
+        import secrets  # a fresh .env gets a working admin sign-in: 24 random characters, shown once here and kept only in .env
+        password = secrets.token_urlsafe(18)
+        text = (ROOT / ".env.example").read_text(encoding="utf-8").replace("ATLAS_ADMIN_USERNAME=\n", "ATLAS_ADMIN_USERNAME=admin\n")
+        (ROOT / ".env").write_text(text.replace("ATLAS_ADMIN_PASSWORD=\n", f"ATLAS_ADMIN_PASSWORD={password}\n"), encoding="utf-8")
+        print(f"Created .env. Sign in as admin with the password {password} (also in .env). Add model settings there or in Settings.")
 
 
 def _port_free(port: int) -> bool:
@@ -112,12 +107,37 @@ def _needs_build(dist: Path) -> bool:
     if not built.exists():
         return True
     stamp = built.stat().st_mtime
-    watched = [FRONTEND / name for name in ("app", "components", "lib", "next.config.ts", "package-lock.json")]
+    watched = [FRONTEND / name for name in ("app", "components", "features", "lib", "next.config.ts", "package-lock.json")]
     return any(f.stat().st_mtime > stamp for item in watched for f in ([item] if item.is_file() else item.rglob("*")) if f.is_file())
 
 
+def _database(env: dict) -> None:
+    """Start the local PostgreSQL (data/postgres) when the app uses one, every time: after a reboot, or when `dev.py db`
+    ran in a window that is gone, nothing else starts it. A remote database (Azure) is left alone."""
+    lines = (ROOT / ".env").read_text(encoding="utf-8").splitlines() if (ROOT / ".env").is_file() else []
+    url = os.environ.get("ATLAS_DATABASE_URL") or next((l.split("=", 1)[1].strip().strip('"\'') for l in lines if l.strip().startswith("ATLAS_DATABASE_URL=")), "")
+    if url and urlsplit(url).hostname not in {"127.0.0.1", "localhost", "::1"}:
+        return
+    run([str(PYTHON), str(ROOT / "scripts" / "pg_local.py")])  # starts it if stopped and writes its URL to .env
+    env.pop("ATLAS_DATABASE_URL", None)  # a stale local URL in the system environment would win over the fresh one in .env
+
+
+def _wait(url: str, processes: list, what: str, seconds: int = 180) -> None:
+    for _ in range(seconds):
+        if any(p.poll() is not None for p in processes):
+            sys.exit(f"The {what} stopped during startup. See the messages above.")
+        try:
+            urllib.request.urlopen(url, timeout=2).close()
+            return
+        except OSError:
+            time.sleep(1)
+    sys.exit(f"The {what} did not answer at {url} within {seconds // 60} minutes. See the messages above.")
+
+
 def up() -> None:
-    """The launchers call this: one command from a fresh checkout to the app in a browser."""
+    """The launchers call this: one command from a fresh checkout to the app in a browser.
+    Order: dependencies, the UI build, the database, the backend (waited for), then the UI, so nothing waits on a server
+    that is not there yet."""
     api_port, ui_port = int(os.environ.get("ATLAS_PORT", "8000")), int(os.environ.get("ATLAS_UI_PORT", "3000"))
     for port in (api_port, ui_port):
         if not _port_free(port):
@@ -130,56 +150,35 @@ def up() -> None:
     if _needs_build(FRONTEND / os.environ.get("ATLAS_DIST_DIR", ".next")):
         print("Building the UI.")
         subprocess.run([npm(), "run", "build"], cwd=FRONTEND, env=env, check=True)
+    _database(env)
     backend = _spawn([str(PYTHON), "-m", "uvicorn", "backend.app:app", "--host", "127.0.0.1", "--port", str(api_port)], ROOT, env)
-    frontend = _spawn([npm(), "run", "start", "--", "--hostname", "127.0.0.1", "--port", str(ui_port)], FRONTEND, env)
-    url = f"http://127.0.0.1:{ui_port}"
+    frontend, url = None, f"http://127.0.0.1:{ui_port}"
     try:
-        for _ in range(120):
-            if backend.poll() is not None or frontend.poll() is not None:
-                sys.exit("A server stopped during startup. See the messages above.")
-            try:
-                urllib.request.urlopen(f"{url}/api/health", timeout=2).close()
-                break
-            except OSError:
-                time.sleep(1)
-        else:
-            sys.exit(f"The app did not answer at {url} within two minutes.")
-        print(f"\nAgentic QE Platform is running at {url}. Press Ctrl+C to stop.\n")
+        print("Starting the backend.")
+        _wait(f"http://127.0.0.1:{api_port}/api/health", [backend], "backend")
+        frontend = _spawn([npm(), "run", "start", "--", "--hostname", "127.0.0.1", "--port", str(ui_port)], FRONTEND, env)
+        _wait(f"{url}/login", [backend, frontend], "UI")
+        print(f"\nAgentic QE Platform is running at {url}. Press Ctrl+C to stop.\n", flush=True)
         if not os.environ.get("ATLAS_NO_BROWSER"):
             webbrowser.open(url)
-        while backend.poll() is None and frontend.poll() is None:
+        while not os.environ.get("ATLAS_UP_CHECK") and backend.poll() is None and frontend.poll() is None:  # CI: started, so stop
             time.sleep(1)
     finally:
-        _stop(frontend)
+        if frontend:
+            _stop(frontend)
         _stop(backend)
-
-
-def evidence() -> None:
-    """Run each level into JUnit XML (failures recorded, not raised), then write the evidence report."""
-    out = ROOT / "data" / "evidence"
-    out.mkdir(parents=True, exist_ok=True)
-    levels = [("unit-integration", ["tests", "-q", "-m", "not e2e and not live and not smoke"]),
-              ("smoke", ["tests/e2e/test_smoke.py", "-v", "-m", "smoke"])]
-    if "--e2e" in sys.argv:
-        levels.append(("e2e", ["tests/e2e", "-v", "-m", "e2e"]))
-    for name, args in levels:
-        subprocess.run([str(PYTHON), "-m", "pytest", *args, f"--junitxml={out / (name + '.xml')}"], cwd=ROOT, env=ENV, check=False)
-    report = [str(PYTHON), str(ROOT / "scripts" / "evidence_report.py"), "--screens", str(ROOT / "docs" / "evidence" / "screens")]
-    for name, _ in levels:
-        report += ["--level", f"{name}={out / (name + '.xml')}"]
-    run(report)
 
 
 COMMANDS = {
     "db": lambda: run([str(PYTHON), str(ROOT / "scripts" / "pg_local.py"), *sys.argv[2:]]),
-    "evidence": evidence,
+    "evidence": lambda: run([str(PYTHON), str(ROOT / "scripts" / "evidence_run.py"), *sys.argv[2:]]),
     "env-check": lambda: run([sys.executable, str(ROOT / "scripts" / "env_check.py"), *sys.argv[2:]]),
     "azure-local": lambda: run([str(PYTHON), str(ROOT / "scripts" / "azure_local.py"), *sys.argv[2:]]),  # needs psycopg for its local PostgreSQL
     "up": up,
     "setup": setup,
     "backend": lambda: run(BACKEND),
     "frontend": lambda: run([npm(), "run", "dev", "--", "--hostname", "127.0.0.1"], FRONTEND),
-    "start": start,
+    "start": lambda: (os.environ.setdefault("ATLAS_NO_BROWSER", "1"), up()),  # production: the same order as up, no browser
     "test": lambda: run([str(PYTHON), "-m", "pytest", "tests", "-q", "-m", "not e2e and not live and not smoke"]),
     "smoke": lambda: run([str(PYTHON), "-m", "pytest", "tests/e2e/test_smoke.py", "-v", "-m", "smoke"]),
     "e2e": lambda: run([str(PYTHON), "-m", "pytest", "tests/e2e", "-v", "-m", "e2e", "-s"]),

@@ -69,6 +69,17 @@ def _configure(con: psycopg.Connection) -> None:
     con.adapters.register_dumper(bool, _BoolAsInt)
 
 
+def _reason() -> str:
+    """Why one direct connection fails (refused, password, missing database), with the URL's password masked."""
+    try:
+        psycopg.connect(DATABASE_URL, connect_timeout=5).close()
+        return "a direct connection works, so the pool settings are at fault"
+    except Exception as exc:  # noqa: BLE001 - only reported
+        from backend.core.security import redact
+
+        return redact(str(exc).strip().splitlines()[0] if str(exc).strip() else type(exc).__name__)
+
+
 def pool() -> ConnectionPool:
     global _pool
     with _lock:
@@ -81,8 +92,9 @@ def pool() -> ConnectionPool:
                 made.open(wait=True, timeout=30)
             except PoolTimeout:
                 made.close()
-                raise DatabaseNotConfigured("PostgreSQL at ATLAS_DATABASE_URL did not answer within 30 seconds. Locally run `python scripts/dev.py db` "
-                                            "to start it; on Azure check the server is running and its firewall allows this app.") from None
+                raise DatabaseNotConfigured(f"PostgreSQL at ATLAS_DATABASE_URL did not answer within 30 seconds ({_reason()}). Locally run "
+                                            "`python scripts/dev.py up` (it starts the local database) or `python scripts/dev.py db`; on Azure "
+                                            "check the server is running and its firewall allows this app.") from None
             _pool = made
         return _pool
 

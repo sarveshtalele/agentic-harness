@@ -49,9 +49,9 @@ python3 scripts/dev.py env-check --env local
 python3 scripts/dev.py up
 ```
 
-`db` starts a local PostgreSQL in `data/postgres` and adds its URL to `.env` (it never prints the URL). Run it again after a restart. If you had an older SQLite store, `python3 scripts/dev.py db --import-sqlite` copies it in and verifies the ledger chains and document hashes.
+`db` starts a local PostgreSQL in `data/postgres` and adds its URL to `.env` (it never prints the URL). `up` does the same on every start, so after a restart `up` alone is enough. If you had an older SQLite store, `python3 scripts/dev.py db --import-sqlite` copies it in and verifies the ledger chains and document hashes.
 
-`setup` creates `.venv`, installs Python and Node packages, and installs Playwright's Chromium. `up` builds the UI, starts both servers and opens <http://127.0.0.1:3000>.
+`setup` creates `.venv`, installs Python and Node packages, and installs Playwright's Chromium. `up` builds the UI when it changed, starts the local database, then the backend (and waits for it), then the UI, and opens <http://127.0.0.1:3000>.
 
 You can also double-click `start-mac.command`.
 
@@ -102,9 +102,9 @@ py scripts\dev.py up
 ```
 
 - `setup` always creates and uses the project's own `.venv` (never the global Python), installs the Python and Node packages, and installs Playwright's Chromium (used for browser tests and QE screenshots). It prints one line per step with the elapsed time, `[setup 2/4 |   95s] …`, so a slow step looks slow, not stuck. `npm ci` takes 5 to 10 minutes on Windows the first time.
-- `db` starts PostgreSQL in `data\postgres` and adds `ATLAS_DATABASE_URL` to `.env`. It prints each step (`[db] Creating a new cluster…`, `[db] Starting PostgreSQL on 127.0.0.1:<port> (server log: …)`, `[db] Ready…`) and takes under a minute. If it fails, it prints the end of `data\postgres\server.log`. After a restart of Windows, run `db` again before `up`.
+- `db` starts PostgreSQL in `data\postgres` and adds `ATLAS_DATABASE_URL` to `.env`. It prints each step (`[db] Creating a new cluster…`, `[db] Starting PostgreSQL on 127.0.0.1:<port> (server log: …)`, `[db] Ready…`) and takes under a minute. If it fails, it prints the end of `data\postgres\server.log`. `up` also starts it, so after a restart of Windows `up` alone is enough. If the database does not answer, the error names the reason (connection refused, wrong password, missing database).
 - If an earlier `setup` printed warnings about `pythoncore-3.14-64\Scripts` not being on `PATH`, it had installed into the global Python (fixed). Run `setup` again: it creates `.venv` and installs there. The global copies are harmless.
-- `up` builds the UI and opens <http://127.0.0.1:3000>.
+- `up` starts the database, the backend and then the UI, and opens <http://127.0.0.1:3000>. A stale local `ATLAS_DATABASE_URL` in `.env` is replaced with the running cluster's.
 
 You can also double-click `start-windows.bat`.
 

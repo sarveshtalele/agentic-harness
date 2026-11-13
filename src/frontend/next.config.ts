@@ -7,6 +7,10 @@ const backend = process.env.ATLAS_BACKEND_URL || "http://127.0.0.1:8000";
 
 const nextConfig: NextConfig = {
   devIndicators: false,
+  // This folder is the app's root: the repository's own package-lock.json (Playwright tools) is not part of the UI, and
+  // without this Next warns about two lockfiles and may trace from the wrong folder (seen on Windows 2026-11-13).
+  turbopack: { root: __dirname },
+  outputFileTracingRoot: __dirname,
   distDir: process.env.ATLAS_DIST_DIR || ".next",
   // Azure startup sets this: the server then runs from a small self-contained folder.
   ...(process.env.ATLAS_STANDALONE ? { output: "standalone" as const } : {}),
