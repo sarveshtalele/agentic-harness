@@ -1,6 +1,9 @@
 import { HttpAgent } from "@ag-ui/client";
 import { CopilotRuntime, createCopilotRuntimeHandler } from "@copilotkit/runtime/v2";
 
+// No usage data to third parties: next.config sets this only while building, and the desktop and standalone servers
+// read the environment at run time (the desktop log showed "telemetry enabled", 2026-11-13).
+process.env.COPILOTKIT_TELEMETRY_DISABLED = "true";
 const backend = process.env.ATLAS_BACKEND_URL || "http://127.0.0.1:8000";
 // A chat request is a few messages; anything far larger is refused before any library parses it (zod 3 inside CopilotKit
 // has a known memory exhaustion on oversized input, GHSA-mrhx-c7xc-m3w5).
@@ -10,7 +13,12 @@ const MAX_BODY_BYTES = 2 * 1024 * 1024;
 // picker shows. A hardcoded copy here drifted: "harness" and "bug-fix-reviewer" were offered but unknown, which crashed the chat.
 // The backend also checks the caller's session first, so nobody who is signed out reaches the runtime.
 async function chatAgentKeys(headers: Record<string, string>): Promise<string[] | Response> {
-  const response = await fetch(`${backend}/api/chat/agents`, { headers, cache: "no-store" });
+  let response: Response;
+  try {
+    response = await fetch(`${backend}/api/chat/agents`, { headers, cache: "no-store" });
+  } catch {
+    return new Response(`The backend did not answer at ${backend}. Start it, or set ATLAS_BACKEND_URL to its address.`, { status: 502 });
+  }
   if (response.status === 401 || response.status === 403) return new Response("Sign in first", { status: response.status });
   if (!response.ok) return new Response(`Could not load chat agents from the backend: HTTP ${response.status}`, { status: 502 });
   const agents: { key: string }[] = await response.json();

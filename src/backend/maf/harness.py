@@ -110,6 +110,8 @@ def build(project_id: str, thread_id: str, start_run, *, user_id: str | None = N
     dirs = state_dirs(project_id, user_id)
     ws = workspace.open_workspace(project_id, thread_id, user_id)  # None without a repository: no write or shell tools then
     command = active_command.current(dirs["tools"], thread_id)
+    if ws:  # one way to read files: MAF's file tools on the workspace, where edits land (the platform's read the ingested copy)
+        every = [t for t in every if t.name not in ("list_files", "read_file", "grep")]
     if command and ws:  # a plugin command does the QE work itself: one way per job, so the platform's QE and repository tools step aside
         every = [t for t in every if t.name not in active_command.PLATFORM_QE_TOOLS]
     for tool in every:

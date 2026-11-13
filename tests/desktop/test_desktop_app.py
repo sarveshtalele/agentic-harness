@@ -174,6 +174,8 @@ def test_the_terminal_pane_runs_a_real_shell_in_the_project_workspace(app, serve
     # the pane on the harness page: a new terminal tab renders xterm and echoes what is typed
     main.goto(f"{origin}/harness?project={project['id']}")
     main.get_by_role("button", name="New terminal").click(timeout=60000)
+    main.wait_for_timeout(1500)
+    assert main.get_by_text("Runtime info request failed").count() == 0  # the UI reaches the desktop backend's real port
     main.locator("[data-testid=terminal-pty] .xterm").wait_for(timeout=30000)
     main.locator("[data-testid=terminal-pty] .xterm").click()
     main.keyboard.type("echo PANE-$((6 * 7))\n")

@@ -44,6 +44,9 @@ def note(ws) -> str:
         lines.append("- No bash here (on Windows, install Git for Windows to get it), so .sh scripts cannot run; use PowerShell.")
     if v := versions():
         lines.append("Tools: " + "; ".join(f"{k} {val}" for k, val in v.items()))
+    lines.append("The repository's code runs in its own environment, never the platform's: for Python, create it once with "
+                 "`python3 -m venv .venv` and install the project into it (`.venv/bin/pip install -e .` or `-r requirements.txt`; "
+                 "on Windows `.venv\\Scripts\\pip`); from then on `python` and `pytest` in the shell are the repository's. For Node, `npm ci`.")
     lines.append(f"Working directory: the workspace {ws.root}. Shells keep `cd` and variables between calls. Run skill scripts with the "
                  "interpreter their SKILL.md names (python, node for .ts/.js, bash for .sh, pwsh for .ps1); Node 22.18 or newer runs a .ts "
                  "file directly (`node scripts/x.ts`), so no tsx, npx or install is needed. Use run_in_background for "

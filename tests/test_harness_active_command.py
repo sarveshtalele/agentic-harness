@@ -50,7 +50,7 @@ def test_the_active_command_is_pinned_and_the_platform_qe_tools_step_aside(clien
     scripted = ScriptedClient([(NEEDLE, steps("Reading the routes."))])
     llm.set_client_override(scripted)
     turn(client, thread["id"], "what is in this repository?", "r0")
-    assert "read_file" in scripted.tools[-1] and "ACTIVE PLUGIN COMMAND" not in scripted.calls[-1]
+    assert "file_access_read" in scripted.tools[-1] and "read_file" not in scripted.tools[-1] and "ACTIVE PLUGIN COMMAND" not in scripted.calls[-1]
 
     turn(client, thread["id"], f"/agentic-qe:qe-requirements {APP}", "r1")
     seen, offered = scripted.calls[-1], scripted.tools[-1]

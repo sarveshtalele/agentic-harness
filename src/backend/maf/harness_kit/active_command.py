@@ -105,9 +105,11 @@ class ActiveCommandContext(ContextProvider):
             f"ACTIVE PLUGIN COMMAND: /{c['name']} {c['args']}".rstrip(),
             "You are carrying out this command until the user types another one. A message like \"continue\" or a gate phrase belongs to it.",
             "How to work here:",
-            "- Do its steps in order. The plugin's gates are the only gates.",
+            "- Do its steps in order, and only its steps: running the project's tests, installing packages or reading beyond what a step needs "
+            "waits for the command that asks for it. The plugin's gates are the only gates.",
             "- The repository facts in your instructions (languages, frameworks, test runners, file counts) are already measured: use them, do not re-derive them.",
-            "- Tools while it runs: list_files, read_file, grep, file_access_ls, file_access_read, file_access_grep (read, no approval); file_access_write, "
+            "- Tools while it runs: file_access_ls, file_access_read, file_access_grep (read the workspace, no approval); describe_contract(path) "
+            "(the fields a plugin file must have: call it before writing one) and check_gate(gate, app) (the plugin's own gate check); file_access_write, "
             "file_access_replace, file_access_replace_lines (change it, one approval card each); bash or powershell (run_shell on the web) for the plugin's scripts, tests and git; "
             "todos_*; load_skill and read_skill_resource (the plugin's skills); background_agents_* (the plugin's specialists). "
             f"These platform tools do not exist now, so never call them: {', '.join(sorted(PLATFORM_QE_TOOLS))}.",

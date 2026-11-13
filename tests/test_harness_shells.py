@@ -88,3 +88,18 @@ def test_background_task_stops_at_its_time_limit(ws):
     while time.monotonic() < deadline and "ended" not in bg_tasks.output(ws.thread_id, task_id):
         time.sleep(0.3)
     assert "minute limit" in bg_tasks.output(ws.thread_id, task_id)
+
+
+def test_repository_code_never_runs_in_the_platforms_python(ws, monkeypatch):
+    """Live run 2026-11-13: python3 in the workspace was the platform's .venv, so the repository's tests failed on its packages."""
+    import os
+
+    monkeypatch.setenv("PYTHONPATH", os.pathsep.join([str(shells.Path(__file__).resolve().parents[1] / "src"), "/somewhere/else"]))
+    env = shells.environment(ws)
+    platform_bin = str(shells.Path(sys.prefix) / ("Scripts" if os.name == "nt" else "bin"))
+    if sys.prefix != sys.base_prefix:
+        assert platform_bin not in env["PATH"].split(os.pathsep)
+    assert env.get("PYTHONPATH") == "/somewhere/else"  # the platform's own folders are gone, the rest kept
+    venv = ws.root / ".venv" / ("Scripts" if os.name == "nt" else "bin")
+    venv.mkdir(parents=True)
+    assert shells.environment(ws)["PATH"].split(os.pathsep)[0] == str(venv)  # the repository's environment comes first

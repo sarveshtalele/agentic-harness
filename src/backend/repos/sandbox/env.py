@@ -13,6 +13,20 @@ SENSITIVE_ENV_PATTERN = re.compile(
 )
 
 
+def _without_platform(env: dict, root: Path) -> None:
+    """Repository code must not run in the platform's own Python (live run 2026-11-13: `python3` in the workspace was the
+    platform's .venv with mcp 2.3 while the repository needs mcp 1.x, and its tests failed for that reason). Drop the
+    platform's virtual environment from PATH and the platform's folders from PYTHONPATH."""
+    venv_bin = Path(sys.prefix) / ("Scripts" if os.name == "nt" else "bin") if sys.prefix != sys.base_prefix else None
+    keep = lambda p, inside: p and not (inside and Path(p).resolve().is_relative_to(inside))  # noqa: E731
+    env["PATH"] = os.pathsep.join(p for p in env.get("PATH", "").split(os.pathsep) if keep(p, venv_bin.resolve() if venv_bin else None))
+    python_path = os.pathsep.join(p for p in env.get("PYTHONPATH", "").split(os.pathsep) if keep(p, root.resolve()))
+    if python_path:
+        env["PYTHONPATH"] = python_path
+    else:
+        env.pop("PYTHONPATH", None)
+
+
 def playwright_browsers() -> str:
     """The folder `playwright install` filled for this account (Playwright's own default per OS), when it exists."""
     if os.environ.get("PLAYWRIGHT_BROWSERS_PATH"):
@@ -38,6 +52,7 @@ def clean_sandbox_env(extra_env: dict | None = None) -> dict:
     }
     env = {k: v for k, v in os.environ.items() if k in allowed and not SENSITIVE_ENV_PATTERN.search(k)}
     env.setdefault("PYTHONDONTWRITEBYTECODE", "1")
+    _without_platform(env, ROOT)
     browsers = playwright_browsers()
     if browsers:  # commands may get another HOME (the harness does), so Playwright is told where Chromium really is
         env.setdefault("PLAYWRIGHT_BROWSERS_PATH", browsers)

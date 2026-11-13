@@ -54,7 +54,12 @@ def argv(kind: str, program: str, command: str | None = None) -> list[str]:
 
 
 def environment(ws) -> dict[str, str]:
-    return clean_sandbox_env({**ws.env(), "AQH_PROJECT_DIR": str(ws.root), "CLAUDE_PROJECT_DIR": str(ws.root)})
+    env = clean_sandbox_env({**ws.env(), "AQH_PROJECT_DIR": str(ws.root), "CLAUDE_PROJECT_DIR": str(ws.root)})
+    venv = Path(ws.root) / ".venv" / ("Scripts" if os.name == "nt" else "bin")
+    if venv.is_dir():  # the repository's own environment comes first, so `python` and `pytest` are the repository's
+        env["PATH"] = f"{venv}{os.pathsep}{env.get('PATH', '')}"
+        env["VIRTUAL_ENV"] = str(venv.parent)
+    return env
 
 
 async def session(ws, kind: str, sandbox: dict | None = None) -> LocalShellTool:

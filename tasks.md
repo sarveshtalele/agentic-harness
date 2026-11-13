@@ -347,3 +347,14 @@
 - [x] 11 R3 uploads and brainstorming; R4 Atlassian (optional) (2026-11-13). R3: sources with page, slide and notes markers, .doc/.ppt through LibreOffice, size limit, redacted; brainstorm workflow on the real model; runs gated by their workflow's feature. R4: MCP servers with per-member OAuth 2.1 + PKCE (discovery, dynamic registration, refresh), BA Studio search and attach through the server's own search and fetch tools; tested against a local OAuth + MCP stand-in, not against Atlassian itself (needs an Atlassian account)
 - [ ] 12 R5 QE cycle to Gate 5 with traceability
 - [ ] 13 Azure guide, proposal workbook, docs refresh
+
+## Phase 3 (owner request 2026-11-13, docs/PHASE3_PLAN.md)
+
+- [ ] 1 Harness accuracy: isolated repository environments (A1), one file tool set (A2), phase-bound turns (A3), runner flags (A4), runtime 500 (A7); live run to Gate 5
+- [ ] 2 Size reduction (owner's yes on the list)
+- [ ] 3 Naming and English pass with a retired-words test
+- [ ] 4 Feature test matrix with Playwright and the harness, one evidence report
+- [ ] 5 QE cycle to Gate 5 on personal-finance-mcp and mcp-server-market-v2, outputs verified
+- [ ] 6 A skill per repository, tested with the QE cycle
+- [ ] 7 Gaps found fixed with tests
+- [ ] 8 Local and Azure deployment checks; Developer Guide; README

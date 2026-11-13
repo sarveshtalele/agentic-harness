@@ -49,7 +49,8 @@ async function boot() {
   children.push(api);
 
   const ui = layout.uiServer();
-  const uiEnv = { ...process.env, ELECTRON_RUN_AS_NODE: "1", NODE_ENV: "production", HOSTNAME: "127.0.0.1", PORT: String(layout.UI_PORT) };
+  // the UI's server-side routes (chat runtime, downloads) call the backend directly, so they need its real port
+  const uiEnv = { ...process.env, ELECTRON_RUN_AS_NODE: "1", NODE_ENV: "production", HOSTNAME: "127.0.0.1", PORT: String(layout.UI_PORT), COPILOTKIT_TELEMETRY_DISABLED: "true", NEXT_TELEMETRY_DISABLED: "1", ATLAS_BACKEND_URL: `http://127.0.0.1:${layout.API_PORT}` };
   const web = procs.start("ui", process.execPath, [ui.script], { env: uiEnv, cwd: ui.cwd, logDir });
   children.push(web);
 

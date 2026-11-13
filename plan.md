@@ -168,3 +168,7 @@ Fix (`maf/harness_kit/active_command.py`):
 ## Phase 2 (owner request, 2026-11-12), awaiting approval
 
 See `docs/FINAL_PLAN.md` section 14: a live capability index for the harness, then a home page with gated downloads, a governance page for features, BA Studio uploads and a brainstorming workflow, Confluence import through MCP, the QE cycle traced end to end, and admin-issued desktop credentials.
+
+## Phase 3 (owner request, 2026-11-13)
+
+Final review, harness accuracy, size, naming, full Playwright testing on two repositories, local and Azure deployment, developer guide. Plan: `docs/PHASE3_PLAN.md`; order in its section 4. Started 2026-11-13 with harness accuracy (the live run showed the repository running in the platform's own Python).

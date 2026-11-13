@@ -21,11 +21,12 @@ from backend.maf import llm  # noqa: E402  reads ATLAS_DATABASE_URL from .env li
 cfg = llm.current()
 if not (cfg.get("api_key") and cfg.get("model")):
     sys.exit("No model is configured in your local store. Set it on the Settings page (or OPENAI_* in .env) first.")
-env = {**os.environ, "OPENAI_BASE_URL": cfg["base_url"], "OPENAI_API_KEY": cfg["api_key"], "DEFAULT_MODEL": cfg["model"],
+model = os.environ.get("AQE_LIVE_MODEL") or cfg["model"]  # another model the same proxy offers, for one live run
+env = {**os.environ, "OPENAI_BASE_URL": cfg["base_url"], "OPENAI_API_KEY": cfg["api_key"], "DEFAULT_MODEL": model,
        "PYTHONPATH": os.pathsep.join([str(ROOT / "src"), str(ROOT)])}
 for key in ("ATLAS_DATABASE_URL", "ATLAS_DATA_DIR", "ATLAS_SKILLS_DIR", "ATLAS_ADMIN_USERNAME", "ATLAS_ADMIN_PASSWORD", "ATLAS_SECRET_KEY",
             "ATLAS_BACKEND_URL", "ATLAS_WORKSPACES", "ATLAS_KEY_VAULT_URL"):
     env.pop(key, None)  # the child builds its own throwaway store
-print(f"live run with model {cfg['model']}", flush=True)
+print(f"live run with model {model}", flush=True)
 args = sys.argv[1:] or ["tests"]
 sys.exit(subprocess.run([sys.executable, "-m", "pytest", *args, "-m", "live", "-s", "-q", "-p", "no:cacheprovider"], cwd=ROOT, env=env).returncode)
