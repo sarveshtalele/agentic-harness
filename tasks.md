@@ -343,7 +343,7 @@
 - [x] 8 R6: pepper, recorded scrypt cost and rehash at sign-in, 12-character minimum, breached-password check, first admin as a hash (`dev.py admin-password`); desktop central sign-in with a signed grant (no local admin or password, sign-out); desktop Terminal pane (node-pty, xterm) with background tasks as tabs (2026-11-13)
 - [x] 9 R2: features (Harness, BA Studio, QE cycle, Bugs, Skill Studio, MCP, Documents, Desktop downloads, Traces, Usage) as role defaults plus member overrides, enforced per route (every route named or core), ledgered with before and after, Settings > Features editor with effective preview, navigation hides denied; R1: /home after sign-in, landing page without installers, /api/downloads only with the Downloads feature (2026-11-13). BA Studio tile and routes join with R3
 - [x] Playwright UI audit test (tests/e2e/test_ui_audit.py), 2026-11-12
-- [ ] 10 UI audit fixes U1 to U10; audit at zero findings
+- [x] 10 UI audit fixes U1 to U10; audit at zero findings in desktop light, desktop dark and phone (2026-11-13): phone drawer, theme follows the system, plain short names, one QE download, landing without a 401, capabilities grouped by kind
 - [ ] 11 R3 uploads and brainstorming; R4 Atlassian (optional)
 - [ ] 12 R5 QE cycle to Gate 5 with traceability
 - [ ] 13 Azure guide, proposal workbook, docs refresh

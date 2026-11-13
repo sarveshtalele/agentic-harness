@@ -43,20 +43,8 @@ export function QePage() {
   return (
     <div className="space-y-6">
       <PageTitle
-        title="Autonomous QE & AI SDLC Lifecycle"
-        subtitle="End-to-end quality engineering lifecycle from BRD intake to automated sandbox build, test generation, and setup ZIP package export."
-        actions={
-          <div className="flex items-center gap-2">
-            <a
-              href={`/api/projects/${project.id}/export-zip`}
-              download={`${project.id}_sdlc_export.zip`}
-            >
-              <Button variant="secondary">
-                <Download className="h-4 w-4" /> Export SDLC Package (.ZIP)
-              </Button>
-            </a>
-          </div>
-        }
+        title="QE cycle"
+        subtitle="From requirements to signed gates: plan, design, generate and run tests, each step approved by a person."
       />
 
       {/* Project Mode Selector (Greenfield vs Brownfield) */}
@@ -81,9 +69,9 @@ export function QePage() {
               }}
             />
           ) : (
-            <Card title="Active Execution Run">
+            <Card title="Current run">
               <p className="text-sm text-slate-500">
-                No active QE lifecycle run selected. Click "Start QE Lifecycle" above or pick a run from Past Runs.
+                No QE cycle run selected. Choose "Start the QE cycle" above, or pick a run from Past runs.
               </p>
             </Card>
           )}
@@ -91,7 +79,7 @@ export function QePage() {
 
         <div className="space-y-4">
           <RunDocuments projectId={project.id} runId={runId} />
-          <Card title="Past QE Runs">
+          <Card title="Past runs">
             <RunList
               projectId={project.id}
               workflow={["qe"]}

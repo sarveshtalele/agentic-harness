@@ -461,6 +461,8 @@ Run on 2026-11-12: 34 pages x 3 views, 103 screenshots in `docs/evidence/ui-audi
 
 The audit test itself had one wrong path (`/chat` exists only as `/chat/<id>`); removed. After the fixes the test must report zero findings in all three views.
 
+**Result (2026-11-13):** zero findings over 37 pages in the three views (`/home` added). U1: below 768 px both sidebars are drawers behind a menu button and the headers wrap (`components/MobileMenu.tsx`); U2 and U10 followed from U1. U3: the page follows the system theme until the person picks one. U4 and U5: short plain names in both menus and headings. U6: one "Download a runnable copy" card (both buttons fetched the same ZIP). U7: the landing page reads the public `/api/auth/status` (`signed_in`), so no 401. U8: the only `null` was the placeholder `<desc-or-null>` in MAF's own `file_memory_ls` description; the audit now flags a bare `null` only. U9: capabilities grouped by kind with counts, folded unless a search or kind is chosen. The audit also found that the smoke server used its own secret key against the session's shared test database, so a later server could not read its users; smoke now uses the session's key.
+
 ## 15. Tests and evidence
 
 - **Parity matrix, run on macOS, Windows and Linux in CI** (GitHub runners), each with the real shells present on that runner:

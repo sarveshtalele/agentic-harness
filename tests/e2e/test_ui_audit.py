@@ -17,12 +17,12 @@ from tests.e2e.conftest import EVIDENCE, UI
 pytestmark = pytest.mark.e2e
 OUT = EVIDENCE / "ui-audit"
 SIGNED_OUT = ["/", "/login"]
-PAGES = ["/projects", "/harness", "/documents", "/templates", "/skills", "/skills/studio", "/agents", "/mcp", "/capabilities",
+PAGES = ["/home", "/projects", "/harness", "/documents", "/templates", "/skills", "/skills/studio", "/agents", "/mcp", "/capabilities",
          "/approvals", "/findings", "/traces", "/observability", "/usage", "/users", "/settings", "/account", "/docs"]
 PROJECT_PAGES = ["", "/chat", "/ba", "/qe", "/bugs", "/feature", "/documents", "/repository", "/runs", "/approvals", "/governance",
                  "/observability", "/prompts"]
 LEAK = re.compile(r"\bundefined\b|\bNaN\b|\[object Object\]|\{\{|\}\}|Traceback \(most recent|at [A-Za-z_.]+ \(.*:\d+:\d+\)|"
-                  r"\"detail\":|Internal Server Error|\bnull\b")
+                  r"\"detail\":|Internal Server Error|(?<![\w-])null(?![\w>-])")  # "<desc-or-null>" in a tool's own description is text
 CHECKS = """() => {
   const out = {overflowX: document.documentElement.scrollWidth > window.innerWidth + 1, clipped: [], noAlt: [], noName: []};
   for (const el of document.querySelectorAll('body *')) {
@@ -50,7 +50,7 @@ def _audit(browser_page, path: str, label: str, findings: list) -> None:
     browser_page.on("requestfailed", lambda r: failed.append(f"failed {r.url.replace(UI, '')[:120]}"))
     browser_page.goto(f"{UI}{path}", wait_until="networkidle")
     browser_page.wait_for_timeout(800)
-    name = f"{label}{path.replace('/', '_') or '_home'}.png"
+    name = f"{label}{re.sub(r'prj_[0-9a-f]+', 'project', path).replace('/', '_') or '_home'}.png"  # one stable set of files per view
     browser_page.screenshot(path=str(OUT / name), full_page=True)
     text = browser_page.inner_text("body")
     leaks = sorted({m.group(0) for m in LEAK.finditer(text)})

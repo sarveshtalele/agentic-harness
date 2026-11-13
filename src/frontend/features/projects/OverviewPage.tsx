@@ -49,7 +49,7 @@ export function OverviewPage() {
           <div className="flex items-center gap-2">
             <Link href={`/harness?project=${project.id}`}>
               <Button variant="primary">
-                <Terminal className="h-4 w-4" /> Open in QE Harness
+                <Terminal className="h-4 w-4" /> Open in the harness
               </Button>
             </Link>
             <Button

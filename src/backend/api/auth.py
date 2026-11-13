@@ -65,9 +65,11 @@ class GrantIn(BaseModel):
 
 
 @router.get("/api/auth/status")
-def status():
+def status(request: Request):
+    """Public: whether sign-in is set up, and whether this browser is signed in (so a public page need not call /me and
+    get a 401 it would log as an error, UI audit U7). Nothing about the account is returned."""
     desktop = config.PROFILE == "desktop"
-    return {"configured": auth.admin_configured() or desktop, "desktop": desktop}
+    return {"configured": auth.admin_configured() or desktop, "desktop": desktop, "signed_in": bool(auth.session_user(request.cookies.get(auth.COOKIE)))}
 
 
 @router.post("/api/auth/desktop-session")

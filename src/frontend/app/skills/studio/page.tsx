@@ -13,7 +13,7 @@ function StudioContent() {
 export default function SkillStudioPage() {
   return (
     <AppShell>
-      <PageTitle title="Skill Creator Studio" subtitle="AI Architect: draft a plan from your source, approve it, generate the skill, test it, evaluate it on the model (Benchmark Quality), and publish a version." />
+      <PageTitle title="Skill Studio" subtitle="AI Architect: draft a plan from your source, approve it, generate the skill, test it, evaluate it on the model (Benchmark Quality), and publish a version." />
       <Suspense fallback={<p className="p-8 text-center text-sm text-slate-400">Loading…</p>}>
         <StudioContent />
       </Suspense>

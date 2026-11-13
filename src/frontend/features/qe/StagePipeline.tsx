@@ -8,7 +8,7 @@ type Props = { project: any; safeDocs: any[]; safeGates: any[]; model: string; s
 
 export function StagePipeline({ project, safeDocs, safeGates, model, setModel, install, setInstall, error, onStart }: Props) {
   return (
-    <Card title="Autonomous AI SDLC & Quality Gate Pipeline" className="mb-4">
+    <Card title="Stages and gates" className="mb-4">
       <ol className="flex flex-wrap gap-2">
         {STAGES.map(([name, gate, kind]) => {
           const matchingDocs = safeDocs.filter((d) => d?.kind === kind);
@@ -59,7 +59,7 @@ export function StagePipeline({ project, safeDocs, safeGates, model, setModel, i
 
       <div className="mt-4 flex flex-wrap items-center gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
         <Button onClick={onStart}>
-          <Play className="h-4 w-4" /> Start QE Lifecycle
+          <Play className="h-4 w-4" /> Start the QE cycle
         </Button>
         <ModelPicker value={model} onChange={setModel} compact />
         <label className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 cursor-pointer">

@@ -69,7 +69,7 @@ export function CapabilitiesPage() {
             </select>
             <input aria-label="Search capabilities" placeholder="Search names and descriptions" className={`${inputClass} md:col-span-2`} value={q} onChange={(e) => setQ(e.target.value)} />
           </div>
-          {shown.length ? <CapTable items={shown} onOpen={setOpen} /> : <Empty title="Nothing matches">Change the kind or the search.</Empty>}
+          {shown.length ? <CapTable items={shown} onOpen={setOpen} expanded={!!(kind || q.trim())} /> : <Empty title="Nothing matches">Change the kind or the search.</Empty>}
         </>
       )}
       {open && <CapDrawer id={open} onOpen={setOpen} onClose={() => setOpen("")} />}

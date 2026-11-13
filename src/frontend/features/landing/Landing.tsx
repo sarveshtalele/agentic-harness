@@ -10,7 +10,7 @@ const FEATURES = [
   { icon: Bot, title: "Project harness", text: "An agent on Microsoft Agent Framework that plans, reads your repository, runs approved commands in a sandbox and uses skills, plugins and MCP tools." },
   { icon: FileText, title: "Requirements", text: "BRDs, user stories and Gherkin, checked by the official parser. Every save is an immutable version with its SHA-256." },
   { icon: ClipboardCheck, title: "Governed QE", text: "Test plans, cases, code and runs through gates G0 to G5. A named person signs each gate; agents never approve." },
-  { icon: Wand2, title: "Skill Creator Studio", text: "Plan, generate, test and evaluate new agent skills on the real model before anyone can publish them." },
+  { icon: Wand2, title: "Skill Studio", text: "Plan, generate, test and evaluate new agent skills on the real model before anyone can publish them." },
 ];
 
 const button = "inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold";
@@ -19,7 +19,7 @@ const button = "inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font
 export function Landing() {
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
   useEffect(() => {
-    api("/auth/me").then(() => setSignedIn(true)).catch(() => setSignedIn(false));
+    api("/auth/status").then((r) => setSignedIn(!!r.signed_in)).catch(() => setSignedIn(false)); // never a 401 when signed out
   }, []);
   const enter = signedIn ? (
     <Link href="/home" data-testid="landing-open" className={`${button} bg-indigo-600 text-white hover:bg-indigo-500`}>Open workspace <ArrowRight className="h-4 w-4" /></Link>

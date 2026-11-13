@@ -7,7 +7,7 @@ import { McpRegistry } from "../../features/mcp/McpRegistry";
 export default function McpPage() {
   return (
     <AppShell>
-      <PageTitle title="MCP Server Registry" />
+      <PageTitle title="MCP servers" />
       <McpRegistry />
     </AppShell>
   );

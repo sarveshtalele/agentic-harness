@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { useFeatures } from "../lib/features";
+import { useMobileMenu } from "./MobileMenu";
 import { useAuth, UserMenu } from "./AuthGate";
 import { ThemeToggle } from "./ui";
 
@@ -23,39 +24,39 @@ interface NavSection {
 
 const navSections: NavSection[] = [
   {
-    title: "WORKSPACE & AGENTS",
+    title: "WORK",
     items: [
       { href: "/home", label: "Home", icon: House },
       { href: "/projects", label: "Projects", icon: FolderKanban },
-      { href: "/harness", label: "Autonomous QE Harness", icon: Terminal, feature: "harness" },
-      { href: "/approvals", label: "Gate Approvals", icon: CheckSquare, badge: true },
-      { href: "/agents", label: "AI Specialist Roster", icon: Bot },
+      { href: "/harness", label: "Harness", icon: Terminal, feature: "harness" },
+      { href: "/approvals", label: "Approvals", icon: CheckSquare, badge: true },
+      { href: "/agents", label: "Agents", icon: Bot },
     ],
   },
   {
-    title: "STUDIOS & ECOSYSTEM",
+    title: "BUILD",
     items: [
-      { href: "/skills/studio", label: "Skill Creator Studio", icon: Wand2, feature: "skills" },
-      { href: "/skills", label: "Project Skills & Tools", icon: Sparkles },
-      { href: "/mcp", label: "MCP Server Registry", icon: Cpu, feature: "mcp" },
-      { href: "/templates", label: "Specification Templates", icon: FileText, feature: "docs" },
+      { href: "/skills/studio", label: "Skill Studio", icon: Wand2, feature: "skills" },
+      { href: "/skills", label: "Skills", icon: Sparkles },
+      { href: "/mcp", label: "MCP servers", icon: Cpu, feature: "mcp" },
+      { href: "/templates", label: "Templates", icon: FileText, feature: "docs" },
     ],
   },
   {
-    title: "GOVERNANCE & INSIGHTS",
+    title: "INSIGHT",
     items: [
-      { href: "/observability", label: "Observability & Telemetry", icon: Activity, feature: "traces" },
-      { href: "/traces", label: "Trace Explorer", icon: ListTree, feature: "traces" },
-      { href: "/capabilities", label: "Capability Registry", icon: Cpu },
-      { href: "/docs", label: "Platform Documentation", icon: BookOpen },
+      { href: "/observability", label: "Observability", icon: Activity, feature: "traces" },
+      { href: "/traces", label: "Traces", icon: ListTree, feature: "traces" },
+      { href: "/capabilities", label: "Capabilities", icon: Cpu },
+      { href: "/docs", label: "Docs", icon: BookOpen },
     ],
   },
   {
-    title: "ENTERPRISE ADMIN",
+    title: "ADMIN",
     items: [
-      { href: "/users", label: "User Access & Accounts", icon: UsersRound, admin: true },
-      { href: "/usage", label: "Token Budget & Usage", icon: BarChart3, admin: true, feature: "usage" },
-      { href: "/settings", label: "System Configuration", icon: Settings, admin: true },
+      { href: "/users", label: "Users", icon: UsersRound, admin: true },
+      { href: "/usage", label: "Usage", icon: BarChart3, admin: true, feature: "usage" },
+      { href: "/settings", label: "Settings", icon: Settings, admin: true },
     ],
   },
 ];
@@ -67,6 +68,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const features = useFeatures();
   const [pending, setPending] = useState(0);
   const [collapsed, setCollapsed] = useState(false);
+  const menu = useMobileMenu(pathname);
 
   useEffect(() => {
     const load = () => api("/approvals").then((items) => setPending(items.length)).catch(() => {});
@@ -77,7 +79,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-screen">
-      <aside className={`sticky top-0 flex h-screen shrink-0 flex-col border-r border-slate-200 bg-white p-3 transition-all dark:border-slate-800 dark:bg-[#060a17] ${collapsed ? "w-16" : "w-60"}`}>
+      {menu.backdrop}
+      <aside className={menu.aside(collapsed)}>
         <div className="mb-4 flex items-center justify-between border-b border-slate-200 pb-3 dark:border-slate-800">
           {!collapsed && (
             <Link href="/home" className="flex items-center gap-2.5 px-1">
@@ -88,7 +91,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <button
             onClick={() => setCollapsed(!collapsed)}
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            className="rounded-md border border-slate-200 p-1 text-slate-500 hover:bg-slate-100 dark:border-slate-800 dark:hover:bg-slate-800"
+            className="hidden md:block rounded-md border border-slate-200 p-1 text-slate-500 hover:bg-slate-100 dark:border-slate-800 dark:hover:bg-slate-800"
           >
             {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
           </button>
@@ -144,13 +147,14 @@ export function AppShell({ children }: { children: ReactNode }) {
         </nav>
       </aside>
       <div className="min-w-0 flex-1">
-        <header className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-slate-200 bg-white/95 px-6 py-2.5 backdrop-blur dark:border-slate-800 dark:bg-[#060a17]/90">
+        <header className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 bg-white/95 px-3 py-2.5 backdrop-blur md:px-6 dark:border-slate-800 dark:bg-[#060a17]/90">
+          {menu.button}
           {pathname === "/harness" ? (
             <div className="flex items-center gap-2 text-xs">
               <span className="flex h-6 w-6 items-center justify-center rounded-md bg-indigo-600 text-white shadow-xs">
                 <Terminal className="h-3.5 w-3.5" />
               </span>
-              <span className="font-bold text-slate-800 dark:text-slate-100">Autonomous QE Harness</span>
+              <span className="font-bold text-slate-800 dark:text-slate-100">Harness</span>
               <span className="hidden sm:inline-block rounded-md bg-indigo-500/10 px-1.5 py-0.5 text-[10px] font-mono font-semibold text-indigo-600 dark:text-indigo-400">
                 Microsoft Agent Framework
               </span>
@@ -158,16 +162,15 @@ export function AppShell({ children }: { children: ReactNode }) {
           ) : (
             <Link href="/harness" className="flex items-center gap-1.5 rounded-lg border border-indigo-500/30 bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:text-indigo-300 transition">
               <Terminal className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
-              <span>QE Harness</span>
-              <span className="rounded bg-indigo-600/20 px-1 py-0.2 text-[10px] font-mono">Enterprise QE</span>
+              <span>Harness</span>
             </Link>
           )}
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 md:gap-3">
             <UserMenu />
             <ThemeToggle />
           </div>
         </header>
-        <main className={`mx-auto p-6 ${pathname === "/harness" ? "max-w-full px-4 py-3" : "max-w-6xl"}`}>
+        <main className={`mx-auto p-3 md:p-6 ${pathname === "/harness" ? "max-w-full md:px-4 md:py-3" : "max-w-6xl"}`}>
           {(user as any)?.warnings?.map((w: string) => <p key={w} role="alert" data-testid="admin-warning" className="mb-4 rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-700 dark:text-rose-300">{w}</p>)}
           {children}
         </main>

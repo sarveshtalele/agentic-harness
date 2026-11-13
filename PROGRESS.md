@@ -16,7 +16,7 @@ Written by `scripts/hooks/activity_log.py`. Times are local.
 | 8 | Harness eval suite (5.9); repository map only if it helps (5.8) | open | |
 | 9 | Azure guide at or under $25/month, first test deployment (9) | in progress (guide done 2026-11-12; test deployment and portal screenshots open) | `docs/AZURE_DEPLOYMENT_GUIDE.md`: prices re-read from prices.azure.com 2026-11-12, $20.70 with the PostgreSQL stop schedule (Automation runbook), zipping, portal steps, UI tour, troubleshooting. Owner approved deleting the 4 old Azure docs |
 | 10 | Desktop bundled PostgreSQL (D4), signing when certificates exist | open | |
-| 11 | Phase 2 (docs/PHASE2_PLAN.md rev 3): Claude Code-class harness on MAF (CLI, desktop, web), then R1 to R6 | approved 2026-11-12; step 1 built, baseline run blocked | Step 1: evals/harness/discovery.json (20 tasks, fixture repo with Python, TS, Bash, PowerShell, .claude and .agents skills), src/backend/maf/evals/discovery.py scorer (tests/test_discovery_eval_scoring.py: 3 passed), tests/test_harness_discovery_eval.py live driver, `python scripts/dev.py live`. Baseline not run: the model proxy answers HTTP 429 'daily token limit exceeded (25,101,895/25,000,000)'; Step 2 done locally (2026-11-12): bash and powershell on MAF LocalShellTool (persistent), background tasks, spill, permission modes and rules, /mode; tests/test_harness_shells.py and tests/test_harness_permissions.py (20 passed, PowerShell skipped on this Mac); full suite 710 passed, 2 skipped; CI green on 3 OS for 3bc0fd5 (after fixing PowerShell escape codes and Git Bash paths). Step 3 done locally: core/script_runtime.py, core/script_health.py, per-turn skill runner, Flagged badge and Check again; full suite 716 passed, 3 skipped; committed 75ecbbb + PowerShell syntax-check fix 8a62ef4; CI green on 3 OS (run 43251382164); Step 4 done locally: skill scopes, tool index with arguments, nearest names for invented tools, MCP refresh, command substitutions; tests/test_harness_discovery_scopes.py 5 passed; committed c6897c7; CI: tests green on 3 OS, macOS smoke failed on an ambiguous test locator (fixed, smoke 4 passed locally). Step 5 done locally (2026-11-13): settings files, settings and http hooks, updatedInput, PostToolUseFailure, Stop hooks, checkpoints and /rewind, routed helper-agent permissions; full suite 729 passed before one contract test update (now 5 passed); not committed. Discovery eval running (quota reset); Discovery eval after (current code, docs/evidence/runs/2026-11-13-discovery-after): 15/20 passed, selection 0.95, first try 0.6, argument validity 1.0, 36 invented names. Found and fixed: run_skill_script crashed on MAF's FileSkill (.name), run_shell alias for the primary shell, deferred tools called by name are loaded on the spot; full suite 732 passed, 3 skipped. Baseline (b76ddbd, docs/evidence/runs/2026-11-13-discovery-baseline): 12/20 passed, selection 0.85, first try 0.55, argument validity 1.0, 6 invented names. Eval after the fixes (docs/evidence/runs/2026-11-13-discovery-after-fixes): 18/20 passed, 4 invented names. Re-scored all three runs uniformly after widening two answer checks to patterns (results-rescored.json): baseline 13/20 (65%), steps 2-4 16/20 (80%), with fixes 18/20 (90%). Full threads recorded: no task mix-up, the model wandered. Full suite 732 passed, 3 skipped. Committed e5944aa. Step 6 (aqh CLI) built: tests/test_aqh_cli.py 4 passed; live `aqh -p` with the real model on macOS created notes.txt in the bound folder (data/aqh-demo); committed 00c27f9; CI green on 3 OS (run 43294669803). Step 7 (OS sandbox T1) built: harness_kit/os_sandbox.py (Seatbelt, bubblewrap) around persistent and background shells, auto mode skips the card only when sandboxed, Linux CI installs bubblewrap; tests/test_os_sandbox.py 3 passed on macOS with real Seatbelt (write outside the workspace refused, network blocked); full suite 740 passed, 3 skipped; committed 33ac060; CI green on 3 OS (run 43297921200). Step 8 (R6, Terminal pane) built: tests/test_credentials_r6.py 7 passed, tests/test_desktop_signin.py 2 passed, tests/desktop/test_desktop_app.py 2 passed with the real Electron app against a real server on macOS (sign-in, wrong password refused, signed in as the member; a zsh PTY in the project workspace echoed through the pane); full suite 749 passed, 4 skipped; committed 31649b5 + race-test fix ddc1f2c; CI green on 3 OS (run 43365289968); desktop installers built (macOS arm64, x64, Windows). Step 9 (R2 features, R1 Home) built: tests/test_features_r2.py 2 passed, access matrix with features 6 passed, smoke 4 passed (Home after sign-in, no installers on the landing page, /api/downloads 401 signed out, developer without MCP, Features editor); full suite 752 passed, 4 skipped; committed 08d6dd3; CI green on 3 OS (run 43368548741). Windows setup fix (owner report 2026-11-13: `dev.py up` failed, PostgreSQL did not answer): `dev.py up` now starts the local database every time, then waits for the backend, then starts the UI; `dev.py db` replaces a stale local URL in .env; the backend names the real connection error; Next's lockfile warning silenced; a fresh .env gets a strong admin password; CI runs `dev.py up` on all 3 OS. Local: database stopped, then `up` recovered; full suite 753 passed |
+| 11 | Phase 2 (docs/PHASE2_PLAN.md rev 3): Claude Code-class harness on MAF (CLI, desktop, web), then R1 to R6 | approved 2026-11-12; step 1 built, baseline run blocked | Step 1: evals/harness/discovery.json (20 tasks, fixture repo with Python, TS, Bash, PowerShell, .claude and .agents skills), src/backend/maf/evals/discovery.py scorer (tests/test_discovery_eval_scoring.py: 3 passed), tests/test_harness_discovery_eval.py live driver, `python scripts/dev.py live`. Baseline not run: the model proxy answers HTTP 429 'daily token limit exceeded (25,101,895/25,000,000)'; Step 2 done locally (2026-11-12): bash and powershell on MAF LocalShellTool (persistent), background tasks, spill, permission modes and rules, /mode; tests/test_harness_shells.py and tests/test_harness_permissions.py (20 passed, PowerShell skipped on this Mac); full suite 710 passed, 2 skipped; CI green on 3 OS for 3bc0fd5 (after fixing PowerShell escape codes and Git Bash paths). Step 3 done locally: core/script_runtime.py, core/script_health.py, per-turn skill runner, Flagged badge and Check again; full suite 716 passed, 3 skipped; committed 75ecbbb + PowerShell syntax-check fix 8a62ef4; CI green on 3 OS (run 43251382164); Step 4 done locally: skill scopes, tool index with arguments, nearest names for invented tools, MCP refresh, command substitutions; tests/test_harness_discovery_scopes.py 5 passed; committed c6897c7; CI: tests green on 3 OS, macOS smoke failed on an ambiguous test locator (fixed, smoke 4 passed locally). Step 5 done locally (2026-11-13): settings files, settings and http hooks, updatedInput, PostToolUseFailure, Stop hooks, checkpoints and /rewind, routed helper-agent permissions; full suite 729 passed before one contract test update (now 5 passed); not committed. Discovery eval running (quota reset); Discovery eval after (current code, docs/evidence/runs/2026-11-13-discovery-after): 15/20 passed, selection 0.95, first try 0.6, argument validity 1.0, 36 invented names. Found and fixed: run_skill_script crashed on MAF's FileSkill (.name), run_shell alias for the primary shell, deferred tools called by name are loaded on the spot; full suite 732 passed, 3 skipped. Baseline (b76ddbd, docs/evidence/runs/2026-11-13-discovery-baseline): 12/20 passed, selection 0.85, first try 0.55, argument validity 1.0, 6 invented names. Eval after the fixes (docs/evidence/runs/2026-11-13-discovery-after-fixes): 18/20 passed, 4 invented names. Re-scored all three runs uniformly after widening two answer checks to patterns (results-rescored.json): baseline 13/20 (65%), steps 2-4 16/20 (80%), with fixes 18/20 (90%). Full threads recorded: no task mix-up, the model wandered. Full suite 732 passed, 3 skipped. Committed e5944aa. Step 6 (aqh CLI) built: tests/test_aqh_cli.py 4 passed; live `aqh -p` with the real model on macOS created notes.txt in the bound folder (data/aqh-demo); committed 00c27f9; CI green on 3 OS (run 43294669803). Step 7 (OS sandbox T1) built: harness_kit/os_sandbox.py (Seatbelt, bubblewrap) around persistent and background shells, auto mode skips the card only when sandboxed, Linux CI installs bubblewrap; tests/test_os_sandbox.py 3 passed on macOS with real Seatbelt (write outside the workspace refused, network blocked); full suite 740 passed, 3 skipped; committed 33ac060; CI green on 3 OS (run 43297921200). Step 8 (R6, Terminal pane) built: tests/test_credentials_r6.py 7 passed, tests/test_desktop_signin.py 2 passed, tests/desktop/test_desktop_app.py 2 passed with the real Electron app against a real server on macOS (sign-in, wrong password refused, signed in as the member; a zsh PTY in the project workspace echoed through the pane); full suite 749 passed, 4 skipped; committed 31649b5 + race-test fix ddc1f2c; CI green on 3 OS (run 43365289968); desktop installers built (macOS arm64, x64, Windows). Step 9 (R2 features, R1 Home) built: tests/test_features_r2.py 2 passed, access matrix with features 6 passed, smoke 4 passed (Home after sign-in, no installers on the landing page, /api/downloads 401 signed out, developer without MCP, Features editor); full suite 752 passed, 4 skipped; committed 08d6dd3; CI green on 3 OS (run 43368548741). Windows setup fix (owner report 2026-11-13: `dev.py up` failed, PostgreSQL did not answer): `dev.py up` now starts the local database every time, then waits for the backend, then starts the UI; `dev.py db` replaces a stale local URL in .env; the backend names the real connection error; Next's lockfile warning silenced; a fresh .env gets a strong admin password; CI runs `dev.py up` on all 3 OS. Local: database stopped, then `up` recovered; full suite 753 passed; committed e10f83d; CI green on 3 OS (run 43371279329), `dev.py up` passed on Windows, macOS and Linux. Step 10 (UI audit U1-U10) built: tests/e2e/test_ui_audit.py 0 findings (37 pages x desktop light, desktop dark, phone), smoke 4 passed in the same session, full suite 753 passed |
 
 | Time | Event | Detail |
 |---|---|---|
@@ -12154,3 +12154,131 @@ Written by `scripts/hooks/activity_log.py`. Times are local.
 | 2026-11-13 10:49:22 | before | Bash: Inspect tsconfig change and new script status |
 | 2026-11-13 10:49:22 | after | Bash: Inspect tsconfig change and new script status |
 | 2026-11-13 10:49:29 | before | Bash: Commit and push the setup fix |
+| 2026-11-13 10:49:34 | after | Bash: Commit and push the setup fix |
+| 2026-11-13 10:49:39 | before | Bash: Watch CI for the setup fix |
+| 2026-11-13 10:49:39 | after | Bash: Watch CI for the setup fix |
+| 2026-11-13 10:49:42 | before | mcp__ccd_turn__wrap_up |
+| 2026-11-13 10:49:42 | after | mcp__ccd_turn__wrap_up |
+| 2026-11-13 10:49:53 | turn end |  |
+| 2026-11-13 11:04:52 | user | <ta[redacted]> <task-id>bgog5bcnx</task-id> <tool-use-id>toolu_01CK8ZRra1sh2qerySaRYdyd</tool-use-id> <output-file>/private/tmp/claude-501/-Users-sarveshtalele… |
+| 2026-11-13 11:04:55 | before | Bash: Read CI result for the setup fix |
+| 2026-11-13 11:04:56 | after | Bash: Read CI result for the setup fix |
+| 2026-11-13 11:05:01 | before | Bash: Confirm dev.py up step ran on each OS |
+| 2026-11-13 11:05:08 | after | Bash: Confirm dev.py up step ran on each OS |
+| 2026-11-13 11:05:14 | before | Bash: Record CI result; read UI audit plan section |
+| 2026-11-13 11:05:15 | after | Bash: Record CI result; read UI audit plan section |
+| 2026-11-13 11:05:20 | before | mcp__ccd_turn__update_plan |
+| 2026-11-13 11:05:20 | after | mcp__ccd_turn__update_plan |
+| 2026-11-13 11:05:21 | before | Bash: Read UI audit test setup |
+| 2026-11-13 11:05:21 | after | Bash: Read UI audit test setup |
+| 2026-11-13 11:05:23 | before | Bash: Read audit loop and e2e conftest |
+| 2026-11-13 11:05:24 | after | Bash: Read audit loop and e2e conftest |
+| 2026-11-13 11:05:28 | before | Bash: Run UI audit and summarize findings |
+| 2026-11-13 11:06:20 | after | Bash: Run UI audit and summarize findings |
+| 2026-11-13 11:06:23 | before | Bash: Show the audit setup error |
+| 2026-11-13 11:07:01 | after | Bash: Show the audit setup error |
+| 2026-11-13 11:07:03 | before | Bash: Find e2e waits on the Projects heading after sign-in |
+| 2026-11-13 11:07:03 | after | Bash: Find e2e waits on the Projects heading after sign-in |
+| 2026-11-13 11:07:05 | before | Bash: Make e2e login wait for Home |
+| 2026-11-13 11:07:06 | after | Bash: Make e2e login wait for Home |
+| 2026-11-13 11:07:12 | before | Bash: Rerun UI audit and summarize current findings |
+| 2026-11-13 11:09:54 | after | Bash: Rerun UI audit and summarize current findings |
+| 2026-11-13 11:10:02 | before | mcp__ccd_turn__update_plan |
+| 2026-11-13 11:10:02 | after | mcp__ccd_turn__update_plan |
+| 2026-11-13 11:10:04 | before | Bash: Read AppShell header and ProjectShell layout |
+| 2026-11-13 11:10:04 | after | Bash: Read AppShell header and ProjectShell layout |
+| 2026-11-13 11:10:11 | before | Bash: Read ProjectShell in full |
+| 2026-11-13 11:10:11 | after | Bash: Read ProjectShell in full |
+| 2026-11-13 11:10:32 | before | Bash: Add phone drawer to both app frames |
+| 2026-11-13 11:10:36 | after | Bash: Add phone drawer to both app frames |
+| 2026-11-13 11:10:41 | before | Bash: Find landing auth check and capabilities rendering |
+| 2026-11-13 11:10:41 | after | Bash: Find landing auth check and capabilities rendering |
+| 2026-11-13 11:10:47 | before | Bash: Landing uses public status; inspect capabilities rendering |
+| 2026-11-13 11:10:48 | after | Bash: Landing uses public status; inspect capabilities rendering |
+| 2026-11-13 11:10:52 | before | Bash: Locate the leaked null finding |
+| 2026-11-13 11:10:53 | after | Bash: Locate the leaked null finding |
+| 2026-11-13 11:10:59 | before | Bash: Find where null comes from in capabilities data |
+| 2026-11-13 11:11:02 | after | Bash: Find where null comes from in capabilities data |
+| 2026-11-13 11:11:10 | before | Bash: Read the MAF tool description containing null |
+| 2026-11-13 11:11:10 | after | Bash: Read the MAF tool description containing null |
+| 2026-11-13 11:11:20 | before | Bash: Narrow the null leak pattern and audit /home |
+| 2026-11-13 11:11:21 | after | Bash: Narrow the null leak pattern and audit /home |
+| 2026-11-13 11:11:24 | before | Bash: Show the edited regex line |
+| 2026-11-13 11:11:24 | after | Bash: Show the edited regex line |
+| 2026-11-13 11:11:27 | before | Bash: Fix regex parenthesis and test it |
+| 2026-11-13 11:11:28 | after | Bash: Fix regex parenthesis and test it |
+| 2026-11-13 11:11:32 | before | Bash: Find clipped text components |
+| 2026-11-13 11:11:32 | after | Bash: Find clipped text components |
+| 2026-11-13 11:11:34 | before | Bash: Locate evaluation text and phase chips |
+| 2026-11-13 11:11:35 | after | Bash: Locate evaluation text and phase chips |
+| 2026-11-13 11:11:38 | before | Bash: Search more broadly for the clipped texts |
+| 2026-11-13 11:11:38 | after | Bash: Search more broadly for the clipped texts |
+| 2026-11-13 11:11:41 | before | Bash: Find usages of QE lib and evaluation text |
+| 2026-11-13 11:11:42 | after | Bash: Find usages of QE lib and evaluation text |
+| 2026-11-13 11:11:44 | before | Bash: Find stage chips and agent evaluation text |
+| 2026-11-13 11:11:45 | after | Bash: Find stage chips and agent evaluation text |
+| 2026-11-13 11:11:47 | before | Bash: Read stage pipeline and agent card text |
+| 2026-11-13 11:11:48 | after | Bash: Read stage pipeline and agent card text |
+| 2026-11-13 11:11:53 | before | Bash: Rerun audit after first fixes |
+| 2026-11-13 11:14:42 | after | Bash: Rerun audit after first fixes |
+| 2026-11-13 11:14:47 | before | Bash: Prepare phone screenshot for review |
+| 2026-11-13 11:14:48 | after | Bash: Prepare phone screenshot for review |
+| 2026-11-13 11:14:49 | before | Read: /Users/sarveshtalele/Downloads/agentic-harness/docs/evidence/ui-audit/phone-light_projects.png |
+| 2026-11-13 11:14:49 | after | Read: /Users/sarveshtalele/Downloads/agentic-harness/docs/evidence/ui-audit/phone-light_projects.png |
+| 2026-11-13 11:14:53 | before | Bash: Read theme toggle, layout, css dark config |
+| 2026-11-13 11:14:53 | after | Bash: Read theme toggle, layout, css dark config |
+| 2026-11-13 11:14:59 | before | Bash: Follow system theme until the person picks one |
+| 2026-11-13 11:15:00 | after | Bash: Follow system theme until the person picks one |
+| 2026-11-13 11:15:09 | before | Bash: Find all uses of the labels to rename |
+| 2026-11-13 11:15:09 | after | Bash: Find all uses of the labels to rename |
+| 2026-11-13 11:15:25 | before | Bash: Rename jargon labels and headings (U4, U5) |
+| 2026-11-13 11:15:26 | after | Bash: Rename jargon labels and headings (U4, U5) |
+| 2026-11-13 11:15:29 | before | Bash: Finish renames; read QE page download buttons |
+| 2026-11-13 11:15:30 | after | Bash: Finish renames; read QE page download buttons |
+| 2026-11-13 11:15:40 | before | Bash: One QE download with a plain description; typecheck and lint |
+| 2026-11-13 11:15:43 | after | Bash: One QE download with a plain description; typecheck and lint |
+| 2026-11-13 11:15:46 | before | Bash: Read capabilities table and page |
+| 2026-11-13 11:15:46 | after | Bash: Read capabilities table and page |
+| 2026-11-13 11:15:50 | before | Bash: Find tests using capability rows |
+| 2026-11-13 11:15:50 | after | Bash: Find tests using capability rows |
+| 2026-11-13 11:16:01 | before | Bash: Group capabilities by kind with counts |
+| 2026-11-13 11:16:03 | after | Bash: Group capabilities by kind with counts |
+| 2026-11-13 11:16:08 | before | Bash: Rerun audit after all U fixes |
+| 2026-11-13 11:18:54 | after | Bash: Rerun audit after all U fixes |
+| 2026-11-13 11:18:56 | before | Bash: List light screenshots to review |
+| 2026-11-13 11:18:57 | after | Bash: List light screenshots to review |
+| 2026-11-13 11:19:00 | before | Bash: Crop light screenshots for review |
+| 2026-11-13 11:19:01 | after | Bash: Crop light screenshots for review |
+| 2026-11-13 11:19:03 | before | Read: /Users/sarveshtalele/Downloads/agentic-harness/docs/evidence/ui-audit/desktop-light_home.png |
+| 2026-11-13 11:19:03 | after | Read: /Users/sarveshtalele/Downloads/agentic-harness/docs/evidence/ui-audit/desktop-light_home.png |
+| 2026-11-13 11:19:04 | before | Read: /Users/sarveshtalele/Downloads/agentic-harness/docs/evidence/ui-audit/desktop-light_projects_prj_3e4c8c33fe5f_qe.png |
+| 2026-11-13 11:19:04 | after | Read: /Users/sarveshtalele/Downloads/agentic-harness/docs/evidence/ui-audit/desktop-light_projects_prj_3e4c8c33fe5f_qe.png |
+| 2026-11-13 11:19:08 | before | Bash: Find remaining long titles |
+| 2026-11-13 11:19:08 | after | Bash: Find remaining long titles |
+| 2026-11-13 11:19:13 | before | Bash: Shorten section titles and card names |
+| 2026-11-13 11:19:15 | after | Bash: Shorten section titles and card names |
+| 2026-11-13 11:19:19 | before | Bash: Read the e2e uses of the approvals link |
+| 2026-11-13 11:19:20 | after | Bash: Read the e2e uses of the approvals link |
+| 2026-11-13 11:19:24 | before | Bash: Update e2e label references; run smoke and audit |
+| 2026-11-13 11:22:21 | after | Bash: Update e2e label references; run smoke and audit |
+| 2026-11-13 11:22:23 | before | Bash: See which check failed |
+| 2026-11-13 11:22:24 | after | Bash: See which check failed |
+| 2026-11-13 11:22:30 | before | Bash: Find e2e server log location |
+| 2026-11-13 11:22:30 | after | Bash: Find e2e server log location |
+| 2026-11-13 11:22:33 | before | Bash: Read e2e server log errors |
+| 2026-11-13 11:22:33 | after | Bash: Read e2e server log errors |
+| 2026-11-13 11:22:35 | before | Bash: Show the users 500 traceback tail |
+| 2026-11-13 11:22:36 | after | Bash: Show the users 500 traceback tail |
+| 2026-11-13 11:22:46 | before | Bash: Read test DB setup and e2e keys |
+| 2026-11-13 11:22:46 | after | Bash: Read test DB setup and e2e keys |
+| 2026-11-13 11:22:53 | before | Bash: Share the session key in smoke; rerun smoke and audit together |
+| 2026-11-13 11:25:46 | after | Bash: Share the session key in smoke; rerun smoke and audit together |
+| 2026-11-13 11:25:50 | before | mcp__ccd_turn__update_plan |
+| 2026-11-13 11:25:50 | after | mcp__ccd_turn__update_plan |
+| 2026-11-13 11:25:51 | before | Bash: Run full offline suite |
+| 2026-11-13 11:29:49 | after | Bash: Run full offline suite |
+| 2026-11-13 11:29:58 | before | Bash: Update tasks, plan results and tracker |
+| 2026-11-13 11:29:59 | after | Bash: Update tasks, plan results and tracker |
+| 2026-11-13 11:30:08 | before | Bash: Stable screenshot names; rerun audit |
+| 2026-11-13 11:32:51 | after | Bash: Stable screenshot names; rerun audit |
+| 2026-11-13 11:32:59 | before | Bash: Commit and push step 10 |

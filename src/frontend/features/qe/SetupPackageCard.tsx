@@ -10,10 +10,10 @@ export function SetupPackageCard({ project }: { project: any }) {
           </div>
           <div>
             <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-              One-Click Local Sandbox Execution Package
+              Download a runnable copy
             </h3>
             <p className="text-xs text-slate-500">
-              Includes application source code, deterministic test suites, <code>setup_mac_linux.sh</code>, and <code>setup_windows.bat</code>.
+              One ZIP with the project&apos;s source, its generated tests, and setup scripts for macOS and Linux (<code>setup_mac_linux.sh</code>) and Windows (<code>setup_windows.bat</code>).
             </p>
           </div>
         </div>
@@ -23,7 +23,7 @@ export function SetupPackageCard({ project }: { project: any }) {
           download={`${project.id}_sdlc_export.zip`}
           className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-indigo-700 transition-colors"
         >
-          <Download className="h-4 w-4" /> Download Setup Package (.ZIP)
+          <Download className="h-4 w-4" /> Download (.zip)
         </a>
       </div>
     </div>

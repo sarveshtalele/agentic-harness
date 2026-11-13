@@ -27,13 +27,13 @@ ADMIN = {"username": "smoke-admin", "password": secrets.token_urlsafe(18)}
 MEMBER = {"username": "smoke-member", "password": secrets.token_urlsafe(18)}
 PAGES = [
     ("Projects", "Projects", "/projects"),
-    ("Gate Approvals", "Approvals", "/approvals"),
-    ("AI Specialist Roster", "Agents", "/agents"),
-    ("Observability & Telemetry", "Observability", "/observability"),
-    ("Specification Templates", "Templates", "/templates"),
-    ("System Configuration", "Settings", "/settings"),
-    ("User Access & Accounts", "Users", "/users"),
-    ("Platform Documentation", None, "/docs"),
+    ("Approvals", "Approvals", "/approvals"),
+    ("Agents", "Agents", "/agents"),
+    ("Observability", "Observability", "/observability"),
+    ("Templates", "Templates", "/templates"),
+    ("Settings", "Settings", "/settings"),
+    ("Users", "Users", "/users"),
+    ("Docs", None, "/docs"),
 ]
 
 
@@ -48,7 +48,7 @@ def _dev():
 def app():
     dev = _dev()
     data = Path(tempfile.mkdtemp(prefix="atlas-smoke-"))
-    env = {**os.environ, "PYTHONPATH": str(ROOT / "src"), "ATLAS_DATA_DIR": str(data), "ATLAS_SECRET_KEY": secrets.token_urlsafe(24),
+    env = {**os.environ, "PYTHONPATH": str(ROOT / "src"), "ATLAS_DATA_DIR": str(data),  # the session's secret key: the session's database is shared with other e2e servers
            "ATLAS_ADMIN_USERNAME": ADMIN["username"], "ATLAS_ADMIN_PASSWORD": ADMIN["password"], "ATLAS_BACKEND_URL": API, "ATLAS_ALLOWED_ORIGINS": UI,
            "ATLAS_DIST_DIR": ".next-smoke", "NEXT_TELEMETRY_DISABLED": "1", "OPENAI_API_KEY": "", "OPENAI_BASE_URL": "", "DEFAULT_MODEL": ""}  # no model, even if a .env has one
     frontend_dir = ROOT / "src" / "frontend"
@@ -141,7 +141,7 @@ def test_a_non_admin_is_refused_on_users(browser, app):
     expect(tab.get_by_role("heading", name="Home")).to_be_visible(timeout=30_000)
     nav = tab.get_by_role("navigation", name="Workspace")
     expect(nav.get_by_role("link", name="Projects")).to_be_visible(timeout=15_000)
-    expect(nav.get_by_role("link", name="MCP Server Registry")).to_have_count(0)  # not in a developer's default features (R2)
+    expect(nav.get_by_role("link", name="MCP servers")).to_have_count(0)  # not in a developer's default features (R2)
     assert tab.evaluate("fetch('/api/mcp/servers').then(r => r.status)") == 403
     expect(nav.get_by_role("link", name="Users")).to_have_count(0)
     expect(nav.get_by_role("link", name="Settings")).to_have_count(0)

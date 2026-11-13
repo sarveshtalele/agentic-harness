@@ -72,7 +72,7 @@ def page(servers):
         tab.get_by_label("Username").fill(os.environ["ATLAS_ADMIN_USERNAME"])
         tab.get_by_label("Password").fill(os.environ["ATLAS_ADMIN_PASSWORD"])
         tab.get_by_role("button", name="Sign in").click()
-        tab.get_by_role("heading", name="Projects").wait_for(timeout=30_000)
+        tab.get_by_role("heading", name="Home").wait_for(timeout=30_000)
         state["console_errors"] = []
         tab.on("pageerror", lambda e: state["console_errors"].append(str(e)))
         yield tab

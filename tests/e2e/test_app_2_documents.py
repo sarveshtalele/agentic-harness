@@ -25,7 +25,7 @@ def test_06_ba_workflow_with_template_gherkin_and_gates(page):
     wait_card(page, "Gate 0")
     page.goto(f"{UI}/projects")
     expect(page.get_by_test_id("stat-need-approval")).to_contain_text("1")
-    page.get_by_role("link", name=re.compile("Gate Approvals")).click()
+    page.get_by_role("navigation", name="Workspace").get_by_role("link", name=re.compile("^Approvals")).click()
     expect(page.get_by_test_id("approvals-summary")).to_contain_text("1 project needs your approval")
     shot(page, "06b-approvals-page")
     approve_next(page, "Gate 0")

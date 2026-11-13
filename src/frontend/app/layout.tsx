@@ -8,7 +8,8 @@ export const metadata: Metadata = {
   description: "Requirements, code changes, bug scans, and governed test engineering on Microsoft Agent Framework.",
 };
 
-const themeScript = `try{var t=localStorage.getItem('atlas_theme');if(t==='light'){document.documentElement.classList.remove('dark');document.documentElement.classList.add('light')}}catch(e){}`;
+// The person's choice from the theme button wins; until they make one, follow the system setting, also when it changes (UI audit U3).
+const themeScript = `(function(){var d=document.documentElement,m=window.matchMedia('(prefers-color-scheme: light)');function chosen(){try{return localStorage.getItem('atlas_theme')}catch(e){return null}}function apply(){var t=chosen()||(m.matches?'light':'dark');d.classList.remove('dark','light');d.classList.add(t)}apply();m.addEventListener('change',function(){if(!chosen())apply()})})()`;
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (

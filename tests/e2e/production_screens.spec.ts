@@ -98,6 +98,6 @@ test.describe("Production Screens and Multi-Agent Harness E2E", () => {
     await page.goto("/mcp");
     await page.waitForLoadState("networkidle");
 
-    await expect(page.locator("text=MCP Server Registry")).toBeVisible();
+    await expect(page.locator("text=MCP servers")).toBeVisible();
   });
 });

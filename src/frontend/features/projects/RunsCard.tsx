@@ -7,7 +7,7 @@ export function RunsCard({ recentRuns, base }: { recentRuns: any[]; base: string
     <Card
       title={
         <Link className="hover:text-indigo-600 transition-colors" href={`${base}/runs`}>
-          Workflow Execution Runs
+          Runs
         </Link>
       }
       actions={
