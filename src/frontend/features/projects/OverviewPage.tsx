@@ -1,6 +1,6 @@
 "use client";
 
-import { Pencil, Terminal } from "lucide-react";
+import { Pencil } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useProject } from "../../components/ProjectShell";
@@ -47,11 +47,6 @@ export function OverviewPage() {
         subtitle={project?.description || "No description"}
         actions={
           <div className="flex items-center gap-2">
-            <Link href={`/harness?project=${project.id}`}>
-              <Button variant="primary">
-                <Terminal className="h-4 w-4" /> Open in the harness
-              </Button>
-            </Link>
             <Button
               variant="secondary"
               onClick={() => setShowRenameModal(true)}

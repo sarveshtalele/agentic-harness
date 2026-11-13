@@ -102,12 +102,8 @@ def test_deleting_a_project_removes_its_run_folders_and_nothing_else(client, pro
         (folder / "err-reply.txt").write_text("reply")
     stranger = config.RUNS / "run_not_in_any_project"
     stranger.mkdir()
-    from backend.maf import harness
-    for pid in (project["id"], keep["id"]):  # harness memory files of both projects
-        harness.state_dirs(pid, "admin")["memory"].joinpath("note.md").write_text("fact")
     assert client.delete(f"/api/projects/{project['id']}").status_code == 204
-    assert not (config.RUNS / gone).exists() and not (harness.HARNESS_DIR / project["id"]).exists()
-    assert (harness.HARNESS_DIR / keep["id"] / "memory" / "admin" / "note.md").exists()
+    assert not (config.RUNS / gone).exists()
     assert (config.RUNS / kept / "failures" / "err-reply.txt").exists() and stranger.exists()
 
 

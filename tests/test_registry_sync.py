@@ -26,7 +26,6 @@ def test_sync_finds_every_tool_file_agent_and_workflow_with_its_stages():
     tool_files = [p for p in sorted(TOOLS_DIR.glob("*.py")) if "@tool(" in p.read_text(encoding="utf-8")]
     assert tool_files and all(p.relative_to(ROOT).as_posix() in sources for p in tool_files)
     assert by[("tool", "run_tests")]["needs_approval"] and not by[("tool", "grep")]["needs_approval"]
-    assert {"todos_add", "mode_set", "load_skill", "run_shell"} <= {c["name"] for c in caps.values() if c["kind"] == "tool"}
     assert all(("agent", key) in by for key in POLICIES)
     assert {c["name"] for c in caps.values() if c["kind"] == "workflow"} == {"ba", "brainstorm", "qe", "bug_scan", "change"}
     for stage, agent in QE_STAGES.items():
@@ -35,7 +34,6 @@ def test_sync_finds_every_tool_file_agent_and_workflow_with_its_stages():
     assert ("qe.plan", "gates", "G2") in links and ("ba.gherkin", "gates", "G1") in links and ("qe.intake", "gates", "G0") in links
     assert ("principal-test-architect", "uses_tool", "grep") in links
     assert ("principal-test-architect", "applies_skill", "local-skills:planning-tests") in links
-    assert ("harness", "delegates_to", "confidence-reviewer") in links
 
 
 def test_sync_reads_the_agentic_qe_plugin_commands_agents_hooks_and_scripts():

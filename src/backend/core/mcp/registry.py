@@ -18,7 +18,7 @@ NOT_CONNECTED, CONNECTED, ERROR = "not_connected", "connected", "error"
 TRANSPORTS = ("stdio", "http", "websocket")
 STDIO_COMMANDS = {"npx", "node", "uvx", "python", "python3"}
 LOOPBACK = {"localhost", "127.0.0.1", "::1"}
-DESKTOP_PROFILES = ("local", "desktop")
+STDIO_PROFILES = ("local",)  # stdio servers start a process on this machine: local development only
 
 
 class McpProblem(Exception):
@@ -30,12 +30,12 @@ class McpProblem(Exception):
 
 
 def stdio_allowed() -> bool:
-    return config.PROFILE in DESKTOP_PROFILES
+    return config.PROFILE in STDIO_PROFILES
 
 
 def require_stdio_allowed() -> None:
     if not stdio_allowed():
-        raise McpProblem(403, "stdio MCP servers run only in the desktop app")
+        raise McpProblem(403, "stdio MCP servers run only in local development; on the web use an HTTP or WebSocket server")
 
 
 def _check_command(command: str, args: list) -> None:

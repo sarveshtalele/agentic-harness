@@ -44,7 +44,7 @@ def test_extracted_backend_package_finds_its_assets(name, tmp_path):
     assert os.path.realpath(found["root"]) == real, found
     for key in ("prompts", "skills", "templates"):
         assert Path(found[key]).is_dir(), f"{name}: {key} folder missing in the package at {found[key]}"
-    assert (Path(found["prompts"]) / "harness.md").is_file() and (wwwroot / "evals" / "harness.json").is_file()
+    assert (Path(found["prompts"]) / "project-copilot.md").is_file() and (wwwroot / "evals" / "project-copilot.json").is_file()
 
 
 def test_every_azure_setup_script_sets_what_the_backend_needs():

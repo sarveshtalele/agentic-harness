@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, Bot, Bug, CheckSquare, ChevronLeft, ChevronRight, Code2, Cpu, FileText, Files, FolderGit2, History, Home, Lock, ScrollText, Settings, ShieldCheck, Terminal } from "lucide-react";
+import { Activity, Bot, Bug, CheckSquare, ChevronLeft, ChevronRight, Code2, Cpu, FileText, Files, FolderGit2, History, Home, Lock, ScrollText, Settings, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from "react";
@@ -152,14 +152,6 @@ export function ProjectShell({ children }: { children: ReactNode }) {
             <span className="hidden sm:inline rounded bg-slate-100 px-2 py-0.5 text-[11px] font-mono text-slate-500 dark:bg-slate-800 dark:text-slate-400">{id}</span>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Link
-              href={`/harness?project=${id}`}
-              title="Open this project in the harness"
-              className="flex items-center gap-1.5 rounded-lg border border-indigo-500/30 bg-indigo-50 px-2.5 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:text-indigo-300 dark:hover:bg-indigo-900/60 transition shadow-sm"
-            >
-              <Terminal className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
-              <span>Harness</span>
-            </Link>
             <Link href="/settings" className="flex items-center gap-1.5 rounded-lg border border-slate-300 px-2.5 py-1.5 text-[11px] font-semibold dark:border-slate-700">
               <span className={`h-1.5 w-1.5 rounded-full ${llm?.configured ? "bg-emerald-500" : "bg-rose-500"}`} />
               <span className="mono">{llm?.configured ? llm.model : "No model configured"}</span>

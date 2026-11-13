@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, BarChart3, BookOpen, House, ChevronLeft, ChevronRight, Cpu, UsersRound, Bot, Sparkles, CheckSquare, FileText, FolderKanban, ListTree, Settings, ShieldCheck, Terminal, Wand2 } from "lucide-react";
+import { Activity, BarChart3, BookOpen, House, ChevronLeft, ChevronRight, Cpu, UsersRound, Bot, Sparkles, CheckSquare, FileText, FolderKanban, ListTree, Settings, ShieldCheck, Wand2 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
@@ -28,7 +28,6 @@ const navSections: NavSection[] = [
     items: [
       { href: "/home", label: "Home", icon: House },
       { href: "/projects", label: "Projects", icon: FolderKanban },
-      { href: "/harness", label: "Harness", icon: Terminal, feature: "harness" },
       { href: "/approvals", label: "Approvals", icon: CheckSquare, badge: true },
       { href: "/agents", label: "Agents", icon: Bot },
     ],
@@ -149,28 +148,13 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="min-w-0 flex-1">
         <header className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 bg-white/95 px-3 py-2.5 backdrop-blur md:px-6 dark:border-slate-800 dark:bg-[#060a17]/90">
           {menu.button}
-          {pathname === "/harness" ? (
-            <div className="flex items-center gap-2 text-xs">
-              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-indigo-600 text-white shadow-xs">
-                <Terminal className="h-3.5 w-3.5" />
-              </span>
-              <span className="font-bold text-slate-800 dark:text-slate-100">Harness</span>
-              <span className="hidden sm:inline-block rounded-md bg-indigo-500/10 px-1.5 py-0.5 text-[10px] font-mono font-semibold text-indigo-600 dark:text-indigo-400">
-                Microsoft Agent Framework
-              </span>
-            </div>
-          ) : (
-            <Link href="/harness" className="flex items-center gap-1.5 rounded-lg border border-indigo-500/30 bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:text-indigo-300 transition">
-              <Terminal className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
-              <span>Harness</span>
-            </Link>
-          )}
+          <span />
           <div className="flex flex-wrap items-center gap-2 md:gap-3">
             <UserMenu />
             <ThemeToggle />
           </div>
         </header>
-        <main className={`mx-auto p-3 md:p-6 ${pathname === "/harness" ? "max-w-full md:px-4 md:py-3" : "max-w-6xl"}`}>
+        <main className="mx-auto max-w-6xl p-3 md:p-6">
           {(user as any)?.warnings?.map((w: string) => <p key={w} role="alert" data-testid="admin-warning" className="mb-4 rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-700 dark:text-rose-300">{w}</p>)}
           {children}
         </main>

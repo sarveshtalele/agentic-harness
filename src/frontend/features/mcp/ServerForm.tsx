@@ -36,7 +36,7 @@ export function ServerForm({ prefill, stdioAllowed, onAdded, onCancel }: { prefi
     <Card title="Add MCP server">
       <form onSubmit={submit} className="space-y-3" data-testid="mcp-add-form">
         <Field label="Name"><input className={inputClass} required value={name} onChange={(e) => setName(e.target.value)} /></Field>
-        <Field label="Transport" hint={stdioAllowed ? undefined : "stdio servers run only in the desktop app"}>
+        <Field label="Transport" hint={stdioAllowed ? undefined : "stdio servers run only in local development"}>
           <select className={inputClass} value={transport} onChange={(e) => setTransport(e.target.value)}>
             <option value="stdio" disabled={!stdioAllowed}>stdio</option><option value="http">http</option><option value="websocket">websocket</option>
           </select>

@@ -102,7 +102,7 @@ def test_web_profile_refuses_stdio(client, echo, monkeypatch):
     assert [t.name for t in mcp_tools_for("any", ADMIN) if t.name == sid] == [sid]
     monkeypatch.setattr(config, "PROFILE", "web")
     refused = client.post(f"/api/mcp/servers/{sid}/connect")
-    assert refused.status_code == 403 and "desktop app" in refused.json()["message"]
+    assert refused.status_code == 403 and "local development" in refused.json()["message"]
     assert client.post("/api/mcp/servers", json={"name": "w", "command": sys.executable, "args": [ECHO]}).status_code == 403
     assert not [t for t in mcp_tools_for("any", ADMIN) if t.name == sid]
 

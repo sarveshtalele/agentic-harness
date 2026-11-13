@@ -1,4 +1,4 @@
-"""A local PostgreSQL cluster in a folder (MASTER_PLAN Part 3, G5): the desktop app's database, the developer's
+"""A local PostgreSQL cluster in a folder (MASTER_PLAN Part 3, G5): the developer's database
 (`python scripts/dev.py db`), and the tests' throwaway one. It uses the PostgreSQL installed on the machine (Homebrew,
 the official installer, apt, or the one GitHub's runners ship) and never touches a system service. It imports nothing
 from the backend, so it can run before the settings are read.

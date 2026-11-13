@@ -14,24 +14,22 @@ from backend.core.auth.base import ADMIN_ID, ROLES, AuthError, current_user, sig
 from backend.db import db, now
 
 PLATFORM_PROJECT = "prj_platform"  # hidden and archived, like the eval project: holds the governance ledger
-FEATURES = {"harness": "Harness", "ba": "BA Studio", "qe": "QE cycle", "bugs": "Bugs and Feature", "skills": "Skill Studio",
-            "mcp": "MCP", "docs": "Documents", "downloads": "Desktop downloads", "traces": "Traces", "usage": "Usage"}
+FEATURES = {"ba": "BA Studio", "qe": "QE cycle", "bugs": "Bugs and Feature", "skills": "Skill Studio",
+            "mcp": "MCP", "docs": "Documents", "traces": "Traces", "usage": "Usage"}
 DEFAULTS = {  # the plan's table (12.3); traces with the roles that run agents
-    "qe_lead": ["harness", "ba", "qe", "bugs", "skills", "docs", "downloads", "traces"],
+    "qe_lead": ["ba", "qe", "bugs", "skills", "docs", "traces"],
     "ba": ["ba", "docs"],
-    "developer": ["harness", "qe", "bugs", "docs", "downloads", "traces"],
+    "developer": ["qe", "bugs", "docs", "traces"],
     "viewer": ["docs"],
 }
 # (path pattern, feature). BA Studio routes join with R3; usage is admin-only by its own rule as well.
 ROUTES = [
-    (re.compile(r"^/agui/harness$|^/api/harness(/|$)|^/api/chats/[^/]+/(todos|terminal)$"), "harness"),
     (re.compile(r"^/api/projects/[^/]+/(sources|atlassian)(/|$)"), "ba"),
     (re.compile(r"^/api/projects/[^/]+/qe(/|$)"), "qe"),
     (re.compile(r"^/api/(projects/[^/]+/)?findings(/|$)"), "bugs"),
     (re.compile(r"^/api/skill-studio(/|$)"), "skills"),
     (re.compile(r"^/api/mcp(/|$)"), "mcp"),
     (re.compile(r"^/api/(projects/[^/]+/)?(documents|templates)(/|$)"), "docs"),
-    (re.compile(r"^/api/downloads(/|$)"), "downloads"),
     (re.compile(r"^/api/(traces|observability)(/|$)|^/api/projects/[^/]+/observability$"), "traces"),
     (re.compile(r"^/api/usage(/|$)"), "usage"),
 ]

@@ -13,7 +13,7 @@ from backend import config
 
 TIMEOUT = 120
 TAIL = 4000
-WEB_REFUSAL = "Script runs are off on the shared web server; use the desktop app"
+WEB_REFUSAL = "Script runs are off on the shared web server; run them in local development"
 _COUNT = re.compile(r"(\d+) (passed|failed|error|errors)\b")
 
 
@@ -23,7 +23,7 @@ class ProfileRefused(PermissionError):
 
 def check_profile() -> None:
     """Skill code is untrusted, so it runs only where the user's own machine pays for it."""
-    if config.PROFILE not in ("local", "desktop"):
+    if config.PROFILE != "local":
         raise ProfileRefused(WEB_REFUSAL)
 
 

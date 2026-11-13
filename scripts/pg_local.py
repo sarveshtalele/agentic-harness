@@ -1,6 +1,6 @@
 """`python scripts/dev.py db`: local PostgreSQL in data/postgres for development; its URL goes into .env once, never on
 screen. `--import-sqlite [path]` then copies an old SQLite store into it (scripts/sqlite_to_postgres.py).
-The cluster code lives in `backend/local_postgres.py`, shared with the desktop app and the tests."""
+The cluster code lives in `backend/local_postgres.py`, shared with the tests."""
 from __future__ import annotations
 
 import os

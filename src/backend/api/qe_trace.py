@@ -17,7 +17,6 @@ from fastapi.responses import FileResponse
 
 from backend.api.common import _project
 from backend.config import sandbox_dir
-from backend.core import cli_workspaces
 from backend.core.security import PathEscape, redact, safe_path
 
 router = APIRouter()
@@ -26,7 +25,7 @@ MAX_FILE = 5 * 1024 * 1024
 
 
 def _root(project_id: str) -> Path:
-    return (cli_workspaces.path_of(project_id) or sandbox_dir(project_id)).resolve()
+    return sandbox_dir(project_id).resolve()
 
 
 def _quotes(app_dir: Path) -> dict[str, dict]:

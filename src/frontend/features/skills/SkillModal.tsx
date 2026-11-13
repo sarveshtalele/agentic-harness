@@ -92,15 +92,6 @@ export function SkillModal({ selectedSkill, detail, loadingDetail, onClose, onDe
             <Button variant="secondary" onClick={onClose}>
               Close
             </Button>
-            <Button
-              onClick={() => {
-                window.location.href = `/harness?skill=${encodeURIComponent(selectedSkill.name)}`;
-              }}
-              className="flex items-center gap-1.5"
-            >
-              <Terminal className="h-3.5 w-3.5" />
-              <span>Load into Harness</span>
-            </Button>
           </div>
         </div>
       </div>

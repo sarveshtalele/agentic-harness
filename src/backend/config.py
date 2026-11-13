@@ -38,18 +38,8 @@ MODEL_RETRIES = int(os.environ.get("ATLAS_MODEL_RETRIES", "3"))
 # LiteLLM answers an identical prompt from its cache, so a retry would get the same bad reply. Set 0 for endpoints that reject the field.
 MODEL_NO_CACHE = os.environ.get("ATLAS_MODEL_NO_CACHE", "1") != "0"
 MODEL_CONCURRENCY = int(os.environ.get("ATLAS_MODEL_CONCURRENCY", "4"))
-# web (shared server: no skill script runs), local, or desktop. Plan M4 profiles.
+# web (Azure: the shared server) or local (development and tests).
 PROFILE = os.environ.get("ATLAS_PROFILE", "local")
-# Model rounds and tool calls per chat turn. The harness plans and explores, so it gets more than other agents;
-# when a budget runs out MAF asks for a final answer with tools off (see maf/agui.py).
-HARNESS_MAX_ROUNDS = int(os.environ.get("ATLAS_HARNESS_MAX_ROUNDS", "200"))  # a safety limit only; the turn budget below ends long turns (D2)
-HARNESS_MAX_TOOL_CALLS = int(os.environ.get("ATLAS_HARNESS_MAX_TOOL_CALLS", "400"))
-HARNESS_TURN_MINUTES = float(os.environ.get("ATLAS_HARNESS_TURN_MINUTES", "30"))
-# The harness model's context window; MAF compaction (tool results first, then a summary) keeps each request inside it.
-HARNESS_CONTEXT_TOKENS = int(os.environ.get("ATLAS_HARNESS_CONTEXT_TOKENS", "128000"))
-# The harness shell tool (plan H2): seconds per command, and on the web profile the platform-wide sandbox slots that
-# shell and write calls share (harness_kit/leases.py).
-HARNESS_SHELL_TIMEOUT = int(os.environ.get("ATLAS_HARNESS_SHELL_TIMEOUT", "600"))
 MAX_SANDBOXES = int(os.environ.get("ATLAS_MAX_SANDBOXES", "5"))
 # WAL needs shared memory, which network storage such as Azure App Service /home lacks. Use DELETE there.
 ALLOWED_ORIGINS = {

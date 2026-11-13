@@ -13,7 +13,7 @@ import defusedxml.ElementTree as ET  # JUnit files can carry text from the code 
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-STORY_FILES = (ROOT / "docs" / "USER_STORIES.md", ROOT / "docs" / "HARNESS_USER_STORIES.md")
+STORY_FILES = (ROOT / "docs" / "USER_STORIES.md",)
 ROW = re.compile(r"^\|\s*((?:US|HS)-\d+)\s*\|(.+)\|\s*$")
 
 

@@ -1,13 +1,12 @@
-"""Claude Code-style settings files for the harness (docs/PHASE2_PLAN.md section 9.4).
+"""Claude Code-style settings files: the plugins' hooks and permission rules (docs/PHASE2_PLAN.md section 9.4).
 
 Layers, highest first: managed (the organisation's file), the person's own, then the project's local and shared files.
 - managed: macOS /Library/Application Support/AgenticQE/managed-settings.json, Windows %ProgramData%\\AgenticQE\\
   managed-settings.json, Linux /etc/agentic-qe/managed-settings.json;
-- user (not on the shared web server): ~/.aqh/settings.json, then ~/.claude/settings.json (read only, so a Claude Code
-  user's own rules carry over);
-- project local: .claude/settings.local.json; project shared: .claude/settings.json and .aqh/settings.json.
+- user (local development only): ~/.claude/settings.json (read only, so a Claude Code user's own rules carry over);
+- project local: .claude/settings.local.json; project shared: .claude/settings.json.
 Managed and user layers are trusted. Project files are repository content (CLAUDE.md): until a folder can be marked
-trusted (the CLI, plan step 6) they may only tighten things, so their `deny` and `ask` rules apply and their `allow`
+trusted they may only tighten things, so their `deny` and `ask` rules apply and their `allow`
 rules, `env` and `hooks` are ignored. Keys read today: `permissions` (allow, ask, deny), `hooks` (Claude Code's shape).
 """
 from __future__ import annotations
@@ -49,10 +48,10 @@ def layers(root=None) -> list[Layer]:
     """Every settings file that exists, highest precedence first."""
     found = [("managed", managed_path(), True)]
     if config.PROFILE != "web":
-        found += [("user", Path.home() / ".aqh" / "settings.json", True), ("user", Path.home() / ".claude" / "settings.json", True)]
+        found += [("user", Path.home() / ".claude" / "settings.json", True)]
     if root is not None:
         found += [("project-local", Path(root) / ".claude" / "settings.local.json", False),
-                  ("project", Path(root) / ".claude" / "settings.json", False), ("project", Path(root) / ".aqh" / "settings.json", False)]
+                  ("project", Path(root) / ".claude" / "settings.json", False)]
     return [Layer(name, path, trusted, data) for name, path, trusted in found if (data := _read(path)) is not None]
 
 

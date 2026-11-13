@@ -37,33 +37,6 @@ def run():
         page.wait_for_timeout(1000)
         page.screenshot(path=os.path.join(EVIDENCE_DIR, "02_project_overview_light.png"))
 
-        # 5. Project QE Harness - Light
-        print("5. Capturing QE Harness Light...")
-        page.goto("http://localhost:3000/projects/prj_agentic_qe/harness", wait_until="networkidle")
-        page.wait_for_timeout(1000)
-        page.screenshot(path=os.path.join(EVIDENCE_DIR, "03_harness_light.png"))
-
-        # 6. Switch back to Dark Theme for Harness Chat
-        print("6. Switching to Dark Theme for Harness Chat...")
-        theme_btn = page.locator('button[aria-label*="mode"]').first
-        if theme_btn.is_visible():
-            theme_btn.click()
-            page.wait_for_timeout(500)
-            page.screenshot(path=os.path.join(EVIDENCE_DIR, "03_harness_dark.png"))
-
-        # 7. Type a prompt in Harness and Send
-        print("7. Sending prompt in Harness...")
-        textarea = page.locator('textarea').first
-        if textarea.is_visible():
-            textarea.fill("/skills")
-            send_btn = page.locator('button[aria-label="Send to QE Harness"]').first
-            if send_btn.is_visible():
-                send_btn.click()
-            else:
-                page.keyboard.press("Enter")
-            page.wait_for_timeout(3500)
-            page.screenshot(path=os.path.join(EVIDENCE_DIR, "04_harness_chat_stream.png"))
-
         print("Finished all evidence captures!")
         browser.close()
 

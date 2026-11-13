@@ -12,7 +12,6 @@ from backend.config import RUNS, project_dir
 from backend.core import auth, ledger
 from backend.core.security import safe_path
 from backend.db import db, new_id, now, rows
-from backend.maf import harness
 from backend.repos import ingest
 
 router = APIRouter()
@@ -102,5 +101,4 @@ def delete_project(project_id: str):
     for run_id in filter(None, run_ids):  # saved failure replies and finished batches belong to the project's runs
         ingest._rm_tree(safe_path(RUNS, run_id, for_write=True))
     ingest._rm_tree(project_dir(project_id))
-    ingest._rm_tree(safe_path(harness.HARNESS_DIR, project_id, for_write=True))  # the harness's memory, todos and history for this project
     return Response(status_code=204)

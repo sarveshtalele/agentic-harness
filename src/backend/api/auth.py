@@ -4,9 +4,7 @@ from __future__ import annotations
 from fastapi import APIRouter, HTTPException, Request, Response
 from pydantic import BaseModel, ConfigDict, Field
 
-from backend import config
 from backend.core import auth
-from backend.core.auth import desktop
 
 router = APIRouter()
 DATE = r"^\d{4}-\d{2}-\d{2}$|^$"
@@ -60,43 +58,17 @@ class UserPatch(BaseModel):
     enabled: bool | None = None
 
 
-class GrantIn(BaseModel):
-    grant: str = Field(max_length=4000)
-
-
 @router.get("/api/auth/status")
 def status(request: Request):
     """Public: whether sign-in is set up, and whether this browser is signed in (so a public page need not call /me and
     get a 401 it would log as an error, UI audit U7). Nothing about the account is returned."""
-    desktop = config.PROFILE == "desktop"
-    return {"configured": auth.admin_configured() or desktop, "desktop": desktop, "signed_in": bool(auth.session_user(request.cookies.get(auth.COOKIE)))}
-
-
-@router.post("/api/auth/desktop-session")
-def desktop_session():
-    """For the desktop app: a signed grant for the signed-in member (R6)."""
-    try:
-        return desktop.issue(auth.current_user.get())
-    except auth.AuthError as exc:
-        raise HTTPException(403, str(exc)) from exc
-
-
-@router.post("/api/auth/desktop")
-def desktop_login(body: GrantIn, response: Response):
-    """On the desktop's local backend only: the app posts the grant it started the backend with, and gets a session."""
-    try:
-        token, hours = desktop.sign_in(body.grant)
-    except auth.AuthError as exc:
-        raise HTTPException(401, str(exc)) from exc
-    response.set_cookie(auth.COOKIE, token, httponly=True, samesite="strict", secure=False, max_age=int(hours * 3600), path="/")
-    return auth.describe(auth.session_user(token))
+    return {"configured": auth.admin_configured(), "signed_in": bool(auth.session_user(request.cookies.get(auth.COOKIE)))}
 
 
 @router.post("/api/auth/login")
 def login(body: LoginIn, request: Request, response: Response):
     if not auth.admin_configured():
-        raise HTTPException(503, "Sign in through the desktop app's sign-in window (restart the app)" if config.PROFILE == "desktop"
-                            else "Sign-in is not set up. Add ATLAS_ADMIN_USERNAME and ATLAS_ADMIN_PASSWORD to .env, then restart")
+        raise HTTPException(503, "Sign-in is not set up. Add ATLAS_ADMIN_USERNAME and ATLAS_ADMIN_PASSWORD to .env, then restart")
     try:
         token = auth.login(body.username, body.password)
     except auth.AuthError as exc:

@@ -1,4 +1,4 @@
-"""Phase R harness search: BM25 over the visible registry, describe with links, and the compact index."""
+"""Phase R registry search: BM25 over the visible registry, describe with links, and the compact index."""
 from backend.core import registry
 from backend.core.registry.search import bm25, words
 
@@ -26,5 +26,4 @@ def test_describe_and_index_text():
     assert registry.describe_capability("no-such-capability", None) is None
     text = registry.index_text(None)
     assert "## command" in text and "- agentic-qe:qe-plan:" in text
-    assert "discover->repo-intelligence-analyst" in text and "delegates_to:" in text
     assert len(text.splitlines()) == len([l for l in text.splitlines() if l.startswith(("## ", "- "))])

@@ -100,15 +100,15 @@ def plugin_sources(g: Graph) -> None:
         for server in plugin.mcp_servers:  # declared in .mcp.json; an admin registers it before it can connect
             sid = g.add(Cap("mcp_server", server["name"], f"{plugin.id}:{server['name']}", f"Declared in {plugin.id}/.mcp.json, not registered",
                             f"{rel(plugin.root)}/.mcp.json", digest(json.dumps(server, sort_keys=True, default=str)), plugin=plugin.id, enabled=False,
-                            profiles=",".join(mcp.DESKTOP_PROFILES) if server["transport"] == "stdio" else ALL_PROFILES,
+                            profiles=",".join(mcp.STDIO_PROFILES) if server["transport"] == "stdio" else ALL_PROFILES,
                             meta={"transport": server["transport"], "declared": True}))
             g.link(pid, sid, "contains")
 
 
 def mcp_sources(g: Graph) -> None:
-    """Registered servers and only the tools their real list_tools stored. Every MCP tool needs approval (harness_kit/catalog.py)."""
+    """Registered servers and only the tools their real list_tools stored. Every MCP tool needs approval (code_sources.RISKY rule)."""
     for server in mcp.all_servers():
-        profiles = ",".join(mcp.DESKTOP_PROFILES) if server["transport"] == "stdio" else ALL_PROFILES
+        profiles = ",".join(mcp.STDIO_PROFILES) if server["transport"] == "stdio" else ALL_PROFILES
         facts = {k: server.get(k) for k in ("name", "transport", "command", "args", "url", "status", "plugin_id")}
         sid = g.add(Cap("mcp_server", server["name"], server["name"], f"{server['transport']} MCP server, {server['status']}", "mcp_servers",
                         digest(json.dumps(facts, sort_keys=True)), plugin=server.get("plugin_id"), profiles=profiles,

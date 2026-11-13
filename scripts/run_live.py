@@ -1,6 +1,6 @@
 """Run live tests with the model configured in your local store (Settings page), without printing or exporting the key.
 
-    python scripts/dev.py live tests/test_harness_discovery_eval.py [more pytest args]
+    python scripts/dev.py live tests/test_brainstorm_live.py [more pytest args]
 
 The model's base URL, name and key are read from the local store and handed to one pytest child through its environment
 only. The child gets a throwaway store, database and skills folder (tests/conftest.py), so a live run never touches your data.

@@ -2,7 +2,7 @@
 
 Anyone else sees only what they may use now: an enabled capability (a plugin's state and an agent's kill switch are read
 live, not from the last sync), a plugin granted to their role (core/plugin_grants.py), an MCP tool their role was granted
-on a connected server (core/mcp/grants.py), and only what runs under this profile (stdio MCP runs on local and desktop).
+on a connected server (core/mcp/grants.py), and only what runs under this profile (stdio MCP runs only in local development).
 """
 from __future__ import annotations
 

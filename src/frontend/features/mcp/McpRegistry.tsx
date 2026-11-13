@@ -31,7 +31,7 @@ export function McpRegistry() {
         {stats.map(([label, n]) => <Card key={label}><p className="text-xs text-slate-500">{label}</p><p className="text-2xl font-bold" data-testid={`mcp-stat-${label.toLowerCase().replace(" ", "-")}`}>{n}</p></Card>)}
       </div>
       <ErrorNote message={error} />
-      {!data.stdio_allowed && <p className="text-xs text-slate-500">stdio servers run only in the desktop app.</p>}
+      {!data.stdio_allowed && <p className="text-xs text-slate-500">stdio servers run only in local development; on the web use an HTTP or WebSocket server.</p>}
       {admin && !form && <Button onClick={() => setForm({ prefill: null })}>Add server</Button>}
       {admin && form && <ServerForm prefill={form.prefill} stdioAllowed={data.stdio_allowed} onCancel={() => setForm(null)} onAdded={() => { setForm(null); load(); }} />}
       {admin && <Catalog templates={templates} stdioAllowed={data.stdio_allowed} onPick={(t) => setForm({ prefill: t })} />}

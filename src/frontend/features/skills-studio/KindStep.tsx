@@ -3,7 +3,7 @@ import { Kind } from "./types";
 
 const kinds: { id: Kind; title: string; text: string }[] = [
   { id: "instructions", title: "Instructions only (SKILL.md + references)", text: "For methods, checklists and formats." },
-  { id: "scripts", title: "Script based (scripts + tests)", text: "For deterministic work such as parsing or converting. It runs tests in the desktop app only." },
+  { id: "scripts", title: "Script based (scripts + tests)", text: "For deterministic work such as parsing or converting. Its tests run in local development." },
 ];
 
 export function KindStep({ kind, onKind }: { kind: Kind | ""; onKind: (k: Kind) => void }) {

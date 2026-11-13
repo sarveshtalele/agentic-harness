@@ -8,28 +8,23 @@ from __future__ import annotations
 
 import json
 import logging
-import re
 
-from backend.config import sandbox_dir
-
-from ag_ui.core import RunErrorEvent, TextMessageContentEvent, TextMessageEndEvent, TextMessageStartEvent
+from ag_ui.core import RunErrorEvent
 from ag_ui.encoder import EventEncoder
 from agent_framework.ag_ui import AgentFrameworkAgent
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
 
-from backend.core import auth, ledger, plugins
+from backend.core import auth, ledger
 from backend.core import skills
 from backend.core.errors import stack_of
 from backend.core.security import redact, sha256
 from backend.db import db, new_id, now, row, rows
-from backend.maf import engine, governance, harness, llm, skill_chat, tools
+from backend.maf import engine, governance, llm, skill_chat, tools
 from backend.maf import runtime as agents
-from backend.maf.harness_kit import active_command, budget, local_commands, prompt_hooks
-from backend.maf.harness_kit.nudges import HideLoopNudges
 
 router = APIRouter()
-BUDGET_NOTICE = ("\n\n*Stopped: this turn reached its tool budget before the model finished, so its last tool call did not run. Reply \"continue\" to go on; the harness keeps its todos.*")
+BUDGET_NOTICE = ("\n\n*Stopped: this turn reached its tool budget before the model finished, so its last tool call did not run. Reply \"continue\" to go on.*")
 
 
 def create_thread(project_id: str, agent: str, title: str = "New chat", model: str = "") -> dict:
@@ -83,68 +78,32 @@ async def agui(agent_key: str, request: Request):
         raise HTTPException(403, "Your role is viewer. A viewer can read but not chat with the agents")
     incoming = body.get("messages") or []
     last_user = next((m for m in reversed(incoming) if m.get("role") == "user"), None)
-    hooked = None  # the plugins' prompt hooks' outcome (harness only)
-    mode_reply = None  # the answer to `/mode`, given without the model
     if last_user:
         clean = governance.guard_text(agent_key, _text_of(last_user), "input", project_id)
         if clean != _text_of(last_user):  # the model and the store only ever see the redacted text
             last_user["content"] = clean
-        first = not thread_messages(thread_id)
         _append(thread_id, "user", clean, agent_key, last_user.get("id"))
-        local_cmd = re.match(r"^/(mode|rewind)(?:\s+(\S+))?\s*$", clean) if agent_key == harness.AGENT and not body.get("resume") else None
-        if local_cmd:  # answered here, without the model and without plugin prompt hooks (they would close a plugin's write window)
-            mode_reply = local_commands.answer(project_id, thread_id, local_cmd[1], local_cmd[2])
-        elif agent_key == harness.AGENT:
-            # plan H3: plugins' SessionStart and UserPromptSubmit hooks see the human's own text, before any expansion
-            hooked = None if body.get("resume") else await prompt_hooks.submitted(project_id, thread_id, auth.acting_user(project_id), clean, first)
-            command = plugins.expand_slash(clean, project_dir=sandbox_dir(project_id))  # the model gets the command's instructions; the chat keeps what the user typed
-            # a plugin command becomes the thread's active command, given in the instructions on every call (never compacted)
-            pinned = active_command.remember(harness.state_dirs(project_id, auth.acting_user(project_id))["tools"], thread_id, command)
-            text = clean if pinned else (command or clean)
-            last_user["content"] = prompt_hooks.for_model(text, hooked) if hooked else text
     encoder = EventEncoder()
 
     async def stream():
-        if mode_reply:
-            _append(thread_id, "assistant", mode_reply, agent_key)
-            for event in prompt_hooks.reply_events(thread_id, body.get("runId") or new_id("rn"), mode_reply):
-                yield encoder.encode(event)
-            return
-        if hooked and hooked.blocked:  # a plugin's UserPromptSubmit hook refused the message: the model is not called
-            for event in prompt_hooks.blocked_events(thread_id, body.get("runId") or new_id("rn"), hooked.reason):
-                yield encoder.encode(event)
-            return
         answer: list[str] = []
         agents.set_emitter(None)
         try:
             user_id = auth.acting_user(project_id)
-            if agent_key == harness.AGENT:  # MAF's own harness: it loads skills itself through progressive disclosure
-                agent = harness.build(project_id, thread_id, engine.start, user_id=user_id, model=thread["model"])
-            else:
-                chat_tools = tools.document_tools(project_id) + tools.chat_tools(project_id, thread_id, engine.start)
-                model = auth.model_for(project_id, agent_key, None, user_id, thread["model"])
-                rendered = skills.render([])
-                if last_user and skill_chat.mode(agent_key, model) == "pick":  # one small call per user message; a failure means no skill
-                    text = _text_of(last_user)
-                    chosen = await skill_chat.pick(agent_key, project_id, user_id, model, text, key=(thread_id, last_user.get("id") or sha256(text)))
-                    rendered = skills.render(chosen)
-                    if chosen:
-                        logging.getLogger("aqe.chat").info("chat %s uses skill %s", thread_id, ", ".join(chosen))
-                agent = agents.build(agent_key, project_id, chat_tools, chat=True, source="chat", user_id=user_id, model=model, skill_set=rendered)
+            chat_tools = tools.document_tools(project_id) + tools.chat_tools(project_id, thread_id, engine.start)
+            model = auth.model_for(project_id, agent_key, None, user_id, thread["model"])
+            rendered = skills.render([])
+            if last_user and skill_chat.mode(agent_key, model) == "pick":  # one small call per user message; a failure means no skill
+                text = _text_of(last_user)
+                chosen = await skill_chat.pick(agent_key, project_id, user_id, model, text, key=(thread_id, last_user.get("id") or sha256(text)))
+                rendered = skills.render(chosen)
+                if chosen:
+                    logging.getLogger("aqe.chat").info("chat %s uses skill %s", thread_id, ", ".join(chosen))
+            agent = agents.build(agent_key, project_id, chat_tools, chat=True, source="chat", user_id=user_id, model=model, skill_set=rendered)
             payload = {"messages": incoming, "thread_id": thread_id, "run_id": body.get("runId") or new_id("rn"),
                        "state": body.get("state") or {}, "tools": body.get("tools") or [], "context": body.get("context") or [],
                        "forwarded_props": body.get("forwardedProps") or {}}
-            if agent_key == harness.AGENT:
-                # The thread snapshot keeps mode, approvals and history per project and person across requests. The scope
-                # is set here from the server's own ids; a risky tool ends the run with an approval interrupt, and the
-                # client's next request carries `resume` with the human's answer.
-                wrapped = AgentFrameworkAgent(HideLoopNudges(agent), require_confirmation=False, snapshot_store=harness.SNAPSHOTS)
-                wrapped._approval_state_store = harness.APPROVALS  # ponytail: 1.24 takes no store argument; see harness_kit/snapshots.py
-                payload["__ag_ui_snapshot_scope"] = payload["__ag_ui_approval_scope"] = harness.scope(project_id, user_id)
-                if body.get("resume"):
-                    payload["resume"] = body["resume"]
-            else:
-                wrapped = AgentFrameworkAgent(agent, require_confirmation=False)
+            wrapped = AgentFrameworkAgent(agent, require_confirmation=False)
             # When a turn reaches its tool budget, MAF asks for a final answer with tools off and some models then write
             # their next tool call as text (DeepSeek DSML). Nothing ran, so that text is cut and the user is told plainly.
             markup = False
@@ -160,11 +119,6 @@ async def agui(agent_key: str, request: Request):
                     answer.append(event.delta)
                 if markup and kind == "MESSAGES_SNAPSHOT":
                     continue  # the snapshot still holds the markup; the streamed text above is the clean copy
-                if kind == "RUN_FINISHED" and (notice := budget.stopped.pop(thread_id, None)):  # a budget stop ends the loop without model text
-                    message_id = new_id("msg")
-                    for extra in (TextMessageStartEvent(message_id=message_id, role="assistant"), TextMessageContentEvent(message_id=message_id, delta=notice), TextMessageEndEvent(message_id=message_id)):
-                        yield encoder.encode(extra)
-                    answer.append(notice)
                 # every event type is redacted, including the final message snapshot
                 # ponytail: a secret split across two deltas passes in the live stream; the snapshot and stored copy are clean
                 yield redact(encoder.encode(event))

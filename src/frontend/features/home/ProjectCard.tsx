@@ -1,4 +1,4 @@
-import { Archive, FolderGit2, Pencil, Terminal, Trash2, Undo2 } from "lucide-react";
+import { Archive, FolderGit2, Pencil, Trash2, Undo2 } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "../../components/ui";
 import { when } from "../../lib/api";
@@ -12,14 +12,6 @@ export function ProjectCard({ p, archived, onRename, onArchive, onRemove }: { p:
       <div className="flex items-start justify-between gap-2">
         <Link href={`/projects/${p.id}`} className="flex-1 truncate">
           <h2 className="truncate font-bold hover:text-indigo-600 transition">{p.name}</h2>
-        </Link>
-        <Link
-          href={`/harness?project=${p.id}`}
-          title="Open in the harness"
-          className="flex items-center gap-1 rounded bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold text-indigo-600 hover:bg-indigo-600 hover:text-white dark:bg-indigo-950/60 dark:text-indigo-400 dark:hover:bg-indigo-600 dark:hover:text-white transition"
-        >
-          <Terminal className="h-3 w-3" />
-          <span>Harness</span>
         </Link>
       </div>
 

@@ -45,12 +45,12 @@ def test_report_lists_failures_and_unrun_levels(tmp_path):
 def test_html_report_maps_stories_to_cases_and_screenshots(tmp_path):
     import evidence_html
     junit = _junit(tmp_path, "e2e.xml", '<testcase classname="t" name="test_us51_instructions_skill"/>'
-                   '<testcase classname="t" name="test_hs01_hs03_plan_and_scan"><failure message="no calc.py"/></testcase>', 2, failures=1)
+                   '<testcase classname="t" name="test_us52_us53_script_skill"><failure message="no tests ran"/></testcase>', 2, failures=1)
     screens = tmp_path / "screens"
     screens.mkdir()
     (screens / "us-51-plan.png").write_bytes(b"\x89PNG")
     report = er.build({"e2e": junit}, None, "m")  # build lists repo screenshots; write copies the story ones
     page = evidence_html.write(report, tmp_path / "out", [junit], screens).read_text()
-    assert "<span class='PASS'>PASS</span> US-51" in page and "<span class='FAIL'>FAIL</span> HS-01" in page and "<span class='FAIL'>FAIL</span> HS-03" in page
+    assert "<span class='PASS'>PASS</span> US-51" in page and "<span class='FAIL'>FAIL</span> US-52" in page and "<span class='FAIL'>FAIL</span> US-53" in page
     assert "shots/us-51-plan.png" in page and (tmp_path / "out" / "shots" / "us-51-plan.png").exists()
     assert "<span class='NOT-RUN'>NOT RUN</span> US-01" in page and "No test ran for this story." in page

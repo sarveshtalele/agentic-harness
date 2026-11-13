@@ -12,7 +12,7 @@ from pathlib import Path
 from backend.config import ROOT
 from backend.core.security import sha256
 
-ALL_PROFILES = "web,local,desktop"
+ALL_PROFILES = "web,local"
 RELATIONS = ("contains", "performed_by", "uses_tool", "applies_skill", "runs_script", "delegates_to", "serves", "gates")
 
 

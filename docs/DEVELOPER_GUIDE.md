@@ -8,8 +8,8 @@ The README has the short setup; this guide has the detail.
 | Tool | Version | Notes |
 |---|---|---|
 | Python | 3.12 or newer | the project always uses its own `.venv`, never the global Python |
-| Node.js | 22.18 or newer | runs the UI, the desktop app, and the agentic-qe plugin's TypeScript natively |
-| Git | any | Windows: Git for Windows also gives the harness `bash` |
+| Node.js | 22.18 or newer | runs the UI and the agentic-qe plugin's TypeScript natively |
+| Git | any | |
 | PostgreSQL | 16 or newer, installed | the app starts its own cluster in `data/postgres`; set `PGBIN` if its programs are not in the default place |
 
 ```bash
@@ -48,14 +48,11 @@ Work only on `feature/maf-harness-platform`; `main` is the owner's backup and is
 | `src/backend/maf/agents` | One file per agent with its policy; adding a file registers the agent. Its prompt is `prompts/<agent>.md`, its eval cases `evals/<agent>.json` |
 | `src/backend/maf/tools` | One file per tool |
 | `src/backend/maf/workflows` | One file per workflow (registers itself); `shared/` and `qe/` hold shared stages. A new workflow needs its feature in `features.WORKFLOWS` |
-| `src/backend/maf/harness.py`, `maf/harness_kit/` | The harness: MAF `create_harness_agent` plus shells, permissions, hooks, settings files, skills, plugin contracts, checkpoints, sandbox |
 | `src/backend/repos`, `src/backend/qe` | Git, ingest, sandboxes, static analysis; validators, runners, traceability |
 | `src/frontend` | Next.js UI (`app/` pages, `features/` areas, `components/`) and the CopilotKit runtime route. Next.js here may differ from what you know: read `node_modules/next/dist/docs/` before using an unfamiliar API |
-| `src/aqh` | The `aqh` command-line tool |
-| `apps/desktop` | The Electron desktop app |
 | `plugins/agentic-qe` | The agentic-qe plugin (pinned copy of its repository) |
 | `skills/`, `prompts/`, `templates/`, `evals/` | Platform skills, versioned agent prompts, document templates, agent eval cases |
-| `tests/` | Unit and integration tests; `tests/e2e` Playwright; `tests/desktop` the desktop app; `tests/fixtures` real stand-in servers |
+| `tests/` | Unit and integration tests; `tests/e2e` Playwright; `tests/fixtures` real stand-in servers |
 | `deploy/` | Environment templates and Azure startup scripts |
 | `data/` | Runtime state: database cluster, stores, workspaces, the activity log. Never in Git |
 
@@ -65,14 +62,12 @@ Work only on `feature/maf-harness-platform`; `main` is the owner's backup and is
 
 | Profile | Used by | Differences |
 |---|---|---|
-| `local` | `dev.py up` | everything: real Bash and PowerShell in the harness, stdio MCP servers, plugin installs |
-| `web` | Azure | shared server: the harness runs an allowlisted runner instead of a free shell; no stdio MCP, no plugin installs |
-| `desktop` | the desktop app | starts only after sign-in through the team's server; one member, no local admin |
-| `cli` | `aqh` | a project is bound to the folder `aqh` runs in, edited in place |
+| `local` | `dev.py up` (development and tests) | everything, including stdio MCP servers and plugin installs |
+| `web` | Azure | shared server: repository code and skill scripts run through the allowlisted runner; no stdio MCP, no plugin installs |
 
 Settings come from `.env` (local) or App Service settings and Key Vault (Azure). The templates are `.env.example` and
 `deploy/environments/*.example`. Secrets are encrypted at rest with `ATLAS_SECRET_KEY`, never logged, never in URLs or
-command lines. Leave the harness limits (`ATLAS_HARNESS_MAX_ROUNDS`, `ATLAS_HARNESS_MAX_TOOL_CALLS`) unset.
+command lines.
 
 ## 5. Tests and evidence
 
@@ -92,9 +87,8 @@ command lines. Leave the harness limits (`ATLAS_HARNESS_MAX_ROUNDS`, `ATLAS_HARN
 
 ## 7. Naming
 
-Use these names in the UI, messages, documents and code comments: **Agentic QE Platform**; **Home, Projects, Harness,
-BA Studio, QE Cycle, Skill Studio, MCP Servers, Approvals, Traces, Observability, Settings, Users, Usage**; the
-command-line tool **aqh**. Write plain English: short sentences, active voice, the same word for the same thing. Do not
+Use these names in the UI, messages, documents and code comments: **Agentic QE Platform**; **Home, Projects,
+BA Studio, QE Cycle, Skill Studio, MCP Servers, Approvals, Traces, Observability, Settings, Users, Usage**. Write plain English: short sentences, active voice, the same word for the same thing. Do not
 use "Autonomous", "Enterprise", "AI SDLC" or "Atlas" in visible text (the `ATLAS_` setting names stay).
 
 ## 8. Deploy to Azure
@@ -103,11 +97,6 @@ use "Autonomous", "Enterprise", "AI SDLC" or "Atlas" in visible text (the `ATLAS
 2. `python3 scripts/dev.py azure-local --check` runs both zips locally in the web profile; it must print `API health: 200; UI /login: 200`.
 3. Follow `docs/AZURE_DEPLOYMENT_GUIDE.md` for the resources (East US 2, under $25 a month), the settings and Key Vault secrets, the Kudu upload and the first sign-in. Any change that raises the cost needs the owner's approval.
 
-## 9. Release the desktop app
-
-Push to the branch: `.github/workflows/desktop.yml` builds the macOS (Apple silicon and Intel) and Windows installers
-with SHA-256 manifests. Publishing them to the Blob `downloads` container is in `docs/DESKTOP_RELEASE_GUIDE.md`.
-
-## 10. Troubleshooting
+## 9. Troubleshooting
 
 See the README's table. The activity log of the development hooks is in `data/activity-log.md`.

@@ -2,17 +2,15 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Activity, CheckSquare, ChevronRight, Cpu, FileText, FolderKanban, Terminal, Wand2 } from "lucide-react";
+import { Activity, CheckSquare, ChevronRight, Cpu, FileText, FolderKanban, Wand2 } from "lucide-react";
 import { AppShell } from "../../components/AppShell";
 import { useAuth } from "../../components/AuthGate";
 import { Card, Empty, ErrorNote, PageTitle, Spinner } from "../../components/ui";
-import { DesktopDownloads } from "../../features/login/DesktopDownloads";
 import { api } from "../../lib/api";
 import { useFeatures } from "../../lib/features";
 
 // Tiles for features that have a page today; BA Studio joins with R3. A tile without a feature is for everyone.
 const TILES = [
-  { href: "/harness", label: "Harness", icon: Terminal, feature: "harness" },
   { href: "/projects", label: "QE cycle", icon: FolderKanban, feature: "qe" },
   { href: "/approvals", label: "Approvals", icon: CheckSquare },
   { href: "/skills/studio", label: "Skill Studio", icon: Wand2, feature: "skills" },
@@ -21,7 +19,7 @@ const TILES = [
   { href: "/traces", label: "Traces", icon: Activity, feature: "traces" },
 ];
 
-/** Home after sign-in (plan 12.2): where you left off, your work, and the desktop app when your access includes it. */
+/** Home after sign-in (plan 12.2): where you left off and your work. */
 export default function HomePage() {
   const { user } = useAuth();
   const features = useFeatures();
@@ -69,7 +67,6 @@ export default function HomePage() {
             )}
           </Card>
         </div>
-        {features?.includes("downloads") && <DesktopDownloads className="w-full" />}
       </div>
     </AppShell>
   );

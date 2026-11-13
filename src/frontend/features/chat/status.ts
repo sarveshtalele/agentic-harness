@@ -1,4 +1,4 @@
-/** Plain-words status lines for the harness, derived only from real AG-UI events (plan M4, US-60). */
+/** Plain-words status lines for a chat run, derived only from real AG-UI events (plan M4, US-60). */
 
 const PHRASES: Record<string, string> = {
   scan_repository: "Analysing the repository",

@@ -5,23 +5,20 @@ Agentic QE Platform is a quality engineering workspace for business analysts, de
 every quality gate is signed by a named person, and every change is written to a hash-chained ledger. Nothing is
 simulated: a missing model or repository is a clear error, and a value that was not measured says so.
 
-It runs in three places from one code base: the **web app** (local or Azure), the **desktop app** (macOS and Windows),
-and the **`aqh` command-line tool** (macOS, Windows, Linux).
+It is a cloud application on Azure. You can also run it on your own machine for development and testing.
 
 **Contents:** [Modules](#modules) · [Requirements](#requirements) · [Set up on macOS or Linux](#set-up-on-macos-or-linux) ·
-[Set up on Windows](#set-up-on-windows) · [First sign-in](#first-sign-in) · [Command-line tool](#command-line-tool-aqh) ·
-[Desktop app](#desktop-app) · [Deploy to Azure](#deploy-to-azure) · [Tests](#tests) · [Troubleshooting](#troubleshooting) ·
+[Set up on Windows](#set-up-on-windows) · [First sign-in](#first-sign-in) · [Deploy to Azure](#deploy-to-azure) · [Tests](#tests) · [Troubleshooting](#troubleshooting) ·
 [Documents](#documents)
 
 ## Modules
 
 | Module | What it does |
 |---|---|
-| **Home** | Where you left off, your work, and the desktop downloads when your access includes them |
-| **Projects** | A project per repository: connect it from Git, a ZIP or a local folder (local and desktop only) |
-| **Harness** | A Claude Code-class agent on MAF: plans with todos, reads and edits files with approval, runs Bash and PowerShell, background tasks, skills in any language, slash commands, MCP tools, hooks, permission modes, checkpoints and `/rewind` |
+| **Home** | Where you left off and your work |
+| **Projects** | A project per repository: connect it from Git, a ZIP, or a local folder (local development only) |
 | **BA Studio** | Upload sources (Word, PowerPoint, PDF, Markdown), brainstorm one question at a time, pick an approach, and get a BRD and checked Gherkin scenarios signed at Gate 1; optional Jira and Confluence through the Atlassian MCP server |
-| **QE Cycle** | Gates G0 to G5 from intake to release, each signed by a named person, with a traceability view: requirement, scenario, case, test, result |
+| **QE Cycle** | Gates G0 to G5 from intake to release, each signed by a named person. Each stage runs the agentic-qe plugin's skill and scripts and is checked by its validators; a traceability view: requirement, scenario, case, test, result |
 | **Skill Studio** | Plan, generate, evaluate and publish new agent skills |
 | **MCP Servers** | Real connections over stdio, HTTP or WebSocket; tools granted per role; each member signs in with OAuth where the server needs it |
 | **Approvals, Traces, Observability** | Gates and decisions waiting for you; OpenTelemetry traces; error log |
@@ -93,37 +90,7 @@ A short folder such as `C:\src` avoids Windows path-length errors. You can also 
 1. Sign in with the `admin` account and the password `up` printed (also in `.env`, as `ATLAS_ADMIN_PASSWORD`). To set your own, edit `.env` (12 characters or more, not containing the username) and run `up` again. For a password that is never stored in plain text, run `python3 scripts/dev.py admin-password` and put the printed hash in `ATLAS_ADMIN_PASSWORD_HASH`.
 2. **Settings, Model provider:** the base URL, model name and key of your OpenAI-compatible endpoint; **Test connection**; tick the models people may use.
 3. **Users:** add people with a role (QE lead, BA, developer, viewer). **Settings, Features** sets what each role may use.
-4. **Projects, New project**, then connect its repository. Open **Harness**, **BA Studio** or **QE Cycle** from the project.
-
-## Command-line tool (aqh)
-
-`aqh` runs the same harness in the folder you start it in, editing your files in place. It starts its own local server and PostgreSQL under `~/.aqh` the first time.
-
-```bash
-python3 -m pip install -e .
-```
-
-```bash
-aqh config model --base-url https://your-endpoint/v1 --name your-model
-```
-
-```bash
-aqh config set-key
-```
-
-```bash
-aqh doctor
-```
-
-Then `aqh` (interactive) or `aqh -p "prompt" --output-format json` (scripts and CI; allow what may run with `--allowedTools "Bash(npm test)"` or `--permission-mode acceptEdits`). `aqh --continue` resumes this folder's last session; `aqh server stop` stops the local server. The key is kept in the OS keychain and never printed.
-
-## Desktop app
-
-The macOS DMG and Windows MSI are built by CI (`.github/workflows/desktop.yml`) and published as described in `docs/DESKTOP_RELEASE_GUIDE.md`. Members sign in with your server's address and their account; the app keeps only a signed sign-in, never the password. It adds a **Terminal** pane under the harness chat. To run it from source:
-
-```bash
-python3 scripts/desktop_build.py --ui && cd apps/desktop && npm install && npx electron .
-```
+4. **Projects, New project**, then connect its repository. Open **BA Studio** or **QE Cycle** from the project.
 
 ## Deploy to Azure
 
@@ -158,7 +125,6 @@ CI (`.github/workflows/ci.yml`) runs the unit, integration and smoke tests and `
 | "PostgreSQL did not answer" | Run `up` again: it starts the database. The message names the real cause (refused, password, missing database) |
 | `initdb` not found | Install PostgreSQL, or set `PGBIN` to its `bin` folder |
 | Port 8000 or 3000 in use | Stop the other program, or set `ATLAS_PORT` and `ATLAS_UI_PORT` |
-| The harness stops long tasks early | Remove `ATLAS_HARNESS_MAX_ROUNDS` and `ATLAS_HARNESS_MAX_TOOL_CALLS` from `.env` (an older template set them too low) |
 | `py` not recognized (Windows) | Reinstall Python with **Add python.exe to PATH** |
 | `npm` fails with `EPERM` (Windows) | Close editors and terminals that hold `node_modules`, then run `up` again |
 
@@ -168,12 +134,12 @@ CI (`.github/workflows/ci.yml`) runs the unit, integration and smoke tests and `
 |---|---|
 | `docs/DEVELOPER_GUIDE.md` | How to develop: layout, profiles, settings, database, tests, adding agents, tools, workflows and routes, release and deployment |
 | `docs/AZURE_DEPLOYMENT_GUIDE.md` | The Azure deployment, step by step, with costs |
-| `docs/DESKTOP_APP_GUIDE.md`, `docs/DESKTOP_RELEASE_GUIDE.md` | Using and releasing the desktop app |
 | `docs/SYSTEM_ARCHITECTURE_AND_DESIGN.md`, `docs/ARCHITECTURE.md` | How the system is built |
-| `docs/AGENT_SKILLS_AND_MAF_SPECIFICATION.md` | How MAF is used: agents, harness, skills, MCP, workflows |
+| `docs/AGENT_SKILLS_AND_MAF_SPECIFICATION.md` | How MAF is used: agents, skills, MCP, workflows |
 | `docs/SECURITY_GOVERNANCE_AND_AUDIT.md` | Security, governance, audits and accepted risks |
 | `docs/PROJECT_STRUCTURE.md` | Every file and what it does (generated by `python3 scripts/gen_structure.py`) |
-| `docs/FINAL_PLAN.md`, `docs/PHASE2_PLAN.md`, `docs/PHASE3_PLAN.md` | The approved plans and their status |
-| `docs/USER_STORIES.md`, `docs/HARNESS_USER_STORIES.md` | The stories the end-to-end tests prove |
+| `docs/STABLE_BUILD_PLAN.md`, `docs/FINAL_PLAN.md`, `docs/PHASE2_PLAN.md`, `docs/PHASE3_PLAN.md` | The approved plans and their status |
+| `docs/harness/` | The separate harness application: separation plan and engineering design (not part of this build) |
+| `docs/USER_STORIES.md` | The stories the end-to-end tests prove |
 | `docs/THIRD_PARTY_NOTICES.md` | Third-party licences |
 | `CLAUDE.md` | The project rules |

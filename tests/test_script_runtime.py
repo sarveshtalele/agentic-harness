@@ -10,7 +10,6 @@ from fastapi.testclient import TestClient
 from backend.app import app
 from backend.core import script_health
 from backend.core import script_runtime as rt
-from backend.maf.harness_kit import skill_runner
 
 NODE = rt.node_version()
 HAS_TS = bool(NODE and (NODE >= (22, 6) or NODE[0] >= 23))
@@ -67,38 +66,6 @@ def test_health_flags_what_cannot_run_and_explains_why(tmp_path):
     assert by["scripts/odd.xyz"]["verdict"] == "flagged" and "not-an-interpreter-xyz" in by["scripts/odd.xyz"]["reason"]
     smoked = {r["script"]: r for r in script_health.check_skill(bad, refresh=True, smoke=True)["scripts"]}
     assert smoked["scripts/missing.py"]["verdict"] == "flagged" and "not_a_real_module_xyz" in smoked["scripts/missing.py"]["reason"]
-
-
-@pytest.mark.skipif(not HAS_TS, reason="Node 22.6+ is needed to run TypeScript")
-def test_a_typescript_script_runs_with_arguments_through_the_harness_runner(tmp_path, monkeypatch):
-    folder = skill(tmp_path, "ts-skill", "Run `node ${CLAUDE_SKILL_DIR}/scripts/sum.ts 2 3`.",
-                   {"scripts/sum.ts": "const nums: number[] = process.argv.slice(2).map(Number);\nconsole.log(`sum ${nums.reduce((a, b) => a + b, 0)}`);\n"})
-    monkeypatch.setattr(skill_runner.testing, "check_profile", lambda: None)
-    run = skill_runner.runner(None)
-    out = asyncio.run(run(*real(folder, "scripts/sum.ts"), ["2", "3"]))
-    assert "sum 5" in out and "typescript script scripts/sum.ts: exit code 0" in out
-
-
-def test_a_flagged_script_is_refused_and_three_failures_flag_a_skill(tmp_path, monkeypatch):
-    monkeypatch.setattr(skill_runner.testing, "check_profile", lambda: None)
-    run = skill_runner.runner(None)
-    broken = skill(tmp_path, "broken", "", {"scripts/b.py": "def (:\n"})
-    out = asyncio.run(run(*real(broken, "scripts/b.py"), []))
-    assert out.startswith("Refused: the skill broken is flagged") and "SyntaxError" in out
-    failing = skill(tmp_path, "failing", "", {"scripts/f.py": "import sys\nsys.exit(0 if '--help' in sys.argv else 3)\n"})
-    for _ in range(skill_runner.FAILS_TO_FLAG):
-        out = asyncio.run(run(*real(failing, "scripts/f.py"), []))
-        assert "exit code 3" in out
-    out = asyncio.run(run(*real(failing, "scripts/f.py"), []))
-    assert "failed 3 runs in a row" in out and out.startswith("Refused")
-
-
-@pytest.mark.skipif(not shutil.which("pwsh") and os.name != "nt", reason="no PowerShell on this machine")
-def test_a_powershell_script_runs(tmp_path, monkeypatch):
-    folder = skill(tmp_path, "ps-skill", "", {"scripts/hello.ps1": "param([string]$Name = 'x')\nWrite-Output \"hello $Name\"\n"})
-    monkeypatch.setattr(skill_runner.testing, "check_profile", lambda: None)
-    out = asyncio.run(skill_runner.runner(None)(*real(folder, "scripts/hello.ps1"), ["-Name", "shop"]))
-    assert "hello shop" in out
 
 
 def test_the_skills_page_shows_each_skills_health():

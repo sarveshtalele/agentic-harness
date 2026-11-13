@@ -15,9 +15,9 @@ from backend.core.security import redact
 
 LOG = logging.getLogger("aqe.registry")
 _LOCK = threading.Lock()
-# order matters: links resolve at the end, and harness_delegations reads the plugin agents plugin_sources added
-SOURCES = (code_sources.platform_tools, code_sources.maf_builtins, code_sources.agents, plugin_sources.plugin_sources,
-           plugin_sources.mcp_sources, workflow_sources.gate_sources, workflow_sources.workflow_sources, code_sources.harness_delegations)
+# order matters: links resolve at the end
+SOURCES = (code_sources.platform_tools, code_sources.agents, plugin_sources.plugin_sources,
+           plugin_sources.mcp_sources, workflow_sources.gate_sources, workflow_sources.workflow_sources)
 
 
 def build() -> tuple[Graph, list[str]]:

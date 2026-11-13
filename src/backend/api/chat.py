@@ -1,7 +1,6 @@
 """Chat API."""
 from __future__ import annotations
 
-from agent_framework import AgentSession, TodoFileStore
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import (
     Response,
@@ -12,7 +11,7 @@ from backend import config
 from backend.api.common import _project
 from backend.core import auth
 from backend.db import db, row, rows
-from backend.maf import agui, engine, evals, governance, harness, llm, workflows  # noqa: F401 - workflows registers definitions
+from backend.maf import agui, engine, evals, governance, llm, workflows  # noqa: F401 - workflows registers definitions
 from backend.maf import runtime as agents
 
 router = APIRouter()
@@ -36,7 +35,7 @@ class MemoryIn(BaseModel):
 
 @router.get("/api/profile")
 def profile():
-    """Which deployment profile this server runs (web, local, desktop), so the UI can say what is switched off."""
+    """Which deployment profile this server runs (web on Azure, local for development), so the UI can say what is switched off."""
     return {"profile": config.PROFILE}
 
 
@@ -68,40 +67,6 @@ def get_chat(thread_id: str):
     if not thread:
         raise HTTPException(404, f"Chat thread not found: {thread_id}")
     return {**thread, "messages": agui.thread_messages(thread_id)}
-
-
-@router.get("/api/chats/{thread_id}/todos")
-async def chat_todos(thread_id: str):
-    """The harness's own MAF todo list for this chat thread and person, read through MAF's TodoFileStore. Empty means no todos yet."""
-    with db() as con:
-        thread = row(con.execute("SELECT project_id, agent FROM chat_threads WHERE id=?", (thread_id,)))
-    if not thread:
-        raise HTTPException(404, f"Chat thread not found: {thread_id}")
-    if thread["agent"] != harness.AGENT:
-        return {"todos": [], "note": "Only the project harness keeps a todo list"}
-    session = AgentSession(session_id=harness.session_id(thread["project_id"], auth.acting_user(thread["project_id"]), thread_id))
-    items, _ = await TodoFileStore(harness.HARNESS_DIR / thread["project_id"] / "todos").load_state(session, source_id="todo")
-    return {"todos": [{"id": t.id, "title": t.title, "description": t.description, "done": t.is_complete} for t in items]}
-
-
-@router.get("/api/chats/{thread_id}/terminal")
-def chat_terminal(thread_id: str):
-    """For the desktop Terminal pane: the folder this chat's harness works in, and its background tasks with their latest
-    output. Never on the shared web server (D-SHELL-WEB)."""
-    from backend.core.security import redact
-    from backend.maf.harness_kit import bg_tasks, workspace
-
-    if config.PROFILE == "web":
-        raise HTTPException(404, "The terminal is only in the desktop app and the CLI")
-    with db() as con:
-        thread = row(con.execute("SELECT project_id FROM chat_threads WHERE id=?", (thread_id,)))
-    if not thread:
-        raise HTTPException(404, f"Chat thread not found: {thread_id}")
-    ws = workspace.open_workspace(thread["project_id"], thread_id, auth.acting_user(thread["project_id"]))
-    tasks = [{"id": task_id, "description": t.description or t.command[:80], "status": bg_tasks.status(t),
-              "output": redact(bg_tasks._plain(t.log.read_text(encoding="utf-8", errors="replace")))[-20000:] if t.log.is_file() else ""}
-             for task_id, t in bg_tasks._tasks.get(thread_id, {}).items()]
-    return {"cwd": str(ws.root) if ws else None, "tasks": tasks}
 
 
 @router.patch("/api/chats/{thread_id}")

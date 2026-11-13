@@ -1,8 +1,8 @@
 import { HttpAgent } from "@ag-ui/client";
 import { CopilotRuntime, createCopilotRuntimeHandler } from "@copilotkit/runtime/v2";
 
-// No usage data to third parties: next.config sets this only while building, and the desktop and standalone servers
-// read the environment at run time (the desktop log showed "telemetry enabled", 2026-11-13).
+// No usage data to third parties: next.config sets this only while building, and the standalone server reads the
+// environment at run time.
 process.env.COPILOTKIT_TELEMETRY_DISABLED = "true";
 const backend = process.env.ATLAS_BACKEND_URL || "http://127.0.0.1:8000";
 // A chat request is a few messages; anything far larger is refused before any library parses it (zod 3 inside CopilotKit

@@ -1,13 +1,12 @@
 "use client";
 
-import { ArrowRight, Bot, ClipboardCheck, FileText, LogIn, ShieldCheck, Wand2 } from "lucide-react";
+import { ArrowRight, ClipboardCheck, FileText, LogIn, ShieldCheck, Wand2 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ThemeToggle } from "../../components/ui";
 import { api } from "../../lib/api";
 
 const FEATURES = [
-  { icon: Bot, title: "Project harness", text: "An agent on Microsoft Agent Framework that plans, reads your repository, runs approved commands in a sandbox and uses skills, plugins and MCP tools." },
   { icon: FileText, title: "Requirements", text: "BRDs, user stories and Gherkin, checked by the official parser. Every save is an immutable version with its SHA-256." },
   { icon: ClipboardCheck, title: "Governed QE", text: "Test plans, cases, code and runs through gates G0 to G5. A named person signs each gate; agents never approve." },
   { icon: Wand2, title: "Skill Studio", text: "Plan, generate, test and evaluate new agent skills on the real model before anyone can publish them." },
@@ -15,7 +14,7 @@ const FEATURES = [
 
 const button = "inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold";
 
-/** Public home page: what the platform does, the desktop downloads and the way in. It reads no project data. */
+/** Public home page: what the platform does and the way in. It reads no project data. */
 export function Landing() {
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
   useEffect(() => {

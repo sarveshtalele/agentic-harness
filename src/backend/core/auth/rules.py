@@ -22,9 +22,9 @@ OWNER_ONLY = re.compile(r"^/api/projects/[^/]+/members(/|$)")  # also the admin
 OWNER_DELETE = re.compile(r"^/api/projects/[^/]+$")
 # /api/traces is session-only here; core/tracing/queries.py limits each answer to the caller's own runs (404 otherwise).
 # Signed-in users with no project in the path. A path in none of these lists is refused, so a new route has to be added here or above.
-SESSION_ONLY = re.compile(r"^(/agui/[^/]+|/api/(auth/(me|logout|desktop-session)|account/(password|email)|features/me|chat/agents|profile|approvals|documents|findings|projects|harness(/.*)?|observability(/errors|/export)?|plugins(/.*)?|templates(/upload|/[^/]+)?"
+SESSION_ONLY = re.compile(r"^(/agui/[^/]+|/api/(auth/(me|logout)|account/(password|email)|features/me|chat/agents|profile|approvals|documents|findings|projects|observability(/errors|/export)?|plugins(/.*)?|templates(/upload|/[^/]+)?"
                           r"|prompts(/[^/]+(/scores)?)?|skills(/.*)?|skill-studio(/.*)?|agents(/[^/]+(/metrics)?)?|evals(/[^/]+)?|mcp(/.*)?|settings/(llm|models|timezone|gate-roles)|traces(/[^/]+)?|capabilities(/.*)?))$")
-VIEWER_MAY_WRITE = re.compile(r"^/api/(auth/(logout|desktop-session)|account/(password|email))$")  # a viewer can still sign out and change their own password
+VIEWER_MAY_WRITE = re.compile(r"^/api/(auth/logout|account/(password|email))$")  # a viewer can still sign out and change their own password
 WRITES = {"POST", "PUT", "PATCH", "DELETE"}
 
 

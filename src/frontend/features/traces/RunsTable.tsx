@@ -54,7 +54,7 @@ export function RunsTable({ onOpen }: { onOpen: (traceId: string) => void }) {
       <div className="grid gap-2 md:grid-cols-4">
         {select("project", "Project", [["", "All projects"], ...projects.map((p): [string, string] => [p.id, p.name])])}
         {admin && select("user", "User", [["", "All users"], ["admin", "Administrator"], ...users.map((u): [string, string] => [u.id, u.username])])}
-        <input aria-label="Agent" placeholder="Agent, e.g. harness" className={inputClass} value={filters.agent} onChange={(e) => set({ agent: e.target.value.trim() })} />
+        <input aria-label="Agent" placeholder="Agent, e.g. qe-engineer" className={inputClass} value={filters.agent} onChange={(e) => set({ agent: e.target.value.trim() })} />
         {select("status", "Status", STATUSES)}
         <input aria-label="From" type="datetime-local" className={inputClass} value={filters.from} onChange={(e) => set({ from: e.target.value })} />
         <input aria-label="To" type="datetime-local" className={inputClass} value={filters.to} onChange={(e) => set({ to: e.target.value })} />
