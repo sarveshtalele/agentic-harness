@@ -52,7 +52,7 @@ export function ProjectGovernanceAccess({ project, refresh }: { project: any; re
     >
       <div data-testid="governance-access" className="space-y-4">
         <p className="text-xs text-slate-500 dark:text-slate-400">
-          Features and execution boundaries are tracked per user profile. Only directory users provisioned by an Administrator can be assigned as project collaborators.
+          Only users an administrator has provisioned can be added.
         </p>
 
         <MembersTable items={items} onRevoke={setMemberToRemove} />

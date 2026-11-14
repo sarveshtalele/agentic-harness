@@ -37,6 +37,7 @@ export function DocumentsTable({ shown, project, onDownload, onDelete }: Props) 
                   <td className="px-4 py-3.5 font-medium">
                     <Link
                       className="font-semibold text-slate-900 hover:text-indigo-600 dark:text-slate-100 dark:hover:text-indigo-400 block transition-colors"
+                      title={d.title}
                       href={`/projects/${project.id}/documents/${d.id}`}
                     >
                       {d.title || "Untitled Specification"}

@@ -30,7 +30,7 @@ ENV DEBIAN_FRONTEND=noninteractive PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 
 USER root
 # JDK 21 and .NET SDK 8 from the Ubuntu 24.04 archive; git and curl for repository cloning and the healthcheck
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      git curl ca-certificates xz-utils openjdk-21-jdk-headless dotnet-sdk-8.0 \
+      git curl ca-certificates xz-utils python3-venv openjdk-21-jdk-headless dotnet-sdk-8.0 \
  && rm -rf /var/lib/apt/lists/*
 # Node 22 (official tarball) and Go (official tarball), pinned
 RUN case "$TARGETARCH" in arm64) N=arm64; G=arm64;; *) N=x64; G=amd64;; esac \

@@ -24,9 +24,14 @@ export function PluginCard({ plugin, admin, onChange }: { plugin: any; admin: bo
         )}
       </div>
       <p className="text-xs text-slate-500">{plugin.description}</p>
-      <p className="text-xs text-slate-500">{plugin.skills} skills, {plugin.commands.length} commands, {plugin.mcp_servers.length} MCP servers. Source: {plugin.source}</p>
+      <p className="break-words text-xs text-slate-500">{plugin.skills} skills, {plugin.commands.length} commands, {plugin.mcp_servers.length} MCP servers. Source: {plugin.source}</p>
       <PluginGrants pluginId={plugin.id} admin={admin} />
-      {problems.length > 0 && <ErrorNote message={problems.join("; ")} />}
+      {problems.length > 0 && (
+        <div role="alert" className="mt-2 rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-700 dark:text-rose-300">
+          <p>{problems.some((p) => /no manifest/i.test(p)) ? "This plugin has no manifest and no skills folder." : `${problems.length} problem${problems.length > 1 ? "s" : ""} found in this plugin.`}</p>
+          <details className="text-xs"><summary className="cursor-pointer">Details</summary><p className="mt-1 break-words">{problems.join("; ")}</p></details>
+        </div>
+      )}
       <ErrorNote message={error} />
     </div>
   );

@@ -29,6 +29,7 @@ export function NewDocumentCard({ title, setTitle, template, setTemplate, templa
         <Button onClick={onCreate} disabled={!title.trim()}>
           <Plus className="h-4 w-4" /> Create Document
         </Button>
+        {!title.trim() && <span className="text-xs text-slate-600 dark:text-slate-400">Enter a name to create.</span>}
       </div>
       <ErrorNote message={error} />
     </Card>

@@ -66,3 +66,10 @@ div[data-nextjs-toast="true"] {
   pointer-events: none !important;
   visibility: hidden !important;
 }
+
+/* One visible keyboard focus ring for buttons, links, selects and toggles */
+a:focus-visible, button:focus-visible, select:focus-visible, summary:focus-visible, [role="button"]:focus-visible, input[type="checkbox"]:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
+.dark a:focus-visible, .dark button:focus-visible, .dark select:focus-visible, .dark summary:focus-visible, .dark input[type="checkbox"]:focus-visible { outline-color: #a5b4fc; }

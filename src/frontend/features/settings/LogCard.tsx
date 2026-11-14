@@ -14,7 +14,7 @@ export function LogCard() {
         {logDay && <a className="inline-flex items-center gap-1.5 text-sm text-indigo-500 underline" href={`/api/logs?date=${logDay}`}><Download className="h-4 w-4" /> Download log for {logDay}</a>}
         {logDay && <a className="inline-flex items-center gap-1.5 text-sm text-indigo-500 underline" href={`/api/logs?date=${logDay}&kind=errors`}><Download className="h-4 w-4" /> Errors with stack traces</a>}
       </div>
-      <p className="mt-2 text-xs text-slate-500">One JSON line per event that day, in data/logs/app-DAY.jsonl. Warnings and errors with their stack traces are also in data/logs/errors-DAY.jsonl. Passwords, keys, and request bodies are not written to either.</p>
+      <p className="mt-2 text-xs text-slate-500">One log line per event that day. The errors file adds stack traces for warnings and errors. Passwords, keys, and request bodies are never written.</p>
     </Card>
   );
 }

@@ -33,10 +33,10 @@ export function FeatureAccess() {
       <p className="mb-2 text-xs text-slate-500">Which parts of the platform each role may use. A member override wins over the role. Every change is written to the ledger with who, before and after. The admin has every feature.</p>
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm" data-testid="feature-roles">
-          <thead><tr><th>Role</th>{names.map((f) => <th key={f} className="px-1 text-xs">{data.names[f]}</th>)}</tr></thead>
+          <thead><tr><th>Role</th>{names.map((f) => <th key={f} className="px-2 text-xs font-semibold" title={data.names[f]}>{data.names[f]}</th>)}</tr></thead>
           <tbody>{ROLES.map((role) => (
-            <tr key={role}><td className="pr-2">{role.replace("_", " ")}</td>{names.map((f) => (
-              <td key={f} className="px-1"><input type="checkbox" aria-label={`${role} may use ${data.names[f]}`} checked={(data.roles[role] || []).includes(f)} onChange={(e) => toggle(role, f, e.target.checked)} /></td>
+            <tr key={role}><td className="pr-3 whitespace-nowrap">{role.replace("_", " ")}</td>{names.map((f) => (
+              <td key={f} className="px-2 py-1 text-center"><input type="checkbox" className="h-5 w-5 cursor-pointer" aria-label={`${role} may use ${data.names[f]}`} checked={(data.roles[role] || []).includes(f)} onChange={(e) => toggle(role, f, e.target.checked)} /></td>
             ))}</tr>
           ))}</tbody>
         </table>

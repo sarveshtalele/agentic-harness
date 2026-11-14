@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Badge, Card } from "../../components/ui";
+import { Badge, Card, Empty } from "../../components/ui";
 import { getGovernanceId } from "../documents/lib";
 
 export function DocumentsCard({ documents, project, base }: { documents: any[]; project: any; base: string }) {
@@ -27,7 +27,7 @@ export function DocumentsCard({ documents, project, base }: { documents: any[]; 
                     <span className="font-mono text-[10px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-1.5 py-0.5 rounded">
                       {govId}
                     </span>
-                    <Link className="truncate font-semibold text-slate-800 hover:text-indigo-600 dark:text-slate-200 dark:hover:text-indigo-400" href={`${base}/documents/${d.id}`}>
+                    <Link title={d.title} className="truncate font-semibold text-slate-800 hover:text-indigo-600 dark:text-slate-200 dark:hover:text-indigo-400" href={`${base}/documents/${d.id}`}>
                       {d.title}
                     </Link>
                   </div>
@@ -45,7 +45,7 @@ export function DocumentsCard({ documents, project, base }: { documents: any[]; 
           })}
         </ul>
       ) : (
-        <p className="text-sm text-slate-500">No project documents generated yet.</p>
+        <Empty title="No documents yet">Documents appear here as the stages produce them.</Empty>
       )}
     </Card>
   );

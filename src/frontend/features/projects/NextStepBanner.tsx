@@ -5,7 +5,7 @@ export function NextStepBanner({ step }: { step: { label: string; href: string }
   return (
     <Link
       href={step.href}
-      className="group flex items-center justify-between rounded-2xl border border-indigo-500/40 bg-gradient-to-r from-indigo-500/10 via-indigo-500/5 to-transparent p-4 transition-all hover:border-indigo-500 hover:shadow-md dark:border-indigo-500/30 dark:from-indigo-950/30"
+      className="group flex flex-col gap-3 rounded-2xl border border-indigo-500/40 bg-gradient-to-r from-indigo-500/10 via-indigo-500/5 to-transparent p-4 transition-all hover:border-indigo-500 hover:shadow-md sm:flex-row sm:items-center sm:justify-between dark:border-indigo-500/30 dark:from-indigo-950/30"
     >
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm group-hover:scale-105 transition-transform">

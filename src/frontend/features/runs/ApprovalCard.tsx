@@ -9,6 +9,7 @@ import { BrainstormStep } from "./BrainstormStep";
 import { ConfidenceNote } from "./ConfidenceNote";
 import { NotExecutedCard } from "./NotExecutedCard";
 import { cleanTestName } from "./lib";
+import { classificationLabel, VERDICTS } from "../../lib/labels";
 
 export function ApprovalCard({ approval, projectId, onDecided }: { approval: any; projectId: string; onDecided: () => void }) {
   const { user } = useAuth();
@@ -53,7 +54,13 @@ export function ApprovalCard({ approval, projectId, onDecided }: { approval: any
       {payload.summary?.verdict === "NOT EXECUTED" && <NotExecutedCard payload={payload} />}
       <ConfidenceNote review={payload.confidence || payload.verification?.confidence} />
       {payload.case_limit && <p className="text-sm" data-testid="case-limit">{payload.case_limit.message}{payload.case_limit.left_out_count ? `: ${payload.case_limit.left_out.join(", ")}` : ""}</p>}
-      {payload.estimate && <p className="text-xs text-slate-600 dark:text-slate-400" data-testid="token-estimate">Tokens used so far {payload.estimate.used_so_far}. Next: {payload.estimate.next_step}. {payload.estimate.estimated_tokens === null ? payload.estimate.basis : `Estimate about ${payload.estimate.estimated_tokens} tokens (${payload.estimate.expected_calls} calls at ${payload.estimate.average_tokens_per_call}). ${payload.estimate.basis}.`}</p>}
+      {payload.estimate && (
+        <dl className="space-y-0.5 text-xs text-slate-600 dark:text-slate-400" data-testid="token-estimate">
+          <div><dt className="inline font-semibold">Used: </dt><dd className="inline">{payload.estimate.used_so_far} tokens so far.</dd></div>
+          <div><dt className="inline font-semibold">Next: </dt><dd className="inline">{payload.estimate.next_step}.</dd></div>
+          <div><dt className="inline font-semibold">Estimate: </dt><dd className="inline">{payload.estimate.estimated_tokens === null ? payload.estimate.basis : `about ${payload.estimate.estimated_tokens} tokens (${payload.estimate.expected_calls} calls at ${payload.estimate.average_tokens_per_call}). ${payload.estimate.basis}.`}</dd></div>
+        </dl>
+      )}
       {payload.emit_unresolved?.length > 0 && (
         <div role="alert" className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm max-h-64 overflow-y-auto space-y-2" data-testid="emit-unresolved">
           <b className="text-amber-900 dark:text-amber-200 block text-xs uppercase tracking-wider">
@@ -61,7 +68,7 @@ export function ApprovalCard({ approval, projectId, onDecided }: { approval: any
           </b>
           <div className="space-y-1">
             {payload.emit_unresolved.map((u: any, idx: number) => (
-              <div key={idx} className="font-mono text-[11px] text-slate-700 dark:text-slate-300 break-all bg-white/60 dark:bg-slate-900/60 p-2 rounded-lg border border-amber-200/60 dark:border-amber-900/40">
+              <div key={idx} className="font-mono text-xs text-slate-700 dark:text-slate-300 break-words bg-white/60 dark:bg-slate-900/60 p-2 rounded-lg border border-amber-200/60 dark:border-amber-900/40">
                 <span className="font-semibold text-amber-700 dark:text-amber-400">{cleanTestName(u.path)}</span>
                 {u.findings?.[0] && <span className="ml-1 text-slate-600 dark:text-slate-400">: {u.findings[0]}</span>}
               </div>
@@ -69,7 +76,7 @@ export function ApprovalCard({ approval, projectId, onDecided }: { approval: any
           </div>
         </div>
       )}
-      {payload.execution_summary && <p className="text-sm" data-testid="execution-summary">{payload.execution_summary.text} <span className="text-xs">({payload.execution_summary.source === "agent" ? "written by the qa-execution-engineer and checked against the JUnit counts" : "written by code"})</span></p>}
+      {payload.execution_summary && <p className="text-sm" data-testid="execution-summary">{payload.execution_summary.text} <span className="text-xs text-slate-500">({payload.execution_summary.source === "agent" ? "written by the qa-execution-engineer and checked against the JUnit counts" : "written by code"})</span></p>}
       {payload.defect_records?.length > 0 && (
         <div className="space-y-2 rounded-xl border border-slate-200 bg-white/80 p-3 shadow-sm dark:border-slate-800 dark:bg-[#070d1f]">
           <div className="flex items-center justify-between pb-1.5 border-b border-slate-100 dark:border-slate-800">
@@ -79,10 +86,10 @@ export function ApprovalCard({ approval, projectId, onDecided }: { approval: any
             <span className="text-[11px] text-slate-500">Deterministic code classification</span>
           </div>
           <div className="max-h-72 overflow-y-auto rounded-lg border border-slate-100 dark:border-slate-800/80">
-            <table className="w-full text-left text-xs table-fixed" data-testid="defect-records">
+            <table className="w-full min-w-[40rem] text-left text-xs" data-testid="defect-records">
               <thead className="sticky top-0 bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400">
                 <tr>
-                  <th className="p-2 w-48 font-semibold">Test Case</th>
+                  <th className="p-2 w-44 font-semibold">Test Case</th>
                   <th className="p-2 w-28 font-semibold">Classification</th>
                   <th className="p-2 min-w-[200px] font-semibold">Root Cause</th>
                   <th className="p-2 min-w-[200px] font-semibold">Recommended Fix</th>
@@ -91,16 +98,16 @@ export function ApprovalCard({ approval, projectId, onDecided }: { approval: any
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {payload.defect_records.map((r: any, idx: number) => (
                   <tr key={idx} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
-                    <td className="mono p-2 truncate font-medium text-slate-900 dark:text-slate-100" title={r.test}>
+                    <td className="mono p-2 break-all align-top font-medium text-slate-900 dark:text-slate-100" title={r.test}>
                       {cleanTestName(r.test)}
                     </td>
-                    <td className="p-2">
+                    <td className="p-2 align-top">
                       <Badge tone={r.classification === "application" ? "rose" : r.classification === "drift" ? "amber" : "slate"}>
-                        {r.classification}
+                        {classificationLabel(r.classification)}
                       </Badge>
                     </td>
-                    <td className="p-2 break-words text-slate-600 dark:text-slate-300">{r.cause}</td>
-                    <td className="p-2 break-words text-slate-600 dark:text-slate-300">{r.fix}</td>
+                    <td className="p-2 align-top break-words text-slate-600 dark:text-slate-300">{r.cause}</td>
+                    <td className="p-2 align-top break-words text-slate-600 dark:text-slate-300">{r.fix}</td>
                   </tr>
                 ))}
               </tbody>
@@ -112,6 +119,7 @@ export function ApprovalCard({ approval, projectId, onDecided }: { approval: any
       {payload.verification && (
         <div className="flex flex-wrap items-center gap-2 text-sm">
           Test verdict <Badge>{payload.verification.verdict}</Badge>
+          {VERDICTS[payload.verification.verdict] && <span className="text-xs text-slate-600 dark:text-slate-400">{VERDICTS[payload.verification.verdict]}</span>}
           {payload.verification.reason && <span className="text-xs">{payload.verification.reason}</span>}
           {payload.verification.suites?.map((s: any) => <span key={s.runner} className="mono text-xs">{s.runner}: {s.passed} passed, {s.failed} failed{s.reason ? ` (${s.reason})` : ""}</span>)}
           {!payload.verification.suites?.length && <span className="text-xs">No registered test runner found in this repository.</span>}
@@ -123,15 +131,16 @@ export function ApprovalCard({ approval, projectId, onDecided }: { approval: any
           <ul className="mono mt-1 text-xs">{payload.verification.changed_assertions.map((line: string, i: number) => <li key={i}>{line}</li>)}</ul>
         </div>
       )}
-      {payload.diff !== undefined && <pre className="mono max-h-96 overflow-auto rounded-lg bg-[#070d1f] p-3 text-xs text-slate-200">{payload.diff.split("\n").map((line: string, i: number) => <div key={i} className={line.startsWith("+") ? "text-emerald-400" : line.startsWith("-") ? "text-rose-400" : ""}>{line || " "}</div>)}</pre>}
+      {payload.diff !== undefined && <pre className="mono max-h-96 overflow-auto rounded-lg bg-[#070d1f] p-3 text-xs text-slate-200 whitespace-pre-wrap break-words" tabIndex={0} aria-label="Proposed changes">{payload.diff.split("\n").map((line: string, i: number) => <div key={i} className={`flex gap-2 ${line.startsWith("+") ? "text-emerald-400" : line.startsWith("-") ? "text-rose-400" : ""}`}><span aria-hidden className="w-8 shrink-0 select-none text-right text-slate-600">{i + 1}</span><span className="min-w-0">{line || " "}</span></div>)}</pre>}
       <div className="grid gap-3 md:grid-cols-2">
         <Field label="Signing as"><p className="py-2 text-sm font-semibold" data-testid="signing-as">{user.username}</p></Field>
-        <Field label={rejects.length ? `Reason (required: ${rejects.length} item${rejects.length > 1 ? "s are" : " is"} REJECT, and it is written to the ledger if you approve)` : "Feedback (required to send back)"}><input className={inputClass} data-testid="reject-reason" value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder={rejects.length ? "Why these can be accepted" : "What should change"} /></Field>
+        <Field label={rejects.length ? "Reason (required to approve)" : "Feedback (required to send back)"} hint={rejects.length ? `${rejects.length} item${rejects.length > 1 ? "s are" : " is"} marked REJECT. Your reason is written to the ledger if you approve.` : undefined}><input className={inputClass} data-testid="reject-reason" value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder={rejects.length ? "Why these can be accepted" : "What should change"} /></Field>
       </div>
       {payload.can_open_pr && <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={openPr} onChange={(e) => setOpenPr(e.target.checked)} /> Push the branch and open a pull request</label>}
       <ErrorNote message={error} />
       {!allowed && <p className="text-xs text-slate-500" data-testid="cannot-sign">Your role cannot {approval.gate == null ? "approve here" : `sign gate G${approval.gate}`}. Ask the project owner or an administrator.</p>}
-      <div className="flex gap-2">
+      {allowed && !payload.partial && <p className="text-xs text-slate-600 dark:text-slate-400" data-testid="decision-hint">{!feedback.trim() ? (rejects.length ? "Write a reason to approve or to send back." : "Write feedback to send this back. You can approve without it.") : "Ready to decide."}</p>}
+      <div className="flex flex-wrap gap-2">
         <Button variant="success" busy={busy} disabled={!!payload.partial || !allowed || (rejects.length > 0 && !feedback.trim())} onClick={() => decide(true)}>Approve</Button>
         <Button variant="danger" busy={busy} disabled={!feedback.trim() || !allowed} onClick={() => decide(false)}>Send back</Button>
       </div>

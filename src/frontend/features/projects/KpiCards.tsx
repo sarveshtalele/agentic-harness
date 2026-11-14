@@ -13,15 +13,15 @@ export function KpiCards({ repo, a, project, base, documents, approvedGates, tot
           <FolderGit2 className="h-4 w-4 text-indigo-500" />
         </div>
         <div className="mt-2 flex items-baseline gap-2">
-          <span className="text-2xl font-bold text-slate-900 dark:text-white">
-            {a.total_files ?? "—"}
-          </span>
-          <span className="text-xs text-slate-500 font-medium">total source files</span>
+          {repo ? <>
+            <span className="text-2xl font-bold text-slate-900 dark:text-white">{a.total_files ?? "Not analyzed"}</span>
+            <span className="text-xs text-slate-500 font-medium">total source files</span>
+          </> : <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">No repository connected</span>}
         </div>
         <div className="mt-2 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100 pt-2 dark:border-slate-800/80">
-          <span>Tests: <strong className="text-slate-800 dark:text-slate-200">{a.test_file_count ?? "—"}</strong></span>
+          <span>Tests: <strong className="text-slate-800 dark:text-slate-200">{repo ? (a.test_file_count ?? "Not analyzed") : "None"}</strong></span>
           <span className="rounded bg-indigo-50 px-1.5 py-0.5 font-mono text-[11px] text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400">
-            {repo ? (repo.commit_sha || "HEAD").slice(0, 7) : "greenfield"}
+            {repo ? (repo.commit_sha || "HEAD").slice(0, 7) : "Mode: greenfield"}
           </span>
         </div>
       </div>

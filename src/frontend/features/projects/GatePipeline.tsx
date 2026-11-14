@@ -6,13 +6,13 @@ import { Approver } from "../../components/Approver";
 export function GatePipeline({ gates, base }: { gates: any[]; base: string }) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-[#0b1329]">
-      <div className="flex items-center justify-between mb-4">
+      <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h3 className="text-sm font-bold text-slate-900 dark:text-white">Quality Engineering Gate Progression</h3>
           <p className="text-xs text-slate-500">Strict human-in-the-loop stage sign-offs enforce non-weakened assertions</p>
         </div>
         <Link href={`${base}/qe`} className="text-xs font-semibold text-indigo-600 hover:underline dark:text-indigo-400 flex items-center gap-1">
-          QE Studio <ArrowRight className="h-3.5 w-3.5" />
+          QE cycle <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       </div>
 
@@ -44,7 +44,7 @@ export function GatePipeline({ gates, base }: { gates: any[]; base: string }) {
                 <span className="block text-xs font-bold text-slate-800 dark:text-slate-200 line-clamp-1">
                   {g.name}
                 </span>
-                <span className="block text-[11px] text-slate-500 truncate mt-0.5">
+                <span className="block text-[11px] text-slate-600 dark:text-slate-400 truncate mt-0.5">
                   {g.decided_by ? <Approver item={g} /> : "Automated Review"}
                 </span>
               </div>

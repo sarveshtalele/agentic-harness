@@ -71,21 +71,22 @@ export function Chat({ projectId, standalone = false, defaultAgent = "project-co
   };
 
   return (
-    <div className={`grid gap-3 md:grid-cols-[250px_1fr] ${standalone ? "h-screen p-3" : "h-[calc(100vh-110px)]"}`}>
-      <div className="flex min-h-0 flex-col gap-2 rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-[#0b1329]">
+    <div className={`grid grid-rows-[auto_minmax(0,1fr)] gap-3 md:grid-cols-[250px_1fr] md:grid-rows-none ${standalone ? "h-screen p-3" : "h-[calc(100vh-110px)]"}`}>
+      <div className="flex max-h-72 min-h-0 flex-col gap-2 rounded-xl border border-slate-200 bg-white p-3 md:max-h-none dark:border-slate-800 dark:bg-[#0b1329]">
         <select key={agents.length} aria-label="Agent for new chat" className={inputClass} defaultValue={defaultAgent} id="new-agent">
           {agents.map((a) => <option key={a.key} value={a.key}>{a.name}</option>)}
         </select>
+        <p className="text-xs text-slate-600 dark:text-slate-400">The agent that answers. Each one reads this project&apos;s documents and code.</p>
         <Button onClick={() => create((document.getElementById("new-agent") as HTMLSelectElement).value)}><MessageSquarePlus className="h-4 w-4" /> New chat</Button>
         <ul className="min-h-0 flex-1 space-y-1 overflow-y-auto" aria-label="Saved chats">
           {threads.map((t) => (
             <li key={t.id} className={`group flex items-center gap-1 rounded-lg px-2 py-1.5 ${thread?.id === t.id ? "bg-indigo-600/15" : "hover:bg-slate-100 dark:hover:bg-slate-900"}`}>
               <button className="min-w-0 flex-1 text-left" onClick={() => open(t.id)}>
                 <span className="block truncate text-[13px] font-semibold">{t.title}</span>
-                <span className="block truncate text-[11px] text-slate-500">{agents.find((a) => a.key === t.agent)?.name} · {when(t.updated_at)}</span>
+                <span className="block truncate text-[11px] text-slate-600 dark:text-slate-400">{agents.find((a) => a.key === t.agent)?.name} · {when(t.updated_at)}</span>
               </button>
-              <button aria-label={`Rename ${t.title}`} onClick={() => rename(t)} className="text-slate-400 opacity-0 hover:text-indigo-500 group-hover:opacity-100"><Pencil className="h-3.5 w-3.5" /></button>
-              <button aria-label={`Delete ${t.title}`} onClick={() => remove(t.id)} className="text-slate-400 opacity-0 hover:text-rose-500 group-hover:opacity-100"><Trash2 className="h-3.5 w-3.5" /></button>
+              <button aria-label={`Rename ${t.title}`} onClick={() => rename(t)} className="text-slate-500 hover:text-indigo-500 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100"><Pencil className="h-3.5 w-3.5" /></button>
+              <button aria-label={`Delete ${t.title}`} onClick={() => remove(t.id)} className="text-slate-500 hover:text-rose-500 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100"><Trash2 className="h-3.5 w-3.5" /></button>
             </li>
           ))}
         </ul>

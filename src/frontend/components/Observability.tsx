@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Badge, Button, Card, Empty, ErrorNote, inputClass, Spinner } from "./ui";
 import { api, when } from "../lib/api";
+import { actionLabel } from "../lib/labels";
 
 const KINDS: [string, string][] = [["", "All"], ["skill", "Skills"], ["agent", "Agents"], ["tool", "Tools"], ["mcp", "MCP tools"], ["workflow", "Workflow steps"], ["approval", "Approvals"], ["guardrail", "Guardrails"], ["audit", "Audit ledger"]];
 const PAGE = 100;
@@ -14,10 +15,10 @@ function Entry({ item, showProject }: { item: any; showProject: boolean }) {
   const [open, setOpen] = useState(false);
   return (
     <li className="border-b border-slate-200 last:border-0 dark:border-slate-800" data-testid="log-entry" data-kind={item.kind}>
-      <button type="button" aria-expanded={open} onClick={() => setOpen(!open)} className="grid w-full grid-cols-[150px_90px_1fr] items-baseline gap-2 px-2 py-1.5 text-left text-xs hover:bg-slate-100 dark:hover:bg-slate-900">
-        <span className="text-slate-500">{when(item.ts)}</span>
+      <button type="button" aria-expanded={open} onClick={() => setOpen(!open)} className="grid w-full grid-cols-1 items-baseline gap-1 sm:grid-cols-[150px_90px_1fr] sm:gap-2 px-2 py-1.5 text-left text-xs hover:bg-slate-100 dark:hover:bg-slate-900">
+        <span className="text-slate-600 dark:text-slate-400">{when(item.ts)}</span>
         <span><Badge tone={tone[item.level]}>{item.kind}</Badge></span>
-        <span className="min-w-0 break-words"><b className="mono">{item.name}</b> <span className="text-slate-600 dark:text-slate-400">{item.message}</span>{showProject && item.project && <span className="text-slate-500"> · {item.project}</span>}</span>
+        <span className="min-w-0 break-words"><b className={item.kind === "audit" ? "" : "mono"} title={item.name}>{item.kind === "audit" ? actionLabel(item.name) : item.name}</b> <span className="text-slate-600 dark:text-slate-400">{item.message}</span>{showProject && item.project && <span className="text-slate-500"> · {item.project}</span>}</span>
       </button>
       {open && (
         <div className="space-y-1 px-2 pb-2 text-xs">
@@ -149,7 +150,7 @@ export function Observability({ projectId }: { projectId?: string }) {
       <Card>
         <div className="mb-3 flex flex-wrap items-center gap-2">
           {!projectId && (
-            <select aria-label="Project" className={`${inputClass} !w-48`} value={project} onChange={(e) => { setProject(e.target.value); setRun(""); }}>
+            <select aria-label="Project" className={`${inputClass} !w-full sm:!w-48`} value={project} onChange={(e) => { setProject(e.target.value); setRun(""); }}>
               <option value="">All projects</option>
               {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
             </select>
@@ -161,12 +162,12 @@ export function Observability({ projectId }: { projectId?: string }) {
           </div>
           {view === "log" && (
             <>
-              <select aria-label="Run" className={`${inputClass} !w-64`} value={run} onChange={(e) => setRun(e.target.value)}>
+              <select aria-label="Run" className={`${inputClass} !w-full sm:!w-64`} value={run} onChange={(e) => setRun(e.target.value)}>
                 <option value="">All runs</option>
                 {run && !data.runs.some((r: any) => r.id === run) && <option value={run}>{run}</option>}
                 {data.runs.map((r: any) => <option key={r.id} value={r.id}>{r.workflow} · {r.status} · {when(r.started_at)}{projectId ? "" : ` · ${r.project}`}</option>)}
               </select>
-              <input aria-label="Search the log" placeholder="Search names, messages, arguments" className={`${inputClass} !w-64`} value={text} onChange={(e) => setText(e.target.value)} />
+              <input aria-label="Search the log" placeholder="Search names, messages, arguments" className={`${inputClass} !w-full sm:!w-64`} value={text} onChange={(e) => setText(e.target.value)} />
               <label className="flex items-center gap-1.5 text-sm"><input type="checkbox" checked={live} onChange={(e) => setLive(e.target.checked)} /> Live</label>
               <Button variant="secondary" onClick={load}><RefreshCw className="h-4 w-4" /> Refresh</Button>
               <a className="ml-auto inline-flex items-center gap-1.5 text-sm text-indigo-500 underline" href={`/api/observability/export?${params()}`}><Download className="h-4 w-4" /> Download JSON</a>
@@ -174,9 +175,9 @@ export function Observability({ projectId }: { projectId?: string }) {
           )}
         </div>
         {view === "errors" ? <ErrorsView projectId={projectId || project} /> : <>
-        <div role="tablist" aria-label="Log type" className="mb-3 flex flex-wrap gap-1.5">
+        <div role="tablist" aria-label="Log type" className="mb-3 flex gap-1.5 overflow-x-auto pb-1 sm:flex-wrap">
           {KINDS.map(([id, label]) => (
-            <button key={id} type="button" role="tab" aria-selected={kind === id} onClick={() => setKind(id)} className={`rounded-md border px-2 py-1 text-xs font-semibold ${kind === id ? "border-indigo-500 bg-indigo-500/10 text-indigo-600 dark:text-indigo-300" : "border-slate-300 dark:border-slate-700"}`}>
+            <button key={id} type="button" role="tab" aria-selected={kind === id} onClick={() => setKind(id)} className={`shrink-0 whitespace-nowrap rounded-md border px-2 py-1 text-xs font-semibold ${kind === id ? "border-indigo-500 bg-indigo-500/10 text-indigo-600 dark:text-indigo-300" : "border-slate-300 dark:border-slate-700"}`}>
               {label}{id && ` ${data.counts[id]}`}
             </button>
           ))}

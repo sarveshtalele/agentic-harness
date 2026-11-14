@@ -3,7 +3,7 @@
 import { RefreshCw, Search } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../../components/AuthGate";
-import { Badge, Button, Empty, ErrorNote, inputClass, Spinner } from "../../components/ui";
+import { Badge, Button, Empty, ErrorNote, Field, inputClass, Spinner } from "../../components/ui";
 import { api, when } from "../../lib/api";
 import { duration, Run } from "./lib";
 
@@ -33,6 +33,7 @@ export function RunsTable({ onOpen }: { onOpen: (traceId: string) => void }) {
   const [projects, setProjects] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [error, setError] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
 
   const load = useCallback(() => {
     api(`/traces?${query(filters, offset)}`).then((found) => { setData(found); setError(""); }).catch((e) => setError(e.message));
@@ -43,23 +44,26 @@ export function RunsTable({ onOpen }: { onOpen: (traceId: string) => void }) {
 
   const set = (change: Partial<Filters>) => { setOffset(0); setFilters((current) => ({ ...current, ...change })); };
   const select = (key: keyof Filters, label: string, options: [string, string][]) => (
-    <select aria-label={label} className={inputClass} value={String(filters[key])} onChange={(e) => set({ [key]: e.target.value })}>
-      {options.map(([value, text]) => <option key={value} value={value}>{text}</option>)}
-    </select>
+    <Field label={label}>
+      <select aria-label={label} className={inputClass} value={String(filters[key])} onChange={(e) => set({ [key]: e.target.value })}>
+        {options.map(([value, text]) => <option key={value} value={value}>{text}</option>)}
+      </select>
+    </Field>
   );
 
   return (
     <div className="space-y-3">
       <p data-testid="trace-scope" className="text-xs font-semibold text-slate-500">{data ? (data.scope === "all" ? "All runs" : "You see your own runs") : ""}</p>
-      <div className="grid gap-2 md:grid-cols-4">
+      <Button variant="secondary" className="md:hidden" aria-expanded={showFilters} onClick={() => setShowFilters(!showFilters)}>{showFilters ? "Hide filters" : "Show filters"}</Button>
+      <div className={`${showFilters ? "grid" : "hidden"} gap-2 md:grid md:grid-cols-4`}>
         {select("project", "Project", [["", "All projects"], ...projects.map((p): [string, string] => [p.id, p.name])])}
         {admin && select("user", "User", [["", "All users"], ["admin", "Administrator"], ...users.map((u): [string, string] => [u.id, u.username])])}
-        <input aria-label="Agent" placeholder="Agent, e.g. qe-engineer" className={inputClass} value={filters.agent} onChange={(e) => set({ agent: e.target.value.trim() })} />
+        <Field label="Agent"><input aria-label="Agent" placeholder="e.g. qe-engineer" className={inputClass} value={filters.agent} onChange={(e) => set({ agent: e.target.value.trim() })} /></Field>
         {select("status", "Status", STATUSES)}
-        <input aria-label="From" type="datetime-local" className={inputClass} value={filters.from} onChange={(e) => set({ from: e.target.value })} />
-        <input aria-label="To" type="datetime-local" className={inputClass} value={filters.to} onChange={(e) => set({ to: e.target.value })} />
-        <form className="flex gap-2 md:col-span-2" onSubmit={(e) => { e.preventDefault(); set({ q: draft.trim() }); }}>
-          <input aria-label="Search runs" placeholder="Search span names and attributes" className={inputClass} value={draft} onChange={(e) => setDraft(e.target.value)} />
+        <Field label="From"><input aria-label="From" type="datetime-local" className={inputClass} value={filters.from} onChange={(e) => set({ from: e.target.value })} /></Field>
+        <Field label="To"><input aria-label="To" type="datetime-local" className={inputClass} value={filters.to} onChange={(e) => set({ to: e.target.value })} /></Field>
+        <form className="flex items-end gap-2 md:col-span-2" onSubmit={(e) => { e.preventDefault(); set({ q: draft.trim() }); }}>
+          <div className="min-w-0 flex-1"><Field label="Search"><input aria-label="Search runs" placeholder="Span names and attributes" className={inputClass} value={draft} onChange={(e) => setDraft(e.target.value)} /></Field></div>
           <Button type="submit" variant="secondary"><Search className="h-4 w-4" /> Search</Button>
         </form>
       </div>

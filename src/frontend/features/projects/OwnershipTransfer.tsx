@@ -7,7 +7,7 @@ export function OwnershipTransfer({ newOwner, setNewOwner, onTransfer }: { newOw
         Project Ownership Governance
       </span>
       <div className="mt-1.5 flex flex-wrap items-end gap-2">
-        <Field label="Transfer ownership to" hint="Admin only. Logged in audit ledger.">
+        <Field label="Transfer ownership to" hint="Admin only. Logged in the audit ledger. The current owner loses ownership.">
           <input
             name="transfer-username"
             autoComplete="off"
@@ -24,6 +24,7 @@ export function OwnershipTransfer({ newOwner, setNewOwner, onTransfer }: { newOw
         >
           Transfer Ownership
         </Button>
+        {!newOwner.trim() && <span className="text-xs text-slate-600 dark:text-slate-400">Enter a username to enable.</span>}
       </div>
     </div>
   );

@@ -17,7 +17,7 @@ export function ApprovalsList({ projectId, onChange }: { projectId?: string; onC
     return () => clearInterval(timer);
   }, [load]);
   if (!items) return <Spinner />;
-  if (!items.length) return <Empty title="Nothing needs your approval" />;
+  if (!items.length) return <Empty title="Nothing needs your approval">Gate decisions and send-backs appear here when a run reaches a gate.</Empty>;
   const groups = Object.values(items.reduce((all: Record<string, any>, a: any) => {
     (all[a.project_id] ||= { id: a.project_id, name: a.project_name, items: [] }).items.push(a);
     return all;
@@ -30,7 +30,7 @@ export function ApprovalsList({ projectId, onChange }: { projectId?: string; onC
           {!projectId && <h2 className="text-sm font-bold"><Link className="hover:underline" href={`/projects/${group.id}`}>{group.name}</Link></h2>}
           {group.items.map((a: any) => (
             <div key={a.id}>
-              <p className="mb-1 text-xs text-slate-500">{a.workflow} run · waiting since {when(a.created_at)} · <Link className="text-indigo-500 underline" href={`/projects/${a.project_id}/runs/${a.run_id}`}>open run</Link></p>
+              <p className="mb-1 text-xs text-slate-600 dark:text-slate-400">{a.workflow} run · waiting since {when(a.created_at)} · <Link className="text-indigo-500 underline" href={`/projects/${a.project_id}/runs/${a.run_id}`}>open run</Link></p>
               <ApprovalCard approval={a} projectId={a.project_id} onDecided={() => { toast("Decision recorded"); load(); onChange?.(); }} />
             </div>
           ))}

@@ -28,7 +28,7 @@ export function ModelProviderCard() {
     setTesting(false);
   };
   return (
-  <Card title="Model provider">
+  <Card title="Model provider" id="model-provider">
     <div className="space-y-3">
       <Field label="OpenAI-compatible base URL" hint="OpenAI, Azure OpenAI, LiteLLM, Ollama, or any compatible endpoint."><input name="base-url" className={inputClass} value={baseUrl} onChange={(e) => setBaseUrl(e.target.value)} placeholder="https://api.openai.com/v1" /></Field>
       <Field label="Fallback model" hint="Used only when no default is set in the Models list below."><input name="model" className={inputClass} value={model} onChange={(e) => setModel(e.target.value)} /></Field>

@@ -43,7 +43,7 @@ const navSections: ProjectNavSection[] = [
       { href: "/approvals", label: "Approvals", icon: CheckSquare },
       { href: "/governance", label: "Governance", icon: Lock },
       { href: "/runs", label: "Runs", icon: History },
-      { href: "/observability", label: "Logs", icon: Activity },
+      { href: "/observability", label: "Observability", icon: Activity },
       { href: "/prompts", label: "Prompts", icon: ScrollText },
     ],
   },
@@ -148,13 +148,13 @@ export function ProjectShell({ children }: { children: ReactNode }) {
         <header className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 bg-white/95 px-3 py-2 backdrop-blur md:px-5 dark:border-slate-800 dark:bg-[#060a17]/90">
           <div className="flex min-w-0 items-center gap-2">
             {menu.button}
-            <span className="font-semibold text-slate-800 dark:text-slate-200 text-sm">{project?.name || "Project"}</span>
-            <span className="hidden sm:inline rounded bg-slate-100 px-2 py-0.5 text-[11px] font-mono text-slate-500 dark:bg-slate-800 dark:text-slate-400">{id}</span>
+            <span className="truncate font-semibold text-slate-800 dark:text-slate-200 text-sm" title={project?.name}>{project?.name || "Project"}</span>
+            
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <Link href="/settings" className="flex items-center gap-1.5 rounded-lg border border-slate-300 px-2.5 py-1.5 text-[11px] font-semibold dark:border-slate-700">
-              <span className={`h-1.5 w-1.5 rounded-full ${llm?.configured ? "bg-emerald-500" : "bg-rose-500"}`} />
-              <span className="mono">{llm?.configured ? llm.model : "No model configured"}</span>
+              <span className={`h-1.5 w-1.5 rounded-full ${llm?.configured ? "bg-emerald-500" : "bg-amber-500"}`} />
+              <span className={llm?.configured ? "mono" : "text-slate-600 dark:text-slate-400"}>{llm?.configured ? llm.model : "No model configured"}</span>
             </Link>
             <UserMenu />
             <ThemeToggle />

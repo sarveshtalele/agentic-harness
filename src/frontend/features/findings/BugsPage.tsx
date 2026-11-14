@@ -30,8 +30,9 @@ export function BugsPage() {
   if (!project?.repo) {
     return (
       <Empty title="Bug Scan needs code">
-        <Link className="text-indigo-500 underline" href={`/projects/${project?.id || ""}/repository`}>
-          Connect a repository or upload a ZIP
+        <p className="mb-3">Connect a repository or upload a ZIP so the scan has code to read.</p>
+        <Link className="inline-flex items-center rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500" href={`/projects/${project?.id || ""}/repository`}>
+          Connect a repository
         </Link>
       </Empty>
     );

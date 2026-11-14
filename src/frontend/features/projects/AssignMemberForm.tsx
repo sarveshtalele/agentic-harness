@@ -53,6 +53,7 @@ export function AssignMemberForm({ projectId, run }: { projectId: string; run: (
         >
           <UserPlus className="h-4 w-4" /> Assign Policy
         </Button>
+        {!username.trim() && <span className="text-xs text-slate-600 dark:text-slate-400">Enter a username to enable.</span>}
       </div>
     </div>
   );

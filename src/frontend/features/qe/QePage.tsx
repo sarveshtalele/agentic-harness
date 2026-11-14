@@ -1,6 +1,5 @@
 "use client";
 
-import { Download } from "lucide-react";
 import { useState } from "react";
 import { useProject } from "../../components/ProjectShell";
 import { Button, Card, PageTitle } from "../../components/ui";
@@ -73,9 +72,8 @@ export function QePage() {
             />
           ) : (
             <Card title="Current run">
-              <p className="text-sm text-slate-500">
-                No QE cycle run selected. Choose "Start the QE cycle" above, or pick a run from Past runs.
-              </p>
+              <p className="text-sm text-slate-500">No run selected. Start the QE cycle, or pick a past run.</p>
+              <Button variant="secondary" className="mt-3" onClick={() => document.getElementById("stages-and-gates")?.scrollIntoView({ behavior: "smooth" })}>Go to Start</Button>
             </Card>
           )}
         </div>
