@@ -1,9 +1,7 @@
 name: Container image
-# Builds the Azure custom-container image and pushes it to GitHub Container Registry. Not triggered on main.
+# Not used: the owner chose App Service's built-in Python image without Docker (2026-11-14). Kept for a manual run only,
+# until the owner decides whether to remove it and deploy/azure/Dockerfile.
 on:
-  push:
-    branches: [feature/maf-harness-platform]
-    paths: ["deploy/azure/Dockerfile", "deploy/azure/container_start.py", "requirements.txt", "src/**", "prompts/**", "templates/**", "skills/**", "evals/**", ".dockerignore", ".github/workflows/container.yml"]
   workflow_dispatch:
 concurrency:
   group: container-${{ github.ref }}
