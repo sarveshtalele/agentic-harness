@@ -1,5 +1,5 @@
 """REST API, one router per area."""
-from backend.api import atlassian, auth, capabilities, chat, documents, features, findings, governance, logs, observability, plugins, projects, qe_trace, repository, runs, settings, skill_studio, skills, templates, traces, mcp
+from backend.api import atlassian, auth, capabilities, chat, documents, features, findings, governance, logs, observability, plugins, projects, qe_trace, repository, run_tests, runs, settings, skill_studio, skills, templates, traces, mcp
 
 ROUTERS = [
     atlassian.router,
@@ -16,6 +16,7 @@ ROUTERS = [
     projects.router,
     qe_trace.router,
     repository.router,
+    run_tests.router,
     runs.router,
     settings.router,
     skill_studio.router,

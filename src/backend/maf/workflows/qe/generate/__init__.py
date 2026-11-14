@@ -10,6 +10,7 @@ from backend.maf.workflows.qe.generate.env import load_env, prepare_worktree
 from backend.maf.workflows.qe.generate.files import GeneratedFile, GeneratedSuite, _clean_code, _generated_file_problems
 from backend.maf.workflows.qe.generate.repair import quarantine_syntax, repair_static, write_suite
 from backend.maf.workflows.qe.generate.review import review_and_save
+from backend.maf.workflows.qe.generate.validate import finish, validate
 
 
 async def qe_generate(rc: RunContext, state: dict) -> dict:
@@ -23,7 +24,9 @@ async def qe_generate(rc: RunContext, state: dict) -> dict:
     unresolved = await repair_static(env, suite, case_of)
     quarantine_syntax(suite, unresolved)
     write_suite(env, suite, unresolved)
-    return await review_and_save(env, suite, unresolved, case_of, call, missing, partial)
+    checked = await validate(env, suite, case_of)
+    update = await review_and_save(env, suite, unresolved, case_of, call, missing, partial)
+    return update | {"validation": await finish(env, suite, case_of, checked)}
 
 
 __all__ = ["GeneratedFile", "GeneratedSuite", "_clean_code", "_generated_file_problems", "qe_generate"]

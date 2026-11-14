@@ -22,7 +22,7 @@ from backend.maf.workflows.qe.requirements import qe_requirements
 from backend.maf.workflows.qe.sign import qe_sign
 from backend.maf.workflows.qe.trace import qe_trace
 from backend.maf.workflows.shared import intake, intake_gate
-from backend.qe import carry, confidence
+from backend.qe import carry, confidence, validity
 
 
 async def qe_intake(rc: RunContext, state: dict) -> dict:
@@ -61,7 +61,7 @@ def qe_definition() -> Definition:
         StageSpec("plan", qe_plan, "Test plan", guard=carry, approval=_doc_gate(2, "test plan", "plan_doc", lambda s: f"Deterministic score {s['plan_score']['score']}, independent review {s['plan_review']['score'] if s['plan_review']['score'] is not None else 'not run'} ({s['plan_review']['verdict']}). {_plugin_line(s.get('plan_plugin_check'), 2)}", "plan_review", lambda rc, s: {"plugin_check": s.get("plan_plugin_check")}), on_rejected="plan", next="design"),
         StageSpec("design", qe_design, "Test design", guard=carry, next="data"),
         StageSpec("data", qe_data, "Test data", guard=carry, approval=_doc_gate(3, "test design and data", "cases_doc", lambda s: f"{len(s['cases'])} cases. {s['case_limit']['message']}. Remaining gaps: {s['design_gaps'] or 'none'}. {_plugin_line(s.get('design_plugin_check'), 3)}", "cases_review", lambda rc, s: _gate3_extras(rc, s) | {"plugin_check": s.get("design_plugin_check"), "design_audit": s.get("design_audit")}), on_rejected="design", next="generate"),
-        StageSpec("generate", qe_generate, "Generate tests", guard=carry, approval=_doc_gate(4, "generated tests", "test_doc", lambda s: f"{len(s['tests'])} of {len(s['cases'])} cases have tests, on branch {s['branch']}. Approving also allows them to run on this machine.{_deps_line(s)}", "tests_review", _gate4_extras), on_approved=qe_commit, on_rejected="generate", next="prepare"),
+        StageSpec("generate", qe_generate, "Generate tests", guard=carry, approval=_doc_gate(4, "generated tests", "test_doc", lambda s: f"{len(s['tests'])} of {len(s['cases'])} cases have tests, on branch {s['branch']}. {validity.line(s.get('validation'))} Approving also allows them to run on this machine.{_deps_line(s)}", "tests_review", _gate4_extras), on_approved=qe_commit, on_rejected="generate", next="prepare"),
         StageSpec("prepare", qe_prepare, "Prepare environment", guard=carry, next="execute"),
         StageSpec("execute", qe_execute, "Execute", guard=carry),
         StageSpec("heal", qe_heal, "Heal test drift", guard=carry),

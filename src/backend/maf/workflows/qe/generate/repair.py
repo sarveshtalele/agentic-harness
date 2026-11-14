@@ -13,20 +13,21 @@ from backend.maf.workflows.qe.generate.files import GeneratedFile, GeneratedSuit
 from backend.qe import emit, execution
 
 
-async def repair_static(env: Env, suite: GeneratedSuite, case_of: dict) -> list[dict]:
+async def repair_static(env: Env, suite: GeneratedSuite, case_of: dict, check=None, label: str = "static checks") -> list[dict]:
+    """Sends each flagged file back to the author once. `check` (default: the static checks) returns a file's problems."""
     rc, worktree, known, files_of, notes, async_ok = env.rc, env.worktree, env.known, env.files_of, env.notes, env.async_ok
-    static_findings = env.static_findings
+    static_findings = check or env.static_findings
     unresolved: list[dict] = []
     flagged = {i: found for i, item in enumerate(suite.files) if (found := static_findings(item))}
     if flagged:
-        rc.log(f"{len(flagged)} generated tests failed the static checks. Each goes back alone, once", {"findings": {suite.files[i].path: found[:5] for i, found in flagged.items()}}, "warning")
+        rc.log(f"{len(flagged)} generated tests failed the {label}. Each goes back alone, once", {"findings": {suite.files[i].path: found[:5] for i, found in flagged.items()}}, "warning")
 
     async def send_back(i: int, found: list[str]) -> GeneratedFile:
         old = suite.files[i]
         case = case_of.get(old.case_ids[0], {})
         under_test = files_of.get(case.get("requirement_id"))
         again = AgentCall(rc.run_id, rc.project_id, "test-automation-engineer")
-        result = await again.typed(f"Rewrite only this generated test file and fix every problem the static checks found. Send a suite with exactly this one file, with the same path and case id.\nCASE:\n{json.dumps(case)}\n"
+        result = await again.typed(f"Rewrite only this generated test file and fix every problem the {label} found. Send a suite with exactly this one file, with the same path and case id.\nCASE:\n{json.dumps(case)}\n"
                                    f"CURRENT FILE {old.path}:\n{old.content}\nPROBLEMS, each with the real signature:\n" + "\n".join(found[:20]) + f"\n{notes}\n{emit.signatures(worktree, [under_test] if under_test else [])}", GeneratedSuite, attempts=2)
         new = next((f for f in result.files if f.path == old.path and f.case_ids == old.case_ids), None)
         if new is None:

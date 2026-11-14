@@ -97,7 +97,7 @@ def _gate3_extras(rc: RunContext, state: dict) -> dict:
 
 
 def _gate4_extras(rc: RunContext, state: dict) -> dict:
-    return {"emit_unresolved": state.get("emit_unresolved", []), "estimate": token_estimate(rc.run_id, None, 4, "execution summary, up to two repair attempts, and the release review",
+    return {"emit_unresolved": state.get("emit_unresolved", []), "validation": state.get("validation"), "estimate": token_estimate(rc.run_id, None, 4, "execution summary, up to two repair attempts, and the release review",
                                                                                           "upper bound: the average of every model call this run has recorded, times four calls")}
 
 

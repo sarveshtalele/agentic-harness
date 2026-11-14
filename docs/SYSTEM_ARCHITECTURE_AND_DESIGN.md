@@ -1227,6 +1227,19 @@ In accordance with the repository documentation policy (**1 Single Doc for Each 
 - **After a stage:** carried exactly (upstream hashes unchanged), complete (every upstream id covered, or excused by the stage's own reason fields: case budget, partial result, `tests_missing`), no invention (references only existing ids). A violation reruns the stage once with the list in `state["feedback"]`; a second violation fails the stage.
 - Each check goes to the ledger (`trace.check`, with counts and per-kind hashes). The report is `state["trace"]["last"]`, shown in every QE gate card payload (`trace`) and as one summary sentence.
 
+## 24. Validity checks (QE v2 step 1, 2026-11-14)
+
+Code, not a model, checks every generated test at the end of Generate, before Gate 4 (`qe/validity/`, `generate/validate.py`). A test is valid only when all four pass.
+
+| Check | What | Where |
+|---|---|---|
+| V3 | The file parses, then `pytest --collect-only -q` (Python), `node --check` (JS) or `tsc --noEmit` (TS) runs in the run's own environment: the `.venv` beside the worktree that Install dependencies makes, never the platform's packages. With no such environment V3 is `NOT CHECKED`, the test is not valid, and the message says to start the run with Install dependencies on. A syntax error fails without it | `validity/collect.py` |
+| V4 | Imports resolve and called symbols exist: `emit.check`, plus the import and own-subject checks that generation already ran | `validity/__init__.py` |
+| V5 | AST: each test function has a real assertion (`assert`, `pytest.raises`, `expect`); no `assert True`, `assert x == x`, skip or xfail; one literal of the case's expected result appears in an assertion | `validity/assertions.py` |
+| V6 | The file carries `CASE_ID: <id>` and the id is a case of the run. The plugin's `05-generation/manifest.json` is written and `check-gate --gate 4` is run; its verdict is recorded, and its code-review and code-audit gaps do not fail a test until step 3 | `generate/validate.py` |
+
+A failing file goes back to the test-automation-engineer once through `repair_static` with a message saying what, where and how to fix; it is re-checked, and what still fails is invalid. After the independent review, any file it rewrote is checked again. The result is `state["validation"]` (per test `{path, case_id, checks, valid}`, counts, valid and invalid lists, plugin check), shown on the Gate 4 card as one sentence plus `payload.validation`. `GET /api/runs/{id}/tests.zip` (owned by the `/api/runs/<id>` rule) returns `tests/`, `needs-review/`, `VALIDATION.md` and the plugin's `coverage-map.md`; the run state, and so the zip, exists once Gate 4 is approved. Limits: V5's expected-result rule needs a literal (number, quoted text, exception name, true/false/none) to compare; TypeScript is checked one file at a time without `tsconfig.json`; nothing here runs a test body.
+
 ## QE Cycle on the agentic-qe plugin
 
 The platform's QE workflow (`maf/workflows/qe/`) keeps the frame: stages, gates G0 to G5 signed by a named person,
