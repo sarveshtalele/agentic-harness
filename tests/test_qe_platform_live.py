@@ -52,7 +52,7 @@ def test_qe_cycle_to_gate5_on_a_real_repository(client):
             approval = pending(run)
             entry = {"gate": approval["gate"], "seconds": round(time.time() - mark, 1), "title": approval["title"],
                      "summary": approval["summary"], "plugin_check": approval["payload"].get("plugin_check"),
-                     "design_audit": approval["payload"].get("design_audit"),
+                     "design_audit": approval["payload"].get("design_audit"), "trace": approval["payload"].get("trace"),
                      **({k: approval["payload"].get(k) for k in ("defect_records", "execution_summary", "failure_classes")} if approval["gate"] == 5 else {})}
             record["gates"].append(entry)
             decided = client.post(f"/api/approvals/{approval['id']}/decide", json={"approved": True})

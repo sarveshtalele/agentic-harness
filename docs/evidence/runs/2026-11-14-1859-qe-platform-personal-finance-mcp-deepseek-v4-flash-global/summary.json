@@ -1,0 +1,2163 @@
+{
+ "repo": "https://github.com/sarveshtalele/personal-finance-mcp.git",
+ "model": "deepseek-v4-flash-global",
+ "run_id": "run_06c2d92c54fc",
+ "gates": [
+  {
+   "gate": 0,
+   "seconds": 0.0,
+   "title": "Gate 0: confirm intake scope",
+   "summary": "Mode: brownfield. Source: git https://github.com/sarveshtalele/personal-finance-mcp.git at aff44ea06f. Files: 88. Languages: Python, JavaScript, CSS. Agents read this project's repository and documents only. Generated code lands on a separate branch.",
+   "plugin_check": null,
+   "design_audit": null,
+   "trace": null
+  },
+  {
+   "gate": 1,
+   "seconds": 55.3,
+   "title": "Gate 1: approve requirements",
+   "summary": "22 requirements with verified evidence. agentic-qe Gate 1 check: PASS. Trace: 0 upstream items carried 0, 0 changed, 0 dropped with reason, 0 dropped without reason, 0 new. Tokens: 108,776 used of 50,000,000, 49,891,224 left.",
+   "plugin_check": {
+    "ok": true,
+    "gaps": [],
+    "missing": [],
+    "validator": {
+     "validator": "1.6.0",
+     "gate": 1,
+     "ok": true,
+     "errors": [],
+     "warnings": [],
+     "metrics": {
+      "requirements": 22,
+      "scenarios": 0,
+      "cases": 0,
+      "test_files": 0,
+      "results": 0,
+      "repo_test_files": 11,
+      "repo_tests": 137,
+      "existing": 11,
+      "generated": 0,
+      "manual": 0
+     },
+     "suspects": [],
+     "duplicates": [],
+     "brief": "Gate 1 validation: PASS (0 errors, 0 warnings)."
+    },
+    "error": null,
+    "app": "prj_d8d6132034a1",
+    "dropped": [
+     "REQ-004"
+    ]
+   },
+   "design_audit": null,
+   "trace": {
+    "stage": "requirements",
+    "upstream": 0,
+    "carried": 0,
+    "changed": 0,
+    "dropped_with_reason": 0,
+    "dropped_without_reason": 0,
+    "new": 0,
+    "verdict": "PASS"
+   }
+  },
+  {
+   "gate": 2,
+   "seconds": 17.8,
+   "title": "Gate 2: approve test plan",
+   "summary": "Deterministic score 100, independent review 85 (REVISE). agentic-qe Gate 2 check: PASS. Trace: 22 upstream items carried 22, 0 changed, 0 dropped with reason, 0 dropped without reason, 24 new. Tokens: 129,264 used of 50,000,000, 49,870,736 left.",
+   "plugin_check": {
+    "ok": true,
+    "gaps": [],
+    "missing": [],
+    "validator": {
+     "validator": "1.6.0",
+     "gate": 2,
+     "ok": true,
+     "errors": [],
+     "warnings": [],
+     "metrics": {
+      "requirements": 22,
+      "scenarios": 24,
+      "cases": 0,
+      "test_files": 0,
+      "results": 0,
+      "repo_test_files": 11,
+      "repo_tests": 137,
+      "existing": 11,
+      "generated": 0,
+      "manual": 0,
+      "plan_by_area_level": {
+       "CORS allows cross-origin requests": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator - invalid JSON body returns 400": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator - invalid calculator inputs (ValueError etc.)": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator - invalid sanitized parameters (boundary/security)": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Calculator - successful run returns result": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator - unexpected exception does not leak internals": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "FX endpoint - invalid currency code validation": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Health endpoint (Integration - HTTP response)": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Health endpoint (Unit - no I/O, logic only)": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "List tools endpoint": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "NAV endpoint - empty/too long query validation": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "NAV endpoint - invalid scheme code validation": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "NAV endpoint - valid code or search query": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Production server CLI overrides for host/port (Integration - subprocess with args)": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Production server runs SSE transport (Integration - can be tested by running as subprocess)": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Quote endpoint - invalid symbol validation": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Rate limiter returns 429 when limit exceeded": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Sanitize params - capped parameter exceeded (Unit)": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Sanitize params - non-finite numeric values (Unit)": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Sanitize params - numeric out of range (Unit)": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Sanitize params - string too long (Unit)": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Sanitize params rejects invalid parameters (Integration - API call with invalid params)": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Security headers added to every response": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Security middleware - oversized request body returns 413": {
+        "Integration": 1,
+        "Unit": 0
+       }
+      }
+     },
+     "suspects": [],
+     "duplicates": [],
+     "brief": "Gate 2 validation: PASS (0 errors, 0 warnings)."
+    },
+    "error": null,
+    "app": "prj_d8d6132034a1"
+   },
+   "design_audit": null,
+   "trace": {
+    "stage": "plan",
+    "upstream": 22,
+    "carried": 22,
+    "changed": 0,
+    "dropped_with_reason": 0,
+    "dropped_without_reason": 0,
+    "new": 24,
+    "verdict": "PASS"
+   }
+  },
+  {
+   "gate": 3,
+   "seconds": 150.7,
+   "title": "Gate 3: approve test design and data",
+   "summary": "80 cases. Case budget 80 of 40 (ATLAS_MAX_CASES), decided before design; P0 and P1 need more than the limit, so the limit is exceeded for them; 2 lower-priority requirements get no cases: REQ-017, REQ-019. Remaining gaps: ['REQ-007: no Exception case, and the requirement states error behaviour']. agentic-qe Gate 3 check: FAIL (plan scenarios with no designed case (22 of 24 designed): SC-AREA-017-001, SC-AREA-023-001; cases the coverage auditor says do not cover their scenario: TC-APP-002 (PARTIAL), TC-APP-012 (MISSES), TC-APP-015 (PARTIAL), TC-APP-016 (PARTIAL), TC-APP-019 (PARTIAL), TC-APP-021 (PARTIAL), TC-APP-028 (PARTIAL), TC-APP-029 (MISSES), TC-APP-033 (PARTIAL), TC-APP-037 (PARTIAL), TC-APP-038 (MISSES), TC-APP-041 (MISSES), TC-APP-045 (MISSES), TC-APP-049 (MISSES), TC-APP-053 (MISSES), TC-APP-057 (MISSES), TC-APP-062 (MISSES), TC-APP-063 (MISSES), TC-APP-064 (MISSES), TC-APP-065 (PARTIAL), TC-APP-069 (MISSES), TC-APP-072 (PARTIAL), TC-APP-073 (PARTIAL), TC-APP-076 (PARTIAL), TC-APP-077 (PARTIAL) and 1 more). Trace: 126 upstream items carried 126, 0 changed, 0 dropped with reason, 0 dropped without reason, 0 new. Tokens: 437,081 used of 50,000,000, 49,562,919 left.",
+   "plugin_check": {
+    "ok": false,
+    "gaps": [
+     "plan scenarios with no designed case (22 of 24 designed): SC-AREA-017-001, SC-AREA-023-001",
+     "cases the coverage auditor says do not cover their scenario: TC-APP-002 (PARTIAL), TC-APP-012 (MISSES), TC-APP-015 (PARTIAL), TC-APP-016 (PARTIAL), TC-APP-019 (PARTIAL), TC-APP-021 (PARTIAL), TC-APP-028 (PARTIAL), TC-APP-029 (MISSES), TC-APP-033 (PARTIAL), TC-APP-037 (PARTIAL), TC-APP-038 (MISSES), TC-APP-041 (MISSES), TC-APP-045 (MISSES), TC-APP-049 (MISSES), TC-APP-053 (MISSES), TC-APP-057 (MISSES), TC-APP-062 (MISSES), TC-APP-063 (MISSES), TC-APP-064 (MISSES), TC-APP-065 (PARTIAL), TC-APP-069 (MISSES), TC-APP-072 (PARTIAL), TC-APP-073 (PARTIAL), TC-APP-076 (PARTIAL), TC-APP-077 (PARTIAL) and 1 more"
+    ],
+    "missing": [
+     "SC-AREA-017-001",
+     "SC-AREA-023-001",
+     "TC-APP-002 (PARTIAL)",
+     "TC-APP-012 (MISSES)",
+     "TC-APP-015 (PARTIAL)",
+     "TC-APP-016 (PARTIAL)",
+     "TC-APP-019 (PARTIAL)",
+     "TC-APP-021 (PARTIAL)",
+     "TC-APP-028 (PARTIAL)",
+     "TC-APP-029 (MISSES)",
+     "TC-APP-033 (PARTIAL)",
+     "TC-APP-037 (PARTIAL)",
+     "TC-APP-038 (MISSES)",
+     "TC-APP-041 (MISSES)",
+     "TC-APP-045 (MISSES)",
+     "TC-APP-049 (MISSES)",
+     "TC-APP-053 (MISSES)",
+     "TC-APP-057 (MISSES)",
+     "TC-APP-062 (MISSES)",
+     "TC-APP-063 (MISSES)",
+     "TC-APP-064 (MISSES)",
+     "TC-APP-065 (PARTIAL)",
+     "TC-APP-069 (MISSES)",
+     "TC-APP-072 (PARTIAL)",
+     "TC-APP-073 (PARTIAL)",
+     "TC-APP-076 (PARTIAL)",
+     "TC-APP-077 (PARTIAL)",
+     "TC-APP-079 (PARTIAL)"
+    ],
+    "validator": {
+     "validator": "1.6.0",
+     "gate": 3,
+     "ok": false,
+     "errors": [
+      {
+       "check": "design.coverage",
+       "message": "plan scenarios with no designed case (22 of 24 designed)",
+       "ids": [
+        "SC-AREA-017-001",
+        "SC-AREA-023-001"
+       ]
+      },
+      {
+       "check": "design.areas",
+       "message": "plan areas with no designed case at all",
+       "ids": [
+        "CORS allows cross-origin requests",
+        "Production server CLI overrides for host/port (Integration - subprocess with args)"
+       ]
+      },
+      {
+       "check": "design.suspects",
+       "message": "cases that do not read like their scenario and no auditor verdict COVERS them",
+       "ids": [
+        "TC-APP-041",
+        "TC-APP-069",
+        "TC-APP-072..TC-APP-073",
+        "TC-APP-076..TC-APP-077",
+        "TC-APP-079"
+       ]
+      }
+     ],
+     "warnings": [
+      {
+       "check": "design.duplicates",
+       "message": "3 groups of near-identical cases",
+       "ids": [
+        "TC-APP-029",
+        "TC-APP-033",
+        "TC-APP-037",
+        "TC-APP-041",
+        "TC-APP-066",
+        "TC-APP-068",
+        "TC-APP-073",
+        "TC-APP-076"
+       ]
+      }
+     ],
+     "metrics": {
+      "requirements": 22,
+      "scenarios": 24,
+      "cases": 80,
+      "test_files": 0,
+      "results": 0,
+      "repo_test_files": 11,
+      "repo_tests": 137,
+      "existing": 11,
+      "generated": 0,
+      "manual": 0,
+      "plan_by_area_level": {
+       "CORS allows cross-origin requests": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator - invalid JSON body returns 400": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator - invalid calculator inputs (ValueError etc.)": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator - invalid sanitized parameters (boundary/security)": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Calculator - successful run returns result": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator - unexpected exception does not leak internals": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "FX endpoint - invalid currency code validation": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Health endpoint (Integration - HTTP response)": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Health endpoint (Unit - no I/O, logic only)": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "List tools endpoint": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "NAV endpoint - empty/too long query validation": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "NAV endpoint - invalid scheme code validation": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "NAV endpoint - valid code or search query": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Production server CLI overrides for host/port (Integration - subprocess with args)": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Production server runs SSE transport (Integration - can be tested by running as subprocess)": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Quote endpoint - invalid symbol validation": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Rate limiter returns 429 when limit exceeded": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Sanitize params - capped parameter exceeded (Unit)": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Sanitize params - non-finite numeric values (Unit)": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Sanitize params - numeric out of range (Unit)": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Sanitize params - string too long (Unit)": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Sanitize params rejects invalid parameters (Integration - API call with invalid params)": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Security headers added to every response": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Security middleware - oversized request body returns 413": {
+        "Integration": 1,
+        "Unit": 0
+       }
+      },
+      "design_coverage_by_area": {
+       "CORS allows cross-origin requests": 0,
+       "Calculator - invalid JSON body returns 400": 100,
+       "Calculator - invalid calculator inputs (ValueError etc.)": 100,
+       "Calculator - invalid sanitized parameters (boundary/security)": 100,
+       "Calculator - successful run returns result": 100,
+       "Calculator - unexpected exception does not leak internals": 100,
+       "FX endpoint - invalid currency code validation": 100,
+       "Health endpoint (Integration - HTTP response)": 100,
+       "Health endpoint (Unit - no I/O, logic only)": 100,
+       "List tools endpoint": 100,
+       "NAV endpoint - empty/too long query validation": 100,
+       "NAV endpoint - invalid scheme code validation": 100,
+       "NAV endpoint - valid code or search query": 100,
+       "Production server CLI overrides for host/port (Integration - subprocess with args)": 0,
+       "Production server runs SSE transport (Integration - can be tested by running as subprocess)": 100,
+       "Quote endpoint - invalid symbol validation": 100,
+       "Rate limiter returns 429 when limit exceeded": 100,
+       "Sanitize params - capped parameter exceeded (Unit)": 100,
+       "Sanitize params - non-finite numeric values (Unit)": 100,
+       "Sanitize params - numeric out of range (Unit)": 100,
+       "Sanitize params - string too long (Unit)": 100,
+       "Sanitize params rejects invalid parameters (Integration - API call with invalid params)": 100,
+       "Security headers added to every response": 100,
+       "Security middleware - oversized request body returns 413": 100
+      },
+      "cases_per_scenario": {
+       "mean": 4.36
+      },
+      "similarity_median": 0.261
+     },
+     "suspects": [
+      {
+       "case": "TC-APP-041",
+       "scenario": "SC-AREA-007-001",
+       "similarity": 0.03,
+       "audit": "MISSES"
+      },
+      {
+       "case": "TC-APP-044",
+       "scenario": "SC-AREA-007-001",
+       "similarity": 0.022,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-066",
+       "scenario": "SC-AREA-005-001",
+       "similarity": 0,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-067",
+       "scenario": "SC-AREA-005-001",
+       "similarity": 0,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-068",
+       "scenario": "SC-AREA-005-001",
+       "similarity": 0,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-069",
+       "scenario": "SC-AREA-005-001",
+       "similarity": 0.075,
+       "audit": "MISSES"
+      },
+      {
+       "case": "TC-APP-070",
+       "scenario": "SC-AREA-005-001",
+       "similarity": 0,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-071",
+       "scenario": "SC-AREA-005-001",
+       "similarity": 0,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-072",
+       "scenario": "SC-AREA-005-001",
+       "similarity": 0.063,
+       "audit": "PARTIAL"
+      },
+      {
+       "case": "TC-APP-073",
+       "scenario": "SC-AREA-005-001",
+       "similarity": 0.044,
+       "audit": "PARTIAL"
+      },
+      {
+       "case": "TC-APP-074",
+       "scenario": "SC-AREA-005-001",
+       "similarity": 0,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-075",
+       "scenario": "SC-AREA-005-001",
+       "similarity": 0,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-076",
+       "scenario": "SC-AREA-005-001",
+       "similarity": 0.042,
+       "audit": "PARTIAL"
+      },
+      {
+       "case": "TC-APP-077",
+       "scenario": "SC-AREA-005-001",
+       "similarity": 0.048,
+       "audit": "PARTIAL"
+      },
+      {
+       "case": "TC-APP-078",
+       "scenario": "SC-AREA-005-001",
+       "similarity": 0,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-079",
+       "scenario": "SC-AREA-005-001",
+       "similarity": 0.061,
+       "audit": "PARTIAL"
+      },
+      {
+       "case": "TC-APP-080",
+       "scenario": "SC-AREA-005-001",
+       "similarity": 0,
+       "audit": "COVERS"
+      }
+     ],
+     "duplicates": [
+      [
+       "TC-APP-029",
+       "TC-APP-033",
+       "TC-APP-037",
+       "TC-APP-041"
+      ],
+      [
+       "TC-APP-066",
+       "TC-APP-068"
+      ],
+      [
+       "TC-APP-073",
+       "TC-APP-076"
+      ]
+     ],
+     "brief": "Gate 3 validation: FAIL (3 errors, 1 warnings).\n- plan scenarios with no designed case (22 of 24 designed): SC-AREA-017-001, SC-AREA-023-001\n- plan areas with no designed case at all: CORS allows cross-origin requests, Production server CLI overrides for host/port (Integration - subprocess with args)\n- cases that do not read like their scenario and no auditor verdict COVERS them: TC-APP-041, TC-APP-069, TC-APP-072..TC-APP-073, TC-APP-076..TC-APP-077, TC-APP-079\nAudit these case/scenario pairs first (low similarity): TC-APP-041, TC-APP-044, TC-APP-066, TC-APP-067, TC-APP-068, TC-APP-069, TC-APP-070, TC-APP-071, TC-APP-072, TC-APP-073, TC-APP-074, TC-APP-075, TC-APP-076, TC-APP-077, TC-APP-078, TC-APP-079, TC-APP-080"
+    },
+    "error": null
+   },
+   "design_audit": {
+    "app": "prj_d8d6132034a1",
+    "reviewed": 80,
+    "audited": 80,
+    "counts": {
+     "COVERS": 54,
+     "PARTIAL": 14,
+     "MISSES": 12
+    },
+    "unaudited": []
+   },
+   "trace": {
+    "stage": "data",
+    "upstream": 126,
+    "carried": 126,
+    "changed": 0,
+    "dropped_with_reason": 0,
+    "dropped_without_reason": 0,
+    "new": 0,
+    "verdict": "PASS"
+   },
+   "refused": "These items were judged REJECT: TC-APP-077. Approving them needs a reason, and this one has 0 characters, fewer than 10. Write it in the reason field.",
+   "sent_back": true
+  },
+  {
+   "gate": 3,
+   "seconds": 126.6,
+   "title": "Gate 3: approve test design and data",
+   "summary": "80 cases. Case budget 80 of 40 (ATLAS_MAX_CASES), decided before design; P0 and P1 need more than the limit, so the limit is exceeded for them; 2 lower-priority requirements get no cases: REQ-017, REQ-019; 2 excess cases dropped before review. Remaining gaps: ['REQ-011: needs 2 Negative cases', 'REQ-012: needs 2 Negative cases', 'REQ-013: needs 2 Negative cases', 'REQ-020: needs 2 Negative cases', 'REQ-021: needs 2 Negative cases', 'REQ-022: needs 2 Negative cases', 'REQ-023: needs 2 Negative cases']. agentic-qe Gate 3 check: FAIL (plan scenarios with no designed case (22 of 24 designed): SC-AREA-017-001, SC-AREA-023-001; cases the coverage auditor says do not cover their scenario: TC-APP-011 (PARTIAL), TC-APP-015 (PARTIAL), TC-APP-016 (PARTIAL), TC-APP-018 (MISSES), TC-APP-019 (MISSES), TC-APP-022 (PARTIAL), TC-APP-023 (MISSES), TC-APP-026 (MISSES), TC-APP-027 (MISSES), TC-APP-028 (MISSES), TC-APP-029 (MISSES), TC-APP-030 (MISSES), TC-APP-031 (PARTIAL), TC-APP-035 (MISSES), TC-APP-040 (MISSES), TC-APP-042 (PARTIAL), TC-APP-047 (PARTIAL), TC-APP-048 (PARTIAL), TC-APP-051 (MISSES), TC-APP-055 (MISSES), TC-APP-061 (MISSES), TC-APP-062 (PARTIAL), TC-APP-063 (MISSES), TC-APP-064 (MISSES), TC-APP-067 (PARTIAL) and 1 more). Trace: 126 upstream items carried 126, 0 changed, 0 dropped with reason, 0 dropped without reason, 0 new. Tokens: 706,173 used of 50,000,000, 49,293,827 left.",
+   "plugin_check": {
+    "ok": false,
+    "gaps": [
+     "plan scenarios with no designed case (22 of 24 designed): SC-AREA-017-001, SC-AREA-023-001",
+     "cases the coverage auditor says do not cover their scenario: TC-APP-011 (PARTIAL), TC-APP-015 (PARTIAL), TC-APP-016 (PARTIAL), TC-APP-018 (MISSES), TC-APP-019 (MISSES), TC-APP-022 (PARTIAL), TC-APP-023 (MISSES), TC-APP-026 (MISSES), TC-APP-027 (MISSES), TC-APP-028 (MISSES), TC-APP-029 (MISSES), TC-APP-030 (MISSES), TC-APP-031 (PARTIAL), TC-APP-035 (MISSES), TC-APP-040 (MISSES), TC-APP-042 (PARTIAL), TC-APP-047 (PARTIAL), TC-APP-048 (PARTIAL), TC-APP-051 (MISSES), TC-APP-055 (MISSES), TC-APP-061 (MISSES), TC-APP-062 (PARTIAL), TC-APP-063 (MISSES), TC-APP-064 (MISSES), TC-APP-067 (PARTIAL) and 1 more"
+    ],
+    "missing": [
+     "SC-AREA-017-001",
+     "SC-AREA-023-001",
+     "TC-APP-011 (PARTIAL)",
+     "TC-APP-015 (PARTIAL)",
+     "TC-APP-016 (PARTIAL)",
+     "TC-APP-018 (MISSES)",
+     "TC-APP-019 (MISSES)",
+     "TC-APP-022 (PARTIAL)",
+     "TC-APP-023 (MISSES)",
+     "TC-APP-026 (MISSES)",
+     "TC-APP-027 (MISSES)",
+     "TC-APP-028 (MISSES)",
+     "TC-APP-029 (MISSES)",
+     "TC-APP-030 (MISSES)",
+     "TC-APP-031 (PARTIAL)",
+     "TC-APP-035 (MISSES)",
+     "TC-APP-040 (MISSES)",
+     "TC-APP-042 (PARTIAL)",
+     "TC-APP-047 (PARTIAL)",
+     "TC-APP-048 (PARTIAL)",
+     "TC-APP-051 (MISSES)",
+     "TC-APP-055 (MISSES)",
+     "TC-APP-061 (MISSES)",
+     "TC-APP-062 (PARTIAL)",
+     "TC-APP-063 (MISSES)",
+     "TC-APP-064 (MISSES)",
+     "TC-APP-067 (PARTIAL)",
+     "TC-APP-077 (PARTIAL)"
+    ],
+    "validator": {
+     "validator": "1.6.0",
+     "gate": 3,
+     "ok": false,
+     "errors": [
+      {
+       "check": "design.coverage",
+       "message": "plan scenarios with no designed case (22 of 24 designed)",
+       "ids": [
+        "SC-AREA-017-001",
+        "SC-AREA-023-001"
+       ]
+      },
+      {
+       "check": "design.areas",
+       "message": "plan areas with no designed case at all",
+       "ids": [
+        "CORS allows cross-origin requests",
+        "Production server CLI overrides for host/port (Integration - subprocess with args)"
+       ]
+      },
+      {
+       "check": "design.suspects",
+       "message": "cases that do not read like their scenario and no auditor verdict COVERS them",
+       "ids": [
+        "TC-APP-022",
+        "TC-APP-077"
+       ]
+      }
+     ],
+     "warnings": [
+      {
+       "check": "design.duplicates",
+       "message": "3 groups of near-identical cases",
+       "ids": [
+        "TC-APP-027",
+        "TC-APP-057..TC-APP-059",
+        "TC-APP-065",
+        "TC-APP-068"
+       ]
+      }
+     ],
+     "metrics": {
+      "requirements": 22,
+      "scenarios": 24,
+      "cases": 80,
+      "test_files": 0,
+      "results": 0,
+      "repo_test_files": 11,
+      "repo_tests": 137,
+      "existing": 11,
+      "generated": 0,
+      "manual": 0,
+      "plan_by_area_level": {
+       "CORS allows cross-origin requests": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator - invalid JSON body returns 400": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator - invalid calculator inputs (ValueError etc.)": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator - invalid sanitized parameters (boundary/security)": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Calculator - successful run returns result": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator - unexpected exception does not leak internals": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "FX endpoint - invalid currency code validation": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Health endpoint (Integration - HTTP response)": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Health endpoint (Unit - no I/O, logic only)": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "List tools endpoint": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "NAV endpoint - empty/too long query validation": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "NAV endpoint - invalid scheme code validation": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "NAV endpoint - valid code or search query": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Production server CLI overrides for host/port (Integration - subprocess with args)": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Production server runs SSE transport (Integration - can be tested by running as subprocess)": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Quote endpoint - invalid symbol validation": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Rate limiter returns 429 when limit exceeded": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Sanitize params - capped parameter exceeded (Unit)": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Sanitize params - non-finite numeric values (Unit)": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Sanitize params - numeric out of range (Unit)": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Sanitize params - string too long (Unit)": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Sanitize params rejects invalid parameters (Integration - API call with invalid params)": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Security headers added to every response": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Security middleware - oversized request body returns 413": {
+        "Integration": 1,
+        "Unit": 0
+       }
+      },
+      "design_coverage_by_area": {
+       "CORS allows cross-origin requests": 0,
+       "Calculator - invalid JSON body returns 400": 100,
+       "Calculator - invalid calculator inputs (ValueError etc.)": 100,
+       "Calculator - invalid sanitized parameters (boundary/security)": 100,
+       "Calculator - successful run returns result": 100,
+       "Calculator - unexpected exception does not leak internals": 100,
+       "FX endpoint - invalid currency code validation": 100,
+       "Health endpoint (Integration - HTTP response)": 100,
+       "Health endpoint (Unit - no I/O, logic only)": 100,
+       "List tools endpoint": 100,
+       "NAV endpoint - empty/too long query validation": 100,
+       "NAV endpoint - invalid scheme code validation": 100,
+       "NAV endpoint - valid code or search query": 100,
+       "Production server CLI overrides for host/port (Integration - subprocess with args)": 0,
+       "Production server runs SSE transport (Integration - can be tested by running as subprocess)": 100,
+       "Quote endpoint - invalid symbol validation": 100,
+       "Rate limiter returns 429 when limit exceeded": 100,
+       "Sanitize params - capped parameter exceeded (Unit)": 100,
+       "Sanitize params - non-finite numeric values (Unit)": 100,
+       "Sanitize params - numeric out of range (Unit)": 100,
+       "Sanitize params - string too long (Unit)": 100,
+       "Sanitize params rejects invalid parameters (Integration - API call with invalid params)": 100,
+       "Security headers added to every response": 100,
+       "Security middleware - oversized request body returns 413": 100
+      },
+      "cases_per_scenario": {
+       "mean": 4.36
+      },
+      "similarity_median": 0.245
+     },
+     "suspects": [
+      {
+       "case": "TC-APP-022",
+       "scenario": "SC-AREA-015-001",
+       "similarity": 0.069,
+       "audit": "PARTIAL"
+      },
+      {
+       "case": "TC-APP-037",
+       "scenario": "SC-AREA-024-001",
+       "similarity": 0.071,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-038",
+       "scenario": "SC-AREA-024-001",
+       "similarity": 0.07,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-039",
+       "scenario": "SC-AREA-024-001",
+       "similarity": 0.047,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-065",
+       "scenario": "SC-AREA-005-001",
+       "similarity": 0,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-066",
+       "scenario": "SC-AREA-005-001",
+       "similarity": 0,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-068",
+       "scenario": "SC-AREA-005-001",
+       "similarity": 0,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-069",
+       "scenario": "SC-AREA-005-001",
+       "similarity": 0,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-070",
+       "scenario": "SC-AREA-005-001",
+       "similarity": 0,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-071",
+       "scenario": "SC-AREA-005-001",
+       "similarity": 0.072,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-072",
+       "scenario": "SC-AREA-005-001",
+       "similarity": 0,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-073",
+       "scenario": "SC-AREA-005-001",
+       "similarity": 0,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-074",
+       "scenario": "SC-AREA-005-001",
+       "similarity": 0,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-075",
+       "scenario": "SC-AREA-005-001",
+       "similarity": 0.061,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-076",
+       "scenario": "SC-AREA-005-001",
+       "similarity": 0.058,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-077",
+       "scenario": "SC-AREA-005-001",
+       "similarity": 0,
+       "audit": "PARTIAL"
+      },
+      {
+       "case": "TC-APP-078",
+       "scenario": "SC-AREA-005-001",
+       "similarity": 0,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-079",
+       "scenario": "SC-AREA-005-001",
+       "similarity": 0.079,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-080",
+       "scenario": "SC-AREA-005-001",
+       "similarity": 0,
+       "audit": "COVERS"
+      }
+     ],
+     "duplicates": [
+      [
+       "TC-APP-027",
+       "TC-APP-057"
+      ],
+      [
+       "TC-APP-058",
+       "TC-APP-059"
+      ],
+      [
+       "TC-APP-065",
+       "TC-APP-068"
+      ]
+     ],
+     "brief": "Gate 3 validation: FAIL (3 errors, 1 warnings).\n- plan scenarios with no designed case (22 of 24 designed): SC-AREA-017-001, SC-AREA-023-001\n- plan areas with no designed case at all: CORS allows cross-origin requests, Production server CLI overrides for host/port (Integration - subprocess with args)\n- cases that do not read like their scenario and no auditor verdict COVERS them: TC-APP-022, TC-APP-077\nAudit these case/scenario pairs first (low similarity): TC-APP-022, TC-APP-037, TC-APP-038, TC-APP-039, TC-APP-065, TC-APP-066, TC-APP-068, TC-APP-069, TC-APP-070, TC-APP-071, TC-APP-072, TC-APP-073, TC-APP-074, TC-APP-075, TC-APP-076, TC-APP-077, TC-APP-078, TC-APP-079, TC-APP-080"
+    },
+    "error": null
+   },
+   "design_audit": {
+    "app": "prj_d8d6132034a1",
+    "reviewed": 80,
+    "audited": 80,
+    "counts": {
+     "COVERS": 54,
+     "PARTIAL": 11,
+     "MISSES": 15
+    },
+    "unaudited": []
+   },
+   "trace": {
+    "stage": "data",
+    "upstream": 126,
+    "carried": 126,
+    "changed": 0,
+    "dropped_with_reason": 0,
+    "dropped_without_reason": 0,
+    "new": 0,
+    "verdict": "PASS"
+   }
+  },
+  {
+   "gate": 4,
+   "seconds": 48.2,
+   "title": "Gate 4: approve generated tests",
+   "summary": "80 of 80 cases have tests, on branch atlas/qe-2c54fc. Approving also allows them to run on this machine. Trace: 126 upstream items carried 126, 0 changed, 0 dropped with reason, 0 dropped without reason, 80 new. Tokens: 917,393 used of 50,000,000, 49,082,607 left.",
+   "plugin_check": null,
+   "design_audit": null,
+   "trace": {
+    "stage": "generate",
+    "upstream": 126,
+    "carried": 126,
+    "changed": 0,
+    "dropped_with_reason": 0,
+    "dropped_without_reason": 0,
+    "new": 80,
+    "verdict": "PASS"
+   },
+   "refused": "These items were judged REJECT: TC-APP-032. Approving them needs a reason, and this one has 0 characters, fewer than 10. Write it in the reason field.",
+   "sent_back": true
+  },
+  {
+   "gate": 4,
+   "seconds": 52.2,
+   "title": "Gate 4: approve generated tests",
+   "summary": "80 of 80 cases have tests, on branch atlas/qe-2c54fc. Approving also allows them to run on this machine. Trace: 126 upstream items carried 126, 0 changed, 0 dropped with reason, 0 dropped without reason, 0 new. Tokens: 1,115,666 used of 50,000,000, 48,884,334 left.",
+   "plugin_check": null,
+   "design_audit": null,
+   "trace": {
+    "stage": "generate",
+    "upstream": 126,
+    "carried": 126,
+    "changed": 0,
+    "dropped_with_reason": 0,
+    "dropped_without_reason": 0,
+    "new": 0,
+    "verdict": "PASS"
+   }
+  },
+  {
+   "gate": 5,
+   "seconds": 57.2,
+   "title": "Gate 5: approve release",
+   "summary": "Verdict FAIL: 33/132 tests passed. 65 reviewed tests failed and are capped at 60. Trace: 206 upstream items carried 206, 0 changed, 0 dropped with reason, 0 dropped without reason, 0 new. Tokens: 1,142,131 used of 50,000,000, 48,857,869 left.",
+   "plugin_check": null,
+   "design_audit": null,
+   "trace": {
+    "stage": "sign",
+    "upstream": 206,
+    "carried": 206,
+    "changed": 0,
+    "dropped_with_reason": 0,
+    "dropped_without_reason": 0,
+    "new": 0,
+    "verdict": "PASS"
+   },
+   "defect_records": [
+    {
+     "test": "test_calc_debt_success",
+     "case_id": "",
+     "classification": "test problem",
+     "class": "FIXTURE_DRIFT",
+     "evidence": "collection failure\ntests/agentic_qe/test_calc_debt_success.py:11: in <module>\n    DATA = FIXTURES[\"cases\"][\"TC-APP-010\"][\"data\"]\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   KeyError: 'TC-APP-010'",
+     "cause": "Fixtures dictionary missing key 'TC-APP-010'",
+     "fix": "Added TC-APP-010 entry to FIXTURES[\"cases\"] in fixtures.py",
+     "pattern": "Fixture Outdated",
+     "healed": false
+    },
+    {
+     "test": "test_calc_debt_tc_app_010",
+     "case_id": "TC-APP-010",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-3eq7_82q/projects/prj_d8d6132034a1/worktrees/run_06c2d92c54fc/tests/agentic_qe/test_calc_debt_tc_app_010.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_calc_debt_tc_app_010.py:",
+     "cause": "ImportError due to circular import in src/web/server.py (from ..server import mcp) \u2014 application defect",
+     "fix": "No test edit; application defect",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_calc_rental_calculator_success",
+     "case_id": "",
+     "classification": "test problem",
+     "class": "FIXTURE_DRIFT",
+     "evidence": "collection failure\ntests/agentic_qe/test_calc_rental_calculator_success.py:11: in <module>\n    DATA = FIXTURES[\"cases\"][\"TC-APP-012\"][\"data\"]\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   KeyError: 'TC-APP-012'",
+     "cause": "Fixtures dictionary missing key 'TC-APP-012'",
+     "fix": "Added TC-APP-012 entry to FIXTURES[\"cases\"] in fixtures.py",
+     "pattern": "Fixture Outdated",
+     "healed": false
+    },
+    {
+     "test": "test_calc_rental_calculator_tc_app_012",
+     "case_id": "TC-APP-012",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-3eq7_82q/projects/prj_d8d6132034a1/worktrees/run_06c2d92c54fc/tests/agentic_qe/test_calc_rental_calculator_tc_app_012.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_calc_rental",
+     "cause": "ImportError due to circular import in src/web/server.py (from ..server import mcp) \u2014 application defect",
+     "fix": "No test edit; application defect",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_calc_stocks_success",
+     "case_id": "",
+     "classification": "test problem",
+     "class": "FIXTURE_DRIFT",
+     "evidence": "collection failure\ntests/agentic_qe/test_calc_stocks_success.py:11: in <module>\n    DATA = FIXTURES[\"cases\"][\"TC-APP-011\"][\"data\"]\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   KeyError: 'TC-APP-011'",
+     "cause": "Fixtures dictionary missing key 'TC-APP-011'",
+     "fix": "Added TC-APP-011 entry to FIXTURES[\"cases\"] in fixtures.py",
+     "pattern": "Fixture Outdated",
+     "healed": false
+    },
+    {
+     "test": "test_calc_stocks_tc_app_011",
+     "case_id": "TC-APP-011",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-3eq7_82q/projects/prj_d8d6132034a1/worktrees/run_06c2d92c54fc/tests/agentic_qe/test_calc_stocks_tc_app_011.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_calc_stocks_tc_app_011",
+     "cause": "ImportError due to circular import in src/web/server.py (from ..server import mcp) \u2014 application defect",
+     "fix": "No test edit; application defect",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_calc_tvm_success",
+     "case_id": "",
+     "classification": "test problem",
+     "class": "FIXTURE_DRIFT",
+     "evidence": "collection failure\ntests/agentic_qe/test_calc_tvm_success.py:12: in <module>\n    DATA = FIXTURES[\"cases\"][\"TC-APP-009\"][\"data\"]\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   KeyError: 'TC-APP-009'",
+     "cause": "Fixtures dictionary missing key 'TC-APP-009'",
+     "fix": "Added TC-APP-009 entry to FIXTURES[\"cases\"] in fixtures.py",
+     "pattern": "Fixture Outdated",
+     "healed": false
+    },
+    {
+     "test": "test_calc_tvm_tc_app_009",
+     "case_id": "TC-APP-009",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-3eq7_82q/projects/prj_d8d6132034a1/worktrees/run_06c2d92c54fc/tests/agentic_qe/test_calc_tvm_tc_app_009.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_calc_tvm_tc_app_009.py:9:",
+     "cause": "ImportError due to circular import in src/web/server.py (from ..server import mcp) \u2014 application defect",
+     "fix": "No test edit; application defect",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_fx_invalid_base_TC_APP_049",
+     "case_id": "TC-APP-049",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-3eq7_82q/projects/prj_d8d6132034a1/worktrees/run_06c2d92c54fc/tests/agentic_qe/test_fx_invalid_base_TC_APP_049.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_fx_invalid_base_TC",
+     "cause": "ImportError due to circular import in src/web/server.py (from ..server import mcp) \u2014 application defect",
+     "fix": "No test edit; application defect",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_fx_invalid_symbols_TC_APP_050",
+     "case_id": "TC-APP-050",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-3eq7_82q/projects/prj_d8d6132034a1/worktrees/run_06c2d92c54fc/tests/agentic_qe/test_fx_invalid_symbols_TC_APP_050.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_fx_invalid_symb",
+     "cause": "ImportError due to circular import in src/web/server.py (from ..server import mcp) \u2014 application defect",
+     "fix": "No test edit; application defect",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_fx_lowercase_base_TC_APP_052",
+     "case_id": "TC-APP-052",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-3eq7_82q/projects/prj_d8d6132034a1/worktrees/run_06c2d92c54fc/tests/agentic_qe/test_fx_lowercase_base_TC_APP_052.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_fx_lowercase_bas",
+     "cause": "ImportError due to circular import in src/web/server.py (from ..server import mcp) \u2014 application defect",
+     "fix": "No test edit; application defect",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_fx_valid_base_TC_APP_051",
+     "case_id": "TC-APP-051",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-3eq7_82q/projects/prj_d8d6132034a1/worktrees/run_06c2d92c54fc/tests/agentic_qe/test_fx_valid_base_TC_APP_051.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_fx_valid_base_TC_APP",
+     "cause": "ImportError due to circular import in src/web/server.py (from ..server import mcp) \u2014 application defect",
+     "fix": "No test edit; application defect",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_health_tc_app_025",
+     "case_id": "TC-APP-025",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-3eq7_82q/projects/prj_d8d6132034a1/worktrees/run_06c2d92c54fc/tests/agentic_qe/test_health_tc_app_025.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_health_tc_app_025.py:4: in ",
+     "cause": "ImportError due to circular import in src/web/server.py (from ..server import mcp) \u2014 application defect",
+     "fix": "No test edit; application defect",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_health_tc_app_026",
+     "case_id": "TC-APP-026",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-3eq7_82q/projects/prj_d8d6132034a1/worktrees/run_06c2d92c54fc/tests/agentic_qe/test_health_tc_app_026.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_health_tc_app_026.py:4: in ",
+     "cause": "ImportError due to circular import in src/web/server.py (from ..server import mcp) \u2014 application defect",
+     "fix": "No test edit; application defect",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_health_tc_app_027",
+     "case_id": "TC-APP-027",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-3eq7_82q/projects/prj_d8d6132034a1/worktrees/run_06c2d92c54fc/tests/agentic_qe/test_health_tc_app_027.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_health_tc_app_027.py:4: in ",
+     "cause": "ImportError due to circular import in src/web/server.py (from ..server import mcp) \u2014 application defect",
+     "fix": "No test edit; application defect",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_health_tc_app_028",
+     "case_id": "TC-APP-028",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-3eq7_82q/projects/prj_d8d6132034a1/worktrees/run_06c2d92c54fc/tests/agentic_qe/test_health_tc_app_028.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_health_tc_app_028.py:4: in ",
+     "cause": "ImportError due to circular import in src/web/server.py (from ..server import mcp) \u2014 application defect",
+     "fix": "No test edit; application defect",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_integration_tc_app_049",
+     "case_id": "TC-APP-049",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "collection failure\n../.venv/lib/python3.14/site-packages/_pytest/python.py:508: in importtestmodule\n    mod = import_path(\n../.venv/lib/python3.14/site-packages/_pytest/pathlib.py:596: in import_path\n    importlib.import_module(module_name)\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n<frozen importlib._bootstrap>:1406: in _gcd_import\n    ???\n<frozen importlib._bootstrap>:1371: in _find_and_load\n    ???\n<",
+     "cause": "Collection failure due to import error (DEFECT) \u2014 application defect",
+     "fix": "No test edit; application defect",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_integration_tc_app_050",
+     "case_id": "TC-APP-050",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "collection failure\n../.venv/lib/python3.14/site-packages/_pytest/python.py:508: in importtestmodule\n    mod = import_path(\n../.venv/lib/python3.14/site-packages/_pytest/pathlib.py:596: in import_path\n    importlib.import_module(module_name)\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n<frozen importlib._bootstrap>:1406: in _gcd_import\n    ???\n<frozen importlib._bootstrap>:1371: in _find_and_load\n    ???\n<",
+     "cause": "Collection failure due to import error (DEFECT) \u2014 application defect",
+     "fix": "No test edit; application defect",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_integration_tc_app_051",
+     "case_id": "TC-APP-051",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "collection failure\n../.venv/lib/python3.14/site-packages/_pytest/python.py:508: in importtestmodule\n    mod = import_path(\n../.venv/lib/python3.14/site-packages/_pytest/pathlib.py:596: in import_path\n    importlib.import_module(module_name)\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n<frozen importlib._bootstrap>:1406: in _gcd_import\n    ???\n<frozen importlib._bootstrap>:1371: in _find_and_load\n    ???\n<",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_integration_tc_app_052",
+     "case_id": "TC-APP-052",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "collection failure\n../.venv/lib/python3.14/site-packages/_pytest/python.py:508: in importtestmodule\n    mod = import_path(\n../.venv/lib/python3.14/site-packages/_pytest/pathlib.py:596: in import_path\n    importlib.import_module(module_name)\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n<frozen importlib._bootstrap>:1406: in _gcd_import\n    ???\n<frozen importlib._bootstrap>:1371: in _find_and_load\n    ???\n<",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_integration_tc_app_053",
+     "case_id": "TC-APP-053",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "collection failure\n../.venv/lib/python3.14/site-packages/_pytest/python.py:508: in importtestmodule\n    mod = import_path(\n../.venv/lib/python3.14/site-packages/_pytest/pathlib.py:596: in import_path\n    importlib.import_module(module_name)\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n<frozen importlib._bootstrap>:1406: in _gcd_import\n    ???\n<frozen importlib._bootstrap>:1371: in _find_and_load\n    ???\n<",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_integration_tc_app_054",
+     "case_id": "TC-APP-054",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "collection failure\n../.venv/lib/python3.14/site-packages/_pytest/python.py:508: in importtestmodule\n    mod = import_path(\n../.venv/lib/python3.14/site-packages/_pytest/pathlib.py:596: in import_path\n    importlib.import_module(module_name)\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n<frozen importlib._bootstrap>:1406: in _gcd_import\n    ???\n<frozen importlib._bootstrap>:1371: in _find_and_load\n    ???\n<",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_integration_tc_app_055",
+     "case_id": "TC-APP-055",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "collection failure\n../.venv/lib/python3.14/site-packages/_pytest/python.py:508: in importtestmodule\n    mod = import_path(\n../.venv/lib/python3.14/site-packages/_pytest/pathlib.py:596: in import_path\n    importlib.import_module(module_name)\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n<frozen importlib._bootstrap>:1406: in _gcd_import\n    ???\n<frozen importlib._bootstrap>:1371: in _find_and_load\n    ???\n<",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_integration_tc_app_056",
+     "case_id": "TC-APP-056",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "collection failure\n../.venv/lib/python3.14/site-packages/_pytest/python.py:508: in importtestmodule\n    mod = import_path(\n../.venv/lib/python3.14/site-packages/_pytest/pathlib.py:596: in import_path\n    importlib.import_module(module_name)\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n<frozen importlib._bootstrap>:1406: in _gcd_import\n    ???\n<frozen importlib._bootstrap>:1371: in _find_and_load\n    ???\n<",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_nav_ambiguous_param_400",
+     "case_id": "",
+     "classification": "test problem",
+     "class": "FIXTURE_DRIFT",
+     "evidence": "collection failure\ntests/agentic_qe/test_nav_ambiguous_param_400.py:11: in <module>\n    DATA = FIXTURES[\"cases\"][\"TC-APP-016\"][\"data\"]\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   KeyError: 'TC-APP-016'",
+     "cause": "The test passes data or arguments the code does not accept, or reads data that is not there.",
+     "fix": "Correct the fixture or the call to match the real signature or schema. Forbidden: removing the request or the assertion.",
+     "pattern": "Fixture Outdated",
+     "healed": false
+    },
+    {
+     "test": "test_nav_ambiguous_params_tc_app_016",
+     "case_id": "TC-APP-016",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-3eq7_82q/projects/prj_d8d6132034a1/worktrees/run_06c2d92c54fc/tests/agentic_qe/test_nav_ambiguous_params_tc_app_016.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_nav_ambiguous",
+     "cause": "The test could not run properly in this environment.",
+     "fix": "Fix the environment: install the missing package, or provide the service. The application is not at fault.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_nav_code_success",
+     "case_id": "",
+     "classification": "test problem",
+     "class": "FIXTURE_DRIFT",
+     "evidence": "collection failure\ntests/agentic_qe/test_nav_code_success.py:12: in <module>\n    DATA = FIXTURES[\"cases\"][\"TC-APP-013\"][\"data\"]\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   KeyError: 'TC-APP-013'",
+     "cause": "The test passes data or arguments the code does not accept, or reads data that is not there.",
+     "fix": "Correct the fixture or the call to match the real signature or schema. Forbidden: removing the request or the assertion.",
+     "pattern": "Fixture Outdated",
+     "healed": false
+    },
+    {
+     "test": "test_nav_code_tc_app_013",
+     "case_id": "TC-APP-013",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-3eq7_82q/projects/prj_d8d6132034a1/worktrees/run_06c2d92c54fc/tests/agentic_qe/test_nav_code_tc_app_013.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_nav_code_tc_app_013.py:8:",
+     "cause": "The test could not run properly in this environment.",
+     "fix": "Fix the environment: install the missing package, or provide the service. The application is not at fault.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_nav_missing_param_400",
+     "case_id": "",
+     "classification": "test problem",
+     "class": "FIXTURE_DRIFT",
+     "evidence": "collection failure\ntests/agentic_qe/test_nav_missing_param_400.py:11: in <module>\n    DATA = FIXTURES[\"cases\"][\"TC-APP-015\"][\"data\"]\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   KeyError: 'TC-APP-015'",
+     "cause": "The test passes data or arguments the code does not accept, or reads data that is not there.",
+     "fix": "Correct the fixture or the call to match the real signature or schema. Forbidden: removing the request or the assertion.",
+     "pattern": "Fixture Outdated",
+     "healed": false
+    },
+    {
+     "test": "test_nav_missing_param_tc_app_015",
+     "case_id": "TC-APP-015",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-3eq7_82q/projects/prj_d8d6132034a1/worktrees/run_06c2d92c54fc/tests/agentic_qe/test_nav_missing_param_tc_app_015.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_nav_missing_para",
+     "cause": "The test could not run properly in this environment.",
+     "fix": "Fix the environment: install the missing package, or provide the service. The application is not at fault.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_nav_search_success",
+     "case_id": "",
+     "classification": "test problem",
+     "class": "FIXTURE_DRIFT",
+     "evidence": "collection failure\ntests/agentic_qe/test_nav_search_success.py:12: in <module>\n    DATA = FIXTURES[\"cases\"][\"TC-APP-014\"][\"data\"]\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   KeyError: 'TC-APP-014'",
+     "cause": "The test passes data or arguments the code does not accept, or reads data that is not there.",
+     "fix": "Correct the fixture or the call to match the real signature or schema. Forbidden: removing the request or the assertion.",
+     "pattern": "Fixture Outdated",
+     "healed": false
+    },
+    {
+     "test": "test_nav_search_tc_app_014",
+     "case_id": "TC-APP-014",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-3eq7_82q/projects/prj_d8d6132034a1/worktrees/run_06c2d92c54fc/tests/agentic_qe/test_nav_search_tc_app_014.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_nav_search_tc_app_014.p",
+     "cause": "The test could not run properly in this environment.",
+     "fix": "Fix the environment: install the missing package, or provide the service. The application is not at fault.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_payload_TC_APP_017",
+     "case_id": "TC-APP-017",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-3eq7_82q/projects/prj_d8d6132034a1/worktrees/run_06c2d92c54fc/tests/agentic_qe/test_payload_TC_APP_017.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_payload_TC_APP_017.py:8: i",
+     "cause": "The test could not run properly in this environment.",
+     "fix": "Fix the environment: install the missing package, or provide the service. The application is not at fault.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_payload_TC_APP_018",
+     "case_id": "TC-APP-018",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-3eq7_82q/projects/prj_d8d6132034a1/worktrees/run_06c2d92c54fc/tests/agentic_qe/test_payload_TC_APP_018.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_payload_TC_APP_018.py:8: i",
+     "cause": "The test could not run properly in this environment.",
+     "fix": "Fix the environment: install the missing package, or provide the service. The application is not at fault.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_payload_TC_APP_019",
+     "case_id": "TC-APP-019",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-3eq7_82q/projects/prj_d8d6132034a1/worktrees/run_06c2d92c54fc/tests/agentic_qe/test_payload_TC_APP_019.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_payload_TC_APP_019.py:8: i",
+     "cause": "The test could not run properly in this environment.",
+     "fix": "Fix the environment: install the missing package, or provide the service. The application is not at fault.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_payload_TC_APP_020",
+     "case_id": "TC-APP-020",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-3eq7_82q/projects/prj_d8d6132034a1/worktrees/run_06c2d92c54fc/tests/agentic_qe/test_payload_TC_APP_020.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_payload_TC_APP_020.py:8: i",
+     "cause": "The test could not run properly in this environment.",
+     "fix": "Fix the environment: install the missing package, or provide the service. The application is not at fault.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_quote_empty_symbol_TC_APP_054",
+     "case_id": "TC-APP-054",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-3eq7_82q/projects/prj_d8d6132034a1/worktrees/run_06c2d92c54fc/tests/agentic_qe/test_quote_empty_symbol_TC_APP_054.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_quote_empty_sym",
+     "cause": "The test could not run properly in this environment.",
+     "fix": "Fix the environment: install the missing package, or provide the service. The application is not at fault.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_quote_invalid_symbol_TC_APP_053",
+     "case_id": "TC-APP-053",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-3eq7_82q/projects/prj_d8d6132034a1/worktrees/run_06c2d92c54fc/tests/agentic_qe/test_quote_invalid_symbol_TC_APP_053.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_quote_invalid",
+     "cause": "The test could not run properly in this environment.",
+     "fix": "Fix the environment: install the missing package, or provide the service. The application is not at fault.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_quote_special_char_symbol_TC_APP_056",
+     "case_id": "TC-APP-056",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-3eq7_82q/projects/prj_d8d6132034a1/worktrees/run_06c2d92c54fc/tests/agentic_qe/test_quote_special_char_symbol_TC_APP_056.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_quote_sp",
+     "cause": "The test could not run properly in this environment.",
+     "fix": "Fix the environment: install the missing package, or provide the service. The application is not at fault.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_quote_valid_symbol_TC_APP_055",
+     "case_id": "TC-APP-055",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-3eq7_82q/projects/prj_d8d6132034a1/worktrees/run_06c2d92c54fc/tests/agentic_qe/test_quote_valid_symbol_TC_APP_055.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_quote_valid_sym",
+     "cause": "The test could not run properly in this environment.",
+     "fix": "Fix the environment: install the missing package, or provide the service. The application is not at fault.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_rate_limit_TC_APP_021",
+     "case_id": "TC-APP-021",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-3eq7_82q/projects/prj_d8d6132034a1/worktrees/run_06c2d92c54fc/tests/agentic_qe/test_rate_limit_TC_APP_021.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_rate_limit_TC_APP_021.p",
+     "cause": "The test could not run properly in this environment.",
+     "fix": "Fix the environment: install the missing package, or provide the service. The application is not at fault.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_rate_limit_TC_APP_022",
+     "case_id": "TC-APP-022",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-3eq7_82q/projects/prj_d8d6132034a1/worktrees/run_06c2d92c54fc/tests/agentic_qe/test_rate_limit_TC_APP_022.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_rate_limit_TC_APP_022.p",
+     "cause": "The test could not run properly in this environment.",
+     "fix": "Fix the environment: install the missing package, or provide the service. The application is not at fault.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_rate_limit_TC_APP_023",
+     "case_id": "TC-APP-023",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-3eq7_82q/projects/prj_d8d6132034a1/worktrees/run_06c2d92c54fc/tests/agentic_qe/test_rate_limit_TC_APP_023.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_rate_limit_TC_APP_023.p",
+     "cause": "The test could not run properly in this environment.",
+     "fix": "Fix the environment: install the missing package, or provide the service. The application is not at fault.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_rate_limit_TC_APP_024",
+     "case_id": "TC-APP-024",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-3eq7_82q/projects/prj_d8d6132034a1/worktrees/run_06c2d92c54fc/tests/agentic_qe/test_rate_limit_TC_APP_024.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_rate_limit_TC_APP_024.p",
+     "cause": "The test could not run properly in this environment.",
+     "fix": "Fix the environment: install the missing package, or provide the service. The application is not at fault.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_sanitize_params_TC_APP_065",
+     "case_id": "TC-APP-065",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "collection failure\ntests/agentic_qe/test_sanitize_params_TC_APP_065.py:15: in <module>\n    _test_data = json.loads(_case[\"data\"])\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/__init__.py:352: in loads\n    return _default_decoder.decode(s)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/decoder.py:345: in decode\n    obj, end = self.raw_decode(s, idx=_w(s, 0).end())\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/Library/Frameworks/Python.framework/Versions/3.1",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_sanitize_params_TC_APP_066",
+     "case_id": "TC-APP-066",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "collection failure\ntests/agentic_qe/test_sanitize_params_TC_APP_066.py:15: in <module>\n    _test_data = json.loads(_case[\"data\"])\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/__init__.py:352: in loads\n    return _default_decoder.decode(s)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/decoder.py:345: in decode\n    obj, end = self.raw_decode(s, idx=_w(s, 0).end())\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/Library/Frameworks/Python.framework/Versions/3.1",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_sanitize_params_TC_APP_067",
+     "case_id": "TC-APP-067",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "collection failure\ntests/agentic_qe/test_sanitize_params_TC_APP_067.py:14: in <module>\n    _test_data = json.loads(_case[\"data\"])\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/__init__.py:352: in loads\n    return _default_decoder.decode(s)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/decoder.py:345: in decode\n    obj, end = self.raw_decode(s, idx=_w(s, 0).end())\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/Library/Frameworks/Python.framework/Versions/3.1",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_sanitize_params_TC_APP_068",
+     "case_id": "TC-APP-068",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "collection failure\ntests/agentic_qe/test_sanitize_params_TC_APP_068.py:15: in <module>\n    _test_data = json.loads(_case[\"data\"])\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/__init__.py:352: in loads\n    return _default_decoder.decode(s)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/decoder.py:345: in decode\n    obj, end = self.raw_decode(s, idx=_w(s, 0).end())\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/Library/Frameworks/Python.framework/Versions/3.1",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_sanitize_params_TC_APP_069",
+     "case_id": "TC-APP-069",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "collection failure\ntests/agentic_qe/test_sanitize_params_TC_APP_069.py:14: in <module>\n    _test_data = json.loads(_case[\"data\"])\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/__init__.py:352: in loads\n    return _default_decoder.decode(s)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/decoder.py:345: in decode\n    obj, end = self.raw_decode(s, idx=_w(s, 0).end())\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/Library/Frameworks/Python.framework/Versions/3.1",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_sanitize_params_TC_APP_070",
+     "case_id": "TC-APP-070",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "collection failure\ntests/agentic_qe/test_sanitize_params_TC_APP_070.py:14: in <module>\n    _test_data = json.loads(_case[\"data\"])\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/__init__.py:352: in loads\n    return _default_decoder.decode(s)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/decoder.py:345: in decode\n    obj, end = self.raw_decode(s, idx=_w(s, 0).end())\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/Library/Frameworks/Python.framework/Versions/3.1",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_sanitize_params_TC_APP_071",
+     "case_id": "TC-APP-071",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "collection failure\ntests/agentic_qe/test_sanitize_params_TC_APP_071.py:14: in <module>\n    _test_data = json.loads(_case[\"data\"])\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/__init__.py:352: in loads\n    return _default_decoder.decode(s)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/decoder.py:345: in decode\n    obj, end = self.raw_decode(s, idx=_w(s, 0).end())\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/Library/Frameworks/Python.framework/Versions/3.1",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_sanitize_params_TC_APP_072",
+     "case_id": "TC-APP-072",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "collection failure\ntests/agentic_qe/test_sanitize_params_TC_APP_072.py:14: in <module>\n    _test_data = json.loads(_case[\"data\"])\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/__init__.py:352: in loads\n    return _default_decoder.decode(s)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/decoder.py:345: in decode\n    obj, end = self.raw_decode(s, idx=_w(s, 0).end())\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/Library/Frameworks/Python.framework/Versions/3.1",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_security_TC_APP_057",
+     "case_id": "TC-APP-057",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-3eq7_82q/projects/prj_d8d6132034a1/worktrees/run_06c2d92c54fc/tests/agentic_qe/test_security_TC_APP_057.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_security_TC_APP_057.py:6:",
+     "cause": "The test could not run properly in this environment.",
+     "fix": "Fix the environment: install the missing package, or provide the service. The application is not at fault.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_security_TC_APP_058",
+     "case_id": "TC-APP-058",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-3eq7_82q/projects/prj_d8d6132034a1/worktrees/run_06c2d92c54fc/tests/agentic_qe/test_security_TC_APP_058.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_security_TC_APP_058.py:6:",
+     "cause": "The test could not run properly in this environment.",
+     "fix": "Fix the environment: install the missing package, or provide the service. The application is not at fault.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_security_TC_APP_059",
+     "case_id": "TC-APP-059",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-3eq7_82q/projects/prj_d8d6132034a1/worktrees/run_06c2d92c54fc/tests/agentic_qe/test_security_TC_APP_059.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_security_TC_APP_059.py:6:",
+     "cause": "The test could not run properly in this environment.",
+     "fix": "Fix the environment: install the missing package, or provide the service. The application is not at fault.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_security_TC_APP_060",
+     "case_id": "TC-APP-060",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-3eq7_82q/projects/prj_d8d6132034a1/worktrees/run_06c2d92c54fc/tests/agentic_qe/test_security_TC_APP_060.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_security_TC_APP_060.py:6:",
+     "cause": "The test could not run properly in this environment.",
+     "fix": "Fix the environment: install the missing package, or provide the service. The application is not at fault.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_tools_tc_app_029",
+     "case_id": "TC-APP-029",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-3eq7_82q/projects/prj_d8d6132034a1/worktrees/run_06c2d92c54fc/tests/agentic_qe/test_tools_tc_app_029.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_tools_tc_app_029.py:4: in <m",
+     "cause": "The test could not run properly in this environment.",
+     "fix": "Fix the environment: install the missing package, or provide the service. The application is not at fault.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_tools_tc_app_030",
+     "case_id": "TC-APP-030",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-3eq7_82q/projects/prj_d8d6132034a1/worktrees/run_06c2d92c54fc/tests/agentic_qe/test_tools_tc_app_030.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_tools_tc_app_030.py:4: in <m",
+     "cause": "The test could not run properly in this environment.",
+     "fix": "Fix the environment: install the missing package, or provide the service. The application is not at fault.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_tools_tc_app_031",
+     "case_id": "TC-APP-031",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-3eq7_82q/projects/prj_d8d6132034a1/worktrees/run_06c2d92c54fc/tests/agentic_qe/test_tools_tc_app_031.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_tools_tc_app_031.py:4: in <m",
+     "cause": "The test could not run properly in this environment.",
+     "fix": "Fix the environment: install the missing package, or provide the service. The application is not at fault.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_tools_tc_app_032",
+     "case_id": "TC-APP-032",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-3eq7_82q/projects/prj_d8d6132034a1/worktrees/run_06c2d92c54fc/tests/agentic_qe/test_tools_tc_app_032.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_tools_tc_app_032.py:4: in <m",
+     "cause": "The test could not run properly in this environment.",
+     "fix": "Fix the environment: install the missing package, or provide the service. The application is not at fault.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_TC-APP-026::test_TC_APP_026_health_endpoint_http_200_expected_json",
+     "case_id": "TC-APP-026",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "failed on setup with \"AttributeError: 'ASGITransport' object has no attribute '__enter__'. Did you mean: '__aenter__'?\"\ntests/agentic_qe/test_TC-APP-026.py:15: in client\n    with httpx.Client(transport=transport, base_url=\"http://test\") as client:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n../.venv/lib/python3.14/site-packages/httpx/_client.py:1287: in __enter__\n    self._transport.__enter__()\n    ^^^^^^^^^^^^^^^^^^^^^^^^^\nE   AttributeError: 'ASGITransport' object has no attribute '__enter__'. Did you mean: '__aenter__'?",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_TC-APP-027::test_TC_APP_027_health_endpoint_security_headers",
+     "case_id": "TC-APP-027",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "failed on setup with \"AttributeError: 'ASGITransport' object has no attribute '__enter__'. Did you mean: '__aenter__'?\"\ntests/agentic_qe/test_TC-APP-027.py:13: in client\n    with httpx.Client(transport=transport, base_url=\"http://test\") as client:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n../.venv/lib/python3.14/site-packages/httpx/_client.py:1287: in __enter__\n    self._transport.__enter__()\n    ^^^^^^^^^^^^^^^^^^^^^^^^^\nE   AttributeError: 'ASGITransport' object has no attribute '__enter__'. Did you mean: '__aenter__'?",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_TC-APP-028::test_TC_APP_028_nonexistent_path_returns_404",
+     "case_id": "TC-APP-028",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "failed on setup with \"AttributeError: 'ASGITransport' object has no attribute '__enter__'. Did you mean: '__aenter__'?\"\ntests/agentic_qe/test_TC-APP-028.py:13: in client\n    with httpx.Client(transport=transport, base_url=\"http://test\") as client:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n../.venv/lib/python3.14/site-packages/httpx/_client.py:1287: in __enter__\n    self._transport.__enter__()\n    ^^^^^^^^^^^^^^^^^^^^^^^^^\nE   AttributeError: 'ASGITransport' object has no attribute '__enter__'. Did you mean: '__aenter__'?",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_TC-APP-029::test_TC_APP_029_list_tools_returns_expected_fields",
+     "case_id": "TC-APP-029",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "failed on setup with \"AttributeError: 'ASGITransport' object has no attribute '__enter__'. Did you mean: '__aenter__'?\"\ntests/agentic_qe/test_TC-APP-029.py:13: in client\n    with httpx.Client(transport=transport, base_url=\"http://test\") as client:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n../.venv/lib/python3.14/site-packages/httpx/_client.py:1287: in __enter__\n    self._transport.__enter__()\n    ^^^^^^^^^^^^^^^^^^^^^^^^^\nE   AttributeError: 'ASGITransport' object has no attribute '__enter__'. Did you mean: '__aenter__'?",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_TC-APP-030::test_TC_APP_030_list_tools_count_matches_tools_array_length",
+     "case_id": "TC-APP-030",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "failed on setup with \"AttributeError: 'ASGITransport' object has no attribute '__enter__'. Did you mean: '__aenter__'?\"\ntests/agentic_qe/test_TC-APP-030.py:13: in client\n    with httpx.Client(transport=transport, base_url=\"http://test\") as client:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n../.venv/lib/python3.14/site-packages/httpx/_client.py:1287: in __enter__\n    self._transport.__enter__()\n    ^^^^^^^^^^^^^^^^^^^^^^^^^\nE   AttributeError: 'ASGITransport' object has no attribute '__enter__'. Did you mean: '__aenter__'?",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_TC-APP-031::test_TC_APP_031_list_tools_includes_categories",
+     "case_id": "TC-APP-031",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "failed on setup with \"AttributeError: 'ASGITransport' object has no attribute '__enter__'. Did you mean: '__aenter__'?\"\ntests/agentic_qe/test_TC-APP-031.py:13: in client\n    with httpx.Client(transport=transport, base_url=\"http://test\") as client:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n../.venv/lib/python3.14/site-packages/httpx/_client.py:1287: in __enter__\n    self._transport.__enter__()\n    ^^^^^^^^^^^^^^^^^^^^^^^^^\nE   AttributeError: 'ASGITransport' object has no attribute '__enter__'. Did you mean: '__aenter__'?",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_TC-APP-032::test_TC_APP_032_list_tools_empty_manager",
+     "case_id": "TC-APP-032",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "failed on setup with \"AttributeError: 'ASGITransport' object has no attribute '__enter__'. Did you mean: '__aenter__'?\"\ntests/agentic_qe/test_TC-APP-032.py:19: in client\n    with httpx.Client(transport=transport, base_url=\"http://test\") as client:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n../.venv/lib/python3.14/site-packages/httpx/_client.py:1287: in __enter__\n    self._transport.__enter__()\n    ^^^^^^^^^^^^^^^^^^^^^^^^^\nE   AttributeError: 'ASGITransport' object has no attribute '__enter__'. Did you mean: '__aenter__'?",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_api_calc_TC_APP_001::test_TC_APP_001_invalid_interest_rate",
+     "case_id": "TC-APP-001",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "assert 'invalid inputs:' in \"unknown calculator 'tvm'\"\ntests/agentic_qe/test_api_calc_TC_APP_001.py:25: in test_TC_APP_001_invalid_interest_rate\n    asyncio.run(run())\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/runners.py:205: in run\n    return runner.run(main)\n           ^^^^^^^^^^^^^^^^\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/runners.py:128: in run\n    return self._loop.run_until_complete(task)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/base_events.py",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_api_calc_TC_APP_002::test_TC_APP_002_debt_zero_payment",
+     "case_id": "TC-APP-002",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "assert \"unknown calculator 'debt'\" == 'invalid inpu...ision by zero'\n  \n  - invalid inputs: division by zero\n  + unknown calculator 'debt'\ntests/agentic_qe/test_api_calc_TC_APP_002.py:21: in test_TC_APP_002_debt_zero_payment\n    asyncio.run(run())\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/runners.py:205: in run\n    return runner.run(main)\n           ^^^^^^^^^^^^^^^^\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/runners.py:128: in run\n    return self._loop.run_until_complete(task)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/Library",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_api_calc_TC_APP_003::test_TC_APP_003_unknown_param_key_error",
+     "case_id": "TC-APP-003",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "assert 'invalid inputs:' in \"unknown calculator 'tvm'\"\ntests/agentic_qe/test_api_calc_TC_APP_003.py:24: in test_TC_APP_003_unknown_param_key_error\n    asyncio.run(run())\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/runners.py:205: in run\n    return runner.run(main)\n           ^^^^^^^^^^^^^^^^\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/runners.py:128: in run\n    return self._loop.run_until_complete(task)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/base_events.",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_api_calc_TC_APP_004::test_TC_APP_004_string_param_type_error",
+     "case_id": "TC-APP-004",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "assert 'invalid inputs:' in \"unknown calculator 'tvm'\"\ntests/agentic_qe/test_api_calc_TC_APP_004.py:23: in test_TC_APP_004_string_param_type_error\n    asyncio.run(run())\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/runners.py:205: in run\n    return runner.run(main)\n           ^^^^^^^^^^^^^^^^\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/runners.py:128: in run\n    return self._loop.run_until_complete(task)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/base_events.",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_api_calc_TC_APP_008::test_TC_APP_008_faulty_exit",
+     "case_id": "TC-APP-008",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "SystemExit: 1\ntests/agentic_qe/test_api_calc_TC_APP_008.py:25: in test_TC_APP_008_faulty_exit\n    asyncio.run(run())\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/runners.py:205: in run\n    return runner.run(main)\n           ^^^^^^^^^^^^^^^^\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/runners.py:128: in run\n    return self._loop.run_until_complete(task)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/base_events.py:707: in run_until_complete\n    self.run_forever()\n",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_api_calc_TC_APP_035::test_TC_APP_035_valid_json",
+     "case_id": "TC-APP-035",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "assert 400 == 200\n +  where 400 = <Response [400 Bad Request]>.status_code\ntests/agentic_qe/test_api_calc_TC_APP_035.py:13: in test_TC_APP_035_valid_json\n    assert response.status_code == 200\nE   assert 400 == 200\nE    +  where 400 = <Response [400 Bad Request]>.status_code",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_api_calc_TC_APP_037::test_TC_APP_037_non_finite_number",
+     "case_id": "TC-APP-037",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "assert {'error': \"un...avings', ...]} == {'error': \"'b...inite number\"}\n  \n  Differing items:\n  {'error': \"unknown calculator 'None'\"} != {'error': \"'balance' must be a finite number\"}\n  Left contains 1 more item:\n  {'available': ['future_value',\n                 'present_value',\n                 'future_value_annuity',...\n  \n  ...Full output truncated (14 lines hidden), use '-vv' to show\ntests/agentic_qe/test_api_calc_TC_APP_037.py:16: in test_TC_APP_037_non_finite_number\n    assert body == {\"error\": \"'balance' must be a finite number\"}\nE   assert {'error': \"un...avings', ...]} == {'error': \"",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_api_calc_TC_APP_038::test_TC_APP_038_out_of_range_number",
+     "case_id": "TC-APP-038",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "assert {'error': \"un...avings', ...]} == {'error': \"'b...out of range\"}\n  \n  Differing items:\n  {'error': \"unknown calculator 'None'\"} != {'error': \"'balance' is out of range\"}\n  Left contains 1 more item:\n  {'available': ['future_value',\n                 'present_value',\n                 'future_value_annuity',...\n  \n  ...Full output truncated (14 lines hidden), use '-vv' to show\ntests/agentic_qe/test_api_calc_TC_APP_038.py:15: in test_TC_APP_038_out_of_range_number\n    assert body == {\"error\": \"'balance' is out of range\"}\nE   assert {'error': \"un...avings', ...]} == {'error': \"'b...out of ra",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_api_calc_TC_APP_039::test_TC_APP_039_years_cap_exceeded",
+     "case_id": "TC-APP-039",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "assert {'error': \"un...avings', ...]} == {'error': \"'y...ust be \u2264 120\"}\n  \n  Differing items:\n  {'error': \"unknown calculator 'None'\"} != {'error': \"'years' must be \u2264 120\"}\n  Left contains 1 more item:\n  {'available': ['future_value',\n                 'present_value',\n                 'future_value_annuity',...\n  \n  ...Full output truncated (14 lines hidden), use '-vv' to show\ntests/agentic_qe/test_api_calc_TC_APP_039.py:16: in test_TC_APP_039_years_cap_exceeded\n    assert body == {\"error\": \"'years' must be \u2264 120\"}\nE   assert {'error': \"un...avings', ...]} == {'error': \"'y...ust be \u2264 120\"}\nE  ",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_api_calc_TC_APP_040::test_TC_APP_040_valid_tvm_params",
+     "case_id": "TC-APP-040",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "assert 400 == 200\n +  where 400 = <Response [400 Bad Request]>.status_code\ntests/agentic_qe/test_api_calc_TC_APP_040.py:13: in test_TC_APP_040_valid_tvm_params\n    assert response.status_code == 200\nE   assert 400 == 200\nE    +  where 400 = <Response [400 Bad Request]>.status_code",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_api_payload_size_TC_APP_018::test_TC_APP_018_boundary_16kb_accepted",
+     "case_id": "TC-APP-018",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "AssertionError: Exact 16 KB body should not be rejected as too large\nassert 413 != 413\n +  where 413 = <Response [413 Request Entity Too Large]>.status_code\ntests/agentic_qe/test_api_payload_size_TC_APP_018.py:16: in test_TC_APP_018_boundary_16kb_accepted\n    assert response.status_code != 413, \"Exact 16 KB body should not be rejected as too large\"\nE   AssertionError: Exact 16 KB body should not be rejected as too large\nE   assert 413 != 413\nE    +  where 413 = <Response [413 Request Entity Too Large]>.status_code",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_calc_TC_APP_001::test_TC_APP_001_tvm_rate_negative",
+     "case_id": "TC-APP-001",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "assert False\n +  where False = <built-in method startswith of str object at 0x10b8902b0>('invalid inputs:')\n +    where <built-in method startswith of str object at 0x10b8902b0> = \"unknown calculator 'tvm'\".startswith\ntests/agentic_qe/test_calc_TC_APP_001.py:28: in test_TC_APP_001_tvm_rate_negative\n    assert body[\"error\"].startswith(\"invalid inputs:\")\nE   assert False\nE    +  where False = <built-in method startswith of str object at 0x10b8902b0>('invalid inputs:')\nE    +    where <built-in method startswith of str object at 0x10b8902b0> = \"unknown calculator 'tvm'\".startswith",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_calc_TC_APP_002::test_TC_APP_002_debt_payment_zero",
+     "case_id": "TC-APP-002",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "assert {'error': \"un...avings', ...]} == {'error': 'in...sion by zero'}\n  \n  Differing items:\n  {'error': \"unknown calculator 'debt'\"} != {'error': 'invalid inputs: division by zero'}\n  Left contains 1 more item:\n  {'available': ['future_value',\n                 'present_value',\n                 'future_value_annuity',...\n  \n  ...Full output truncated (14 lines hidden), use '-vv' to show\ntests/agentic_qe/test_calc_TC_APP_002.py:27: in test_TC_APP_002_debt_payment_zero\n    assert body == {\"error\": \"invalid inputs: division by zero\"}\nE   assert {'error': \"un...avings', ...]} == {'error': 'in...s",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_calc_TC_APP_003::test_TC_APP_003_tvm_unknown_param",
+     "case_id": "TC-APP-003",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "assert 'unknown_param' in \"unknown calculator 'tvm'\"\ntests/agentic_qe/test_calc_TC_APP_003.py:28: in test_TC_APP_003_tvm_unknown_param\n    assert \"unknown_param\" in body[\"error\"]\nE   assert 'unknown_param' in \"unknown calculator 'tvm'\"",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_calc_TC_APP_004::test_TC_APP_004_tvm_rate_string",
+     "case_id": "TC-APP-004",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "assert False\n +  where False = <built-in method startswith of str object at 0x10b6f4440>('invalid inputs:')\n +    where <built-in method startswith of str object at 0x10b6f4440> = \"unknown calculator 'tvm'\".startswith\ntests/agentic_qe/test_calc_TC_APP_004.py:28: in test_TC_APP_004_tvm_rate_string\n    assert body[\"error\"].startswith(\"invalid inputs:\")\nE   assert False\nE    +  where False = <built-in method startswith of str object at 0x10b6f4440>('invalid inputs:')\nE    +    where <built-in method startswith of str object at 0x10b6f4440> = \"unknown calculator 'tvm'\".startswith",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_calc_TC_APP_005::test_TC_APP_005_faulty_calc_runtime_error",
+     "case_id": "TC-APP-005",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "assert {'error': \"un...avings', ...]} == {'error': 'ca...ation failed'}\n  \n  Differing items:\n  {'error': \"unknown calculator 'faulty_calc'\"} != {'error': 'calculation failed'}\n  Left contains 1 more item:\n  {'available': ['future_value',\n                 'present_value',\n                 'future_value_annuity',...\n  \n  ...Full output truncated (14 lines hidden), use '-vv' to show\ntests/agentic_qe/test_calc_TC_APP_005.py:27: in test_TC_APP_005_faulty_calc_runtime_error\n    assert body == {\"error\": \"calculation failed\"}\nE   assert {'error': \"un...avings', ...]} == {'error': 'ca...ation failed'}",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_calc_TC_APP_006::test_TC_APP_006_faulty_index_index_error",
+     "case_id": "TC-APP-006",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "assert {'error': \"un...avings', ...]} == {'error': 'ca...ation failed'}\n  \n  Differing items:\n  {'error': \"unknown calculator 'faulty_index'\"} != {'error': 'calculation failed'}\n  Left contains 1 more item:\n  {'available': ['future_value',\n                 'present_value',\n                 'future_value_annuity',...\n  \n  ...Full output truncated (14 lines hidden), use '-vv' to show\ntests/agentic_qe/test_calc_TC_APP_006.py:27: in test_TC_APP_006_faulty_index_index_error\n    assert body == {\"error\": \"calculation failed\"}\nE   assert {'error': \"un...avings', ...]} == {'error': 'ca...ation failed'}",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_calc_TC_APP_007::test_TC_APP_007_faulty_attr_attribute_error",
+     "case_id": "TC-APP-007",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "assert {'error': \"un...avings', ...]} == {'error': 'ca...ation failed'}\n  \n  Differing items:\n  {'error': \"unknown calculator 'faulty_attr'\"} != {'error': 'calculation failed'}\n  Left contains 1 more item:\n  {'available': ['future_value',\n                 'present_value',\n                 'future_value_annuity',...\n  \n  ...Full output truncated (14 lines hidden), use '-vv' to show\ntests/agentic_qe/test_calc_TC_APP_007.py:27: in test_TC_APP_007_faulty_attr_attribute_error\n    assert body == {\"error\": \"calculation failed\"}\nE   assert {'error': \"un...avings', ...]} == {'error': 'ca...ation failed",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_calc_TC_APP_008::test_TC_APP_008_faulty_exit_system_exit",
+     "case_id": "TC-APP-008",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "SystemExit: 1\ntests/agentic_qe/test_calc_TC_APP_008.py:24: in test_TC_APP_008_faulty_exit_system_exit\n    resp = await client.post(\"/api/calc\", json=payload)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n../.venv/lib/python3.14/site-packages/httpx/_client.py:1859: in post\n    return await self.request(\n../.venv/lib/python3.14/site-packages/httpx/_client.py:1540: in request\n    return await self.send(request, auth=auth, follow_redirects=follow_redirects)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n../.venv/lib/python3.14/site-packages/httpx/_clien",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_nav_TC_APP_043::test_TC_APP_043",
+     "case_id": "TC-APP-043",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "AssertionError: assert {'error': 'qu...0 characters'} == {'error': 'in... scheme code'}\n  \n  Differing items:\n  {'error': 'query must be 1\u201380 characters'} != {'error': 'invalid scheme code'}\n  Use -v to get more diff\ntests/agentic_qe/test_nav_TC_APP_043.py:25: in test_TC_APP_043\n    assert body == {\"error\": \"invalid scheme code\"}\nE   AssertionError: assert {'error': 'qu...0 characters'} == {'error': 'in... scheme code'}\nE     \nE     Differing items:\nE     {'error': 'query must be 1\u201380 characters'} != {'error': 'invalid scheme code'}\nE     Use -v to get more diff",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_nav_api_TC_APP_043::test_TC_APP_043_nav_empty_code",
+     "case_id": "TC-APP-043",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "AssertionError: assert {'error': 'qu...0 characters'} == {'error': 'in... scheme code'}\n  \n  Differing items:\n  {'error': 'query must be 1\u201380 characters'} != {'error': 'invalid scheme code'}\n  Use -v to get more diff\ntests/agentic_qe/test_nav_api_TC_APP_043.py:19: in test_TC_APP_043_nav_empty_code\n    assert response.json() == {'error': 'invalid scheme code'}\nE   AssertionError: assert {'error': 'qu...0 characters'} == {'error': 'in... scheme code'}\nE     \nE     Differing items:\nE     {'error': 'query must be 1\u201380 characters'} != {'error': 'invalid scheme code'}\nE     Use -v to get more diff",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_production_TC_APP_061::test_TC_APP_061_production_server_starts",
+     "case_id": "TC-APP-061",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "httpx.ConnectError: All connection attempts failed\n../.venv/lib/python3.14/site-packages/httpx/_transports/default.py:101: in map_httpcore_exceptions\n    yield\n../.venv/lib/python3.14/site-packages/httpx/_transports/default.py:394: in handle_async_request\n    resp = await self._pool.handle_async_request(req)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n../.venv/lib/python3.14/site-packages/httpcore/_async/connection_pool.py:256: in handle_async_request\n    raise exc from None\n../.venv/lib/python3.14/site-packages/httpcore/_async/connection_pool.py:236: in handle_async_request\n    resp",
+     "cause": "The test needs a running server and nothing is listening.",
+     "fix": "Call the application object through a test client, or start the application before the test.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_production_TC_APP_062::test_TC_APP_062_production_server_uses_sse_transport",
+     "case_id": "TC-APP-062",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "assert 'Starting Personal Finance MCP Server (SSE)' in \"/Library/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python: can't open file '/priv...t-of-sarveshtalele/pytest-20/test_TC_APP_062_production_ser0/run_production.py': [Errno 2] No such file or directory\\n\"\ntests/agentic_qe/test_production_TC_APP_062.py:19: in test_TC_APP_062_production_server_uses_sse_transport\n    assert \"Starting Personal Finance MCP Server (SSE)\" in output\nE   assert 'Starting Personal Finance MCP Server (SSE)' in \"/Library/Frameworks/Python.framework/Versions/3.14/Resources/Python.app",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_production_TC_APP_064::test_TC_APP_064_production_server_accepts_custom_host_port",
+     "case_id": "TC-APP-064",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "httpx.ConnectError: All connection attempts failed\n../.venv/lib/python3.14/site-packages/httpx/_transports/default.py:101: in map_httpcore_exceptions\n    yield\n../.venv/lib/python3.14/site-packages/httpx/_transports/default.py:394: in handle_async_request\n    resp = await self._pool.handle_async_request(req)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n../.venv/lib/python3.14/site-packages/httpcore/_async/connection_pool.py:256: in handle_async_request\n    raise exc from None\n../.venv/lib/python3.14/site-packages/httpcore/_async/connection_pool.py:236: in handle_async_request\n    resp",
+     "cause": "The test needs a running server and nothing is listening.",
+     "fix": "Call the application object through a test client, or start the application before the test.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_production_server_custom_host_port_TC_APP_064::test_TC_APP_064_production_server_custom_host_port",
+     "case_id": "TC-APP-064",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "ProcessLookupError\ntests/agentic_qe/test_production_server_custom_host_port_TC_APP_064.py:43: in test_TC_APP_064_production_server_custom_host_port\n    pytest.fail(\"Production server did not respond on 127.0.0.1:9090 within 10 seconds\")\nE   Failed: Production server did not respond on 127.0.0.1:9090 within 10 seconds\n\nDuring handling of the above exception, another exception occurred:\ntests/agentic_qe/test_production_server_custom_host_port_TC_APP_064.py:45: in test_TC_APP_064_production_server_custom_host_port\n    proc.terminate()\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_production_server_invalid_port_TC_APP_063::test_TC_APP_063_production_server_rejects_port_zero",
+     "case_id": "TC-APP-063",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "AssertionError: Expected error message about binding failure. Got:\n  Starting Personal Finance MCP Server (SSE)\n    Host: 127.0.0.1\n    Port: 0\n    Tools: 77\n    URL:  http://127.0.0.1:0/sse\n  \n  Traceback (most recent call last):\n    File \"<frozen runpy>\", line 203, in _run_module_as_main\n    File \"<frozen runpy>\", line 88, in _run_code\n    File \"/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-3eq7_82q/projects/prj_d8d6132034a1/worktrees/run_06c2d92c54fc/run_production.py\", line 47, in <module>\n      main()\n      ~~~~^^\n    File \"/private/var/folders/p7/frxf61c540xgjd377fs",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_production_server_sse_transport_TC_APP_062::test_TC_APP_062_production_server_uses_sse_transport",
+     "case_id": "TC-APP-062",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value\ntests/agentic_qe/test_production_server_sse_transport_TC_APP_062.py:15: in test_TC_APP_062_production_server_uses_sse_transport\n    proc = await asyncio.create_subprocess_exec(\n                 ^^^^^^^\nE   UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_production_server_start_and_health_TC_APP_061::test_TC_APP_061_production_server_starts_and_listens",
+     "case_id": "TC-APP-061",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "ProcessLookupError\ntests/agentic_qe/test_production_server_start_and_health_TC_APP_061.py:45: in test_TC_APP_061_production_server_starts_and_listens\n    pytest.fail(\"Production server did not start and bind port within 10 seconds\")\nE   Failed: Production server did not start and bind port within 10 seconds\n\nDuring handling of the above exception, another exception occurred:\ntests/agentic_qe/test_production_server_start_and_health_TC_APP_061.py:47: in test_TC_APP_061_production_server_starts_and_listens\n    proc.terminate()\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyn",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_sanitize_params_TC_APP_073::test_TC_APP_073_years_above_cap",
+     "case_id": "TC-APP-073",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "Failed: DID NOT RAISE ValueError\ntests/agentic_qe/test_sanitize_params_TC_APP_073.py:6: in test_TC_APP_073_years_above_cap\n    with pytest.raises(ValueError, match=\"'years' must be \u2264 100\"):\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   Failed: DID NOT RAISE ValueError",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_sanitize_params_TC_APP_074::test_TC_APP_074_months_above_cap",
+     "case_id": "TC-APP-074",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "Failed: DID NOT RAISE ValueError\ntests/agentic_qe/test_sanitize_params_TC_APP_074.py:6: in test_TC_APP_074_months_above_cap\n    with pytest.raises(ValueError, match=\"'months' must be \u2264 600\"):\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   Failed: DID NOT RAISE ValueError",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_sanitize_params_TC_APP_077::test_TC_APP_077_string_longer_than_40",
+     "case_id": "TC-APP-077",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "Failed: DID NOT RAISE ValueError\ntests/agentic_qe/test_sanitize_params_TC_APP_077.py:6: in test_TC_APP_077_string_longer_than_40\n    with pytest.raises(ValueError, match=\"'label' is too long\"):\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   Failed: DID NOT RAISE ValueError",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_security_headers_post_calc_TC_APP_058::test_TC_APP_058_calc_security_headers",
+     "case_id": "TC-APP-058",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "assert 400 == 200\n +  where 400 = <Response [400 Bad Request]>.status_code\ntests/agentic_qe/test_security_headers_post_calc_TC_APP_058.py:22: in test_TC_APP_058_calc_security_headers\n    assert response.status_code == 200\nE   assert 400 == 200\nE    +  where 400 = <Response [400 Bad Request]>.status_code",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    }
+   ],
+   "execution_summary": {
+    "text": "pytest: FAIL. 33 passed, 99 failed, 0 skipped. Failures by class: 53 defect, 8 test problem, 38 environment. Environment failures count as not passed.",
+    "source": "code",
+    "reason": "Agent summary refused: its text says 8 tests but the report has 132"
+   },
+   "failure_classes": {
+    "defect": 53,
+    "test problem": 8,
+    "environment": 38
+   },
+   "refused": "These items were judged REJECT: TC-APP-001, TC-APP-002, TC-APP-003, TC-APP-004, TC-APP-005, TC-APP-006, TC-APP-007, TC-APP-008, TC-APP-009, TC-APP-010, TC-APP-011, TC-APP-012 and more. Approving them needs a reason, and this one has 0 characters, fewer than 10. Write it in the reason field.",
+   "approved_with_reason": "Live test approver: approved with the REJECT items still listed after one send-back, to measure the later stages end to end. Not a release decision."
+  }
+ ],
+ "started": "2026-11-14T18:59:59.647932",
+ "status": "completed",
+ "error": "",
+ "total_seconds": 508.4,
+ "summary": {
+  "verdict": "FAIL",
+  "executed": 132,
+  "passed": 33,
+  "failed": 99,
+  "pass_rate": 25.0,
+  "requirements": 22,
+  "requirements_covered": 5,
+  "coverage": 22.7,
+  "gaps": [
+   "REQ-001",
+   "REQ-002",
+   "REQ-005",
+   "REQ-006",
+   "REQ-007",
+   "REQ-008",
+   "REQ-009",
+   "REQ-012",
+   "REQ-013",
+   "REQ-014",
+   "REQ-015",
+   "REQ-016",
+   "REQ-018",
+   "REQ-020",
+   "REQ-021"
+  ],
+  "defects": 53,
+  "failure_classes": {
+   "defect": 53,
+   "test problem": 8,
+   "environment": 38
+  }
+ },
+ "requirements": 22
+}
