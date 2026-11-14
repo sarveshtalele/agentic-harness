@@ -74,19 +74,17 @@ def plan_file(plan: dict) -> dict:
             "skippedLevels": [{"level": k, "reason": v} for k, v in plan.get("skipped_levels", {}).items()]}
 
 
-def scenarios_of(plan: dict) -> dict[str, list[str]]:
-    """Requirement id to the plugin scenario ids of the plan areas that list it."""
-    out: dict[str, list[str]] = {}
-    for a in plan["areas"]:
-        for rid in a["requirement_ids"]:
-            out.setdefault(rid, []).append(scenario_id(a["id"]))
-    return out
+def scenarios_of(plan: dict, requirement_id: str, level: str = "") -> list[str]:
+    """The plugin scenario ids a case links to: the plan areas listing its requirement at the case's own level, or at any
+    level when none matches. Linking a Unit case to an E2E scenario makes the auditor rightly say it does not cover it."""
+    areas = [a for a in plan["areas"] if requirement_id in a["requirement_ids"]]
+    same = [a for a in areas if level and a["level"] == level]
+    return [scenario_id(a["id"]) for a in (same or areas)]
 
 
 def cases_file(cases: list[dict], plan: dict) -> dict:
     """The platform's designed cases in the plugin's test_cases.json shape, each linked to its plan scenarios."""
-    links = scenarios_of(plan)
-    return {"cases": [{"tc_id": c["id"], "requirement_id": c["requirement_id"], "planScenarioIds": links.get(c["requirement_id"], []),
+    return {"cases": [{"tc_id": c["id"], "requirement_id": c["requirement_id"], "planScenarioIds": scenarios_of(plan, c["requirement_id"], c.get("level", "")),
                        "scenario": c.get("scenario", ""), "type": c.get("type", ""), "level": c.get("level", ""), "priority": c.get("priority", ""),
                        "precondition": c.get("precondition", ""), "test_data": c.get("test_data", ""), "steps": c.get("steps", []),
                        "expected_result": c.get("expected_result", "")} for c in cases]}

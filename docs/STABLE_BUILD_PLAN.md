@@ -118,6 +118,15 @@ Live run 2026-11-14 on personal-finance-mcp (G1/G2 code): G1 68 s, plugin PASS; 
 180 s goal. The gate stopped there: the engine refuses to approve REJECT cases without a reason, so the live test now
 sends such a gate back once with that reason.
 
+Live run 2026-11-14 16:37 (G3 code, 28 requirements):
+- G1 68 s, PASS. G2 23 s, PASS.
+- G3 182 s: 96 cases; the auditor found 49 COVERS, 25 PARTIAL and 22 MISSES; the plugin check said FAIL. The gate was sent
+  back once for 3 REJECT cases.
+- G3 again after 338 s: 100 cases, 62 COVERS; one REJECT case was still left, so approval needs a person's reason.
+
+Cause of many MISSES: each case was linked to every scenario of its requirement, at every level. Fixed: a case now links
+to the scenarios at its own level.
+
 Limit: greenfield requirements cite approved documents, not code, so the plugin's quote check is recorded as not applied
 for them. Evidence: `tests/test_plugin_bridge.py` (real `check-gate.ts`: a real quote passes, an invented one is flagged)
 and the G1 assertions in `tests/test_api_change.py`.

@@ -115,6 +115,9 @@ def test_gate3_needs_linked_reviewed_audited_cases_with_recorded_answers():
             "steps": ["call add(2, 3)"], "expected_result": "5"}
     cases = pb.cases_file([case], plan)
     assert cases["cases"][0]["planScenarioIds"] == ["SC-A1-001"]
+    two = {"areas": [area, {**area, "id": "A2", "level": "E2E"}]}
+    assert pb.cases_file([case], two)["cases"][0]["planScenarioIds"] == ["SC-A1-001"], "a Unit case links to the Unit scenario only"
+    assert pb.cases_file([{**case, "level": "Integration"}], two)["cases"][0]["planScenarioIds"] == ["SC-A1-001", "SC-A2-001"]
     pb.write(pid, app, "04-design/test_cases.json", cases)
     review = [{"tc_id": "TC-ADD-001", "scores": {"source_proven": 30, "correct_target": 25, "expected_derivable": 25, "fixture_validity": 20}, "total": 100, "verdict": "APPROVED", "flaws": []}]
     pb.write(pid, app, "04-design/confidence.json", {"kind": "design", "items": review})  # written without a capture stamp

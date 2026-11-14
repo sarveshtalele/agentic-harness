@@ -1,0 +1,897 @@
+{
+ "repo": "https://github.com/sarveshtalele/personal-finance-mcp.git",
+ "model": "deepseek-v4-flash-global",
+ "run_id": "run_8a19062af677",
+ "gates": [
+  {
+   "gate": 0,
+   "seconds": 0.0,
+   "title": "Gate 0: confirm intake scope",
+   "summary": "Mode: brownfield. Source: git https://github.com/sarveshtalele/personal-finance-mcp.git at aff44ea06f. Files: 88. Languages: Python, JavaScript, CSS. Agents read this project's repository and documents only. Generated code lands on a separate branch.",
+   "plugin_check": null,
+   "design_audit": null
+  },
+  {
+   "gate": 1,
+   "seconds": 68.2,
+   "title": "Gate 1: approve requirements",
+   "summary": "28 requirements with verified evidence. agentic-qe Gate 1 check: PASS. Tokens: 113,383 used of 50,000,000, 49,886,617 left.",
+   "plugin_check": {
+    "ok": true,
+    "gaps": [],
+    "missing": [],
+    "validator": {
+     "validator": "1.6.0",
+     "gate": 1,
+     "ok": true,
+     "errors": [],
+     "warnings": [],
+     "metrics": {
+      "requirements": 28,
+      "scenarios": 0,
+      "cases": 0,
+      "test_files": 0,
+      "results": 0,
+      "repo_test_files": 11,
+      "repo_tests": 137,
+      "existing": 11,
+      "generated": 0,
+      "manual": 0
+     },
+     "suspects": [],
+     "duplicates": [],
+     "brief": "Gate 1 validation: PASS (0 errors, 0 warnings)."
+    },
+    "error": null,
+    "app": "prj_dc14d32a8e6c",
+    "dropped": []
+   },
+   "design_audit": null
+  },
+  {
+   "gate": 2,
+   "seconds": 23.1,
+   "title": "Gate 2: approve test plan",
+   "summary": "Deterministic score 100, independent review 85 (REVISE). agentic-qe Gate 2 check: PASS. Tokens: 148,398 used of 50,000,000, 49,851,602 left.",
+   "plugin_check": {
+    "ok": true,
+    "gaps": [],
+    "missing": [],
+    "validator": {
+     "validator": "1.6.0",
+     "gate": 2,
+     "ok": true,
+     "errors": [],
+     "warnings": [
+      {
+       "check": "plan.requirements",
+       "message": "P2/P3 requirements with no plan scenario",
+       "ids": [
+        "REQ-018"
+       ]
+      }
+     ],
+     "metrics": {
+      "requirements": 28,
+      "scenarios": 27,
+      "cases": 0,
+      "test_files": 0,
+      "results": 0,
+      "repo_test_files": 11,
+      "repo_tests": 137,
+      "existing": 11,
+      "generated": 0,
+      "manual": 0,
+      "plan_by_area_level": {
+       "Asset allocation monthly breakdown with positive investment": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "CORS middleware configuration": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator domain errors return 400": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator parameter cap enforcement": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator parameter finite number validation": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator parameter maximum magnitude validation": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Health endpoint returns status and tool count": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Information ratio zero tracking error": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Invalid JSON body returns 400": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Invalid currency code returns 400 in FX endpoint": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Invalid stock symbol returns 400 in quote endpoint": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Mutual fund search query length validation": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Payload too large returns 413": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Portfolio expected return length mismatch": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Production server SSE transport on configured host and port": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Rate limit exceeded returns 429": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Scheme code validation returns 400": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Security headers on every response": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Sharpe ratio zero standard deviation": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Sortino ratio zero downside deviation": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Static file serving for exported web output": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Successful calculator call returns result": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Tools list returns sorted categories and tools": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Treynor ratio zero beta": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Unexpected calculator exception returns 400 without internals": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Unknown calculator returns 400 with available list": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Web server main runs uvicorn on PORT env var": {
+        "Integration": 1,
+        "Unit": 0
+       }
+      }
+     },
+     "suspects": [],
+     "duplicates": [],
+     "brief": "Gate 2 validation: PASS (0 errors, 1 warnings)."
+    },
+    "error": null,
+    "app": "prj_dc14d32a8e6c"
+   },
+   "design_audit": null
+  },
+  {
+   "gate": 3,
+   "seconds": 182.4,
+   "title": "Gate 3: approve test design and data",
+   "summary": "96 cases. Case budget 100 of 40 (ATLAS_MAX_CASES), decided before design; P0 and P1 need more than the limit, so the limit is exceeded for them; 3 lower-priority requirements get no cases: REQ-018, REQ-022, REQ-028. Remaining gaps: ['REQ-002: no Exception case, and the requirement states error behaviour', 'REQ-003: no Exception case, and the requirement states error behaviour', 'REQ-010: no Positive case', 'REQ-010: needs 2 Negative cases', 'REQ-013: no Exception case, and the requirement states error behaviour', 'refused REQ-010: case \\'Valid calculator call with correct parameters returns result\\' has test data \\'Object: {\"calculator\": \"add\", \"parameters\": [2, 3]}\\', a string, but the requirement states its input type as object. Use a value of that type, or state the error behaviour in the requirement first', 'refused REQ-010: case \\'Valid calculator call with string parameters returns concate\\' has test data \\'Object: {\"calculator\": \"concat\", \"parameters\": [\"hello\", \" w\\', a string, but the requirement states its input type as object. Use a value of that type, or state the error behaviour in the requirement first', 'refused REQ-010: case \\'Valid calculator call with parameter absent but optional\\' has test data \\'Object: {\"calculator\": \"increment\", \"parameters\": [5]} (assu\\', a string, but the requirement states its input type as object. Use a value of that type, or state the error behaviour in the requirement first', 'refused REQ-010: case \\'Valid calculator call with extra parameters ignored\\' has test data \\'Object: {\"calculator\": \"add\", \"parameters\": [2, 3, 100]}\\', a string, but the requirement states its input type as object. Use a value of that type, or state the error behaviour in the requirement first']. agentic-qe Gate 3 check: FAIL (plan scenarios with no designed case (24 of 27 designed): SC-AREA-UNIT-6-001, SC-AREA-INT-10-001, SC-AREA-INT-18-001; cases the coverage auditor says do not cover their scenario: TC-APP-011 (PARTIAL), TC-APP-012 (PARTIAL), TC-APP-015 (PARTIAL), TC-APP-016 (PARTIAL), TC-APP-018 (PARTIAL), TC-APP-019 (PARTIAL), TC-APP-023 (MISSES), TC-APP-025 (PARTIAL), TC-APP-027 (MISSES), TC-APP-028 (PARTIAL), TC-APP-029 (PARTIAL), TC-APP-031 (PARTIAL), TC-APP-033 (MISSES), TC-APP-036 (MISSES), TC-APP-037 (MISSES), TC-APP-041 (MISSES), TC-APP-044 (MISSES), TC-APP-045 (PARTIAL), TC-APP-048 (PARTIAL), TC-APP-049 (PARTIAL), TC-APP-052 (PARTIAL), TC-APP-056 (MISSES), TC-APP-058 (MISSES), TC-APP-059 (MISSES), TC-APP-060 (MISSES) and 22 more). Tokens: 529,279 used of 50,000,000, 49,470,721 left.",
+   "plugin_check": {
+    "ok": false,
+    "gaps": [
+     "plan scenarios with no designed case (24 of 27 designed): SC-AREA-UNIT-6-001, SC-AREA-INT-10-001, SC-AREA-INT-18-001",
+     "cases the coverage auditor says do not cover their scenario: TC-APP-011 (PARTIAL), TC-APP-012 (PARTIAL), TC-APP-015 (PARTIAL), TC-APP-016 (PARTIAL), TC-APP-018 (PARTIAL), TC-APP-019 (PARTIAL), TC-APP-023 (MISSES), TC-APP-025 (PARTIAL), TC-APP-027 (MISSES), TC-APP-028 (PARTIAL), TC-APP-029 (PARTIAL), TC-APP-031 (PARTIAL), TC-APP-033 (MISSES), TC-APP-036 (MISSES), TC-APP-037 (MISSES), TC-APP-041 (MISSES), TC-APP-044 (MISSES), TC-APP-045 (PARTIAL), TC-APP-048 (PARTIAL), TC-APP-049 (PARTIAL), TC-APP-052 (PARTIAL), TC-APP-056 (MISSES), TC-APP-058 (MISSES), TC-APP-059 (MISSES), TC-APP-060 (MISSES) and 22 more"
+    ],
+    "missing": [
+     "SC-AREA-UNIT-6-001",
+     "SC-AREA-INT-10-001",
+     "SC-AREA-INT-18-001",
+     "TC-APP-011 (PARTIAL)",
+     "TC-APP-012 (PARTIAL)",
+     "TC-APP-015 (PARTIAL)",
+     "TC-APP-016 (PARTIAL)",
+     "TC-APP-018 (PARTIAL)",
+     "TC-APP-019 (PARTIAL)",
+     "TC-APP-023 (MISSES)",
+     "TC-APP-025 (PARTIAL)",
+     "TC-APP-027 (MISSES)",
+     "TC-APP-028 (PARTIAL)",
+     "TC-APP-029 (PARTIAL)",
+     "TC-APP-031 (PARTIAL)",
+     "TC-APP-033 (MISSES)",
+     "TC-APP-036 (MISSES)",
+     "TC-APP-037 (MISSES)",
+     "TC-APP-041 (MISSES)",
+     "TC-APP-044 (MISSES)",
+     "TC-APP-045 (PARTIAL)",
+     "TC-APP-048 (PARTIAL)",
+     "TC-APP-049 (PARTIAL)",
+     "TC-APP-052 (PARTIAL)",
+     "TC-APP-056 (MISSES)",
+     "TC-APP-058 (MISSES)",
+     "TC-APP-059 (MISSES)",
+     "TC-APP-060 (MISSES)",
+     "TC-APP-061 (PARTIAL)",
+     "TC-APP-064 (PARTIAL)",
+     "TC-APP-065 (PARTIAL)",
+     "TC-APP-068 (PARTIAL)",
+     "TC-APP-069 (PARTIAL)",
+     "TC-APP-072 (PARTIAL)",
+     "TC-APP-073 (MISSES)",
+     "TC-APP-076 (PARTIAL)",
+     "TC-APP-077 (MISSES)",
+     "TC-APP-080 (PARTIAL)",
+     "TC-APP-081 (MISSES)",
+     "TC-APP-083 (MISSES)",
+     "TC-APP-084 (MISSES)",
+     "TC-APP-085 (MISSES)",
+     "TC-APP-087 (MISSES)",
+     "TC-APP-088 (MISSES)",
+     "TC-APP-089 (MISSES)",
+     "TC-APP-091 (PARTIAL)",
+     "TC-APP-092 (MISSES)",
+     "TC-APP-093 (PARTIAL)",
+     "TC-APP-095 (PARTIAL)",
+     "TC-APP-096 (MISSES)"
+    ],
+    "validator": {
+     "validator": "1.6.0",
+     "gate": 3,
+     "ok": false,
+     "errors": [
+      {
+       "check": "design.coverage",
+       "message": "plan scenarios with no designed case (24 of 27 designed)",
+       "ids": [
+        "SC-AREA-INT-10-001",
+        "SC-AREA-INT-18-001",
+        "SC-AREA-UNIT-6-001"
+       ]
+      },
+      {
+       "check": "design.areas",
+       "message": "plan areas with no designed case at all",
+       "ids": [
+        "Asset allocation monthly breakdown with positive investment",
+        "CORS middleware configuration",
+        "Successful calculator call returns result"
+       ]
+      },
+      {
+       "check": "design.suspects",
+       "message": "cases that do not read like their scenario and no auditor verdict COVERS them",
+       "ids": [
+        "TC-APP-025",
+        "TC-APP-027..TC-APP-028",
+        "TC-APP-033"
+       ]
+      }
+     ],
+     "warnings": [
+      {
+       "check": "plan.requirements",
+       "message": "P2/P3 requirements with no plan scenario",
+       "ids": [
+        "REQ-018"
+       ]
+      },
+      {
+       "check": "design.duplicates",
+       "message": "1 groups of near-identical cases",
+       "ids": [
+        "TC-APP-078..TC-APP-079"
+       ]
+      }
+     ],
+     "metrics": {
+      "requirements": 28,
+      "scenarios": 27,
+      "cases": 96,
+      "test_files": 0,
+      "results": 0,
+      "repo_test_files": 11,
+      "repo_tests": 137,
+      "existing": 11,
+      "generated": 0,
+      "manual": 0,
+      "plan_by_area_level": {
+       "Asset allocation monthly breakdown with positive investment": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "CORS middleware configuration": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator domain errors return 400": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator parameter cap enforcement": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator parameter finite number validation": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator parameter maximum magnitude validation": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Health endpoint returns status and tool count": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Information ratio zero tracking error": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Invalid JSON body returns 400": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Invalid currency code returns 400 in FX endpoint": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Invalid stock symbol returns 400 in quote endpoint": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Mutual fund search query length validation": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Payload too large returns 413": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Portfolio expected return length mismatch": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Production server SSE transport on configured host and port": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Rate limit exceeded returns 429": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Scheme code validation returns 400": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Security headers on every response": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Sharpe ratio zero standard deviation": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Sortino ratio zero downside deviation": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Static file serving for exported web output": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Successful calculator call returns result": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Tools list returns sorted categories and tools": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Treynor ratio zero beta": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Unexpected calculator exception returns 400 without internals": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Unknown calculator returns 400 with available list": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Web server main runs uvicorn on PORT env var": {
+        "Integration": 1,
+        "Unit": 0
+       }
+      },
+      "design_coverage_by_area": {
+       "Asset allocation monthly breakdown with positive investment": 0,
+       "CORS middleware configuration": 0,
+       "Calculator domain errors return 400": 100,
+       "Calculator parameter cap enforcement": 100,
+       "Calculator parameter finite number validation": 100,
+       "Calculator parameter maximum magnitude validation": 100,
+       "Health endpoint returns status and tool count": 100,
+       "Information ratio zero tracking error": 100,
+       "Invalid JSON body returns 400": 100,
+       "Invalid currency code returns 400 in FX endpoint": 100,
+       "Invalid stock symbol returns 400 in quote endpoint": 100,
+       "Mutual fund search query length validation": 100,
+       "Payload too large returns 413": 100,
+       "Portfolio expected return length mismatch": 100,
+       "Production server SSE transport on configured host and port": 100,
+       "Rate limit exceeded returns 429": 100,
+       "Scheme code validation returns 400": 100,
+       "Security headers on every response": 100,
+       "Sharpe ratio zero standard deviation": 100,
+       "Sortino ratio zero downside deviation": 100,
+       "Static file serving for exported web output": 100,
+       "Successful calculator call returns result": 0,
+       "Tools list returns sorted categories and tools": 100,
+       "Treynor ratio zero beta": 100,
+       "Unexpected calculator exception returns 400 without internals": 100,
+       "Unknown calculator returns 400 with available list": 100,
+       "Web server main runs uvicorn on PORT env var": 100
+      },
+      "cases_per_scenario": {
+       "mean": 4
+      },
+      "similarity_median": 0.4
+     },
+     "suspects": [
+      {
+       "case": "TC-APP-025",
+       "scenario": "SC-AREA-INT-2-001",
+       "similarity": 0,
+       "audit": "PARTIAL"
+      },
+      {
+       "case": "TC-APP-027",
+       "scenario": "SC-AREA-INT-2-001",
+       "similarity": 0,
+       "audit": "MISSES"
+      },
+      {
+       "case": "TC-APP-028",
+       "scenario": "SC-AREA-INT-2-001",
+       "similarity": 0,
+       "audit": "PARTIAL"
+      },
+      {
+       "case": "TC-APP-033",
+       "scenario": "SC-AREA-INT-5-001",
+       "similarity": 0.053,
+       "audit": "MISSES"
+      },
+      {
+       "case": "TC-APP-053",
+       "scenario": "SC-AREA-INT-11-001",
+       "similarity": 0.072,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-054",
+       "scenario": "SC-AREA-INT-11-001",
+       "similarity": 0.075,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-055",
+       "scenario": "SC-AREA-INT-11-001",
+       "similarity": 0.079,
+       "audit": "COVERS"
+      }
+     ],
+     "duplicates": [
+      [
+       "TC-APP-078",
+       "TC-APP-079"
+      ]
+     ],
+     "brief": "Gate 3 validation: FAIL (3 errors, 2 warnings).\n- plan scenarios with no designed case (24 of 27 designed): SC-AREA-INT-10-001, SC-AREA-INT-18-001, SC-AREA-UNIT-6-001\n- plan areas with no designed case at all: Asset allocation monthly breakdown with positive investment, CORS middleware configuration, Successful calculator call returns result\n- cases that do not read like their scenario and no auditor verdict COVERS them: TC-APP-025, TC-APP-027..TC-APP-028, TC-APP-033\nAudit these case/scenario pairs first (low similarity): TC-APP-025, TC-APP-027, TC-APP-028, TC-APP-033, TC-APP-053, TC-APP-054, TC-APP-055"
+    },
+    "error": null
+   },
+   "design_audit": {
+    "app": "prj_dc14d32a8e6c",
+    "reviewed": 96,
+    "audited": 96,
+    "counts": {
+     "COVERS": 49,
+     "PARTIAL": 25,
+     "MISSES": 22
+    },
+    "unaudited": []
+   },
+   "refused": "These items were judged REJECT: TC-APP-052, TC-APP-088, TC-APP-092. Approving them needs a reason, and this one has 0 characters, fewer than 10. Write it in the reason field.",
+   "sent_back": true
+  },
+  {
+   "gate": 3,
+   "seconds": 337.6,
+   "title": "Gate 3: approve test design and data",
+   "summary": "100 cases. Case budget 100 of 40 (ATLAS_MAX_CASES), decided before design; P0 and P1 need more than the limit, so the limit is exceeded for them; 3 lower-priority requirements get no cases: REQ-018, REQ-022, REQ-028; 2 excess cases dropped before review. Remaining gaps: none. agentic-qe Gate 3 check: FAIL (plan scenarios with no designed case (25 of 27 designed): SC-AREA-UNIT-6-001, SC-AREA-INT-18-001; cases the coverage auditor says do not cover their scenario: TC-APP-002 (MISSES), TC-APP-003 (MISSES), TC-APP-004 (MISSES), TC-APP-010 (PARTIAL), TC-APP-015 (PARTIAL), TC-APP-016 (PARTIAL), TC-APP-019 (PARTIAL), TC-APP-020 (PARTIAL), TC-APP-029 (PARTIAL), TC-APP-031 (MISSES), TC-APP-033 (MISSES), TC-APP-035 (MISSES), TC-APP-036 (PARTIAL), TC-APP-037 (MISSES), TC-APP-039 (MISSES), TC-APP-040 (PARTIAL), TC-APP-041 (MISSES), TC-APP-043 (PARTIAL), TC-APP-044 (MISSES), TC-APP-047 (PARTIAL), TC-APP-051 (MISSES), TC-APP-052 (MISSES), TC-APP-053 (MISSES), TC-APP-057 (MISSES), TC-APP-061 (PARTIAL) and 13 more). Tokens: 843,153 used of 50,000,000, 49,156,847 left.",
+   "plugin_check": {
+    "ok": false,
+    "gaps": [
+     "plan scenarios with no designed case (25 of 27 designed): SC-AREA-UNIT-6-001, SC-AREA-INT-18-001",
+     "cases the coverage auditor says do not cover their scenario: TC-APP-002 (MISSES), TC-APP-003 (MISSES), TC-APP-004 (MISSES), TC-APP-010 (PARTIAL), TC-APP-015 (PARTIAL), TC-APP-016 (PARTIAL), TC-APP-019 (PARTIAL), TC-APP-020 (PARTIAL), TC-APP-029 (PARTIAL), TC-APP-031 (MISSES), TC-APP-033 (MISSES), TC-APP-035 (MISSES), TC-APP-036 (PARTIAL), TC-APP-037 (MISSES), TC-APP-039 (MISSES), TC-APP-040 (PARTIAL), TC-APP-041 (MISSES), TC-APP-043 (PARTIAL), TC-APP-044 (MISSES), TC-APP-047 (PARTIAL), TC-APP-051 (MISSES), TC-APP-052 (MISSES), TC-APP-053 (MISSES), TC-APP-057 (MISSES), TC-APP-061 (PARTIAL) and 13 more"
+    ],
+    "missing": [
+     "SC-AREA-UNIT-6-001",
+     "SC-AREA-INT-18-001",
+     "TC-APP-002 (MISSES)",
+     "TC-APP-003 (MISSES)",
+     "TC-APP-004 (MISSES)",
+     "TC-APP-010 (PARTIAL)",
+     "TC-APP-015 (PARTIAL)",
+     "TC-APP-016 (PARTIAL)",
+     "TC-APP-019 (PARTIAL)",
+     "TC-APP-020 (PARTIAL)",
+     "TC-APP-029 (PARTIAL)",
+     "TC-APP-031 (MISSES)",
+     "TC-APP-033 (MISSES)",
+     "TC-APP-035 (MISSES)",
+     "TC-APP-036 (PARTIAL)",
+     "TC-APP-037 (MISSES)",
+     "TC-APP-039 (MISSES)",
+     "TC-APP-040 (PARTIAL)",
+     "TC-APP-041 (MISSES)",
+     "TC-APP-043 (PARTIAL)",
+     "TC-APP-044 (MISSES)",
+     "TC-APP-047 (PARTIAL)",
+     "TC-APP-051 (MISSES)",
+     "TC-APP-052 (MISSES)",
+     "TC-APP-053 (MISSES)",
+     "TC-APP-057 (MISSES)",
+     "TC-APP-061 (PARTIAL)",
+     "TC-APP-065 (PARTIAL)",
+     "TC-APP-067 (PARTIAL)",
+     "TC-APP-069 (PARTIAL)",
+     "TC-APP-072 (PARTIAL)",
+     "TC-APP-077 (MISSES)",
+     "TC-APP-079 (MISSES)",
+     "TC-APP-081 (MISSES)",
+     "TC-APP-084 (PARTIAL)",
+     "TC-APP-085 (MISSES)",
+     "TC-APP-088 (PARTIAL)",
+     "TC-APP-089 (MISSES)",
+     "TC-APP-093 (MISSES)",
+     "TC-APP-097 (MISSES)"
+    ],
+    "validator": {
+     "validator": "1.6.0",
+     "gate": 3,
+     "ok": false,
+     "errors": [
+      {
+       "check": "design.coverage",
+       "message": "plan scenarios with no designed case (25 of 27 designed)",
+       "ids": [
+        "SC-AREA-INT-18-001",
+        "SC-AREA-UNIT-6-001"
+       ]
+      },
+      {
+       "check": "design.areas",
+       "message": "plan areas with no designed case at all",
+       "ids": [
+        "Asset allocation monthly breakdown with positive investment",
+        "CORS middleware configuration"
+       ]
+      },
+      {
+       "check": "design.suspects",
+       "message": "cases that do not read like their scenario and no auditor verdict COVERS them",
+       "ids": [
+        "TC-APP-010",
+        "TC-APP-047",
+        "TC-APP-079"
+       ]
+      }
+     ],
+     "warnings": [
+      {
+       "check": "plan.requirements",
+       "message": "P2/P3 requirements with no plan scenario",
+       "ids": [
+        "REQ-018"
+       ]
+      },
+      {
+       "check": "design.duplicates",
+       "message": "5 groups of near-identical cases",
+       "ids": [
+        "TC-APP-030",
+        "TC-APP-032",
+        "TC-APP-034",
+        "TC-APP-036",
+        "TC-APP-038",
+        "TC-APP-040",
+        "TC-APP-063..TC-APP-064",
+        "TC-APP-099..TC-APP-100"
+       ]
+      }
+     ],
+     "metrics": {
+      "requirements": 28,
+      "scenarios": 27,
+      "cases": 100,
+      "test_files": 0,
+      "results": 0,
+      "repo_test_files": 11,
+      "repo_tests": 137,
+      "existing": 11,
+      "generated": 0,
+      "manual": 0,
+      "plan_by_area_level": {
+       "Asset allocation monthly breakdown with positive investment": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "CORS middleware configuration": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator domain errors return 400": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator parameter cap enforcement": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator parameter finite number validation": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator parameter maximum magnitude validation": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Health endpoint returns status and tool count": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Information ratio zero tracking error": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Invalid JSON body returns 400": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Invalid currency code returns 400 in FX endpoint": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Invalid stock symbol returns 400 in quote endpoint": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Mutual fund search query length validation": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Payload too large returns 413": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Portfolio expected return length mismatch": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Production server SSE transport on configured host and port": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Rate limit exceeded returns 429": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Scheme code validation returns 400": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Security headers on every response": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Sharpe ratio zero standard deviation": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Sortino ratio zero downside deviation": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Static file serving for exported web output": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Successful calculator call returns result": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Tools list returns sorted categories and tools": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Treynor ratio zero beta": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Unexpected calculator exception returns 400 without internals": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Unknown calculator returns 400 with available list": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Web server main runs uvicorn on PORT env var": {
+        "Integration": 1,
+        "Unit": 0
+       }
+      },
+      "design_coverage_by_area": {
+       "Asset allocation monthly breakdown with positive investment": 0,
+       "CORS middleware configuration": 0,
+       "Calculator domain errors return 400": 100,
+       "Calculator parameter cap enforcement": 100,
+       "Calculator parameter finite number validation": 100,
+       "Calculator parameter maximum magnitude validation": 100,
+       "Health endpoint returns status and tool count": 100,
+       "Information ratio zero tracking error": 100,
+       "Invalid JSON body returns 400": 100,
+       "Invalid currency code returns 400 in FX endpoint": 100,
+       "Invalid stock symbol returns 400 in quote endpoint": 100,
+       "Mutual fund search query length validation": 100,
+       "Payload too large returns 413": 100,
+       "Portfolio expected return length mismatch": 100,
+       "Production server SSE transport on configured host and port": 100,
+       "Rate limit exceeded returns 429": 100,
+       "Scheme code validation returns 400": 100,
+       "Security headers on every response": 100,
+       "Sharpe ratio zero standard deviation": 100,
+       "Sortino ratio zero downside deviation": 100,
+       "Static file serving for exported web output": 100,
+       "Successful calculator call returns result": 100,
+       "Tools list returns sorted categories and tools": 100,
+       "Treynor ratio zero beta": 100,
+       "Unexpected calculator exception returns 400 without internals": 100,
+       "Unknown calculator returns 400 with available list": 100,
+       "Web server main runs uvicorn on PORT env var": 100
+      },
+      "cases_per_scenario": {
+       "mean": 4
+      },
+      "similarity_median": 0.391
+     },
+     "suspects": [
+      {
+       "case": "TC-APP-010",
+       "scenario": "SC-AREA-INT-10-001",
+       "similarity": 0.017,
+       "audit": "PARTIAL"
+      },
+      {
+       "case": "TC-APP-045",
+       "scenario": "SC-AREA-INT-2-001",
+       "similarity": 0.014,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-047",
+       "scenario": "SC-AREA-INT-2-001",
+       "similarity": 0,
+       "audit": "PARTIAL"
+      },
+      {
+       "case": "TC-APP-048",
+       "scenario": "SC-AREA-INT-2-001",
+       "similarity": 0,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-074",
+       "scenario": "SC-AREA-INT-11-001",
+       "similarity": 0.034,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-075",
+       "scenario": "SC-AREA-INT-11-001",
+       "similarity": 0,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-076",
+       "scenario": "SC-AREA-INT-11-001",
+       "similarity": 0,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-079",
+       "scenario": "SC-AREA-INT-12-001",
+       "similarity": 0.071,
+       "audit": "MISSES"
+      }
+     ],
+     "duplicates": [
+      [
+       "TC-APP-030",
+       "TC-APP-032"
+      ],
+      [
+       "TC-APP-034",
+       "TC-APP-036"
+      ],
+      [
+       "TC-APP-038",
+       "TC-APP-040"
+      ],
+      [
+       "TC-APP-063",
+       "TC-APP-064"
+      ],
+      [
+       "TC-APP-099",
+       "TC-APP-100"
+      ]
+     ],
+     "brief": "Gate 3 validation: FAIL (3 errors, 2 warnings).\n- plan scenarios with no designed case (25 of 27 designed): SC-AREA-INT-18-001, SC-AREA-UNIT-6-001\n- plan areas with no designed case at all: Asset allocation monthly breakdown with positive investment, CORS middleware configuration\n- cases that do not read like their scenario and no auditor verdict COVERS them: TC-APP-010, TC-APP-047, TC-APP-079\nAudit these case/scenario pairs first (low similarity): TC-APP-010, TC-APP-045, TC-APP-047, TC-APP-048, TC-APP-074, TC-APP-075, TC-APP-076, TC-APP-079"
+    },
+    "error": null
+   },
+   "design_audit": {
+    "app": "prj_dc14d32a8e6c",
+    "reviewed": 100,
+    "audited": 100,
+    "counts": {
+     "COVERS": 62,
+     "PARTIAL": 17,
+     "MISSES": 21
+    },
+    "unaudited": []
+   }
+  }
+ ],
+ "started": "2026-11-14T16:37:03.867023",
+ "status": "waiting_approval",
+ "error": "",
+ "total_seconds": 611.4,
+ "summary": null,
+ "requirements": 28
+}
