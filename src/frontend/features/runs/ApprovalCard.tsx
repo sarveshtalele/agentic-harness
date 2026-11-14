@@ -7,6 +7,7 @@ import { useAuth } from "../../components/AuthGate";
 import { Badge, Button, ErrorNote, Field, inputClass } from "../../components/ui";
 import { BrainstormStep } from "./BrainstormStep";
 import { ConfidenceNote } from "./ConfidenceNote";
+import { NotExecutedCard } from "./NotExecutedCard";
 import { cleanTestName } from "./lib";
 
 export function ApprovalCard({ approval, projectId, onDecided }: { approval: any; projectId: string; onDecided: () => void }) {
@@ -49,6 +50,7 @@ export function ApprovalCard({ approval, projectId, onDecided }: { approval: any
           ))}
         </ul>
       )}
+      {payload.summary?.verdict === "NOT EXECUTED" && <NotExecutedCard payload={payload} />}
       <ConfidenceNote review={payload.confidence || payload.verification?.confidence} />
       {payload.case_limit && <p className="text-sm" data-testid="case-limit">{payload.case_limit.message}{payload.case_limit.left_out_count ? `: ${payload.case_limit.left_out.join(", ")}` : ""}</p>}
       {payload.estimate && <p className="text-xs text-slate-600 dark:text-slate-400" data-testid="token-estimate">Tokens used so far {payload.estimate.used_so_far}. Next: {payload.estimate.next_step}. {payload.estimate.estimated_tokens === null ? payload.estimate.basis : `Estimate about ${payload.estimate.estimated_tokens} tokens (${payload.estimate.expected_calls} calls at ${payload.estimate.average_tokens_per_call}). ${payload.estimate.basis}.`}</p>}

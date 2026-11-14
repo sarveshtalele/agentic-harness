@@ -31,7 +31,10 @@ async def qe_generate(rc: RunContext, state: dict) -> dict:
     write_suite(env, suite, unresolved)
     checked = await validate(env, suite, case_of)
     update = await review_and_save(env, suite, unresolved, case_of, call, missing, partial)
-    return update | {"validation": await finish(env, suite, case_of, checked)}
+    update |= {"validation": await finish(env, suite, case_of, checked)}
+    if state.get("mode") == "brownfield":
+        update["_next"] = "trace"  # brownfield tests are downloaded, not run here: Prepare, Execute and Heal are skipped
+    return update
 
 
 __all__ = ["GeneratedFile", "GeneratedSuite", "_clean_code", "_generated_file_problems", "qe_generate"]

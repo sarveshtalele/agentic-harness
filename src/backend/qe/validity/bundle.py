@@ -8,12 +8,15 @@ from pathlib import Path
 RUN_COMMAND = {"pytest": "python -m pytest tests/agentic_qe", "vitest": "npx vitest run tests/agentic_qe", "jest": "npx jest tests/agentic_qe", "playwright": "npx playwright test tests/agentic_qe"}
 
 
+def run_command(framework: str) -> str:
+    return RUN_COMMAND[next((r for r in RUN_COMMAND if r in (framework or "").lower()), "pytest")]
+
+
 def _cell(text: str) -> str:
     return " ".join(str(text).split()).replace("|", "\\|")
 
 
 def validation_md(validation: dict, framework: str) -> str:
-    runner = next((r for r in RUN_COMMAND if r in (framework or "").lower()), "pytest")
     rows = ["| Test | Case | Valid | V3 collect | V4 symbols | V5 assertions | V6 trace |", "|---|---|---|---|---|---|---|"]
     for t in validation["tests"]:
         rows.append(f"| {_cell(t['path'])} | {_cell(t['case_id'])} | {'yes' if t['valid'] else 'no'} | " + " | ".join(f"{c['status']}: {_cell(c['message'])}" for c in (t["checks"][k] for k in ("V3", "V4", "V5", "V6"))) + " |")
@@ -21,7 +24,7 @@ def validation_md(validation: dict, framework: str) -> str:
     plugin = validation.get("plugin_check") or {}
     return (f"# Validation\n\n{c['valid']} of {c['total']} tests valid. Valid tests are in `tests/`. The others are in `needs-review/`; each row below says what failed and how to fix it.\n"
             "No test body was run by the platform: a test is valid when it parses, collects, imports real names, asserts the expected result and carries its case id.\n\n"
-            f"## How to run\n\nFrom the repository root, with the repository's dependencies installed, copy `tests/` into the repository and run:\n\n    {RUN_COMMAND[runner]}\n\n"
+            f"## How to run\n\nFrom the repository root, with the repository's dependencies installed, copy `tests/` into the repository and run:\n\n    {run_command(framework)}\n\n"
             "## Per test\n\n" + "\n".join(rows) + "\n\n## Plugin Gate 4 check\n\n" + (f"ok: {plugin.get('ok')}. {plugin.get('error') or ''}\n" + "".join(f"- {g}\n" for g in plugin.get("gaps", [])[:20]) if plugin else "Not run.\n"))
 
 

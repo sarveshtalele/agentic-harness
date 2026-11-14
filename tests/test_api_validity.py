@@ -43,7 +43,7 @@ def approve_gate4(client, run, approval):
 def test_gate4_shows_validity_and_the_zip_holds_valid_tests(client, project):
     run, approval = to_gate4(client, project, with_env=True)
     validation = approval["payload"]["validation"]
-    assert "Validity: 4 of 4 tests valid; 0 need review (V3 0, V4 0, V5 0, V6 0)." in approval["summary"]
+    assert "Validity: 4 of 4 tests valid; 0 need review (V2b 0, V3 0, V4 0, V5 0, V6 0)." in approval["summary"]
     assert validation["counts"]["valid"] == 4 and validation["invalid"] == [] and len(validation["valid"]) == 4
     assert all(t["case_id"].startswith("TC-APP-") and {c["status"] for c in t["checks"].values()} == {"PASS"} for t in validation["tests"])
     assert validation["plugin_check"]["error"] is None, "check-gate ran; its provenance gaps are recorded, not failures"
@@ -64,7 +64,7 @@ def test_without_installed_dependencies_no_test_is_valid_and_the_zip_says_how_to
     validation = approval["payload"]["validation"]
     assert validation["counts"]["valid"] == 0 and validation["counts"]["V3"] == 4 and validation["valid"] == []
     assert {t["checks"]["V3"]["status"] for t in validation["tests"]} == {"NOT CHECKED"}
-    assert "Validity: 0 of 4 tests valid; 4 need review (V3 4, V4 0, V5 0, V6 0)." in approval["summary"]
+    assert "Validity: 0 of 4 tests valid; 4 need review (V2b 0, V3 4, V4 0, V5 0, V6 0)." in approval["summary"]
     run = approve_gate4(client, run, approval)
     bundle = zipfile.ZipFile(io.BytesIO(client.get(f"/api/runs/{run['id']}/tests.zip").content))
     assert "needs-review/test_tc_app_001.py" in bundle.namelist() and not any(n.startswith("tests/agentic_qe/test_") for n in bundle.namelist())
@@ -106,6 +106,6 @@ def test_a_test_still_failing_after_one_round_is_invalid_and_ships_in_needs_revi
     assert validation["invalid"] == ["tests/agentic_qe/test_tc_app_001.py"]
     bad = next(t for t in validation["tests"] if not t["valid"])
     assert bad["checks"]["V5"]["status"] == "FAIL" and "no assertion" in bad["checks"]["V5"]["message"]
-    assert "Validity: 3 of 4 tests valid; 1 need review (V3 0, V4 0, V5 1, V6 0)." in approval["summary"]
+    assert "Validity: 3 of 4 tests valid; 1 need review (V2b 0, V3 0, V4 0, V5 1, V6 0)." in approval["summary"]
     names = zipfile.ZipFile(io.BytesIO(client.get(f"/api/runs/{approve_gate4(client, run, approval)['id']}/tests.zip").content)).namelist()
     assert "needs-review/test_tc_app_001.py" in names and "tests/agentic_qe/test_tc_app_002.py" in names

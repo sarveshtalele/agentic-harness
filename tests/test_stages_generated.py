@@ -7,7 +7,7 @@ import pytest
 from backend.maf import llm
 from backend.qe import execution
 from tests.scripted_client import ScriptedClient
-from tests.helpers_api import CASES, TESTS, pending, upload_repo, wait_run
+from tests.helpers_api import CASES, TESTS, client, pending, project, upload_repo, wait_run  # noqa: F401 - fixtures
 from tests.helpers_confidence import CALC, base_rules
 from tests.helpers_stages import junit_result
 
@@ -66,20 +66,25 @@ def test_a_test_that_is_still_wrong_after_one_round_stays_marked(client, project
 # the execution summary
 
 
-def summary_rules(reply):
-    return base_rules(extra=[("You are a QA execution engineer", reply)])
+PASSED = {"runner": "pytest", "verdict": "PASS", "reason": "", "exit_code": 0, "passed": 4, "failed": 0, "skipped": 0, "total": 4, "cases": []}
 
 
-def at_gate5(client, project, reply):
-    run, _ = run_to(client, project, 5, summary_rules(reply))
-    return pending(run)["payload"]
+def explained(client, project, reply):
+    """The Execute stage's summary step (greenfield only now), with the scripted qa-execution-engineer."""
+    from backend.db import db, now
+    from backend.maf.engine import RunContext
+    from backend.maf.workflows.qe.execute import _explain
+
+    with db() as con:
+        con.execute("INSERT OR REPLACE INTO runs (id, project_id, workflow, status, input, state, started_at) VALUES ('run_sum', ?, 'qe', 'running', '{}', '{}', ?)", (project["id"], now()))
+    llm.set_client_override(ScriptedClient([("You are a QA execution engineer", reply)]))
+    return client.portal.call(_explain, RunContext("run_sum", project["id"], "execute"), PASSED)
 
 
 def test_the_agents_execution_summary_is_used_when_it_matches_the_junit_counts(client, project):
     good = json.dumps({"summary": "4 passed, 0 failed, 0 skipped. All tests passed.", "passed": 4, "failed": 0, "skipped": 0, "verdict": "PASS"})
-    payload = at_gate5(client, project, good)
-    assert payload["execution_summary"]["source"] == "agent" and payload["execution_summary"]["text"].startswith("4 passed")
-    assert payload["failure_classes"] == {"defect": 0, "test problem": 0, "environment": 0} and payload["defect_records"] == []
+    summary = explained(client, project, good)
+    assert summary["source"] == "agent" and summary["text"].startswith("4 passed")
 
 
 @pytest.mark.parametrize("reply", [
@@ -89,9 +94,9 @@ def test_the_agents_execution_summary_is_used_when_it_matches_the_junit_counts(c
     {"summary": "Everything fine.", "passed": 4, "failed": 0, "skipped": 0, "verdict": "FAIL"},
 ])
 def test_a_summary_that_does_not_match_the_counts_is_refused(client, project, reply):
-    payload = at_gate5(client, project, json.dumps(reply))
-    assert payload["execution_summary"]["source"] == "code" and "refused" in payload["execution_summary"]["reason"]
-    assert payload["execution_summary"]["text"].startswith("pytest: PASS. 4 passed, 0 failed, 0 skipped")
+    summary = explained(client, project, json.dumps(reply))
+    assert summary["source"] == "code" and "refused" in summary["reason"]
+    assert summary["text"].startswith("pytest: PASS. 4 passed, 0 failed, 0 skipped")
 
 
 def test_summary_checks_in_isolation():

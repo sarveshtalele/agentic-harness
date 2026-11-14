@@ -1,6 +1,8 @@
 """Change workflow and the QE lifecycle through the real API."""
 
-from backend.maf import llm
+from backend.config import project_dir
+from backend.maf import engine, llm
+from tests.helpers_validity import make_run_env
 from tests.reviewing import rules as case_rules
 from tests.scripted_client import ScriptedClient
 from tests.helpers_api import CALC, CASES, client, edit_script, FIX_ADD, pending, PLAN, project, REQUIREMENTS, TESTS, upload_repo, wait_run  # noqa: F401 - fixtures
@@ -46,8 +48,9 @@ def test_change_refuses_escape_and_secret_edits(client, project):
     assert run["status"] == "failed" and "without changing any file" in run["error"] and secret not in run["error"]
 
 
-def test_qe_lifecycle_all_six_gates_with_real_execution(client, project):
+def test_brownfield_qe_lifecycle_g0_to_g5_is_not_executed_and_the_tests_download(client, project):
     upload_repo(client, project, {"calc.py": "def add(a, b):\n    return a + b\n", "conftest.py": ""})
+    make_run_env(project_dir(project["id"]) / "worktrees" / "x")  # the .venv the run's worktree sits beside
     llm.set_client_override(ScriptedClient([
         ("You are a repository intelligence analyst", "## Purpose\nCalculator"),
         ("You are a requirements analyst", REQUIREMENTS),
@@ -78,13 +81,31 @@ def test_qe_lifecycle_all_six_gates_with_real_execution(client, project):
             check, audit = approval["payload"]["plugin_check"], approval["payload"]["design_audit"]
             assert check["error"] is None and audit["counts"]["COVERS"] == 4 and audit["unaudited"] == [], (check, audit)
             assert check["gaps"] and all("skippedLevels" in g for g in check["gaps"]), check["gaps"]
+        if approval["gate"] == 0:
+            assert "dependency installers" in approval["summary"] and "No test body is run" in approval["summary"]
+        if approval["gate"] == 4:
+            assert "run on this machine" not in approval["summary"], "brownfield tests are never run here"
+        if approval["gate"] == 5:
+            payload = approval["payload"]
+            assert payload["summary"]["verdict"] == "NOT EXECUTED" and "Verdict NOT EXECUTED" in approval["summary"]
+            assert (payload["summary"]["requirements"], payload["summary"]["cases"], payload["summary"]["tests"], payload["summary"]["valid"], payload["summary"]["needs_review"]) == (1, 4, 4, 4, 0), payload["summary"]
+            assert payload["summary"]["by_check"] == {"V3": 0, "V4": 0, "V5": 0, "V6": 0}
+            row = payload["matrix_rows"][0]
+            assert row["covered"] and [c["test_file"] for c in row["cases"]][0].startswith("tests/agentic_qe/") and {c["result"] for c in row["cases"]} == {"valid"}
+            assert payload["tests_zip"] == f"/api/runs/{run['id']}/tests.zip" and payload["run_command"] == "python -m pytest tests/agentic_qe"
+            assert payload["plugin_check"]["ok"] is None and "tests are not executed here" in payload["plugin_check"]["note"], "execution gaps are not failures"
+            assert payload["trace"]["stage"] == "sign" and payload["trace"]["verdict"] == "PASS" and "Trace:" in approval["summary"], "the carry-forward line holds with Prepare, Execute and Heal skipped"
+            assert client.get(payload["tests_zip"]).status_code == 200, "the zip is downloadable at Gate 5"
         assert client.post(f"/api/approvals/{approval['id']}/decide", json={"approved": True}).status_code == 200
     run = wait_run(client, run["id"], ("completed", "failed"))
     assert run["status"] == "completed", run["error"]
     assert seen == [0, 1, 2, 3, 4, 5]
+    started = [e["message"] for e in engine.events(run["id"]) if e["message"].startswith("Started ")]
+    assert not {"Started Prepare environment", "Started Execute", "Started Heal test drift"} & set(started), started
+    assert "Started Traceability" in started and "Started Release sign-off" in started
     assert [r["id"] for r in run["state"]["requirements"]] == ["REQ-001"], "the unverifiable requirement must be dropped"
     summary = run["state"]["summary"]
-    assert summary["verdict"] == "PASS" and summary["executed"] == 4 and summary["coverage"] == 100.0
+    assert summary["verdict"] == "NOT EXECUTED" and "executed" not in summary and "passed" not in summary
     assert all(g["status"] == "approved" for g in client.get(f"/api/projects/{project['id']}/gates").json())
     kinds = {d["kind"] for d in client.get(f"/api/projects/{project['id']}/documents").json()}
     assert {"discovery", "requirements", "test_plan", "test_cases", "test_code", "traceability", "release", "test_data"} <= kinds

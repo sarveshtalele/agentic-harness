@@ -9,7 +9,7 @@ from backend.core import documents
 from backend.core.errors import AllowanceError
 from backend.maf.engine import RunContext
 from backend.maf.workflows.shared import review_evidence, token_estimate, token_line
-from backend.qe import carry
+from backend.qe import carry, confidence
 from backend.repos import git
 
 DESIGN_BATCH = 4
@@ -101,5 +101,17 @@ def _gate4_extras(rc: RunContext, state: dict) -> dict:
                                                                                           "upper bound: the average of every model call this run has recorded, times four calls")}
 
 
+def _gate5_text(state: dict) -> str:
+    s = state["summary"]
+    if state.get("mode") == "brownfield":
+        by = ", ".join(f"{k} {v}" for k, v in s["by_check"].items())
+        return (f"Verdict {s['verdict']}: the platform did not run these tests. {s['requirements_with_valid_test']} of {s['requirements']} requirements have a valid test; {s['cases']} cases, {s['tests']} tests, "
+                f"{s['valid']} valid, {s['needs_review']} need review (failed checks: {by}). Download the tests at {state['tests_zip']} and run them with `{state['run_command']}`.")
+    return f"Verdict {s['verdict']}: {s['passed']}/{s['executed']} tests passed. {state['tests_review_after']['capped']} reviewed tests failed and are capped at {confidence.TEST_FAIL_CAP}."
+
+
 def _gate5_extras(rc: RunContext, state: dict) -> dict:
+    if state.get("mode") == "brownfield":
+        return {"summary": state["summary"], "validation": state.get("validation"), "plugin_check": state.get("plugin_check_5"), "tests_zip": state["tests_zip"], "run_command": state["run_command"],
+                "matrix_rows": [{"requirement_id": r["requirement_id"], "title": r["title"], "priority": r["priority"], "covered": r["covered"], "cases": r["cases"]} for r in state["matrix"]["rows"]]}
     return {"defect_records": state.get("defect_records", []), "execution_summary": state.get("execution_summary"), "failure_classes": state["summary"].get("failure_classes")}

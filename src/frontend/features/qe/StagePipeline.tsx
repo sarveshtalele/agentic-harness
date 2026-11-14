@@ -4,13 +4,13 @@ import { ModelPicker } from "../../components/ModelPicker";
 import { Badge, Button, Card, ErrorNote } from "../../components/ui";
 import { STAGES } from "./lib";
 
-type Props = { project: any; safeDocs: any[]; safeGates: any[]; model: string; setModel: (v: string) => void; install: boolean; setInstall: (v: boolean) => void; error: string; onStart: () => void };
+type Props = { project: any; safeDocs: any[]; safeGates: any[]; model: string; setModel: (v: string) => void; mode: "brownfield" | "greenfield"; install: boolean; setInstall: (v: boolean) => void; error: string; onStart: () => void };
 
-export function StagePipeline({ project, safeDocs, safeGates, model, setModel, install, setInstall, error, onStart }: Props) {
+export function StagePipeline({ project, safeDocs, safeGates, model, setModel, mode, install, setInstall, error, onStart }: Props) {
   return (
     <Card title="Stages and gates" className="mb-4">
       <ol className="flex flex-wrap gap-2">
-        {STAGES.map(([name, gate, kind]) => {
+        {STAGES.filter(([, gate]) => mode === "greenfield" || gate !== "G5-Exec").map(([name, gate, kind]) => {
           const matchingDocs = safeDocs.filter((d) => d?.kind === kind);
           const doc = matchingDocs.find((d) => d?.status === "approved") || matchingDocs[0];
           const record = safeGates.find((g) => `G${g?.gate}` === gate);
@@ -62,7 +62,7 @@ export function StagePipeline({ project, safeDocs, safeGates, model, setModel, i
           <Play className="h-4 w-4" /> Start the QE cycle
         </Button>
         <ModelPicker value={model} onChange={setModel} compact />
-        <label className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 cursor-pointer">
+        {mode === "greenfield" && <label className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 cursor-pointer">
           <input
             type="checkbox"
             checked={install}
@@ -71,7 +71,8 @@ export function StagePipeline({ project, safeDocs, safeGates, model, setModel, i
           />
           <span>Install sandbox repository dependencies before running tests</span>
           <span className="text-amber-500 font-semibold">(runs install scripts)</span>
-        </label>
+        </label>}
+        {mode === "brownfield" && <span className="text-xs text-slate-500" data-testid="brownfield-note">Tests are not run here. You download them at Gate 5.</span>}
       </div>
 
       <ErrorNote message={error} />

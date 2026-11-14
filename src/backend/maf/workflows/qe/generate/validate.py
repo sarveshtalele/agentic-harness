@@ -20,7 +20,8 @@ def _key(item: GeneratedFile) -> str:
 
 
 def _check(env: Env, item: GeneratedFile, case_of: dict) -> dict:
-    return validity.check_file(env.worktree, item.path, item.content, item.case_ids, case_of, inventory=env.inventory, allowed=env.allowed, async_ok=env.async_ok)
+    quotes = {r["id"]: r.get("quote") or "" for r in env.state["requirements"]}
+    return validity.check_file(env.worktree, item.path, item.content, item.case_ids, case_of, inventory=env.inventory, allowed=env.allowed, async_ok=env.async_ok, quotes=quotes)
 
 
 async def _check_all(env: Env, suite: GeneratedSuite, case_of: dict, cache: dict) -> None:

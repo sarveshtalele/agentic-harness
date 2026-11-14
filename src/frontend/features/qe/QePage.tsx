@@ -30,7 +30,7 @@ export function QePage() {
     setError("");
     try {
       const res = await api(`/projects/${project.id}/runs`, {
-        json: { workflow: "qe", model, input: { install_deps: install, mode: projectMode } },
+        json: { workflow: "qe", model, input: { mode: projectMode, ...(projectMode === "greenfield" ? { install_deps: install } : {}) } },
       });
       if (res?.id) setRunId(res.id);
     } catch (e: any) {
@@ -51,7 +51,7 @@ export function QePage() {
       {/* Project Mode Selector (Greenfield vs Brownfield) */}
       <ModeSelector projectMode={projectMode} setProjectMode={setProjectMode} />
 
-      <StagePipeline project={project} safeDocs={safeDocs} safeGates={safeGates} model={model} setModel={setModel} install={install} setInstall={setInstall} error={error} onStart={start} />
+      <StagePipeline project={project} safeDocs={safeDocs} safeGates={safeGates} model={model} setModel={setModel} mode={projectMode} install={install} setInstall={setInstall} error={error} onStart={start} />
 
       <TraceView projectId={project.id} />
 

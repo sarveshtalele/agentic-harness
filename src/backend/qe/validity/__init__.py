@@ -8,14 +8,15 @@ from backend.qe import emit, execution
 from backend.qe.emit.subject import own_subject
 from backend.qe.validity.assertions import integrity
 from backend.qe.validity.collect import compiles
+from backend.qe.validity.inputs import async_misuse, invented
 
-CHECKS = ("V3", "V4", "V5", "V6")
+CHECKS = ("V2b", "V3", "V4", "V5", "V6")
 MARKER = re.compile(r"CASE_ID:\s*([A-Za-z0-9_.-]+)")
 
 
 def _symbols(worktree: Path, path: str, code: str, inventory, allowed, async_ok: bool) -> dict:
     """V4: imports resolve and the symbols called exist, with signatures: emit.check plus the generation stage's import checks."""
-    found = [*emit.check(worktree, path, code, inventory, allowed), *execution.invalid_test_code(worktree, path, code, async_ok), *own_subject(worktree, path, code)]
+    found = [*emit.check(worktree, path, code, inventory, allowed), *execution.invalid_test_code(worktree, path, code, async_ok), *own_subject(worktree, path, code), *async_misuse(code)]
     found = list(dict.fromkeys(found))
     return {"status": "FAIL", "message": "; ".join(found[:4]) + ". Import only names the repository defines and call them with their real signature"} if found else {"status": "PASS", "message": "imports and called symbols exist"}
 
@@ -31,10 +32,12 @@ def _trace(path: str, code: str, case_ids: list[str], known: set[str]) -> dict:
     return {"status": "PASS", "message": f"carries {', '.join(sorted(marked))}"}
 
 
-def check_file(worktree: Path, path: str, code: str, case_ids: list[str], cases: dict, *, inventory=None, allowed=frozenset(), async_ok: bool = False) -> dict[str, dict]:
-    """{"V3": {status, message}, ...} for one test file. `cases` maps case id to its record."""
+def check_file(worktree: Path, path: str, code: str, case_ids: list[str], cases: dict, *, inventory=None, allowed=frozenset(), async_ok: bool = False, quotes: dict | None = None) -> dict[str, dict]:
+    """{"V2b": {status, message}, "V3": ...} for one test file. `cases` maps case id to its record; `quotes` maps requirement id to its quote."""
     expected = " ".join(cases.get(c, {}).get("expected_result", "") for c in case_ids)
-    return {"V3": compiles(worktree, path, code), "V4": _symbols(worktree, path, code, inventory, allowed, async_ok),
+    case = cases.get(case_ids[0], {}) if case_ids else {}
+    v2b = invented(worktree, path, code, case, (quotes or {}).get(case.get("requirement_id"), "")) if path.endswith(".py") else {"status": "NOT CHECKED", "message": "V2b reads Python tests only"}
+    return {"V2b": v2b, "V3": compiles(worktree, path, code), "V4": _symbols(worktree, path, code, inventory, allowed, async_ok),
             "V5": integrity(path, code, expected), "V6": _trace(path, code, case_ids, set(cases))}
 
 
@@ -44,16 +47,17 @@ def problems(checks: dict[str, dict]) -> list[str]:
 
 
 def tally(tests: list[dict]) -> dict:
-    """The run's result: per-test rows, counts by check, and the valid and invalid paths. A test is valid only when all four checks PASS."""
+    """The run's result: per-test rows, counts by check, and the valid and invalid paths. A test is valid when no check FAILs and V3 to V6 PASS;
+    V2b NOT CHECKED (a non-Python test) does not make it invalid."""
     for t in tests:
-        t["valid"] = all(c["status"] == "PASS" for c in t["checks"].values())
+        t["valid"] = all(c["status"] == "PASS" or (k == "V2b" and c["status"] == "NOT CHECKED") for k, c in t["checks"].items())
     return {"tests": tests, "valid": [t["path"] for t in tests if t["valid"]], "invalid": [t["path"] for t in tests if not t["valid"]],
             "counts": {"total": len(tests), "valid": sum(t["valid"] for t in tests), "invalid": sum(not t["valid"] for t in tests),
-                       **{k: sum(t["checks"][k]["status"] != "PASS" for t in tests) for k in CHECKS}}}
+                       **{k: sum(t["checks"].get(k, {}).get("status") == "FAIL" or (k != "V2b" and t["checks"].get(k, {}).get("status") != "PASS") for t in tests) for k in CHECKS}}}
 
 
 def line(validation: dict | None) -> str:
     if not validation:
         return ""
     c = validation["counts"]
-    return f"Validity: {c['valid']} of {c['total']} tests valid; {c['invalid']} need review (V3 {c['V3']}, V4 {c['V4']}, V5 {c['V5']}, V6 {c['V6']})."
+    return f"Validity: {c['valid']} of {c['total']} tests valid; {c['invalid']} need review (V2b {c.get('V2b', 0)}, V3 {c['V3']}, V4 {c['V4']}, V5 {c['V5']}, V6 {c['V6']})."

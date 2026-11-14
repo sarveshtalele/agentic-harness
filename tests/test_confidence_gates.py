@@ -6,11 +6,11 @@ import pytest
 
 from backend.core import documents, gates, ledger
 
-from tests.helpers_api import TESTS, pending, wait_run
+from tests.helpers_api import TESTS, client, pending, project, wait_run  # noqa: F401 - fixtures
 from tests.helpers_confidence import base_rules, go_to_gate
 
 
-def test_generated_tests_are_reviewed_per_file_and_a_failed_test_is_capped_after_execution(client, project):
+def test_generated_tests_are_reviewed_per_file_and_brownfield_does_not_cap_them_because_nothing_runs(client, project):
     failing = json.loads(TESTS)
     failing["files"][1]["content"] = failing["files"][1]["content"].replace("== 0", "== 5")  # TC-APP-002 asserts a wrong value, so it fails when run
     ninety_five = lambda kind, key: {"scores": {"import_safety": 15}} if kind == "code" else None
@@ -27,15 +27,11 @@ def test_generated_tests_are_reviewed_per_file_and_a_failed_test_is_capped_after
     gate = pending(run)
     assert gate["gate"] == 5
     after = gate["payload"]["confidence"]
-    by_id = {r["tc_id"]: r for r in after["records"]}
-    assert (by_id["TC-APP-002"]["total"], by_id["TC-APP-002"]["total_before"], by_id["TC-APP-002"]["capped"]) == (60, 95, True)
-    assert all(by_id[i]["total"] == 95 and not by_id[i]["capped"] for i in ("TC-APP-001", "TC-APP-003", "TC-APP-004"))
-    assert after["score_before"] == 95 and after["score"] < 95 and after["capped"] == 1 and after["failed"] == 1
-    assert run["state"]["tests_review"]["score"] == 95, "the review made before execution is kept as it was"
-    assert run["state"]["tests_review_after"]["capped"] == 1
-    refused = client.post(f"/api/approvals/{gate['id']}/decide", json={"approved": True})
-    assert refused.status_code == 400 and "TC-APP-002" in refused.text, "a failed test is a REJECT item, so signing the release needs a reason"
-    assert client.post(f"/api/approvals/{gate['id']}/decide", json={"approved": True, "feedback": "Known defect, tracked"}).status_code == 200
+    assert gate["payload"]["summary"]["verdict"] == "NOT EXECUTED"
+    assert after["score"] == 95, "nothing ran, so nothing is capped"
+    assert all(not r.get("capped") and r["total"] == 95 for r in after["records"])
+    assert run["state"]["tests_review"]["score"] == 95 and run["state"]["tests_review_after"]["score"] == 95
+    assert client.post(f"/api/approvals/{gate['id']}/decide", json={"approved": True}).status_code == 200, "no failed test is a REJECT item: brownfield tests are not executed here"
 
 
 def test_a_rejected_test_file_goes_back_alone_and_is_rewritten_on_the_branch(client, project):

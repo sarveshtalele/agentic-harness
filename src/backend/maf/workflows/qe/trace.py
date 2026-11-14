@@ -1,13 +1,14 @@
 """QE Traceability Stage: Building requirement-to-test matrix, execution summary, and confidence capping."""
 from __future__ import annotations
 
+import asyncio
 from pathlib import Path
 
 from backend.core import documents
 from backend.maf.engine import RunContext
 from backend.maf.workflows.qe.common import _cell
 from backend.maf.workflows.qe.heal import _records
-from backend.qe import confidence, execution, trace
+from backend.qe import confidence, execution, plugin_bridge, trace
 from backend.qe.emit.subject import exercises_repository
 
 
@@ -24,7 +25,36 @@ def _defect_body(records: list[dict]) -> str:
     return "| Test | Classification | Evidence | Cause | Fix | Healed |\n|---|---|---|---|---|---|\n" + "\n".join(rows)
 
 
+def _static_rows(matrix: dict) -> str:
+    lines = ["| Requirement | Priority | Cases | Test files | Validity |", "|---|---|---|---|---|"]
+    for r in matrix["rows"]:
+        lines.append(f"| {r['requirement_id']}: {_cell(r['title'])} | {r['priority']} | {', '.join(c['case_id'] for c in r['cases'])} | {_cell(', '.join(c['test_file'] or 'none' for c in r['cases']))} | "
+                     + ", ".join(c["result"] + (f" ({'/'.join(c['failed_checks'])})" if c["failed_checks"] else "") for c in r["cases"]) + " |")
+    return "\n".join(lines)
+
+
+async def _plugin_gate5(rc: RunContext) -> dict:
+    """The plugin's Gate 5 check, recorded. Its execution-result gaps are not failures here: no test is executed."""
+    check = await asyncio.to_thread(plugin_bridge.check_gate, rc.project_id, plugin_bridge.app_name(rc.project_id), 5)
+    note = "not applicable: tests are not executed here"
+    return {"ok": None, "error": check.get("error"), "not_applicable": [f"{g} ({note})" for g in [*check.get("gaps", []), *check.get("missing", [])]], "note": note}
+
+
+async def qe_trace_static(rc: RunContext, state: dict) -> dict:
+    """Brownfield traceability without execution: the verdict is NOT EXECUTED, the counts are the validity result."""
+    validation = state.get("validation")
+    matrix = trace.static_matrix(state["requirements"], state["cases"], state.get("tests", []), validation)
+    summary = trace.not_executed_summary(matrix, state["cases"], state.get("tests", []), validation)
+    doc = documents.create(rc.project_id, "traceability", "Requirements-to-Test Traceability Matrix", _static_rows(matrix) + f"\n\nGaps (P0 and P1 requirements without a valid test): {matrix['gaps'] or 'none'}",
+                           "system", data={"matrix": matrix, "summary": summary}, run_id=rc.run_id)
+    plugin_check = await _plugin_gate5(rc)
+    rc.log(f"Verdict {summary['verdict']}: {summary['valid']} of {summary['tests']} tests valid, {summary['requirements_with_valid_test']}/{summary['requirements']} requirements with a valid test", summary, "artifact")
+    return {"matrix_doc": doc["id"], "summary": summary, "matrix": matrix, "plugin_check_5": plugin_check, "tests_review_after": state.get("tests_review"), "_next": "sign"}
+
+
 async def qe_trace(rc: RunContext, state: dict) -> dict:
+    if state.get("mode") == "brownfield":
+        return await qe_trace_static(rc, state)
     results = state.get("results", [])
     defects = state.get("defects", [])
     matrix = trace.build_matrix(state["requirements"], state["cases"], state.get("tests", []), results)

@@ -458,7 +458,8 @@ flowchart TD
     G3 -->|Rejected / Feedback| DESIGN
 
     GEN --> G4{Gate 4: Test Code Inspection}
-    G4 -->|Approved / Commit| PREP[Stage: qe_prepare]
+    G4 -->|Approved / Commit, brownfield| TRACE
+    G4 -->|Approved / Commit, greenfield| PREP[Stage: qe_prepare]
     G4 -->|Rejected / Feedback| GEN
 
     PREP --> EXEC[Stage: qe_execute]
@@ -545,9 +546,11 @@ flowchart TD
   - Verifies function and class calls match real AST signatures (positional, keyword-only, default parameters) up to `SIGNATURE_BUDGET` characters.
   - Verifies third-party imports against the sandbox Python environment inventory (`emit.inventory`).
   - Flagged files return to the agent for revision. Persistent syntax errors are quarantined with `@pytest.mark.skip`.
-- **Gate 4:** Named reviewer inspects generated test code. Approving commits files to the branch and authorizes execution on the host machine.
+- **Gate 4:** Named reviewer inspects generated test code. Approving commits files to the branch. For greenfield it also authorizes execution on the host machine; brownfield tests are never run by the platform.
 
-#### 7. Environment Preparation & Execution (Stages `qe_prepare` & `qe_execute`)
+#### 7. Environment Preparation & Execution (Stages `qe_prepare` & `qe_execute`), greenfield only
+- **Brownfield skips Prepare, Execute and Heal** (QE v2 step 2). `qe_generate` returns `_next = "trace"` when `mode == "brownfield"` (route `generate -> trace`). Gate 0 sets `install_deps` for brownfield and its card says that approving it lets the repository's dependency installers run in the sandbox, only to collect and compile the tests (V3 to V6). No test body runs. The team downloads `GET /api/runs/{id}/tests.zip` (available once Gate 4 is approved) and runs the tests on its own systems.
+- **Brownfield Trace and Sign** (`qe_trace_static`, `qe_sign`): the verdict is always `NOT EXECUTED` (never PASS, FAIL or INCONCLUSIVE). The summary carries the counts: requirements, cases, tests, valid, needs review, by check. The matrix is requirement, cases, test files, validity. `plugin_bridge.check_gate(.., 5)` is recorded, and its execution-result gaps are listed as "not applicable: tests are not executed here", not as failures. The Gate 5 card shows the verdict, the matrix, the counts, the zip link and the run command. The carry-forward hook still guards `trace` and `sign`.
 - **Stage `qe_prepare`:** Installs declared dependencies if opted in, configures `pytest-asyncio` for async tests, and sets CLI options (`-o asyncio_mode=auto`).
 - **Stage `qe_execute`:** Executes the test runner (`execution.run_suite`) inside the worktree using `clean_env()`.
 - **Result Parsing:** Ingests JUnit XML reports to extract test names, execution times, status, and failure traces.

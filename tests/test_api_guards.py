@@ -20,25 +20,27 @@ def test_guarded_apply_refuses_unsafe_edits(tmp_path):
     assert not (tmp_path.parent / "evil.py").exists()
 
 
-def test_healing_guard_refuses_weakened_assertion(client, project):
+def test_healing_guard_refuses_weakened_assertion(client, project, tmp_path):
+    """Heal runs for greenfield only now, so the guard is tested on the stage itself with a drifted test in a worktree."""
+    from backend.db import db, now
+    from backend.maf.engine import RunContext
+    from backend.maf.workflows.qe import qe_heal
+    from tests.helpers_stages import junit_result
+
     upload_repo(client, project, {"calc.py": "def add(a, b):\n    return a + b\n", "conftest.py": ""})
-    drifted = TESTS.replace("assert add(2, 3) == 5", "{}['seed']\\n    assert add(2, 3) == 5")
+    (tmp_path / "tests/agentic_qe").mkdir(parents=True)
+    (tmp_path / "calc.py").write_text("def add(a, b):\n    return a + b\n", encoding="utf-8")
+    test = tmp_path / "tests/agentic_qe/test_tc_app_001.py"
+    test.write_text("from calc import add\n\n\ndef test_TC_APP_001():\n    {}['seed']\n    assert add(2, 3) == 5\n", encoding="utf-8")
     weaken = ("replace_text", {"path": "tests/agentic_qe/test_tc_app_001.py", "search": "assert add(2, 3) == 5", "replace": "assert True"})
     app_edit = ("replace_text", {"path": "calc.py", "search": "a + b", "replace": "a - b"})
-    llm.set_client_override(ScriptedClient([
-        ("You are a repository intelligence analyst", "## Purpose\nCalculator"), ("You are a requirements analyst", REQUIREMENTS), ("You are a principal test architect", PLAN),
-        *case_rules(), ("You are an independent reviewer", '{"score": 95, "verdict": "APPROVED", "issues": []}'), ("You are a test design architect", CASES), ("You are a test automation engineer", drifted),
-        ("You diagnose failures", edit_script(weaken, app_edit)),
-    ]))
-    run = client.post(f"/api/projects/{project['id']}/runs", json={"workflow": "qe"}).json()
-    for _ in range(5):
-        run = wait_run(client, run["id"])
-        assert run["status"] == "waiting_approval", run["error"]
-        client.post(f"/api/approvals/{pending(run)['id']}/decide", json={"approved": True})
-    run = wait_run(client, run["id"])
-    assert run["status"] == "waiting_approval", run["error"]
-    assert pending(run)["gate"] == 5 and run["state"]["summary"]["verdict"] == "FAIL"
-    assert len(run["state"]["healer_log"][0]["refused"]) == 2 and run["state"]["healer_log"][0]["applied"] == []
+    llm.set_client_override(ScriptedClient([("You diagnose failures", edit_script(weaken, app_edit))]))
+    with db() as con:
+        con.execute("INSERT INTO runs (id, project_id, workflow, status, input, state, started_at) VALUES ('run_heal', ?, 'qe', 'running', '{}', '{}', ?)", (project["id"], now()))
+    update = client.portal.call(qe_heal, RunContext("run_heal", project["id"], "heal"), {"worktree": str(tmp_path), "mode": "greenfield", "results": [junit_result("KeyError: 'seed'")]})
+    assert len(update["healer_log"][0]["refused"]) == 2 and update["healer_log"][0]["applied"] == []
+    assert "assert add(2, 3) == 5" in test.read_text(encoding="utf-8") and "a + b" in (tmp_path / "calc.py").read_text(encoding="utf-8")
+    assert update["_next"] == "trace", "nothing was applied, so nothing is run again"
 
 
 def test_agent_text_uses_last_message_without_tool_narration(client, project):

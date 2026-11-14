@@ -159,9 +159,19 @@ intake G0 (documents, target repo) -> read documents (RAG) -> requirements G1 ->
 | 15 tests failed collection: relative imports beyond the top-level package | The generation prompt now carries the repository's own test import style and says tests/agentic_qe is not a package |
 | None of the 30 "defects" was an application defect, all were test bugs: a sync httpx client on an async transport, a missing await, and calculator names that do not exist in the repository | An error raised by the test's own code is `TEST_BUG` (a test problem, never healed, never a defect). The prompt names the async client rule and forbids inventing input values. **Not yet caught: an invented input value that leads to a clean assertion failure.** That needs V2b, below |
 
-**V2b (planned with step 3):** input values in Positive cases must appear in the repository (a registry name, route, key or enum)
-or in the requirement quote. Without execution, brownfield cannot see these failures, so this static check is the only
-guard.
+**V2b (built with step 2, 2026-11-14):** static checks for what only execution would otherwise show
+(`src/backend/qe/validity/inputs.py`):
+
+| Error seen live | Check | Fix message sent back to the test author (once) |
+|---|---|---|
+| Invented input (`calc('interest')` when the code only has `future_value`, `present_value`) | Positive and Boundary cases: every string input (call argument, payload key or value, URL path segment) to a request or a repository function must appear in the repository's code (names and literals, not comments) or in the case and requirement text. Negative and Exception cases may use invalid inputs on purpose | "uses input value(s) 'interest' that appear nowhere in the repository's code or the requirement. Use values the code defines, for example 'future_value', 'present_value'" (close matches from the code) |
+| Asserted message the code never produces (`== 'invalid parameters'`) | Any case: text an assertion compares (`==`, `in`, `startswith`) must occur in the code's literals or the case text | "asserts text the code never produces: 'invalid parameters'. Assert the exact message the code returns, or the status code" |
+| Sync `httpx.Client` on `ASGITransport` | V4 | "use `async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url='http://test')` in an async test and await each request" |
+| Missing `await` on an AsyncClient request | V4 | "`client.get(...)` on an AsyncClient is not awaited, so it returns a coroutine. Write `await client.get(...)`" |
+| Relative import beyond the top-level package | V3 (collect) plus the import-style guide in the generation prompt | the collect error, plus the rule "absolute imports from the repository root" |
+
+What still fails after the one send-back is shipped in `needs-review/`, with its message in `VALIDATION.md`.
+Limit (`ponytail:`): V2b reads Python tests; other languages are NOT CHECKED for V2b.
 
 ## 9. Order, models and evidence
 
@@ -172,7 +182,7 @@ the commit. Live runs use the real model and real repositories.
 |---|---|---|---|
 | 0 | Carry-forward hook (section 2a): snapshots, before and after checks, regenerate once, trace table on every gate card, ledger entries | Sonnet | seeded changes are each blocked, with their names on the card, in tests: a requirement quote edited in the plan, a case's expected result altered in a test, a requirement dropped without a reason, an invented case id. **Status: done offline, 2026-11-14** (`src/backend/qe/carry.py`, `tests/test_carry.py`; not yet run on a live model, not committed) |
 | 1 | Validity checks V3 to V6 and the zip with `tests/`, `needs-review/`, `VALIDATION.md` | Sonnet | seeded bad tests (no assertion, `assert True`, wrong import, wrong symbol, missing case id) each refused, in tests **Status: done offline, 2026-11-14** (`src/backend/qe/validity/`, `generate/validate.py`, `api/run_tests.py`, `tests/test_validity.py`, `tests/test_api_validity.py`; not yet run on a live model, not committed) |
-| 2 | Brownfield v2 flow: Validate stage, Execute, Prepare and Heal removed for brownfield, Gate 5 `NOT EXECUTED`, plugin Gate 4 and 5 checks | Sonnet | live run on personal-finance-mcp to Gate 5 with the zip, every stage at or under 180 s |
+| 2 | Brownfield v2 flow: Validate stage, Execute, Prepare and Heal removed for brownfield, Gate 5 `NOT EXECUTED`, plugin Gate 4 and 5 checks | Sonnet | live run on personal-finance-mcp to Gate 5 with the zip, every stage at or under 180 s. **Status: done offline, 2026-11-14** (`definition.py` route `generate -> trace`, `qe/trace.py` `static_matrix`/`not_executed_summary`, `qe_trace_static`, `qe_sign`, `NotExecutedCard.tsx`, `tests/test_api_change.py`; not yet run on a live model, not committed) |
 | 3 | V2 oracle check in Design, and V1 code audit | Sonnet | seeded case with an invented expected result refused |
 | 4 | Documents: multi-upload, parse, chunk, pgvector plus keyword, rerank, citation check, RAG eval | Sonnet | RAG eval recall@8 at least 0.9 and citation accuracy 1.0 on the sample BRD |
 | 5 | Greenfield requirements, plan and design on RAG, plugin Gates 1 to 3 | Sonnet | live run from an uploaded BRD to Gate 3 |

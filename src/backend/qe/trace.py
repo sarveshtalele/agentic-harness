@@ -58,3 +58,29 @@ def no_product_run(mode: str, matrix: dict, real_files: set[str]) -> str:
         return f"None of the {len(ran)} executed tests exercised the repository's code"
     return ""
 
+
+
+NOT_EXECUTED = "NOT EXECUTED"
+
+
+def static_matrix(requirements: list[dict], cases: list[dict], tests: list[dict], validation: dict | None) -> dict:
+    """Brownfield matrix: requirement to cases to test files to validity. Nothing ran, so a cell is `valid`, `needs review` or `no test`, never passed or failed."""
+    matrix = build_matrix(requirements, cases, tests, [])
+    rows = {t["case_id"]: t for t in (validation or {}).get("tests", [])}
+    for row in matrix["rows"]:
+        for cell in row["cases"]:
+            v = rows.get(cell["case_id"])
+            cell["result"] = "no test" if not v else "valid" if v["valid"] else "needs review"
+            cell["failed_checks"] = [k for k, c in (v or {}).get("checks", {}).items() if c["status"] != "PASS"]
+        row["covered"] = any(c["result"] == "valid" for c in row["cases"])
+    matrix["gaps"] = [r["requirement_id"] for r in matrix["rows"] if r["priority"] in ("P0", "P1") and not r["covered"]]
+    return matrix
+
+
+def not_executed_summary(matrix: dict, cases: list[dict], tests: list[dict], validation: dict | None) -> dict:
+    """The brownfield verdict is always NOT EXECUTED: the platform does not run the tests, the team does."""
+    counts = (validation or {}).get("counts", {})
+    rows = matrix["rows"]
+    return {"verdict": NOT_EXECUTED, "reason": "The tests are downloaded and run on the team's own systems; the platform only collects and compiles them",
+            "requirements": len(rows), "requirements_with_valid_test": sum(r["covered"] for r in rows), "cases": len(cases), "tests": len(tests),
+            "valid": counts.get("valid", 0), "needs_review": counts.get("invalid", 0), "by_check": {k: counts.get(k, 0) for k in ("V3", "V4", "V5", "V6")}, "gaps": matrix["gaps"]}

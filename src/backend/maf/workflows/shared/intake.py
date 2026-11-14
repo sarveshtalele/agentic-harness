@@ -23,7 +23,9 @@ def intake_gate(rc: RunContext, state: dict):
     source = f"{repo['kind']} {repo['url']} at {repo['commit_sha'][:10]}" if repo else "no repository"
     return {"gate": 0, "title": "Gate 0: confirm intake scope",
             "summary": f"Mode: {a['mode']}. Source: {source}. Files: {a['total_files']}. Languages: {', '.join(a['languages']) or 'none'}. "
-                       "Agents read this project's repository and documents only. Generated code lands on a separate branch.",
+                       "Agents read this project's repository and documents only. Generated code lands on a separate branch."
+                       + (" Approving Gate 0 lets the platform run this repository's dependency installers (pip, npm) in the sandbox, only to collect and compile the generated tests. No test body is run; "
+                          "you download the tests and run them on your own systems." if a["mode"] == "brownfield" else ""),
             "payload": {"analysis": {k: a.get(k) for k in ("mode", "languages", "frameworks", "test_runners", "total_files", "test_file_count")}}}
 
 
