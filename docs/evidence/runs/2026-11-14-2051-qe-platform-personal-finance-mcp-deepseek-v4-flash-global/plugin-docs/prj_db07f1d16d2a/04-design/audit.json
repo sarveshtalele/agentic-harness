@@ -1,0 +1,294 @@
+{
+ "_capture": {
+  "agent_type": "coverage-auditor",
+  "agent_id": "run_d5337c94a9d7:design",
+  "at": "2026-11-14T15:24:35.475232+00:00",
+  "sha256": "30d6380f03e24bdfb604b138503442f16a8305c9b56798f941205206a4330eaa",
+  "note": "Recorded by Agentic QE Platform from the agent's own checked answer. Do not edit."
+ },
+ "kind": "design",
+ "verdicts": [
+  {
+   "id": "TC-APP-001",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-001-001",
+   "reason": "The case sends GET to /api/health and asserts status 'ok' and tools as an integer, directly testing the behaviour described in SC-AREA-001-001 and REQ-001."
+  },
+  {
+   "id": "TC-APP-002",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-001-001",
+   "reason": "The case tests the health endpoint with zero tools loaded and checks status 'ok' and tools=0, which is a valid boundary of the integer return for REQ-001."
+  },
+  {
+   "id": "TC-APP-003",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-001-001",
+   "reason": "The case tests the health endpoint with exactly one tool loaded and confirms status 'ok' and tools=1, directly exercising the scenario and requirement REQ-001."
+  },
+  {
+   "id": "TC-APP-004",
+   "verdict": "PARTIAL",
+   "scenario": "SC-AREA-001-001",
+   "reason": "The case repeats the same behaviour as TC-APP-001 and adds no new coverage; it misses edge cases like missing tool manager or non-integer count, and does not match the scenario's stated level (Integration) of testing status and tool count as a generic positive."
+  },
+  {
+   "id": "TC-APP-005",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-002-001",
+   "reason": "Sends malformed JSON missing quotes, trigger line 246-247 in src/web/server.py, and expects 400 with 'invalid JSON'."
+  },
+  {
+   "id": "TC-APP-006",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-002-001",
+   "reason": "The case sends malformed JSON (single quotes) to POST /api/calc and expects 400 with error 'invalid JSON', exactly matching SC-AREA-002-001 and REQ-003."
+  },
+  {
+   "id": "TC-APP-007",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-002-001",
+   "reason": "Sends truncated JSON, triggers the same exception path at line 246-247 in src/web/server.py, and expects 400 with 'invalid JSON'."
+  },
+  {
+   "id": "TC-APP-008",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-002-001",
+   "reason": "Sends incomplete JSON, triggers line 246-247 in src/web/server.py, and expects 400 with 'invalid JSON'."
+  },
+  {
+   "id": "TC-APP-009",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-003-001",
+   "reason": "Provides missing required parameters, triggering a ValueError in _sanitize_params at line 258-259 in src/web/server.py and expects a 400 with the error message from that function."
+  },
+  {
+   "id": "TC-APP-010",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-003-001",
+   "reason": "The case sends a POST to /api/calc with missing required parameters such that _sanitize_params raises a ValueError, and expects a 400 response with an error message, directly covering SC-AREA-003-001 and REQ-005."
+  },
+  {
+   "id": "TC-APP-011",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-003-001",
+   "reason": "The test sends a POST with a parameter of wrong type (principal=\"abc\") and expects a 400 with error from _sanitize_params, matching the scenario."
+  },
+  {
+   "id": "TC-APP-012",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-003-001",
+   "reason": "The test sends a POST with an extra unknown parameter that _sanitize_params rejects, expecting a 400 with error message, covering the scenario."
+  },
+  {
+   "id": "TC-APP-013",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-004-001",
+   "reason": "Sends inputs that cause a ValueError (negative PV), triggering line 267 in src/web/server.py, and expects 400 with 'invalid inputs:' prefix."
+  },
+  {
+   "id": "TC-APP-014",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-004-001",
+   "reason": "The test sends a ZeroDivisionError case (rate=0) and expects a 400 with 'invalid inputs: ' prefix, directly covering the scenario."
+  },
+  {
+   "id": "TC-APP-015",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-004-001",
+   "reason": "The test sends a negative sqrt (ValueError) case and expects a 400 with 'invalid inputs: ' prefix, covering the scenario."
+  },
+  {
+   "id": "TC-APP-016",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-004-001",
+   "reason": "The test sends an invalid calculator name causing KeyError and expects a 400 with 'invalid inputs: ' prefix, covering the scenario."
+  },
+  {
+   "id": "TC-APP-017",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-005-001",
+   "reason": "Sends a non-numeric string that slips through sanitization and causes an unexpected exception, triggering line 273 in src/web/server.py, and expects 400 with 'calculation failed'."
+  },
+  {
+   "id": "TC-APP-018",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-005-001",
+   "reason": "The test triggers an unexpected RuntimeError via a special calculator and expects a 400 with 'calculation failed', directly covering the scenario."
+  },
+  {
+   "id": "TC-APP-019",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-005-001",
+   "reason": "Sends valid JSON with a zero rate for interest calculator, likely causing division by zero and an unexpected exception at line 273 in src/web/server.py, expecting 400 with 'calculation failed'."
+  },
+  {
+   "id": "TC-APP-020",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-005-001",
+   "reason": "Sends a string value for principal that bypasses sanitization, causing a TypeError in the calculator, triggering line 273 in src/web/server.py, and expects 400 with 'calculation failed'."
+  },
+  {
+   "id": "TC-APP-021",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-006-001",
+   "reason": "The test sends a valid POST to /api/calc with calculator \"interest\" and required parameters, and expects a 200 response with calculator name and computed result, matching the requirement at src/web/server.py:264."
+  },
+  {
+   "id": "TC-APP-022",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-006-001",
+   "reason": "Sends a valid calculator name 'interest' with correct parameters inside 'params' object, expects 200 and the correct result of 100.0, matching line 264 in src/web/server.py."
+  },
+  {
+   "id": "TC-APP-023",
+   "verdict": "PARTIAL",
+   "scenario": "SC-AREA-006-001",
+   "reason": "Sends a calculator name 'simple_interest' that does not exist (not in CALCULATORS), so the request would hit the error path at line 252-254 instead of the valid result path at line 264 in src/web/server.py; thus it does not exercise the scenario's valid-positive flow."
+  },
+  {
+   "id": "TC-APP-024",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-006-001",
+   "reason": "The case sends a POST to /api/calc with valid calculator and parameters and expects 200 with calculator name and result, matching the scenario and REQ-008 (src/web/server.py:264)."
+  },
+  {
+   "id": "TC-APP-025",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-007-001",
+   "reason": "The test sends a code with non-digit characters and expects a 400 with error \"invalid scheme code\", directly exercising the requirement at src/web/server.py:280."
+  },
+  {
+   "id": "TC-APP-026",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-007-001",
+   "reason": "The test uses a code of 10 digits (exceeding the maximum length of 9) and expects a 400 with \"invalid scheme code\", testing the length condition cited at src/web/server.py:280."
+  },
+  {
+   "id": "TC-APP-027",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-007-001",
+   "reason": "An empty code parameter is sent, which fails the .isdigit() or length check, and expects a 400 with \"invalid scheme code\", covering the scenario and the requirement at src/web/server.py:280."
+  },
+  {
+   "id": "TC-APP-028",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-008-001",
+   "reason": "The case tests a query longer than 80 characters and expects 400 with the exact error message, covering the scenario and REQ-010 (src/web/server.py:284)."
+  },
+  {
+   "id": "TC-APP-029",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-008-001",
+   "reason": "An empty q parameter is sent, and the test expects a 400 with error \"query must be 1–80 characters\", exactly matching the requirement at src/web/server.py:284."
+  },
+  {
+   "id": "TC-APP-030",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-008-001",
+   "reason": "A q value of 81 characters (exceeding the 80‑character limit) is sent, and the test expects a 400 with the appropriate error message, covering the boundary condition per src/web/server.py:284."
+  },
+  {
+   "id": "TC-APP-031",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-008-001",
+   "reason": "The case also tests a query longer than 80 characters with the same expected error, covering the scenario and REQ-010 (src/web/server.py:284)."
+  },
+  {
+   "id": "TC-APP-032",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-009-001",
+   "reason": "The case uses an invalid base currency code and expects 400 with 'invalid currency code', covering the scenario and REQ-011 (src/web/server.py:292)."
+  },
+  {
+   "id": "TC-APP-033",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-009-001",
+   "reason": "The case sends a base with lowercase letters, which should fail the _CCY_RE check, and expects a 400 with 'invalid currency code', directly exercising the behaviour stated in the scenario."
+  },
+  {
+   "id": "TC-APP-034",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-009-001",
+   "reason": "The case sends symbols containing a digit (invalid per _CCY_RE) and expects a 400 with the correct error message, covering the scenario's requirement."
+  },
+  {
+   "id": "TC-APP-035",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-009-001",
+   "reason": "The case sends a symbols string longer than 40 characters, which will not match _CCY_RE, and expects a 400 with 'invalid currency code', exercising the scenario."
+  },
+  {
+   "id": "TC-APP-036",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-010-001",
+   "reason": "The case sends a symbol containing an invalid character and expects 400 with 'invalid symbol', covering the scenario and REQ-012 (src/web/server.py:299)."
+  },
+  {
+   "id": "TC-APP-037",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-010-001",
+   "reason": "The case sends a symbol containing a space (invalid per _SYMBOL_RE) and expects a 400 with 'invalid symbol', directly covering the scenario."
+  },
+  {
+   "id": "TC-APP-038",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-010-001",
+   "reason": "The case sends a 16-character symbol (exceeds the limit) and expects a 400 with 'invalid symbol', covering boundary invalid input per the scenario."
+  },
+  {
+   "id": "TC-APP-039",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-010-001",
+   "reason": "The case sends an empty symbol and expects a 400 with 'invalid symbol', which exercises the scenario's requirement for invalid symbol."
+  },
+  {
+   "id": "TC-APP-040",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-011-001",
+   "reason": "The case sends a payload one byte over the limit and expects 413 with 'payload too large', covering the scenario and REQ-013 (src/web/server.py:151)."
+  },
+  {
+   "id": "TC-APP-041",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-011-001",
+   "reason": "The test sends a payload of 16385 bytes (over the 16384 limit) to POST /api/calc and expects a 413 with the error message, exactly matching REQ-013's behavior for oversize payloads."
+  },
+  {
+   "id": "TC-APP-042",
+   "verdict": "PARTIAL",
+   "scenario": "SC-AREA-011-001",
+   "reason": "The test verifies that sending exactly 16384 bytes returns a 200 with a valid result, but REQ-013 only specifies the error path for payloads over 16384 bytes; this boundary-at-limit case is not required by the requirement and does not exercise the rejection behavior."
+  },
+  {
+   "id": "TC-APP-043",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-011-001",
+   "reason": "The test sends a payload of 16386 bytes (two bytes over the limit) and expects a 413 with the error message, directly exercising the rejection behavior described in REQ-013 at src/web/server.py:151."
+  },
+  {
+   "id": "TC-APP-044",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-012-001",
+   "reason": "The test sends a GET request to /api/health and expects all six security headers listed in REQ-015 (x-content-type-options, referrer-policy, permissions-policy, strict-transport-security, cross-origin-opener-policy, content-security-policy), which is exactly the behavior required."
+  },
+  {
+   "id": "TC-APP-045",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-012-001",
+   "reason": "The test sends a valid POST /api/calc request and expects a 200 response along with all six security headers required by REQ-015, covering the requirement's scope on a successful response at src/web/server.py:171."
+  },
+  {
+   "id": "TC-APP-046",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-012-001",
+   "reason": "The test sends a GET /api/nav with an invalid code, expects a 400 response, and checks that all six security headers are present, fulfilling the requirement that every HTTP response include these headers (REQ-015)."
+  },
+  {
+   "id": "TC-APP-047",
+   "verdict": "COVERS",
+   "scenario": "SC-AREA-012-001",
+   "reason": "The test sends a GET /api/fx with an invalid base, expects a 400 response, and verifies all six security headers are present, again covering REQ-015's requirement on every HTTP response as implemented at src/web/server.py:171."
+  }
+ ]
+}

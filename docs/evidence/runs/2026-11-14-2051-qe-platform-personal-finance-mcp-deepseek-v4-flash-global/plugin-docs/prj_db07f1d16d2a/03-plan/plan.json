@@ -1,0 +1,135 @@
+{
+ "strategy": "Focus on integration-level testing for all P0 and P1 requirements since the application is a web API (no UI for E2E) and the core logic for sanitization, currency validation, and security headers is exercised at the API boundary. Unit tests are deferred because the pure logic is minimal and critical behaviors (e.g., payload size limit, security headers) are not testable in isolation without the server. All existing integration tests leverage httpx test client via FastAPI's TestClient; no other frameworks detected.",
+ "scenarios": [
+  {
+   "id": "SC-AREA-001-001",
+   "area": "Health endpoint returns status and tool count",
+   "title": "Health endpoint returns status and tool count",
+   "level": "Integration",
+   "priority": "P1",
+   "requirementIds": [
+    "REQ-001"
+   ]
+  },
+  {
+   "id": "SC-AREA-002-001",
+   "area": "Run calculator - invalid JSON body returns 400",
+   "title": "Run calculator - invalid JSON body returns 400",
+   "level": "Integration",
+   "priority": "P1",
+   "requirementIds": [
+    "REQ-003"
+   ]
+  },
+  {
+   "id": "SC-AREA-003-001",
+   "area": "Run calculator - invalid sanitized params returns 400",
+   "title": "Run calculator - invalid sanitized params returns 400",
+   "level": "Integration",
+   "priority": "P1",
+   "requirementIds": [
+    "REQ-005"
+   ]
+  },
+  {
+   "id": "SC-AREA-004-001",
+   "area": "Run calculator - calculator domain errors return 400",
+   "title": "Run calculator - calculator domain errors return 400",
+   "level": "Integration",
+   "priority": "P1",
+   "requirementIds": [
+    "REQ-006"
+   ]
+  },
+  {
+   "id": "SC-AREA-005-001",
+   "area": "Run calculator - unexpected exception returns 400",
+   "title": "Run calculator - unexpected exception returns 400",
+   "level": "Integration",
+   "priority": "P1",
+   "requirementIds": [
+    "REQ-007"
+   ]
+  },
+  {
+   "id": "SC-AREA-006-001",
+   "area": "Run calculator - valid input returns 200 and result",
+   "title": "Run calculator - valid input returns 200 and result",
+   "level": "Integration",
+   "priority": "P1",
+   "requirementIds": [
+    "REQ-008"
+   ]
+  },
+  {
+   "id": "SC-AREA-007-001",
+   "area": "API NAV - invalid scheme code returns 400",
+   "title": "API NAV - invalid scheme code returns 400",
+   "level": "Integration",
+   "priority": "P1",
+   "requirementIds": [
+    "REQ-009"
+   ]
+  },
+  {
+   "id": "SC-AREA-008-001",
+   "area": "API NAV - invalid query length returns 400",
+   "title": "API NAV - invalid query length returns 400",
+   "level": "Integration",
+   "priority": "P1",
+   "requirementIds": [
+    "REQ-010"
+   ]
+  },
+  {
+   "id": "SC-AREA-009-001",
+   "area": "API FX - invalid currency codes return 400",
+   "title": "API FX - invalid currency codes return 400",
+   "level": "Integration",
+   "priority": "P1",
+   "requirementIds": [
+    "REQ-011"
+   ]
+  },
+  {
+   "id": "SC-AREA-010-001",
+   "area": "API Quote - invalid symbol returns 400",
+   "title": "API Quote - invalid symbol returns 400",
+   "level": "Integration",
+   "priority": "P1",
+   "requirementIds": [
+    "REQ-012"
+   ]
+  },
+  {
+   "id": "SC-AREA-011-001",
+   "area": "Payload size limit on all /api endpoints",
+   "title": "Payload size limit on all /api endpoints",
+   "level": "Integration",
+   "priority": "P0",
+   "requirementIds": [
+    "REQ-013"
+   ]
+  },
+  {
+   "id": "SC-AREA-012-001",
+   "area": "Security headers on every HTTP response",
+   "title": "Security headers on every HTTP response",
+   "level": "Integration",
+   "priority": "P0",
+   "requirementIds": [
+    "REQ-015"
+   ]
+  }
+ ],
+ "skippedLevels": [
+  {
+   "level": "Unit",
+   "reason": "All P0 and P1 behaviors involve HTTP request/response handling, middleware, or external I/O (payload size check, security headers, JSON parsing, query validations). No pure-logic-only scenarios exist for these requirements; existing unit tests in tests/ (e.g., test_tvm.py) cover isolated calculator logic but are not P0/P1. Writing additional unit tests would duplicate integration coverage."
+  },
+  {
+   "level": "E2E",
+   "reason": "The application has no browser-accessible UI; it is a JSON-over-HTTP API only. All functionality is accessed via API calls, making E2E browser testing impossible and unnecessary."
+  }
+ ]
+}

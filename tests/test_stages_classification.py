@@ -157,3 +157,16 @@ def test_healing_may_repair_drifted_tests_and_fixtures_only():
     assert execution.heal_allowed(failures, "tests/agentic_qe/test_tc_app_002.py") and execution.heal_allowed(failures, "tests/agentic_qe/fixtures.json")
     assert not execution.heal_allowed(failures, "calc.py") and not execution.heal_allowed(failures, "tests/agentic_qe/test_tc_app_003.py")
     assert not execution.assertions_preserved("assert a == 1\nassert b", "assert a == 1")[0], "a removed assertion is refused"
+
+
+def test_an_error_raised_by_the_generated_test_itself_is_a_test_bug_not_a_defect():
+    sync_client = ("AttributeError: 'ASGITransport' object has no attribute '__enter__'. Did you mean: '__aenter__'?\n"
+                   "tests/agentic_qe/test_api_fx_TC_APP_032.py:12: in test_TC_APP_032\n    with httpx.Client(transport=transport) as client:")
+    missing_await = ("AttributeError: 'coroutine' object has no attribute 'status_code'\n"
+                     "tests/agentic_qe/test_calc_tc_app_005.py:15: in test_TC_APP_005\n    assert response.status_code == 400")
+    app_raised = ("ValueError: rate must be positive\ntests/agentic_qe/test_tvm.py:9: in test_TC_APP_001\n    tvm(1, -1)\n"
+                  "src/tvm.py:20: in tvm\n    raise ValueError('rate must be positive')")
+    assert execution.classify_failure(sync_client) == "TEST_BUG"
+    assert execution.classify_failure(missing_await) == "TEST_BUG"
+    assert execution.classify_failure(app_raised) != "TEST_BUG", "an exception from the application's own code is not the test's bug"
+    assert execution.CLASSIFICATION["TEST_BUG"] == "test problem"

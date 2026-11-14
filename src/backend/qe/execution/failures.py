@@ -36,7 +36,19 @@ def choose_runners(analysis: dict) -> list[str]:
     return runners or (["pytest"] if "Python" in analysis.get("languages", {}) else [])
 
 
-CLASSIFICATION = {"DEFECT": "defect", "SELECTOR_DRIFT": "test problem", "FIXTURE_DRIFT": "test problem", "ENVIRONMENT": "environment"}
+CLASSIFICATION = {"DEFECT": "defect", "SELECTOR_DRIFT": "test problem", "FIXTURE_DRIFT": "test problem", "TEST_BUG": "test problem", "ENVIRONMENT": "environment"}
+# the last traceback frame of a failure ("path:line: in name"); when it lies in a generated test, the test's own code raised
+FRAME = re.compile(r"^(\S+?\.(?:py|ts|js|java|cs|go)):\d+: in ", re.M)
+
+
+def _raised_in_test(message: str) -> bool:
+    """True when the exception came from the generated test's own code, not from the application it calls.
+
+    Seen live: a sync httpx.Client on an async transport, a missing await, a wrong attribute. None is an application defect.
+    ponytail: reads the pytest traceback text; other runners' frames fall through to the rules below.
+    """
+    frames = FRAME.findall(message)
+    return bool(frames) and "tests/agentic_qe/" in frames[-1].replace("\\", "/")
 
 
 ENV_EVIDENCE = re.compile(
@@ -75,6 +87,8 @@ def classify_failure(message: str) -> str:
         return "ENVIRONMENT"
     if ASSERTION_LINE.match(_first_line(message)):
         return "SELECTOR_DRIFT" if re.search(r"locator|selector|getby|strict mode violation", text) else "DEFECT"
+    if _raised_in_test(message) and re.search(r"\b(?:AttributeError|TypeError|NameError|UnboundLocalError)\b", message):
+        return "TEST_BUG"  # never healed (healing repairs drift only) and never counted as an application defect
     if "cannot import name" in text:  # the module exists but the test asks for a wrong name: the test is wrong, not the machine
         return "FIXTURE_DRIFT"
     if ENV_EVIDENCE.search(text):
@@ -88,6 +102,8 @@ def classify_failure(message: str) -> str:
 
 # The rows of skills/healing-tests/references/HEALING_PATTERNS.md, plus the environment signatures seen on real repositories.
 HEALING_PATTERNS = {
+    "TEST_BUG": {"pattern": "Test Bug", "cause": "The generated test's own code raised the error (a wrong client, a missing await, a wrong attribute), not the application.",
+                 "fix": "Regenerate the test from its case. It is not healed and is not counted as an application defect."},
     "DEFECT": {"pattern": "Real App Bug", "cause": "The test ran and its assertion about the application's behaviour failed.",
                "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion."},
     "SELECTOR_DRIFT": {"pattern": "Selector Drift", "cause": "The page no longer has the element the test looks for.",

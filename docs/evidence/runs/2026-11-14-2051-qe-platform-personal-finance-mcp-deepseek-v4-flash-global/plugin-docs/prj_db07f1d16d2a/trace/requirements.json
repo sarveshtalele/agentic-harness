@@ -1,0 +1,30 @@
+{
+ "stage": "requirements",
+ "snapshot": {
+  "req": {
+   "REQ-001": "2000d3b90a540fad0c582536426f0e589e39bb556ad5d5c40ec3569820ad3a1a",
+   "REQ-002": "0378b4a479a2fd5975b5d35522997fe8384082341746df084e1410f27a3216bb",
+   "REQ-003": "55c9a90d53634ff03f62d3ab8513576ffb5d4137b3e9e1e144532f54140b593c",
+   "REQ-005": "388f141484ce09f680e76cf7e096ac85d095a0fd34eef9f08f8d9c3a873c6a19",
+   "REQ-006": "3aba01074a4599b65ffb39160b696eede81b45737ebdad0a445c261720aceb57",
+   "REQ-007": "55e3eaee954023503da7cbff84d7757e9c09a604b9c9a13e800b795be0f7e6fb",
+   "REQ-008": "549bf131dfd3c31779a47b7f2a1e1932e8f03e753ed553141c21e23921551faa",
+   "REQ-009": "f7116bc753ecd4c14f664fd1101e176a9010d30de23d5d6b9b3d380c9e44fc2a",
+   "REQ-010": "68c9453b390af66be9f1d063ee431702751af9554c8fd3362f760838ef4e2925",
+   "REQ-011": "25616f9837fe2f4a1391438aa9ecb1924e4387658dff22db122e95935f4ef98d",
+   "REQ-012": "0beb3c226e0a7cfc0a9aeb6a038676bae418f028984395ccaee2bc6084a859cf",
+   "REQ-013": "6a57f21f74aa94b3201bfb5c6a21e29951fc679c97ffb2e3b0ab1b0d2b7f7088",
+   "REQ-015": "c7412b34bda841ec2c24dc9a2c7cb34e0e40b5a10b7dd31957cd502a82dda7a3"
+  }
+ },
+ "last_check": {
+  "stage": "requirements",
+  "upstream": 0,
+  "carried": 0,
+  "changed": 0,
+  "dropped_with_reason": 0,
+  "dropped_without_reason": 0,
+  "new": 0,
+  "verdict": "PASS"
+ }
+}

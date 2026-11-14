@@ -1,0 +1,854 @@
+{
+ "cases": [
+  {
+   "tc_id": "TC-APP-001",
+   "requirement_id": "REQ-001",
+   "planScenarioIds": [
+    "SC-AREA-001-001"
+   ],
+   "scenario": "Health endpoint returns status ok and tools count as an integer",
+   "type": "Positive",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and tool manager is initialized with at least one tool",
+   "test_data": "No input data needed",
+   "steps": [
+    "Send GET request to /api/health",
+    "Parse the JSON response"
+   ],
+   "expected_result": "status is 'ok', tools is an integer (e.g., 10)"
+  },
+  {
+   "tc_id": "TC-APP-002",
+   "requirement_id": "REQ-001",
+   "planScenarioIds": [
+    "SC-AREA-001-001"
+   ],
+   "scenario": "Health endpoint returns tools count 0 when no tools are loaded",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running with an empty tool manager (no tools loaded)",
+   "test_data": "No input data needed",
+   "steps": [
+    "Send GET request to /api/health",
+    "Parse the JSON response"
+   ],
+   "expected_result": "status is 'ok', tools is 0"
+  },
+  {
+   "tc_id": "TC-APP-003",
+   "requirement_id": "REQ-001",
+   "planScenarioIds": [
+    "SC-AREA-001-001"
+   ],
+   "scenario": "Health endpoint returns tools count 1 when exactly one tool is loaded",
+   "type": "Negative (Boundary)",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running with exactly one tool registered in the tool manager",
+   "test_data": "No input data needed",
+   "steps": [
+    "Send GET request to /api/health",
+    "Parse the JSON response"
+   ],
+   "expected_result": "status is 'ok', tools is 1"
+  },
+  {
+   "tc_id": "TC-APP-004",
+   "requirement_id": "REQ-001",
+   "planScenarioIds": [
+    "SC-AREA-001-001"
+   ],
+   "scenario": "Health endpoint returns status ok and tools count as integer with a realistic number of tools",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running with a realistic number of tools (e.g., 10) in the tool manager",
+   "test_data": "No input data needed",
+   "steps": [
+    "Send GET request to /api/health",
+    "Parse the JSON response"
+   ],
+   "expected_result": "status is 'ok', tools is an integer (e.g., 10)"
+  },
+  {
+   "tc_id": "TC-APP-005",
+   "requirement_id": "REQ-003",
+   "planScenarioIds": [
+    "SC-AREA-002-001"
+   ],
+   "scenario": "POST /api/calc with malformed JSON body returns 400 with error 'invalid JSON'",
+   "type": "Exception",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "invalid JSON string: {calculator: tvm} (missing quotes around keys and values)",
+   "steps": [
+    "Send POST request to /api/calc with Content-Type: application/json and body as malformed JSON string above",
+    "Receive response"
+   ],
+   "expected_result": "Response status code is 400 and JSON body contains error field with value 'invalid JSON'"
+  },
+  {
+   "tc_id": "TC-APP-006",
+   "requirement_id": "REQ-003",
+   "planScenarioIds": [
+    "SC-AREA-002-001"
+   ],
+   "scenario": "POST /api/calc with malformed JSON body returns 400 with error 'invalid JSON'",
+   "type": "Exception",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "Malformed JSON: \"{'calculator': 'tvm'}\" (single quotes)",
+   "steps": [
+    "Send POST request to /api/calc with Content-Type: application/json and body as malformed JSON string above",
+    "Receive response"
+   ],
+   "expected_result": "Response status code is 400 and JSON body is {\"error\": \"invalid JSON\"}"
+  },
+  {
+   "tc_id": "TC-APP-007",
+   "requirement_id": "REQ-003",
+   "planScenarioIds": [
+    "SC-AREA-002-001"
+   ],
+   "scenario": "POST /api/calc with malformed JSON (truncated object) returns 400 with error 'invalid JSON'",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "{\"key\": \"value\"",
+   "steps": [
+    "Send POST request to /api/calc with Content-Type: application/json and body as truncated JSON string: '{\"key\": \"value\"'",
+    "Receive response"
+   ],
+   "expected_result": "Response status code is 400 and JSON body contains {\"error\": \"invalid JSON\"}"
+  },
+  {
+   "tc_id": "TC-APP-008",
+   "requirement_id": "REQ-003",
+   "planScenarioIds": [
+    "SC-AREA-002-001"
+   ],
+   "scenario": "POST /api/calc with malformed JSON body returns 400 with error 'invalid JSON'",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "malformed JSON string: {\"calculator\": \"tvm\", \"key\"",
+   "steps": [
+    "Send POST request to /api/calc with Content-Type: application/json and body as above",
+    "Receive response"
+   ],
+   "expected_result": "Response status code is 400 and JSON body contains {\"error\": \"invalid JSON\"}"
+  },
+  {
+   "tc_id": "TC-APP-009",
+   "requirement_id": "REQ-005",
+   "planScenarioIds": [
+    "SC-AREA-003-001"
+   ],
+   "scenario": "POST /api/calc with missing required parameters returns 400",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "{\"calculator\": \"interest\"}",
+   "steps": [
+    "Send POST request to /api/calc with Content-Type: application/json and body {\"calculator\": \"interest\"}",
+    "Receive response"
+   ],
+   "expected_result": "Response status code is 400 and JSON body contains \"error\" field with message from _sanitize_params"
+  },
+  {
+   "tc_id": "TC-APP-010",
+   "requirement_id": "REQ-005",
+   "planScenarioIds": [
+    "SC-AREA-003-001"
+   ],
+   "scenario": "POST /api/calc with missing required parameter that _sanitize_params rejects returns 400 with error message",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "{\"calculator\": \"interest\", \"rate\": 5}",
+   "steps": [
+    "Send POST request to /api/calc with Content-Type: application/json and body as above",
+    "Receive response"
+   ],
+   "expected_result": "Response status code is 400 and JSON body has an error field with message from ValueError"
+  },
+  {
+   "tc_id": "TC-APP-011",
+   "requirement_id": "REQ-005",
+   "planScenarioIds": [
+    "SC-AREA-003-001"
+   ],
+   "scenario": "POST /api/calc with parameter of wrong type that _sanitize_params rejects returns 400 with error message",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "{\"calculator\": \"interest\", \"principal\": \"abc\", \"rate\": 5, \"time\": 2}",
+   "steps": [
+    "Send POST request to /api/calc with Content-Type: application/json and body as above",
+    "Receive response"
+   ],
+   "expected_result": "Response status code is 400 and JSON body has an error field with message from ValueError"
+  },
+  {
+   "tc_id": "TC-APP-012",
+   "requirement_id": "REQ-005",
+   "planScenarioIds": [
+    "SC-AREA-003-001"
+   ],
+   "scenario": "POST /api/calc with extra unknown parameter that _sanitize_params rejects returns 400 with error message",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "{\"calculator\": \"interest\", \"principal\": 1000, \"rate\": 5, \"time\": 2, \"unknown\": \"value\"}",
+   "steps": [
+    "Send POST request to /api/calc with Content-Type: application/json and body as above",
+    "Receive response"
+   ],
+   "expected_result": "Response status code is 400 and JSON body has an error field with message from ValueError"
+  },
+  {
+   "tc_id": "TC-APP-013",
+   "requirement_id": "REQ-006",
+   "planScenarioIds": [
+    "SC-AREA-004-001"
+   ],
+   "scenario": "POST /api/calc with inputs that cause ValueError returns 400",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "{\"calculator\": \"tvm\", \"pv\": -1000, \"fv\": 2000, \"rate\": 5, \"nper\": 10}",
+   "steps": [
+    "Send POST request to /api/calc with Content-Type: application/json and body as above",
+    "Receive response"
+   ],
+   "expected_result": "Response status code is 400 and JSON body includes error key with message starting with 'invalid inputs:'"
+  },
+  {
+   "tc_id": "TC-APP-014",
+   "requirement_id": "REQ-006",
+   "planScenarioIds": [
+    "SC-AREA-004-001"
+   ],
+   "scenario": "POST /api/calc with divisor zero that raises ZeroDivisionError returns 400 with actionable error message",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "{\"calculator\": \"interest\", \"principal\": 1000, \"rate\": 0, \"time\": 2}",
+   "steps": [
+    "Send POST request to /api/calc with Content-Type: application/json and body as above",
+    "Receive response"
+   ],
+   "expected_result": "Response status code is 400 and JSON body has error field containing message from ZeroDivisionError prefixed with \"invalid inputs: \""
+  },
+  {
+   "tc_id": "TC-APP-015",
+   "requirement_id": "REQ-006",
+   "planScenarioIds": [
+    "SC-AREA-004-001"
+   ],
+   "scenario": "POST /api/calc with value that causes negative sqrt (ValueError) returns 400 with actionable error message",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "{\"calculator\": \"sqrt\", \"value\": -5}",
+   "steps": [
+    "Send POST request to /api/calc with Content-Type: application/json and body as above",
+    "Receive response"
+   ],
+   "expected_result": "Response status code is 400 and JSON body has error field containing message from ValueError prefixed with \"invalid inputs: \""
+  },
+  {
+   "tc_id": "TC-APP-016",
+   "requirement_id": "REQ-006",
+   "planScenarioIds": [
+    "SC-AREA-004-001"
+   ],
+   "scenario": "POST /api/calc with invalid calculator name that raises KeyError returns 400 with actionable error message",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "{\"calculator\": \"nonexistent\", \"param\": 1}",
+   "steps": [
+    "Send POST request to /api/calc with Content-Type: application/json and body as above",
+    "Receive response"
+   ],
+   "expected_result": "Response status code is 400 and JSON body has error field containing message from KeyError prefixed with \"invalid inputs: \""
+  },
+  {
+   "tc_id": "TC-APP-017",
+   "requirement_id": "REQ-007",
+   "planScenarioIds": [
+    "SC-AREA-005-001"
+   ],
+   "scenario": "POST /api/calc with input that triggers an unexpected exception returns 400",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "{\"calculator\": \"tvm\", \"pv\": \"abc\", \"fv\": 2000, \"rate\": 5, \"nper\": 10}",
+   "steps": [
+    "Send POST request to /api/calc with Content-Type: application/json and body as above",
+    "Receive response"
+   ],
+   "expected_result": "Response status code is 400 and JSON body equals {\"error\": \"calculation failed\"}"
+  },
+  {
+   "tc_id": "TC-APP-018",
+   "requirement_id": "REQ-007",
+   "planScenarioIds": [
+    "SC-AREA-005-001"
+   ],
+   "scenario": "POST /api/calc with input that triggers an unexpected exception (e.g., raising RuntimeError in a calculator) returns 400 with generic error 'calculation failed'",
+   "type": "Exception",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available; a calculator that raises RuntimeError is registered",
+   "test_data": "{\"calculator\": \"runtime_error_calc\", \"param\": 1}",
+   "steps": [
+    "Send POST request to /api/calc with Content-Type: application/json and body as above",
+    "Receive response"
+   ],
+   "expected_result": "Response status code is 400 and JSON body is {\"error\": \"calculation failed\"}"
+  },
+  {
+   "tc_id": "TC-APP-019",
+   "requirement_id": "REQ-007",
+   "planScenarioIds": [
+    "SC-AREA-005-001"
+   ],
+   "scenario": "POST /api/calc with valid params that cause a calculator to raise an unexpected exception (e.g., invalid division) returns 400 with generic error 'calculation failed'",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "{\"calculator\": \"interest\", \"principal\": 100, \"rate\": 0, \"time\": 2}",
+   "steps": [
+    "Send POST request to /api/calc with Content-Type: application/json and body as above",
+    "Receive response"
+   ],
+   "expected_result": "Response status code is 400 and JSON body is {\"error\": \"calculation failed\"}"
+  },
+  {
+   "tc_id": "TC-APP-020",
+   "requirement_id": "REQ-007",
+   "planScenarioIds": [
+    "SC-AREA-005-001"
+   ],
+   "scenario": "POST /api/calc with a string value for a numeric parameter that causes a TypeError in calculator returns 400 with generic error 'calculation failed'",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "{\"calculator\": \"interest\", \"principal\": \"abc\", \"rate\": 5, \"time\": 2}",
+   "steps": [
+    "Send POST request to /api/calc with Content-Type: application/json and body as above",
+    "Receive response"
+   ],
+   "expected_result": "Response status code is 400 and JSON body is {\"error\": \"calculation failed\"}"
+  },
+  {
+   "tc_id": "TC-APP-021",
+   "requirement_id": "REQ-008",
+   "planScenarioIds": [
+    "SC-AREA-006-001"
+   ],
+   "scenario": "POST /api/calc with valid calculator name and valid parameters returns 200 with calculator name and result",
+   "type": "Positive",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "{\"calculator\": \"interest\", \"principal\": 1000, \"rate\": 5, \"time\": 2}",
+   "steps": [
+    "Send POST request to /api/calc with Content-Type: application/json and body as above",
+    "Receive response"
+   ],
+   "expected_result": "Response status code is 200 and JSON body is {\"calculator\": \"interest\", \"result\": 100.0} (assuming simple interest: 1000 * 0.05 * 2 = 100)"
+  },
+  {
+   "tc_id": "TC-APP-022",
+   "requirement_id": "REQ-008",
+   "planScenarioIds": [
+    "SC-AREA-006-001"
+   ],
+   "scenario": "POST /api/calc with valid calculator name and valid parameters returns 200 and correct result",
+   "type": "Positive",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "{\"calculator\": \"interest\", \"params\": {\"principal\": 1000, \"rate\": 5, \"time\": 2}}",
+   "steps": [
+    "Send POST request to /api/calc with Content-Type: application/json and body as above",
+    "Receive response"
+   ],
+   "expected_result": "Response status code is 200 with JSON body containing \"calculator\": \"interest\" and \"result\": 100.0"
+  },
+  {
+   "tc_id": "TC-APP-023",
+   "requirement_id": "REQ-008",
+   "planScenarioIds": [
+    "SC-AREA-006-001"
+   ],
+   "scenario": "POST /api/calc with valid calculator name and parameters returns 200 with calculator name and result",
+   "type": "Positive",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "{\"calculator\": \"simple_interest\", \"principal\": 1000, \"rate\": 5, \"time\": 2}",
+   "steps": [
+    "Send POST request to /api/calc with Content-Type: application/json and body as above",
+    "Receive response"
+   ],
+   "expected_result": "Response status code is 200 and JSON body has fields \"calculator\": \"simple_interest\" and \"result\": 100.0"
+  },
+  {
+   "tc_id": "TC-APP-024",
+   "requirement_id": "REQ-008",
+   "planScenarioIds": [
+    "SC-AREA-006-001"
+   ],
+   "scenario": "POST /api/calc with valid calculator and valid parameters returns 200 with calculator name and result",
+   "type": "Positive",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "{\"calculator\": \"add\", \"a\": 2, \"b\": 3}",
+   "steps": [
+    "Send POST request to /api/calc with Content-Type: application/json and body as above",
+    "Receive response"
+   ],
+   "expected_result": "Response status code is 200 and JSON body has \"calculator\": \"add\" and \"result\": 5"
+  },
+  {
+   "tc_id": "TC-APP-025",
+   "requirement_id": "REQ-009",
+   "planScenarioIds": [
+    "SC-AREA-007-001"
+   ],
+   "scenario": "GET /api/nav with code containing non-digit characters returns 400 with error 'invalid scheme code'",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "code=AB1234",
+   "steps": [
+    "Send GET request to /api/nav?code=AB1234",
+    "Receive response"
+   ],
+   "expected_result": "Response status code is 400 and JSON body is {\"error\": \"invalid scheme code\"}"
+  },
+  {
+   "tc_id": "TC-APP-026",
+   "requirement_id": "REQ-009",
+   "planScenarioIds": [
+    "SC-AREA-007-001"
+   ],
+   "scenario": "GET /api/nav with code longer than 9 characters returns 400 with error 'invalid scheme code'",
+   "type": "Negative (Boundary)",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "code=1234567890 (10 digits)",
+   "steps": [
+    "Send GET request to /api/nav?code=1234567890",
+    "Receive response"
+   ],
+   "expected_result": "Response status code is 400 and JSON body is {\"error\": \"invalid scheme code\"}"
+  },
+  {
+   "tc_id": "TC-APP-027",
+   "requirement_id": "REQ-009",
+   "planScenarioIds": [
+    "SC-AREA-007-001"
+   ],
+   "scenario": "GET /api/nav with empty code returns 400 with error 'invalid scheme code'",
+   "type": "Exception",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "code=",
+   "steps": [
+    "Send GET request to /api/nav?code=",
+    "Receive response"
+   ],
+   "expected_result": "Response status code is 400 and JSON body is {\"error\": \"invalid scheme code\"}"
+  },
+  {
+   "tc_id": "TC-APP-028",
+   "requirement_id": "REQ-010",
+   "planScenarioIds": [
+    "SC-AREA-008-001"
+   ],
+   "scenario": "GET /api/nav with q longer than 80 characters returns 400 with error message",
+   "type": "Negative (Boundary)",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "q=a string of 81 characters",
+   "steps": [
+    "Send GET request to /api/nav?q=a string of 81 characters",
+    "Receive response"
+   ],
+   "expected_result": "Response status code is 400 and JSON body contains error property with value 'query must be 1–80 characters'"
+  },
+  {
+   "tc_id": "TC-APP-029",
+   "requirement_id": "REQ-010",
+   "planScenarioIds": [
+    "SC-AREA-008-001"
+   ],
+   "scenario": "GET /api/nav with empty q returns 400 with error 'query must be 1–80 characters'",
+   "type": "Negative (Boundary)",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "q=",
+   "steps": [
+    "Send GET request to /api/nav?q=",
+    "Receive response"
+   ],
+   "expected_result": "Response status code is 400 and JSON body is {\"error\": \"query must be 1–80 characters\"}"
+  },
+  {
+   "tc_id": "TC-APP-030",
+   "requirement_id": "REQ-010",
+   "planScenarioIds": [
+    "SC-AREA-008-001"
+   ],
+   "scenario": "GET /api/nav with q longer than 80 characters returns 400 with error 'query must be 1–80 characters'",
+   "type": "Negative (Boundary)",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "q=a string of 81 characters: exactly 81 letters 'a'",
+   "steps": [
+    "Send GET request to /api/nav?q=a string of 81 characters: exactly 81 letters 'a'",
+    "Receive response"
+   ],
+   "expected_result": "Response status code is 400 and JSON body is {\"error\": \"query must be 1–80 characters\"}"
+  },
+  {
+   "tc_id": "TC-APP-031",
+   "requirement_id": "REQ-010",
+   "planScenarioIds": [
+    "SC-AREA-008-001"
+   ],
+   "scenario": "GET /api/nav with q longer than 80 characters returns 400 with error message",
+   "type": "Exception",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "q=a string of 81 characters: 81 letters 'b'",
+   "steps": [
+    "Send GET request to /api/nav?q=a string of 81 characters: 81 letters 'b'",
+    "Receive response"
+   ],
+   "expected_result": "Response status code is 400 and JSON body equals {'error': 'query must be 1–80 characters'}"
+  },
+  {
+   "tc_id": "TC-APP-032",
+   "requirement_id": "REQ-011",
+   "planScenarioIds": [
+    "SC-AREA-009-001"
+   ],
+   "scenario": "GET /api/fx with invalid base currency code returns 400",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "base=INVALID",
+   "steps": [
+    "Send GET request to /api/fx?base=INVALID",
+    "Receive response"
+   ],
+   "expected_result": "Response status code is 400 and JSON body contains {\"error\": \"invalid currency code\"}"
+  },
+  {
+   "tc_id": "TC-APP-033",
+   "requirement_id": "REQ-011",
+   "planScenarioIds": [
+    "SC-AREA-009-001"
+   ],
+   "scenario": "GET /api/fx with base containing lowercase letters returns 400 with error 'invalid currency code'",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "base=usd&symbols=EUR",
+   "steps": [
+    "Send GET request to /api/fx?base=usd&symbols=EUR",
+    "Receive response"
+   ],
+   "expected_result": "Response status code is 400 and JSON body is {\"error\": \"invalid currency code\"}"
+  },
+  {
+   "tc_id": "TC-APP-034",
+   "requirement_id": "REQ-011",
+   "planScenarioIds": [
+    "SC-AREA-009-001"
+   ],
+   "scenario": "GET /api/fx with symbols containing invalid characters (digit) returns 400 with error 'invalid currency code'",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "base=USD&symbols=EUR,123",
+   "steps": [
+    "Send GET request to /api/fx?base=USD&symbols=EUR,123",
+    "Receive response"
+   ],
+   "expected_result": "Response status code is 400 and JSON body is {\"error\": \"invalid currency code\"}"
+  },
+  {
+   "tc_id": "TC-APP-035",
+   "requirement_id": "REQ-011",
+   "planScenarioIds": [
+    "SC-AREA-009-001"
+   ],
+   "scenario": "GET /api/fx with symbols string longer than 40 characters returns 400 with error 'invalid currency code'",
+   "type": "Exception",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "base=USD&symbols=EUROPEAN,GBP,JPY,AUSTRALIAN,CANADIAN (total length > 40)",
+   "steps": [
+    "Send GET request to /api/fx?base=USD&symbols=EUROPEAN,GBP,JPY,AUSTRALIAN,CANADIAN",
+    "Receive response"
+   ],
+   "expected_result": "Response status code is 400 and JSON body is {\"error\": \"invalid currency code\"}"
+  },
+  {
+   "tc_id": "TC-APP-036",
+   "requirement_id": "REQ-012",
+   "planScenarioIds": [
+    "SC-AREA-010-001"
+   ],
+   "scenario": "GET /api/quote with symbol containing invalid character '@' returns 400",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "symbol=AAP@L",
+   "steps": [
+    "Send GET request to /api/quote?symbol=AAP@L",
+    "Receive response"
+   ],
+   "expected_result": "Response status code is 400 and JSON body has key \"error\" with value \"invalid symbol\""
+  },
+  {
+   "tc_id": "TC-APP-037",
+   "requirement_id": "REQ-012",
+   "planScenarioIds": [
+    "SC-AREA-010-001"
+   ],
+   "scenario": "GET /api/quote with symbol containing invalid characters (space) returns 400 with error 'invalid symbol'",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "symbol=AA PL",
+   "steps": [
+    "Send GET request to /api/quote?symbol=AA PL",
+    "Receive response"
+   ],
+   "expected_result": "Response status code is 400 and JSON body is {\"error\": \"invalid symbol\"}"
+  },
+  {
+   "tc_id": "TC-APP-038",
+   "requirement_id": "REQ-012",
+   "planScenarioIds": [
+    "SC-AREA-010-001"
+   ],
+   "scenario": "GET /api/quote with symbol longer than 15 characters returns 400 with error 'invalid symbol'",
+   "type": "Negative (Boundary)",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "symbol=VERYLONGSYMBOL123 (16 characters)",
+   "steps": [
+    "Send GET request to /api/quote?symbol=VERYLONGSYMBOL123",
+    "Receive response"
+   ],
+   "expected_result": "Response status code is 400 and JSON body is {\"error\": \"invalid symbol\"}"
+  },
+  {
+   "tc_id": "TC-APP-039",
+   "requirement_id": "REQ-012",
+   "planScenarioIds": [
+    "SC-AREA-010-001"
+   ],
+   "scenario": "GET /api/quote with empty symbol returns 400 with error 'invalid symbol'",
+   "type": "Exception",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "symbol=",
+   "steps": [
+    "Send GET request to /api/quote?symbol=",
+    "Receive response"
+   ],
+   "expected_result": "Response status code is 400 and JSON body is {\"error\": \"invalid symbol\"}"
+  },
+  {
+   "tc_id": "TC-APP-040",
+   "requirement_id": "REQ-013",
+   "planScenarioIds": [
+    "SC-AREA-011-001"
+   ],
+   "scenario": "POST /api/calc with content-length exactly one byte over the limit returns 413",
+   "type": "Negative (Boundary)",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available; valid calculator and params that produce a body of exactly 16385 bytes",
+   "test_data": "A valid JSON payload with calculator and parameters such that content-length is exactly 16385 bytes (one byte over limit)",
+   "steps": [
+    "Send POST request to /api/calc with Content-Type: application/json and body adjusted to exactly 16385 bytes",
+    "Receive response"
+   ],
+   "expected_result": "Response status code is 413 and JSON body contains {\"error\":\"payload too large\"}"
+  },
+  {
+   "tc_id": "TC-APP-041",
+   "requirement_id": "REQ-013",
+   "planScenarioIds": [
+    "SC-AREA-011-001"
+   ],
+   "scenario": "POST /api/calc with content-length greater than 16384 returns 413 with error 'payload too large'",
+   "type": "Negative (Boundary)",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "A JSON payload padded to make content-length exactly 16385 bytes (one byte over limit)",
+   "steps": [
+    "Send POST request to /api/calc with Content-Type: application/json and body padded to 16385 bytes",
+    "Receive response"
+   ],
+   "expected_result": "Response status code is 413 and JSON body is {\"error\":\"payload too large\"}"
+  },
+  {
+   "tc_id": "TC-APP-042",
+   "requirement_id": "REQ-013",
+   "planScenarioIds": [
+    "SC-AREA-011-001"
+   ],
+   "scenario": "POST /api/calc with content-length 16384 (exactly limit) returns 200 with result",
+   "type": "Negative (Boundary)",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available; a valid JSON payload of exactly 16384 bytes is sent",
+   "test_data": "A valid JSON payload with calculator and parameters padded to exactly 16384 bytes content-length",
+   "steps": [
+    "Send POST request to /api/calc with Content-Type: application/json and body of exactly 16384 bytes",
+    "Receive response"
+   ],
+   "expected_result": "Response status code is 200 and JSON body contains calculator and result"
+  },
+  {
+   "tc_id": "TC-APP-043",
+   "requirement_id": "REQ-013",
+   "planScenarioIds": [
+    "SC-AREA-011-001"
+   ],
+   "scenario": "POST /api/calc with content-length 16386 (two bytes over limit) returns 413 with error 'payload too large'",
+   "type": "Exception",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "A JSON payload padded to make content-length exactly 16386 bytes (two bytes over limit)",
+   "steps": [
+    "Send POST request to /api/calc with Content-Type: application/json and body padded to 16386 bytes",
+    "Receive response"
+   ],
+   "expected_result": "Response status code is 413 and JSON body is {\"error\":\"payload too large\"}"
+  },
+  {
+   "tc_id": "TC-APP-044",
+   "requirement_id": "REQ-015",
+   "planScenarioIds": [
+    "SC-AREA-012-001"
+   ],
+   "scenario": "GET /api/health returns all six security headers",
+   "type": "Positive",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "No specific test data",
+   "steps": [
+    "Send GET request to /api/health",
+    "Receive response",
+    "Inspect response headers"
+   ],
+   "expected_result": "Response includes headers: x-content-type-options, referrer-policy, permissions-policy, strict-transport-security, cross-origin-opener-policy, and content-security-policy with appropriate values"
+  },
+  {
+   "tc_id": "TC-APP-045",
+   "requirement_id": "REQ-015",
+   "planScenarioIds": [
+    "SC-AREA-012-001"
+   ],
+   "scenario": "POST /api/calc with valid request returns all six security headers",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "{\"calculator\": \"interest\", \"principal\": 1000, \"rate\": 5, \"time\": 2}",
+   "steps": [
+    "Send POST request to /api/calc with Content-Type: application/json and body as above",
+    "Receive response",
+    "Inspect response headers"
+   ],
+   "expected_result": "Response status code is 200 and response headers include x-content-type-options, referrer-policy, permissions-policy, strict-transport-security, cross-origin-opener-policy, and content-security-policy"
+  },
+  {
+   "tc_id": "TC-APP-046",
+   "requirement_id": "REQ-015",
+   "planScenarioIds": [
+    "SC-AREA-012-001"
+   ],
+   "scenario": "GET /api/nav with invalid code returns 400 and includes all six security headers",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "code=ABC",
+   "steps": [
+    "Send GET request to /api/nav?code=ABC",
+    "Receive response",
+    "Inspect response headers"
+   ],
+   "expected_result": "Response status code is 400 and response headers include x-content-type-options, referrer-policy, permissions-policy, strict-transport-security, cross-origin-opener-policy, and content-security-policy"
+  },
+  {
+   "tc_id": "TC-APP-047",
+   "requirement_id": "REQ-015",
+   "planScenarioIds": [
+    "SC-AREA-012-001"
+   ],
+   "scenario": "GET /api/fx with invalid base returns 400 and includes all six security headers",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and available",
+   "test_data": "base=123&symbols=EUR",
+   "steps": [
+    "Send GET request to /api/fx?base=123&symbols=EUR",
+    "Receive response",
+    "Inspect response headers"
+   ],
+   "expected_result": "Response status code is 400 and response headers include x-content-type-options, referrer-policy, permissions-policy, strict-transport-security, cross-origin-opener-policy, and content-security-policy"
+  }
+ ]
+}

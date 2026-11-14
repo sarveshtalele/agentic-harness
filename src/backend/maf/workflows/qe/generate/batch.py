@@ -21,7 +21,11 @@ async def generate_batch(env: Env, cases: list[dict]) -> tuple[dict[str, Generat
     wanted = {c["id"] for c in cases}
     under_test = list(dict.fromkeys(files_of[c["requirement_id"]] for c in cases if files_of.get(c["requirement_id"])))
     request = (f"Generate executable tests under tests/agentic_qe/ for these cases, one file per case. Send a file for every case.\nCASES:\n{json.dumps(cases)}\nDETECTED RUNNERS: {a['test_runners']}\n"
-               f"Import only names you can see in this code. Name each test function with its case id, for example test_TC_APP_001_empty_input.\n"
+               f"Import only names you can see in this code, with absolute imports from the repository root: tests/agentic_qe is not a package, so never use relative imports (from . or from ..). "
+               f"Await every coroutine. With an ASGI app use httpx.AsyncClient(transport=httpx.ASGITransport(app=...)) inside an async test, never httpx.Client. "
+               f"Use only input values the code or the case shows (names, ids, keys); never invent one for a case that expects success.\n"
+               f"{emit.import_style(worktree)}"
+               f"Name each test function with its case id, for example test_TC_APP_001_empty_input.\n"
                f"tests/agentic_qe/fixtures.json holds the shared datasets under \"datasets\" and, under \"cases\", one entry per case id with exactly two keys: \"data\" (the case's test data as text) "
                f"and \"uses\" (names of the shared datasets it uses). Load it with json and pathlib relative to __file__. Never define, copy or stub the code under test: import the repository's real module.\n"
                f"{notes}\n{emit.signatures(worktree, under_test)}{feedback}\n\nCODE:\n{code}")

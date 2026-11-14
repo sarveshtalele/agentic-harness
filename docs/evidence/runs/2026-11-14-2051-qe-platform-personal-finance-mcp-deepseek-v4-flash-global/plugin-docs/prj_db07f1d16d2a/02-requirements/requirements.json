@@ -1,0 +1,121 @@
+{
+ "requirements": [
+  {
+   "id": "REQ-001",
+   "title": "Health endpoint returns status and tool count",
+   "text": "GET /api/health returns JSON with status 'ok' and tools count as integer.",
+   "priority": "P1",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 227,
+   "quote": "    return JSONResponse({\"status\": \"ok\", \"tools\": len(mcp._tool_manager._tools)})"
+  },
+  {
+   "id": "REQ-002",
+   "title": "List tools returns categorized tool listing",
+   "text": "GET /api/tools returns JSON with count, categories, and tools array sorted by category then name.",
+   "priority": "P2",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 240,
+   "quote": "    return JSONResponse({\"count\": len(tools), \"categories\": categories, \"tools\": tools})"
+  },
+  {
+   "id": "REQ-003",
+   "title": "Run calculator returns 400 on invalid JSON body",
+   "text": "POST /api/calc with malformed JSON returns 400 with error 'invalid JSON'.",
+   "priority": "P1",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 247,
+   "quote": "        return JSONResponse({\"error\": \"invalid JSON\"}, status_code=400)"
+  },
+  {
+   "id": "REQ-005",
+   "title": "Run calculator returns 400 on invalid sanitized params",
+   "text": "POST /api/calc with parameters that fail validation returns 400 with error message from _sanitize_params.",
+   "priority": "P1",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 259,
+   "quote": "        return JSONResponse({\"error\": str(e)}, status_code=400)"
+  },
+  {
+   "id": "REQ-006",
+   "title": "Run calculator returns 400 on calculator domain errors",
+   "text": "POST /api/calc with inputs that cause ValueError, ZeroDivisionError, KeyError, or TypeError returns 400 with actionable error message.",
+   "priority": "P1",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 267,
+   "quote": "        return JSONResponse({\"error\": f\"invalid inputs: {e}\"}, status_code=400)"
+  },
+  {
+   "id": "REQ-007",
+   "title": "Run calculator returns 400 on unexpected calculator exception",
+   "text": "POST /api/calc with inputs that cause an unexpected exception returns 400 with generic error 'calculation failed'.",
+   "priority": "P1",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 273,
+   "quote": "        return JSONResponse({\"error\": \"calculation failed\"}, status_code=400)"
+  },
+  {
+   "id": "REQ-008",
+   "title": "Run calculator returns result on valid calculator and params",
+   "text": "POST /api/calc with valid calculator name and parameters returns 200 with calculator name and result.",
+   "priority": "P1",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 264,
+   "quote": "        return JSONResponse({\"calculator\": name, \"result\": fn(**allowed)})"
+  },
+  {
+   "id": "REQ-009",
+   "title": "API NAV returns 400 on invalid scheme code",
+   "text": "GET /api/nav with code that is not all digits or longer than 9 characters returns 400 with error 'invalid scheme code'.",
+   "priority": "P1",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 280,
+   "quote": "            return JSONResponse({\"error\": \"invalid scheme code\"}, status_code=400)"
+  },
+  {
+   "id": "REQ-010",
+   "title": "API NAV returns 400 on invalid query",
+   "text": "GET /api/nav with empty q or q longer than 80 characters returns 400 with error 'query must be 1–80 characters'.",
+   "priority": "P1",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 284,
+   "quote": "        return JSONResponse({\"error\": \"query must be 1–80 characters\"}, status_code=400)"
+  },
+  {
+   "id": "REQ-011",
+   "title": "API FX returns 400 on invalid currency codes",
+   "text": "GET /api/fx with base or symbols not matching _CCY_RE returns 400 with error 'invalid currency code'.",
+   "priority": "P1",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 292,
+   "quote": "        return JSONResponse({\"error\": \"invalid currency code\"}, status_code=400)"
+  },
+  {
+   "id": "REQ-012",
+   "title": "API Quote returns 400 on invalid symbol",
+   "text": "GET /api/quote with symbol not matching _SYMBOL_RE returns 400 with error 'invalid symbol'.",
+   "priority": "P1",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 299,
+   "quote": "        return JSONResponse({\"error\": \"invalid symbol\"}, status_code=400)"
+  },
+  {
+   "id": "REQ-013",
+   "title": "Payload size limit on /api endpoints",
+   "text": "POST /api/* with content-length greater than 16384 returns 413 with error 'payload too large'.",
+   "priority": "P0",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 151,
+   "quote": "                return await _send_json(send, 413, b'{\"error\":\"payload too large\"}')"
+  },
+  {
+   "id": "REQ-015",
+   "title": "Security headers added to every HTTP response",
+   "text": "Every HTTP response includes x-content-type-options, referrer-policy, permissions-policy, strict-transport-security, cross-origin-opener-policy, and content-security-policy headers.",
+   "priority": "P0",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 171,
+   "quote": "                message[\"headers\"].extend(SEC_HEADERS)"
+  }
+ ]
+}

@@ -14,6 +14,7 @@ from .inventory import (
     _normal,
     declared_dependencies,
     missing_dependencies,
+    import_style,
 )
 from .sigs import (
     PASS_THROUGH,

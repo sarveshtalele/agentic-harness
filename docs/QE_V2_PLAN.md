@@ -149,6 +149,20 @@ intake G0 (documents, target repo) -> read documents (RAG) -> requirements G1 ->
 | The execution agent said 8 tests when the report had 132 (refused by code) | Brownfield execution is removed in step 2; greenfield keeps the code check |
 | Generated files failed at collection (`ImportError`) and were classed as environment | Step 1's collect check (V3) refuses them before Gate 4 |
 
+## 8b. Findings from the live runs of 2026-11-14 20:30 to 20:51
+
+| Finding | Fix |
+|---|---|
+| V3 failed every test: the run's environment was made in Prepare, after Gate 4 | Generate installs the dependencies before the validity checks |
+| The carry hook excused requirements with no case whenever the budget notice was on | Only `left_out_requirements` (the budget) excuses a requirement without a case |
+| The hook then stopped a run where Design gave REQ-023 and REQ-027 no case | Correct block; the redesign of auditor MISSES then cut MISSES from 16 to 0 in the next run |
+| 15 tests failed collection: relative imports beyond the top-level package | The generation prompt now carries the repository's own test import style and says tests/agentic_qe is not a package |
+| None of the 30 "defects" was an application defect, all were test bugs: a sync httpx client on an async transport, a missing await, and calculator names that do not exist in the repository | An error raised by the test's own code is `TEST_BUG` (a test problem, never healed, never a defect). The prompt names the async client rule and forbids inventing input values. **Not yet caught: an invented input value that leads to a clean assertion failure.** That needs V2b, below |
+
+**V2b (planned with step 3):** input values in Positive cases must appear in the repository (a registry name, route, key or enum)
+or in the requirement quote. Without execution, brownfield cannot see these failures, so this static check is the only
+guard.
+
 ## 9. Order, models and evidence
 
 Each step: Sonnet implements, Opus reviews against the brief, Sonnet fixes, then the full suite and CI must be green before

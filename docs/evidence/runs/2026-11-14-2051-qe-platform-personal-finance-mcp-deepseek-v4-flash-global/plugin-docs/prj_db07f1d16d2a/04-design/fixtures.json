@@ -1,0 +1,302 @@
+{
+ "datasets": {
+  "boundary": {
+   "string": {
+    "empty": "",
+    "whitespaceOnly": "   \t\n  ",
+    "maxLength1024": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "specialCharacters": "<script>alert('xss')</script>' OR 1=1; -- 🚀 漢字",
+    "unicodeEmoji": "🔥💻🧪🎯✨"
+   },
+   "json": {
+    "emptyObject": {},
+    "emptyArray": [],
+    "deeplyNested": {
+     "l1": {
+      "l2": {
+       "l3": {
+        "l4": {
+         "value": "deep"
+        }
+       }
+      }
+     }
+    },
+    "nullFields": {
+     "name": null,
+     "count": null
+    }
+   }
+  },
+  "pagination": {
+   "firstPage": {
+    "items": [
+     "item-1",
+     "item-2",
+     "item-3",
+     "item-4",
+     "item-5",
+     "item-6",
+     "item-7",
+     "item-8",
+     "item-9",
+     "item-10"
+    ],
+    "pageIndex": 0,
+    "pageSize": 10,
+    "totalItems": 25,
+    "totalPages": 3,
+    "hasNextPage": true,
+    "hasPrevPage": false
+   },
+   "lastPage": {
+    "items": [
+     "item-21",
+     "item-22",
+     "item-23",
+     "item-24",
+     "item-25"
+    ],
+    "pageIndex": 2,
+    "pageSize": 10,
+    "totalItems": 25,
+    "totalPages": 3,
+    "hasNextPage": false,
+    "hasPrevPage": true
+   },
+   "empty": {
+    "items": [],
+    "pageIndex": 0,
+    "pageSize": 10,
+    "totalItems": 0,
+    "totalPages": 0,
+    "hasNextPage": false,
+    "hasPrevPage": false
+   }
+  }
+ },
+ "cases": {
+  "TC-APP-001": {
+   "data": "No input data needed",
+   "uses": []
+  },
+  "TC-APP-002": {
+   "data": "No input data needed",
+   "uses": []
+  },
+  "TC-APP-003": {
+   "data": "No input data needed",
+   "uses": []
+  },
+  "TC-APP-004": {
+   "data": "No input data needed",
+   "uses": []
+  },
+  "TC-APP-005": {
+   "data": "invalid JSON string: {calculator: tvm} (missing quotes around keys and values)",
+   "uses": []
+  },
+  "TC-APP-006": {
+   "data": "Malformed JSON: \"{'calculator': 'tvm'}\" (single quotes)",
+   "uses": []
+  },
+  "TC-APP-007": {
+   "data": "{\"key\": \"value\"",
+   "uses": [
+    "boundary.json"
+   ]
+  },
+  "TC-APP-008": {
+   "data": "malformed JSON string: {\"calculator\": \"tvm\", \"key\"",
+   "uses": [
+    "boundary.json"
+   ]
+  },
+  "TC-APP-009": {
+   "data": "{\"calculator\": \"interest\"}",
+   "uses": []
+  },
+  "TC-APP-010": {
+   "data": "{\"calculator\": \"interest\", \"rate\": 5}",
+   "uses": []
+  },
+  "TC-APP-011": {
+   "data": "{\"calculator\": \"interest\", \"principal\": \"abc\", \"rate\": 5, \"time\": 2}",
+   "uses": []
+  },
+  "TC-APP-012": {
+   "data": "{\"calculator\": \"interest\", \"principal\": 1000, \"rate\": 5, \"time\": 2, \"unknown\": \"value\"}",
+   "uses": []
+  },
+  "TC-APP-013": {
+   "data": "{\"calculator\": \"tvm\", \"pv\": -1000, \"fv\": 2000, \"rate\": 5, \"nper\": 10}",
+   "uses": []
+  },
+  "TC-APP-014": {
+   "data": "{\"calculator\": \"interest\", \"principal\": 1000, \"rate\": 0, \"time\": 2}",
+   "uses": []
+  },
+  "TC-APP-015": {
+   "data": "{\"calculator\": \"sqrt\", \"value\": -5}",
+   "uses": []
+  },
+  "TC-APP-016": {
+   "data": "{\"calculator\": \"nonexistent\", \"param\": 1}",
+   "uses": []
+  },
+  "TC-APP-017": {
+   "data": "{\"calculator\": \"tvm\", \"pv\": \"abc\", \"fv\": 2000, \"rate\": 5, \"nper\": 10}",
+   "uses": []
+  },
+  "TC-APP-018": {
+   "data": "{\"calculator\": \"runtime_error_calc\", \"param\": 1}",
+   "uses": []
+  },
+  "TC-APP-019": {
+   "data": "{\"calculator\": \"interest\", \"principal\": 100, \"rate\": 0, \"time\": 2}",
+   "uses": []
+  },
+  "TC-APP-020": {
+   "data": "{\"calculator\": \"interest\", \"principal\": \"abc\", \"rate\": 5, \"time\": 2}",
+   "uses": []
+  },
+  "TC-APP-021": {
+   "data": "{\"calculator\": \"interest\", \"principal\": 1000, \"rate\": 5, \"time\": 2}",
+   "uses": []
+  },
+  "TC-APP-022": {
+   "data": "{\"calculator\": \"interest\", \"params\": {\"principal\": 1000, \"rate\": 5, \"time\": 2}}",
+   "uses": []
+  },
+  "TC-APP-023": {
+   "data": "{\"calculator\": \"simple_interest\", \"principal\": 1000, \"rate\": 5, \"time\": 2}",
+   "uses": []
+  },
+  "TC-APP-024": {
+   "data": "{\"calculator\": \"add\", \"a\": 2, \"b\": 3}",
+   "uses": []
+  },
+  "TC-APP-025": {
+   "data": "code=AB1234",
+   "uses": [
+    "boundary.string"
+   ]
+  },
+  "TC-APP-026": {
+   "data": "code=1234567890 (10 digits)",
+   "uses": [
+    "boundary.string"
+   ]
+  },
+  "TC-APP-027": {
+   "data": "code=",
+   "uses": []
+  },
+  "TC-APP-028": {
+   "data": "q=a string of 81 characters",
+   "uses": [
+    "boundary.string"
+   ]
+  },
+  "TC-APP-029": {
+   "data": "q=",
+   "uses": [
+    "boundary.string"
+   ]
+  },
+  "TC-APP-030": {
+   "data": "q=a string of 81 characters: exactly 81 letters 'a'",
+   "uses": [
+    "boundary.string"
+   ]
+  },
+  "TC-APP-031": {
+   "data": "q=a string of 81 characters: 81 letters 'b'",
+   "uses": []
+  },
+  "TC-APP-032": {
+   "data": "base=INVALID",
+   "uses": [
+    "boundary.string"
+   ]
+  },
+  "TC-APP-033": {
+   "data": "base=usd&symbols=EUR",
+   "uses": [
+    "boundary.string"
+   ]
+  },
+  "TC-APP-034": {
+   "data": "base=USD&symbols=EUR,123",
+   "uses": [
+    "boundary.string"
+   ]
+  },
+  "TC-APP-035": {
+   "data": "base=USD&symbols=EUROPEAN,GBP,JPY,AUSTRALIAN,CANADIAN (total length > 40)",
+   "uses": []
+  },
+  "TC-APP-036": {
+   "data": "symbol=AAP@L",
+   "uses": [
+    "boundary.string"
+   ]
+  },
+  "TC-APP-037": {
+   "data": "symbol=AA PL",
+   "uses": [
+    "boundary.string"
+   ]
+  },
+  "TC-APP-038": {
+   "data": "symbol=VERYLONGSYMBOL123 (16 characters)",
+   "uses": [
+    "boundary.string"
+   ]
+  },
+  "TC-APP-039": {
+   "data": "symbol=",
+   "uses": []
+  },
+  "TC-APP-040": {
+   "data": "A valid JSON payload with calculator and parameters such that content-length is exactly 16385 bytes (one byte over limit)",
+   "uses": [
+    "pagination"
+   ]
+  },
+  "TC-APP-041": {
+   "data": "A JSON payload padded to make content-length exactly 16385 bytes (one byte over limit)",
+   "uses": [
+    "pagination"
+   ]
+  },
+  "TC-APP-042": {
+   "data": "A valid JSON payload with calculator and parameters padded to exactly 16384 bytes content-length",
+   "uses": [
+    "pagination"
+   ]
+  },
+  "TC-APP-043": {
+   "data": "A JSON payload padded to make content-length exactly 16386 bytes (two bytes over limit)",
+   "uses": [
+    "pagination"
+   ]
+  },
+  "TC-APP-044": {
+   "data": "No specific test data",
+   "uses": []
+  },
+  "TC-APP-045": {
+   "data": "{\"calculator\": \"interest\", \"principal\": 1000, \"rate\": 5, \"time\": 2}",
+   "uses": []
+  },
+  "TC-APP-046": {
+   "data": "code=ABC",
+   "uses": []
+  },
+  "TC-APP-047": {
+   "data": "base=123&symbols=EUR",
+   "uses": []
+  }
+ }
+}

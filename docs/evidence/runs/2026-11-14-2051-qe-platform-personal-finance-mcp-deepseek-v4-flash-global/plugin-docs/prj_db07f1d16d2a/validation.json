@@ -1,0 +1,118 @@
+{
+ "validator": "1.6.0",
+ "gate": 4,
+ "ok": true,
+ "errors": [],
+ "warnings": [
+  {
+   "check": "plan.requirements",
+   "message": "P2/P3 requirements with no plan scenario",
+   "ids": [
+    "REQ-002"
+   ]
+  }
+ ],
+ "metrics": {
+  "requirements": 13,
+  "scenarios": 12,
+  "cases": 47,
+  "test_files": 47,
+  "results": 0,
+  "repo_test_files": 69,
+  "repo_tests": 321,
+  "existing": 22,
+  "generated": 47,
+  "manual": 0,
+  "plan_by_area_level": {
+   "API FX - invalid currency codes return 400": {
+    "Integration": 1
+   },
+   "API NAV - invalid query length returns 400": {
+    "Integration": 1
+   },
+   "API NAV - invalid scheme code returns 400": {
+    "Integration": 1
+   },
+   "API Quote - invalid symbol returns 400": {
+    "Integration": 1
+   },
+   "Health endpoint returns status and tool count": {
+    "Integration": 1
+   },
+   "Payload size limit on all /api endpoints": {
+    "Integration": 1
+   },
+   "Run calculator - calculator domain errors return 400": {
+    "Integration": 1
+   },
+   "Run calculator - invalid JSON body returns 400": {
+    "Integration": 1
+   },
+   "Run calculator - invalid sanitized params returns 400": {
+    "Integration": 1
+   },
+   "Run calculator - unexpected exception returns 400": {
+    "Integration": 1
+   },
+   "Run calculator - valid input returns 200 and result": {
+    "Integration": 1
+   },
+   "Security headers on every HTTP response": {
+    "Integration": 1
+   }
+  },
+  "design_coverage_by_area": {
+   "API FX - invalid currency codes return 400": 100,
+   "API NAV - invalid query length returns 400": 100,
+   "API NAV - invalid scheme code returns 400": 100,
+   "API Quote - invalid symbol returns 400": 100,
+   "Health endpoint returns status and tool count": 100,
+   "Payload size limit on all /api endpoints": 100,
+   "Run calculator - calculator domain errors return 400": 100,
+   "Run calculator - invalid JSON body returns 400": 100,
+   "Run calculator - invalid sanitized params returns 400": 100,
+   "Run calculator - unexpected exception returns 400": 100,
+   "Run calculator - valid input returns 200 and result": 100,
+   "Security headers on every HTTP response": 100
+  },
+  "cases_per_scenario": {
+   "mean": 3.92
+  },
+  "similarity_median": 0.352,
+  "to_generate": 0
+ },
+ "suspects": [
+  {
+   "case": "TC-APP-013",
+   "scenario": "SC-AREA-004-001",
+   "similarity": 0,
+   "audit": "COVERS"
+  },
+  {
+   "case": "TC-APP-014",
+   "scenario": "SC-AREA-004-001",
+   "similarity": 0,
+   "audit": "COVERS"
+  },
+  {
+   "case": "TC-APP-015",
+   "scenario": "SC-AREA-004-001",
+   "similarity": 0,
+   "audit": "COVERS"
+  },
+  {
+   "case": "TC-APP-016",
+   "scenario": "SC-AREA-004-001",
+   "similarity": 0.053,
+   "audit": "COVERS"
+  },
+  {
+   "case": "TC-APP-020",
+   "scenario": "SC-AREA-005-001",
+   "similarity": 0.048,
+   "audit": "COVERS"
+  }
+ ],
+ "duplicates": [],
+ "brief": "Gate 4 validation: PASS (0 errors, 1 warnings).\nAudit these case/scenario pairs first (low similarity): TC-APP-013, TC-APP-014, TC-APP-015, TC-APP-016, TC-APP-020"
+}

@@ -12,11 +12,13 @@ import datetime as dt
 import json
 import os
 import re
+import shutil
 import time
 from pathlib import Path
 
 import pytest
 
+from backend.config import project_dir
 from tests.helpers_api import client, pending, wait_run  # noqa: F401 - fixtures
 
 pytestmark = pytest.mark.live
@@ -77,6 +79,14 @@ def test_qe_cycle_to_gate5_on_a_real_repository(client):
                    "summary": (run.get("state") or {}).get("summary"),
                    "requirements": len((run.get("state") or {}).get("requirements") or [])}
         (folder / "summary.json").write_text(json.dumps(record, indent=1, default=str), encoding="utf-8")
+        # the run's own log and the plugin's files, so each agent's output can be checked after the throwaway store is gone
+        from backend.maf import engine
+        with (folder / "events.jsonl").open("w", encoding="utf-8") as out:
+            for event in engine.events(run["id"], 0):
+                out.write(json.dumps(event, default=str) + "\n")
+        plugin_docs = project_dir(project["id"]) / "docs" / "qe"
+        if plugin_docs.is_dir():
+            shutil.copytree(plugin_docs, folder / "plugin-docs", dirs_exist_ok=True)
         print(f"\nevidence: {folder / 'summary.json'}", flush=True)
         for g in record["gates"]:
             print(f"G{g['gate']} after {g['seconds']} s: {g['summary'][:300]}", flush=True)

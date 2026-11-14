@@ -1,0 +1,2095 @@
+{
+ "app": "prj_db07f1d16d2a",
+ "approvedUpTo": 3,
+ "checks": [
+  {
+   "gate": 1,
+   "ok": true,
+   "gaps": [],
+   "missing": [],
+   "counts": {
+    "requirements": 13,
+    "scenarios": 12,
+    "cases": 47,
+    "tests": 47,
+    "results": 0
+   }
+  },
+  {
+   "gate": 2,
+   "ok": true,
+   "gaps": [],
+   "missing": [],
+   "counts": {
+    "requirements": 13,
+    "scenarios": 12,
+    "cases": 47,
+    "tests": 47,
+    "results": 0
+   }
+  },
+  {
+   "gate": 3,
+   "ok": false,
+   "gaps": [
+    "cases the coverage auditor says do not cover their scenario: TC-APP-004 (PARTIAL), TC-APP-023 (PARTIAL), TC-APP-042 (PARTIAL)"
+   ],
+   "missing": [
+    "TC-APP-004 (PARTIAL)",
+    "TC-APP-023 (PARTIAL)",
+    "TC-APP-042 (PARTIAL)"
+   ],
+   "counts": {
+    "requirements": 13,
+    "scenarios": 12,
+    "cases": 47,
+    "tests": 47,
+    "results": 0
+   }
+  },
+  {
+   "gate": 4,
+   "ok": false,
+   "gaps": [
+    "cases the coverage auditor says do not cover their scenario: TC-APP-004 (PARTIAL), TC-APP-023 (PARTIAL), TC-APP-042 (PARTIAL)",
+    "generated tests with no code confidence review: TC-APP-001, TC-APP-002, TC-APP-003, TC-APP-004, TC-APP-005, TC-APP-006, TC-APP-007, TC-APP-008, TC-APP-009, TC-APP-010, TC-APP-011, TC-APP-012, TC-APP-013, TC-APP-014, TC-APP-015, TC-APP-016, TC-APP-017, TC-APP-018, TC-APP-019, TC-APP-020, TC-APP-021, TC-APP-022, TC-APP-023, TC-APP-024, TC-APP-025 and 22 more",
+    "05-generation/confidence.json was not recorded from the confidence-reviewer agent",
+    "05-generation/audit.json missing: run the coverage-auditor agent on the generated tests"
+   ],
+   "missing": [
+    "TC-APP-004 (PARTIAL)",
+    "TC-APP-023 (PARTIAL)",
+    "TC-APP-042 (PARTIAL)",
+    "TC-APP-001",
+    "TC-APP-002",
+    "TC-APP-003",
+    "TC-APP-004",
+    "TC-APP-005",
+    "TC-APP-006",
+    "TC-APP-007",
+    "TC-APP-008",
+    "TC-APP-009",
+    "TC-APP-010",
+    "TC-APP-011",
+    "TC-APP-012",
+    "TC-APP-013",
+    "TC-APP-014",
+    "TC-APP-015",
+    "TC-APP-016",
+    "TC-APP-017",
+    "TC-APP-018",
+    "TC-APP-019",
+    "TC-APP-020",
+    "TC-APP-021",
+    "TC-APP-022",
+    "TC-APP-023",
+    "TC-APP-024",
+    "TC-APP-025",
+    "TC-APP-026",
+    "TC-APP-027",
+    "TC-APP-028",
+    "TC-APP-029",
+    "TC-APP-030",
+    "TC-APP-031",
+    "TC-APP-032",
+    "TC-APP-033",
+    "TC-APP-034",
+    "TC-APP-035",
+    "TC-APP-036",
+    "TC-APP-037",
+    "TC-APP-038",
+    "TC-APP-039",
+    "TC-APP-040",
+    "TC-APP-041",
+    "TC-APP-042",
+    "TC-APP-043",
+    "TC-APP-044",
+    "TC-APP-045",
+    "TC-APP-046",
+    "TC-APP-047"
+   ],
+   "counts": {
+    "requirements": 13,
+    "scenarios": 12,
+    "cases": 47,
+    "tests": 47,
+    "results": 0
+   }
+  },
+  {
+   "gate": 5,
+   "ok": false,
+   "gaps": [
+    "cases the coverage auditor says do not cover their scenario: TC-APP-004 (PARTIAL), TC-APP-023 (PARTIAL), TC-APP-042 (PARTIAL)",
+    "generated tests with no code confidence review: TC-APP-001, TC-APP-002, TC-APP-003, TC-APP-004, TC-APP-005, TC-APP-006, TC-APP-007, TC-APP-008, TC-APP-009, TC-APP-010, TC-APP-011, TC-APP-012, TC-APP-013, TC-APP-014, TC-APP-015, TC-APP-016, TC-APP-017, TC-APP-018, TC-APP-019, TC-APP-020, TC-APP-021, TC-APP-022, TC-APP-023, TC-APP-024, TC-APP-025 and 22 more",
+    "05-generation/confidence.json was not recorded from the confidence-reviewer agent",
+    "05-generation/audit.json missing: run the coverage-auditor agent on the generated tests",
+    "designed cases with no test result (0 of 47 executed): TC-APP-001, TC-APP-002, TC-APP-003, TC-APP-004, TC-APP-005, TC-APP-006, TC-APP-007, TC-APP-008, TC-APP-009, TC-APP-010, TC-APP-011, TC-APP-012, TC-APP-013, TC-APP-014, TC-APP-015, TC-APP-016, TC-APP-017, TC-APP-018, TC-APP-019, TC-APP-020, TC-APP-021, TC-APP-022, TC-APP-023, TC-APP-024, TC-APP-025 and 22 more"
+   ],
+   "missing": [
+    "TC-APP-004 (PARTIAL)",
+    "TC-APP-023 (PARTIAL)",
+    "TC-APP-042 (PARTIAL)",
+    "TC-APP-001",
+    "TC-APP-002",
+    "TC-APP-003",
+    "TC-APP-004",
+    "TC-APP-005",
+    "TC-APP-006",
+    "TC-APP-007",
+    "TC-APP-008",
+    "TC-APP-009",
+    "TC-APP-010",
+    "TC-APP-011",
+    "TC-APP-012",
+    "TC-APP-013",
+    "TC-APP-014",
+    "TC-APP-015",
+    "TC-APP-016",
+    "TC-APP-017",
+    "TC-APP-018",
+    "TC-APP-019",
+    "TC-APP-020",
+    "TC-APP-021",
+    "TC-APP-022",
+    "TC-APP-023",
+    "TC-APP-024",
+    "TC-APP-025",
+    "TC-APP-026",
+    "TC-APP-027",
+    "TC-APP-028",
+    "TC-APP-029",
+    "TC-APP-030",
+    "TC-APP-031",
+    "TC-APP-032",
+    "TC-APP-033",
+    "TC-APP-034",
+    "TC-APP-035",
+    "TC-APP-036",
+    "TC-APP-037",
+    "TC-APP-038",
+    "TC-APP-039",
+    "TC-APP-040",
+    "TC-APP-041",
+    "TC-APP-042",
+    "TC-APP-043",
+    "TC-APP-044",
+    "TC-APP-045",
+    "TC-APP-046",
+    "TC-APP-047"
+   ],
+   "counts": {
+    "requirements": 13,
+    "scenarios": 12,
+    "cases": 47,
+    "tests": 47,
+    "results": 0
+   }
+  }
+ ],
+ "coverage": {
+  "app": "prj_db07f1d16d2a",
+  "requirements": [
+   {
+    "id": "REQ-001",
+    "priority": "P1",
+    "evidence": true,
+    "quoteFound": true,
+    "text": "Health endpoint returns status and tool count GET /api/health returns JSON with status 'ok' and tools count as integer."
+   },
+   {
+    "id": "REQ-002",
+    "priority": "P2",
+    "evidence": true,
+    "quoteFound": true,
+    "text": "List tools returns categorized tool listing GET /api/tools returns JSON with count, categories, and tools array sorted by category then name."
+   },
+   {
+    "id": "REQ-003",
+    "priority": "P1",
+    "evidence": true,
+    "quoteFound": true,
+    "text": "Run calculator returns 400 on invalid JSON body POST /api/calc with malformed JSON returns 400 with error 'invalid JSON'."
+   },
+   {
+    "id": "REQ-005",
+    "priority": "P1",
+    "evidence": true,
+    "quoteFound": true,
+    "text": "Run calculator returns 400 on invalid sanitized params POST /api/calc with parameters that fail validation returns 400 with error message from _sanitize_params."
+   },
+   {
+    "id": "REQ-006",
+    "priority": "P1",
+    "evidence": true,
+    "quoteFound": true,
+    "text": "Run calculator returns 400 on calculator domain errors POST /api/calc with inputs that cause ValueError, ZeroDivisionError, KeyError, or TypeError returns 400 with actionable error message."
+   },
+   {
+    "id": "REQ-007",
+    "priority": "P1",
+    "evidence": true,
+    "quoteFound": true,
+    "text": "Run calculator returns 400 on unexpected calculator exception POST /api/calc with inputs that cause an unexpected exception returns 400 with generic error 'calculation failed'."
+   },
+   {
+    "id": "REQ-008",
+    "priority": "P1",
+    "evidence": true,
+    "quoteFound": true,
+    "text": "Run calculator returns result on valid calculator and params POST /api/calc with valid calculator name and parameters returns 200 with calculator name and result."
+   },
+   {
+    "id": "REQ-009",
+    "priority": "P1",
+    "evidence": true,
+    "quoteFound": true,
+    "text": "API NAV returns 400 on invalid scheme code GET /api/nav with code that is not all digits or longer than 9 characters returns 400 with error 'invalid scheme code'."
+   },
+   {
+    "id": "REQ-010",
+    "priority": "P1",
+    "evidence": true,
+    "quoteFound": true,
+    "text": "API NAV returns 400 on invalid query GET /api/nav with empty q or q longer than 80 characters returns 400 with error 'query must be 1–80 characters'."
+   },
+   {
+    "id": "REQ-011",
+    "priority": "P1",
+    "evidence": true,
+    "quoteFound": true,
+    "text": "API FX returns 400 on invalid currency codes GET /api/fx with base or symbols not matching _CCY_RE returns 400 with error 'invalid currency code'."
+   },
+   {
+    "id": "REQ-012",
+    "priority": "P1",
+    "evidence": true,
+    "quoteFound": true,
+    "text": "API Quote returns 400 on invalid symbol GET /api/quote with symbol not matching _SYMBOL_RE returns 400 with error 'invalid symbol'."
+   },
+   {
+    "id": "REQ-013",
+    "priority": "P0",
+    "evidence": true,
+    "quoteFound": true,
+    "text": "Payload size limit on /api endpoints POST /api/* with content-length greater than 16384 returns 413 with error 'payload too large'."
+   },
+   {
+    "id": "REQ-015",
+    "priority": "P0",
+    "evidence": true,
+    "quoteFound": true,
+    "text": "Security headers added to every HTTP response Every HTTP response includes x-content-type-options, referrer-policy, permissions-policy, strict-transport-security, cross-origin-opener-policy, and content-security-policy headers."
+   }
+  ],
+  "reviews": {
+   "design": [
+    {
+     "id": "TC-APP-001",
+     "total": 100,
+     "scores": {
+      "source_proven": 30,
+      "correct_target": 25,
+      "expected_derivable": 25,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-002",
+     "total": 100,
+     "scores": {
+      "source_proven": 30,
+      "correct_target": 25,
+      "expected_derivable": 25,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-003",
+     "total": 100,
+     "scores": {
+      "source_proven": 30,
+      "correct_target": 25,
+      "expected_derivable": 25,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-004",
+     "total": 100,
+     "scores": {
+      "source_proven": 30,
+      "correct_target": 25,
+      "expected_derivable": 25,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-005",
+     "total": 100,
+     "scores": {
+      "source_proven": 30,
+      "correct_target": 25,
+      "expected_derivable": 25,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-006",
+     "total": 95,
+     "scores": {
+      "source_proven": 30,
+      "correct_target": 25,
+      "expected_derivable": 20,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-007",
+     "total": 100,
+     "scores": {
+      "source_proven": 30,
+      "correct_target": 25,
+      "expected_derivable": 25,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-008",
+     "total": 100,
+     "scores": {
+      "source_proven": 30,
+      "correct_target": 25,
+      "expected_derivable": 25,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-009",
+     "total": 100,
+     "scores": {
+      "source_proven": 30,
+      "correct_target": 25,
+      "expected_derivable": 25,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-010",
+     "total": 85,
+     "scores": {
+      "source_proven": 15,
+      "correct_target": 25,
+      "expected_derivable": 25,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-011",
+     "total": 75,
+     "scores": {
+      "source_proven": 15,
+      "correct_target": 25,
+      "expected_derivable": 15,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-012",
+     "total": 75,
+     "scores": {
+      "source_proven": 15,
+      "correct_target": 25,
+      "expected_derivable": 15,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-013",
+     "total": 100,
+     "scores": {
+      "source_proven": 30,
+      "correct_target": 25,
+      "expected_derivable": 25,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-014",
+     "total": 100,
+     "scores": {
+      "source_proven": 30,
+      "correct_target": 25,
+      "expected_derivable": 25,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-015",
+     "total": 100,
+     "scores": {
+      "source_proven": 30,
+      "correct_target": 25,
+      "expected_derivable": 25,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-016",
+     "total": 100,
+     "scores": {
+      "source_proven": 30,
+      "correct_target": 25,
+      "expected_derivable": 25,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-017",
+     "total": 100,
+     "scores": {
+      "source_proven": 30,
+      "correct_target": 25,
+      "expected_derivable": 25,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-018",
+     "total": 100,
+     "scores": {
+      "source_proven": 30,
+      "correct_target": 25,
+      "expected_derivable": 25,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-019",
+     "total": 100,
+     "scores": {
+      "source_proven": 30,
+      "correct_target": 25,
+      "expected_derivable": 25,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-020",
+     "total": 100,
+     "scores": {
+      "source_proven": 30,
+      "correct_target": 25,
+      "expected_derivable": 25,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-021",
+     "total": 95,
+     "scores": {
+      "source_proven": 30,
+      "correct_target": 25,
+      "expected_derivable": 20,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-022",
+     "total": 100,
+     "scores": {
+      "source_proven": 30,
+      "correct_target": 25,
+      "expected_derivable": 25,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-023",
+     "total": 80,
+     "scores": {
+      "source_proven": 20,
+      "correct_target": 25,
+      "expected_derivable": 15,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-024",
+     "total": 80,
+     "scores": {
+      "source_proven": 20,
+      "correct_target": 25,
+      "expected_derivable": 15,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-025",
+     "total": 100,
+     "scores": {
+      "source_proven": 30,
+      "correct_target": 25,
+      "expected_derivable": 25,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-026",
+     "total": 100,
+     "scores": {
+      "source_proven": 30,
+      "correct_target": 25,
+      "expected_derivable": 25,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-027",
+     "total": 95,
+     "scores": {
+      "source_proven": 30,
+      "correct_target": 25,
+      "expected_derivable": 20,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-028",
+     "total": 85,
+     "scores": {
+      "source_proven": 25,
+      "correct_target": 25,
+      "expected_derivable": 25,
+      "fixture_validity": 10
+     }
+    },
+    {
+     "id": "TC-APP-029",
+     "total": 100,
+     "scores": {
+      "source_proven": 30,
+      "correct_target": 25,
+      "expected_derivable": 25,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-030",
+     "total": 80,
+     "scores": {
+      "source_proven": 25,
+      "correct_target": 25,
+      "expected_derivable": 10,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-031",
+     "total": 75,
+     "scores": {
+      "source_proven": 20,
+      "correct_target": 25,
+      "expected_derivable": 20,
+      "fixture_validity": 10
+     }
+    },
+    {
+     "id": "TC-APP-032",
+     "total": 100,
+     "scores": {
+      "source_proven": 30,
+      "correct_target": 25,
+      "expected_derivable": 25,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-033",
+     "total": 100,
+     "scores": {
+      "source_proven": 30,
+      "correct_target": 25,
+      "expected_derivable": 25,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-034",
+     "total": 100,
+     "scores": {
+      "source_proven": 30,
+      "correct_target": 25,
+      "expected_derivable": 25,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-035",
+     "total": 75,
+     "scores": {
+      "source_proven": 20,
+      "correct_target": 25,
+      "expected_derivable": 10,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-036",
+     "total": 100,
+     "scores": {
+      "source_proven": 30,
+      "correct_target": 25,
+      "expected_derivable": 25,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-037",
+     "total": 100,
+     "scores": {
+      "source_proven": 30,
+      "correct_target": 25,
+      "expected_derivable": 25,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-038",
+     "total": 100,
+     "scores": {
+      "source_proven": 30,
+      "correct_target": 25,
+      "expected_derivable": 25,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-039",
+     "total": 100,
+     "scores": {
+      "source_proven": 30,
+      "correct_target": 25,
+      "expected_derivable": 25,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-040",
+     "total": 75,
+     "scores": {
+      "source_proven": 20,
+      "correct_target": 25,
+      "expected_derivable": 20,
+      "fixture_validity": 10
+     }
+    },
+    {
+     "id": "TC-APP-041",
+     "total": 100,
+     "scores": {
+      "source_proven": 30,
+      "correct_target": 25,
+      "expected_derivable": 25,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-042",
+     "total": 75,
+     "scores": {
+      "source_proven": 30,
+      "correct_target": 25,
+      "expected_derivable": 0,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-043",
+     "total": 100,
+     "scores": {
+      "source_proven": 30,
+      "correct_target": 25,
+      "expected_derivable": 25,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-044",
+     "total": 100,
+     "scores": {
+      "source_proven": 30,
+      "correct_target": 25,
+      "expected_derivable": 25,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-045",
+     "total": 100,
+     "scores": {
+      "source_proven": 30,
+      "correct_target": 25,
+      "expected_derivable": 25,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-046",
+     "total": 100,
+     "scores": {
+      "source_proven": 30,
+      "correct_target": 25,
+      "expected_derivable": 25,
+      "fixture_validity": 20
+     }
+    },
+    {
+     "id": "TC-APP-047",
+     "total": 100,
+     "scores": {
+      "source_proven": 30,
+      "correct_target": 25,
+      "expected_derivable": 25,
+      "fixture_validity": 20
+     }
+    }
+   ],
+   "code": []
+  },
+  "inventory": {
+   "files": 69,
+   "tests": 321,
+   "byLevel": {
+    "Unit": 321,
+    "Integration": 0,
+    "E2E": 0
+   },
+   "existing": 22,
+   "generated": 47,
+   "manual": 0,
+   "markedNotInManifest": [],
+   "truncated": false
+  },
+  "scenarios": [
+   {
+    "id": "SC-AREA-001-001",
+    "area": "Health endpoint returns status and tool count",
+    "level": "Integration",
+    "priority": "P1",
+    "requirementIds": [
+     "REQ-001"
+    ],
+    "text": "Health endpoint returns status and tool count"
+   },
+   {
+    "id": "SC-AREA-002-001",
+    "area": "Run calculator - invalid JSON body returns 400",
+    "level": "Integration",
+    "priority": "P1",
+    "requirementIds": [
+     "REQ-003"
+    ],
+    "text": "Run calculator - invalid JSON body returns 400"
+   },
+   {
+    "id": "SC-AREA-003-001",
+    "area": "Run calculator - invalid sanitized params returns 400",
+    "level": "Integration",
+    "priority": "P1",
+    "requirementIds": [
+     "REQ-005"
+    ],
+    "text": "Run calculator - invalid sanitized params returns 400"
+   },
+   {
+    "id": "SC-AREA-004-001",
+    "area": "Run calculator - calculator domain errors return 400",
+    "level": "Integration",
+    "priority": "P1",
+    "requirementIds": [
+     "REQ-006"
+    ],
+    "text": "Run calculator - calculator domain errors return 400"
+   },
+   {
+    "id": "SC-AREA-005-001",
+    "area": "Run calculator - unexpected exception returns 400",
+    "level": "Integration",
+    "priority": "P1",
+    "requirementIds": [
+     "REQ-007"
+    ],
+    "text": "Run calculator - unexpected exception returns 400"
+   },
+   {
+    "id": "SC-AREA-006-001",
+    "area": "Run calculator - valid input returns 200 and result",
+    "level": "Integration",
+    "priority": "P1",
+    "requirementIds": [
+     "REQ-008"
+    ],
+    "text": "Run calculator - valid input returns 200 and result"
+   },
+   {
+    "id": "SC-AREA-007-001",
+    "area": "API NAV - invalid scheme code returns 400",
+    "level": "Integration",
+    "priority": "P1",
+    "requirementIds": [
+     "REQ-009"
+    ],
+    "text": "API NAV - invalid scheme code returns 400"
+   },
+   {
+    "id": "SC-AREA-008-001",
+    "area": "API NAV - invalid query length returns 400",
+    "level": "Integration",
+    "priority": "P1",
+    "requirementIds": [
+     "REQ-010"
+    ],
+    "text": "API NAV - invalid query length returns 400"
+   },
+   {
+    "id": "SC-AREA-009-001",
+    "area": "API FX - invalid currency codes return 400",
+    "level": "Integration",
+    "priority": "P1",
+    "requirementIds": [
+     "REQ-011"
+    ],
+    "text": "API FX - invalid currency codes return 400"
+   },
+   {
+    "id": "SC-AREA-010-001",
+    "area": "API Quote - invalid symbol returns 400",
+    "level": "Integration",
+    "priority": "P1",
+    "requirementIds": [
+     "REQ-012"
+    ],
+    "text": "API Quote - invalid symbol returns 400"
+   },
+   {
+    "id": "SC-AREA-011-001",
+    "area": "Payload size limit on all /api endpoints",
+    "level": "Integration",
+    "priority": "P0",
+    "requirementIds": [
+     "REQ-013"
+    ],
+    "text": "Payload size limit on all /api endpoints"
+   },
+   {
+    "id": "SC-AREA-012-001",
+    "area": "Security headers on every HTTP response",
+    "level": "Integration",
+    "priority": "P0",
+    "requirementIds": [
+     "REQ-015"
+    ],
+    "text": "Security headers on every HTTP response"
+   }
+  ],
+  "skippedLevels": [
+   {
+    "level": "Unit",
+    "reason": "All P0 and P1 behaviors involve HTTP request/response handling, middleware, or external I/O (payload size check, security headers, JSON parsing, query validations). No pure-logic-only scenarios exist for these requirements; existing unit tests in tests/ (e.g., test_tvm.py) cover isolated calculator logic but are not P0/P1. Writing additional unit tests would duplicate integration coverage."
+   },
+   {
+    "level": "E2E",
+    "reason": "The application has no browser-accessible UI; it is a JSON-over-HTTP API only. All functionality is accessed via API calls, making E2E browser testing impossible and unnecessary."
+   }
+  ],
+  "declaredScenarios": null,
+  "cases": [
+   {
+    "id": "TC-APP-001",
+    "scenarioIds": [
+     "SC-AREA-001-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Positive",
+    "text": "Health endpoint returns status ok and tools count as an integer Send GET request to /api/health Parse the JSON response status is 'ok', tools is an integer (e.g., 10) Server is running and tool manager is initialized with at least one tool",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-002",
+    "scenarioIds": [
+     "SC-AREA-001-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Negative",
+    "text": "Health endpoint returns tools count 0 when no tools are loaded Send GET request to /api/health Parse the JSON response status is 'ok', tools is 0 Server is running with an empty tool manager (no tools loaded)",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-003",
+    "scenarioIds": [
+     "SC-AREA-001-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Negative (Boundary)",
+    "text": "Health endpoint returns tools count 1 when exactly one tool is loaded Send GET request to /api/health Parse the JSON response status is 'ok', tools is 1 Server is running with exactly one tool registered in the tool manager",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-004",
+    "scenarioIds": [
+     "SC-AREA-001-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "PARTIAL",
+    "type": "Negative",
+    "text": "Health endpoint returns status ok and tools count as integer with a realistic number of tools Send GET request to /api/health Parse the JSON response status is 'ok', tools is an integer (e.g., 10) Server is running with a realistic number of tools (e.g., 10) in the tool manager",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-005",
+    "scenarioIds": [
+     "SC-AREA-002-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Exception",
+    "text": "POST /api/calc with malformed JSON body returns 400 with error 'invalid JSON' Send POST request to /api/calc with Content-Type: application/json and body as malformed JSON string above Receive response Response status code is 400 and JSON body contains error field with value 'invalid JSON' Server is running and available",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-006",
+    "scenarioIds": [
+     "SC-AREA-002-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Exception",
+    "text": "POST /api/calc with malformed JSON body returns 400 with error 'invalid JSON' Send POST request to /api/calc with Content-Type: application/json and body as malformed JSON string above Receive response Response status code is 400 and JSON body is {\"error\": \"invalid JSON\"} Server is running and available",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-007",
+    "scenarioIds": [
+     "SC-AREA-002-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Negative",
+    "text": "POST /api/calc with malformed JSON (truncated object) returns 400 with error 'invalid JSON' Send POST request to /api/calc with Content-Type: application/json and body as truncated JSON string: '{\"key\": \"value\"' Receive response Response status code is 400 and JSON body contains {\"error\": \"invalid JSON\"} Server is running and available",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-008",
+    "scenarioIds": [
+     "SC-AREA-002-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Negative",
+    "text": "POST /api/calc with malformed JSON body returns 400 with error 'invalid JSON' Send POST request to /api/calc with Content-Type: application/json and body as above Receive response Response status code is 400 and JSON body contains {\"error\": \"invalid JSON\"} Server is running and available",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-009",
+    "scenarioIds": [
+     "SC-AREA-003-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Negative",
+    "text": "POST /api/calc with missing required parameters returns 400 Send POST request to /api/calc with Content-Type: application/json and body {\"calculator\": \"interest\"} Receive response Response status code is 400 and JSON body contains \"error\" field with message from _sanitize_params Server is running and available",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-010",
+    "scenarioIds": [
+     "SC-AREA-003-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Negative",
+    "text": "POST /api/calc with missing required parameter that _sanitize_params rejects returns 400 with error message Send POST request to /api/calc with Content-Type: application/json and body as above Receive response Response status code is 400 and JSON body has an error field with message from ValueError Server is running and available",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-011",
+    "scenarioIds": [
+     "SC-AREA-003-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Negative",
+    "text": "POST /api/calc with parameter of wrong type that _sanitize_params rejects returns 400 with error message Send POST request to /api/calc with Content-Type: application/json and body as above Receive response Response status code is 400 and JSON body has an error field with message from ValueError Server is running and available",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-012",
+    "scenarioIds": [
+     "SC-AREA-003-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Negative",
+    "text": "POST /api/calc with extra unknown parameter that _sanitize_params rejects returns 400 with error message Send POST request to /api/calc with Content-Type: application/json and body as above Receive response Response status code is 400 and JSON body has an error field with message from ValueError Server is running and available",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-013",
+    "scenarioIds": [
+     "SC-AREA-004-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Negative",
+    "text": "POST /api/calc with inputs that cause ValueError returns 400 Send POST request to /api/calc with Content-Type: application/json and body as above Receive response Response status code is 400 and JSON body includes error key with message starting with 'invalid inputs:' Server is running and available",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-014",
+    "scenarioIds": [
+     "SC-AREA-004-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Negative",
+    "text": "POST /api/calc with divisor zero that raises ZeroDivisionError returns 400 with actionable error message Send POST request to /api/calc with Content-Type: application/json and body as above Receive response Response status code is 400 and JSON body has error field containing message from ZeroDivisionError prefixed with \"invalid inputs: \" Server is running and available",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-015",
+    "scenarioIds": [
+     "SC-AREA-004-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Negative",
+    "text": "POST /api/calc with value that causes negative sqrt (ValueError) returns 400 with actionable error message Send POST request to /api/calc with Content-Type: application/json and body as above Receive response Response status code is 400 and JSON body has error field containing message from ValueError prefixed with \"invalid inputs: \" Server is running and available",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-016",
+    "scenarioIds": [
+     "SC-AREA-004-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Negative",
+    "text": "POST /api/calc with invalid calculator name that raises KeyError returns 400 with actionable error message Send POST request to /api/calc with Content-Type: application/json and body as above Receive response Response status code is 400 and JSON body has error field containing message from KeyError prefixed with \"invalid inputs: \" Server is running and available",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-017",
+    "scenarioIds": [
+     "SC-AREA-005-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Negative",
+    "text": "POST /api/calc with input that triggers an unexpected exception returns 400 Send POST request to /api/calc with Content-Type: application/json and body as above Receive response Response status code is 400 and JSON body equals {\"error\": \"calculation failed\"} Server is running and available",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-018",
+    "scenarioIds": [
+     "SC-AREA-005-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Exception",
+    "text": "POST /api/calc with input that triggers an unexpected exception (e.g., raising RuntimeError in a calculator) returns 400 with generic error 'calculation failed' Send POST request to /api/calc with Content-Type: application/json and body as above Receive response Response status code is 400 and JSON body is {\"error\": \"calculation failed\"} Server is running and available; a calculator that raises RuntimeError is registered",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-019",
+    "scenarioIds": [
+     "SC-AREA-005-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Negative",
+    "text": "POST /api/calc with valid params that cause a calculator to raise an unexpected exception (e.g., invalid division) returns 400 with generic error 'calculation failed' Send POST request to /api/calc with Content-Type: application/json and body as above Receive response Response status code is 400 and JSON body is {\"error\": \"calculation failed\"} Server is running and available",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-020",
+    "scenarioIds": [
+     "SC-AREA-005-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Negative",
+    "text": "POST /api/calc with a string value for a numeric parameter that causes a TypeError in calculator returns 400 with generic error 'calculation failed' Send POST request to /api/calc with Content-Type: application/json and body as above Receive response Response status code is 400 and JSON body is {\"error\": \"calculation failed\"} Server is running and available",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-021",
+    "scenarioIds": [
+     "SC-AREA-006-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Positive",
+    "text": "POST /api/calc with valid calculator name and valid parameters returns 200 with calculator name and result Send POST request to /api/calc with Content-Type: application/json and body as above Receive response Response status code is 200 and JSON body is {\"calculator\": \"interest\", \"result\": 100.0} (assuming simple interest: 1000 * 0.05 * 2 = 100) Server is running and available",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-022",
+    "scenarioIds": [
+     "SC-AREA-006-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Positive",
+    "text": "POST /api/calc with valid calculator name and valid parameters returns 200 and correct result Send POST request to /api/calc with Content-Type: application/json and body as above Receive response Response status code is 200 with JSON body containing \"calculator\": \"interest\" and \"result\": 100.0 Server is running and available",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-023",
+    "scenarioIds": [
+     "SC-AREA-006-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "PARTIAL",
+    "type": "Positive",
+    "text": "POST /api/calc with valid calculator name and parameters returns 200 with calculator name and result Send POST request to /api/calc with Content-Type: application/json and body as above Receive response Response status code is 200 and JSON body has fields \"calculator\": \"simple_interest\" and \"result\": 100.0 Server is running and available",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-024",
+    "scenarioIds": [
+     "SC-AREA-006-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Positive",
+    "text": "POST /api/calc with valid calculator and valid parameters returns 200 with calculator name and result Send POST request to /api/calc with Content-Type: application/json and body as above Receive response Response status code is 200 and JSON body has \"calculator\": \"add\" and \"result\": 5 Server is running and available",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-025",
+    "scenarioIds": [
+     "SC-AREA-007-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Negative",
+    "text": "GET /api/nav with code containing non-digit characters returns 400 with error 'invalid scheme code' Send GET request to /api/nav?code=AB1234 Receive response Response status code is 400 and JSON body is {\"error\": \"invalid scheme code\"} Server is running and available",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-026",
+    "scenarioIds": [
+     "SC-AREA-007-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Negative (Boundary)",
+    "text": "GET /api/nav with code longer than 9 characters returns 400 with error 'invalid scheme code' Send GET request to /api/nav?code=1234567890 Receive response Response status code is 400 and JSON body is {\"error\": \"invalid scheme code\"} Server is running and available",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-027",
+    "scenarioIds": [
+     "SC-AREA-007-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Exception",
+    "text": "GET /api/nav with empty code returns 400 with error 'invalid scheme code' Send GET request to /api/nav?code= Receive response Response status code is 400 and JSON body is {\"error\": \"invalid scheme code\"} Server is running and available",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-028",
+    "scenarioIds": [
+     "SC-AREA-008-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Negative (Boundary)",
+    "text": "GET /api/nav with q longer than 80 characters returns 400 with error message Send GET request to /api/nav?q=a string of 81 characters Receive response Response status code is 400 and JSON body contains error property with value 'query must be 1–80 characters' Server is running and available",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-029",
+    "scenarioIds": [
+     "SC-AREA-008-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Negative (Boundary)",
+    "text": "GET /api/nav with empty q returns 400 with error 'query must be 1–80 characters' Send GET request to /api/nav?q= Receive response Response status code is 400 and JSON body is {\"error\": \"query must be 1–80 characters\"} Server is running and available",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-030",
+    "scenarioIds": [
+     "SC-AREA-008-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Negative (Boundary)",
+    "text": "GET /api/nav with q longer than 80 characters returns 400 with error 'query must be 1–80 characters' Send GET request to /api/nav?q=a string of 81 characters: exactly 81 letters 'a' Receive response Response status code is 400 and JSON body is {\"error\": \"query must be 1–80 characters\"} Server is running and available",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-031",
+    "scenarioIds": [
+     "SC-AREA-008-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Exception",
+    "text": "GET /api/nav with q longer than 80 characters returns 400 with error message Send GET request to /api/nav?q=a string of 81 characters: 81 letters 'b' Receive response Response status code is 400 and JSON body equals {'error': 'query must be 1–80 characters'} Server is running and available",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-032",
+    "scenarioIds": [
+     "SC-AREA-009-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Negative",
+    "text": "GET /api/fx with invalid base currency code returns 400 Send GET request to /api/fx?base=INVALID Receive response Response status code is 400 and JSON body contains {\"error\": \"invalid currency code\"} Server is running and available",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-033",
+    "scenarioIds": [
+     "SC-AREA-009-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Negative",
+    "text": "GET /api/fx with base containing lowercase letters returns 400 with error 'invalid currency code' Send GET request to /api/fx?base=usd&symbols=EUR Receive response Response status code is 400 and JSON body is {\"error\": \"invalid currency code\"} Server is running and available",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-034",
+    "scenarioIds": [
+     "SC-AREA-009-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Negative",
+    "text": "GET /api/fx with symbols containing invalid characters (digit) returns 400 with error 'invalid currency code' Send GET request to /api/fx?base=USD&symbols=EUR,123 Receive response Response status code is 400 and JSON body is {\"error\": \"invalid currency code\"} Server is running and available",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-035",
+    "scenarioIds": [
+     "SC-AREA-009-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Exception",
+    "text": "GET /api/fx with symbols string longer than 40 characters returns 400 with error 'invalid currency code' Send GET request to /api/fx?base=USD&symbols=EUROPEAN,GBP,JPY,AUSTRALIAN,CANADIAN Receive response Response status code is 400 and JSON body is {\"error\": \"invalid currency code\"} Server is running and available",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-036",
+    "scenarioIds": [
+     "SC-AREA-010-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Negative",
+    "text": "GET /api/quote with symbol containing invalid character '@' returns 400 Send GET request to /api/quote?symbol=AAP@L Receive response Response status code is 400 and JSON body has key \"error\" with value \"invalid symbol\" Server is running and available",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-037",
+    "scenarioIds": [
+     "SC-AREA-010-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Negative",
+    "text": "GET /api/quote with symbol containing invalid characters (space) returns 400 with error 'invalid symbol' Send GET request to /api/quote?symbol=AA PL Receive response Response status code is 400 and JSON body is {\"error\": \"invalid symbol\"} Server is running and available",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-038",
+    "scenarioIds": [
+     "SC-AREA-010-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Negative (Boundary)",
+    "text": "GET /api/quote with symbol longer than 15 characters returns 400 with error 'invalid symbol' Send GET request to /api/quote?symbol=VERYLONGSYMBOL123 Receive response Response status code is 400 and JSON body is {\"error\": \"invalid symbol\"} Server is running and available",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-039",
+    "scenarioIds": [
+     "SC-AREA-010-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Exception",
+    "text": "GET /api/quote with empty symbol returns 400 with error 'invalid symbol' Send GET request to /api/quote?symbol= Receive response Response status code is 400 and JSON body is {\"error\": \"invalid symbol\"} Server is running and available",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-040",
+    "scenarioIds": [
+     "SC-AREA-011-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Negative (Boundary)",
+    "text": "POST /api/calc with content-length exactly one byte over the limit returns 413 Send POST request to /api/calc with Content-Type: application/json and body adjusted to exactly 16385 bytes Receive response Response status code is 413 and JSON body contains {\"error\":\"payload too large\"} Server is running and available; valid calculator and params that produce a body of exactly 16385 bytes",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-041",
+    "scenarioIds": [
+     "SC-AREA-011-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Negative (Boundary)",
+    "text": "POST /api/calc with content-length greater than 16384 returns 413 with error 'payload too large' Send POST request to /api/calc with Content-Type: application/json and body padded to 16385 bytes Receive response Response status code is 413 and JSON body is {\"error\":\"payload too large\"} Server is running and available",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-042",
+    "scenarioIds": [
+     "SC-AREA-011-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "PARTIAL",
+    "type": "Negative (Boundary)",
+    "text": "POST /api/calc with content-length 16384 (exactly limit) returns 200 with result Send POST request to /api/calc with Content-Type: application/json and body of exactly 16384 bytes Receive response Response status code is 200 and JSON body contains calculator and result Server is running and available; a valid JSON payload of exactly 16384 bytes is sent",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-043",
+    "scenarioIds": [
+     "SC-AREA-011-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Exception",
+    "text": "POST /api/calc with content-length 16386 (two bytes over limit) returns 413 with error 'payload too large' Send POST request to /api/calc with Content-Type: application/json and body padded to 16386 bytes Receive response Response status code is 413 and JSON body is {\"error\":\"payload too large\"} Server is running and available",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-044",
+    "scenarioIds": [
+     "SC-AREA-012-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Positive",
+    "text": "GET /api/health returns all six security headers Send GET request to /api/health Receive response Inspect response headers Response includes headers: x-content-type-options, referrer-policy, permissions-policy, strict-transport-security, cross-origin-opener-policy, and content-security-policy with appropriate values Server is running and available",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-045",
+    "scenarioIds": [
+     "SC-AREA-012-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Negative",
+    "text": "POST /api/calc with valid request returns all six security headers Send POST request to /api/calc with Content-Type: application/json and body as above Receive response Inspect response headers Response status code is 200 and response headers include x-content-type-options, referrer-policy, permissions-policy, strict-transport-security, cross-origin-opener-policy, and content-security-policy Server is running and available",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-046",
+    "scenarioIds": [
+     "SC-AREA-012-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Negative",
+    "text": "GET /api/nav with invalid code returns 400 and includes all six security headers Send GET request to /api/nav?code=ABC Receive response Inspect response headers Response status code is 400 and response headers include x-content-type-options, referrer-policy, permissions-policy, strict-transport-security, cross-origin-opener-policy, and content-security-policy Server is running and available",
+    "codeConfidence": false
+   },
+   {
+    "id": "TC-APP-047",
+    "scenarioIds": [
+     "SC-AREA-012-001"
+    ],
+    "level": "Integration",
+    "confidence": true,
+    "audit": "COVERS",
+    "type": "Negative",
+    "text": "GET /api/fx with invalid base returns 400 and includes all six security headers Send GET request to /api/fx?base=123&symbols=EUR Receive response Inspect response headers Response status code is 400 and response headers include x-content-type-options, referrer-policy, permissions-policy, strict-transport-security, cross-origin-opener-policy, and content-security-policy Server is running and available",
+    "codeConfidence": false
+   }
+  ],
+  "tests": [
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_health_tc_app_001.py",
+    "caseIds": [
+     "TC-APP-001"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-001"
+    ],
+    "tests": 1,
+    "assertions": 3,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_health_tc_app_002.py",
+    "caseIds": [
+     "TC-APP-002"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-002"
+    ],
+    "tests": 1,
+    "assertions": 3,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_health_tc_app_003.py",
+    "caseIds": [
+     "TC-APP-003"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-003"
+    ],
+    "tests": 1,
+    "assertions": 3,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_health_tc_app_004.py",
+    "caseIds": [
+     "TC-APP-004"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-004"
+    ],
+    "tests": 1,
+    "assertions": 4,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_calc_tc_app_005.py",
+    "caseIds": [
+     "TC-APP-005"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-005"
+    ],
+    "tests": 1,
+    "assertions": 2,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_calc_tc_app_006.py",
+    "caseIds": [
+     "TC-APP-006"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-006"
+    ],
+    "tests": 1,
+    "assertions": 2,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_calc_tc_app_007.py",
+    "caseIds": [
+     "TC-APP-007"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-007"
+    ],
+    "tests": 1,
+    "assertions": 2,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_calc_tc_app_008.py",
+    "caseIds": [
+     "TC-APP-008"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-008"
+    ],
+    "tests": 1,
+    "assertions": 2,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_api_calc_tc_app_009.py",
+    "caseIds": [
+     "TC-APP-009"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-009"
+    ],
+    "tests": 1,
+    "assertions": 4,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_api_calc_tc_app_010.py",
+    "caseIds": [
+     "TC-APP-010"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-010"
+    ],
+    "tests": 1,
+    "assertions": 3,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_api_calc_tc_app_011.py",
+    "caseIds": [
+     "TC-APP-011"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-011"
+    ],
+    "tests": 1,
+    "assertions": 3,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_api_calc_tc_app_012.py",
+    "caseIds": [
+     "TC-APP-012"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-012"
+    ],
+    "tests": 1,
+    "assertions": 3,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_api_calc_tc_app_013.py",
+    "caseIds": [
+     "TC-APP-013"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-013"
+    ],
+    "tests": 1,
+    "assertions": 3,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_api_calc_tc_app_014.py",
+    "caseIds": [
+     "TC-APP-014"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-014"
+    ],
+    "tests": 1,
+    "assertions": 3,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_api_calc_tc_app_015.py",
+    "caseIds": [
+     "TC-APP-015"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-015"
+    ],
+    "tests": 1,
+    "assertions": 3,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_api_calc_tc_app_016.py",
+    "caseIds": [
+     "TC-APP-016"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-016"
+    ],
+    "tests": 1,
+    "assertions": 3,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_calc_TC_APP_017.py",
+    "caseIds": [
+     "TC-APP-017"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-017"
+    ],
+    "tests": 1,
+    "assertions": 2,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_calc_TC_APP_018.py",
+    "caseIds": [
+     "TC-APP-018"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-018"
+    ],
+    "tests": 1,
+    "assertions": 2,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_calc_TC_APP_019.py",
+    "caseIds": [
+     "TC-APP-019"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-019"
+    ],
+    "tests": 1,
+    "assertions": 2,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_calc_TC_APP_020.py",
+    "caseIds": [
+     "TC-APP-020"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-020"
+    ],
+    "tests": 1,
+    "assertions": 2,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_calc_TC_APP_021.py",
+    "caseIds": [
+     "TC-APP-021"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-021"
+    ],
+    "tests": 1,
+    "assertions": 2,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_calc_TC_APP_022.py",
+    "caseIds": [
+     "TC-APP-022"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-022"
+    ],
+    "tests": 1,
+    "assertions": 3,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_calc_TC_APP_023.py",
+    "caseIds": [
+     "TC-APP-023"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-023"
+    ],
+    "tests": 1,
+    "assertions": 3,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_calc_TC_APP_024.py",
+    "caseIds": [
+     "TC-APP-024"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-024"
+    ],
+    "tests": 1,
+    "assertions": 3,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_api_fx_TC_APP_032.py",
+    "caseIds": [
+     "TC-APP-032"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-032"
+    ],
+    "tests": 1,
+    "assertions": 2,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_api_nav_TC_APP_025.py",
+    "caseIds": [
+     "TC-APP-025"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-025"
+    ],
+    "tests": 1,
+    "assertions": 2,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_api_nav_TC_APP_026.py",
+    "caseIds": [
+     "TC-APP-026"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-026"
+    ],
+    "tests": 1,
+    "assertions": 2,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_api_nav_TC_APP_027.py",
+    "caseIds": [
+     "TC-APP-027"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-027"
+    ],
+    "tests": 1,
+    "assertions": 2,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_api_nav_TC_APP_028.py",
+    "caseIds": [
+     "TC-APP-028"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-028"
+    ],
+    "tests": 1,
+    "assertions": 3,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_api_nav_TC_APP_029.py",
+    "caseIds": [
+     "TC-APP-029"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-029"
+    ],
+    "tests": 1,
+    "assertions": 2,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_api_nav_TC_APP_030.py",
+    "caseIds": [
+     "TC-APP-030"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-030"
+    ],
+    "tests": 1,
+    "assertions": 2,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_api_nav_TC_APP_031.py",
+    "caseIds": [
+     "TC-APP-031"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-031"
+    ],
+    "tests": 1,
+    "assertions": 2,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_fx_lowercase_base_TC_APP_033.py",
+    "caseIds": [
+     "TC-APP-033"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-033"
+    ],
+    "tests": 1,
+    "assertions": 2,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_fx_symbols_digit_TC_APP_034.py",
+    "caseIds": [
+     "TC-APP-034"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-034"
+    ],
+    "tests": 1,
+    "assertions": 2,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_fx_symbols_too_long_TC_APP_035.py",
+    "caseIds": [
+     "TC-APP-035"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-035"
+    ],
+    "tests": 1,
+    "assertions": 2,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_quote_invalid_char_TC_APP_036.py",
+    "caseIds": [
+     "TC-APP-036"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-036"
+    ],
+    "tests": 1,
+    "assertions": 3,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_quote_space_TC_APP_037.py",
+    "caseIds": [
+     "TC-APP-037"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-037"
+    ],
+    "tests": 1,
+    "assertions": 2,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_quote_too_long_symbol_TC_APP_038.py",
+    "caseIds": [
+     "TC-APP-038"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-038"
+    ],
+    "tests": 1,
+    "assertions": 2,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_quote_empty_symbol_TC_APP_039.py",
+    "caseIds": [
+     "TC-APP-039"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-039"
+    ],
+    "tests": 1,
+    "assertions": 2,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_calc_payload_too_large_TC_APP_040.py",
+    "caseIds": [
+     "TC-APP-040"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-040"
+    ],
+    "tests": 1,
+    "assertions": 3,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_api_calc_content_length_041.py",
+    "caseIds": [
+     "TC-APP-041"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-041"
+    ],
+    "tests": 1,
+    "assertions": 4,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_api_calc_content_length_042.py",
+    "caseIds": [
+     "TC-APP-042"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-042"
+    ],
+    "tests": 1,
+    "assertions": 6,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_api_calc_content_length_043.py",
+    "caseIds": [
+     "TC-APP-043"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-043"
+    ],
+    "tests": 1,
+    "assertions": 3,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_health_security_headers_044.py",
+    "caseIds": [
+     "TC-APP-044"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-044"
+    ],
+    "tests": 1,
+    "assertions": 5,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_api_calc_security_headers_045.py",
+    "caseIds": [
+     "TC-APP-045"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-045"
+    ],
+    "tests": 1,
+    "assertions": 2,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_api_nav_security_headers_046.py",
+    "caseIds": [
+     "TC-APP-046"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-046"
+    ],
+    "tests": 1,
+    "assertions": 2,
+    "level": "Unit"
+   },
+   {
+    "path": "worktrees/run_d5337c94a9d7/tests/agentic_qe/test_api_fx_security_headers_047.py",
+    "caseIds": [
+     "TC-APP-047"
+    ],
+    "exists": true,
+    "markers": [
+     "TC-APP-047"
+    ],
+    "tests": 1,
+    "assertions": 2,
+    "level": "Unit"
+   }
+  ],
+  "results": {},
+  "provenance": {
+   "design": "confidence-reviewer run_d5337c94a9d7:design",
+   "code": null,
+   "designAudit": "coverage-auditor run_d5337c94a9d7:design",
+   "codeAudit": null
+  },
+  "problems": []
+ }
+}

@@ -125,3 +125,11 @@ def test_missing_dependencies_are_the_declared_ones_the_python_lacks(tmp_path):
     (tmp_path / "requirements.txt").write_text("Flask>=3\nhttpx\n", encoding="utf-8")
     assert emit.missing_dependencies(tmp_path, {"versions": {"flask": "3.0"}}) == ["httpx"]
     assert emit.missing_dependencies(tmp_path, None) == [], "an unreadable inventory claims nothing"
+
+
+def test_import_style_comes_from_the_repositorys_own_tests(tmp_path):
+    (tmp_path / "tests").mkdir()
+    (tmp_path / "tests" / "test_a.py").write_text("import pytest\nfrom src.tvm import fv\n\ndef test_x():\n    assert fv(1) == 1\n", encoding="utf-8")
+    style = emit.import_style(tmp_path)
+    assert "from src.tvm import fv" in style and "tests/test_a.py" in style
+    assert emit.import_style(tmp_path / "nothing") == ""

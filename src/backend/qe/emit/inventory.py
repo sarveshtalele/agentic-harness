@@ -66,3 +66,17 @@ def missing_dependencies(worktree: Path, found: dict | None) -> list[str]:
         return []
     have = {_normal(n) for n in found["versions"]}
     return sorted(d for d in declared_dependencies(worktree) if d not in have)
+
+
+def import_style(worktree: Path, files: int = 2, lines: int = 12) -> str:
+    """How the repository's own tests import its code, as a guide for generated tests. Empty when it has none."""
+    found = []
+    for path in sorted(worktree.glob("tests/**/test_*.py"))[:20]:
+        if "agentic_qe" in path.parts:
+            continue
+        head = [l for l in path.read_text(encoding="utf-8", errors="replace").splitlines() if l.startswith(("import ", "from "))][:lines]
+        if head:
+            found.append(f"# {path.relative_to(worktree).as_posix()}\n" + "\n".join(head))
+        if len(found) == files:
+            break
+    return ("IMPORT STYLE OF THE REPOSITORY'S OWN TESTS (copy it):\n" + "\n\n".join(found) + "\n") if found else ""
