@@ -43,7 +43,7 @@ COPY requirements.txt ./
 RUN python3 -m venv --system-site-packages /opt/venv \
  && /opt/venv/bin/pip install --upgrade pip \
  && /opt/venv/bin/pip install -r requirements.txt \
- && /opt/venv/bin/python -c "import playwright, sys; print('playwright', playwright.__version__)"
+ && /opt/venv/bin/python -c "from importlib.metadata import version; print('playwright', version('playwright'))"
 COPY src/backend /app/src/backend
 COPY prompts /app/prompts
 COPY templates /app/templates
