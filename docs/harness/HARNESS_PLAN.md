@@ -120,9 +120,11 @@ todo loop and AG-UI's collected-approval store (mistakes M4 and M8).
 | H6 | Clients: CLI first, then the others the owner chooses | client tests |
 | H7 | Live acceptance: the QE cycle to Gate 5 on `personal-finance-mcp` and `mcp-server-market-v2` | every stage 180 s or less, 40 tool calls or fewer, Gates 0 to 5 in the plugin ledger, harness coverage reported |
 
-## 10. Decisions needed from the owner before H0
+## 10. Decisions (owner, 2026-11-14)
 
-1. **Location:** a new repository folder `~/Downloads/maf-harness` (outside this repository) or another place.
-2. **Clients:** CLI only first, or CLI and web, or CLI, web and desktop.
-3. **Relation to the platform:** fully separate, or able to sign in to a platform server later to read projects and post
-   results through its public API.
+1. **Location:** `~/Downloads/maf-harness`, with the GitHub repository `sarveshtalele/maf-harness` (public: no secrets,
+   private hostnames or customer code may be committed).
+2. **Clients:** the CLI (`aqh`) first.
+3. **Relation to the platform:** fully separate; no connection now.
+
+H0 done: repository, CI on 3 OS, `legacy/` copied from `feature/harness-rebuild` (`dfe25c3`), commit `b44f7b8`.
