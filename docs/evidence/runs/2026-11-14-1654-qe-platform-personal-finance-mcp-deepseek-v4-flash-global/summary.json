@@ -1,0 +1,808 @@
+{
+ "repo": "https://github.com/sarveshtalele/personal-finance-mcp.git",
+ "model": "deepseek-v4-flash-global",
+ "run_id": "run_a6f0228726a6",
+ "gates": [
+  {
+   "gate": 0,
+   "seconds": 0.0,
+   "title": "Gate 0: confirm intake scope",
+   "summary": "Mode: brownfield. Source: git https://github.com/sarveshtalele/personal-finance-mcp.git at aff44ea06f. Files: 88. Languages: Python, JavaScript, CSS. Agents read this project's repository and documents only. Generated code lands on a separate branch.",
+   "plugin_check": null,
+   "design_audit": null
+  },
+  {
+   "gate": 1,
+   "seconds": 38.9,
+   "title": "Gate 1: approve requirements",
+   "summary": "26 requirements with verified evidence. agentic-qe Gate 1 check: PASS. Tokens: 67,743 used of 50,000,000, 49,932,257 left.",
+   "plugin_check": {
+    "ok": true,
+    "gaps": [],
+    "missing": [],
+    "validator": {
+     "validator": "1.6.0",
+     "gate": 1,
+     "ok": true,
+     "errors": [],
+     "warnings": [],
+     "metrics": {
+      "requirements": 26,
+      "scenarios": 0,
+      "cases": 0,
+      "test_files": 0,
+      "results": 0,
+      "repo_test_files": 11,
+      "repo_tests": 137,
+      "existing": 11,
+      "generated": 0,
+      "manual": 0
+     },
+     "suspects": [],
+     "duplicates": [],
+     "brief": "Gate 1 validation: PASS (0 errors, 0 warnings)."
+    },
+    "error": null,
+    "app": "prj_f32a5ba7879d",
+    "dropped": [
+     "REQ-005",
+     "REQ-008"
+    ]
+   },
+   "design_audit": null
+  },
+  {
+   "gate": 2,
+   "seconds": 31.9,
+   "title": "Gate 2: approve test plan",
+   "summary": "Deterministic score 100, independent review 80 (REVISE). agentic-qe Gate 2 check: PASS. Tokens: 103,001 used of 50,000,000, 49,896,999 left.",
+   "plugin_check": {
+    "ok": true,
+    "gaps": [],
+    "missing": [],
+    "validator": {
+     "validator": "1.6.0",
+     "gate": 2,
+     "ok": true,
+     "errors": [],
+     "warnings": [
+      {
+       "check": "plan.requirements",
+       "message": "P2/P3 requirements with no plan scenario",
+       "ids": [
+        "REQ-027"
+       ]
+      }
+     ],
+     "metrics": {
+      "requirements": 26,
+      "scenarios": 25,
+      "cases": 0,
+      "test_files": 0,
+      "results": 0,
+      "repo_test_files": 11,
+      "repo_tests": 137,
+      "existing": 11,
+      "generated": 0,
+      "manual": 0,
+      "plan_by_area_level": {
+       "API middleware rejects payloads over 16 KB": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator endpoint rejects invalid JSON body": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator endpoint rejects invalid parameter inputs": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator endpoint returns result for known calculator": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator exception caught and returns generic error message": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "FX endpoint rejects invalid currency codes": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "FX endpoint returns exchange rate data": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Health endpoint returns status and tool count": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "List tools endpoint returns tool catalog": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "NAV endpoint rejects empty or overlong query": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "NAV endpoint rejects invalid scheme code": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "NAV endpoint returns data for valid scheme code": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "NAV endpoint searches mutual funds by query": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "PORT environment variable controls HTTP server port": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Production runner starts SSE server on configured host and port": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Quote endpoint rejects invalid symbols": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Quote endpoint returns market data for symbol": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Security headers added to every response": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Security middleware applies CORS with permissive origins": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Server serves opengraph-image as PNG": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Server serves static files from web/out directory": {
+        "Integration": 1,
+        "Unit": 0
+       }
+      }
+     },
+     "suspects": [],
+     "duplicates": [],
+     "brief": "Gate 2 validation: PASS (0 errors, 1 warnings)."
+    },
+    "error": null,
+    "app": "prj_f32a5ba7879d"
+   },
+   "design_audit": null
+  },
+  {
+   "gate": 3,
+   "seconds": 80.3,
+   "title": "Gate 3: approve test design and data",
+   "summary": "68 cases. Case budget 68 of 40 (ATLAS_MAX_CASES), decided before design; P0 and P1 need more than the limit, so the limit is exceeded for them; 9 lower-priority requirements get no cases: REQ-018, REQ-019, REQ-020, REQ-021, REQ-023, REQ-024, REQ-025, REQ-026, REQ-027. Remaining gaps: ['REQ-004: no Exception case, and the requirement states error behaviour', 'REQ-009: needs 2 Negative cases', 'REQ-011: no Exception case, and the requirement states error behaviour', 'REQ-013: no Exception case, and the requirement states error behaviour', 'REQ-015: no Exception case, and the requirement states error behaviour', 'REQ-017: no Exception case, and the requirement states error behaviour', 'REQ-022: needs 2 Negative cases']. agentic-qe Gate 3 check: FAIL (plan scenarios with no designed case (17 of 25 designed): SC-UNIT-001-001, SC-UNIT-002-001, SC-UNIT-003-001, SC-UNIT-004-001, SC-INT-017-001, SC-INT-018-001, SC-INT-019-001, SC-INT-020-001; cases the coverage auditor says do not cover their scenario: TC-APP-003 (MISSES), TC-APP-004 (MISSES), TC-APP-007 (MISSES), TC-APP-008 (MISSES), TC-APP-010 (PARTIAL), TC-APP-011 (PARTIAL), TC-APP-012 (PARTIAL), TC-APP-014 (MISSES), TC-APP-016 (MISSES), TC-APP-018 (PARTIAL), TC-APP-019 (PARTIAL), TC-APP-020 (PARTIAL), TC-APP-022 (MISSES), TC-APP-023 (MISSES), TC-APP-024 (MISSES), TC-APP-027 (MISSES), TC-APP-028 (MISSES), TC-APP-032 (MISSES), TC-APP-035 (MISSES), TC-APP-036 (MISSES), TC-APP-043 (MISSES), TC-APP-044 (PARTIAL), TC-APP-047 (MISSES), TC-APP-048 (MISSES), TC-APP-051 (MISSES) and 7 more). Tokens: 295,378 used of 50,000,000, 49,704,622 left.",
+   "plugin_check": {
+    "ok": false,
+    "gaps": [
+     "plan scenarios with no designed case (17 of 25 designed): SC-UNIT-001-001, SC-UNIT-002-001, SC-UNIT-003-001, SC-UNIT-004-001, SC-INT-017-001, SC-INT-018-001, SC-INT-019-001, SC-INT-020-001",
+     "cases the coverage auditor says do not cover their scenario: TC-APP-003 (MISSES), TC-APP-004 (MISSES), TC-APP-007 (MISSES), TC-APP-008 (MISSES), TC-APP-010 (PARTIAL), TC-APP-011 (PARTIAL), TC-APP-012 (PARTIAL), TC-APP-014 (MISSES), TC-APP-016 (MISSES), TC-APP-018 (PARTIAL), TC-APP-019 (PARTIAL), TC-APP-020 (PARTIAL), TC-APP-022 (MISSES), TC-APP-023 (MISSES), TC-APP-024 (MISSES), TC-APP-027 (MISSES), TC-APP-028 (MISSES), TC-APP-032 (MISSES), TC-APP-035 (MISSES), TC-APP-036 (MISSES), TC-APP-043 (MISSES), TC-APP-044 (PARTIAL), TC-APP-047 (MISSES), TC-APP-048 (MISSES), TC-APP-051 (MISSES) and 7 more"
+    ],
+    "missing": [
+     "SC-UNIT-001-001",
+     "SC-UNIT-002-001",
+     "SC-UNIT-003-001",
+     "SC-UNIT-004-001",
+     "SC-INT-017-001",
+     "SC-INT-018-001",
+     "SC-INT-019-001",
+     "SC-INT-020-001",
+     "TC-APP-003 (MISSES)",
+     "TC-APP-004 (MISSES)",
+     "TC-APP-007 (MISSES)",
+     "TC-APP-008 (MISSES)",
+     "TC-APP-010 (PARTIAL)",
+     "TC-APP-011 (PARTIAL)",
+     "TC-APP-012 (PARTIAL)",
+     "TC-APP-014 (MISSES)",
+     "TC-APP-016 (MISSES)",
+     "TC-APP-018 (PARTIAL)",
+     "TC-APP-019 (PARTIAL)",
+     "TC-APP-020 (PARTIAL)",
+     "TC-APP-022 (MISSES)",
+     "TC-APP-023 (MISSES)",
+     "TC-APP-024 (MISSES)",
+     "TC-APP-027 (MISSES)",
+     "TC-APP-028 (MISSES)",
+     "TC-APP-032 (MISSES)",
+     "TC-APP-035 (MISSES)",
+     "TC-APP-036 (MISSES)",
+     "TC-APP-043 (MISSES)",
+     "TC-APP-044 (PARTIAL)",
+     "TC-APP-047 (MISSES)",
+     "TC-APP-048 (MISSES)",
+     "TC-APP-051 (MISSES)",
+     "TC-APP-052 (MISSES)",
+     "TC-APP-055 (MISSES)",
+     "TC-APP-059 (MISSES)",
+     "TC-APP-064 (MISSES)",
+     "TC-APP-066 (MISSES)",
+     "TC-APP-067 (MISSES)",
+     "TC-APP-068 (MISSES)"
+    ],
+    "validator": {
+     "validator": "1.6.0",
+     "gate": 3,
+     "ok": false,
+     "errors": [
+      {
+       "check": "design.coverage",
+       "message": "plan scenarios with no designed case (17 of 25 designed)",
+       "ids": [
+        "SC-INT-017-001",
+        "SC-INT-018-001",
+        "SC-INT-019-001",
+        "SC-INT-020-001",
+        "SC-UNIT-001-001",
+        "SC-UNIT-002-001",
+        "SC-UNIT-003-001",
+        "SC-UNIT-004-001"
+       ]
+      },
+      {
+       "check": "design.areas",
+       "message": "plan areas with no designed case at all",
+       "ids": [
+        "PORT environment variable controls HTTP server port",
+        "Security middleware applies CORS with permissive origins",
+        "Server serves opengraph-image as PNG",
+        "Server serves static files from web/out directory",
+        "_sanitize_params caps loop-driving parameters",
+        "_sanitize_params rejects non-dict or oversized parameter maps",
+        "_sanitize_params rejects non-finite numeric values",
+        "_sanitize_params rejects values exceeding absolute maximum"
+       ]
+      },
+      {
+       "check": "design.suspects",
+       "message": "cases that do not read like their scenario and no auditor verdict COVERS them",
+       "ids": [
+        "TC-APP-036",
+        "TC-APP-051..TC-APP-052"
+       ]
+      }
+     ],
+     "warnings": [
+      {
+       "check": "plan.requirements",
+       "message": "P2/P3 requirements with no plan scenario",
+       "ids": [
+        "REQ-027"
+       ]
+      },
+      {
+       "check": "design.duplicates",
+       "message": "2 groups of near-identical cases",
+       "ids": [
+        "TC-APP-045",
+        "TC-APP-052",
+        "TC-APP-057..TC-APP-058"
+       ]
+      }
+     ],
+     "metrics": {
+      "requirements": 26,
+      "scenarios": 25,
+      "cases": 68,
+      "test_files": 0,
+      "results": 0,
+      "repo_test_files": 11,
+      "repo_tests": 137,
+      "existing": 11,
+      "generated": 0,
+      "manual": 0,
+      "plan_by_area_level": {
+       "API middleware rejects payloads over 16 KB": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator endpoint rejects invalid JSON body": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator endpoint rejects invalid parameter inputs": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator endpoint returns result for known calculator": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator exception caught and returns generic error message": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "FX endpoint rejects invalid currency codes": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "FX endpoint returns exchange rate data": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Health endpoint returns status and tool count": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "List tools endpoint returns tool catalog": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "NAV endpoint rejects empty or overlong query": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "NAV endpoint rejects invalid scheme code": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "NAV endpoint returns data for valid scheme code": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "NAV endpoint searches mutual funds by query": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "PORT environment variable controls HTTP server port": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Production runner starts SSE server on configured host and port": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Quote endpoint rejects invalid symbols": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Quote endpoint returns market data for symbol": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Security headers added to every response": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Security middleware applies CORS with permissive origins": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Server serves opengraph-image as PNG": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Server serves static files from web/out directory": {
+        "Integration": 1,
+        "Unit": 0
+       }
+      },
+      "design_coverage_by_area": {
+       "API middleware rejects payloads over 16 KB": 100,
+       "Calculator endpoint rejects invalid JSON body": 100,
+       "Calculator endpoint rejects invalid parameter inputs": 100,
+       "Calculator endpoint returns result for known calculator": 100,
+       "Calculator exception caught and returns generic error message": 100,
+       "FX endpoint rejects invalid currency codes": 100,
+       "FX endpoint returns exchange rate data": 100,
+       "Health endpoint returns status and tool count": 100,
+       "List tools endpoint returns tool catalog": 100,
+       "NAV endpoint rejects empty or overlong query": 100,
+       "NAV endpoint rejects invalid scheme code": 100,
+       "NAV endpoint returns data for valid scheme code": 100,
+       "NAV endpoint searches mutual funds by query": 100,
+       "PORT environment variable controls HTTP server port": 0,
+       "Production runner starts SSE server on configured host and port": 100,
+       "Quote endpoint rejects invalid symbols": 100,
+       "Quote endpoint returns market data for symbol": 100,
+       "Security headers added to every response": 100,
+       "Security middleware applies CORS with permissive origins": 0,
+       "Server serves opengraph-image as PNG": 0,
+       "Server serves static files from web/out directory": 0
+      },
+      "cases_per_scenario": {
+       "mean": 4
+      },
+      "similarity_median": 0.307
+     },
+     "suspects": [
+      {
+       "case": "TC-APP-033",
+       "scenario": "SC-INT-005-001",
+       "similarity": 0.03,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-034",
+       "scenario": "SC-INT-005-001",
+       "similarity": 0,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-036",
+       "scenario": "SC-INT-005-001",
+       "similarity": 0.048,
+       "audit": "MISSES"
+      },
+      {
+       "case": "TC-APP-051",
+       "scenario": "SC-INT-011-001",
+       "similarity": 0.076,
+       "audit": "MISSES"
+      },
+      {
+       "case": "TC-APP-052",
+       "scenario": "SC-INT-011-001",
+       "similarity": 0.078,
+       "audit": "MISSES"
+      }
+     ],
+     "duplicates": [
+      [
+       "TC-APP-045",
+       "TC-APP-052"
+      ],
+      [
+       "TC-APP-057",
+       "TC-APP-058"
+      ]
+     ],
+     "brief": "Gate 3 validation: FAIL (3 errors, 2 warnings).\n- plan scenarios with no designed case (17 of 25 designed): SC-INT-017-001, SC-INT-018-001, SC-INT-019-001, SC-INT-020-001, SC-UNIT-001-001, SC-UNIT-002-001, SC-UNIT-003-001, SC-UNIT-004-001\n- plan areas with no designed case at all: PORT environment variable controls HTTP server port, Security middleware applies CORS with permissive origins, Server serves opengraph-image as PNG, Server serves static files from web/out directory, _sanitize_params caps loop-driving parameters, _sanitize_params rejects non-dict or oversized parameter maps, _sanitize_params rejects non-finite numeric values, _sanitize_params rejects values exceeding absolute maximum\n- cases that do not read like their scenario and no auditor verdict COVERS them: TC-APP-036, TC-APP-051..TC-APP-052\nAudit these case/scenario pairs first (low similarity): TC-APP-033, TC-APP-034, TC-APP-036, TC-APP-051, TC-APP-052"
+    },
+    "error": null
+   },
+   "design_audit": {
+    "app": "prj_f32a5ba7879d",
+    "reviewed": 68,
+    "audited": 68,
+    "counts": {
+     "COVERS": 36,
+     "PARTIAL": 7,
+     "MISSES": 25
+    },
+    "unaudited": []
+   },
+   "refused": "These items were judged REJECT: TC-APP-043, TC-APP-055, TC-APP-059. Approving them needs a reason, and this one has 0 characters, fewer than 10. Write it in the reason field.",
+   "sent_back": true
+  },
+  {
+   "gate": 3,
+   "seconds": 80.8,
+   "title": "Gate 3: approve test design and data",
+   "summary": "68 cases. Case budget 68 of 40 (ATLAS_MAX_CASES), decided before design; P0 and P1 need more than the limit, so the limit is exceeded for them; 9 lower-priority requirements get no cases: REQ-018, REQ-019, REQ-020, REQ-021, REQ-023, REQ-024, REQ-025, REQ-026, REQ-027; 4 excess cases dropped before review. Remaining gaps: ['REQ-004: no Exception case, and the requirement states error behaviour']. agentic-qe Gate 3 check: FAIL (plan scenarios with no designed case (17 of 25 designed): SC-UNIT-001-001, SC-UNIT-002-001, SC-UNIT-003-001, SC-UNIT-004-001, SC-INT-017-001, SC-INT-018-001, SC-INT-019-001, SC-INT-020-001; cases the coverage auditor says do not cover their scenario: TC-APP-002 (MISSES), TC-APP-003 (MISSES), TC-APP-004 (PARTIAL), TC-APP-006 (MISSES), TC-APP-007 (MISSES), TC-APP-008 (PARTIAL), TC-APP-010 (PARTIAL), TC-APP-011 (MISSES), TC-APP-012 (MISSES), TC-APP-016 (PARTIAL), TC-APP-022 (PARTIAL), TC-APP-023 (PARTIAL), TC-APP-024 (PARTIAL), TC-APP-030 (PARTIAL), TC-APP-031 (MISSES), TC-APP-032 (MISSES), TC-APP-036 (PARTIAL), TC-APP-037 (MISSES), TC-APP-041 (MISSES), TC-APP-045 (MISSES), TC-APP-049 (MISSES), TC-APP-054 (MISSES), TC-APP-055 (MISSES), TC-APP-056 (MISSES), TC-APP-061 (MISSES) and 2 more). Tokens: 484,179 used of 50,000,000, 49,515,821 left.",
+   "plugin_check": {
+    "ok": false,
+    "gaps": [
+     "plan scenarios with no designed case (17 of 25 designed): SC-UNIT-001-001, SC-UNIT-002-001, SC-UNIT-003-001, SC-UNIT-004-001, SC-INT-017-001, SC-INT-018-001, SC-INT-019-001, SC-INT-020-001",
+     "cases the coverage auditor says do not cover their scenario: TC-APP-002 (MISSES), TC-APP-003 (MISSES), TC-APP-004 (PARTIAL), TC-APP-006 (MISSES), TC-APP-007 (MISSES), TC-APP-008 (PARTIAL), TC-APP-010 (PARTIAL), TC-APP-011 (MISSES), TC-APP-012 (MISSES), TC-APP-016 (PARTIAL), TC-APP-022 (PARTIAL), TC-APP-023 (PARTIAL), TC-APP-024 (PARTIAL), TC-APP-030 (PARTIAL), TC-APP-031 (MISSES), TC-APP-032 (MISSES), TC-APP-036 (PARTIAL), TC-APP-037 (MISSES), TC-APP-041 (MISSES), TC-APP-045 (MISSES), TC-APP-049 (MISSES), TC-APP-054 (MISSES), TC-APP-055 (MISSES), TC-APP-056 (MISSES), TC-APP-061 (MISSES) and 2 more"
+    ],
+    "missing": [
+     "SC-UNIT-001-001",
+     "SC-UNIT-002-001",
+     "SC-UNIT-003-001",
+     "SC-UNIT-004-001",
+     "SC-INT-017-001",
+     "SC-INT-018-001",
+     "SC-INT-019-001",
+     "SC-INT-020-001",
+     "TC-APP-002 (MISSES)",
+     "TC-APP-003 (MISSES)",
+     "TC-APP-004 (PARTIAL)",
+     "TC-APP-006 (MISSES)",
+     "TC-APP-007 (MISSES)",
+     "TC-APP-008 (PARTIAL)",
+     "TC-APP-010 (PARTIAL)",
+     "TC-APP-011 (MISSES)",
+     "TC-APP-012 (MISSES)",
+     "TC-APP-016 (PARTIAL)",
+     "TC-APP-022 (PARTIAL)",
+     "TC-APP-023 (PARTIAL)",
+     "TC-APP-024 (PARTIAL)",
+     "TC-APP-030 (PARTIAL)",
+     "TC-APP-031 (MISSES)",
+     "TC-APP-032 (MISSES)",
+     "TC-APP-036 (PARTIAL)",
+     "TC-APP-037 (MISSES)",
+     "TC-APP-041 (MISSES)",
+     "TC-APP-045 (MISSES)",
+     "TC-APP-049 (MISSES)",
+     "TC-APP-054 (MISSES)",
+     "TC-APP-055 (MISSES)",
+     "TC-APP-056 (MISSES)",
+     "TC-APP-061 (MISSES)",
+     "TC-APP-065 (MISSES)",
+     "TC-APP-067 (PARTIAL)"
+    ],
+    "validator": {
+     "validator": "1.6.0",
+     "gate": 3,
+     "ok": false,
+     "errors": [
+      {
+       "check": "design.coverage",
+       "message": "plan scenarios with no designed case (17 of 25 designed)",
+       "ids": [
+        "SC-INT-017-001",
+        "SC-INT-018-001",
+        "SC-INT-019-001",
+        "SC-INT-020-001",
+        "SC-UNIT-001-001",
+        "SC-UNIT-002-001",
+        "SC-UNIT-003-001",
+        "SC-UNIT-004-001"
+       ]
+      },
+      {
+       "check": "design.areas",
+       "message": "plan areas with no designed case at all",
+       "ids": [
+        "PORT environment variable controls HTTP server port",
+        "Security middleware applies CORS with permissive origins",
+        "Server serves opengraph-image as PNG",
+        "Server serves static files from web/out directory",
+        "_sanitize_params caps loop-driving parameters",
+        "_sanitize_params rejects non-dict or oversized parameter maps",
+        "_sanitize_params rejects non-finite numeric values",
+        "_sanitize_params rejects values exceeding absolute maximum"
+       ]
+      },
+      {
+       "check": "design.suspects",
+       "message": "cases that do not read like their scenario and no auditor verdict COVERS them",
+       "ids": [
+        "TC-APP-016"
+       ]
+      }
+     ],
+     "warnings": [
+      {
+       "check": "plan.requirements",
+       "message": "P2/P3 requirements with no plan scenario",
+       "ids": [
+        "REQ-027"
+       ]
+      },
+      {
+       "check": "design.duplicates",
+       "message": "1 groups of near-identical cases",
+       "ids": [
+        "TC-APP-017..TC-APP-019"
+       ]
+      }
+     ],
+     "metrics": {
+      "requirements": 26,
+      "scenarios": 25,
+      "cases": 68,
+      "test_files": 0,
+      "results": 0,
+      "repo_test_files": 11,
+      "repo_tests": 137,
+      "existing": 11,
+      "generated": 0,
+      "manual": 0,
+      "plan_by_area_level": {
+       "API middleware rejects payloads over 16 KB": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator endpoint rejects invalid JSON body": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator endpoint rejects invalid parameter inputs": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator endpoint returns result for known calculator": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator exception caught and returns generic error message": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "FX endpoint rejects invalid currency codes": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "FX endpoint returns exchange rate data": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Health endpoint returns status and tool count": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "List tools endpoint returns tool catalog": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "NAV endpoint rejects empty or overlong query": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "NAV endpoint rejects invalid scheme code": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "NAV endpoint returns data for valid scheme code": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "NAV endpoint searches mutual funds by query": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "PORT environment variable controls HTTP server port": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Production runner starts SSE server on configured host and port": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Quote endpoint rejects invalid symbols": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Quote endpoint returns market data for symbol": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Security headers added to every response": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Security middleware applies CORS with permissive origins": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Server serves opengraph-image as PNG": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Server serves static files from web/out directory": {
+        "Integration": 1,
+        "Unit": 0
+       }
+      },
+      "design_coverage_by_area": {
+       "API middleware rejects payloads over 16 KB": 100,
+       "Calculator endpoint rejects invalid JSON body": 100,
+       "Calculator endpoint rejects invalid parameter inputs": 100,
+       "Calculator endpoint returns result for known calculator": 100,
+       "Calculator exception caught and returns generic error message": 100,
+       "FX endpoint rejects invalid currency codes": 100,
+       "FX endpoint returns exchange rate data": 100,
+       "Health endpoint returns status and tool count": 100,
+       "List tools endpoint returns tool catalog": 100,
+       "NAV endpoint rejects empty or overlong query": 100,
+       "NAV endpoint rejects invalid scheme code": 100,
+       "NAV endpoint returns data for valid scheme code": 100,
+       "NAV endpoint searches mutual funds by query": 100,
+       "PORT environment variable controls HTTP server port": 0,
+       "Production runner starts SSE server on configured host and port": 100,
+       "Quote endpoint rejects invalid symbols": 100,
+       "Quote endpoint returns market data for symbol": 100,
+       "Security headers added to every response": 100,
+       "Security middleware applies CORS with permissive origins": 0,
+       "Server serves opengraph-image as PNG": 0,
+       "Server serves static files from web/out directory": 0
+      },
+      "cases_per_scenario": {
+       "mean": 4
+      },
+      "similarity_median": 0.35
+     },
+     "suspects": [
+      {
+       "case": "TC-APP-013",
+       "scenario": "SC-INT-006-001",
+       "similarity": 0.035,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-016",
+       "scenario": "SC-INT-006-001",
+       "similarity": 0.027,
+       "audit": "PARTIAL"
+      }
+     ],
+     "duplicates": [
+      [
+       "TC-APP-017",
+       "TC-APP-018",
+       "TC-APP-019"
+      ]
+     ],
+     "brief": "Gate 3 validation: FAIL (3 errors, 2 warnings).\n- plan scenarios with no designed case (17 of 25 designed): SC-INT-017-001, SC-INT-018-001, SC-INT-019-001, SC-INT-020-001, SC-UNIT-001-001, SC-UNIT-002-001, SC-UNIT-003-001, SC-UNIT-004-001\n- plan areas with no designed case at all: PORT environment variable controls HTTP server port, Security middleware applies CORS with permissive origins, Server serves opengraph-image as PNG, Server serves static files from web/out directory, _sanitize_params caps loop-driving parameters, _sanitize_params rejects non-dict or oversized parameter maps, _sanitize_params rejects non-finite numeric values, _sanitize_params rejects values exceeding absolute maximum\n- cases that do not read like their scenario and no auditor verdict COVERS them: TC-APP-016\nAudit these case/scenario pairs first (low similarity): TC-APP-013, TC-APP-016"
+    },
+    "error": null
+   },
+   "design_audit": {
+    "app": "prj_f32a5ba7879d",
+    "reviewed": 68,
+    "audited": 68,
+    "counts": {
+     "COVERS": 41,
+     "PARTIAL": 10,
+     "MISSES": 17
+    },
+    "unaudited": []
+   }
+  },
+  {
+   "gate": 4,
+   "seconds": 54.4,
+   "title": "Gate 4: approve generated tests",
+   "summary": "68 of 68 cases have tests, on branch atlas/qe-8726a6. Approving also allows them to run on this machine. Tokens: 695,879 used of 50,000,000, 49,304,121 left.",
+   "plugin_check": null,
+   "design_audit": null
+  },
+  {
+   "gate": 5,
+   "seconds": 29.3,
+   "title": "Gate 5: approve release",
+   "summary": "Verdict FAIL: 0/68 tests passed. 68 reviewed tests failed and are capped at 60. Tokens: 719,547 used of 50,000,000, 49,280,453 left.",
+   "plugin_check": null,
+   "design_audit": null,
+   "refused": "These items were judged REJECT: TC-APP-001, TC-APP-002, TC-APP-003, TC-APP-004, TC-APP-005, TC-APP-006, TC-APP-007, TC-APP-008, TC-APP-009, TC-APP-010, TC-APP-011, TC-APP-012 and more. Approving them needs a reason, and this one has 0 characters, fewer than 10. Write it in the reason field.",
+   "sent_back": true
+  }
+ ],
+ "started": "2026-11-14T16:54:55.991874",
+ "status": "rejected",
+ "error": "",
+ "total_seconds": 316.0,
+ "summary": {
+  "verdict": "FAIL",
+  "executed": 68,
+  "passed": 0,
+  "failed": 68,
+  "pass_rate": 0.0,
+  "requirements": 26,
+  "requirements_covered": 0,
+  "coverage": 0.0,
+  "gaps": [
+   "REQ-001",
+   "REQ-002",
+   "REQ-003",
+   "REQ-004",
+   "REQ-006",
+   "REQ-007",
+   "REQ-009",
+   "REQ-010",
+   "REQ-011",
+   "REQ-012",
+   "REQ-013",
+   "REQ-014",
+   "REQ-015",
+   "REQ-016",
+   "REQ-017",
+   "REQ-022",
+   "REQ-028"
+  ],
+  "defects": 9,
+  "failure_classes": {
+   "defect": 9,
+   "test problem": 0,
+   "environment": 59
+  }
+ },
+ "requirements": 26
+}

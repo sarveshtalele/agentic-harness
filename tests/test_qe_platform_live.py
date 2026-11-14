@@ -22,7 +22,9 @@ from tests.helpers_api import client, pending, wait_run  # noqa: F401 - fixtures
 pytestmark = pytest.mark.live
 
 REPO = os.environ.get("AQE_LIVE_REPO", "https://github.com/sarveshtalele/personal-finance-mcp.git")
-STAGE_LIMIT = 600  # seconds one gate segment may take before the run counts as stuck; the 180 s goal is reported, not hidden
+REASON = ("Live test approver: approved with the REJECT items still listed after one send-back, to measure the later "
+          "stages end to end. Not a release decision.")
+STAGE_LIMIT = 600 # seconds one gate segment may take before the run counts as stuck; the 180 s goal is reported, not hidden
 
 
 def _evidence_dir() -> Path:
@@ -53,13 +55,19 @@ def test_qe_cycle_to_gate5_on_a_real_repository(client):
                      "design_audit": approval["payload"].get("design_audit")}
             record["gates"].append(entry)
             decided = client.post(f"/api/approvals/{approval['id']}/decide", json={"approved": True})
-            if decided.status_code == 400 and approval["gate"] not in sent_back:
+            if decided.status_code == 400 and approval["gate"] not in sent_back and approval["gate"] < 5:  # sending Gate 5 back ends the run
                 # the engine refuses to approve REJECT items without a reason; as a person would, send the gate back once with it
                 entry["refused"] = decided.json().get("detail")
                 sent_back.add(approval["gate"])
                 decided = client.post(f"/api/approvals/{approval['id']}/decide",
                                       json={"approved": False, "feedback": f"Revise the items the review judged REJECT and fix their flaws. {entry['refused']}"})
                 entry["sent_back"] = True
+            elif decided.status_code == 400:
+                # owner decision 2026-11-14: after one send-back, the test admin approves what is left with a written reason,
+                # so Gates 4 and 5 are measured; the reason is in the gate record and this evidence, never hidden
+                entry["refused"] = decided.json().get("detail")
+                entry["approved_with_reason"] = REASON
+                decided = client.post(f"/api/approvals/{approval['id']}/decide", json={"approved": True, "feedback": REASON})
             assert decided.status_code == 200, decided.text
             mark = time.time()
         run = wait_run(client, run["id"], ("completed", "failed", "rejected"), timeout=STAGE_LIMIT)
