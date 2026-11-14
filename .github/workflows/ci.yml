@@ -22,11 +22,6 @@ jobs:
         run: |
           brew list postgresql@17 >/dev/null 2>&1 || brew install postgresql@17
           echo "PGBIN=$(brew --prefix postgresql@17)/bin" >> "$GITHUB_ENV"
-      - name: bubblewrap for the OS sandbox tests (Ubuntu 24.04 blocks unprivileged user namespaces through AppArmor)
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt-get install -y bubblewrap
-          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
       - run: pytest tests -q -m "not e2e and not live and not smoke"
       - run: npm ci
         working-directory: src/frontend
@@ -60,7 +55,13 @@ jobs:
       - run: python -m playwright install --with-deps chromium
       - run: npm ci
         working-directory: src/frontend
-      - run: python -m pytest tests/e2e/test_smoke.py -v -m smoke
+      - run: python -m pytest tests/e2e -v -m smoke  # smoke tests and the stable build's feature walk (screenshots)
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: feature-walk-${{ matrix.os }}
+          path: docs/evidence/stable-build/
+          if-no-files-found: ignore
       - name: The documented start, end to end (dev.py up starts PostgreSQL, the backend, then the UI)
         run: python scripts/dev.py up
         env:
@@ -68,6 +69,35 @@ jobs:
           ATLAS_NO_BROWSER: "1"
           ATLAS_ADMIN_USERNAME: ci-admin
           ATLAS_ADMIN_PASSWORD: ci-start-check-${{ github.run_id }}
+
+  azure-package:
+    # The cloud build: both Azure zips are built, started through their own startup scripts in the web profile, checked
+    # (API health 200, UI /login 200), and kept as an artifact. Deployment itself stays manual (azure-deploy.yml).
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: python -m pip install --upgrade pip setuptools
+      - run: pip install -r requirements.txt
+      - run: npm ci
+        working-directory: src/frontend
+      - run: python scripts/dev.py azure-local --check
+        env:
+          ATLAS_ADMIN_USERNAME: ci-admin
+          ATLAS_ADMIN_PASSWORD: ci-azure-check-${{ github.run_id }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: azure-zips
+          path: |
+            dist/azure_backend.zip
+            dist/azure_frontend.zip
+          retention-days: 7
 
   evals-install:
     # RAGAS is optional (requirements-evals.txt). This job only shows whether it installs and imports on Windows, and may fail without failing the build.
