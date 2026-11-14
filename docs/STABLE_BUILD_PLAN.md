@@ -98,6 +98,12 @@ One stage end to end before the others, through a small bridge, `src/backend/qe/
 When the pilot passes its tests and a live run, the same bridge carries Plan (G2), Design and Data (G3), Generate (G4) and
 Sign (G5), each with its own plugin skill, scripts and gate check.
 
+Plan (G2), 2026-11-14: each plan area becomes a plugin scenario `SC-<AREA>-001` with its level and requirement ids, and
+skipped levels keep their reasons, in `docs/qe/<app>/03-plan/plan.json`. `check-gate.ts --gate 2` runs on it. Its gaps go
+back to the architect once, for example a missing level or a skipped level whose reason is under 10 characters. The fix is
+kept only when it does not lower the deterministic plan score, and the verdict is shown on the G2 card. Live QE run:
+`tests/test_qe_platform_live.py`, run with `python scripts/dev.py live`.
+
 Limit: greenfield requirements cite approved documents, not code, so the plugin's quote check is recorded as not applied
 for them. Evidence: `tests/test_plugin_bridge.py` (real `check-gate.ts`: a real quote passes, an invented one is flagged)
 and the G1 assertions in `tests/test_api_change.py`.

@@ -76,3 +76,28 @@ def test_check_gate_reports_when_node_is_missing(monkeypatch):
     monkeypatch.setattr(script_runtime, "plan", lambda *a, **k: script_runtime.Plan("typescript", None, "Node.js is not installed here"))
     out = pb.check_gate("p-none", "app", 1)
     assert out["ok"] is False and "Node.js is not installed" in out["error"]
+
+
+def test_plan_file_maps_areas_to_plugin_scenarios():
+    plan = {"strategy": "s", "areas": [{"id": "A1", "name": "Add", "requirement_ids": ["REQ-1"], "risk": "P0", "level": "Unit",
+                                        "framework": "pytest", "rationale": "r"}], "skipped_levels": {"E2E": "No user interface exists"}}
+    out = pb.plan_file(plan)
+    assert out["scenarios"] == [{"id": "SC-A1-001", "area": "Add", "title": "Add", "level": "Unit", "priority": "P0", "requirementIds": ["REQ-1"]}]
+    assert out["skippedLevels"] == [{"level": "E2E", "reason": "No user interface exists"}]
+    assert pb.scenario_id("area 7/x") == "SC-AREA-7-X-001" and pb.scenario_id("--") == "SC-AREA-001"
+
+
+@pytest.mark.skipif(not node_ok, reason="Node 22.6+ is needed to run the plugin's TypeScript")
+def test_gate2_needs_every_level_or_a_real_reason():
+    pid = _project("def add(a, b):\n    return a + b\n")
+    app = pb.app_name(pid)
+    pb.write(pid, app, "02-requirements/requirements.json", pb.requirements_file([_req("REQ-1", "def add(a, b):")]))
+    area = {"id": "A1", "name": "Add", "requirement_ids": ["REQ-1"], "risk": "P1", "level": "Unit", "framework": "pytest", "rationale": "r"}
+    pb.write(pid, app, "03-plan/plan.json", pb.plan_file({"strategy": "s", "areas": [area], "skipped_levels": {"Integration": "No IO", "E2E": "No UI"}}))
+    short = pb.check_gate(pid, app, 2)
+    assert short["ok"] is False and any("no Integration scenarios" in g for g in short["gaps"]), short
+    reasons = {"Integration": "The function has no I/O or collaborators", "E2E": "There is no user interface or entry point"}
+    pb.write(pid, app, "03-plan/plan.json", pb.plan_file({"strategy": "s", "areas": [area], "skipped_levels": reasons}))
+    good = pb.check_gate(pid, app, 2)
+    assert good["ok"] is True and good["gaps"] == [], good
+    shutil.rmtree(project_dir(pid))

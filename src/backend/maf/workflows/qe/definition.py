@@ -35,12 +35,12 @@ async def qe_intake(rc: RunContext, state: dict) -> dict:
     return update
 
 
-def _plugin_line(check: dict | None) -> str:
+def _plugin_line(check: dict | None, gate: int = 1) -> str:
     if not check or check.get("ok") is None:
-        return f"agentic-qe Gate 1 check not applied ({check['error']})." if check else ""
+        return f"agentic-qe Gate {gate} check not applied ({check['error']})." if check else ""
     if check.get("error"):
-        return f"agentic-qe Gate 1 check could not run: {check['error']}."
-    return "agentic-qe Gate 1 check: PASS." if check["ok"] else f"agentic-qe Gate 1 check: FAIL ({'; '.join(check['gaps'][:3])})."
+        return f"agentic-qe Gate {gate} check could not run: {check['error']}."
+    return f"agentic-qe Gate {gate} check: PASS." if check["ok"] else f"agentic-qe Gate {gate} check: FAIL ({'; '.join(check['gaps'][:3])})."
 
 
 def qe_definition() -> Definition:
@@ -49,7 +49,7 @@ def qe_definition() -> Definition:
         StageSpec("intake", qe_intake, "Intake", approval=intake_gate, next="discover"),
         StageSpec("discover", qe_discover, "Discovery", next="requirements"),
         StageSpec("requirements", qe_requirements, "Requirements", approval=_doc_gate(1, "requirements", "requirements_doc", lambda s: f"{len(s['requirements'])} requirements with verified evidence. {_plugin_line(s.get('plugin_check'))}", "requirements_review", lambda rc, s: {"plugin_check": s.get("plugin_check")}), on_rejected="requirements", next="plan"),
-        StageSpec("plan", qe_plan, "Test plan", approval=_doc_gate(2, "test plan", "plan_doc", lambda s: f"Deterministic score {s['plan_score']['score']}, independent review {s['plan_review']['score'] if s['plan_review']['score'] is not None else 'not run'} ({s['plan_review']['verdict']}).", "plan_review"), on_rejected="plan", next="design"),
+        StageSpec("plan", qe_plan, "Test plan", approval=_doc_gate(2, "test plan", "plan_doc", lambda s: f"Deterministic score {s['plan_score']['score']}, independent review {s['plan_review']['score'] if s['plan_review']['score'] is not None else 'not run'} ({s['plan_review']['verdict']}). {_plugin_line(s.get('plan_plugin_check'), 2)}", "plan_review", lambda rc, s: {"plugin_check": s.get("plan_plugin_check")}), on_rejected="plan", next="design"),
         StageSpec("design", qe_design, "Test design", next="data"),
         StageSpec("data", qe_data, "Test data", approval=_doc_gate(3, "test design and data", "cases_doc", lambda s: f"{len(s['cases'])} cases. {s['case_limit']['message']}. Remaining gaps: {s['design_gaps'] or 'none'}.", "cases_review", _gate3_extras), on_rejected="design", next="generate"),
         StageSpec("generate", qe_generate, "Generate tests", approval=_doc_gate(4, "generated tests", "test_doc", lambda s: f"{len(s['tests'])} of {len(s['cases'])} cases have tests, on branch {s['branch']}. Approving also allows them to run on this machine.", "tests_review", _gate4_extras), on_approved=qe_commit, on_rejected="generate", next="prepare"),

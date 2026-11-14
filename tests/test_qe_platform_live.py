@@ -1,0 +1,66 @@
+"""Live: the platform's QE Cycle (Gates 0 to 5) on a real repository with the real model, through the API.
+
+    python scripts/dev.py live tests/test_qe_platform_live.py
+
+AQE_LIVE_REPO picks the repository (default: personal-finance-mcp on GitHub). The test signs in as the test admin, who
+approves each gate as the named person; every gate's summary, the agentic-qe plugin's verdicts and the seconds per gate
+go to docs/evidence/runs/<date>-qe-platform-<repo>-<model>/summary.json, written before any assertion can fail.
+"""
+from __future__ import annotations
+
+import datetime as dt
+import json
+import os
+import re
+import time
+from pathlib import Path
+
+import pytest
+
+from tests.helpers_api import client, pending, wait_run  # noqa: F401 - fixtures
+
+pytestmark = pytest.mark.live
+
+REPO = os.environ.get("AQE_LIVE_REPO", "https://github.com/sarveshtalele/personal-finance-mcp.git")
+STAGE_LIMIT = 600  # seconds one gate segment may take before the run counts as stuck; the 180 s goal is reported, not hidden
+
+
+def _evidence_dir() -> Path:
+    name = re.sub(r"[^a-z0-9-]+", "-", f"{Path(REPO).stem}-{os.environ.get('DEFAULT_MODEL', 'model')}".lower()).strip("-")
+    folder = Path(__file__).resolve().parent.parent / "docs" / "evidence" / "runs" / f"{dt.datetime.now():%Y-%m-%d-%H%M}-qe-platform-{name}"
+    folder.mkdir(parents=True, exist_ok=True)
+    return folder
+
+
+def test_qe_cycle_to_gate5_on_a_real_repository(client):
+    project = client.post("/api/projects", json={"name": Path(REPO).stem, "description": "live QE cycle"}).json()
+    connected = client.post(f"/api/projects/{project['id']}/repo/git", json={"url": REPO})
+    assert connected.status_code == 200, connected.text
+    started = time.time()
+    run = client.post(f"/api/projects/{project['id']}/runs", json={"workflow": "qe"}).json()
+    record = {"repo": REPO, "model": os.environ.get("DEFAULT_MODEL"), "run_id": run["id"], "gates": [], "started": dt.datetime.now().isoformat()}
+    folder = _evidence_dir()
+    try:
+        mark = time.time()
+        for _ in range(6):
+            run = wait_run(client, run["id"], timeout=STAGE_LIMIT)
+            if run["status"] != "waiting_approval":
+                break
+            approval = pending(run)
+            record["gates"].append({"gate": approval["gate"], "seconds": round(time.time() - mark, 1), "title": approval["title"],
+                                    "summary": approval["summary"], "plugin_check": approval["payload"].get("plugin_check")})
+            decided = client.post(f"/api/approvals/{approval['id']}/decide", json={"approved": True})
+            assert decided.status_code == 200, decided.text
+            mark = time.time()
+        run = wait_run(client, run["id"], ("completed", "failed", "rejected"), timeout=STAGE_LIMIT)
+    finally:
+        record |= {"status": run.get("status"), "error": run.get("error"), "total_seconds": round(time.time() - started, 1),
+                   "summary": (run.get("state") or {}).get("summary"),
+                   "requirements": len((run.get("state") or {}).get("requirements") or [])}
+        (folder / "summary.json").write_text(json.dumps(record, indent=1, default=str), encoding="utf-8")
+        print(f"\nevidence: {folder / 'summary.json'}", flush=True)
+        for g in record["gates"]:
+            print(f"G{g['gate']} after {g['seconds']} s: {g['summary'][:300]}", flush=True)
+    assert run["status"] == "completed", run.get("error")
+    assert [g["gate"] for g in record["gates"]] == [0, 1, 2, 3, 4, 5]
+    assert record["gates"][1]["plugin_check"]["error"] is None, record["gates"][1]["plugin_check"]

@@ -58,6 +58,20 @@ def requirements_file(kept: list[dict]) -> dict:
     } for r in kept]}
 
 
+def scenario_id(area_id: str, n: int = 1) -> str:
+    """The plugin's plan scenario id for a platform plan area: SC-<AREA>-NNN."""
+    key = "-".join(re.findall(r"[A-Z0-9]+", area_id.upper())) or "AREA"
+    return f"SC-{key}-{n:03d}"
+
+
+def plan_file(plan: dict) -> dict:
+    """The platform's plan in the plugin's plan.json shape: one scenario per area, skipped levels with their reasons."""
+    return {"strategy": plan.get("strategy", ""),
+            "scenarios": [{"id": scenario_id(a["id"]), "area": a["name"], "title": a["name"], "level": a["level"],
+                           "priority": a["risk"], "requirementIds": a["requirement_ids"]} for a in plan["areas"]],
+            "skippedLevels": [{"level": k, "reason": v} for k, v in plan.get("skipped_levels", {}).items()]}
+
+
 def check_gate(project_id: str, app: str, gate: int) -> dict:
     """Run the plugin's check-gate.ts. Returns {ok, gaps, missing, validator, error}; ok is False whenever it cannot run."""
     planned = script_runtime.plan(CHECK_GATE, CHECK_GATE.parent.parent)
