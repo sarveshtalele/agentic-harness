@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Awaitable, Callable
+from typing import Any, Awaitable, Callable
 
 from backend.maf.engine.run_context import RunContext
 
@@ -29,6 +29,7 @@ class StageSpec:
     on_approved: Callable[["RunContext", dict, dict], Awaitable[dict]] | None = None
     on_rejected: str | None = None  # stage to loop back to with reviewer feedback; None ends the run
     next: str | None = None
+    guard: Any = None  # carry-forward hook (before, after, record, approved, summary); None leaves the stage unguarded
     forward: bool = False  # sends to fan-out edges instead of naming a single next stage
 
 

@@ -93,6 +93,13 @@ class ExecutionError(AqeError):
     action = "Tick install dependencies for this run, or fix the environment, then retry the stage."
 
 
+class TraceError(AqeError):
+    """The carry-forward hook found an item changed, dropped without a reason, or invented between two stages."""
+
+    code = "AQE-TRACE-001"
+    action = "Fix the items the message names (or send the earlier gate back), then retry the stage."
+
+
 class InternalError(AqeError):
     pass
 

@@ -9,6 +9,7 @@ from backend.core import documents
 from backend.core.errors import AllowanceError
 from backend.maf.engine import RunContext
 from backend.maf.workflows.shared import review_evidence, token_estimate, token_line
+from backend.qe import carry
 from backend.repos import git
 
 DESIGN_BATCH = 4
@@ -68,11 +69,15 @@ def _doc_gate(gate: int, label: str, doc_key: str, summary: Callable[[dict], str
             payload["confidence"] = review
         if extras:
             payload |= extras(rc, state)
+        trace_line = ""
         payload["tokens"] = tokens = token_line(rc.run_id)
+        if last := (state.get("trace") or {}).get("last"):
+            payload["trace"] = last
+            trace_line = " " + carry.summary(last)
         if state.get("partial"):
             payload["partial"] = state["partial"]
-            return {"gate": gate, "title": f"Gate {gate} (PARTIAL): {label}", "summary": f"PARTIAL RESULT, not complete. Missing: {', '.join(state['partial']['missing'])}. {summary(state)} {tokens['text']}", "payload": payload}
-        return {"gate": gate, "title": f"Gate {gate}: approve {label}", "summary": f"{summary(state)} {tokens['text']}", "payload": payload}
+            return {"gate": gate, "title": f"Gate {gate} (PARTIAL): {label}", "summary": f"PARTIAL RESULT, not complete. Missing: {', '.join(state['partial']['missing'])}. {summary(state)}{trace_line} {tokens['text']}", "payload": payload}
+        return {"gate": gate, "title": f"Gate {gate}: approve {label}", "summary": f"{summary(state)}{trace_line} {tokens['text']}", "payload": payload}
 
     return build
 

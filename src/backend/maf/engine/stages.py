@@ -7,6 +7,7 @@ import logging
 from agent_framework import Executor, Workflow, WorkflowBuilder, WorkflowContext, handler, response_handler
 
 from backend.core import tracing
+from backend.core.errors import TraceError
 from backend.db import db
 from backend.maf import runtime as agent_module
 from backend.maf.engine.failures import _safely
@@ -45,10 +46,31 @@ class Stage(Executor):
         with tracing.span(f"stage {self.spec.id}", stage=self.spec.id, label=self.spec.label, run_id=self.run_id, project_id=self.project_id):
             await self._run(state, ctx)
 
+    async def _guarded(self, rc: RunContext, state: dict) -> dict:
+        """The stage function, wrapped by the optional carry-forward hook: check inputs, run, check outputs, rerun once with the violations."""
+        guard, stage = self.spec.guard, self.spec.id
+        if not guard:
+            return await self.spec.fn(rc, state)
+        if bad := guard.before(stage, state):
+            guard.record(self.project_id, stage, {"stage": stage, "verdict": "BLOCKED", "phase": "before", "violations": bad}, state)
+            raise TraceError(f"Inputs of {stage} changed since they were approved: " + " ".join(bad))
+        update = await self.spec.fn(rc, state) or {}
+        bad, report = guard.after(stage, state, {**state, **update})
+        if bad:
+            rc.log(f"Carry-forward check blocked {stage}; running it once more with the violations", {"violations": bad}, "warning")
+            notes = "\n".join(["The previous attempt broke carry-forward rules. Fix every one and keep all other items exactly as given:", *bad])
+            update = await self.spec.fn(rc, {**state, "feedback": f"{state['feedback']}\n{notes}" if state.get("feedback") else notes}) or {}
+            bad, report = guard.after(stage, state, {**state, **update})
+        guard.record(self.project_id, stage, report | {"violations": bad}, {**state, **update})
+        rc.log(guard.summary(report), report, "trace")
+        if bad:
+            raise TraceError(f"{stage} did not carry the earlier items forward: " + " ".join(bad))
+        return {**update, "trace": {**(state.get("trace") or {}), "last": report}}
+
     async def _run(self, state: dict, ctx: WorkflowContext[dict, str]) -> None:
         rc = self._ctx()
         rc.log(f"Started {self.spec.label or self.spec.id}", kind="stage_start")
-        state = {**state, **(await _safely(rc, self.spec.fn(rc, state)) or {})}
+        state = {**state, **(await _safely(rc, self._guarded(rc, state)) or {})}
         if not state.get("partial"):  # a partial result keeps its batches for the rework that follows
             rc.clear_parts()
         state.pop("_to", None)
@@ -77,6 +99,8 @@ class Stage(Executor):
             if self.spec.on_approved:
                 state = {**state, **(await _safely(rc, self.spec.on_approved(rc, state, answer)) or {})}
             state.pop("feedback", None)
+            if self.spec.guard:
+                state["trace"] = {**(state.get("trace") or {}), "approved": self.spec.guard.approved(self.project_id, self.spec.id, state)}
             await self._advance(state, ctx)
             return
         rc.log(f"Rejected by {answer['by']}: {answer.get('feedback', '')}", kind="rejected")

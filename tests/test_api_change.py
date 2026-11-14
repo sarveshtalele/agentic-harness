@@ -67,10 +67,13 @@ def test_qe_lifecycle_all_six_gates_with_real_execution(client, project):
             check = approval["payload"]["plugin_check"]
             assert check["error"] is None and check["ok"] is True and check["dropped"] == [], check
             assert "agentic-qe Gate 1 check: PASS." in approval["summary"]
+            assert approval["payload"]["trace"]["stage"] == "requirements" and "Trace:" in approval["summary"]
         if approval["gate"] == 2:  # the scripted plan skips two levels with 5-character reasons: the plugin's check says so
             check = approval["payload"]["plugin_check"]
             assert check["ok"] is False and any("no Integration scenarios and no written reason" in g for g in check["gaps"]), check
             assert "agentic-qe Gate 2 check: FAIL" in approval["summary"]
+            trace = approval["payload"]["trace"]
+            assert (trace["stage"], trace["upstream"], trace["carried"], trace["changed"], trace["new"], trace["verdict"]) == ("plan", 1, 1, 0, 1, "PASS"), trace
         if approval["gate"] == 3:  # cases, the reviewer's records and the auditor's verdicts are in the plugin's files; only G2's short reasons remain
             check, audit = approval["payload"]["plugin_check"], approval["payload"]["design_audit"]
             assert check["error"] is None and audit["counts"]["COVERS"] == 4 and audit["unaudited"] == [], (check, audit)
@@ -90,3 +93,22 @@ def test_qe_lifecycle_all_six_gates_with_real_execution(client, project):
     assert table.startswith("TC ID,User Story ID,Scenario,Type,Precondition,Test Data,Steps,Expected Result,Priority,Automation Candidate,Remarks") and "TC-APP-004" in table
     assert client.get(f"/api/documents/{docs[0]['id']}/export/jira").text.startswith("Summary,Issue Type,Description,Priority,Labels,Parent/Story ID")
     assert client.get(f"/api/runs/{run['id']}/changes.zip").status_code == 200
+
+
+def test_qe_plan_naming_an_invented_requirement_fails_with_the_id(client, project):
+    upload_repo(client, project, {"calc.py": "def add(a, b):\n    return a + b\n", "conftest.py": ""})
+    invented = PLAN.replace('"REQ-001"]', '"REQ-001", "REQ-099"]')
+    assert invented != PLAN
+    llm.set_client_override(ScriptedClient([
+        ("You are a repository intelligence analyst", "## Purpose\nCalculator"),
+        ("You are a requirements analyst", REQUIREMENTS),
+        ("You are a principal test architect", invented),
+        *case_rules(), ("You are an independent reviewer", '{"score": 95, "verdict": "APPROVED", "issues": []}'),
+    ]))
+    run = client.post(f"/api/projects/{project['id']}/runs", json={"workflow": "qe"}).json()
+    for _ in range(2):  # Gate 0 and Gate 1
+        run = wait_run(client, run["id"])
+        assert run["status"] == "waiting_approval", run["error"]
+        assert client.post(f"/api/approvals/{pending(run)['id']}/decide", json={"approved": True}).status_code == 200
+    run = wait_run(client, run["id"], ("failed", "waiting_approval"))
+    assert run["status"] == "failed" and "REQ-099" in run["error"], run["error"]

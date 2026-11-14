@@ -1219,6 +1219,14 @@ In accordance with the repository documentation policy (**1 Single Doc for Each 
 - **Traceability view:** the QE cycle page shows requirement -> plan scenario -> designed case -> test file -> result, gaps first, with each gate's check (PASS or FAIL) and the run's evidence files (`api/qe_trace.py`). It reads what the agentic-qe plugin writes in the project's workspace: `docs/qe/<app>/coverage-map.json`, built by the plugin's code from the files on disk, and `02-requirements/requirements.json` for each requirement's quoted source line. Files open read-only from inside the workspace and are never served as HTML. Routes need the QE cycle feature.
 - **Plugin contracts as tools (section 8):** `describe_contract(path)` returns the fields a plugin-owned file must have, read from the enabled plugins' `normalizeX` functions and the skill passages that name the file; `check_gate(gate, app)` runs the plugin's own `check-gate` script (`harness_kit/plugin_contract.py`). Found on the live run of 2026-11-12, where requirements written with an unread field failed Gate 1 three times.
 
+## 23. Carry-forward hook (QE v2 step 0, 2026-11-14)
+
+`StageSpec.guard` is an optional hook; the QE stages set it to `backend/qe/carry.py` (the BA, brainstorm and change flows leave it empty). Pure code, no model.
+- **Fingerprints:** SHA-256 of canonical JSON of fixed fields per item (requirement, plan scenario, case, test). `snapshot(state)` gives `{kind: {id: hash}}`.
+- **Before a stage** (`Stage._guarded`): items the stage only reads must equal `state["trace"]["approved"]`, the snapshot taken at the last approved gate (also written to `docs/qe/<app>/trace/<stage>.json` and the ledger). A difference raises `TraceError` (AQE-TRACE-001) naming the item.
+- **After a stage:** carried exactly (upstream hashes unchanged), complete (every upstream id covered, or excused by the stage's own reason fields: case budget, partial result, `tests_missing`), no invention (references only existing ids). A violation reruns the stage once with the list in `state["feedback"]`; a second violation fails the stage.
+- Each check goes to the ledger (`trace.check`, with counts and per-kind hashes). The report is `state["trace"]["last"]`, shown in every QE gate card payload (`trace`) and as one summary sentence.
+
 ## QE Cycle on the agentic-qe plugin
 
 The platform's QE workflow (`maf/workflows/qe/`) keeps the frame: stages, gates G0 to G5 signed by a named person,
