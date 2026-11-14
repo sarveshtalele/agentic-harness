@@ -84,7 +84,7 @@ def limit_cases(cases: list[dict], requirements: list[dict], limit: int) -> tupl
 FULL_QUOTA = 4  # P0 and P1: 1 Positive, 2 Negative, and 1 Exception when the requirement states error behaviour, else a third Negative
 
 
-def case_quota(requirements: list[dict], limit: int) -> dict:
+def case_quota(requirements: list[dict], limit: int, planned_ids: set[str] | frozenset = frozenset()) -> dict:
     """The case budget, decided before any design call. Returns `quota` (requirement id to "at most N cases"), the requirements left out, and the message for the gate.
 
     P0 and P1 get 4 each and are designed even when that passes the limit. The remaining budget goes to the others: 2 each, else 1 each, else 1 for the first ones that fit.
@@ -95,6 +95,8 @@ def case_quota(requirements: list[dict], limit: int) -> dict:
     room = max(limit - FULL_QUOTA * len(high), 0)
     each = 2 if room >= 2 * len(low) else 1
     quota |= {i: each for i in low[:room // each]}
+    # a requirement the plan gives a scenario gets at least one case: a planned scenario with no case fails the plugin's Gate 3
+    quota |= {i: 1 for i in low if i not in quota and i in planned_ids}
     left = [i for i in low if i not in quota]
     planned = sum(quota.values())
     over = FULL_QUOTA * len(high) > limit

@@ -61,8 +61,8 @@ def test_a_cut_keeps_the_plugins_required_kinds_first():
 # the workflow
 
 
-def requirement_rules(items):
-    ids = [r["id"] for r in items]
+def requirement_rules(items, planned=None):
+    ids = planned or [r["id"] for r in items]
     plan = {"strategy": "Unit first", "areas": [{"id": "A1", "name": "Add", "requirement_ids": ids, "risk": "P1", "level": "Unit", "framework": "pytest", "rationale": "Pure logic"}], "skipped_levels": {"Integration": "No IO", "E2E": "No UI"}}
     return [("You are a requirements analyst", json.dumps({"requirements": items})), ("You are a principal test architect", json.dumps(plan))]
 
@@ -92,7 +92,7 @@ def test_the_prompt_carries_the_quota_and_an_excess_case_is_dropped_before_revie
 def test_low_priority_requirements_with_no_budget_are_named_before_any_design_call(client, project, monkeypatch):
     monkeypatch.setattr(qe, "MAX_CASES", 9)
     prompts = []
-    run, _ = go_to_gate(client, project, 3, base_rules(designer=designer(4, prompts), extra=requirement_rules(reqs("P1", "P1", "P2", "P2"))))
+    run, _ = go_to_gate(client, project, 3, base_rules(designer=designer(4, prompts), extra=requirement_rules(reqs("P1", "P1", "P2", "P2"), planned=["REQ-001", "REQ-002", "REQ-003"])))
     assert prompts and not any("REQ-004" in p.rsplit("REQUIREMENTS:", 1)[-1].split("PLAN:")[0] for p in prompts), "no tokens were spent on the requirement that was left out"
     limit = pending(run)["payload"]["case_limit"]
     assert limit["left_out_requirements"] == ["REQ-004"] and limit["quota"]["REQ-003"] == 1 and "REQ-004" in limit["requirements_without_cases"]
@@ -161,3 +161,11 @@ def test_each_design_review_batch_sees_only_its_own_requirements(client, project
     assert "REQ-001" not in last and "REQ-004" not in last
     first = next(text for text in evidence.values() if "REQ-001" in text)
     assert "REQ-005" not in first
+
+
+
+def test_a_planned_low_priority_requirement_still_gets_one_case():
+    rs = [{"id": f"R{i}", "priority": "P0"} for i in range(10)] + [{"id": "LOW", "priority": "P2"}]
+    assert "LOW" not in model.case_quota(rs, 40)["quota"]
+    planned = model.case_quota(rs, 40, {"LOW"})
+    assert planned["quota"]["LOW"] == 1 and planned["left_out_requirements"] == []

@@ -139,6 +139,16 @@ intake G0 (documents, target repo) -> read documents (RAG) -> requirements G1 ->
 - **Cost:** the table in `docs/AZURE_DEPLOYMENT_GUIDE.md` is updated. The target is unchanged, under $25 a month.
 - **Load:** one greenfield run at a time, which the backend enforces.
 
+## 8a. Fixes from the live run of 2026-11-14 18:59
+
+| Finding | Fix |
+|---|---|
+| After a Gate 4 send-back, the first attempt's files stayed in the worktree: 132 tests ran for 80 cases, and the old ones failed with `KeyError` on fixtures that no longer existed | Generate removes this run's uncommitted files under `tests/agentic_qe/` before it regenerates (`git.untracked`) |
+| The two reviewers disagreed: the confidence reviewer judged 1 of 80 cases REJECT, while the auditor said 27 PARTIAL or MISSES | A case the auditor says MISSES is redesigned once from the auditor's reason, then reviewed and audited again. If it still misses, its record becomes REJECT, so approving it needs a person's reason |
+| The case budget gave no case to planned lower-priority requirements, so their plan scenarios had none and the plugin's Gate 3 check failed | Every requirement the plan lists gets at least one case |
+| The execution agent said 8 tests when the report had 132 (refused by code) | Brownfield execution is removed in step 2; greenfield keeps the code check |
+| Generated files failed at collection (`ImportError`) and were classed as environment | Step 1's collect check (V3) refuses them before Gate 4 |
+
 ## 9. Order, models and evidence
 
 Each step: Sonnet implements, Opus reviews against the brief, Sonnet fixes, then the full suite and CI must be green before

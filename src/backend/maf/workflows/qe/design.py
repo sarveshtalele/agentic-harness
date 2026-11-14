@@ -17,7 +17,8 @@ from backend.maf.workflows.qe.common import (
     settle,
 )
 from backend.maf.workflows.shared import review_cases, review_with_send_back
-from backend.qe import confidence, model, plugin_bridge
+from backend.maf.workflows.qe.design_audit import plugin_design as _plugin_design
+from backend.qe import confidence, model
 
 
 async def qe_design(rc: RunContext, state: dict) -> dict:
@@ -27,7 +28,7 @@ async def qe_design(rc: RunContext, state: dict) -> dict:
     feedback = f"\nFEEDBACK:\n{state['feedback']}" if state.get("feedback") else ""
     root = repo_dir(rc.project_id)
     source = root if root.exists() else None
-    budget = model.case_quota(state["requirements"], effective_max_cases)
+    budget = model.case_quota(state["requirements"], effective_max_cases, {r for a in state["plan"]["areas"] for r in a["requirement_ids"]})
     quota = budget["quota"]
     dropped: list[dict] = []
     rc.log(budget["message"], budget, "warning" if budget["left_out_requirements"] or budget["p0_over_limit"] else "log")
@@ -119,6 +120,7 @@ async def qe_design(rc: RunContext, state: dict) -> dict:
     case_limit["notice"] = bool(case_limit["left_out_count"] or budget["left_out_requirements"] or budget["p0_over_limit"])
     if case_limit["notice"]:
         rc.log(case_limit["message"], case_limit, "warning")
+    design_audit = await _plugin_design(rc, state, cases, records, source)  # may redesign cases the auditor says MISS, so before the roll-up
     cases_review = confidence.summarise([records[c["id"]] for c in cases], tokens)
     rc.log(f"Design review: {cases_review['counts']}, {tokens['total']} tokens", {"tokens": tokens}, "review")
     columns = "| TC ID | Requirement | Scenario | Type | Level | Precondition | Test Data | Steps | Expected Result | Oracle | Priority |\n|---|---|---|---|---|---|---|---|---|---|---|\n"
@@ -129,45 +131,5 @@ async def qe_design(rc: RunContext, state: dict) -> dict:
         body = f"> PARTIAL RESULT. No cases yet for: {', '.join(partial['missing'])}\n\n" + body
     doc = documents.create(rc.project_id, "test_cases", f"Deterministic Test Cases & Scenario Matrix (PARTIAL, {len(partial['missing'])} requirements missing)" if partial else "Deterministic Test Cases & Scenario Matrix", body, "agent:test-design-architect", data=cases, prompt_ref=call.prompt_ref, run_id=rc.run_id)
     rc.log(f"{len(cases)} cases designed; {len(gaps)} remaining gaps", {"gaps": gaps}, "artifact")
-    design_audit = await _plugin_design(rc, state, cases, records)
     return {"cases": cases, "cases_doc": doc["id"], "design_gaps": gaps, "case_limit": case_limit, "cases_review": cases_review, "partial": partial,
             "design_audit": design_audit}
-
-
-AUDIT_BATCH = 10
-
-
-async def _plugin_design(rc: RunContext, state: dict, cases: list[dict], records: dict[str, dict]) -> dict:
-    """The plugin's Gate 3 inputs: test_cases.json, the confidence reviewer's records, and the coverage auditor's verdicts."""
-    if state["mode"] != "brownfield" or not cases:
-        return {"ok": None, "error": "greenfield or no cases: the plugin's design files are not written"}
-    app = plugin_bridge.app_name(rc.project_id)
-    links = plugin_bridge.cases_file(cases, state["plan"])
-    plugin_bridge.write(rc.project_id, app, "04-design/test_cases.json", links)
-    reviewed = [records[c["id"]] for c in cases if c["id"] in records and records[c["id"]].get("verdict") != "NOT RUN"]
-    plugin_bridge.write(rc.project_id, app, "04-design/confidence.json", plugin_bridge.recorded("confidence-reviewer", f"{rc.run_id}:design", "design", "items", reviewed))
-    scenarios = json.dumps(plugin_bridge.plan_file(state["plan"])["scenarios"])
-
-    async def audit(batch: list[dict]) -> list[dict]:
-        call = AgentCall(rc.run_id, rc.project_id, "coverage-auditor")
-        given = [x for x in links["cases"] if x["tc_id"] in {c["id"] for c in batch}]
-        reply = await call.typed(f"Audit these designed cases.\nPLAN SCENARIOS:\n{scenarios}\n\nCASES:\n{json.dumps(given)}\n\nREQUIREMENTS AND EVIDENCE:\n{_design_evidence(rc, state['requirements'], batch)[:30_000]}", model.AuditSet, attempts=2)
-        ids = {x["tc_id"] for x in given}
-        return [v.model_dump() for v in reply.verdicts if v.id in ids]  # an id it was not given is not a verdict
-
-    batches = [cases[i : i + AUDIT_BATCH] for i in range(0, len(cases), AUDIT_BATCH)]
-    outcomes = await asyncio.gather(*(audit(b) for b in batches), return_exceptions=True)
-    verdicts: dict[str, dict] = {}
-    for batch, outcome in zip(batches, outcomes):
-        if isinstance(outcome, AllowanceError) or (isinstance(outcome, BaseException) and not isinstance(outcome, Exception)):
-            raise outcome
-        if isinstance(outcome, Exception):
-            rc.log(f"Coverage audit did not run for {len(batch)} cases: {str(outcome)[:200]}", {"cases": [c["id"] for c in batch]}, "warning")
-            continue
-        for v in outcome:
-            verdicts.setdefault(v["id"], v)
-    plugin_bridge.write(rc.project_id, app, "04-design/audit.json", plugin_bridge.recorded("coverage-auditor", f"{rc.run_id}:design", "design", "verdicts", list(verdicts.values())))
-    counts = {k: sum(v["verdict"] == k for v in verdicts.values()) for k in ("COVERS", "PARTIAL", "MISSES")}
-    result = {"app": app, "reviewed": len(reviewed), "audited": len(verdicts), "counts": counts, "unaudited": [c["id"] for c in cases if c["id"] not in verdicts]}
-    rc.log(f"Coverage audit: {counts}; {len(result['unaudited'])} cases not audited", result, "review")
-    return result

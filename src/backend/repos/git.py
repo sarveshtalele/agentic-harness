@@ -109,5 +109,11 @@ def log(repo: Path, limit: int = 15) -> list[dict]:
     return [dict(zip(("sha", "author", "date", "subject"), line.split("\x1f"))) for line in out.splitlines() if "\x1f" in line]
 
 
+def untracked(worktree: Path, folder: str) -> list[Path]:
+    """Files under `folder` that git does not track: what a run wrote and never committed."""
+    out = run(["git", "ls-files", "--others", "--exclude-standard", "-z", "--", folder], cwd=worktree)
+    return [worktree / name for name in out.split("\0") if name]
+
+
 def push(worktree: Path, branch: str, token: str) -> None:
     run(["push", "-u", "origin", f"HEAD:refs/heads/{branch}"], cwd=worktree, token=token, timeout=300)

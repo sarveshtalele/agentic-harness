@@ -61,12 +61,15 @@ def rules(grade=None, seen=None):
     return [(f"Review type: {label}.", reviewer(grade, seen)) for label in KINDS] + [("Audit these designed cases.", auditor())]
 
 
-def auditor(verdict: str = "COVERS"):
-    """A reply function for the coverage auditor: one verdict for every case it was given."""
+def auditor(verdict="COVERS"):
+    """A reply function for the coverage auditor: one verdict for every case it was given. `verdict` may be a function of (case id, call number)."""
+    calls = []
 
     def reply(text: str) -> str:
         given = json.loads(text.split("CASES:\n", 1)[1].split("\n\nREQUIREMENTS AND EVIDENCE:")[0])
-        return json.dumps({"kind": "design", "verdicts": [{"id": c["tc_id"], "verdict": verdict, "scenario": (c["planScenarioIds"] or [""])[0],
+        calls.append(1)
+        pick = (lambda i: verdict(i, len(calls))) if callable(verdict) else (lambda i: verdict)
+        return json.dumps({"kind": "design", "verdicts": [{"id": c["tc_id"], "verdict": pick(c["tc_id"]), "scenario": (c["planScenarioIds"] or [""])[0],
                                                            "reason": "The expected result checks the behaviour at calc.py:2"} for c in given]})
 
     return reply

@@ -112,3 +112,39 @@ def test_qe_plan_naming_an_invented_requirement_fails_with_the_id(client, projec
         assert client.post(f"/api/approvals/{pending(run)['id']}/decide", json={"approved": True}).status_code == 200
     run = wait_run(client, run["id"], ("failed", "waiting_approval"))
     assert run["status"] == "failed" and "REQ-099" in run["error"], run["error"]
+
+
+
+def _to_gate3(client, project, verdict):
+    from tests.reviewing import auditor
+    upload_repo(client, project, {"calc.py": "def add(a, b):\n    return a + b\n", "conftest.py": ""})
+    llm.set_client_override(ScriptedClient([
+        ("You are a repository intelligence analyst", "## Purpose\nCalculator"),
+        ("You are a requirements analyst", REQUIREMENTS),
+        ("You are a principal test architect", PLAN),
+        ("Audit these designed cases.", auditor(verdict)),
+        *case_rules(), ("You are an independent reviewer", '{"score": 95, "verdict": "APPROVED", "issues": []}'),
+        ("You are a test design architect", CASES),
+    ]))
+    run = client.post(f"/api/projects/{project['id']}/runs", json={"workflow": "qe"}).json()
+    for _ in range(4):
+        run = wait_run(client, run["id"])
+        assert run["status"] == "waiting_approval", run["error"]
+        approval = pending(run)
+        if approval["gate"] == 3:
+            return approval
+        assert client.post(f"/api/approvals/{approval['id']}/decide", json={"approved": True}).status_code == 200
+    raise AssertionError("no Gate 3")
+
+
+def test_a_case_the_auditor_says_misses_is_redesigned_once(client, project):
+    approval = _to_gate3(client, project, lambda i, n: "MISSES" if (i == "TC-APP-001" and n == 1) else "COVERS")
+    audit = approval["payload"]["design_audit"]
+    assert audit["first_audit"]["MISSES"] == 1 and audit["redesigned"] == 1 and audit["counts"]["MISSES"] == 0, audit
+
+
+def test_a_case_that_still_misses_is_a_reject_a_person_must_answer(client, project):
+    approval = _to_gate3(client, project, lambda i, n: "MISSES" if i == "TC-APP-001" else "COVERS")
+    assert approval["payload"]["design_audit"]["counts"]["MISSES"] == 1
+    refused = client.post(f"/api/approvals/{approval['id']}/decide", json={"approved": True})
+    assert refused.status_code == 400 and "TC-APP-001" in refused.text, refused.text

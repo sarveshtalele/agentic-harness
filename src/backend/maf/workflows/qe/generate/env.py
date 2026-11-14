@@ -48,7 +48,11 @@ async def prepare_worktree(rc: RunContext, state: dict) -> dict:
         rc.log(f"[SANDBOX_WORKTREE] Created isolated git worktree at {worktree} on branch {branch}")
     else:
         worktree = Path(state["worktree"])
-        rc.log(f"[SANDBOX_WORKTREE] Reusing verified git worktree at {worktree}")
+        # a send-back regenerates the suite: this run's earlier, uncommitted files would otherwise run beside the new ones
+        stale = await asyncio.to_thread(git.untracked, worktree, "tests/agentic_qe")
+        for path in stale:
+            path.unlink(missing_ok=True)
+        rc.log(f"[SANDBOX_WORKTREE] Reusing verified git worktree at {worktree}; removed {len(stale)} uncommitted files of the earlier attempt")
     return state
 
 
