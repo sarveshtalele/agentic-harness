@@ -39,7 +39,7 @@ def test_qe_cycle_to_gate5_on_a_real_repository(client):
     connected = client.post(f"/api/projects/{project['id']}/repo/git", json={"url": REPO})
     assert connected.status_code == 200, connected.text
     started = time.time()
-    run = client.post(f"/api/projects/{project['id']}/runs", json={"workflow": "qe"}).json()
+    run = client.post(f"/api/projects/{project['id']}/runs", json={"workflow": "qe", "input": {"install_deps": True}}).json()  # the owner's opt-in to run the repo's installers
     record = {"repo": REPO, "model": os.environ.get("DEFAULT_MODEL"), "run_id": run["id"], "gates": [], "started": dt.datetime.now().isoformat()}
     folder = _evidence_dir()
     try:
@@ -52,7 +52,8 @@ def test_qe_cycle_to_gate5_on_a_real_repository(client):
             approval = pending(run)
             entry = {"gate": approval["gate"], "seconds": round(time.time() - mark, 1), "title": approval["title"],
                      "summary": approval["summary"], "plugin_check": approval["payload"].get("plugin_check"),
-                     "design_audit": approval["payload"].get("design_audit")}
+                     "design_audit": approval["payload"].get("design_audit"),
+                     **({k: approval["payload"].get(k) for k in ("defect_records", "execution_summary", "failure_classes")} if approval["gate"] == 5 else {})}
             record["gates"].append(entry)
             decided = client.post(f"/api/approvals/{approval['id']}/decide", json={"approved": True})
             if decided.status_code == 400 and approval["gate"] not in sent_back and approval["gate"] < 5:  # sending Gate 5 back ends the run

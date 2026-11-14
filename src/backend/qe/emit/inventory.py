@@ -58,3 +58,11 @@ def declared_dependencies(worktree: Path) -> set[str]:
         take(spec)
     found |= {_normal(k) for k in data.get("tool", {}).get("poetry", {}).get("dependencies", {})}
     return found
+
+
+def missing_dependencies(worktree: Path, found: dict | None) -> list[str]:
+    """Declared distributions the sandbox Python does not have; empty when its inventory could not be read."""
+    if not found:
+        return []
+    have = {_normal(n) for n in found["versions"]}
+    return sorted(d for d in declared_dependencies(worktree) if d not in have)

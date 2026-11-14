@@ -1,0 +1,711 @@
+{
+ "repo": "https://github.com/sarveshtalele/personal-finance-mcp.git",
+ "model": "deepseek-v4-flash-global",
+ "run_id": "run_c5eaf6f65223",
+ "gates": [
+  {
+   "gate": 0,
+   "seconds": 0.0,
+   "title": "Gate 0: confirm intake scope",
+   "summary": "Mode: brownfield. Source: git https://github.com/sarveshtalele/personal-finance-mcp.git at aff44ea06f. Files: 88. Languages: Python, JavaScript, CSS. Agents read this project's repository and documents only. Generated code lands on a separate branch.",
+   "plugin_check": null,
+   "design_audit": null
+  },
+  {
+   "gate": 1,
+   "seconds": 38.8,
+   "title": "Gate 1: approve requirements",
+   "summary": "20 requirements with verified evidence. agentic-qe Gate 1 check: PASS. Tokens: 67,094 used of 50,000,000, 49,932,906 left.",
+   "plugin_check": {
+    "ok": true,
+    "gaps": [],
+    "missing": [],
+    "validator": {
+     "validator": "1.6.0",
+     "gate": 1,
+     "ok": true,
+     "errors": [],
+     "warnings": [],
+     "metrics": {
+      "requirements": 20,
+      "scenarios": 0,
+      "cases": 0,
+      "test_files": 0,
+      "results": 0,
+      "repo_test_files": 11,
+      "repo_tests": 137,
+      "existing": 11,
+      "generated": 0,
+      "manual": 0
+     },
+     "suspects": [],
+     "duplicates": [],
+     "brief": "Gate 1 validation: PASS (0 errors, 0 warnings)."
+    },
+    "error": null,
+    "app": "prj_815a76571195",
+    "dropped": []
+   },
+   "design_audit": null
+  },
+  {
+   "gate": 2,
+   "seconds": 21.6,
+   "title": "Gate 2: approve test plan",
+   "summary": "Deterministic score 100, independent review 85 (REVISE). agentic-qe Gate 2 check: PASS. Tokens: 97,125 used of 50,000,000, 49,902,875 left.",
+   "plugin_check": {
+    "ok": true,
+    "gaps": [],
+    "missing": [],
+    "validator": {
+     "validator": "1.6.0",
+     "gate": 2,
+     "ok": true,
+     "errors": [],
+     "warnings": [
+      {
+       "check": "plan.requirements",
+       "message": "P2/P3 requirements with no plan scenario",
+       "ids": [
+        "REQ-016..REQ-018",
+        "REQ-020"
+       ]
+      }
+     ],
+     "metrics": {
+      "requirements": 20,
+      "scenarios": 16,
+      "cases": 0,
+      "test_files": 0,
+      "results": 0,
+      "repo_test_files": 11,
+      "repo_tests": 137,
+      "existing": 11,
+      "generated": 0,
+      "manual": 0,
+      "plan_by_area_level": {
+       "Calculator arithmetic and domain errors": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "GET /api/fx rejects invalid currency code (400)": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "GET /api/health returns status and tool count": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "GET /api/nav query length validation (400)": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "GET /api/nav rejects invalid scheme code (400)": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "GET /api/quote rejects invalid symbol (400)": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "GET /api/tools returns categorized tool list": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Next.js static site is served at root when web/out directory exists": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "POST /api/calc does not leak stack trace on unexpected exception": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "POST /api/calc rejects non-JSON body with 400": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "POST /api/calc rejects unknown calculator name": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "POST /api/calc returns result for valid input": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Parameter sanitization \u2013 pure validation logic": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "SecurityMiddleware adds security headers to every response": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "SecurityMiddleware rate-limits /api requests per IP with 429": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "SecurityMiddleware rejects oversized request bodies with 413": {
+        "Integration": 1,
+        "Unit": 0
+       }
+      }
+     },
+     "suspects": [],
+     "duplicates": [],
+     "brief": "Gate 2 validation: PASS (0 errors, 1 warnings)."
+    },
+    "error": null,
+    "app": "prj_815a76571195"
+   },
+   "design_audit": null
+  },
+  {
+   "gate": 3,
+   "seconds": 81.0,
+   "title": "Gate 3: approve test design and data",
+   "summary": "61 cases. Case budget 64 of 40 (ATLAS_MAX_CASES), decided before design; P0 and P1 need more than the limit, so the limit is exceeded for them; 4 lower-priority requirements get no cases: REQ-016, REQ-017, REQ-018, REQ-020. Remaining gaps: ['REQ-003: no Exception case, and the requirement states error behaviour', 'REQ-004: no Exception case, and the requirement states error behaviour', 'REQ-005: needs 2 Negative cases', 'REQ-005: no Exception case, and the requirement states error behaviour', 'REQ-009: no Exception case, and the requirement states error behaviour', 'REQ-012: no Exception case, and the requirement states error behaviour', 'REQ-013: no Exception case, and the requirement states error behaviour', 'REQ-014: no Exception case, and the requirement states error behaviour', 'REQ-015: no Exception case, and the requirement states error behaviour', 'refused REQ-005: case \\'_sanitize_params rejects non-finite number (NaN)\\' has test data \\'{\"name\": \"addition\", \"params\": [1.0, float(\\\\\\'nan\\\\\\')]}\\', a string, but the requirement states its input type as object. Use a value of that type, or state the error behaviour in the requirement first', 'refused REQ-005: case \\'_sanitize_params rejects out-of-range number\\' has test data \\'{\"name\": \"addition\", \"params\": [10**100, 1]}\\', a string, but the requirement states its input type as object. Use a value of that type, or state the error behaviour in the requirement first', 'refused REQ-005: case \\'_sanitize_params rejects overly long string parameter\\' has test data \\'{\"name\": \"addition\", \"params\": [1, \"a\" * 101]}\\', a string, but the requirement states its input type as object. Use a value of that type, or state the error behaviour in the requirement first']. agentic-qe Gate 3 check: FAIL (cases the coverage auditor says do not cover their scenario: TC-APP-002 (PARTIAL), TC-APP-003 (MISSES), TC-APP-006 (PARTIAL), TC-APP-008 (MISSES), TC-APP-018 (PARTIAL), TC-APP-019 (PARTIAL), TC-APP-020 (MISSES), TC-APP-021 (MISSES), TC-APP-025 (MISSES), TC-APP-029 (PARTIAL), TC-APP-030 (PARTIAL), TC-APP-031 (PARTIAL), TC-APP-032 (PARTIAL), TC-APP-033 (PARTIAL), TC-APP-034 (MISSES), TC-APP-038 (MISSES), TC-APP-039 (PARTIAL), TC-APP-046 (PARTIAL), TC-APP-050 (MISSES), TC-APP-053 (PARTIAL), TC-APP-054 (MISSES), TC-APP-056 (PARTIAL), TC-APP-057 (PARTIAL), TC-APP-058 (MISSES)). Tokens: 279,969 used of 50,000,000, 49,720,031 left.",
+   "plugin_check": {
+    "ok": false,
+    "gaps": [
+     "cases the coverage auditor says do not cover their scenario: TC-APP-002 (PARTIAL), TC-APP-003 (MISSES), TC-APP-006 (PARTIAL), TC-APP-008 (MISSES), TC-APP-018 (PARTIAL), TC-APP-019 (PARTIAL), TC-APP-020 (MISSES), TC-APP-021 (MISSES), TC-APP-025 (MISSES), TC-APP-029 (PARTIAL), TC-APP-030 (PARTIAL), TC-APP-031 (PARTIAL), TC-APP-032 (PARTIAL), TC-APP-033 (PARTIAL), TC-APP-034 (MISSES), TC-APP-038 (MISSES), TC-APP-039 (PARTIAL), TC-APP-046 (PARTIAL), TC-APP-050 (MISSES), TC-APP-053 (PARTIAL), TC-APP-054 (MISSES), TC-APP-056 (PARTIAL), TC-APP-057 (PARTIAL), TC-APP-058 (MISSES)"
+    ],
+    "missing": [
+     "TC-APP-002 (PARTIAL)",
+     "TC-APP-003 (MISSES)",
+     "TC-APP-006 (PARTIAL)",
+     "TC-APP-008 (MISSES)",
+     "TC-APP-018 (PARTIAL)",
+     "TC-APP-019 (PARTIAL)",
+     "TC-APP-020 (MISSES)",
+     "TC-APP-021 (MISSES)",
+     "TC-APP-025 (MISSES)",
+     "TC-APP-029 (PARTIAL)",
+     "TC-APP-030 (PARTIAL)",
+     "TC-APP-031 (PARTIAL)",
+     "TC-APP-032 (PARTIAL)",
+     "TC-APP-033 (PARTIAL)",
+     "TC-APP-034 (MISSES)",
+     "TC-APP-038 (MISSES)",
+     "TC-APP-039 (PARTIAL)",
+     "TC-APP-046 (PARTIAL)",
+     "TC-APP-050 (MISSES)",
+     "TC-APP-053 (PARTIAL)",
+     "TC-APP-054 (MISSES)",
+     "TC-APP-056 (PARTIAL)",
+     "TC-APP-057 (PARTIAL)",
+     "TC-APP-058 (MISSES)"
+    ],
+    "validator": {
+     "validator": "1.6.0",
+     "gate": 3,
+     "ok": false,
+     "errors": [
+      {
+       "check": "design.suspects",
+       "message": "cases that do not read like their scenario and no auditor verdict COVERS them",
+       "ids": [
+        "TC-APP-029",
+        "TC-APP-033",
+        "TC-APP-038..TC-APP-039"
+       ]
+      }
+     ],
+     "warnings": [
+      {
+       "check": "plan.requirements",
+       "message": "P2/P3 requirements with no plan scenario",
+       "ids": [
+        "REQ-016..REQ-018",
+        "REQ-020"
+       ]
+      },
+      {
+       "check": "design.level",
+       "message": "cases at a different level from their scenario",
+       "ids": [
+        "TC-APP-033"
+       ]
+      },
+      {
+       "check": "design.duplicates",
+       "message": "1 groups of near-identical cases",
+       "ids": [
+        "TC-APP-021",
+        "TC-APP-034"
+       ]
+      }
+     ],
+     "metrics": {
+      "requirements": 20,
+      "scenarios": 16,
+      "cases": 61,
+      "test_files": 0,
+      "results": 0,
+      "repo_test_files": 11,
+      "repo_tests": 137,
+      "existing": 11,
+      "generated": 0,
+      "manual": 0,
+      "plan_by_area_level": {
+       "Calculator arithmetic and domain errors": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "GET /api/fx rejects invalid currency code (400)": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "GET /api/health returns status and tool count": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "GET /api/nav query length validation (400)": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "GET /api/nav rejects invalid scheme code (400)": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "GET /api/quote rejects invalid symbol (400)": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "GET /api/tools returns categorized tool list": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Next.js static site is served at root when web/out directory exists": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "POST /api/calc does not leak stack trace on unexpected exception": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "POST /api/calc rejects non-JSON body with 400": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "POST /api/calc rejects unknown calculator name": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "POST /api/calc returns result for valid input": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Parameter sanitization \u2013 pure validation logic": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "SecurityMiddleware adds security headers to every response": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "SecurityMiddleware rate-limits /api requests per IP with 429": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "SecurityMiddleware rejects oversized request bodies with 413": {
+        "Integration": 1,
+        "Unit": 0
+       }
+      },
+      "design_coverage_by_area": {
+       "Calculator arithmetic and domain errors": 100,
+       "GET /api/fx rejects invalid currency code (400)": 100,
+       "GET /api/health returns status and tool count": 100,
+       "GET /api/nav query length validation (400)": 100,
+       "GET /api/nav rejects invalid scheme code (400)": 100,
+       "GET /api/quote rejects invalid symbol (400)": 100,
+       "GET /api/tools returns categorized tool list": 100,
+       "Next.js static site is served at root when web/out directory exists": 100,
+       "POST /api/calc does not leak stack trace on unexpected exception": 100,
+       "POST /api/calc rejects non-JSON body with 400": 100,
+       "POST /api/calc rejects unknown calculator name": 100,
+       "POST /api/calc returns result for valid input": 100,
+       "Parameter sanitization \u2013 pure validation logic": 100,
+       "SecurityMiddleware adds security headers to every response": 100,
+       "SecurityMiddleware rate-limits /api requests per IP with 429": 100,
+       "SecurityMiddleware rejects oversized request bodies with 413": 100
+      },
+      "cases_per_scenario": {
+       "mean": 3.81
+      },
+      "similarity_median": 0.369
+     },
+     "suspects": [
+      {
+       "case": "TC-APP-029",
+       "scenario": "SC-U-SANITIZE-PARAMS-001",
+       "similarity": 0,
+       "audit": "PARTIAL"
+      },
+      {
+       "case": "TC-APP-033",
+       "scenario": "SC-U-CALC-ARITHMETIC-001",
+       "similarity": 0,
+       "audit": "PARTIAL"
+      },
+      {
+       "case": "TC-APP-037",
+       "scenario": "SC-I-CALC-UNEXPECTED-EXCEPTION-001",
+       "similarity": 0.075,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-038",
+       "scenario": "SC-I-SEC-PAYLOAD-SIZE-001",
+       "similarity": 0.023,
+       "audit": "MISSES"
+      },
+      {
+       "case": "TC-APP-039",
+       "scenario": "SC-I-SEC-PAYLOAD-SIZE-001",
+       "similarity": 0.023,
+       "audit": "PARTIAL"
+      },
+      {
+       "case": "TC-APP-040",
+       "scenario": "SC-I-SEC-PAYLOAD-SIZE-001",
+       "similarity": 0.022,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-041",
+       "scenario": "SC-I-SEC-PAYLOAD-SIZE-001",
+       "similarity": 0.022,
+       "audit": "COVERS"
+      }
+     ],
+     "duplicates": [
+      [
+       "TC-APP-021",
+       "TC-APP-034"
+      ]
+     ],
+     "brief": "Gate 3 validation: FAIL (1 errors, 3 warnings).\n- cases that do not read like their scenario and no auditor verdict COVERS them: TC-APP-029, TC-APP-033, TC-APP-038..TC-APP-039\nAudit these case/scenario pairs first (low similarity): TC-APP-029, TC-APP-033, TC-APP-037, TC-APP-038, TC-APP-039, TC-APP-040, TC-APP-041"
+    },
+    "error": null
+   },
+   "design_audit": {
+    "app": "prj_815a76571195",
+    "reviewed": 61,
+    "audited": 61,
+    "counts": {
+     "COVERS": 37,
+     "PARTIAL": 14,
+     "MISSES": 10
+    },
+    "unaudited": []
+   },
+   "refused": "These items were judged REJECT: TC-APP-029, TC-APP-030, TC-APP-056, TC-APP-057. Approving them needs a reason, and this one has 0 characters, fewer than 10. Write it in the reason field.",
+   "sent_back": true
+  },
+  {
+   "gate": 3,
+   "seconds": 87.9,
+   "title": "Gate 3: approve test design and data",
+   "summary": "64 cases. Case budget 64 of 40 (ATLAS_MAX_CASES), decided before design; P0 and P1 need more than the limit, so the limit is exceeded for them; 4 lower-priority requirements get no cases: REQ-016, REQ-017, REQ-018, REQ-020; 5 excess cases dropped before review. Remaining gaps: ['REQ-005: no Exception case, and the requirement states error behaviour', 'REQ-007: no Exception case, and the requirement states error behaviour', 'REQ-008: no Exception case, and the requirement states error behaviour', 'REQ-009: no Exception case, and the requirement states error behaviour', 'REQ-010: no Exception case, and the requirement states error behaviour', 'REQ-012: no Exception case, and the requirement states error behaviour', 'REQ-013: no Exception case, and the requirement states error behaviour', 'REQ-014: no Exception case, and the requirement states error behaviour', 'REQ-015: no Exception case, and the requirement states error behaviour']. agentic-qe Gate 3 check: FAIL (cases the coverage auditor says do not cover their scenario: TC-APP-003 (MISSES), TC-APP-004 (MISSES), TC-APP-007 (MISSES), TC-APP-008 (MISSES), TC-APP-009 (MISSES), TC-APP-013 (MISSES), TC-APP-015 (PARTIAL), TC-APP-016 (PARTIAL), TC-APP-018 (MISSES), TC-APP-019 (PARTIAL), TC-APP-020 (PARTIAL), TC-APP-029 (MISSES), TC-APP-030 (MISSES), TC-APP-031 (MISSES), TC-APP-032 (MISSES), TC-APP-033 (MISSES), TC-APP-037 (MISSES), TC-APP-038 (PARTIAL), TC-APP-039 (PARTIAL), TC-APP-040 (PARTIAL), TC-APP-041 (PARTIAL), TC-APP-043 (PARTIAL), TC-APP-044 (PARTIAL), TC-APP-047 (MISSES), TC-APP-049 (PARTIAL) and 2 more). Tokens: 480,286 used of 50,000,000, 49,519,714 left.",
+   "plugin_check": {
+    "ok": false,
+    "gaps": [
+     "cases the coverage auditor says do not cover their scenario: TC-APP-003 (MISSES), TC-APP-004 (MISSES), TC-APP-007 (MISSES), TC-APP-008 (MISSES), TC-APP-009 (MISSES), TC-APP-013 (MISSES), TC-APP-015 (PARTIAL), TC-APP-016 (PARTIAL), TC-APP-018 (MISSES), TC-APP-019 (PARTIAL), TC-APP-020 (PARTIAL), TC-APP-029 (MISSES), TC-APP-030 (MISSES), TC-APP-031 (MISSES), TC-APP-032 (MISSES), TC-APP-033 (MISSES), TC-APP-037 (MISSES), TC-APP-038 (PARTIAL), TC-APP-039 (PARTIAL), TC-APP-040 (PARTIAL), TC-APP-041 (PARTIAL), TC-APP-043 (PARTIAL), TC-APP-044 (PARTIAL), TC-APP-047 (MISSES), TC-APP-049 (PARTIAL) and 2 more"
+    ],
+    "missing": [
+     "TC-APP-003 (MISSES)",
+     "TC-APP-004 (MISSES)",
+     "TC-APP-007 (MISSES)",
+     "TC-APP-008 (MISSES)",
+     "TC-APP-009 (MISSES)",
+     "TC-APP-013 (MISSES)",
+     "TC-APP-015 (PARTIAL)",
+     "TC-APP-016 (PARTIAL)",
+     "TC-APP-018 (MISSES)",
+     "TC-APP-019 (PARTIAL)",
+     "TC-APP-020 (PARTIAL)",
+     "TC-APP-029 (MISSES)",
+     "TC-APP-030 (MISSES)",
+     "TC-APP-031 (MISSES)",
+     "TC-APP-032 (MISSES)",
+     "TC-APP-033 (MISSES)",
+     "TC-APP-037 (MISSES)",
+     "TC-APP-038 (PARTIAL)",
+     "TC-APP-039 (PARTIAL)",
+     "TC-APP-040 (PARTIAL)",
+     "TC-APP-041 (PARTIAL)",
+     "TC-APP-043 (PARTIAL)",
+     "TC-APP-044 (PARTIAL)",
+     "TC-APP-047 (MISSES)",
+     "TC-APP-049 (PARTIAL)",
+     "TC-APP-052 (PARTIAL)",
+     "TC-APP-061 (PARTIAL)"
+    ],
+    "validator": {
+     "validator": "1.6.0",
+     "gate": 3,
+     "ok": false,
+     "errors": [
+      {
+       "check": "design.suspects",
+       "message": "cases that do not read like their scenario and no auditor verdict COVERS them",
+       "ids": [
+        "TC-APP-030..TC-APP-033",
+        "TC-APP-041",
+        "TC-APP-043..TC-APP-044"
+       ]
+      }
+     ],
+     "warnings": [
+      {
+       "check": "plan.requirements",
+       "message": "P2/P3 requirements with no plan scenario",
+       "ids": [
+        "REQ-016..REQ-018",
+        "REQ-020"
+       ]
+      },
+      {
+       "check": "design.level",
+       "message": "cases at a different level from their scenario",
+       "ids": [
+        "TC-APP-029..TC-APP-036"
+       ]
+      }
+     ],
+     "metrics": {
+      "requirements": 20,
+      "scenarios": 16,
+      "cases": 64,
+      "test_files": 0,
+      "results": 0,
+      "repo_test_files": 11,
+      "repo_tests": 137,
+      "existing": 11,
+      "generated": 0,
+      "manual": 0,
+      "plan_by_area_level": {
+       "Calculator arithmetic and domain errors": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "GET /api/fx rejects invalid currency code (400)": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "GET /api/health returns status and tool count": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "GET /api/nav query length validation (400)": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "GET /api/nav rejects invalid scheme code (400)": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "GET /api/quote rejects invalid symbol (400)": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "GET /api/tools returns categorized tool list": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Next.js static site is served at root when web/out directory exists": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "POST /api/calc does not leak stack trace on unexpected exception": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "POST /api/calc rejects non-JSON body with 400": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "POST /api/calc rejects unknown calculator name": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "POST /api/calc returns result for valid input": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Parameter sanitization \u2013 pure validation logic": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "SecurityMiddleware adds security headers to every response": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "SecurityMiddleware rate-limits /api requests per IP with 429": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "SecurityMiddleware rejects oversized request bodies with 413": {
+        "Integration": 1,
+        "Unit": 0
+       }
+      },
+      "design_coverage_by_area": {
+       "Calculator arithmetic and domain errors": 100,
+       "GET /api/fx rejects invalid currency code (400)": 100,
+       "GET /api/health returns status and tool count": 100,
+       "GET /api/nav query length validation (400)": 100,
+       "GET /api/nav rejects invalid scheme code (400)": 100,
+       "GET /api/quote rejects invalid symbol (400)": 100,
+       "GET /api/tools returns categorized tool list": 100,
+       "Next.js static site is served at root when web/out directory exists": 100,
+       "POST /api/calc does not leak stack trace on unexpected exception": 100,
+       "POST /api/calc rejects non-JSON body with 400": 100,
+       "POST /api/calc rejects unknown calculator name": 100,
+       "POST /api/calc returns result for valid input": 100,
+       "Parameter sanitization \u2013 pure validation logic": 100,
+       "SecurityMiddleware adds security headers to every response": 100,
+       "SecurityMiddleware rate-limits /api requests per IP with 429": 100,
+       "SecurityMiddleware rejects oversized request bodies with 413": 100
+      },
+      "cases_per_scenario": {
+       "mean": 4
+      },
+      "similarity_median": 0.389
+     },
+     "suspects": [
+      {
+       "case": "TC-APP-030",
+       "scenario": "SC-U-SANITIZE-PARAMS-001",
+       "similarity": 0,
+       "audit": "MISSES"
+      },
+      {
+       "case": "TC-APP-031",
+       "scenario": "SC-U-SANITIZE-PARAMS-001",
+       "similarity": 0,
+       "audit": "MISSES"
+      },
+      {
+       "case": "TC-APP-032",
+       "scenario": "SC-U-SANITIZE-PARAMS-001",
+       "similarity": 0,
+       "audit": "MISSES"
+      },
+      {
+       "case": "TC-APP-033",
+       "scenario": "SC-U-CALC-ARITHMETIC-001",
+       "similarity": 0.074,
+       "audit": "MISSES"
+      },
+      {
+       "case": "TC-APP-034",
+       "scenario": "SC-U-CALC-ARITHMETIC-001",
+       "similarity": 0.038,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-035",
+       "scenario": "SC-U-CALC-ARITHMETIC-001",
+       "similarity": 0,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-036",
+       "scenario": "SC-U-CALC-ARITHMETIC-001",
+       "similarity": 0.037,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-041",
+       "scenario": "SC-I-SEC-PAYLOAD-SIZE-001",
+       "similarity": 0.036,
+       "audit": "PARTIAL"
+      },
+      {
+       "case": "TC-APP-042",
+       "scenario": "SC-I-SEC-PAYLOAD-SIZE-001",
+       "similarity": 0.036,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-043",
+       "scenario": "SC-I-SEC-PAYLOAD-SIZE-001",
+       "similarity": 0.04,
+       "audit": "PARTIAL"
+      },
+      {
+       "case": "TC-APP-044",
+       "scenario": "SC-I-SEC-PAYLOAD-SIZE-001",
+       "similarity": 0.039,
+       "audit": "PARTIAL"
+      }
+     ],
+     "duplicates": [],
+     "brief": "Gate 3 validation: FAIL (1 errors, 2 warnings).\n- cases that do not read like their scenario and no auditor verdict COVERS them: TC-APP-030..TC-APP-033, TC-APP-041, TC-APP-043..TC-APP-044\nAudit these case/scenario pairs first (low similarity): TC-APP-030, TC-APP-031, TC-APP-032, TC-APP-033, TC-APP-034, TC-APP-035, TC-APP-036, TC-APP-041, TC-APP-042, TC-APP-043, TC-APP-044"
+    },
+    "error": null
+   },
+   "design_audit": {
+    "app": "prj_815a76571195",
+    "reviewed": 64,
+    "audited": 64,
+    "counts": {
+     "COVERS": 37,
+     "PARTIAL": 13,
+     "MISSES": 14
+    },
+    "unaudited": []
+   }
+  },
+  {
+   "gate": 4,
+   "seconds": 47.1,
+   "title": "Gate 4: approve generated tests",
+   "summary": "64 of 64 cases have tests, on branch atlas/qe-f65223. Approving also allows them to run on this machine. Tokens: 663,448 used of 50,000,000, 49,336,552 left.",
+   "plugin_check": null,
+   "design_audit": null
+  },
+  {
+   "gate": 5,
+   "seconds": 21.5,
+   "title": "Gate 5: approve release",
+   "summary": "Verdict FAIL: 23/64 tests passed. 41 reviewed tests failed and are capped at 60. Tokens: 686,595 used of 50,000,000, 49,313,405 left.",
+   "plugin_check": null,
+   "design_audit": null,
+   "refused": "These items were judged REJECT: TC-APP-009, TC-APP-013, TC-APP-014, TC-APP-017, TC-APP-019, TC-APP-020, TC-APP-022, TC-APP-024, TC-APP-026, TC-APP-027, TC-APP-029, TC-APP-031 and more. Approving them needs a reason, and this one has 0 characters, fewer than 10. Write it in the reason field.",
+   "approved_with_reason": "Live test approver: approved with the REJECT items still listed after one send-back, to measure the later stages end to end. Not a release decision."
+  }
+ ],
+ "started": "2026-11-14T17:28:23.813820",
+ "status": "completed",
+ "error": "",
+ "total_seconds": 298.3,
+ "summary": {
+  "verdict": "FAIL",
+  "executed": 64,
+  "passed": 23,
+  "failed": 41,
+  "pass_rate": 35.9,
+  "requirements": 20,
+  "requirements_covered": 9,
+  "coverage": 45.0,
+  "gaps": [
+   "REQ-005",
+   "REQ-007",
+   "REQ-008",
+   "REQ-009",
+   "REQ-010",
+   "REQ-014",
+   "REQ-015"
+  ],
+  "defects": 18,
+  "failure_classes": {
+   "defect": 18,
+   "test problem": 0,
+   "environment": 23
+  }
+ },
+ "requirements": 20
+}

@@ -10,7 +10,7 @@ from backend.maf.workflows.qe.common import CODE_REVIEW_BATCH
 from backend.maf.workflows.qe.generate.env import Env
 from backend.maf.workflows.qe.generate.files import GeneratedFile, GeneratedSuite, _generated_file_problems
 from backend.maf.workflows.shared import review_evidence, review_with_send_back
-from backend.qe import confidence
+from backend.qe import confidence, emit
 
 
 async def review_and_save(env: Env, suite: GeneratedSuite, unresolved: list[dict], case_of: dict, call: AgentCall, missing: list[str], partial: dict | None) -> dict:
@@ -53,4 +53,5 @@ async def review_and_save(env: Env, suite: GeneratedSuite, unresolved: list[dict
         body = f"> PARTIAL RESULT. No tests yet for: {', '.join(partial['missing'])}\n\n" + body
     doc = documents.create(rc.project_id, "test_code", "Autonomous End-to-End Test Suite (PARTIAL)" if partial else "Autonomous End-to-End Test Suite", body, "agent:test-automation-engineer", data=tests, prompt_ref=call.prompt_ref, run_id=rc.run_id)
     rc.log(f"[TEST_SYNTHESIS_COMPLETED] {len(suite.files)} deterministic test files written to sandbox branch {state['branch']}", kind="artifact")
-    return {"worktree": state["worktree"], "branch": state["branch"], "tests": tests, "framework": suite.framework, "test_doc": doc["id"], "heal_attempts": state.get("heal_attempts", 0), "tests_review": tests_review, "tests_missing": missing, "emit_unresolved": unresolved, "env_facts": facts, "partial": partial}
+    return {"worktree": state["worktree"], "branch": state["branch"], "tests": tests, "framework": suite.framework, "test_doc": doc["id"], "heal_attempts": state.get("heal_attempts", 0), "tests_review": tests_review, "tests_missing": missing, "emit_unresolved": unresolved, "env_facts": facts, "partial": partial,
+            "missing_deps": [] if state.get("install_deps") else emit.missing_dependencies(worktree, env.inventory)}

@@ -13,6 +13,7 @@ from .inventory import (
     inventory,
     _normal,
     declared_dependencies,
+    missing_dependencies,
 )
 from .sigs import (
     PASS_THROUGH,

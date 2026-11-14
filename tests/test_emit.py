@@ -119,3 +119,9 @@ def test_declared_dependencies_are_read_from_manifests(tmp_path):
     (tmp_path / "requirements.txt").write_text("Flask>=2.0\n# c\n-r other.txt\nslowapi[extra]==1\n")
     (tmp_path / "pyproject.toml").write_text('[project]\nname="x"\nversion="1"\ndependencies=["httpx>=0.2"]\n[project.optional-dependencies]\ndev=["pytest-asyncio"]\n')
     assert emit.declared_dependencies(tmp_path) == {"flask", "slowapi", "httpx", "pytest-asyncio"}
+
+
+def test_missing_dependencies_are_the_declared_ones_the_python_lacks(tmp_path):
+    (tmp_path / "requirements.txt").write_text("Flask>=3\nhttpx\n", encoding="utf-8")
+    assert emit.missing_dependencies(tmp_path, {"versions": {"flask": "3.0"}}) == ["httpx"]
+    assert emit.missing_dependencies(tmp_path, None) == [], "an unreadable inventory claims nothing"

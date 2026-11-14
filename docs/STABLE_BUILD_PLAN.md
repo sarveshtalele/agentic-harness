@@ -127,6 +127,14 @@ Live run 2026-11-14 16:37 (G3 code, 28 requirements):
 Cause of many MISSES: each case was linked to every scenario of its requirement, at every level. Fixed: a case now links
 to the scenarios at its own level.
 
+Execute, 2026-11-14:
+- The two runs to Gate 5 without installing dependencies had 59 of 68 failures classed as environment. The repository's
+  own tests fail at collection without their packages.
+- The QE page's Install dependencies switch stays off by default, because it runs the repository's installers. The
+  Gate 4 card now warns when declared packages are missing and the switch is off.
+- The live test opts in. Run 17:28: completed through G5 in 298 s, every gate 88 s or less. Verdict FAIL: 23 of 64
+  passed, 18 defects, 23 environment.
+
 Limit: greenfield requirements cite approved documents, not code, so the plugin's quote check is recorded as not applied
 for them. Evidence: `tests/test_plugin_bridge.py` (real `check-gate.ts`: a real quote passes, an invented one is flagged)
 and the G1 assertions in `tests/test_api_change.py`.

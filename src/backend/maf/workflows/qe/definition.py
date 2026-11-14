@@ -43,6 +43,15 @@ def _plugin_line(check: dict | None, gate: int = 1) -> str:
     return f"agentic-qe Gate {gate} check: PASS." if check["ok"] else f"agentic-qe Gate {gate} check: FAIL ({'; '.join(check['gaps'][:3])})."
 
 
+def _deps_line(state: dict) -> str:
+    missing = state.get("missing_deps") or []
+    if not missing:
+        return ""
+    return (f" WARNING: {len(missing)} packages the repository declares are not installed ({', '.join(missing[:8])}), and this run "
+            "was started without installing dependencies, so tests that import them will fail as environment. Start a new run "
+            "with Install dependencies on to execute them.")
+
+
 def qe_definition() -> Definition:
     """End-to-end quality engineering lifecycle: requirements to signed release, with human gates G0 to G5."""
     return Definition("qe", [
@@ -52,7 +61,7 @@ def qe_definition() -> Definition:
         StageSpec("plan", qe_plan, "Test plan", approval=_doc_gate(2, "test plan", "plan_doc", lambda s: f"Deterministic score {s['plan_score']['score']}, independent review {s['plan_review']['score'] if s['plan_review']['score'] is not None else 'not run'} ({s['plan_review']['verdict']}). {_plugin_line(s.get('plan_plugin_check'), 2)}", "plan_review", lambda rc, s: {"plugin_check": s.get("plan_plugin_check")}), on_rejected="plan", next="design"),
         StageSpec("design", qe_design, "Test design", next="data"),
         StageSpec("data", qe_data, "Test data", approval=_doc_gate(3, "test design and data", "cases_doc", lambda s: f"{len(s['cases'])} cases. {s['case_limit']['message']}. Remaining gaps: {s['design_gaps'] or 'none'}. {_plugin_line(s.get('design_plugin_check'), 3)}", "cases_review", lambda rc, s: _gate3_extras(rc, s) | {"plugin_check": s.get("design_plugin_check"), "design_audit": s.get("design_audit")}), on_rejected="design", next="generate"),
-        StageSpec("generate", qe_generate, "Generate tests", approval=_doc_gate(4, "generated tests", "test_doc", lambda s: f"{len(s['tests'])} of {len(s['cases'])} cases have tests, on branch {s['branch']}. Approving also allows them to run on this machine.", "tests_review", _gate4_extras), on_approved=qe_commit, on_rejected="generate", next="prepare"),
+        StageSpec("generate", qe_generate, "Generate tests", approval=_doc_gate(4, "generated tests", "test_doc", lambda s: f"{len(s['tests'])} of {len(s['cases'])} cases have tests, on branch {s['branch']}. Approving also allows them to run on this machine.{_deps_line(s)}", "tests_review", _gate4_extras), on_approved=qe_commit, on_rejected="generate", next="prepare"),
         StageSpec("prepare", qe_prepare, "Prepare environment", next="execute"),
         StageSpec("execute", qe_execute, "Execute"),
         StageSpec("heal", qe_heal, "Heal test drift"),
