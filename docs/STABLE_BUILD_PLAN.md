@@ -5,7 +5,7 @@ Owner decisions, 2026-11-13 (asked and answered in the session):
 | Question | Decision |
 |---|---|
 | Product shape | Cloud only (Azure). No desktop app, no command-line tool, no harness in the stable build. Local runs (`dev.py up`) stay for development and testing only |
-| Removal | Delete the harness, the desktop app and the `aqh` CLI from `feature/maf-harness-platform` (list in `docs/harness/HARNESS_SEPARATION_PLAN.md` section 5). Everything removed stays on `feature/harness-rebuild`. **Exception: `plugins/agentic-qe` stays**, because the QE Cycle now uses its skills |
+| Removal | Delete the harness, the desktop app and the `aqh` CLI from `feature/maf-harness-platform` (list in `docs/harness/HARNESS_SEPARATION_PLAN.md` section 5). Everything removed stays on the `sarveshtalele/maf-harness` repository (`legacy/`). **Exception: `plugins/agentic-qe` stays**, because the QE Cycle now uses its skills |
 | QE Cycle engine | The platform's own MAF workflow runs the stages in a fixed order. Each stage loads the agentic-qe plugin's skill (any language), runs its scripts, and validates the output with the plugin's checks; a named person signs each gate |
 | Repository code on Azure | Runs in the backend App Service through the allowlisted runner, with timeouts and a workspace per project. Cost stays about $21 a month. Only trusted members until sandbox jobs exist |
 | Node on Azure | `startup.py` downloads a pinned Node 22 LTS (checksum verified) into `/home` once |

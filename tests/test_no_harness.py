@@ -1,6 +1,6 @@
 """The stable build has no harness, desktop app or command-line tool (docs/STABLE_BUILD_PLAN.md, Part A).
 
-They moved to branch feature/harness-rebuild. This test fails if any of them comes back by accident: a route, an import,
+They moved to the sarveshtalele/maf-harness repository (legacy/). This test fails if any of them comes back by accident: a route, an import,
 a page or a link."""
 import re
 from pathlib import Path

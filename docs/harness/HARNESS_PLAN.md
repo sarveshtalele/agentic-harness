@@ -111,7 +111,7 @@ todo loop and AG-UI's collected-approval store (mistakes M4 and M8).
 
 | Phase | Delivers | Proof |
 |---|---|---|
-| H0 | New repository from `feature/harness-rebuild`, CI on 3 OS, `legacy/` reference copy | CI green on the skeleton |
+| H0 | New repository from the `sarveshtalele/maf-harness` repository (`legacy/`), CI on 3 OS, `legacy/` reference copy | CI green on the skeleton |
 | H1 | Core: state machine, event log, request builder, model gateway | unit tests; replay of recorded live sessions |
 | H2 | Tool registry, guard chain, sandbox, shells (root start), permissions, hooks | the existing ported tests |
 | H3 | Controls engine with the computational sensors for the agentic-qe stages (contracts, quotes, Gherkin, check-gate, validator, test runs) | each sensor catches its seeded defect |
@@ -127,4 +127,4 @@ todo loop and AG-UI's collected-approval store (mistakes M4 and M8).
 2. **Clients:** the CLI (`aqh`) first.
 3. **Relation to the platform:** fully separate; no connection now.
 
-H0 done: repository, CI on 3 OS, `legacy/` copied from `feature/harness-rebuild` (`dfe25c3`), commit `b44f7b8`.
+H0 done: repository, CI on 3 OS, `legacy/` copied from the `sarveshtalele/maf-harness` repository (`legacy/`) (`dfe25c3`), commit `b44f7b8`.

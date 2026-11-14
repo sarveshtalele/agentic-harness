@@ -13,7 +13,7 @@ The design of the new harness is in `docs/harness/HARNESS_ENGINEERING.md`. This 
 | Branch | Holds | State |
 |---|---|---|
 | `feature/maf-harness-platform` | The platform with the current harness | Stable, pushed (`252f499`); last full suite 777 passed; BRD end-to-end passed live (108 s) |
-| `feature/harness-rebuild` (new) | Harness work in progress (read cache, smaller plugin-step tool surface, shell starts at the workspace root) and this plan | Targeted tests pass; full suite not run on it |
+| the `sarveshtalele/maf-harness` repository (`legacy/`) (new) | Harness work in progress (read cache, smaller plugin-step tool surface, shell starts at the workspace root) and this plan | Targeted tests pass; full suite not run on it |
 | `main` | The owner's backup of a separate project | Never touched |
 
 ## 2. What the harness is today (inventory)
@@ -68,7 +68,7 @@ to the harness app.
 
 | Step | Work | Proof |
 |---|---|---|
-| S0 | Freeze: stable branch untouched; work in progress on `feature/harness-rebuild` (done) | both branches pushed |
+| S0 | Freeze: stable branch untouched; work in progress on the `sarveshtalele/maf-harness` repository (`legacy/`) (done) | both branches pushed |
 | S1 | This plan and `HARNESS_ENGINEERING.md`; owner approves location, scope and the deletion list (section 5) | owner's yes |
 | S2 | Create the new repository: skeleton, `CLAUDE.md`, CI on 3 OS, `legacy/` copy with the source commit | CI green on an empty core |
 | S3 | Strangler, step 1, in the platform: a `harness` switch that is off by default; with it off, no harness route, page, setting or import is loaded | full suite, smoke and BRD end-to-end green with the switch off |
