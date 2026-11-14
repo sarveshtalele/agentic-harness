@@ -104,6 +104,20 @@ back to the architect once, for example a missing level or a skipped level whose
 kept only when it does not lower the deterministic plan score, and the verdict is shown on the G2 card. Live QE run:
 `tests/test_qe_platform_live.py`, run with `python scripts/dev.py live`.
 
+Design and Data (G3), 2026-11-14:
+- Design writes the plugin's `04-design/test_cases.json`. Each case is linked to the plan scenarios of its requirement.
+- Design also writes the confidence reviewer's records and the verdicts of a new platform `coverage-auditor` agent. Its
+  prompt follows the plugin's `agents/coverage-auditor.md`.
+- Both records carry a capture stamp: agent, run, SHA-256 of the checked answer. The platform writes them from its own
+  agent's answer, as the plugin's hook does (owner decision 2026-11-14).
+- Data writes `fixtures.json` and runs `check-gate.ts --gate 3`. The verdict and the audit counts are on the G3 card.
+- There is no automatic fix round at G3. The existing review send-back revises weak cases, and the remaining gaps are
+  shown at the gate.
+
+Live run 2026-11-14 on personal-finance-mcp (G1/G2 code): G1 68 s, plugin PASS; G2 43 s, plugin PASS; G3 257 s, over the
+180 s goal. The gate stopped there: the engine refuses to approve REJECT cases without a reason, so the live test now
+sends such a gate back once with that reason.
+
 Limit: greenfield requirements cite approved documents, not code, so the plugin's quote check is recorded as not applied
 for them. Evidence: `tests/test_plugin_bridge.py` (real `check-gate.ts`: a real quote passes, an invented one is flagged)
 and the G1 assertions in `tests/test_api_change.py`.

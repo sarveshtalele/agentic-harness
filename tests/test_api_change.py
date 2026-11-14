@@ -71,6 +71,10 @@ def test_qe_lifecycle_all_six_gates_with_real_execution(client, project):
             check = approval["payload"]["plugin_check"]
             assert check["ok"] is False and any("no Integration scenarios and no written reason" in g for g in check["gaps"]), check
             assert "agentic-qe Gate 2 check: FAIL" in approval["summary"]
+        if approval["gate"] == 3:  # cases, the reviewer's records and the auditor's verdicts are in the plugin's files; only G2's short reasons remain
+            check, audit = approval["payload"]["plugin_check"], approval["payload"]["design_audit"]
+            assert check["error"] is None and audit["counts"]["COVERS"] == 4 and audit["unaudited"] == [], (check, audit)
+            assert check["gaps"] and all("skippedLevels" in g for g in check["gaps"]), check["gaps"]
         assert client.post(f"/api/approvals/{approval['id']}/decide", json={"approved": True}).status_code == 200
     run = wait_run(client, run["id"], ("completed", "failed"))
     assert run["status"] == "completed", run["error"]

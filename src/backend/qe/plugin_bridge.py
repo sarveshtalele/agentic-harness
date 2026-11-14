@@ -6,6 +6,8 @@ coverage rules, the pandas/numpy validator). Design: docs/STABLE_BUILD_PLAN.md P
 """
 from __future__ import annotations
 
+import datetime as dt
+import hashlib
 import json
 import os
 import re
@@ -70,6 +72,34 @@ def plan_file(plan: dict) -> dict:
             "scenarios": [{"id": scenario_id(a["id"]), "area": a["name"], "title": a["name"], "level": a["level"],
                            "priority": a["risk"], "requirementIds": a["requirement_ids"]} for a in plan["areas"]],
             "skippedLevels": [{"level": k, "reason": v} for k, v in plan.get("skipped_levels", {}).items()]}
+
+
+def scenarios_of(plan: dict) -> dict[str, list[str]]:
+    """Requirement id to the plugin scenario ids of the plan areas that list it."""
+    out: dict[str, list[str]] = {}
+    for a in plan["areas"]:
+        for rid in a["requirement_ids"]:
+            out.setdefault(rid, []).append(scenario_id(a["id"]))
+    return out
+
+
+def cases_file(cases: list[dict], plan: dict) -> dict:
+    """The platform's designed cases in the plugin's test_cases.json shape, each linked to its plan scenarios."""
+    links = scenarios_of(plan)
+    return {"cases": [{"tc_id": c["id"], "requirement_id": c["requirement_id"], "planScenarioIds": links.get(c["requirement_id"], []),
+                       "scenario": c.get("scenario", ""), "type": c.get("type", ""), "level": c.get("level", ""), "priority": c.get("priority", ""),
+                       "precondition": c.get("precondition", ""), "test_data": c.get("test_data", ""), "steps": c.get("steps", []),
+                       "expected_result": c.get("expected_result", "")} for c in cases]}
+
+
+def recorded(agent: str, agent_id: str, kind: str, key: str, items: list[dict]) -> dict:
+    """A reviewer's or auditor's answer as the plugin records it: the items plus a capture stamp. The platform writes it from
+    its own agent's checked answer, as the plugin's SubagentStop hook does (owner decision 2026-11-14); nobody edits it."""
+    body = json.dumps(items, sort_keys=True, ensure_ascii=False)
+    stamp = {"agent_type": agent, "agent_id": agent_id, "at": dt.datetime.now(dt.timezone.utc).isoformat(),
+             "sha256": hashlib.sha256(body.encode("utf-8")).hexdigest(),
+             "note": "Recorded by Agentic QE Platform from the agent's own checked answer. Do not edit."}
+    return {"_capture": stamp, "kind": kind, key: items}
 
 
 def check_gate(project_id: str, app: str, gate: int) -> dict:

@@ -101,3 +101,34 @@ def test_gate2_needs_every_level_or_a_real_reason():
     good = pb.check_gate(pid, app, 2)
     assert good["ok"] is True and good["gaps"] == [], good
     shutil.rmtree(project_dir(pid))
+
+
+@pytest.mark.skipif(not node_ok, reason="Node 22.6+ is needed to run the plugin's TypeScript")
+def test_gate3_needs_linked_reviewed_audited_cases_with_recorded_answers():
+    pid = _project("def add(a, b):\n    return a + b\n")
+    app = pb.app_name(pid)
+    area = {"id": "A1", "name": "Add", "requirement_ids": ["REQ-1"], "risk": "P1", "level": "Unit", "framework": "pytest", "rationale": "r"}
+    plan = {"strategy": "s", "areas": [area], "skipped_levels": {"Integration": "The function has no I/O or collaborators", "E2E": "There is no user interface or entry point"}}
+    pb.write(pid, app, "02-requirements/requirements.json", pb.requirements_file([_req("REQ-1", "def add(a, b):")]))
+    pb.write(pid, app, "03-plan/plan.json", pb.plan_file(plan))
+    case = {"id": "TC-ADD-001", "requirement_id": "REQ-1", "scenario": "adds", "type": "Positive", "level": "Unit", "priority": "P1",
+            "steps": ["call add(2, 3)"], "expected_result": "5"}
+    cases = pb.cases_file([case], plan)
+    assert cases["cases"][0]["planScenarioIds"] == ["SC-A1-001"]
+    pb.write(pid, app, "04-design/test_cases.json", cases)
+    review = [{"tc_id": "TC-ADD-001", "scores": {"source_proven": 30, "correct_target": 25, "expected_derivable": 25, "fixture_validity": 20}, "total": 100, "verdict": "APPROVED", "flaws": []}]
+    pb.write(pid, app, "04-design/confidence.json", {"kind": "design", "items": review})  # written without a capture stamp
+    verdicts = [{"id": "TC-ADD-001", "verdict": "COVERS", "scenario": "SC-A1-001", "reason": "checks the sum"}]
+    pb.write(pid, app, "04-design/audit.json", pb.recorded("coverage-auditor", "run:design", "design", "verdicts", verdicts))
+    unstamped = pb.check_gate(pid, app, 3)
+    assert unstamped["ok"] is False and any("not recorded from the confidence-reviewer" in g for g in unstamped["gaps"]), unstamped
+
+    pb.write(pid, app, "04-design/confidence.json", pb.recorded("confidence-reviewer", "run:design", "design", "items", review))
+    pb.write(pid, app, "04-design/audit.json", pb.recorded("coverage-auditor", "run:design", "design", "verdicts", [{**verdicts[0], "verdict": "PARTIAL"}]))
+    partial = pb.check_gate(pid, app, 3)
+    assert partial["ok"] is False and "TC-ADD-001 (PARTIAL)" in partial["missing"], partial
+
+    pb.write(pid, app, "04-design/audit.json", pb.recorded("coverage-auditor", "run:design", "design", "verdicts", verdicts))
+    good = pb.check_gate(pid, app, 3)
+    assert good["ok"] is True and good["gaps"] == [], good
+    shutil.rmtree(project_dir(pid))

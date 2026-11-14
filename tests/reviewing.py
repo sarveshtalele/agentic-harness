@@ -58,4 +58,15 @@ def reviewer(grade=None, seen=None):
 
 def rules(grade=None, seen=None):
     """ScriptedClient rules for the three review types, placed before any generic reviewer rule."""
-    return [(f"Review type: {label}.", reviewer(grade, seen)) for label in KINDS]
+    return [(f"Review type: {label}.", reviewer(grade, seen)) for label in KINDS] + [("Audit these designed cases.", auditor())]
+
+
+def auditor(verdict: str = "COVERS"):
+    """A reply function for the coverage auditor: one verdict for every case it was given."""
+
+    def reply(text: str) -> str:
+        given = json.loads(text.split("CASES:\n", 1)[1].split("\n\nREQUIREMENTS AND EVIDENCE:")[0])
+        return json.dumps({"kind": "design", "verdicts": [{"id": c["tc_id"], "verdict": verdict, "scenario": (c["planScenarioIds"] or [""])[0],
+                                                           "reason": "The expected result checks the behaviour at calc.py:2"} for c in given]})
+
+    return reply

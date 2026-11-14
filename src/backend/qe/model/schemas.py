@@ -71,3 +71,16 @@ class ConfidenceReview(BaseModel):
     score: int = Field(ge=0, le=100)
     verdict: Literal["APPROVED", "REVISE", "REJECTED"]
     issues: list[str] = Field(default_factory=list)
+
+
+class AuditVerdict(BaseModel):
+    id: str = Field(min_length=1)
+    verdict: Literal["COVERS", "PARTIAL", "MISSES"]
+    scenario: str = ""
+    reason: str = Field(min_length=1, max_length=600)
+
+
+class AuditSet(BaseModel):
+    """What the coverage auditor returns (the plugin's agents/coverage-auditor.md output). Code drops ids it was not given."""
+    kind: Literal["design", "code"] = "design"
+    verdicts: list[AuditVerdict] = Field(min_length=1)

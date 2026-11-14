@@ -15,7 +15,7 @@ def _schemas() -> dict:
     from backend.maf import workflows
 
     return {"Review": workflows.Review, "ReviewFindings": workflows.ReviewFindings, "GeneratedSuite": workflows.GeneratedSuite, "RequirementSet": model.RequirementSet,
-            "TestPlan": model.TestPlan, "CaseSet": model.CaseSet, "ConfidenceReview": model.ConfidenceReview}
+            "TestPlan": model.TestPlan, "CaseSet": model.CaseSet, "ConfidenceReview": model.ConfidenceReview, "AuditSet": model.AuditSet}
 
 
 def build_checks(rules: dict) -> list:

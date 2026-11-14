@@ -11,6 +11,8 @@ from .schemas import (
     PlanArea,
     TestPlan,
     ConfidenceReview,
+    AuditVerdict,
+    AuditSet,
 )
 from .cases import (
     TestCase,

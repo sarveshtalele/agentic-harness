@@ -42,14 +42,24 @@ def test_qe_cycle_to_gate5_on_a_real_repository(client):
     folder = _evidence_dir()
     try:
         mark = time.time()
-        for _ in range(6):
+        sent_back: set[int] = set()
+        for _ in range(9):
             run = wait_run(client, run["id"], timeout=STAGE_LIMIT)
             if run["status"] != "waiting_approval":
                 break
             approval = pending(run)
-            record["gates"].append({"gate": approval["gate"], "seconds": round(time.time() - mark, 1), "title": approval["title"],
-                                    "summary": approval["summary"], "plugin_check": approval["payload"].get("plugin_check")})
+            entry = {"gate": approval["gate"], "seconds": round(time.time() - mark, 1), "title": approval["title"],
+                     "summary": approval["summary"], "plugin_check": approval["payload"].get("plugin_check"),
+                     "design_audit": approval["payload"].get("design_audit")}
+            record["gates"].append(entry)
             decided = client.post(f"/api/approvals/{approval['id']}/decide", json={"approved": True})
+            if decided.status_code == 400 and approval["gate"] not in sent_back:
+                # the engine refuses to approve REJECT items without a reason; as a person would, send the gate back once with it
+                entry["refused"] = decided.json().get("detail")
+                sent_back.add(approval["gate"])
+                decided = client.post(f"/api/approvals/{approval['id']}/decide",
+                                      json={"approved": False, "feedback": f"Revise the items the review judged REJECT and fix their flaws. {entry['refused']}"})
+                entry["sent_back"] = True
             assert decided.status_code == 200, decided.text
             mark = time.time()
         run = wait_run(client, run["id"], ("completed", "failed", "rejected"), timeout=STAGE_LIMIT)
@@ -62,5 +72,5 @@ def test_qe_cycle_to_gate5_on_a_real_repository(client):
         for g in record["gates"]:
             print(f"G{g['gate']} after {g['seconds']} s: {g['summary'][:300]}", flush=True)
     assert run["status"] == "completed", run.get("error")
-    assert [g["gate"] for g in record["gates"]] == [0, 1, 2, 3, 4, 5]
+    assert [g["gate"] for g in record["gates"] if not g.get("sent_back")] == [0, 1, 2, 3, 4, 5]
     assert record["gates"][1]["plugin_check"]["error"] is None, record["gates"][1]["plugin_check"]

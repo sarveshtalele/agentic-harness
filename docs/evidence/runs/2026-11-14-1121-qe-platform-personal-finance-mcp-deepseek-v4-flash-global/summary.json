@@ -1,0 +1,179 @@
+{
+ "repo": "https://github.com/sarveshtalele/personal-finance-mcp.git",
+ "model": "deepseek-v4-flash-global",
+ "run_id": "run_4b678ab47857",
+ "gates": [
+  {
+   "gate": 0,
+   "seconds": 0.0,
+   "title": "Gate 0: confirm intake scope",
+   "summary": "Mode: brownfield. Source: git https://github.com/sarveshtalele/personal-finance-mcp.git at aff44ea06f. Files: 88. Languages: Python, JavaScript, CSS. Agents read this project's repository and documents only. Generated code lands on a separate branch.",
+   "plugin_check": null
+  },
+  {
+   "gate": 1,
+   "seconds": 67.6,
+   "title": "Gate 1: approve requirements",
+   "summary": "13 requirements with verified evidence. agentic-qe Gate 1 check: PASS. Tokens: 139,381 used of 50,000,000, 49,860,619 left.",
+   "plugin_check": {
+    "ok": true,
+    "gaps": [],
+    "missing": [],
+    "validator": {
+     "validator": "1.6.0",
+     "gate": 1,
+     "ok": true,
+     "errors": [],
+     "warnings": [],
+     "metrics": {
+      "requirements": 13,
+      "scenarios": 0,
+      "cases": 0,
+      "test_files": 0,
+      "results": 0,
+      "repo_test_files": 11,
+      "repo_tests": 137,
+      "existing": 11,
+      "generated": 0,
+      "manual": 0
+     },
+     "suspects": [],
+     "duplicates": [],
+     "brief": "Gate 1 validation: PASS (0 errors, 0 warnings)."
+    },
+    "error": null,
+    "app": "prj_7c0fb211e670",
+    "dropped": [
+     "REQ-004",
+     "REQ-008"
+    ]
+   }
+  },
+  {
+   "gate": 2,
+   "seconds": 42.7,
+   "title": "Gate 2: approve test plan",
+   "summary": "Deterministic score 100, independent review 90 (REVISE). agentic-qe Gate 2 check: PASS. Tokens: 174,423 used of 50,000,000, 49,825,577 left.",
+   "plugin_check": {
+    "ok": true,
+    "gaps": [],
+    "missing": [],
+    "validator": {
+     "validator": "1.6.0",
+     "gate": 2,
+     "ok": true,
+     "errors": [],
+     "warnings": [
+      {
+       "check": "plan.requirements",
+       "message": "P2/P3 requirements with no plan scenario",
+       "ids": [
+        "REQ-015"
+       ]
+      }
+     ],
+     "metrics": {
+      "requirements": 13,
+      "scenarios": 17,
+      "cases": 0,
+      "test_files": 0,
+      "results": 0,
+      "repo_test_files": 11,
+      "repo_tests": 137,
+      "existing": 11,
+      "generated": 0,
+      "manual": 0,
+      "plan_by_area_level": {
+       "Body size limit logic": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Calculator invalid JSON body": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator invalid parameters": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator valid input returns result": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Currency code validation regex": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "FX rate currency validation": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Health endpoint integration": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "List tools endpoint integration": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "NAV endpoint valid and invalid codes": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "NAV scheme code validation": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "NAV search query validation": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Production SSE server startup": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Query length validation": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Quote symbol validation": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Request body size limit enforced": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Security headers present on all responses": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Stock symbol validation regex": {
+        "Integration": 0,
+        "Unit": 1
+       }
+      }
+     },
+     "suspects": [],
+     "duplicates": [],
+     "brief": "Gate 2 validation: PASS (0 errors, 1 warnings)."
+    },
+    "error": null,
+    "app": "prj_7c0fb211e670"
+   }
+  },
+  {
+   "gate": 3,
+   "seconds": 256.5,
+   "title": "Gate 3: approve test design and data",
+   "summary": "46 cases. Case budget 48 of 40 (ATLAS_MAX_CASES), decided before design; P0 and P1 need more than the limit, so the limit is exceeded for them; 1 lower-priority requirements get no cases: REQ-015. Remaining gaps: ['REQ-003: no Positive case', 'REQ-003: needs 2 Negative cases', 'REQ-005: no Positive case', 'REQ-005: needs 2 Negative cases', 'REQ-010: needs 2 Negative cases', 'REQ-011: needs 2 Negative cases', 'REQ-012: needs 2 Negative cases', 'REQ-013: needs 2 Negative cases', 'refused REQ-003: case \\'POST /api/calc with valid JSON body returns 200\\' has test data \\'JSON body = {\"calculator\": \"interest\", \"principal\": 1000, \"r\\', a string, but the requirement states its input type as object. Use a value of that type, or state the error behaviour in the requirement first', 'refused REQ-005: case \\'POST /api/calc with valid input returns 200\\' has test data \\'JSON body = {\"calculator\": \"interest\", \"principal\": 1000, \"r\\', a string, but the requirement states its input type as object. Use a value of that type, or state the error behaviour in the requirement first']. Tokens: 341,616 used of 50,000,000, 49,658,384 left.",
+   "plugin_check": null
+  }
+ ],
+ "started": "2026-11-14T11:21:50.990637",
+ "status": "waiting_approval",
+ "error": "",
+ "total_seconds": 367.0,
+ "summary": null,
+ "requirements": 13
+}
