@@ -58,7 +58,7 @@ def reviewer(grade=None, seen=None):
 
 def rules(grade=None, seen=None):
     """ScriptedClient rules for the three review types, placed before any generic reviewer rule."""
-    return [(f"Review type: {label}.", reviewer(grade, seen)) for label in KINDS] + [("Audit these designed cases.", auditor())]
+    return [(f"Review type: {label}.", reviewer(grade, seen)) for label in KINDS] + [("Audit these designed cases.", auditor()), ("Audit these generated tests.", code_auditor())]
 
 
 def auditor(verdict="COVERS"):
@@ -71,5 +71,20 @@ def auditor(verdict="COVERS"):
         pick = (lambda i: verdict(i, len(calls))) if callable(verdict) else (lambda i: verdict)
         return json.dumps({"kind": "design", "verdicts": [{"id": c["tc_id"], "verdict": pick(c["tc_id"]), "scenario": (c["planScenarioIds"] or [""])[0],
                                                            "reason": "The expected result checks the behaviour at calc.py:2"} for c in given]})
+
+    return reply
+
+
+def code_auditor(verdict="COVERS", seen=None):
+    """A reply function for the code audit (V1): one verdict per test it was given. `verdict` may be a function of (case id, call number)."""
+    calls = []
+
+    def reply(text: str) -> str:
+        given = json.loads(text.split("TESTS:\n", 1)[1].split("\n\nREQUIREMENTS AND EVIDENCE:")[0])
+        calls.append(1)
+        if seen is not None:
+            seen.append([t["tc_id"] for t in given])
+        pick = (lambda i: verdict(i, len(calls))) if callable(verdict) else (lambda i: verdict)
+        return json.dumps({"kind": "code", "verdicts": [{"id": t["tc_id"], "verdict": pick(t["tc_id"]), "reason": "The test asserts the case's expected result"} for t in given]})
 
     return reply

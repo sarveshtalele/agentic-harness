@@ -1,0 +1,17 @@
+{
+  "id": "dotnet",
+  "name": ".NET minimal API",
+  "language": "csharp",
+  "ui": false,
+  "toolchains": [{"name": "dotnet", "min": "8.0"}],
+  "install": [["dotnet", "restore", "Tests/Tests.csproj"]],
+  "build": [["dotnet", "build", "App/App.csproj", "--no-restore"]],
+  "test": {
+    "unit": ["dotnet", "test", "Tests/Tests.csproj"],
+    "integration": ["dotnet", "test", "Tests/Tests.csproj", "--filter", "Category=Integration"],
+    "e2e": null
+  },
+  "start": ["dotnet", "run", "--project", "App/App.csproj", "--no-launch-profile", "--urls", "http://127.0.0.1:{port}"],
+  "health": "http://127.0.0.1:{port}/health",
+  "env": {"DOTNET_CLI_TELEMETRY_OPTOUT": "1", "DOTNET_NOLOGO": "1"}
+}

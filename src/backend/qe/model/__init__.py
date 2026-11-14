@@ -13,6 +13,7 @@ from .schemas import (
     ConfidenceReview,
     AuditVerdict,
     AuditSet,
+    ArchitectureNote,
 )
 from .cases import (
     TestCase,
@@ -25,6 +26,8 @@ from .cases import (
 )
 from .quota import (
     coverage_gaps,
+    level_gaps,
+    planned_levels,
     duplicate_scenarios,
     plan_confidence,
     ExecutionSummary,

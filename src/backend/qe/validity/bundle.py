@@ -19,7 +19,7 @@ def _cell(text: str) -> str:
 
 
 def validation_md(validation: dict, framework: str) -> str:
-    rows = ["| Test | Case | Valid | V2b inputs | V3 collect | V4 symbols | V5 assertions | V6 trace |", "|---|---|---|---|---|---|---|---|"]
+    rows = ["| Test | Case | Valid | V1 audit | V2b inputs | V3 collect | V4 symbols | V5 assertions | V6 trace |", "|---|---|---|---|---|---|---|---|---|"]
     for t in validation["tests"]:
         rows.append(f"| {_cell(t['path'])} | {_cell(t['case_id'])} | {'yes' if t['valid'] else 'no'} | " + " | ".join(f"{c['status']}: {_cell(c['message'])}" for c in (t["checks"].get(k, {"status": "NOT CHECKED", "message": ""}) for k in CHECKS)) + " |")
     c = validation["counts"]

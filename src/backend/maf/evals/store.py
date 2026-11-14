@@ -25,6 +25,8 @@ METRICS_BY_AGENT = {
     "defect-diagnostician": (True, True, "Labelled failures: defect, test problem, or environment", "Seeded bugs fixed with tests passing"),
     "confidence-reviewer": (True, True, "Seeded good and bad work, approve or reject", "Agreement with labels"),
     "coverage-auditor": (True, True, "Seeded covering and off-target cases", "Agreement with labels"),
+    "solution-architect": (True, True, "Requirements covered by a module", "Stack fits the requirements, no invented requirement ids"),
+    "document-analyst": (True, True, "Seeded questions, answerable and not in the documents", "Citations found verbatim, no answer when absent"),
     "business-analyst": (True, True, "Facts from the brief", "Invented figures, headings kept, valid Gherkin"),
     "bug-reviewer": (True, True, "Seeded bugs, plus clean files for false alarms", "False alarm rate"),
     "bug-fix-reviewer": (True, True, "Scores proposed bug fixes and assertion preservation", "Verified fixes approved"),

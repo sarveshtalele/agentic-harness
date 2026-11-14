@@ -49,8 +49,8 @@ async def qe_plan(rc: RunContext, state: dict) -> dict:
 
 async def _plugin_sensor(rc: RunContext, state: dict, call: AgentCall, prompt: str, plan: dict) -> tuple[dict, dict]:
     """Gate 2 sensor: the plugin's check-gate.ts on its plan.json; its gaps go back to the architect once."""
-    if state["mode"] != "brownfield":
-        return plan, {"ok": None, "error": "greenfield: the plugin's gate check needs code-evidenced requirements"}
+    if not any(r.get("file") for r in state["requirements"]):  # approved-document requirements with no cited text (the legacy greenfield path) have nothing for the plugin to check
+        return plan, {"ok": None, "error": "the requirements cite no saved text, so the plugin's gate check does not apply"}
     app = plugin_bridge.app_name(rc.project_id)
     for attempt in range(2):
         plugin_bridge.write(rc.project_id, app, "03-plan/plan.json", plugin_bridge.plan_file(plan))

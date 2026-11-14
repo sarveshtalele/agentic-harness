@@ -10,7 +10,8 @@ from backend.qe.validity.assertions import integrity
 from backend.qe.validity.collect import compiles
 from backend.qe.validity.inputs import async_misuse, invented
 
-CHECKS = ("V2b", "V3", "V4", "V5", "V6")
+CHECKS = ("V1", "V2b", "V3", "V4", "V5", "V6")
+OPTIONAL = ("V1", "V2b")  # NOT CHECKED (no auditor answer, a non-Python test) does not make a test invalid; a FAIL does
 MARKER = re.compile(r"CASE_ID:\s*([A-Za-z0-9_.-]+)")
 
 
@@ -33,7 +34,7 @@ def _trace(path: str, code: str, case_ids: list[str], known: set[str]) -> dict:
 
 
 def check_file(worktree: Path, path: str, code: str, case_ids: list[str], cases: dict, *, inventory=None, allowed=frozenset(), async_ok: bool = False, quotes: dict | None = None) -> dict[str, dict]:
-    """{"V2b": {status, message}, "V3": ...} for one test file. `cases` maps case id to its record; `quotes` maps requirement id to its quote."""
+    """{"V2b": {status, message}, "V3": ...} for one test file. V1 (the coverage auditor) is added by the generation stage. `cases` maps case id to its record; `quotes` maps requirement id to its quote."""
     expected = " ".join(cases.get(c, {}).get("expected_result", "") for c in case_ids)
     case = cases.get(case_ids[0], {}) if case_ids else {}
     v2b = invented(worktree, path, code, case, (quotes or {}).get(case.get("requirement_id"), "")) if path.endswith(".py") else {"status": "NOT CHECKED", "message": "V2b reads Python tests only"}
@@ -48,16 +49,16 @@ def problems(checks: dict[str, dict]) -> list[str]:
 
 def tally(tests: list[dict]) -> dict:
     """The run's result: per-test rows, counts by check, and the valid and invalid paths. A test is valid when no check FAILs and V3 to V6 PASS;
-    V2b NOT CHECKED (a non-Python test) does not make it invalid."""
+    V1 or V2b NOT CHECKED (no auditor answer, a non-Python test) does not make it invalid."""
     for t in tests:
-        t["valid"] = all(c["status"] == "PASS" or (k == "V2b" and c["status"] == "NOT CHECKED") for k, c in t["checks"].items())
+        t["valid"] = all(c["status"] == "PASS" or (k in OPTIONAL and c["status"] == "NOT CHECKED") for k, c in t["checks"].items())
     return {"tests": tests, "valid": [t["path"] for t in tests if t["valid"]], "invalid": [t["path"] for t in tests if not t["valid"]],
             "counts": {"total": len(tests), "valid": sum(t["valid"] for t in tests), "invalid": sum(not t["valid"] for t in tests),
-                       **{k: sum(t["checks"].get(k, {}).get("status") == "FAIL" or (k != "V2b" and t["checks"].get(k, {}).get("status") != "PASS") for t in tests) for k in CHECKS}}}
+                       **{k: sum(t["checks"].get(k, {}).get("status") == "FAIL" or (k not in OPTIONAL and t["checks"].get(k, {}).get("status") != "PASS") for t in tests) for k in CHECKS}}}
 
 
 def line(validation: dict | None) -> str:
     if not validation:
         return ""
     c = validation["counts"]
-    return f"Validity: {c['valid']} of {c['total']} tests valid; {c['invalid']} need review (V2b {c.get('V2b', 0)}, V3 {c['V3']}, V4 {c['V4']}, V5 {c['V5']}, V6 {c['V6']})."
+    return f"Validity: {c['valid']} of {c['total']} tests valid; {c['invalid']} need review (V1 {c.get('V1', 0)}, V2b {c.get('V2b', 0)}, V3 {c['V3']}, V4 {c['V4']}, V5 {c['V5']}, V6 {c['V6']})."

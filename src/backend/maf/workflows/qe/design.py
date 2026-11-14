@@ -18,6 +18,7 @@ from backend.maf.workflows.qe.common import (
 )
 from backend.maf.workflows.shared import review_cases, review_with_send_back
 from backend.maf.workflows.qe.design_audit import plugin_design as _plugin_design
+from backend.maf.workflows.qe.design_reuse import reusable
 from backend.qe import confidence, model
 
 
@@ -30,11 +31,13 @@ async def qe_design(rc: RunContext, state: dict) -> dict:
     source = root if root.exists() else None
     budget = model.case_quota(state["requirements"], effective_max_cases, {r for a in state["plan"]["areas"] for r in a["requirement_ids"]})
     quota = budget["quota"]
+    levels = model.planned_levels(state["plan"])
     dropped: list[dict] = []
     rc.log(budget["message"], budget, "warning" if budget["left_out_requirements"] or budget["p0_over_limit"] else "log")
 
     def asked_for(requirements: list[dict]) -> str:
-        return ("\nCASE QUOTA, at most this many cases for each requirement (for 4: 1 Positive, 2 Negative, then 1 Exception only when the requirement states error behaviour, "
+        planned = ", ".join(f"{r['id']}: {' and '.join(levels[r['id']])}" for r in requirements if len(levels.get(r["id"], [])) > 1)
+        return (f"\nPLANNED LEVELS: give each of these requirements at least one case at every level listed, as far as its quota allows: {planned}" if planned else "") + ("\nCASE QUOTA, at most this many cases for each requirement (for 4: 1 Positive, 2 Negative, then 1 Exception only when the requirement states error behaviour, "
                 "else a third Negative; with fewer, the Positive case first). Test data must be of the requirement's input_type:\n") + ", ".join(f"{r['id']}: {quota.get(r['id'], 0)}" for r in requirements)
 
     async def design(requirements: list[dict], note: str = "") -> list[dict]:
@@ -53,7 +56,7 @@ async def qe_design(rc: RunContext, state: dict) -> dict:
         return [c.model_dump() for c in result.cases]
 
     async def design_and_review(requirements: list[dict]) -> tuple[list[dict], list[dict], dict, list[dict]]:
-        found, over = model.apply_quota(await design(requirements), quota, requirements)
+        found, over = model.apply_quota(await design(requirements), quota, requirements, levels)
 
         async def revise_case(i: int, record: dict, calls: list) -> str:
             old = found[i]
@@ -69,7 +72,13 @@ async def qe_design(rc: RunContext, state: dict) -> dict:
         return found, records, tokens, over
 
     designed = [r for r in state["requirements"] if r["id"] in quota]
-    batches = [designed[i : i + DESIGN_BATCH] for i in range(0, len(designed), DESIGN_BATCH)]
+    keep = reusable(state, designed, quota)  # after a send-back only the requirements the feedback names are designed again
+    if keep:
+        rc.log(f"The feedback names {len(designed) - len(keep)} of {len(designed)} requirements. The other {len(keep)} keep their cases, reviews and audit verdicts", {"kept": sorted(keep)})
+    kept_pairs = [(c, record) for r in designed for c, record, _ in keep.get(r["id"], [])]
+    earlier_verdict = {id(c): verdict for rows in keep.values() for c, _, verdict in rows if verdict}
+    fresh_reqs = [r for r in designed if r["id"] not in keep]
+    batches = [fresh_reqs[i : i + DESIGN_BATCH] for i in range(0, len(fresh_reqs), DESIGN_BATCH)]
 
     async def finished_or_new(batch: list[dict]) -> tuple[list[dict], list[dict], dict, list[dict]]:
         key = part_key("design", [r["id"] for r in batch], state.get("feedback", ""), [quota[r["id"]] for r in batch])
@@ -83,13 +92,13 @@ async def qe_design(rc: RunContext, state: dict) -> dict:
     outcomes = await asyncio.gather(*(finished_or_new(b) for b in batches), return_exceptions=True)
     partial = settle(rc, [[r["id"] for r in b] for b in batches], outcomes, "Design")
     done = [o for o in outcomes if not isinstance(o, BaseException)]
-    pairs = [(case, record) for found, records, _, _ in done for case, record in zip(found, records)]
+    pairs = kept_pairs + [(case, record) for found, records, _, _ in done for case, record in zip(found, records)]
     dropped += [c for _, _, _, over in done for c in over]
     tokens = {k: sum(t.get(k, 0) for _, _, t, _ in done) for k in ("review", "revise", "total")}
     cases = [case for case, _ in pairs]
     # batches number their cases separately, so ids are assigned here
     _number_cases(cases)
-    checks = lambda found: model.coverage_gaps(designed, found) + [why for _, why in model.case_problems(state["requirements"], found)]
+    checks = lambda found: model.coverage_gaps(designed, found) + model.level_gaps(designed, found, levels, quota) + [why for _, why in model.case_problems(state["requirements"], found)]
     gaps, dupes = checks(cases), model.duplicate_scenarios(cases)
     if gaps or dupes:
         rc.log(f"Design checks found gaps {gaps} and duplicates {dupes}; revising", kind="warning")
@@ -97,7 +106,7 @@ async def qe_design(rc: RunContext, state: dict) -> dict:
         missing = set(partial["missing"]) if partial else set()  # a partial result is not designed again here
         wanted = [r for r in designed if r["id"] in affected - missing] or ([] if partial else designed)
         if wanted:
-            revised, over = model.apply_quota(await design(wanted, f"\n\nThese cases failed checks. Gaps: {gaps}. Duplicates: {dupes}. Return a full corrected set for these requirements, within the case quota."), quota, wanted)
+            revised, over = model.apply_quota(await design(wanted, f"\n\nThese cases failed checks. Gaps: {gaps}. Duplicates: {dupes}. Return a full corrected set for these requirements, within the case quota."), quota, wanted, levels)
             dropped += over
             fresh, spent = await review_cases(rc, "design", "design cases", [(f"C{n}", json.dumps(c)) for n, c in enumerate(revised, 1)], lambda keys: _design_evidence(rc, wanted, [revised[int(k[1:]) - 1] for k in keys]), source, DESIGN_REVIEW_BATCH)
             tokens["review"] += spent
@@ -107,7 +116,7 @@ async def qe_design(rc: RunContext, state: dict) -> dict:
         refused = model.case_problems(state["requirements"], cases)  # still of the wrong type after the revision, so the case is refused
         pairs = [p for p in pairs if not any(p[0] is case for case, _ in refused)]
         cases = [case for case, _ in pairs]
-        gaps = model.coverage_gaps(designed, cases) + [f"refused {why}" for _, why in refused]
+        gaps = model.coverage_gaps(designed, cases) + model.level_gaps(designed, cases, levels, quota) + [f"refused {why}" for _, why in refused]
     _number_cases(cases)
     records = {case["id"]: {**record, "tc_id": case["id"]} for case, record in pairs}
     # final safety check: after the quota nothing should be cut here, and if something is, it is reported
@@ -120,7 +129,9 @@ async def qe_design(rc: RunContext, state: dict) -> dict:
     case_limit["notice"] = bool(case_limit["left_out_count"] or budget["left_out_requirements"] or budget["p0_over_limit"])
     if case_limit["notice"]:
         rc.log(case_limit["message"], case_limit, "warning")
-    design_audit = await _plugin_design(rc, state, cases, records, source)  # may redesign cases the auditor says MISS, so before the roll-up
+    known = {c["id"]: {**earlier_verdict[id(c)], "id": c["id"]} for c in cases if id(c) in earlier_verdict}
+    design_audit = await _plugin_design(rc, state, cases, records, source, known)  # may redesign cases the auditor says MISS, so before the roll-up
+    verdicts = design_audit.pop("verdicts", {})
     cases_review = confidence.summarise([records[c["id"]] for c in cases], tokens)
     rc.log(f"Design review: {cases_review['counts']}, {tokens['total']} tokens", {"tokens": tokens}, "review")
     columns = "| TC ID | Requirement | Scenario | Type | Level | Precondition | Test Data | Steps | Expected Result | Oracle | Priority |\n|---|---|---|---|---|---|---|---|---|---|---|\n"
@@ -132,4 +143,4 @@ async def qe_design(rc: RunContext, state: dict) -> dict:
     doc = documents.create(rc.project_id, "test_cases", f"Deterministic Test Cases & Scenario Matrix (PARTIAL, {len(partial['missing'])} requirements missing)" if partial else "Deterministic Test Cases & Scenario Matrix", body, "agent:test-design-architect", data=cases, prompt_ref=call.prompt_ref, run_id=rc.run_id)
     rc.log(f"{len(cases)} cases designed; {len(gaps)} remaining gaps", {"gaps": gaps}, "artifact")
     return {"cases": cases, "cases_doc": doc["id"], "design_gaps": gaps, "case_limit": case_limit, "cases_review": cases_review, "partial": partial,
-            "design_audit": design_audit}
+            "design_audit": design_audit, "design_kept": {"cases": cases, "records": records, "verdicts": verdicts}}

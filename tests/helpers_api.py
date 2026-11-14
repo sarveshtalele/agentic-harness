@@ -157,10 +157,10 @@ PLAN = json.dumps({"strategy": "Unit first", "areas": [{"id": "A1", "name": "Add
 
 
 CASES = json.dumps({"cases": [
-    {"id": "TC-APP-001", "requirement_id": "REQ-001", "scenario": "Adds", "type": "Positive", "level": "Unit", "steps": ["call add(2,3)"], "expected_result": "returns 5", "oracle": "specified", "test_data": "2, 3"},
+    {"id": "TC-APP-001", "requirement_id": "REQ-001", "scenario": "Adds", "type": "Positive", "level": "Unit", "steps": ["call add(2,3)"], "expected_result": "returns 5", "oracle": "derived", "test_data": "2, 3"},
     {"id": "TC-APP-002", "requirement_id": "REQ-001", "scenario": "Negatives", "type": "Negative", "level": "Unit", "steps": ["call add(-1,1)"], "expected_result": "returns 0", "oracle": "derived"},
     {"id": "TC-APP-003", "requirement_id": "REQ-001", "scenario": "Zero", "type": "Negative (Boundary)", "level": "Unit", "steps": ["call add(0,0)"], "expected_result": "returns 0", "oracle": "derived"},
-    {"id": "TC-APP-004", "requirement_id": "REQ-001", "scenario": "Bad type", "type": "Exception", "level": "Unit", "steps": ["call add(1,None)"], "expected_result": "raises TypeError", "oracle": "specified"}]})
+    {"id": "TC-APP-004", "requirement_id": "REQ-001", "scenario": "Bad type", "type": "Exception", "level": "Unit", "steps": ["call add(1,None)"], "expected_result": "raises TypeError", "oracle": "derived"}]})
 
 
 def _test_file(number, body):

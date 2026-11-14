@@ -1,0 +1,17 @@
+{
+  "id": "go",
+  "name": "Go net/http API",
+  "language": "go",
+  "ui": false,
+  "toolchains": [{"name": "go", "min": "1.22"}],
+  "install": [["go", "mod", "download"]],
+  "build": [["go", "build", "./..."]],
+  "test": {
+    "unit": ["go", "test", "./..."],
+    "integration": ["go", "test", "-tags", "integration", "./..."],
+    "e2e": null
+  },
+  "start": ["go", "run", ".", "-addr", "127.0.0.1:{port}"],
+  "health": "http://127.0.0.1:{port}/health",
+  "env": {}
+}

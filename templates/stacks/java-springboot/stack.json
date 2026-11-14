@@ -1,0 +1,17 @@
+{
+  "id": "java-springboot",
+  "name": "Java Spring Boot API",
+  "language": "java",
+  "ui": false,
+  "toolchains": [{"name": "java", "min": "17"}, {"name": "mvn", "min": "3.6"}],
+  "install": [["mvn", "-q", "-B", "dependency:resolve"]],
+  "build": [["mvn", "-q", "-B", "-DskipTests", "package"]],
+  "test": {
+    "unit": ["mvn", "-q", "-B", "test"],
+    "integration": ["mvn", "-q", "-B", "verify"],
+    "e2e": null
+  },
+  "start": ["java", "-jar", "target/app.jar", "--server.address=127.0.0.1", "--server.port={port}"],
+  "health": "http://127.0.0.1:{port}/health",
+  "env": {}
+}

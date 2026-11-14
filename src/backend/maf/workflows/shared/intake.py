@@ -6,6 +6,7 @@ from backend.core import gates
 from backend.db import db
 from backend.maf.engine import RunContext
 from backend.maf.workflows.shared.pack import _analysis
+from backend.rag import retrieve, store
 from backend.repos import ingest
 
 
@@ -15,18 +16,30 @@ async def intake(rc: RunContext, state: dict) -> dict:
     return {"mode": a["mode"]}
 
 
+def documents_note(project_id: str) -> tuple[str, list[dict]]:
+    """Gate 0's line on the uploaded requirement documents and what search can do with them; ("", []) when none are indexed."""
+    found = store.sources(project_id)
+    if not found:
+        return "", []
+    how = retrieve.mode(project_id)
+    search = "hybrid (keyword and vector)" if how["vector"] else f"keyword only. {how['note']}".strip()
+    names = ", ".join(f"{s['filename']} v{s['version']}" for s in found)
+    return f" Requirement documents ({len(found)}): {names}. Search: {search}", [{k: s[k] for k in ("doc_id", "filename", "version", "chunk_count", "sha256")} for s in found]
+
+
 def intake_gate(rc: RunContext, state: dict):
     if gates.is_approved(rc.project_id, 0):
         return None
     a = _analysis(rc.project_id)
     repo = ingest.get(rc.project_id)
     source = f"{repo['kind']} {repo['url']} at {repo['commit_sha'][:10]}" if repo else "no repository"
+    note, docs = documents_note(rc.project_id)
     return {"gate": 0, "title": "Gate 0: confirm intake scope",
             "summary": f"Mode: {a['mode']}. Source: {source}. Files: {a['total_files']}. Languages: {', '.join(a['languages']) or 'none'}. "
-                       "Agents read this project's repository and documents only. Generated code lands on a separate branch."
+                       "Agents read this project's repository and documents only. Generated code lands on a separate branch." + note
                        + (" Approving Gate 0 lets the platform run this repository's dependency installers (pip, npm) in the sandbox, only to collect and compile the generated tests. No test body is run; "
                           "you download the tests and run them on your own systems." if a["mode"] == "brownfield" else ""),
-            "payload": {"analysis": {k: a.get(k) for k in ("mode", "languages", "frameworks", "test_runners", "total_files", "test_file_count")}}}
+            "payload": {"analysis": {k: a.get(k) for k in ("mode", "languages", "frameworks", "test_runners", "total_files", "test_file_count")}, "sources": docs, "search": retrieve.mode(rc.project_id)}}
 
 
 def token_line(run_id: str) -> dict:

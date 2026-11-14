@@ -1,0 +1,17 @@
+{
+  "id": "python-fastapi-react",
+  "name": "Python FastAPI with a web page",
+  "language": "python",
+  "ui": true,
+  "toolchains": [{"name": "python", "min": "3.10"}, {"name": "node", "min": "20"}],
+  "install": [["{python}", "-m", "venv", ".venv"], ["{venv_python}", "-m", "pip", "install", "-q", "-r", "requirements.txt"]],
+  "build": [["{venv_python}", "-m", "compileall", "-q", "app"]],
+  "test": {
+    "unit": ["{venv_python}", "-m", "pytest", "-q", "tests"],
+    "integration": ["{venv_python}", "-m", "pytest", "-q", "tests/integration"],
+    "e2e": ["npx", "playwright", "test"]
+  },
+  "start": ["{venv_python}", "-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", "{port}"],
+  "health": "http://127.0.0.1:{port}/health",
+  "env": {}
+}

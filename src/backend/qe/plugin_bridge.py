@@ -52,11 +52,16 @@ def write(project_id: str, app: str, relative: str, obj) -> Path:
     return path
 
 
+def _source_file(file: str) -> str:
+    """Path relative to the project folder: code is under repo/, an uploaded document's saved text under sandbox/ (docs/sources/<doc-id>.md)."""
+    return "" if not file else f"sandbox/{file}" if file.startswith("docs/sources/") else f"repo/{file}"
+
+
 def requirements_file(kept: list[dict]) -> dict:
     """The platform's verified requirements in the plugin's requirements.json shape (paths relative to the project)."""
     return {"requirements": [{
         "id": r["id"], "title": r.get("title", ""), "text": r.get("statement", ""), "priority": r.get("priority", ""),
-        "source_file": f"repo/{r['file']}" if r.get("file") else "", "line_number": r.get("line") or 0, "quote": r.get("quote") or "",
+        "source_file": _source_file(r.get("file", "")), "line_number": r.get("line") or 0, "quote": r.get("quote") or "",
     } for r in kept]}
 
 

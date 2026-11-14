@@ -35,8 +35,8 @@ async def _check_all(env: Env, suite: GeneratedSuite, case_of: dict, cache: dict
     await asyncio.gather(*(one(f) for f in suite.files if _key(f) not in cache))
 
 
-def _rows(suite: GeneratedSuite, cache: dict) -> dict:
-    return validity.tally([{"path": f.path, "case_id": f.case_ids[0], "checks": cache[_key(f)]} for f in suite.files])
+def _rows(suite: GeneratedSuite, cache: dict, v1: dict) -> dict:
+    return validity.tally([{"path": f.path, "case_id": f.case_ids[0], "checks": {"V1": v1.get(f.path, {"status": "NOT CHECKED", "message": "not audited"}), **cache[_key(f)]}} for f in suite.files])
 
 
 def _write(env: Env, items: list[GeneratedFile]) -> None:
@@ -59,16 +59,27 @@ async def validate(env: Env, suite: GeneratedSuite, case_of: dict) -> dict:
     return cache
 
 
-async def finish(env: Env, suite: GeneratedSuite, case_of: dict, cache: dict) -> dict:
-    """After the review: re-check any file it rewrote, write the plugin's manifest, run the plugin's Gate 4 check, and return state["validation"]."""
+
+def write_records(env: Env, suite: GeneratedSuite, records: list[dict], audit: dict) -> None:
+    """The plugin's 05-generation/confidence.json and audit.json, stamped as recorded from the agents' own checked answers."""
+    rc, app = env.rc, plugin_bridge.app_name(env.rc.project_id)
+    reviewed = [r for r in records if r.get("verdict") != "NOT RUN"]
+    given = [{**audit["verdicts"][c], "id": c} for f in suite.files for c in f.case_ids if c in audit["verdicts"]]
+    plugin_bridge.write(rc.project_id, app, "05-generation/confidence.json", plugin_bridge.recorded("confidence-reviewer", f"{rc.run_id}:code", "code", "items", reviewed))
+    plugin_bridge.write(rc.project_id, app, "05-generation/audit.json", plugin_bridge.recorded("coverage-auditor", f"{rc.run_id}:code", "code", "verdicts", given))
+
+
+async def finish(env: Env, suite: GeneratedSuite, case_of: dict, cache: dict, audit: dict, records: list[dict]) -> dict:
+    """After the review: re-check any file it rewrote, write the plugin's manifest, code review and code audit records, run the plugin's Gate 4 check, and return state["validation"]."""
     rc, worktree = env.rc, env.worktree
     await _check_all(env, suite, case_of, cache)
-    validation = _rows(suite, cache)
+    validation = _rows(suite, cache, audit["v1"])
+    validation["audit"] = {k: audit[k] for k in ("first", "now", "regenerated")}
     app = plugin_bridge.app_name(rc.project_id)
     base = worktree.relative_to(project_dir(rc.project_id)).as_posix() if worktree.is_relative_to(project_dir(rc.project_id)) else ""
     manifest = {"files": [{"path": f"{base}/{f.path}".lstrip("/"), "caseIds": f.case_ids} for f in suite.files]}
     plugin_bridge.write(rc.project_id, app, "05-generation/manifest.json", manifest)
-    # the plugin's code review and code audit records come in step 3, so their provenance gaps are recorded here and do not fail a test
+    write_records(env, suite, records, audit)
     validation["plugin_check"] = await asyncio.to_thread(plugin_bridge.check_gate, rc.project_id, app, 4)
     rc.log(f"[VALIDITY] {validity.line(validation)}", {"counts": validation["counts"], "invalid": validation["invalid"][:20]}, "review" if validation["invalid"] else "log")
     return validation

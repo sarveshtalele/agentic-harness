@@ -25,6 +25,28 @@ def coverage_gaps(requirements: list[dict], cases: list[dict]) -> list[str]:
     return gaps
 
 
+def planned_levels(plan: dict) -> dict[str, list[str]]:
+    """The levels each requirement is planned at: every plan area that lists it, in plan order."""
+    levels: dict[str, list[str]] = {}
+    for area in plan.get("areas", []):
+        for requirement_id in area["requirement_ids"]:
+            if area["level"] not in levels.setdefault(requirement_id, []):
+                levels[requirement_id].append(area["level"])
+    return levels
+
+
+def level_gaps(requirements: list[dict], cases: list[dict], levels: dict[str, list[str]], quota: dict[str, int]) -> list[str]:
+    """A requirement with cases needs a case at each planned level, as far as its quota allows (a quota of 1 covers one level)."""
+    gaps = []
+    for requirement in requirements:
+        planned, mine = levels.get(requirement["id"], []), [c["level"] for c in cases if c["requirement_id"] == requirement["id"]]
+        missing = [lvl for lvl in planned if lvl not in mine]
+        owed = min(len(planned), quota.get(requirement["id"], 0)) - (len(planned) - len(missing))
+        if mine and owed > 0:
+            gaps += [f"{requirement['id']}: no case at planned level {lvl}" for lvl in missing[:owed]]
+    return gaps
+
+
 def duplicate_scenarios(cases: list[dict]) -> list[str]:
     seen, dupes = set(), []
     for case in cases:
@@ -112,9 +134,10 @@ def case_quota(requirements: list[dict], limit: int, planned_ids: set[str] | fro
     return {"limit": limit, "quota": quota, "planned": planned, "left_out_requirements": left, "p0_over_limit": over, "message": message}
 
 
-def apply_quota(cases: list[dict], quota: dict[str, int], requirements: list[dict] = ()) -> tuple[list[dict], list[dict]]:
+def apply_quota(cases: list[dict], quota: dict[str, int], requirements: list[dict] = (), levels: dict[str, list[str]] | None = None) -> tuple[list[dict], list[dict]]:
     """Keeps at most the quota of cases per requirement, in order. The required kinds are kept first, so a cut never opens a coverage gap:
-    1 Positive, 2 Negative and 1 Exception for a requirement that states error behaviour, else 1 Positive and 3 Negative. Returns (kept, dropped)."""
+    1 Positive, 2 Negative and 1 Exception for a requirement that states error behaviour, else 1 Positive and 3 Negative.
+    A planned level (`levels`) with no kept case takes the place of a case whose level and kind another kept case also has. Returns (kept, dropped)."""
     errors = {r["id"] for r in requirements if states_error(r)}
     kind = lambda c: "Negative" if c["type"].startswith("Negative") else c["type"]
     keep: set[int] = set()
@@ -127,5 +150,11 @@ def apply_quota(cases: list[dict], quota: dict[str, int], requirements: list[dic
                 left[kind(cases[i])] -= 1
                 chosen.append(i)
         chosen += [i for i in idx if i not in chosen][: max(quota.get(req, 0) - len(chosen), 0)]
+        for level in (levels or {}).get(req, []):
+            spare = [i for i in idx if i not in chosen and cases[i]["level"] == level]
+            if spare and chosen and not any(cases[i]["level"] == level for i in chosen):
+                twin = next((i for i in reversed(chosen) if sum(cases[j]["level"] == cases[i]["level"] for j in chosen) > 1 and sum(kind(cases[j]) == kind(cases[i]) for j in chosen) > 1), None)
+                if twin is not None:
+                    chosen[chosen.index(twin)] = spare[0]
         keep |= set(chosen)
     return [c for i, c in enumerate(cases) if i in keep], [c for i, c in enumerate(cases) if i not in keep]

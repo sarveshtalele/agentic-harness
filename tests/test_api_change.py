@@ -81,15 +81,22 @@ def test_brownfield_qe_lifecycle_g0_to_g5_is_not_executed_and_the_tests_download
             check, audit = approval["payload"]["plugin_check"], approval["payload"]["design_audit"]
             assert check["error"] is None and audit["counts"]["COVERS"] == 4 and audit["unaudited"] == [], (check, audit)
             assert check["gaps"] and all("skippedLevels" in g for g in check["gaps"]), check["gaps"]
+            assert audit["oracle_refused"] == 0 and audit["oracle_still"] == [], audit  # "returns 5" is derived from the inputs, "TypeError" is a builtin
+            assert run["state"]["design_gaps"] == [] and {c["level"] for c in run["state"]["cases"]} == {"Unit"}, "the plan lists REQ-001 at Unit only, so no planned-level gap"
         if approval["gate"] == 0:
             assert "dependency installers" in approval["summary"] and "No test body is run" in approval["summary"]
         if approval["gate"] == 4:
             assert "run on this machine" not in approval["summary"], "brownfield tests are never run here"
+            validation = approval["payload"]["validation"]
+            assert validation["counts"]["V1"] == 0 and "V1 0," in approval["summary"] and validation["audit"] == {"first": {"COVERS": 4, "PARTIAL": 0, "MISSES": 0}, "now": {"COVERS": 4, "PARTIAL": 0, "MISSES": 0}, "regenerated": 0}, validation
+            assert {t["checks"]["V1"]["status"] for t in validation["tests"]} == {"PASS"}
+            gaps = " ".join(validation["plugin_check"]["gaps"])  # the code review and code audit records are recorded, so their provenance rules pass
+            assert validation["plugin_check"]["error"] is None and "audit.json" not in gaps and "confidence.json" not in gaps and "no code confidence review" not in gaps, validation["plugin_check"]
         if approval["gate"] == 5:
             payload = approval["payload"]
             assert payload["summary"]["verdict"] == "NOT EXECUTED" and "Verdict NOT EXECUTED" in approval["summary"]
             assert (payload["summary"]["requirements"], payload["summary"]["cases"], payload["summary"]["tests"], payload["summary"]["valid"], payload["summary"]["needs_review"]) == (1, 4, 4, 4, 0), payload["summary"]
-            assert payload["summary"]["by_check"] == {"V2b": 0, "V3": 0, "V4": 0, "V5": 0, "V6": 0}
+            assert payload["summary"]["by_check"] == {"V1": 0, "V2b": 0, "V3": 0, "V4": 0, "V5": 0, "V6": 0}
             row = payload["matrix_rows"][0]
             assert row["covered"] and [c["test_file"] for c in row["cases"]][0].startswith("tests/agentic_qe/") and {c["result"] for c in row["cases"]} == {"valid"}
             assert payload["tests_zip"] == f"/api/runs/{run['id']}/tests.zip" and payload["run_command"] == "python -m pytest tests/agentic_qe"

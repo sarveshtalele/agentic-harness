@@ -1,0 +1,17 @@
+{
+  "id": "node-nextjs",
+  "name": "Node.js Next.js app",
+  "language": "javascript",
+  "ui": true,
+  "toolchains": [{"name": "node", "min": "20.9"}],
+  "install": [["npm", "install", "--no-audit", "--no-fund"]],
+  "build": [["npm", "run", "build"]],
+  "test": {
+    "unit": ["npm", "test"],
+    "integration": ["npm", "run", "test:integration"],
+    "e2e": ["npx", "playwright", "test"]
+  },
+  "start": ["npm", "run", "start", "--", "-H", "127.0.0.1", "-p", "{port}"],
+  "health": "http://127.0.0.1:{port}/health",
+  "env": {"NEXT_TELEMETRY_DISABLED": "1"}
+}

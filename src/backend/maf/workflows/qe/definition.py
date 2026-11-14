@@ -24,6 +24,7 @@ from backend.maf.workflows.qe.sign import qe_sign
 from backend.maf.workflows.qe.trace import qe_trace
 from backend.maf.workflows.shared import intake, intake_gate
 from backend.qe import carry, validity
+from backend.rag import store
 
 
 async def qe_intake(rc: RunContext, state: dict) -> dict:
@@ -31,10 +32,10 @@ async def qe_intake(rc: RunContext, state: dict) -> dict:
     update = await intake(rc, state)
     if update["mode"] == "brownfield":
         update["install_deps"] = True  # Gate 0's card says approving it lets the installers run, to collect and compile the tests; no test body runs
-    if update["mode"] == "greenfield" and not state.get("spec_first"):
+    if update["mode"] == "greenfield" and not state.get("spec_first") and not store.sources(rc.project_id):  # uploaded documents are enough: the code does not exist yet
         rc.log("No code to test: the repository has no source files. The QE run stops before Gate 0", kind="warning")
         raise RepoError("No code to test: this project's repository has no source files, so there is nothing to design, generate or run tests against.",
-                        action='Upload or connect the code, then start the QE run again. To write failing tests from approved requirements before the code exists, start it with input {"spec_first": true}.')
+                        action='Upload or connect the code, then start the QE run again. To write failing tests before the code exists, upload the requirement documents (BRD, PRD, stories) on the Documents page, or start it with input {"spec_first": true} to use approved BA documents.')
     return update
 
 

@@ -9,13 +9,15 @@ from pydantic import ValidationError
 from backend.core import gherkin
 from backend.maf import runtime as agents
 from backend.qe import model
+from backend.rag.schemas import DocumentAnswer
 
 
 def _schemas() -> dict:
     from backend.maf import workflows
 
     return {"Review": workflows.Review, "ReviewFindings": workflows.ReviewFindings, "GeneratedSuite": workflows.GeneratedSuite, "RequirementSet": model.RequirementSet,
-            "TestPlan": model.TestPlan, "CaseSet": model.CaseSet, "ConfidenceReview": model.ConfidenceReview, "AuditSet": model.AuditSet}
+            "TestPlan": model.TestPlan, "CaseSet": model.CaseSet, "ConfidenceReview": model.ConfidenceReview, "AuditSet": model.AuditSet, "ArchitectureNote": model.ArchitectureNote,
+            "DocumentAnswer": DocumentAnswer}
 
 
 def build_checks(rules: dict) -> list:

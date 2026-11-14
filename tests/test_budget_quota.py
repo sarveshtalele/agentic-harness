@@ -71,7 +71,7 @@ def designer(per_requirement, prompts):
     def reply(text):
         prompts.append(text)
         wanted = re.findall(r'"id": "(REQ-\d+)"', text.rsplit("REQUIREMENTS:", 1)[-1].split("CASE QUOTA")[0])
-        return json.dumps({"cases": [{"id": f"x{n}", "requirement_id": r, "scenario": f"{r} scenario {n}", "type": KINDS[n % 4], "level": "Unit", "steps": ["call add"], "expected_result": "returns the sum 2", "oracle": "specified"}
+        return json.dumps({"cases": [{"id": f"x{n}", "requirement_id": r, "scenario": f"{r} scenario {n}", "type": KINDS[n % 4], "level": "Unit", "steps": ["call add"], "expected_result": "returns the sum 2", "oracle": "derived"}
                                      for r in wanted for n in range(per_requirement)]})
     return reply
 

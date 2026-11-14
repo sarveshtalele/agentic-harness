@@ -94,7 +94,7 @@ def test_without_a_run_environment_v3_is_not_checked_and_the_test_is_not_valid(t
     assert checks["V3"]["status"] == "NOT CHECKED" and "Install dependencies" in checks["V3"]["message"]
     done = validity.tally([{"path": "tests/agentic_qe/test_x.py", "case_id": "TC-APP-001", "checks": checks}])
     assert done["counts"]["valid"] == 0 and done["invalid"] == ["tests/agentic_qe/test_x.py"] and done["counts"]["V3"] == 1
-    assert validity.line(done) == "Validity: 0 of 1 tests valid; 1 need review (V2b 0, V3 1, V4 0, V5 0, V6 0)."
+    assert validity.line(done) == "Validity: 0 of 1 tests valid; 1 need review (V1 0, V2b 0, V3 1, V4 0, V5 0, V6 0)."
 
 
 def test_a_syntax_error_fails_v3_even_without_an_environment(tmp_path):

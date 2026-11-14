@@ -14,8 +14,8 @@ async def qe_data(rc: RunContext, state: dict) -> dict:
     used = sorted(fixtures["datasets"])
     doc = documents.create(rc.project_id, "test_data", "Synthesized Test Fixtures & Data Contracts", "```json\n" + json.dumps(fixtures, indent=2, ensure_ascii=False) + "\n```", "system", data=fixtures, run_id=rc.run_id)
     rc.log(f"Test data built for {len(fixtures['cases'])} cases from {len(used)} shared datasets ({', '.join(used) or 'none needed'}); no model call", {"document_id": doc["id"]}, "artifact")
-    check = {"ok": None, "error": (state.get("design_audit") or {}).get("error") or "greenfield: the plugin's gate check needs code-evidenced requirements"}
-    if state["mode"] == "brownfield" and (state.get("design_audit") or {}).get("app"):
+    check = {"ok": None, "error": (state.get("design_audit") or {}).get("error") or "the plugin's gate check did not run"}
+    if (state.get("design_audit") or {}).get("app"):
         app = state["design_audit"]["app"]
         plugin_bridge.write(rc.project_id, app, "04-design/fixtures.json", fixtures)
         check = await asyncio.to_thread(plugin_bridge.check_gate, rc.project_id, app, 3)  # Gate 3 sensor: design and data together

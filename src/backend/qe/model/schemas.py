@@ -24,6 +24,7 @@ class Requirement(BaseModel):
     file: str = ""
     line: int = 0
     quote: str = ""
+    section: str = Field("", description="Greenfield: the heading path of the document section the quote is in. Empty for code evidence.")
     input_type: str = Field("", description="The type of the input the requirement states: string, number, integer, boolean, list or object. Empty when it states none.")
     error_behaviour: str = Field("", description="The error the requirement or code states for bad input, such as 'raises ValueError when b is 0'. Empty when it states none: never invent one.")
 
@@ -84,3 +85,39 @@ class AuditSet(BaseModel):
     """What the coverage auditor returns (the plugin's agents/coverage-auditor.md output). Code drops ids it was not given."""
     kind: Literal["design", "code"] = "design"
     verdicts: list[AuditVerdict] = Field(min_length=1)
+
+
+class ArchModule(BaseModel):
+    name: str = Field(min_length=1)
+    purpose: str = Field(min_length=1)
+    requirement_ids: list[str] = Field(min_length=1)
+
+
+class ArchEntity(BaseModel):
+    name: str = Field(min_length=1)
+    fields: list[str] = Field(min_length=1)
+    requirement_ids: list[str] = Field(default_factory=list)
+
+
+class ArchRoute(BaseModel):
+    method: Literal["GET", "POST", "PUT", "PATCH", "DELETE"]
+    path: str = Field(pattern=r"^/")
+    purpose: str = Field(min_length=1)
+    requirement_ids: list[str] = Field(min_length=1)
+
+
+class ArchPage(BaseModel):
+    path: str = Field(pattern=r"^/")
+    purpose: str = Field(min_length=1)
+    requirement_ids: list[str] = Field(min_length=1)
+
+
+class ArchitectureNote(BaseModel):
+    """What the solution architect returns for Gate A. Code refuses an unknown stack id and any requirement no module covers."""
+    stack_id: str = Field(min_length=1)
+    rationale: str = Field(min_length=1, max_length=1500)
+    modules: list[ArchModule] = Field(min_length=1)
+    data_model: list[ArchEntity] = Field(default_factory=list)
+    api_routes: list[ArchRoute] = Field(default_factory=list)
+    pages: list[ArchPage] = Field(default_factory=list)
+    risks: list[str] = Field(default_factory=list)

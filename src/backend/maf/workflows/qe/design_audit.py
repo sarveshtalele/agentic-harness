@@ -10,20 +10,22 @@ from backend.maf.engine import RunContext
 from backend.maf.runtime import AgentCall
 from backend.maf.workflows.qe.common import DESIGN_REVIEW_BATCH, _design_evidence
 from backend.maf.workflows.shared import review_cases
-from backend.qe import model, plugin_bridge
+from backend.qe import model, oracle, plugin_bridge
 
 AUDIT_BATCH = 10
 
 
-async def plugin_design(rc: RunContext, state: dict, cases: list[dict], records: dict[str, dict], source) -> dict:
+async def plugin_design(rc: RunContext, state: dict, cases: list[dict], records: dict[str, dict], source, known: dict[str, dict] | None = None) -> dict:
     """The plugin's Gate 3 inputs: test_cases.json, the confidence reviewer's records, and the coverage auditor's verdicts.
 
-    The two reviewers must agree: a case the auditor says MISSES its scenario is redesigned once from the auditor's reason,
+    First code refuses a case whose expected result names a value its requirement's quote and the code near the citation do not contain (V2);
+    it is redesigned once, and one that still does is marked REJECT. The two reviewers must agree: a case the auditor says MISSES its scenario is redesigned once from the auditor's reason,
     reviewed and audited again; one that still misses is marked REJECT, so a person must give a reason to approve it.
-    Changes `cases` and `records` in place.
+    `known` holds the verdicts of cases kept from the earlier design: they are neither audited nor redesigned again.
+    Changes `cases` and `records` in place; the result carries `verdicts` (the caller keeps them for a send-back).
     """
-    if state["mode"] != "brownfield" or not cases:
-        return {"ok": None, "error": "greenfield or no cases: the plugin's design files are not written"}
+    if not cases or not any(r.get("file") for r in state["requirements"]):
+        return {"ok": None, "error": "no cases, or requirements that cite no saved text: the plugin's design files are not written"}
     app = plugin_bridge.app_name(rc.project_id)
     scenarios = json.dumps(plugin_bridge.plan_file(state["plan"])["scenarios"])
 
@@ -50,16 +52,14 @@ async def plugin_design(rc: RunContext, state: dict, cases: list[dict], records:
     async def redesign(case: dict, why: str) -> dict:
         call = AgentCall(rc.run_id, rc.project_id, "test-design-architect", skills=("designing-test-cases",))
         owner = [r for r in state["requirements"] if r["id"] == case["requirement_id"]]
-        result = await call.typed(f"Rewrite only this one test case so it exercises the plan scenario it is linked to, at its level, with an expected result that would fail if the behaviour broke. Keep its type. Send one case.\nTHE COVERAGE AUDITOR SAID: {why}\nREQUIREMENT:\n{json.dumps(owner)}\nCASE:\n{json.dumps(case)}\nPLAN SCENARIOS:\n{scenarios}", model.CaseSet, attempts=2)
+        result = await call.typed(f"Rewrite only this one test case so it exercises the plan scenario it is linked to, at its level, with an expected result that would fail if the behaviour broke. Keep its type and level. Send one case.\nTHE REVIEW SAID: {why}\nREQUIREMENT:\n{json.dumps(owner)}\nCASE:\n{json.dumps(case)}\nPLAN SCENARIOS:\n{scenarios}", model.CaseSet, attempts=2)
         return {**result.cases[0].model_dump(), "id": case["id"], "requirement_id": case["requirement_id"]}
 
-    verdicts = await audit_all(cases)
-    first = {k: sum(v["verdict"] == k for v in verdicts.values()) for k in ("COVERS", "PARTIAL", "MISSES")}
-    misses = [i for i, c in enumerate(cases) if verdicts.get(c["id"], {}).get("verdict") == "MISSES"]
-    if misses:
-        fixed = await asyncio.gather(*(redesign(cases[i], verdicts[cases[i]["id"]]["reason"]) for i in misses), return_exceptions=True)
+    async def redo(fixes: dict[int, str]) -> None:
+        """Redesign each named case once, review the new ones, and keep their records."""
+        fixed = await asyncio.gather(*(redesign(cases[i], why) for i, why in fixes.items()), return_exceptions=True)
         changed = []
-        for i, new in zip(misses, fixed):
+        for i, new in zip(fixes, fixed):
             if isinstance(new, AllowanceError):
                 raise new
             if isinstance(new, Exception):
@@ -69,9 +69,27 @@ async def plugin_design(rc: RunContext, state: dict, cases: list[dict], records:
             changed.append(new)
         if changed:
             fresh, _ = await review_cases(rc, "design", "design cases", [(c["id"], json.dumps(c)) for c in changed], lambda keys: _design_evidence(rc, state["requirements"], changed), source, DESIGN_REVIEW_BATCH)
-            records |= {c["id"]: {**r, "tc_id": c["id"]} for c, r in zip(changed, fresh)}
-            verdicts |= await audit_all(changed)
-    for c in cases:  # still missing after one redesign: the reviewers' disagreement becomes a REJECT a person must answer
+            records.update({c["id"]: {**r, "tc_id": c["id"]} for c, r in zip(changed, fresh)})
+            verdicts.update(await audit_all(changed))
+
+    verdicts: dict[str, dict] = dict(known or {})
+    fresh = {c["id"] for c in cases} - set(verdicts)
+    refused = oracle.problems([c for c in cases if c["id"] in fresh], state["requirements"], source)  # V2, before the audit, so the auditor sees the redesigned cases
+    if refused:
+        rc.log(f"Oracle check refused {len(refused)} cases: an expected value is not in the quote or the code. Redesigning once", refused, "warning")
+        await redo({i: refused[c["id"]] for i, c in enumerate(cases) if c["id"] in refused})
+    verdicts |= await audit_all([c for c in cases if c["id"] in fresh and c["id"] not in verdicts])
+    first = {k: sum(v["verdict"] == k for v in verdicts.values()) for k in ("COVERS", "PARTIAL", "MISSES")}
+    misses = [i for i, c in enumerate(cases) if c["id"] in fresh and verdicts.get(c["id"], {}).get("verdict") == "MISSES"]
+    if misses:
+        await redo({i: verdicts[cases[i]["id"]]["reason"] for i in misses})
+    for c in (c for c in cases if c["id"] in fresh):  # a case still refused by the oracle check: a person must answer
+        if why := oracle.problems([c], state["requirements"], source).get(c["id"]):
+            rec = records.get(c["id"])
+            if rec:
+                records[c["id"]] = {**rec, "verdict": "REJECT", "low": True, "low_reason": "the expected result names a value the requirement and code do not contain",
+                                    "flaws": [*rec.get("flaws", []), {"dimension": "oracle", "evidence": "oracle check", "fix": why}]}
+    for c in (c for c in cases if c["id"] in fresh):  # still missing after one redesign: the reviewers' disagreement becomes a REJECT a person must answer
         v = verdicts.get(c["id"])
         if v and v["verdict"] == "MISSES" and c["id"] in records:
             rec = records[c["id"]]
@@ -83,6 +101,6 @@ async def plugin_design(rc: RunContext, state: dict, cases: list[dict], records:
     plugin_bridge.write(rc.project_id, app, "04-design/audit.json", plugin_bridge.recorded("coverage-auditor", f"{rc.run_id}:design", "design", "verdicts", [verdicts[c["id"]] for c in cases if c["id"] in verdicts]))
     counts = {k: sum(verdicts.get(c["id"], {}).get("verdict") == k for c in cases) for k in ("COVERS", "PARTIAL", "MISSES")}
     result = {"app": app, "reviewed": len(reviewed), "audited": sum(c["id"] in verdicts for c in cases), "counts": counts, "first_audit": first,
-              "redesigned": len(misses), "unaudited": [c["id"] for c in cases if c["id"] not in verdicts]}
-    rc.log(f"Coverage audit: first {first}; {len(misses)} redesigned; now {counts}", result, "review")
+              "redesigned": len(misses), "oracle_refused": len(refused), "oracle_still": [c["id"] for c in cases if c["id"] in fresh and oracle.problems([c], state["requirements"], source)], "verdicts": verdicts, "unaudited": [c["id"] for c in cases if c["id"] not in verdicts]}
+    rc.log(f"Coverage audit: first {first}; {len(misses)} redesigned; now {counts}", {k: v for k, v in result.items() if k != "verdicts"}, "review")
     return result

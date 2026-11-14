@@ -81,7 +81,7 @@ def test_every_case_gets_a_test_across_batches_and_gaps_are_reported(client, pro
 
     def cases(text: str) -> str:
         wanted = re.findall(r'"id": "(REQ-\d+)"', text.rsplit("REQUIREMENTS:", 1)[-1].split("CASE QUOTA")[0])
-        return json.dumps({"cases": [{"id": "x", "requirement_id": r, "scenario": f"{r} {kind}", "type": kind, "level": "Unit", "steps": ["call add"], "expected_result": "returns the sum 2", "oracle": "specified"} for r in wanted for kind in kinds]})
+        return json.dumps({"cases": [{"id": "x", "requirement_id": r, "scenario": f"{r} {kind}", "type": kind, "level": "Unit", "steps": ["call add"], "expected_result": "returns the sum 2", "oracle": "derived"} for r in wanted for kind in kinds]})
 
     numbers = []
 
@@ -116,7 +116,7 @@ def test_cases_a_batch_keeps_leaving_out_get_one_more_try(client, project):
 
     def cases(text: str) -> str:
         wanted = re.findall(r'"id": "(REQ-\d+)"', text.rsplit("REQUIREMENTS:", 1)[-1].split("CASE QUOTA")[0])
-        return json.dumps({"cases": [{"id": "x", "requirement_id": r, "scenario": f"{r} {kind}", "type": kind, "level": "Unit", "steps": ["call add"], "expected_result": "returns the sum 2", "oracle": "specified"} for r in wanted for kind in kinds]})
+        return json.dumps({"cases": [{"id": "x", "requirement_id": r, "scenario": f"{r} {kind}", "type": kind, "level": "Unit", "steps": ["call add"], "expected_result": "returns the sum 2", "oracle": "derived"} for r in wanted for kind in kinds]})
 
     numbers = []
 

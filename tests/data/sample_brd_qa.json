@@ -1,0 +1,82 @@
+[
+ {
+  "question": "How long can a member keep a standard loan?",
+  "expect": "A standard loan lasts 21 days"
+ },
+ {
+  "question": "How many times can a loan be renewed and for how long each?",
+  "expect": "renew a loan up to 2 times"
+ },
+ {
+  "question": "What happens when someone reserved the book that I want to renew?",
+  "expect": "active reservation by another member cannot be renewed"
+ },
+ {
+  "question": "How many loans may a premium member hold?",
+  "expect": "Premium members may hold 12 loans"
+ },
+ {
+  "question": "What message does the system show at the loan limit?",
+  "expect": "Loan limit reached"
+ },
+ {
+  "question": "How long is a reserved copy held for pickup?",
+  "expect": "held for 5 days"
+ },
+ {
+  "question": "What is the overdue fine per day for DVDs?",
+  "expect": "1.00 euro per day for DVDs"
+ },
+ {
+  "question": "What is the maximum fine for one loan?",
+  "expect": "never exceeds 20 euro"
+ },
+ {
+  "question": "From what unpaid fine amount is borrowing blocked?",
+  "expect": "unpaid fines above 10 euro"
+ },
+ {
+  "question": "Which provider takes fine payments and are card numbers stored?",
+  "expect": "Paystream"
+ },
+ {
+  "question": "When are overdue reminder emails sent?",
+  "expect": "3 days before the due date"
+ },
+ {
+  "question": "During which hours are no emails sent?",
+  "expect": "between 22:00 and 07:00"
+ },
+ {
+  "question": "How fast must catalogue search answer?",
+  "expect": "under 2 seconds for 95 percent"
+ },
+ {
+  "question": "What accessibility standard must pages meet?",
+  "expect": "WCAG 2.1 level AA"
+ },
+ {
+  "question": "How many failed sign-in attempts lock an account and for how long?",
+  "expect": "locked for 15 minutes"
+ },
+ {
+  "question": "How long until an idle session ends?",
+  "expect": "Sessions end after 30 minutes"
+ },
+ {
+  "question": "What monthly availability does the website promise?",
+  "expect": "99.5 percent"
+ },
+ {
+  "question": "How long is loan history kept?",
+  "expect": "kept for 24 months"
+ },
+ {
+  "question": "What format is the manager report downloaded in?",
+  "expect": "CSV file"
+ },
+ {
+  "question": "What is not yet decided about children?",
+  "expect": "children under 13"
+ }
+]

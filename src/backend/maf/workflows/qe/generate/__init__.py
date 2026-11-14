@@ -8,6 +8,7 @@ from backend.maf.engine import RunContext
 from backend.maf.workflows.shared import _analysis
 from backend.qe import execution
 from backend.maf.runtime import AgentCall
+from backend.maf.workflows.qe.generate.audit import audit_tests
 from backend.maf.workflows.qe.generate.batch import synthesize
 from backend.maf.workflows.qe.generate.env import load_env, prepare_worktree
 from backend.maf.workflows.qe.generate.files import GeneratedFile, GeneratedSuite, _clean_code, _generated_file_problems
@@ -30,8 +31,9 @@ async def qe_generate(rc: RunContext, state: dict) -> dict:
     quarantine_syntax(suite, unresolved)
     write_suite(env, suite, unresolved)
     checked = await validate(env, suite, case_of)
+    audit = await audit_tests(env, suite, case_of)  # V1; may rewrite a test once, so before the review and the saved document
     update = await review_and_save(env, suite, unresolved, case_of, call, missing, partial)
-    update |= {"validation": await finish(env, suite, case_of, checked)}
+    update |= {"validation": await finish(env, suite, case_of, checked, audit, update["tests_review"]["records"])}
     if state.get("mode") == "brownfield":
         update["_next"] = "trace"  # brownfield tests are downloaded, not run here: Prepare, Execute and Heal are skipped
     return update

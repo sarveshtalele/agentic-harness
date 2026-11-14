@@ -40,7 +40,8 @@ def test_the_mapping_matches_the_plan_table():
         "repo-intelligence-analyst": ("analyzing-repositories",), "requirements-analyst": ("extracting-requirements",), "business-analyst": ("authoring-user-stories",),
         "principal-test-architect": ("planning-tests",), "test-design-architect": ("designing-test-cases", "generating-test-data"), "test-automation-engineer": ("generating-test-code",),
         "defect-diagnostician": ("healing-tests",), "confidence-reviewer": ("tracing-coverage",), "qa-execution-engineer": ("executing-tests",)}
-    assert len(POLICIES) == 15  # 14 platform agents (the coverage auditor added for Gate 3) and the Skill Studio's skill creator (M3); the harness moved out (STABLE_BUILD_PLAN)
+    assert "solution-architect" in POLICIES
+    assert len(POLICIES) == 17  # 14 platform agents, the Skill Studio skill creator (M3), the solution architect (QE v2 step 6) and the document analyst (QE v2 step 4); the harness moved out (STABLE_BUILD_PLAN)
     for key in ("bug-reviewer", "feature-engineer", "project-copilot", "bug-fix-reviewer", "skill-creator"):
         assert POLICIES[key].skills == () and skill_lib.for_agent(key) == []
     assert skill_lib.agent_of("building-qe-dashboard") == [] and skill_lib.agent_of("generating-test-data") == ["test-design-architect"]
