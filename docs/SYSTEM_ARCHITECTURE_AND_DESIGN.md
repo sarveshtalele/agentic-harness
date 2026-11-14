@@ -1218,3 +1218,12 @@ In accordance with the repository documentation policy (**1 Single Doc for Each 
 
 - **Traceability view:** the QE cycle page shows requirement -> plan scenario -> designed case -> test file -> result, gaps first, with each gate's check (PASS or FAIL) and the run's evidence files (`api/qe_trace.py`). It reads what the agentic-qe plugin writes in the project's workspace: `docs/qe/<app>/coverage-map.json`, built by the plugin's code from the files on disk, and `02-requirements/requirements.json` for each requirement's quoted source line. Files open read-only from inside the workspace and are never served as HTML. Routes need the QE cycle feature.
 - **Plugin contracts as tools (section 8):** `describe_contract(path)` returns the fields a plugin-owned file must have, read from the enabled plugins' `normalizeX` functions and the skill passages that name the file; `check_gate(gate, app)` runs the plugin's own `check-gate` script (`harness_kit/plugin_contract.py`). Found on the live run of 2026-11-12, where requirements written with an unread field failed Gate 1 three times.
+
+## QE Cycle on the agentic-qe plugin
+
+The platform's QE workflow (`maf/workflows/qe/`) keeps the frame: stages, gates G0 to G5 signed by a named person,
+documents, ledger. Each stage also uses the agentic-qe plugin through `src/backend/qe/plugin_bridge.py`: the plugin's
+skill text guides the model before it acts; the stage writes the plugin's own files in the project workspace
+(`docs/qe/<app>/`); the plugin's `check-gate.ts` and pandas/numpy validator check them after; their verdict is on the gate
+card. Design and status: `docs/STABLE_BUILD_PLAN.md` Part B.
+

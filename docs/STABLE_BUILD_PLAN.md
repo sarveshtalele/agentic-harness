@@ -82,6 +82,26 @@ in the project workspace, so the traceability view reads them.
 - Limits stated in the guide: B1 has 1.75 GB of memory and `/home` 10 GB; a large Java or .NET build may run slowly or
   fail for memory, and the run then says so. A bigger plan would raise the cost and needs the owner's yes.
 
+### B4. Pilot: Requirements on the plugin (offline done 2026-11-14; live run pending)
+
+One stage end to end before the others, through a small bridge, `src/backend/qe/plugin_bridge.py`:
+
+| Part | What it does |
+|---|---|
+| Guide | the stage's plugin skill text (`qe-requirements`, `extracting-requirements` and its `REQUIREMENT_RULES.md`) goes into the requirements analyst's prompt, ahead of the code |
+| Plugin files | the verified requirements are written as the plugin's `docs/qe/<app>/02-requirements/requirements.json` (`id`, `title`, `text`, `priority`, `source_file`, `line_number`, `quote`) in the project workspace; `<app>` is the project's name as a slug |
+| Sensor (computational) | the plugin's own `check-gate.ts --gate 1 --json` runs on the workspace (Node, argument list, timeout); it re-checks every quote on disk and runs the pandas/numpy validator |
+| Fix | requirements the sensor flags (no evidence, quote not found) are dropped and the check runs again, once; anything still failing is shown to the person at Gate 1, never hidden |
+| Gate | the Gate 1 card shows the plugin's verdict (PASS or FAIL with its gaps) next to the existing reviewer score |
+| Validator environment | the plugin's `qe-doctor` installer creates its pandas/numpy environment once under `data/qe-plugin-home` (local) or `/home/tools/qe-py` (Azure, B3) |
+
+When the pilot passes its tests and a live run, the same bridge carries Plan (G2), Design and Data (G3), Generate (G4) and
+Sign (G5), each with its own plugin skill, scripts and gate check.
+
+Limit: greenfield requirements cite approved documents, not code, so the plugin's quote check is recorded as not applied
+for them. Evidence: `tests/test_plugin_bridge.py` (real `check-gate.ts`: a real quote passes, an invented one is flagged)
+and the G1 assertions in `tests/test_api_change.py`.
+
 ## Part C. Verification (the owner's condition)
 
 On the stable branch, real output in one evidence folder (`docs/evidence/runs/<date>-stable-build/`):

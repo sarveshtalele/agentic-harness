@@ -30,3 +30,5 @@ psutil>=5.9,<8
 prompt_toolkit>=3.0,<4
 keyring>=25,<26
 rich>=13
+pandas>=2.2  # the agentic-qe plugin validator (qe_validate.py) behind every QE gate check
+numpy>=2.0

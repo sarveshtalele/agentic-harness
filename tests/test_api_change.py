@@ -63,6 +63,10 @@ def test_qe_lifecycle_all_six_gates_with_real_execution(client, project):
         assert run["status"] == "waiting_approval", run["error"]
         approval = pending(run)
         seen.append(approval["gate"])
+        if approval["gate"] == 1:  # the agentic-qe plugin's own check-gate.ts verified the requirements on disk
+            check = approval["payload"]["plugin_check"]
+            assert check["error"] is None and check["ok"] is True and check["dropped"] == [], check
+            assert "agentic-qe Gate 1 check: PASS." in approval["summary"]
         assert client.post(f"/api/approvals/{approval['id']}/decide", json={"approved": True}).status_code == 200
     run = wait_run(client, run["id"], ("completed", "failed"))
     assert run["status"] == "completed", run["error"]
