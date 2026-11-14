@@ -10,6 +10,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import toolchains  # deploy/azure/toolchains.py, shipped next to this file as toolchains.py
+
 APP = Path(__file__).resolve().parent
 HOME = Path(os.environ.get("ATLAS_HOME", "/home/atlas"))
 VENV = HOME / "venv"
@@ -45,10 +47,27 @@ def build() -> None:
     log("Environment built")
 
 
+def start_toolchains(env: dict) -> None:
+    """Install Node, JDK, Maven, .NET, Go and Chromium into /home/tools in the background, so the API is up at once.
+    Greenfield runs need them; the log and /home/tools/status.json say which are ready. ATLAS_INSTALL_TOOLCHAINS=none skips."""
+    if not toolchains.supported():
+        log("Toolchains: not Linux x64, none installed here (see toolchains.py)")
+        return
+    if not toolchains.wanted(env.get("ATLAS_INSTALL_TOOLCHAINS")):
+        log("Toolchains: skipped, ATLAS_INSTALL_TOOLCHAINS=none. Greenfield runs will report the missing tools")
+        return
+    log(f"Toolchains: installing in the background into {toolchains.ROOT}; progress in this log and {toolchains.ROOT / 'status.json'}")
+    subprocess.Popen([str(PYTHON), str(APP / "toolchains.py"), "--python", str(PYTHON)], env=env, start_new_session=True, stdin=subprocess.DEVNULL)
+
+
 def main() -> None:
     build()
-    # the venv goes first on PATH so the app finds ruff and other tools installed there
-    env = {**os.environ, "PYTHONPATH": f"{APP / 'src'}{os.pathsep}{APP}", "PATH": f"{PYTHON.parent}{os.pathsep}{os.environ.get('PATH', '')}"}
+    # the venv goes first on PATH so the app finds ruff and other tools installed there; the toolchains in /home/tools follow it.
+    # The API process owns this environment, and clean_sandbox_env (repos/sandbox/env.py) hands PATH, JAVA_HOME, GOROOT,
+    # DOTNET_ROOT and PLAYWRIGHT_BROWSERS_PATH on to every sandbox command, so a project's sandbox sees the same tools.
+    env = {**os.environ, "PYTHONPATH": f"{APP / 'src'}{os.pathsep}{APP}"}
+    env.update(toolchains.tool_env(base_path=f"{PYTHON.parent}{os.pathsep}{os.environ.get('PATH', '')}"))
+    start_toolchains(env)
     # files on the persistent /home share; the database is PostgreSQL, its URL read from Key Vault at startup (backend/keyvault.py)
     env.setdefault("ATLAS_DATA_DIR", str(HOME / "data"))
     port = os.environ.get("PORT", "8000")

@@ -43,7 +43,10 @@ def collect_folder_files(folder: Path, base_dir: Path) -> dict[str, Path]:
 
 def gather_backend_entries() -> dict[str, Path]:
     """Backend files: startup scripts, src/backend plus a backend/ alias, prompts, templates, skills and evals."""
-    return backend_entries(ROOT, DEPLOY_DIR, TRACKED)
+    entries = backend_entries(ROOT, DEPLOY_DIR, TRACKED)
+    entries["toolchains.py"] = DEPLOY_DIR / "toolchains.py"  # startup.py downloads Node, JDK, Maven, .NET, Go and Chromium into /home/tools
+    entries.update(collect_folder_files(ROOT / "plugins" / "agentic-qe", ROOT))  # read at runtime by qe/plugin_bridge.py
+    return entries
 
 
 def gather_frontend_entries() -> dict[str, Path]:
@@ -74,7 +77,7 @@ def main() -> int:
     backend_meta = create_zip(DIST / "azure_backend.zip", backend_entries)
 
     # Verify Backend Zip
-    backend_critical = ["startup.sh", "startup.py", ".deployment", "web.config", "requirements.txt", "src/backend/app.py", "backend/app.py"]
+    backend_critical = ["startup.sh", "startup.py", "toolchains.py", ".deployment", "web.config", "requirements.txt", "src/backend/app.py", "backend/app.py", "plugins/agentic-qe/plugin.json", "templates/stacks/go/stack.json"]
     if not verify_kudu(backend_meta, backend_critical, log, error):
         error("Backend zip verification failed!")
         return 1

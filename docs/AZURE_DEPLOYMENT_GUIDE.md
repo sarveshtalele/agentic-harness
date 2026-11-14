@@ -1,16 +1,21 @@
 # Azure deployment guide (East US 2)
 
-This is the one guide for deploying Agentic QE Platform to Azure. It covers the price, building the container image, every step in the Azure portal, first sign-in, a tour of the UI, and running, updating and removing it.
+This is the one guide for deploying Agentic QE Platform to Azure. It covers the price, building the two zips, every step in the Azure portal, first start (toolchains), sign-in, checking each feature, and updating, rolling back and removing it.
 
-The deployment runs on one App Service plan (B1) with **one web app that runs a custom container**, plus PostgreSQL and Key Vault, all in **East US 2**. GitHub Actions builds the image and stores it in GitHub Container Registry (GHCR); Azure only pulls it. No Azure credential is ever stored in GitHub.
+The deployment runs on one App Service plan (B1) with **two web apps on App Service's built-in images** (no Docker, no container registry): the **API** on the built-in Python 3.12 image, and the **UI** on the built-in Node 22 LTS image. PostgreSQL and Key Vault complete it, all in **East US 2**. You build two zips on your computer and deploy them with zip deploy through Kudu. GitHub never connects to Azure.
 
 **What has been verified, and what has not (2026-11-14):**
 - **Verified on a local machine:**
-  - the earlier zip packaging starts both processes through their own startup scripts in the web profile against PostgreSQL (`azure-local --check` prints `API health: 200; UI /login: 200`, re-run on 2026-11-14);
-  - the full test suite runs against PostgreSQL;
-  - Key Vault secrets are loaded at startup.
-- **Not yet run:** the container image. `deploy/azure/Dockerfile` and `.github/workflows/container.yml` are written, but the image has not been built (Docker is not installed on the development machine and the workflow has not run), and nothing has run on Azure itself. Check each **Verify** line as you go.
-- **No screenshots of the portal yet.** They need a real subscription.
+  - both zips start through their own startup scripts in the web profile against PostgreSQL (`azure-local --check` prints `API health: 200; UI /login: 200`, re-run on 2026-11-14 after the toolchain change);
+  - the toolchain downloader refuses a wrong checksum and leaves nothing behind, and downloads, verifies, extracts and is idempotent for Node 22.12.0 (checked on macOS with a local copy of the vendor tarball, because the sandbox's proxy truncated the live download; the extracted Linux binary was not run, as the machine is not Linux);
+  - the sandbox environment test (`tests/test_redblue_sandbox.py`) passes with the toolchain variables allow-listed.
+- **Not yet run on Azure, and the first deploy must prove these:**
+  1. the built-in Python image runs the startup command **as root** and `apt` reaches its mirrors (needed once per start for Chromium's system libraries, section 12);
+  2. `github.com` (JDK download), `nodejs.org`, `go.dev`, `builds.dotnet.microsoft.com`, `archive.apache.org` and Playwright's CDN are reachable from the app;
+  3. the .NET SDK and Temurin JDK run on the image's libc.
+
+  If any of these fails, use the fallback in section 12.4: greenfield end-to-end runs locally only, and Azure shows their evidence.
+- **No screenshots of the portal yet.** They need a real subscription. The portal steps follow the portal as it is today, but nobody has run them end to end in a subscription. Check each **Verify** line as you go.
 - **Not built yet:** a friendly "database is stopped (outside working hours)" page. While PostgreSQL is stopped, the API answers with a database error (section 13).
 
 ---
@@ -20,21 +25,21 @@ The deployment runs on one App Service plan (B1) with **one web app that runs a 
 1. [Architecture](#1-architecture)
 2. [Monthly cost](#2-monthly-cost-east-us-2)
 3. [Before you start](#3-before-you-start)
-4. [Build and check the image](#4-build-and-check-the-image)
+4. [Build and check the zips](#4-build-and-check-the-zips)
 5. [Resource group](#5-resource-group)
 6. [Key Vault](#6-key-vault)
 7. [PostgreSQL Flexible Server](#7-postgresql-flexible-server)
-8. [Container registry access (GHCR)](#8-container-registry-access-ghcr)
-9. [App Service plan](#9-app-service-plan)
-10. [The container web app](#10-the-container-web-app)
-11. [Database firewall](#11-let-the-app-reach-postgresql)
-12. [Lock down the Kudu site](#12-lock-down-the-kudu-site)
+8. [App Service plan](#8-app-service-plan)
+9. [API web app](#9-api-web-app)
+10. [Let the API reach PostgreSQL](#10-let-the-api-reach-postgresql)
+11. [UI web app, and lock the API to the UI](#11-ui-web-app-and-lock-the-api-to-the-ui)
+12. [First start: toolchains for greenfield runs](#12-first-start-toolchains-for-greenfield-runs)
 13. [Stop PostgreSQL outside working hours (stays under $25)](#13-stop-postgresql-outside-working-hours)
 14. [Check the settings, and move old data](#14-check-the-settings-and-move-old-data)
-15. [First sign-in, people and permissions](#15-first-sign-in-people-and-permissions)
+15. [First sign-in, people, permissions, and checking each feature](#15-first-sign-in-people-and-permissions)
 16. [A tour of the UI](#16-a-tour-of-the-ui)
 17. [Observability](#17-observability)
-18. [Update, backup, stop paying](#18-update-backup-stop-paying)
+18. [Update, roll back, back up, stop paying](#18-update-roll-back-back-up-stop-paying)
 19. [Troubleshooting](#19-troubleshooting)
 20. [Decisions](#20-decisions)
 
@@ -43,26 +48,24 @@ The deployment runs on one App Service plan (B1) with **one web app that runs a 
 ## 1. Architecture
 
 ```text
- People ── browser ──▶ App Service B1, one custom container (image from ghcr.io/sarveshtalele/agentic-qe)
-                        │   UI (Next.js)  0.0.0.0:3000  ← the only public port (WEBSITES_PORT=3000)
-                        │   API (FastAPI + MAF) 127.0.0.1:8000  ← reached by the UI over loopback, never exposed
-                        │        ├─▶ model endpoint
-                        │        ├─▶ PostgreSQL Flexible Server (Burstable B1ms, pgvector)
-                        │        ├─▶ Key Vault: admin password, secret key, database URL (read at startup)
-                        │        ├─▶ /home share: workspaces and files
-                        │        ├─▶ Chromium, Node 22, JDK 21, .NET 8, Go 1.23 inside the image (generated apps are built and tested there)
-                        │        └─▶ Application Insights (optional, OpenTelemetry)
- GitHub Actions ── builds and pushes the image ──▶ GHCR  (App Service pulls it; GitHub never connects to Azure)
+ People ── browser ──▶ UI web app (built-in Node 22, Next.js) ──▶ API web app (built-in Python 3.12, FastAPI + MAF)
+                                                                    ├─▶ model endpoint
+                                                                    ├─▶ PostgreSQL Flexible Server (Burstable B1ms, pgvector)
+                                                                    ├─▶ Key Vault: admin password, secret key, database URL (read at startup)
+                                                                    ├─▶ /home/atlas/data: projects, documents, per-project sandboxes
+                                                                    ├─▶ /home/tools: Node 22, JDK 21, Maven, .NET 8, Go, Playwright Chromium
+                                                                    └─▶ Application Insights (optional, OpenTelemetry)
 ```
 
 | Part | Choice | Why |
 |---|---|---|
-| Compute | One Linux App Service plan **B1**, with one web app running the custom container (UI and API as two processes) | The cheapest plan that runs both. The container carries the browsers and compilers the greenfield runs need |
+| Compute | One Linux App Service plan **B1**, with two web apps on the **built-in** Python 3.12 and Node 22 LTS images | The cheapest plan that runs both, with no registry to pay for or maintain (owner, 2026-11-14) |
+| Toolchains | Downloaded once into `/home/tools` by `startup.py` (`toolchains.py`), each checked against the vendor's SHA | The built-in image has Python only. `/home` survives restarts, so the download happens once |
 | Database | **PostgreSQL Flexible Server, Burstable B1ms**, 32 GiB, version 17 (16 also works), with the `vector` extension allow-listed | The only database the app supports. It gives point-in-time restore, many writers, and pgvector for document search |
 | Secrets | **Key Vault Standard**, read by the API with its managed identity (`ATLAS_KEY_VAULT_URL`) | No secret in app settings |
-| Image | `deploy/azure/Dockerfile`, built by `.github/workflows/container.yml`, stored in GHCR | Free for this use, no Azure container registry to pay for |
 | Sign-in | Built-in accounts. The first admin's password comes from Key Vault | Works without an Entra app registration |
-| Load | **One greenfield run at a time** (the backend enforces it), and at most 5 sandbox jobs (`ATLAS_MAX_SANDBOXES`) | B1 has 1.75 GB of memory, which Chromium, a JDK and the app must share |
+| Greenfield runs | **Every greenfield application is set up and run in the project's own sandbox**, under `/home/atlas/data/projects/<id>/sandbox`, with the sandbox's clean environment (section 12.3) | Generated code never runs with the platform's own environment or secrets |
+| Load | **One greenfield run at a time** (the backend enforces it), and at most 5 sandbox jobs (`ATLAS_MAX_SANDBOXES`) | B1 has 1.75 GB of memory, which two apps, Chromium and a JDK or .NET build must share |
 
 **Security limit.** Repository code runs on the same machine as the API until isolated sandbox jobs exist. Admit only people you trust.
 
@@ -80,7 +83,7 @@ PostgreSQL compute is billed only while the server runs. The standard stops it o
 
 | Resource | Meter | Price (USD / INR) | Per month (USD) | Per month (INR) |
 |---|---|---|---|---|
-| App Service plan B1, Linux (both web apps share it) | B1 | $0.017 / ₹1.6189 an hour | **$12.41** | **₹1,181.80** |
+| App Service plan B1, Linux (both built-in-image web apps share it) | B1 | $0.017 / ₹1.6189 an hour | **$12.41** | **₹1,181.80** |
 | PostgreSQL B1ms compute, 264 hours | B1MS | $0.017 / ₹1.6189 an hour | **$4.49** | **₹427.39** |
 | PostgreSQL storage, 32 GiB | Storage Data Stored | $0.115 / ₹10.9513 per GB a month | **$3.68** | **₹350.44** |
 | PostgreSQL backups, 7 days | Backup Storage LRS | Included up to the provisioned size; above it $0.095 / ₹9.0467 per GB | **$0** | **₹0** |
@@ -88,7 +91,27 @@ PostgreSQL compute is billed only while the server runs. The standard stops it o
 | Azure Automation (the start and stop jobs) | Basic Runtime | First 500 minutes a month free, then $0.002 / ₹0.1905 a minute; about 44 minutes are used | **$0** | **₹0** |
 | **Total** | | | **$20.58** | **₹1,959.66** |
 
-That is $246.96 (₹23,515.92) a year before taxes. The container change adds nothing to this table: the plan and the PostgreSQL tier are the ones already listed, GitHub Container Registry is not an Azure resource, and the Blob Storage line (desktop installers, $0.04 a month) is gone because the installers were removed. For a **private** GHCR package, the GitHub plan's included storage applies (500 MB on Free, 2 GB on Pro and Team); the image is about 2 GB compressed, and beyond the quota GitHub bills about $0.25 per GB a month, so the worst case is about $0.50 a month, which still leaves the total under $25. Making the package public costs nothing, but then anyone can pull the image (it holds code and prompts, no secrets). Check your GitHub plan's quota before choosing.
+That is $246.96 (₹23,515.92) a year before taxes. The built-in images add nothing to this table: the plan and the PostgreSQL tier are the ones already listed, and there is no container registry (the custom-container version's GHCR storage line, up to about $0.50 a month, is gone). Downloading the toolchains is inbound traffic and free.
+
+### Disk: what the toolchains use of the plan's storage
+
+The B1 plan includes **10 GB of storage, shared by all apps in the plan** (each app's `/home` share counts). Nothing extra is billed while you stay inside it. The sizes below are **estimates** from the vendors' archives, not measured on Azure (the extracted Node 22.12.0 was measured: 202 MB):
+
+| Item | Where | Estimated size on disk |
+|---|---|---|
+| Node 22.12.0 | `/home/tools/node-22.12.0` | 0.2 GB (measured) |
+| Temurin JDK 21.0.13 | `/home/tools/jdk-21.0.13` | 0.35 GB |
+| Maven 3.9.9 | `/home/tools/maven-3.9.9` | 0.01 GB |
+| .NET SDK 8.0.428 | `/home/tools/dotnet-8.0.428` | 0.5 GB |
+| Go 1.23.4 | `/home/tools/go-1.23.4` | 0.25 GB |
+| Playwright Chromium and headless shell | `/home/tools/ms-playwright` | 0.6 GB |
+| **Toolchains subtotal** | | **about 1.9 GB** |
+| Python environment (`requirements.txt`) | `/home/atlas/venv` | about 0.8 GB |
+| Built UI (Next.js standalone) | UI app's `/home/atlas/frontend` | about 0.3 GB |
+| Code zips, logs, workspaces, evidence | `/home/site/wwwroot`, `/home/atlas/data` | 0.5 GB to start, grows with projects |
+| **Total at the start** | | **about 3.5 GB of 10 GB** |
+
+Each greenfield project adds its sandbox (a repository clone, dependencies, build output). Watch the web app's **Monitoring, Quotas** page. If the 10 GB ever run out, delete finished projects' sandboxes; more storage means a larger plan (B1 to S1 gives 50 GB), which needs the owner's yes.
 
 ### Other choices
 
@@ -101,7 +124,7 @@ That is $246.96 (₹23,515.92) a year before taxes. The container change adds no
 
 ### Costs that depend on use
 
-- **Outbound data.** The first 100 GB a month are free. After that, $0.087 (₹8.2849) per GB with Microsoft network routing. Image pulls from GHCR are inbound to Azure and free.
+- **Outbound data.** The first 100 GB a month are free. After that, $0.087 (₹8.2849) per GB with Microsoft network routing. Toolchain downloads are inbound to Azure and free.
 - **Application Insights** (optional). The first 5 GB of logs a month are free. After that, $2.76 (₹262.83) per GB ingested.
 - **Model tokens** are billed by your model provider, not by Azure. The **Usage** page limits tokens per person and model.
 
@@ -122,14 +145,16 @@ Multiply an hourly price by 730 for a full month.
 
 ---
 
+---
+
 ## 3. Before you start
 
 You need:
 - **An Azure subscription** where you can create resources.
 - **This repository** on your computer, set up with `python scripts/dev.py setup` (see `README.md`).
 - **PostgreSQL 16 or newer installed locally.** It is needed only for the local check in section 4.
-- **Docker** (optional): only to build and try the image on your own computer. CI builds the real one.
-- **Two random values:** one for the secret key and one for the admin password. Run this twice and keep both values somewhere safe:
+- **Azure CLI** (`az`), signed in to your subscription, to deploy the zips (section 9.5).
+- **Two random values:** one for the secret key and one for the admin credential. Run this twice and keep both values somewhere safe:
   ```bash
   python -c "import secrets; print(secrets.token_urlsafe(48))"
   ```
@@ -142,39 +167,55 @@ You need:
 | Key Vault | `kv-agentic-qe-<unique>` |
 | PostgreSQL server | `pg-agentic-qe-<unique>` |
 | App Service plan | `plan-agentic-qe` |
-| Web app (container) | `aqe-<unique>` |
+| API web app | `aqe-api-<unique>` |
+| UI web app | `aqe-ui-<unique>` |
 | Automation account | `aa-agentic-qe` |
 
 `deploy/environments/azure.appsettings.example` lists every app setting, with no values.
 
 ---
 
-## 4. Build and check the image
+## 4. Build and check the zips
 
-The image is built by GitHub Actions, not on your computer. `.github/workflows/container.yml` runs on every push to `feature/maf-harness-platform` (never on `main`), and pushes `ghcr.io/sarveshtalele/agentic-qe` with two tags: the full commit SHA (`sha-<40 hex>`, use this one in Azure so an update is a visible change) and the branch (`feature-maf-harness-platform`, moves with each push). It signs in to GHCR with the workflow's built-in `GITHUB_TOKEN` (permission `packages: write`); the file holds no secret.
-
-**What is in the image** (`deploy/azure/Dockerfile`):
-- base `mcr.microsoft.com/playwright/python:v1.65.0-noble` (Ubuntu 24.04, Python 3.12, Chromium, Firefox, WebKit; the tag matches the Playwright version in `requirements.txt`);
-- Node 22.12.0, JDK 21 (Ubuntu package), .NET SDK 8 (Ubuntu package) and Go 1.23.4;
-- the backend and `requirements.txt` in `/opt/venv`, and the Next.js UI built into a standalone server in `/opt/ui`;
-- the user `pwuser` (not root). `/home/atlas` is the persistent App Service `/home` share at run time.
-- **Size:** about 5 GB uncompressed and about 2 GB compressed in GHCR (an estimate: the image has not been built yet). The B1 plan has 10 GB of disk for images.
-
-**Processes and ports** are the same as the zip deployment, in one container (`deploy/azure/container_start.py`): the API on `127.0.0.1:8000` and the UI on `0.0.0.0:3000`. The UI proxies `/api/*` to the API over loopback, so `ATLAS_BACKEND_URL` is not set in Azure. The container stops if either process exits, so App Service restarts it.
-
-**Check on your computer (optional, needs Docker):**
+**On macOS or Linux:**
 
 ```bash
-docker build -f deploy/azure/Dockerfile -t agentic-qe-local .
-docker run --rm -p 3000:3000 -e ATLAS_ADMIN_USERNAME=<name> -e ATLAS_ADMIN_PASSWORD=<12+ chars> -e ATLAS_SECRET_KEY=<random> -e ATLAS_DATABASE_URL=<local PostgreSQL URL> agentic-qe-local
-curl http://127.0.0.1:3000/api/health
+python scripts/package_azure_kudu.py
+ATLAS_ADMIN_USERNAME=<name> ATLAS_ADMIN_PASSWORD=<12+ chars> python scripts/dev.py azure-local --check
 ```
 
-**Check without Docker:** `python scripts/dev.py azure-local --check` runs the same two processes from the zip packaging against a local PostgreSQL. It prints `API health: 200; UI /login: 200`. It does not test the image itself.
+**On Windows, in PowerShell from the repository folder:**
+
+```powershell
+py scripts\package_azure_kudu.py
+$env:ATLAS_ADMIN_USERNAME = "<name>"
+$env:ATLAS_ADMIN_PASSWORD = "<12+ chars>"
+py scripts\dev.py azure-local --check
+Remove-Item Env:ATLAS_ADMIN_PASSWORD
+```
+
+**What this does:**
+- **`package_azure_kudu.py`** writes two zips:
+  - `dist/azure_backend.zip`: the API. It holds `startup.py` (the one startup; `startup.sh` only calls it), `toolchains.py`, `.deployment`, `web.config`, `requirements.txt`, the backend code, prompts, templates (including `templates/stacks`), skills, evals, and `plugins/agentic-qe` (read at run time by the QE cycle).
+  - `dist/azure_frontend.zip`: the UI. It holds `startup.js`, `startup.sh`, `.deployment`, `web.config` and the Next.js source.
+- **The zips are built for the Linux App Service:**
+  - paths use forward slashes;
+  - only files Git tracks or would track are included, so `.env`, `data/` and build folders are never in a zip;
+  - `.deployment` turns Kudu's build off, so Kudu only unzips; the startup scripts build once, themselves (Python environment in `/home/atlas/venv`; the UI is built on local disk and its output kept in `/home/atlas/frontend`).
+- **`azure-local --check`** unzips both packages into `data/azure-local`, starts each one through its own startup script in the web profile with a local PostgreSQL, and checks both. On a computer that is not Linux x64 the toolchain step logs that it is skipped, so the check downloads nothing.
+
+**Verify:**
+- the check prints `API health: 200; UI /login: 200`;
+- the top level of the backend zip holds `.deployment`, `requirements.txt`, `startup.py`, `startup.sh`, `toolchains.py` and `web.config`:
+  ```bash
+  python -c "import zipfile; print(sorted(n for n in zipfile.ZipFile('dist/azure_backend.zip').namelist() if '/' not in n))"
+  ```
 
 **Common mistakes:**
-- **Using the moving branch tag in Azure.** Restarting then pulls whatever is newest. Pin the `sha-` tag.
-- **A missing pull credential for a private package** (section 8). The log says `unauthorized`.
+- **Zipping with Explorer** (**Send to, Compressed folder**) or Finder. Those zips use backslashes or include build folders, and the app does not start. Always use the script.
+- **The wrong runtime stack.** The API is Python 3.12; the UI is Node 22 LTS.
+- **A missing startup command** (sections 9 and 11).
+- **Kudu's build turned on.** `SCM_DO_BUILD_DURING_DEPLOYMENT` must be `false` on both apps.
 
 ---
 
@@ -215,7 +256,7 @@ curl http://127.0.0.1:3000/api/health
    **Stronger, recommended (R6):** keep only a hash of the admin password, and add a pepper.
    1. On your computer run `python scripts/dev.py admin-password`. It prints a random password once (store it in your password manager) and its hash.
    2. Add the secret `atlas-admin-password-hash` with that hash (instead of `atlas-admin-password`), and `atlas-password-pepper` with another random value (`python -c "import secrets; print(secrets.token_urlsafe(32))"`). If you set the pepper, run step 1 with `ATLAS_PASSWORD_PEPPER` set to the same value. **If the pepper is lost, every member must have their password reset.**
-   3. In section 10, set `ATLAS_KEY_VAULT_SECRETS` to `atlas-admin-password-hash,atlas-password-pepper,atlas-secret-key,atlas-database-url,atlas-storage-url`.
+   3. In section 9.4, set `ATLAS_KEY_VAULT_SECRETS` to `atlas-admin-password-hash,atlas-password-pepper,atlas-secret-key,atlas-database-url,atlas-storage-url`.
    Optional settings: `ATLAS_SCRYPT_N` (password hashing cost; raising it rehashes each account at its next sign-in), `ATLAS_BREACHED_PASSWORDS_FILE` (a list of breached passwords, one per line).
 
 **Verify:** **Objects, Secrets** lists both secrets as **Enabled**.
@@ -237,7 +278,7 @@ curl http://127.0.0.1:3000/api/health
      - **Password:** a long password.
    - **Networking** tab:
      - **Connectivity method:** **Public access (allowed IP addresses)**;
-     - leave **Allow public access from any Azure service within Azure to this server** turned **off**. The API's addresses are added in section 11.
+     - leave **Allow public access from any Azure service within Azure to this server** turned **off**. The API's addresses are added in section 10.
    - Select **Review + create**, then **Create**. This takes several minutes.
 2. **Create the database.** When the server is ready, open **Settings, Databases**, then **+ Add**. Name it `agentic_qe` and select **Save**.
 3. **Store the connection URL in Key Vault.** In the vault, open **Objects, Secrets**, then **Generate/Import**:
@@ -259,26 +300,9 @@ The API creates its tables on its first start (from `backend/migrations/postgres
 
 ---
 
-## 8. Container registry access (GHCR)
-
-The image lives in GitHub Container Registry, free for this use. App Service pulls it; nothing is pushed from Azure.
-
-1. **First build.** Push to `feature/maf-harness-platform` (or run the **Container image** workflow by hand) and wait for it to finish. The package `agentic-qe` then appears under your GitHub profile, **Packages**. Note the tag `sha-<40 hex>` of the build you want to deploy.
-2. **Choose public or private.** In the package's **Package settings, Danger zone**:
-   - **Public:** App Service needs no credential. Anyone can pull the image (code, prompts and templates, no secrets). Free.
-   - **Private (recommended):** continue below. Counts against your GitHub plan's package storage (section 2).
-3. **Private only: create a pull credential.** The workflow's `GITHUB_TOKEN` cannot be reused by Azure, so make a separate one:
-   1. In GitHub, open **Settings, Developer settings, Personal access tokens, Fine-grained tokens, Generate new token**.
-   2. Set **Expiration** to 90 days (put the renewal date in your calendar), and **Resource owner** to your account.
-   3. Fine-grained tokens cannot yet be granted `read:packages`. If **Permissions** does not offer **Packages**, use a **classic** token with only the `read:packages` scope instead. Never give it `write:packages`, `repo` or any other scope.
-   4. Copy the token once. You will paste it into the Azure portal in section 10, and nowhere else: never into this repository, a script, a URL or a command line.
-4. **Revoke on leaving.** When someone who made the token leaves, or the token may have leaked, delete it in GitHub and make a new one (section 10 step 4).
-
-**Verify:** the package lists the `sha-...` tag, and its **Visibility** is what you chose.
-
 ---
 
-## 9. App Service plan
+## 8. App Service plan
 
 1. Search **App Service plans**, then select **Create**.
 2. Fill in:
@@ -293,81 +317,178 @@ The image lives in GitHub Container Registry, free for this use. App Service pul
 
 ---
 
-## 10. The container web app
+## 9. API web app
 
 1. **Create the app.** Search **App Services**, then select **Create, Web App**.
    - **Basics** tab:
      - **Resource group:** `rg-agentic-qe`;
-     - **Name:** `aqe-<unique>`;
-     - **Publish:** **Container**;
+     - **Name:** `aqe-api-<unique>`;
+     - **Publish:** Code;
+     - **Runtime stack:** Python 3.12;
      - **Operating System:** Linux;
      - **Region:** East US 2;
-     - **Linux Plan:** `plan-agentic-qe` (B1).
-   - **Container** tab:
-     - **Image Source:** **Other container registries**;
-     - **Access Type:** **Public** or **Private** (section 8);
-     - **Registry server URL:** `https://ghcr.io`;
-     - **Image and tag:** `sarveshtalele/agentic-qe:sha-<40 hex>`;
-     - private only: **Username** your GitHub username, **Password** the token from section 8 (typed into the portal; the portal stores it as an app setting, `DOCKER_REGISTRY_SERVER_PASSWORD`, which only people with access to the app can read);
-     - **Startup command:** leave **empty**. The image's entrypoint (`python3 /app/container_start.py`) starts both processes. If you set one, use exactly `python3 /app/container_start.py`.
+     - **Linux Plan:** `plan-agentic-qe`.
+   - **Deployment** tab: leave continuous deployment **off**.
+   - **Monitoring** tab: Application Insights is optional (section 17).
    - Select **Review + create**, then **Create**.
-   - **Switching an existing B1 web app instead:** open it, **Deployment, Deployment Center**, set **Source** to **Container registry** with the same values, then **Save**. App settings from the old zip deployment (`ATLAS_BACKEND_URL`, `ATLAS_DOWNLOADS_URL`, `SCM_DO_BUILD_DURING_DEPLOYMENT`, `ENABLE_ORYX_BUILD`) are no longer used: delete them, and clear the old **Startup Command**.
 2. **Turn on its identity, and let it read the vault.**
    1. In the app, open **Settings, Identity**. On the **System assigned** tab, set **Status** to **On**, then **Save** and **Yes**.
    2. In the vault, open **Access control (IAM)**, then **Add, Add role assignment**.
    3. Choose the role **Key Vault Secrets User**, then **Next**.
-   4. Choose **Managed identity**, then **Select members**, pick **App Service** and `aqe-<unique>`.
+   4. Choose **Managed identity**, then **Select members**, pick **App Service** and `aqe-api-<unique>`.
    5. Select **Review + assign**.
-3. **General settings.** Open **Settings, Configuration, General settings**: **Always on:** On; **HTTPS Only:** On; **Health check path** (optional): `/api/health`. Select **Save**.
+3. **General settings.** In the app, open **Settings, Configuration, General settings**:
+   - **Startup Command:** `python /home/site/wwwroot/startup.py`;
+   - **Always on:** On;
+   - **HTTPS Only:** On;
+   - **Health check path** (optional): `/api/health`.
+
+   Select **Save**.
 4. **App settings.** Open **Settings, Environment variables, App settings**. Select **+ Add** for each row below, then **Apply** and **Confirm**.
 
    | Name | Value |
    |---|---|
-   | `WEBSITES_PORT` | `3000`. The container listens on 3000 (UI); the API stays on loopback 8000 |
-   | `WEBSITES_ENABLE_APP_SERVICE_STORAGE` | `true`, so `/home` (workspaces and files) survives restarts |
-   | `WEBSITES_CONTAINER_START_TIME_LIMIT` | `600`. The first start loads secrets and creates tables |
    | `ATLAS_KEY_VAULT_URL` | `https://kv-agentic-qe-<unique>.vault.azure.net`. At startup the API reads `atlas-admin-password`, `atlas-secret-key` and `atlas-database-url` from it. Do **not** add those three as app settings |
-   | `ATLAS_PROFILE` | `web` (already the image default) |
-   | `ATLAS_DATA_DIR` | `/home/atlas/data` (already the image default) |
+   | `ATLAS_PROFILE` | `web` |
+   | `ATLAS_DATA_DIR` | `/home/atlas/data` (projects, workspaces, sandboxes, files) |
    | `ATLAS_ADMIN_USERNAME` | the first admin's username |
    | `ATLAS_ADMIN_EMAIL` | the admin's email (optional) |
-   | `ATLAS_ALLOWED_HOSTS` | `aqe-<unique>.azurewebsites.net` |
-   | `ATLAS_ALLOWED_ORIGINS` | `https://aqe-<unique>.azurewebsites.net` |
-   | `ATLAS_MAX_SANDBOXES` | `5` (already the image default) |
-   | `ATLAS_INSTALL_EVALS` | not used by the image. RAGAS is only installed if you add `requirements-evals.txt` to the Dockerfile |
-   | `DOCKER_REGISTRY_SERVER_URL`, `DOCKER_REGISTRY_SERVER_USERNAME`, `DOCKER_REGISTRY_SERVER_PASSWORD` | private package only. The portal sets them from step 1; the password is the GitHub token and is never put in the repository |
+   | `ATLAS_ALLOWED_HOSTS` | `aqe-api-<unique>.azurewebsites.net` |
+   | `ATLAS_ALLOWED_ORIGINS` | `https://aqe-ui-<unique>.azurewebsites.net` |
+   | `ATLAS_MAX_SANDBOXES` | `5` |
+   | `ATLAS_INSTALL_TOOLCHAINS` | `all` (the default). `none` installs nothing, and greenfield runs then report the missing tools. Or a comma list of `node,java,maven,dotnet,go,chromium` |
+   | `ATLAS_INSTALL_EVALS` | `1` to install RAGAS on first start (optional; it adds a few minutes) |
+   | `WEBSITES_ENABLE_APP_SERVICE_STORAGE` | `true`, so `/home` survives restarts |
+   | `WEBSITES_PORT` | `8000` |
+   | `WEBSITES_CONTAINER_START_TIME_LIMIT` | `1800` (the maximum, in seconds). The first start builds the Python environment, which takes several minutes. Toolchains install in the background and do not count |
+   | `SCM_DO_BUILD_DURING_DEPLOYMENT` | `false` |
+   | `ENABLE_ORYX_BUILD` | `false` |
 
-   **One greenfield run at a time.** The backend refuses a second greenfield build while one runs (Chromium, a JDK or .NET build and the app share 1.75 GB). Do not add a second instance: the plan is B1 with one instance, and running workflows live in the API process.
-5. **Watch the first start.** Open **Monitoring, Log stream**. App Service pulls the image first (a few minutes for about 2 GB), then the log shows `API on 127.0.0.1:8000, UI on 0.0.0.0:3000`.
-   - Until section 11 is done, the log shows a PostgreSQL connection error. That is expected.
-   - `unauthorized` or `denied` while pulling: the pull credential is wrong or expired (section 8).
+   **One greenfield run at a time.** The backend refuses a second greenfield build while one runs. Do not add a second instance: the plan is B1 with one instance, and running workflows live in the API process.
+5. **Deploy the zip** `dist/azure_backend.zip` from section 4. Either way:
+   - **Option A, Azure CLI** (works on Linux apps):
+     ```bash
+     az webapp deploy --resource-group rg-agentic-qe --name aqe-api-<unique> --src-path dist/azure_backend.zip --type zip
+     ```
+   - **Option B, Kudu:** open `https://aqe-api-<unique>.scm.azurewebsites.net/ZipDeployUI` and drag the zip onto it. Microsoft documents this drag-and-drop page as unreliable on Linux apps; if it does not accept the zip, use option A.
+
+   Then, in the app's **Overview**, select **Restart**.
+6. **Watch the first start.** Open **Monitoring, Log stream**. It shows, in order:
+   1. `Building environment in /home/atlas/venv. The first run takes several minutes`, then `Environment built`;
+   2. `Toolchains: installing in the background into /home/tools ...` (section 12);
+   3. `Starting API on port 8000`.
+
+   - Until section 10 is done, the log shows a PostgreSQL connection error. That is expected.
    - If Key Vault cannot be read, the log says so and how to fix it, for example "Give the web app's identity the role Key Vault Secrets User".
-   - The container exits if either process exits, and App Service restarts it. Repeated restarts mean the API or UI is crashing: read the lines above the exit.
 
 ---
 
-## 11. Let the app reach PostgreSQL
+## 10. Let the API reach PostgreSQL
 
-1. **Copy the app's outbound addresses.** In the web app, open **Settings, Properties**. Copy every address under **Outbound IP addresses** and **Additional Outbound IP addresses**.
+1. **Copy the API's outbound addresses.** In the **API** app, open **Settings, Properties**. Copy every address under **Outbound IP addresses** and **Additional Outbound IP addresses**.
 2. **Add them to the PostgreSQL firewall.**
    1. In the PostgreSQL server, open **Settings, Networking**.
    2. Under **Firewall rules**, add one rule per address, with that address as both **Start IP address** and **End IP address**.
    3. Select **Save**.
-3. **Restart** the web app.
+3. **Restart** the API app.
 
-**Verify:** `https://aqe-<unique>.azurewebsites.net/api/health` returns `"status": "ok"`.
+**Verify:** `https://aqe-api-<unique>.azurewebsites.net/api/health` returns `"status": "ok"` (before you lock the API in section 11.5).
 
 ---
 
-## 12. Lock down the Kudu site
+## 11. UI web app, and lock the API to the UI
 
-The public site is the UI. The API is not reachable from outside (it listens on loopback only), and every API path still requires sign-in (`core/auth.py`). What is left to restrict is the Kudu site, which can read and change the running container.
+1. **Create the UI app.** Select **Create, Web App**:
+   - **Resource group:** `rg-agentic-qe`;
+   - **Name:** `aqe-ui-<unique>`;
+   - **Publish:** Code;
+   - **Runtime stack:** Node 22 LTS (Node 20 LTS also builds the UI);
+   - **Operating System:** Linux;
+   - **Region:** East US 2;
+   - **Linux Plan:** `plan-agentic-qe`.
 
-1. In the web app, open **Settings, Networking**. Under **Public network access**, open **Access restriction**.
-2. On the **Advanced tool site** tab, allow only your own IP address, and leave unmatched traffic **Denied**. Select **Save**.
-3. Leave the **Main site** tab open to everyone (people sign in with their own accounts).
+   Select **Review + create**, then **Create**.
+2. **General settings:**
+   - **Startup Command:** `node /home/site/wwwroot/startup.js`;
+   - **Always on:** On;
+   - **HTTPS Only:** On.
 
-**Verify:** `https://aqe-<unique>.azurewebsites.net` shows the sign-in page, `https://aqe-<unique>.azurewebsites.net/api/health` returns `"status": "ok"`, and `https://aqe-<unique>.scm.azurewebsites.net` answers 403 from another network.
+   Select **Save**.
+3. **App settings:**
+
+   | Name | Value |
+   |---|---|
+   | `ATLAS_BACKEND_URL` | `https://aqe-api-<unique>.azurewebsites.net` (no trailing slash) |
+   | `WEBSITES_ENABLE_APP_SERVICE_STORAGE` | `true` |
+   | `WEBSITES_PORT` | `3000` |
+   | `WEBSITES_CONTAINER_START_TIME_LIMIT` | `1800` (the first start runs `npm ci` and the Next.js build) |
+   | `SCM_DO_BUILD_DURING_DEPLOYMENT` | `false` (`startup.js` runs `npm ci` and the build itself, on local disk) |
+   | `ENABLE_ORYX_BUILD` | `false` |
+
+4. **Deploy the zip.** Run `az webapp deploy --resource-group rg-agentic-qe --name aqe-ui-<unique> --src-path dist/azure_frontend.zip --type zip`, then **Restart** the app.
+
+   **Verify:** **Log stream** ends with "Starting UI on port 3000", and `https://aqe-ui-<unique>.azurewebsites.net/login` shows the sign-in page.
+5. **Lock the API to the UI.**
+   1. Copy the **UI** app's outbound addresses, the same way as in section 10.
+   2. In the **API** app, open **Settings, Networking**. Under **Public network access**, open **Access restriction**.
+   3. On the **Main site** tab:
+      - set **Unmatched rule action** to **Deny**;
+      - add one **Allow** rule per UI address.
+   4. On the **Advanced tool site** tab, allow only your own IP address. You need it to reach Kudu for deployments.
+   5. Select **Save**.
+   6. Do the same **Advanced tool site** restriction on the UI app. Leave its **Main site** open to everyone (people sign in with their own accounts).
+
+   **Verify:** the API health URL now answers **403** in your browser, and the UI still works.
+
+---
+
+## 12. First start: toolchains for greenfield runs
+
+Greenfield runs build and test generated applications. That needs more than Python: Node 22 (also for the agentic-qe plugin's TypeScript and the Next.js template), JDK 21 and Maven (Spring Boot template), .NET 8, Go (`templates/stacks/*/stack.json` lists them), and Chromium for browser tests. The built-in image has none of these, so `startup.py` installs them, once.
+
+### 12.1 What happens at each start
+
+1. `startup.py` builds the Python environment (skipped when `requirements.txt` is unchanged).
+2. It starts `toolchains.py` **in the background** and starts the API at once, so a slow download never delays the app or hits the start time limit.
+3. `toolchains.py`, for each tool, skips it if it is already in `/home/tools`. Otherwise it downloads the pinned version, checks the vendor's SHA-256 or SHA-512 (a wrong checksum deletes the file and installs nothing), unpacks into a temporary folder, and renames it into place. An interrupted run leaves no half-installed tool.
+4. For Chromium it runs `python -m playwright install chromium` into `/home/tools/ms-playwright`. Chromium's **system libraries** live outside `/home`, so they are gone after each restart: if `ldd` shows a missing library and the process is root, it runs `python -m playwright install-deps chromium` (apt). That costs about a minute at each restart.
+5. Everything is logged with the prefix `[agentic-qe toolchains]`, and `/home/tools/status.json` records `ok` and a detail line for each tool. A failure is never skipped silently: the API still starts, and the failed tool stays missing.
+
+Pinned versions (in `deploy/azure/toolchains.py`, checked 2026-11-14): Node 22.12.0, Temurin 21.0.13+9, Maven 3.9.9, .NET SDK 8.0.428, Go 1.23.4, and the Chromium that matches the `playwright` version in `requirements.txt`. To change one, change its version, URL and digest together, and rebuild the zip.
+
+The downloads need outbound access to `nodejs.org`, `github.com` (Temurin), `archive.apache.org`, `builds.dotnet.microsoft.com`, `go.dev`, Playwright's CDN, and the OS package mirrors. They total about 0.7 GB.
+
+### 12.2 Check it worked (do this on the first deploy)
+
+1. Watch **Log stream** (section 9.6). Within about 10 to 15 minutes the log ends with `ready: node, java, maven, dotnet, go, chromium`. If it says `NOT ready: ...`, read the `FAILED:` lines above it.
+2. In the API app, open **Development Tools, SSH**, then **Go**:
+   ```bash
+   cat /home/tools/status.json
+   id -u            # 0 means root, which install-deps needs
+   ls /home/tools
+   ```
+3. In the app, open a project with a greenfield stack. The stack's toolchain check names every missing tool and version (the same check the QE cycle runs before it starts a greenfield build).
+
+### 12.3 Where greenfield code runs: the project's sandbox
+
+Every greenfield application is set up and run in that project's own sandbox, never in the API's own environment:
+- **Where:** `/home/atlas/data/projects/<project id>/sandbox` (`ATLAS_DATA_DIR` plus `projects/<id>/sandbox`), created by `initialize_sandbox` (`src/backend/repos/sandbox/setup.py`).
+- **What runs there:** installing dependencies, building, starting the app on a loopback port, and the unit, integration and end-to-end tests, all through the sandbox's command runner (`commands.execute_command` and `run_tests`).
+- **With which environment:** `clean_sandbox_env` (`src/backend/repos/sandbox/env.py`). It passes only an allowlist: `PATH`, `PLAYWRIGHT_BROWSERS_PATH`, `JAVA_HOME`, `GOROOT`, `DOTNET_ROOT`, the .NET switches and a few basics. It removes everything that looks like a credential (`ATLAS_*`, keys, tokens, passwords) and drops the platform's own Python environment from `PATH`.
+- **How the tools get there:** `startup.py` puts `/home/tools/<tool>/bin` on the API process's `PATH` and sets `JAVA_HOME`, `GOROOT`, `DOTNET_ROOT` and `PLAYWRIGHT_BROWSERS_PATH=/home/tools/ms-playwright`. The sandbox inherits exactly those through `clean_sandbox_env`, and nothing else from the platform.
+
+### 12.4 If Chromium's libraries cannot be installed (fallback)
+
+If the first deploy shows that the process is not root, or `apt` is unreachable (the log says `chromium: FAILED: ... not root`, or `install-deps` fails), Chromium cannot start on this image. Then:
+- set `ATLAS_INSTALL_TOOLCHAINS` to `node,java,maven,dotnet,go` so the log stays clean;
+- run greenfield **end-to-end** tests only on a developer computer (with a local Chromium), and attach their evidence to the project on Azure;
+- unit and integration tests for the Java, .NET, Go, Node and Python stacks still run in the Azure sandbox, because they need no browser.
+
+Moving to a custom container would change the owner's no-Docker decision, so it is not part of this guide.
+
+### 12.5 Disk and memory
+
+About 1.9 GB of `/home/tools` (section 2). Do not start a greenfield build while the first toolchain download is still running: B1 has 1.75 GB of memory shared by both apps, and the UI build uses up to 1 GB. The API refuses a second greenfield run, and the UI build happens only on the first start and after a UI update.
 
 ---
 
@@ -427,26 +548,30 @@ To change the hours, edit the two schedules. The cost for any schedule is the nu
 
 ---
 
+---
+
 ## 14. Check the settings, and move old data
 
-1. **Check the settings.** In the web app, open **Development Tools, SSH**, then **Go**, and run:
+1. **Check the settings.** In the API app, open **Development Tools, SSH**, then **Go**, and run:
    ```bash
-   cd /app && python3 scripts/env_check.py --env azure
+   cd /home/site/wwwroot && /home/atlas/venv/bin/python scripts/env_check.py --env azure
    ```
    It prints which settings came from Key Vault, by name only, then `azure: OK`.
 2. **Move an old SQLite store (once).** Do this only if an earlier version of the app kept `atlas.sqlite3`:
    1. Upload the old `atlas.sqlite3` to `/home/atlas/data/` with Kudu's **Debug console**.
    2. In the SSH console, run:
       ```bash
-      cd /app && python3 scripts/sqlite_to_postgres.py /home/atlas/data/atlas.sqlite3
+      cd /home/site/wwwroot && /home/atlas/venv/bin/python scripts/sqlite_to_postgres.py /home/atlas/data/atlas.sqlite3
       ```
    It refuses a database that already holds data. It copies every table, then checks the row counts, every project's ledger hash chain and every document version's SHA-256, and prints "Copy complete and verified".
 
 ---
 
+---
+
 ## 15. First sign-in, people and permissions
 
-1. **Sign in.** Open `https://aqe-<unique>.azurewebsites.net`. Sign in as the admin, with the password stored in `atlas-admin-password`.
+1. **Sign in.** Open `https://aqe-ui-<unique>.azurewebsites.net`. Sign in as the admin, with the password stored in `atlas-admin-password`.
 2. **Settings:**
    - enter the model endpoint, model name and key, then select **Test connection**;
    - tick the models people may use;
@@ -458,9 +583,22 @@ To change the hours, edit the two schedules. The cost for any schedule is the nu
 6. **MCP:** add remote (HTTP) MCP servers, and grant each tool to roles. stdio servers do not run on the shared server.
    **Jira and Confluence (optional):** add `https://mcp.atlassian.com/v2/mcp` (transport http) and tick "Each member signs in with OAuth". Select **Sign in** (your Atlassian account), then **Connect** to list its tools, and grant them to the roles that use BA Studio. Each member then connects their own Atlassian account from BA Studio; the platform never sees their password and keeps their token encrypted.
 
-**Verify, end to end:**
-1. Create a project and attach a repository.
-2. Open the project's **QE** page and start the cycle.
+**Verify each feature, end to end:**
+
+1. **Both apps up.** The API's health URL is blocked from your browser (403, section 11.5); the UI at `https://aqe-ui-<unique>.azurewebsites.net/login` loads and you can sign in.
+2. **Model.** **Settings, Test connection** succeeds.
+3. **QE brownfield, with a downloaded result.**
+   1. Create a project and attach an existing repository (zip upload or GitHub URL).
+   2. Open the project's **QE** page and start the cycle. Sign each gate, G0 to G5, as a named person.
+   3. At the end, download the run's evidence from the QE page. It must contain the signed gates and the validator results. Zero executed tests must read `INCONCLUSIVE`, never `PASS`.
+
+   Brownfield needs only Python and Node (the plugin's TypeScript checks). It works as soon as the API is up and `node` is `"ok": true` in `/home/tools/status.json`.
+4. **QE greenfield (needs section 12 to be ready).**
+   1. Check `/home/tools/status.json`: every tool you plan to use is `"ok": true`.
+   2. Create a greenfield project, pick a stack, and run the cycle. The sandbox appears at `/home/atlas/data/projects/<id>/sandbox` (check with `ls` in SSH).
+   3. Unit and integration results come from commands run in that sandbox; end-to-end results need Chromium.
+   4. If Chromium is not ready (section 12.4), run the end-to-end step on a developer computer and attach the evidence; Azure then shows it.
+5. **Document search.** Upload a document and search it; this proves the `vector` extension.
 
 ---
 
@@ -487,6 +625,8 @@ The same pages run locally and on Azure. The screenshots are from real local run
 
 ---
 
+---
+
 ## 17. Observability
 
 - **In the app.**
@@ -499,25 +639,28 @@ The same pages run locally and on Azure. The screenshots are from real local run
 
 ---
 
-## 18. Update, backup, stop paying
+---
+
+## 18. Update, roll back, back up, stop paying
 
 **Update the app:**
 1. Change and test locally: `python scripts/dev.py db`, then `python scripts/dev.py test`.
-2. Push to `feature/maf-harness-platform`. The **Container image** workflow builds and pushes the image. Wait for it to turn green.
-3. In the web app, open **Deployment, Deployment Center**, change the **Image and tag** to the new `sha-<40 hex>`, then **Save**. App Service pulls the image and restarts. If the PostgreSQL server is stopped, start it first.
-4. **Roll back** by setting the previous `sha-` tag the same way.
+2. Build the zips and run `azure-local --check` (section 4). Keep the zips: they are your rollback.
+3. If the PostgreSQL server is stopped, start it first. Deploy the API zip (section 9.5) and the UI zip (section 11.4), then restart both apps.
+4. The Python environment is rebuilt only when `requirements.txt` changed; the UI is rebuilt when its files or `ATLAS_BACKEND_URL` changed; toolchains are installed again only when a pinned version changed.
 
 New tables are added automatically on start.
 
+**Roll back:** deploy the previous zip the same way (`az webapp deploy ... --src-path <old zip> --type zip`) and restart. Keep each release's zips under a dated name, for example `azure_backend-2026-11-14.zip`. Database changes are additive; if one must be undone, use point-in-time restore (below).
+
 **Backup:**
 - **PostgreSQL** keeps 7 days of point-in-time restore: open **Settings, Backup and restore**, then **Restore**.
-- **Images** stay in GHCR under their `sha-` tags, so any earlier build can be redeployed (older untagged versions are removed by GitHub's package retention, not by this guide).
-- **The `/home` share** holds workspaces and files: check the web app's **Backups** page.
+- **The `/home` share** holds workspaces, files and the toolchains: check each app's **Backups** page. The toolchains can always be downloaded again.
 - **Key Vault** keeps deleted secrets for 90 days (soft delete).
 
 **Stop paying:**
 - Deleting the resource group `rg-agentic-qe` removes everything in it and stops all charges.
-- Stopping the web app does **not** stop the plan's charge (section 2).
+- Stopping the web apps does **not** stop the plan's charge (section 2).
 
 ---
 
@@ -525,12 +668,19 @@ New tables are added automatically on start.
 
 | What you see | Cause | Fix |
 |---|---|---|
-| Application error page, and **Log stream** says Key Vault access was denied | The API's identity cannot read secrets | Give `aqe-<unique>` the role **Key Vault Secrets User** on the vault (section 10.2), then restart |
-| Log shows "PostgreSQL ... did not answer within 30 seconds" or a connection timeout | Firewall rule missing, or the server is stopped | Add the app's outbound addresses (section 11); start the server from its **Overview** |
+| Application error page, and **Log stream** says Key Vault access was denied | The API's identity cannot read secrets | Give `aqe-api-<unique>` the role **Key Vault Secrets User** on the vault (section 9.2), then restart |
+| Log shows "PostgreSQL ... did not answer within 30 seconds" or a connection timeout | Firewall rule missing, or the server is stopped | Add the API's outbound addresses (section 10); start the server from its **Overview** |
 | Log shows `password authentication failed` | Wrong `atlas-database-url` | Fix the secret (section 7.3), percent-encoding special characters, then restart |
-| Log shows `unauthorized` or `denied` while pulling the image | The GHCR pull credential is missing, expired or has too few rights | Make a new token with `read:packages` (section 8) and update `DOCKER_REGISTRY_SERVER_PASSWORD`; or make the package public |
-| The app restarts in a loop, and the log says the container did not answer on port 3000 | `WEBSITES_PORT` is not `3000`, or the start limit is too short | Set `WEBSITES_PORT=3000` and `WEBSITES_CONTAINER_START_TIME_LIMIT=600` (section 10.4) |
-| The UI shows "cannot reach the API" | The API process crashed inside the container (the container exits and restarts when either process stops) | Read **Log stream** above the exit line: usually the database URL, Key Vault, or a missing setting |
+| Health answers but the UI shows "cannot reach the API" | `ATLAS_BACKEND_URL` is wrong, or the access restriction blocks the UI | Check the setting, and that every UI outbound address is allowed (section 11.5) |
+| The app never starts, and the log shows Oryx or `pip` building | Kudu's build is on | Set `SCM_DO_BUILD_DURING_DEPLOYMENT=false` and `ENABLE_ORYX_BUILD=false`, then deploy the zip again |
+| `startup.py` or `startup.js` is not found | Wrong startup command, or a zip made with Explorer or Finder | Use the commands in sections 9.3 and 11.2, and build with `package_azure_kudu.py` |
+| The app restarts in a loop during the first start | The first start is longer than the start time limit | Set `WEBSITES_CONTAINER_START_TIME_LIMIT=1800` (sections 9.4 and 11.3) |
+| Log shows `[agentic-qe toolchains] <tool>: FAILED: ... mismatch` | The download is not the pinned file (a proxy, or the vendor re-published it) | Nothing was installed. Restart to retry; if it repeats, check the pin in `toolchains.py` against the vendor's checksum file |
+| Log shows `[agentic-qe toolchains] <tool>: FAILED: could not download` | The vendor host is not reachable from the app | Check outbound access to the hosts in section 12.1, then restart |
+| `chromium: FAILED: ... not root`, or `install-deps` fails | The image does not start as root, or `apt` is unreachable | Section 12.4 (greenfield E2E runs locally; Azure shows the evidence) |
+| A greenfield run says a toolchain is missing, though the log said it was installed | The API has not been restarted since the install, or the version is below what the template needs | Restart the API app so `PATH` is rebuilt; check `/home/tools/status.json` and the minimum in `templates/stacks/<id>/stack.json` |
+| Sandbox commands cannot find a tool the API can | `clean_sandbox_env` passes only its allowlist | A new tool needs its `*_HOME` variable added to the allowlist in `src/backend/repos/sandbox/env.py` |
+| The log shows "no space left", or **Quotas** shows `/home` full | The plan's 10 GB are used | Delete finished projects' sandboxes; see the disk table in section 2 |
 | Log shows `extension "vector" is not allow-listed` | `azure.extensions` does not include VECTOR | Section 7.4, then restart |
 | The start and stop runbook fails with 403 | The Automation account lacks rights on the server | Assign **Contributor** on the PostgreSQL server to `aa-agentic-qe` (section 13.2) |
 
@@ -545,4 +695,5 @@ New tables are added automatically on start.
 | C | Model provider | The existing endpoint, set on **Settings** |
 | E | Region | **East US 2** (owner, 2026-11-11) |
 | F | Cost cap | At most **$25 a month**, through the PostgreSQL stop schedule (owner, 2026-11-12). Any change that raises it needs the owner's yes |
-| G | Packaging | One custom container on the existing B1 plan, image in GHCR (QE v2 step 10, `docs/QE_V2_PLAN.md` section 8). Replaces the two zips; Azure cost unchanged |
+| G | Packaging | **No Docker** (owner, 2026-11-14): two zips on the built-in Python 3.12 and Node 22 images, zip deploy through Kudu. Replaces the custom-container packaging of commit 02b55f6; Azure cost unchanged |
+| H | Greenfield execution | In each project's sandbox with `clean_sandbox_env`, using the toolchains in `/home/tools` (owner, 2026-11-14) |

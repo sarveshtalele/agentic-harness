@@ -18,11 +18,14 @@ WEBSITES_ENABLE_APP_SERVICE_STORAGE=true
 OTEL_EXPORTER_OTLP_ENDPOINT=
 OTEL_SERVICE_NAME=agentic-qe-api
 
-# --- Container web app (one app, one image: ghcr.io/sarveshtalele/agentic-qe) ---
-# The UI is the public port; the API listens on loopback inside the container, so there is no ATLAS_BACKEND_URL.
-WEBSITES_PORT=3000
-WEBSITES_CONTAINER_START_TIME_LIMIT=600
-# Private GHCR package only (set by the portal's Container tab; the password is a read:packages token, never stored in the repository):
-DOCKER_REGISTRY_SERVER_URL=https://ghcr.io
-DOCKER_REGISTRY_SERVER_USERNAME=
-DOCKER_REGISTRY_SERVER_PASSWORD=
+# --- API web app (built-in Python 3.12 image; startup command: python /home/site/wwwroot/startup.py) ---
+WEBSITES_PORT=8000
+WEBSITES_CONTAINER_START_TIME_LIMIT=900
+SCM_DO_BUILD_DURING_DEPLOYMENT=false
+ENABLE_ORYX_BUILD=false
+# all (default) | none | comma list of node,java,maven,dotnet,go,chromium. Installed once into /home/tools in the background.
+ATLAS_INSTALL_TOOLCHAINS=all
+
+# --- UI web app (built-in Node 22 LTS image; startup command: node /home/site/wwwroot/startup.js) ---
+# ATLAS_BACKEND_URL=https://aqe-api-<unique>.azurewebsites.net
+# WEBSITES_PORT=3000, WEBSITES_ENABLE_APP_SERVICE_STORAGE=true, SCM_DO_BUILD_DURING_DEPLOYMENT=false, ENABLE_ORYX_BUILD=false

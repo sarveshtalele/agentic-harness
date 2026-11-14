@@ -133,8 +133,13 @@ intake G0 (documents, target repo) -> read documents (RAG) -> requirements G1 ->
 
 ## 8. Azure
 
-- **Image:** a custom container on the existing B1 plan. GitHub Actions builds it from `mcr.microsoft.com/playwright/python`
-  and adds Node 22, JDK 21, .NET 8 and Go. It is pushed to `ghcr.io/sarveshtalele/agentic-qe` and App Service pulls it.
+- **No Docker (owner, 2026-11-14):** the built-in App Service images on the existing B1 plan (API on Python 3.12, UI on
+  Node 22), deployed as two zips. At start, `deploy/azure/toolchains.py` downloads pinned Node, JDK, Maven, .NET, Go and
+  Chromium into `/home/tools` once, each checked against the vendor's published hash. When the process is root it also
+  installs Chromium's system libraries with apt. Root and apt must be proved on the first deploy; the fallback is greenfield
+  E2E locally, with the evidence shown on Azure.
+- **Sandbox:** every greenfield app is installed, built, started on loopback and tested in the project's sandbox, with
+  `clean_sandbox_env`. That environment exposes only the tool paths, never the platform's secrets.
 - **Database:** the existing PostgreSQL Flexible Server with the `vector` extension allow-listed.
 - **Cost:** the table in `docs/AZURE_DEPLOYMENT_GUIDE.md` is updated. The target is unchanged, under $25 a month.
 - **Load:** one greenfield run at a time, which the backend enforces.
@@ -199,10 +204,10 @@ the commit. Live runs use the real model and real repositories.
 | 0 | Carry-forward hook (section 2a): snapshots, before and after checks, regenerate once, trace table on every gate card, ledger entries | Sonnet | seeded changes are each blocked, with their names on the card, in tests: a requirement quote edited in the plan, a case's expected result altered in a test, a requirement dropped without a reason, an invented case id. **Status: done offline, 2026-11-14** (`src/backend/qe/carry.py`, `tests/test_carry.py`; not yet run on a live model, not committed) |
 | 1 | Validity checks V3 to V6 and the zip with `tests/`, `needs-review/`, `VALIDATION.md` | Sonnet | seeded bad tests (no assertion, `assert True`, wrong import, wrong symbol, missing case id) each refused, in tests **Status: done offline, 2026-11-14** (`src/backend/qe/validity/`, `generate/validate.py`, `api/run_tests.py`, `tests/test_validity.py`, `tests/test_api_validity.py`; not yet run on a live model, not committed) |
 | 2 | Brownfield v2 flow: Validate stage, Execute, Prepare and Heal removed for brownfield, Gate 5 `NOT EXECUTED`, plugin Gate 4 and 5 checks | Sonnet | live run on personal-finance-mcp to Gate 5 with the zip, every stage at or under 180 s. **Status: done offline, 2026-11-14** (`definition.py` route `generate -> trace`, `qe/trace.py` `static_matrix`/`not_executed_summary`, `qe_trace_static`, `qe_sign`, `NotExecutedCard.tsx`, `tests/test_api_change.py`; not yet run on a live model, not committed) |
-| 3 | V2 oracle check in Design, and V1 code audit | Sonnet | seeded case with an invented expected result refused |
-| 4 | Documents: multi-upload, parse, chunk, pgvector plus keyword, rerank, citation check, RAG eval | Sonnet | RAG eval recall@8 at least 0.9 and citation accuracy 1.0 on the sample BRD |
-| 5 | Greenfield requirements, plan and design on RAG, plugin Gates 1 to 3 | Sonnet | live run from an uploaded BRD to Gate 3 |
-| 6 | Stack templates (5) and the solution-architect agent, Gate A | Sonnet | each template builds and starts in the sandbox, in tests |
+| 3 | V2 oracle check in Design, and V1 code audit | Sonnet | seeded case with an invented expected result refused. **Status: done offline, 2026-11-14** (`qe/oracle.py`, `design_audit.py`, `generate/audit.py`, planned levels in `model/quota.py`, `design_reuse.py`, `tests/test_qe_v2_design_code.py`, `tests/test_qe_v2_sendback.py`; not yet run on a live model, not committed) |
+| 4 | Documents: multi-upload, parse, chunk, pgvector plus keyword, rerank, citation check, RAG eval | Sonnet | RAG eval recall@8 at least 0.9 and citation accuracy 1.0 on the sample BRD | **Status: done offline, 2026-11-14** (`src/backend/rag/`, `api/rag.py`, `agents/document_analyst.py`, `tests/test_rag.py`, `tests/test_rag_agent.py`; keyword path tested for real, vector path skipped where pgvector is absent; not yet run on a live model, not committed) |
+| 5 | Greenfield requirements, plan and design on RAG, plugin Gates 1 to 3 | Sonnet | live run from an uploaded BRD to Gate 3 **Status: done offline, 2026-11-14** (`maf/workflows/qe/requirements_docs.py`, `requirements.py`, `plan.py`, `design_audit.py`, `shared/intake.py`, `plugin_bridge.py`, `tests/test_qe_greenfield_rag.py`; scripted run from the sample BRD to Gate 3 with plugin Gates 1 to 3 applied; not yet run on a live model, not committed) |
+| 6 | Stack templates (5) and the solution-architect agent, Gate A | Sonnet | each template builds and starts in the sandbox, in tests **Status: done offline, 2026-11-14** (`templates/stacks/`, `qe/stacks.py`, `qe/stack_run.py`, `qe/architecture.py`, `agents/solution_architect.py`, `tests/test_stacks.py`, `tests/test_architecture.py`; python and node and dotnet exercised end to end, go and java skipped here: no toolchain; Gate A not wired into the workflow; not yet run on a live model, not committed) |
 | 7 | App build, branch and PR push | Sonnet | live build of a small BRD app (FastAPI + React) pushed as a PR to a test repo the owner names |
 | 8 | Greenfield execute, heal, mutation smoke, evidence report | Sonnet | live greenfield run to Gate 5 with E2E screenshots in the report |
 | 9 | UI audit and fixes | Haiku (audit), Sonnet (fixes) | Playwright walk at two widths, every listed gap closed |

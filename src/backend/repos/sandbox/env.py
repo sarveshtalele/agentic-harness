@@ -47,6 +47,8 @@ def clean_sandbox_env(extra_env: dict | None = None) -> dict:
         "PATH", "LANG", "LC_ALL", "PYTHONDONTWRITEBYTECODE", "SYSTEMROOT",
         "TEMP", "TMP", "USER", "TERM", "SHELL", "HOME", "NODE_PATH",
         "NPM_CONFIG_CACHE", "PYTHONPATH", "PLAYWRIGHT_BROWSERS_PATH",
+        # toolchain homes (Azure: /home/tools, deploy/azure/toolchains.py); paths and switches, no secrets
+        "JAVA_HOME", "GOROOT", "DOTNET_ROOT", "DOTNET_CLI_TELEMETRY_OPTOUT", "DOTNET_NOLOGO", "DOTNET_SYSTEM_GLOBALIZATION_INVARIANT",
         # Windows: node, npx and Python need these to find programs and their per-user folders; none holds a secret
         "PATHEXT", "COMSPEC", "WINDIR", "APPDATA", "LOCALAPPDATA", "USERPROFILE", "PROGRAMFILES",
     }
