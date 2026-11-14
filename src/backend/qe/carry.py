@@ -90,8 +90,8 @@ def _excused(stage: str, state: dict) -> set[str]:
         missing |= {r["id"] for r in state.get("requirements") or [] if r.get("priority") not in ("P0", "P1")}
     if stage == "design":
         limit = state.get("case_limit") or {}
-        if limit.get("notice"):
-            missing |= set(limit.get("requirements_without_cases") or []) | set(limit.get("left_out_requirements") or [])
+        # only the budget is a reason: a requirement left without cases for any other cause (a failed batch) is a gap
+        missing |= set(limit.get("left_out_requirements") or [])
         missing |= {d.get("requirement_id") for d in limit.get("dropped_over_quota") or []}
     if stage == "generate":
         missing |= set(state.get("tests_missing") or [])

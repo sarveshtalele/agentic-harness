@@ -91,3 +91,10 @@ def test_plan_may_leave_out_a_lower_priority_requirement_and_says_so():
     low = [*copy.deepcopy(REQ), {"id": "REQ-009", "statement": "log", "priority": "P2", "file": "calc.py", "line": 9, "quote": "log(x)"}]
     bad, report = carry.after("plan", {"requirements": low}, {"requirements": low, "plan": copy.deepcopy(PLAN)})
     assert bad == [] and report["dropped_with_reason"] == 1 and report["dropped_without_reason"] == 0
+
+
+def test_design_without_cases_for_a_reason_other_than_the_budget_is_blocked():
+    old = {"requirements": copy.deepcopy(REQ), "plan": copy.deepcopy(PLAN)}
+    new = {**old, "cases": CASES[:1], "case_limit": {"notice": True, "p0_over_limit": True, "left_out_requirements": [], "requirements_without_cases": ["REQ-004"]}}
+    bad, report = carry.after("design", old, new)
+    assert any("REQ-004 has no case" in b for b in bad) and report["dropped_without_reason"] == 1, bad

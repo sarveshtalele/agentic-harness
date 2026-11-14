@@ -1,0 +1,1062 @@
+{
+ "repo": "https://github.com/sarveshtalele/personal-finance-mcp.git",
+ "model": "deepseek-v4-flash-global",
+ "run_id": "run_d4b5c6d8297e",
+ "gates": [
+  {
+   "gate": 0,
+   "seconds": 0.0,
+   "title": "Gate 0: confirm intake scope",
+   "summary": "Mode: brownfield. Source: git https://github.com/sarveshtalele/personal-finance-mcp.git at aff44ea06f. Files: 88. Languages: Python, JavaScript, CSS. Agents read this project's repository and documents only. Generated code lands on a separate branch.",
+   "plugin_check": null,
+   "design_audit": null,
+   "trace": null,
+   "validation": null
+  },
+  {
+   "gate": 1,
+   "seconds": 61.1,
+   "title": "Gate 1: approve requirements",
+   "summary": "30 requirements with verified evidence. agentic-qe Gate 1 check: PASS. Trace: 0 upstream items carried 0, 0 changed, 0 dropped with reason, 0 dropped without reason, 0 new. Tokens: 103,032 used of 50,000,000, 49,896,968 left.",
+   "plugin_check": {
+    "ok": true,
+    "gaps": [],
+    "missing": [],
+    "validator": {
+     "validator": "1.6.0",
+     "gate": 1,
+     "ok": true,
+     "errors": [],
+     "warnings": [],
+     "metrics": {
+      "requirements": 30,
+      "scenarios": 0,
+      "cases": 0,
+      "test_files": 0,
+      "results": 0,
+      "repo_test_files": 11,
+      "repo_tests": 137,
+      "existing": 11,
+      "generated": 0,
+      "manual": 0
+     },
+     "suspects": [],
+     "duplicates": [],
+     "brief": "Gate 1 validation: PASS (0 errors, 0 warnings)."
+    },
+    "error": null,
+    "app": "prj_a4b15abb37ac",
+    "dropped": []
+   },
+   "design_audit": null,
+   "trace": {
+    "stage": "requirements",
+    "upstream": 0,
+    "carried": 0,
+    "changed": 0,
+    "dropped_with_reason": 0,
+    "dropped_without_reason": 0,
+    "new": 0,
+    "verdict": "PASS"
+   },
+   "validation": null
+  },
+  {
+   "gate": 2,
+   "seconds": 14.5,
+   "title": "Gate 2: approve test plan",
+   "summary": "Deterministic score 100, independent review 100 (APPROVED). agentic-qe Gate 2 check: PASS. Trace: 30 upstream items carried 30, 0 changed, 0 dropped with reason, 0 dropped without reason, 30 new. Tokens: 125,290 used of 50,000,000, 49,874,710 left.",
+   "plugin_check": {
+    "ok": true,
+    "gaps": [],
+    "missing": [],
+    "validator": {
+     "validator": "1.6.0",
+     "gate": 2,
+     "ok": true,
+     "errors": [],
+     "warnings": [],
+     "metrics": {
+      "requirements": 30,
+      "scenarios": 30,
+      "cases": 0,
+      "test_files": 0,
+      "results": 0,
+      "repo_test_files": 11,
+      "repo_tests": 137,
+      "existing": 11,
+      "generated": 0,
+      "manual": 0,
+      "plan_by_area_level": {
+       "API body size cap returns 413": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "API rate limit returns 429": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Asset allocation suggestion includes monthly breakdown": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator endpoint returns 400 for unknown calculator name": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator endpoint returns 400 for unparseable JSON": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator parameter domain caps enforced": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator parameter maximum magnitude enforced": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator parameter name length enforced": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator returns 400 for domain errors from calculator functions": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator returns generic error for unexpected exceptions": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "FX rate endpoint validates currency code format": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Health endpoint returns status ok and tools count": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Indices quote endpoint validates symbol format": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "MCP tool calculate_portfolio_return is registered": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Mutual fund NAV by scheme code returns market data": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Mutual fund NAV rejects invalid scheme code": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Mutual fund search by query returns results": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Mutual fund search rejects empty or oversize query": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Portfolio expected return: length mismatch error": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Portfolio math: Information ratio zero tracking error error": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Portfolio math: Sharpe ratio zero std dev error": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Portfolio math: Sortino ratio zero downside deviation error": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Portfolio math: Treynor ratio zero beta error": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Portfolio risk: dimension mismatch error": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Production server starts with SSE transport": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Security headers present on all responses": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Static Next.js export is served at root path when directory exists": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Tool listing returns categorized tool data": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Two-asset portfolio returns minimum variance portfolio details": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Web server binds to configurable port from environment": {
+        "Integration": 1,
+        "Unit": 0
+       }
+      }
+     },
+     "suspects": [],
+     "duplicates": [],
+     "brief": "Gate 2 validation: PASS (0 errors, 0 warnings)."
+    },
+    "error": null,
+    "app": "prj_a4b15abb37ac"
+   },
+   "design_audit": null,
+   "trace": {
+    "stage": "plan",
+    "upstream": 30,
+    "carried": 30,
+    "changed": 0,
+    "dropped_with_reason": 0,
+    "dropped_without_reason": 0,
+    "new": 30,
+    "verdict": "PASS"
+   },
+   "validation": null
+  },
+  {
+   "gate": 3,
+   "seconds": 139.6,
+   "title": "Gate 3: approve test design and data",
+   "summary": "56 cases. Case budget 90 of 40 (ATLAS_MAX_CASES), decided before design; P0 and P1 need more than the limit, so the limit is exceeded for them. Remaining gaps: ['REQ-006: no Exception case, and the requirement states error behaviour', 'REQ-008: no Positive case', 'REQ-008: needs 2 Negative cases', 'REQ-008: no Exception case, and the requirement states error behaviour', 'REQ-009: no Positive case', 'REQ-009: needs 2 Negative cases', 'REQ-009: no Exception case, and the requirement states error behaviour', 'REQ-010: no Exception case, and the requirement states error behaviour', 'REQ-011: no Exception case, and the requirement states error behaviour', 'REQ-012: no Exception case, and the requirement states error behaviour', 'REQ-014: no Exception case, and the requirement states error behaviour', 'REQ-016: no Exception case, and the requirement states error behaviour', 'REQ-017: no Exception case, and the requirement states error behaviour', 'REQ-018: no Exception case, and the requirement states error behaviour', 'REQ-020: no Positive case', 'REQ-020: needs 2 Negative cases', 'REQ-021: no Positive case', 'REQ-021: needs 2 Negative cases', 'REQ-022: no Positive case', 'REQ-022: needs 2 Negative cases', 'REQ-023: no Positive case', 'REQ-023: needs 2 Negative cases', 'REQ-024: no Positive case', 'REQ-024: needs 2 Negative cases', 'REQ-025: no Positive case', 'REQ-025: needs 2 Negative cases', \"refused REQ-008: case 'Calculator parameter with absolute value within limit (1e13)' has test data 'number 1000000000000 (1e12) as parameter value', a string, but the requirement states its input type as number. Use a value of that type, or state the error behaviour in the requirement first\", \"refused REQ-008: case 'Calculator parameter with value just above 1e13 returns 400' has test data 'number 10000000000001 (1e13 + 1) as parameter value', a string, but the requirement states its input type as number. Use a value of that type, or state the error behaviour in the requirement first\", \"refused REQ-008: case 'Calculator parameter with value exactly at 1e13 boundary is ' has test data 'number 10000000000000 (1e13) as parameter value', a string, but the requirement states its input type as number. Use a value of that type, or state the error behaviour in the requirement first\", \"refused REQ-008: case 'Calculator parameter with negative value just below -1e13 re' has test data 'number -10000000000001 (-1e13 - 1) as parameter value', a string, but the requirement states its input type as number. Use a value of that type, or state the error behaviour in the requirement first\", 'refused REQ-009: case \\'Parameter within cap is accepted (e.g., years = 120)\\' has test data \"number 120 as value for parameter \\'years\\'\", a string, but the requirement states its input type as number. Use a value of that type, or state the error behaviour in the requirement first', 'refused REQ-009: case \\'Parameter years exceeds cap of 120 returns 400\\' has test data \"number 121 as value for parameter \\'years\\'\", a string, but the requirement states its input type as number. Use a value of that type, or state the error behaviour in the requirement first', 'refused REQ-009: case \\'Parameter months exceeds cap of 2400 returns 400\\' has test data \"number 2401 as value for parameter \\'months\\'\", a string, but the requirement states its input type as number. Use a value of that type, or state the error behaviour in the requirement first', 'refused REQ-009: case \\'Parameter months with value exactly at cap 2400 is accepted\\' has test data \"number 2400 as value for parameter \\'months\\'\", a string, but the requirement states its input type as number. Use a value of that type, or state the error behaviour in the requirement first', \"refused REQ-020: case 'Sharpe ratio returns correct result for positive standard de' has test data 'number portfolio_return=0.15, risk_free_rate=0.05, portfolio', a string, but the requirement states its input type as number. Use a value of that type, or state the error behaviour in the requirement first\", \"refused REQ-020: case 'Sharpe ratio returns error when standard deviation is zero' has test data 'number portfolio_return=0.15, risk_free_rate=0.05, portfolio', a string, but the requirement states its input type as number. Use a value of that type, or state the error behaviour in the requirement first\", \"refused REQ-020: case 'Sharpe ratio returns error with negative standard deviation ' has test data 'number portfolio_return=0.15, risk_free_rate=0.05, portfolio', a string, but the requirement states its input type as number. Use a value of that type, or state the error behaviour in the requirement first\", \"refused REQ-020: case 'Sharpe ratio accepts small positive standard deviation (just' has test data 'number portfolio_return=0.15, risk_free_rate=0.05, portfolio', a string, but the requirement states its input type as number. Use a value of that type, or state the error behaviour in the requirement first\", \"refused REQ-021: case 'Treynor ratio computed with non-zero beta' has test data 'number beta=1.5, portfolio_return=0.12, risk_free_rate=0.03', a string, but the requirement states its input type as number. Use a value of that type, or state the error behaviour in the requirement first\", \"refused REQ-021: case 'Treynor ratio returns error when beta is zero' has test data 'number beta=0, portfolio_return=0.12, risk_free_rate=0.03', a string, but the requirement states its input type as number. Use a value of that type, or state the error behaviour in the requirement first\", \"refused REQ-021: case 'Treynor ratio with beta negative (just below zero) returns e' has test data 'number beta=-0.0001, portfolio_return=0.12, risk_free_rate=0', a string, but the requirement states its input type as number. Use a value of that type, or state the error behaviour in the requirement first\", \"refused REQ-021: case 'Treynor ratio with very small positive beta (just above zero' has test data 'number beta=0.0001, portfolio_return=0.15, risk_free_rate=0.', a string, but the requirement states its input type as number. Use a value of that type, or state the error behaviour in the requirement first\", \"refused REQ-022: case 'Information ratio computed with non-zero tracking error' has test data 'number tracking_error=1.2, portfolio_return=0.10, benchmark_', a string, but the requirement states its input type as number. Use a value of that type, or state the error behaviour in the requirement first\", \"refused REQ-022: case 'Information ratio returns error when tracking error is zero' has test data 'number tracking_error=0, portfolio_return=0.10, benchmark_re', a string, but the requirement states its input type as number. Use a value of that type, or state the error behaviour in the requirement first\", \"refused REQ-022: case 'Information ratio with very small positive tracking error (j' has test data 'number tracking_error=0.0001, portfolio_return=0.12, benchma', a string, but the requirement states its input type as number. Use a value of that type, or state the error behaviour in the requirement first\", \"refused REQ-022: case 'Information ratio with very small negative tracking error (j' has test data 'number tracking_error=-0.0001, portfolio_return=0.12, benchm', a string, but the requirement states its input type as number. Use a value of that type, or state the error behaviour in the requirement first\", \"refused REQ-023: case 'Sortino ratio computed with non-zero downside deviation' has test data 'number downside_deviation=0.15, portfolio_return=0.12, risk_', a string, but the requirement states its input type as number. Use a value of that type, or state the error behaviour in the requirement first\", \"refused REQ-023: case 'Sortino ratio returns error when downside deviation is zero' has test data 'number downside_deviation=0, portfolio_return=0.12, risk_fre', a string, but the requirement states its input type as number. Use a value of that type, or state the error behaviour in the requirement first\", \"refused REQ-023: case 'Sortino ratio with very small positive downside deviation (j' has test data 'number downside_deviation=0.0001, portfolio_return=0.12, ris', a string, but the requirement states its input type as number. Use a value of that type, or state the error behaviour in the requirement first\", \"refused REQ-023: case 'Sortino ratio with very small negative downside deviation (j' has test data 'number downside_deviation=-0.0001, portfolio_return=0.12, ri', a string, but the requirement states its input type as number. Use a value of that type, or state the error behaviour in the requirement first\", \"refused REQ-024: case 'Weights and returns arrays have same length \u2013 validation pas' has test data 'list weights=[0.25, 0.25, 0.25, 0.25], returns=[0.10, 0.12, ', a string, but the requirement states its input type as list. Use a value of that type, or state the error behaviour in the requirement first\", \"refused REQ-024: case 'Weights longer than returns \u2013 mismatch error returned' has test data 'list weights=[0.5, 0.3, 0.2], returns=[0.10, 0.12]', a string, but the requirement states its input type as list. Use a value of that type, or state the error behaviour in the requirement first\", \"refused REQ-024: case 'Returns longer than weights \u2013 mismatch error returned' has test data 'list weights=[0.6, 0.4], returns=[0.10, 0.12, 0.08]', a string, but the requirement states its input type as list. Use a value of that type, or state the error behaviour in the requirement first\", \"refused REQ-024: case 'Weights empty array, returns non-empty \u2013 mismatch error retu' has test data 'list weights=[], returns=[0.10]', a string, but the requirement states its input type as list. Use a value of that type, or state the error behaviour in the requirement first\", \"refused REQ-025: case 'Length of std_devs matches length of weights - no error' has test data 'list weights=[0.6, 0.4], std_devs=[0.2, 0.3], correlations=[', a string, but the requirement states its input type as list. Use a value of that type, or state the error behaviour in the requirement first\", \"refused REQ-025: case 'std_devs length does not match weights length - error return' has test data 'list weights=[0.5, 0.5], std_devs=[0.2], correlations=[[1.0]', a string, but the requirement states its input type as list. Use a value of that type, or state the error behaviour in the requirement first\", \"refused REQ-025: case 'correlations length does not match weights length - error re' has test data 'list weights=[0.6, 0.4], std_devs=[0.2, 0.3], correlations=[', a string, but the requirement states its input type as list. Use a value of that type, or state the error behaviour in the requirement first\", \"refused REQ-025: case 'Empty weights list - std_devs length mismatch (non-empty vs ' has test data 'list weights=[], std_devs=[0.2], correlations=[[1.0]]', a string, but the requirement states its input type as list. Use a value of that type, or state the error behaviour in the requirement first\", \"refused REQ-026: case 'Asset allocation with positive monthly_investment includes m' has test data 'number 5000 as monthly_investment', a string, but the requirement states its input type as number. Use a value of that type, or state the error behaviour in the requirement first\"]. agentic-qe Gate 3 check: FAIL (plan scenarios with no designed case (20 of 30 designed): SC-U-001-001, SC-U-002-001, SC-U-003-001, SC-U-004-001, SC-U-005-001, SC-U-006-001, SC-I-008-001, SC-I-009-001, SC-I-020-001, SC-I-024-001; cases the coverage auditor says do not cover their scenario: TC-APP-001 (PARTIAL), TC-APP-010 (PARTIAL), TC-APP-027 (PARTIAL), TC-APP-037 (PARTIAL), TC-APP-040 (PARTIAL), TC-APP-041 (PARTIAL), TC-APP-044 (PARTIAL), TC-APP-045 (PARTIAL), TC-APP-049 (PARTIAL), TC-APP-052 (PARTIAL), TC-APP-054 (PARTIAL), TC-APP-056 (PARTIAL)). Trace: 116 upstream items carried 116, 0 changed, 0 dropped with reason, 0 dropped without reason, 0 new. Tokens: 456,248 used of 50,000,000, 49,543,752 left.",
+   "plugin_check": {
+    "ok": false,
+    "gaps": [
+     "plan scenarios with no designed case (20 of 30 designed): SC-U-001-001, SC-U-002-001, SC-U-003-001, SC-U-004-001, SC-U-005-001, SC-U-006-001, SC-I-008-001, SC-I-009-001, SC-I-020-001, SC-I-024-001",
+     "cases the coverage auditor says do not cover their scenario: TC-APP-001 (PARTIAL), TC-APP-010 (PARTIAL), TC-APP-027 (PARTIAL), TC-APP-037 (PARTIAL), TC-APP-040 (PARTIAL), TC-APP-041 (PARTIAL), TC-APP-044 (PARTIAL), TC-APP-045 (PARTIAL), TC-APP-049 (PARTIAL), TC-APP-052 (PARTIAL), TC-APP-054 (PARTIAL), TC-APP-056 (PARTIAL)"
+    ],
+    "missing": [
+     "SC-U-001-001",
+     "SC-U-002-001",
+     "SC-U-003-001",
+     "SC-U-004-001",
+     "SC-U-005-001",
+     "SC-U-006-001",
+     "SC-I-008-001",
+     "SC-I-009-001",
+     "SC-I-020-001",
+     "SC-I-024-001",
+     "TC-APP-001 (PARTIAL)",
+     "TC-APP-010 (PARTIAL)",
+     "TC-APP-027 (PARTIAL)",
+     "TC-APP-037 (PARTIAL)",
+     "TC-APP-040 (PARTIAL)",
+     "TC-APP-041 (PARTIAL)",
+     "TC-APP-044 (PARTIAL)",
+     "TC-APP-045 (PARTIAL)",
+     "TC-APP-049 (PARTIAL)",
+     "TC-APP-052 (PARTIAL)",
+     "TC-APP-054 (PARTIAL)",
+     "TC-APP-056 (PARTIAL)"
+    ],
+    "validator": {
+     "validator": "1.6.0",
+     "gate": 3,
+     "ok": false,
+     "errors": [
+      {
+       "check": "design.coverage",
+       "message": "plan scenarios with no designed case (20 of 30 designed)",
+       "ids": [
+        "SC-I-008-001",
+        "SC-I-009-001",
+        "SC-I-020-001",
+        "SC-I-024-001",
+        "SC-U-001-001",
+        "SC-U-002-001",
+        "SC-U-003-001",
+        "SC-U-004-001",
+        "SC-U-005-001",
+        "SC-U-006-001"
+       ]
+      },
+      {
+       "check": "design.areas",
+       "message": "plan areas with no designed case at all",
+       "ids": [
+        "Asset allocation suggestion includes monthly breakdown",
+        "Calculator parameter domain caps enforced",
+        "Calculator parameter maximum magnitude enforced",
+        "Portfolio expected return: length mismatch error",
+        "Portfolio math: Information ratio zero tracking error error",
+        "Portfolio math: Sharpe ratio zero std dev error",
+        "Portfolio math: Sortino ratio zero downside deviation error",
+        "Portfolio math: Treynor ratio zero beta error",
+        "Portfolio risk: dimension mismatch error",
+        "Static Next.js export is served at root path when directory exists"
+       ]
+      },
+      {
+       "check": "design.suspects",
+       "message": "cases that do not read like their scenario and no auditor verdict COVERS them",
+       "ids": [
+        "TC-APP-044",
+        "TC-APP-056"
+       ]
+      }
+     ],
+     "warnings": [],
+     "metrics": {
+      "requirements": 30,
+      "scenarios": 30,
+      "cases": 56,
+      "test_files": 0,
+      "results": 0,
+      "repo_test_files": 11,
+      "repo_tests": 137,
+      "existing": 11,
+      "generated": 0,
+      "manual": 0,
+      "plan_by_area_level": {
+       "API body size cap returns 413": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "API rate limit returns 429": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Asset allocation suggestion includes monthly breakdown": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator endpoint returns 400 for unknown calculator name": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator endpoint returns 400 for unparseable JSON": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator parameter domain caps enforced": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator parameter maximum magnitude enforced": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator parameter name length enforced": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator returns 400 for domain errors from calculator functions": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator returns generic error for unexpected exceptions": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "FX rate endpoint validates currency code format": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Health endpoint returns status ok and tools count": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Indices quote endpoint validates symbol format": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "MCP tool calculate_portfolio_return is registered": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Mutual fund NAV by scheme code returns market data": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Mutual fund NAV rejects invalid scheme code": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Mutual fund search by query returns results": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Mutual fund search rejects empty or oversize query": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Portfolio expected return: length mismatch error": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Portfolio math: Information ratio zero tracking error error": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Portfolio math: Sharpe ratio zero std dev error": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Portfolio math: Sortino ratio zero downside deviation error": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Portfolio math: Treynor ratio zero beta error": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Portfolio risk: dimension mismatch error": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Production server starts with SSE transport": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Security headers present on all responses": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Static Next.js export is served at root path when directory exists": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Tool listing returns categorized tool data": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Two-asset portfolio returns minimum variance portfolio details": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Web server binds to configurable port from environment": {
+        "Integration": 1,
+        "Unit": 0
+       }
+      },
+      "design_coverage_by_area": {
+       "API body size cap returns 413": 100,
+       "API rate limit returns 429": 100,
+       "Asset allocation suggestion includes monthly breakdown": 0,
+       "Calculator endpoint returns 400 for unknown calculator name": 100,
+       "Calculator endpoint returns 400 for unparseable JSON": 100,
+       "Calculator parameter domain caps enforced": 0,
+       "Calculator parameter maximum magnitude enforced": 0,
+       "Calculator parameter name length enforced": 100,
+       "Calculator returns 400 for domain errors from calculator functions": 100,
+       "Calculator returns generic error for unexpected exceptions": 100,
+       "FX rate endpoint validates currency code format": 100,
+       "Health endpoint returns status ok and tools count": 100,
+       "Indices quote endpoint validates symbol format": 100,
+       "MCP tool calculate_portfolio_return is registered": 100,
+       "Mutual fund NAV by scheme code returns market data": 100,
+       "Mutual fund NAV rejects invalid scheme code": 100,
+       "Mutual fund search by query returns results": 100,
+       "Mutual fund search rejects empty or oversize query": 100,
+       "Portfolio expected return: length mismatch error": 0,
+       "Portfolio math: Information ratio zero tracking error error": 0,
+       "Portfolio math: Sharpe ratio zero std dev error": 0,
+       "Portfolio math: Sortino ratio zero downside deviation error": 0,
+       "Portfolio math: Treynor ratio zero beta error": 0,
+       "Portfolio risk: dimension mismatch error": 0,
+       "Production server starts with SSE transport": 100,
+       "Security headers present on all responses": 100,
+       "Static Next.js export is served at root path when directory exists": 0,
+       "Tool listing returns categorized tool data": 100,
+       "Two-asset portfolio returns minimum variance portfolio details": 100,
+       "Web server binds to configurable port from environment": 100
+      },
+      "cases_per_scenario": {
+       "mean": 2.8
+      },
+      "similarity_median": 0.283
+     },
+     "suspects": [
+      {
+       "case": "TC-APP-043",
+       "scenario": "SC-I-014-001",
+       "similarity": 0.074,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-044",
+       "scenario": "SC-I-014-001",
+       "similarity": 0.07,
+       "audit": "PARTIAL"
+      },
+      {
+       "case": "TC-APP-055",
+       "scenario": "SC-I-022-001",
+       "similarity": 0.028,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-056",
+       "scenario": "SC-I-022-001",
+       "similarity": 0.041,
+       "audit": "PARTIAL"
+      }
+     ],
+     "duplicates": [],
+     "brief": "Gate 3 validation: FAIL (3 errors, 0 warnings).\n- plan scenarios with no designed case (20 of 30 designed): SC-I-008-001, SC-I-009-001, SC-I-020-001, SC-I-024-001, SC-U-001-001, SC-U-002-001, SC-U-003-001, SC-U-004-001, SC-U-005-001, SC-U-006-001\n- plan areas with no designed case at all: Asset allocation suggestion includes monthly breakdown, Calculator parameter domain caps enforced, Calculator parameter maximum magnitude enforced, Portfolio expected return: length mismatch error, Portfolio math: Information ratio zero tracking error error, Portfolio math: Sharpe ratio zero std dev error, Portfolio math: Sortino ratio zero downside deviation error, Portfolio math: Treynor ratio zero beta error, Portfolio risk: dimension mismatch error, Static Next.js export is served at root path when directory exists\n- cases that do not read like their scenario and no auditor verdict COVERS them: TC-APP-044, TC-APP-056\nAudit these case/scenario pairs first (low similarity): TC-APP-043, TC-APP-044, TC-APP-055, TC-APP-056"
+    },
+    "error": null
+   },
+   "design_audit": {
+    "app": "prj_a4b15abb37ac",
+    "reviewed": 56,
+    "audited": 56,
+    "counts": {
+     "COVERS": 44,
+     "PARTIAL": 12,
+     "MISSES": 0
+    },
+    "first_audit": {
+     "COVERS": 42,
+     "PARTIAL": 12,
+     "MISSES": 2
+    },
+    "redesigned": 2,
+    "unaudited": []
+   },
+   "trace": {
+    "stage": "data",
+    "upstream": 116,
+    "carried": 116,
+    "changed": 0,
+    "dropped_with_reason": 0,
+    "dropped_without_reason": 0,
+    "new": 0,
+    "verdict": "PASS"
+   },
+   "validation": null
+  },
+  {
+   "gate": 4,
+   "seconds": 53.0,
+   "title": "Gate 4: approve generated tests",
+   "summary": "56 of 56 cases have tests, on branch atlas/qe-d8297e. Validity: 0 of 56 tests valid; 56 need review (V3 56, V4 0, V5 0, V6 0). Approving also allows them to run on this machine. Trace: 116 upstream items carried 116, 0 changed, 0 dropped with reason, 0 dropped without reason, 56 new. Tokens: 641,118 used of 50,000,000, 49,358,882 left.",
+   "plugin_check": null,
+   "design_audit": null,
+   "trace": {
+    "stage": "generate",
+    "upstream": 116,
+    "carried": 116,
+    "changed": 0,
+    "dropped_with_reason": 0,
+    "dropped_without_reason": 0,
+    "new": 56,
+    "verdict": "PASS"
+   },
+   "validation": {
+    "total": 56,
+    "valid": 0,
+    "invalid": 56,
+    "V3": 56,
+    "V4": 0,
+    "V5": 0,
+    "V6": 0
+   }
+  },
+  {
+   "gate": 5,
+   "seconds": 214.1,
+   "title": "Gate 5: approve release",
+   "summary": "Verdict FAIL: 16/54 tests passed. 30 reviewed tests failed and are capped at 60. Trace: 172 upstream items carried 172, 0 changed, 0 dropped with reason, 0 dropped without reason, 0 new. Tokens: 681,336 used of 50,000,000, 49,318,664 left.",
+   "plugin_check": null,
+   "design_audit": null,
+   "trace": {
+    "stage": "sign",
+    "upstream": 172,
+    "carried": 172,
+    "changed": 0,
+    "dropped_with_reason": 0,
+    "dropped_without_reason": 0,
+    "new": 0,
+    "verdict": "PASS"
+   },
+   "validation": null,
+   "defect_records": [
+    {
+     "test": "test_TC_APP_025",
+     "case_id": "TC-APP-025",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-k8hbkwgm/projects/prj_a4b15abb37ac/worktrees/run_d4b5c6d8297e/tests/agentic_qe/test_TC_APP_025.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_TC_APP_025.py:6: in <module>\n    f",
+     "cause": "ImportError: cannot import 'mcp' via relative import 'from ..server import mcp' in src/web/server.py",
+     "fix": "This is an application defect; the relative import is not resolvable from the test runner's environment. No test code change.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_TC_APP_026",
+     "case_id": "TC-APP-026",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-k8hbkwgm/projects/prj_a4b15abb37ac/worktrees/run_d4b5c6d8297e/tests/agentic_qe/test_TC_APP_026.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_TC_APP_026.py:4: in <module>\n    f",
+     "cause": "ImportError: cannot import 'mcp' via relative import 'from ..server import mcp' in src/web/server.py",
+     "fix": "Application defect; no test code change.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_TC_APP_027",
+     "case_id": "TC-APP-027",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-k8hbkwgm/projects/prj_a4b15abb37ac/worktrees/run_d4b5c6d8297e/tests/agentic_qe/test_TC_APP_027.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_TC_APP_027.py:4: in <module>\n    f",
+     "cause": "ImportError: cannot import 'mcp' via relative import 'from ..server import mcp' in src/web/server.py",
+     "fix": "Application defect; no test code change.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_TC_APP_028",
+     "case_id": "TC-APP-028",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-k8hbkwgm/projects/prj_a4b15abb37ac/worktrees/run_d4b5c6d8297e/tests/agentic_qe/test_TC_APP_028.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_TC_APP_028.py:4: in <module>\n    f",
+     "cause": "ImportError: cannot import 'mcp' via relative import 'from ..server import mcp' in src/web/server.py",
+     "fix": "Application defect; no test code change.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_TC_APP_029",
+     "case_id": "TC-APP-029",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-k8hbkwgm/projects/prj_a4b15abb37ac/worktrees/run_d4b5c6d8297e/tests/agentic_qe/test_TC_APP_029.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_TC_APP_029.py:4: in <module>\n    f",
+     "cause": "ImportError: cannot import 'mcp' via relative import 'from ..server import mcp' in src/web/server.py",
+     "fix": "Application defect; no test code change.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_TC_APP_030",
+     "case_id": "TC-APP-030",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-k8hbkwgm/projects/prj_a4b15abb37ac/worktrees/run_d4b5c6d8297e/tests/agentic_qe/test_TC_APP_030.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_TC_APP_030.py:4: in <module>\n    f",
+     "cause": "ImportError: cannot import 'mcp' via relative import 'from ..server import mcp' in src/web/server.py",
+     "fix": "Application defect; no test code change.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_TC_APP_031",
+     "case_id": "TC-APP-031",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-k8hbkwgm/projects/prj_a4b15abb37ac/worktrees/run_d4b5c6d8297e/tests/agentic_qe/test_TC_APP_031.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_TC_APP_031.py:4: in <module>\n    f",
+     "cause": "ImportError: cannot import 'mcp' via relative import 'from ..server import mcp' in src/web/server.py",
+     "fix": "Application defect; no test code change.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_TC_APP_032",
+     "case_id": "TC-APP-032",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-k8hbkwgm/projects/prj_a4b15abb37ac/worktrees/run_d4b5c6d8297e/tests/agentic_qe/test_TC_APP_032.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_TC_APP_032.py:4: in <module>\n    f",
+     "cause": "ImportError: cannot import 'mcp' via relative import 'from ..server import mcp' in src/web/server.py",
+     "fix": "Application defect; no test code change.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_invalid_json_016",
+     "case_id": "",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-k8hbkwgm/projects/prj_a4b15abb37ac/worktrees/run_d4b5c6d8297e/tests/agentic_qe/test_invalid_json_016.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_invalid_json_016.py:7: in <m",
+     "cause": "ImportError: cannot import 'build_app' from 'web.server' -> same relative import failure in src/web/server.py",
+     "fix": "Application defect; no test code change.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_payload_009",
+     "case_id": "",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-k8hbkwgm/projects/prj_a4b15abb37ac/worktrees/run_d4b5c6d8297e/tests/agentic_qe/test_payload_009.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_payload_009.py:7: in <module>\n   ",
+     "cause": "ImportError: cannot import 'build_app' from 'web.server' -> same relative import failure in src/web/server.py",
+     "fix": "Application defect; no test code change.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_payload_010",
+     "case_id": "",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-k8hbkwgm/projects/prj_a4b15abb37ac/worktrees/run_d4b5c6d8297e/tests/agentic_qe/test_payload_010.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_payload_010.py:5: in <module>\n   ",
+     "cause": "ImportError: cannot import 'build_app' from 'web.server' -> same relative import failure in src/web/server.py",
+     "fix": "Application defect; no test code change.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_payload_011",
+     "case_id": "",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-k8hbkwgm/projects/prj_a4b15abb37ac/worktrees/run_d4b5c6d8297e/tests/agentic_qe/test_payload_011.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_payload_011.py:7: in <module>\n   ",
+     "cause": "ImportError: cannot import 'build_app' from 'web.server' -> same relative import failure in src/web/server.py",
+     "fix": "Application defect; no test code change.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_portfolio_minimum_variance_TC_APP_005",
+     "case_id": "TC-APP-005",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-k8hbkwgm/projects/prj_a4b15abb37ac/worktrees/run_d4b5c6d8297e/tests/agentic_qe/test_portfolio_minimum_variance_TC_APP_005.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_portfol",
+     "cause": "ImportError: cannot import 'two_asset_portfolio' from 'tools.portfolio'",
+     "fix": "Application defect (missing module or relative import issue); no test code change.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_rate_limit_012",
+     "case_id": "",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-k8hbkwgm/projects/prj_a4b15abb37ac/worktrees/run_d4b5c6d8297e/tests/agentic_qe/test_rate_limit_012.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_rate_limit_012.py:7: in <modul",
+     "cause": "ImportError: cannot import 'build_app' from 'web.server' -> same relative import failure in src/web/server.py",
+     "fix": "Application defect; no test code change.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_rate_limit_013",
+     "case_id": "",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-k8hbkwgm/projects/prj_a4b15abb37ac/worktrees/run_d4b5c6d8297e/tests/agentic_qe/test_rate_limit_013.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_rate_limit_013.py:7: in <modul",
+     "cause": "ImportError: cannot import 'build_app' from 'web.server' -> same relative import failure in src/web/server.py",
+     "fix": "Application defect; no test code change.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_rate_limit_014",
+     "case_id": "",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-k8hbkwgm/projects/prj_a4b15abb37ac/worktrees/run_d4b5c6d8297e/tests/agentic_qe/test_rate_limit_014.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_rate_limit_014.py:7: in <modul",
+     "cause": "The test could not run properly in this environment.",
+     "fix": "Fix the environment: install the missing package, or provide the service. The application is not at fault.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_rate_limit_015",
+     "case_id": "",
+     "classification": "environment",
+     "class": "ENVIRONMENT",
+     "evidence": "collection failure\nImportError while importing test module '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-k8hbkwgm/projects/prj_a4b15abb37ac/worktrees/run_d4b5c6d8297e/tests/agentic_qe/test_rate_limit_015.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/agentic_qe/test_rate_limit_015.py:7: in <modul",
+     "cause": "The test could not run properly in this environment.",
+     "fix": "Fix the environment: install the missing package, or provide the service. The application is not at fault.",
+     "pattern": "Environment",
+     "healed": false
+    },
+    {
+     "test": "test_api_fx_TC_APP_047.TestTCApp047::test_TC_APP_047",
+     "case_id": "TC-APP-047",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "assert 200 == 400\n +  where 200 = <Response [200 OK]>.status_code\ntests/agentic_qe/test_api_fx_TC_APP_047.py:16: in test_TC_APP_047\n    assert response.status_code == 400\nE   assert 200 == 400\nE    +  where 200 = <Response [200 OK]>.status_code",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_api_quote_single_char_symbol_TC_APP_052::test_TC_APP_052_single_char_symbol",
+     "case_id": "TC-APP-052",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "assert 200 == 400\n +  where 200 = <Response [200 OK]>.status_code\ntests/agentic_qe/test_api_quote_single_char_symbol_TC_APP_052.py:19: in test_TC_APP_052_single_char_symbol\n    assert response.status_code == 400\nE   assert 200 == 400\nE    +  where 200 = <Response [200 OK]>.status_code",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_calc_TC_APP_033::test_TC_APP_033_index_error",
+     "case_id": "TC-APP-033",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "assert \"invalid inpu...' and 'years'\" == 'calculation failed'\n  \n  - calculation failed\n  + invalid inputs: sip_calculator() missing 2 required positional arguments: 'annual_return' and 'years'\ntests/agentic_qe/test_calc_TC_APP_033.py:35: in test_TC_APP_033_index_error\n    assert data[\"error\"] == \"calculation failed\"\nE   assert \"invalid inpu...' and 'years'\" == 'calculation failed'\nE     \nE     - calculation failed\nE     + invalid inputs: sip_calculator() missing 2 required positional arguments: 'annual_return' and 'years'",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_calc_TC_APP_034::test_TC_APP_034_runtime_error",
+     "case_id": "TC-APP-034",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "assert \"invalid inpu...nthly_income'\" == 'calculation failed'\n  \n  - calculation failed\n  + invalid inputs: create_financial_plan() missing 1 required positional argument: 'monthly_income'\ntests/agentic_qe/test_calc_TC_APP_034.py:37: in test_TC_APP_034_runtime_error\n    assert data[\"error\"] == \"calculation failed\"\nE   assert \"invalid inpu...nthly_income'\" == 'calculation failed'\nE     \nE     - calculation failed\nE     + invalid inputs: create_financial_plan() missing 1 required positional argument: 'monthly_income'",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_calc_TC_APP_035::test_TC_APP_035_attribute_error",
+     "case_id": "TC-APP-035",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "assert \"invalid inpu...'annual_rate'\" == 'calculation failed'\n  \n  - calculation failed\n  + invalid inputs: future_value() missing 2 required positional arguments: 'pv' and 'annual_rate'\ntests/agentic_qe/test_calc_TC_APP_035.py:34: in test_TC_APP_035_attribute_error\n    assert data[\"error\"] == \"calculation failed\"\nE   assert \"invalid inpu...'annual_rate'\" == 'calculation failed'\nE     \nE     - calculation failed\nE     + invalid inputs: future_value() missing 2 required positional arguments: 'pv' and 'annual_rate'",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_calc_empty_name_TC_APP_022::test_TC_APP_022_empty_name",
+     "case_id": "TC-APP-022",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "assert \"unknown calculator 'None'\" == \"unknown calculator ''\"\n  \n  - unknown calculator ''\n  + unknown calculator 'None'\n  ?                     ++++\ntests/agentic_qe/test_calc_empty_name_TC_APP_022.py:23: in test_TC_APP_022_empty_name\n    assert data[\"error\"] == \"unknown calculator ''\"\nE   assert \"unknown calculator 'None'\" == \"unknown calculator ''\"\nE     \nE     - unknown calculator ''\nE     + unknown calculator 'None'\nE     ?                     ++++",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_calc_param_name_40_chars_TC_APP_024::test_TC_APP_024_param_name_40_chars",
+     "case_id": "TC-APP-024",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "assert 400 != 400\n +  where 400 = <Response [400 Bad Request]>.status_code\ntests/agentic_qe/test_calc_param_name_40_chars_TC_APP_024.py:22: in test_TC_APP_024_param_name_40_chars\n    assert resp.status_code != 400\nE   assert 400 != 400\nE    +  where 400 = <Response [400 Bad Request]>.status_code",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_calc_single_char_name_TC_APP_023::test_TC_APP_023_single_char_name",
+     "case_id": "TC-APP-023",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "assert \"unknown calculator 'None'\" == \"unknown calculator 'x'\"\n  \n  - unknown calculator 'x'\n  ?                     ^\n  + unknown calculator 'None'\n  ?                     ^^^^\ntests/agentic_qe/test_calc_single_char_name_TC_APP_023.py:23: in test_TC_APP_023_single_char_name\n    assert data[\"error\"] == \"unknown calculator 'x'\"\nE   assert \"unknown calculator 'None'\" == \"unknown calculator 'x'\"\nE     \nE     - unknown calculator 'x'\nE     ?                     ^\nE     + unknown calculator 'None'\nE     ?                     ^^^^",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_calc_unknown_calculator_nonexistent_TC_APP_021::test_TC_APP_021_unknown_calculator_nonexistent",
+     "case_id": "TC-APP-021",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "assert \"unknown calculator 'None'\" == \"unknown calc...'nonexistent'\"\n  \n  - unknown calculator 'nonexistent'\n  ?                     ^   -------\n  + unknown calculator 'None'\n  ?                     ^\ntests/agentic_qe/test_calc_unknown_calculator_nonexistent_TC_APP_021.py:23: in test_TC_APP_021_unknown_calculator_nonexistent\n    assert data[\"error\"] == \"unknown calculator 'nonexistent'\"\nE   assert \"unknown calculator 'None'\" == \"unknown calc...'nonexistent'\"\nE     \nE     - unknown calculator 'nonexistent'\nE     ?                     ^   -------\nE     + unknown calculator 'None'\nE     ?        ",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_calc_unknown_calculator_upb_TC_APP_020::test_TC_APP_020_unknown_calculator_upb",
+     "case_id": "TC-APP-020",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "assert \"unknown calculator 'None'\" == \"unknown calculator 'upb'\"\n  \n  - unknown calculator 'upb'\n  ?                     ^^^\n  + unknown calculator 'None'\n  ?                     ^^^^\ntests/agentic_qe/test_calc_unknown_calculator_upb_TC_APP_020.py:23: in test_TC_APP_020_unknown_calculator_upb\n    assert data[\"error\"] == \"unknown calculator 'upb'\"\nE   assert \"unknown calculator 'None'\" == \"unknown calculator 'upb'\"\nE     \nE     - unknown calculator 'upb'\nE     ?                     ^^^\nE     + unknown calculator 'None'\nE     ?                     ^^^^",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_health_returns_status_and_tools_TC_APP_002::test_TC_APP_002_health_returns_status_and_tools",
+     "case_id": "TC-APP-002",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "AttributeError: 'ASGITransport' object has no attribute '__enter__'. Did you mean: '__aenter__'?\ntests/agentic_qe/test_health_returns_status_and_tools_TC_APP_002.py:10: in test_TC_APP_002_health_returns_status_and_tools\n    with httpx.Client(transport=transport, base_url=\"http://test\") as client:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n../.venv/lib/python3.14/site-packages/httpx/_client.py:1287: in __enter__\n    self._transport.__enter__()\n    ^^^^^^^^^^^^^^^^^^^^^^^^^\nE   AttributeError: 'ASGITransport' object has no attribute '__enter__'. Did you mean: '__aenter__'",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_health_security_headers_TC_APP_001::test_TC_APP_001_security_headers",
+     "case_id": "TC-APP-001",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "AttributeError: 'ASGITransport' object has no attribute '__enter__'. Did you mean: '__aenter__'?\ntests/agentic_qe/test_health_security_headers_TC_APP_001.py:10: in test_TC_APP_001_security_headers\n    with httpx.Client(transport=transport, base_url=\"http://test\") as client:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n../.venv/lib/python3.14/site-packages/httpx/_client.py:1287: in __enter__\n    self._transport.__enter__()\n    ^^^^^^^^^^^^^^^^^^^^^^^^^\nE   AttributeError: 'ASGITransport' object has no attribute '__enter__'. Did you mean: '__aenter__'?",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_nav_single_char_query_TC_APP_004::test_TC_APP_004_single_char_query",
+     "case_id": "TC-APP-004",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "AttributeError: 'ASGITransport' object has no attribute '__enter__'. Did you mean: '__aenter__'?\ntests/agentic_qe/test_nav_single_char_query_TC_APP_004.py:16: in test_TC_APP_004_single_char_query\n    with httpx.Client(transport=transport, base_url=\"http://test\") as client:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n../.venv/lib/python3.14/site-packages/httpx/_client.py:1287: in __enter__\n    self._transport.__enter__()\n    ^^^^^^^^^^^^^^^^^^^^^^^^^\nE   AttributeError: 'ASGITransport' object has no attribute '__enter__'. Did you mean: '__aenter__'?",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_post_body_at_limit_no_413_TC_APP_008::test_TC_APP_008_post_body_at_limit_no_413",
+     "case_id": "TC-APP-008",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "AttributeError: 'ASGITransport' object has no attribute '__enter__'. Did you mean: '__aenter__'?\ntests/agentic_qe/test_post_body_at_limit_no_413_TC_APP_008.py:11: in test_TC_APP_008_post_body_at_limit_no_413\n    with httpx.Client(transport=transport, base_url=\"http://test\") as client:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n../.venv/lib/python3.14/site-packages/httpx/_client.py:1287: in __enter__\n    self._transport.__enter__()\n    ^^^^^^^^^^^^^^^^^^^^^^^^^\nE   AttributeError: 'ASGITransport' object has no attribute '__enter__'. Did you mean: '__aenter__'?",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_run_production_main_calls_mcp_run_TC_APP_053::test_TC_APP_053_run_production_main_calls_mcp_run",
+     "case_id": "TC-APP-053",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "AttributeError: <module 'run_production' from '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-k8hbkwgm/projects/prj_a4b15abb37ac/worktrees/run_d4b5c6d8297e/run_production.py'> has no attribute 'mcp'\ntests/agentic_qe/test_run_production_main_calls_mcp_run_TC_APP_053.py:17: in test_TC_APP_053_run_production_main_calls_mcp_run\n    monkeypatch.setattr(run_production, \"mcp\", fake_mcp)\nE   AttributeError: <module 'run_production' from '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-k8hbkwgm/projects/prj_a4b15abb37ac/worktrees/run_d4b5c6d8297e/run_production.",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_run_production_main_env_overrides_TC_APP_055::test_TC_APP_055_run_production_main_env_overrides",
+     "case_id": "TC-APP-055",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "AttributeError: <module 'run_production' from '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-k8hbkwgm/projects/prj_a4b15abb37ac/worktrees/run_d4b5c6d8297e/run_production.py'> has no attribute 'mcp'\ntests/agentic_qe/test_run_production_main_env_overrides_TC_APP_055.py:20: in test_TC_APP_055_run_production_main_env_overrides\n    monkeypatch.setattr(run_production, \"mcp\", fake_mcp)\nE   AttributeError: <module 'run_production' from '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-k8hbkwgm/projects/prj_a4b15abb37ac/worktrees/run_d4b5c6d8297e/run_production.",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_run_production_main_handles_exception_TC_APP_056::test_TC_APP_056_run_production_main_handles_exception",
+     "case_id": "TC-APP-056",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "AttributeError: <module 'run_production' from '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-k8hbkwgm/projects/prj_a4b15abb37ac/worktrees/run_d4b5c6d8297e/run_production.py'> has no attribute 'mcp'\ntests/agentic_qe/test_run_production_main_handles_exception_TC_APP_056.py:18: in test_TC_APP_056_run_production_main_handles_exception\n    monkeypatch.setattr(run_production, \"mcp\", fake_mcp)\nE   AttributeError: <module 'run_production' from '/private/var/folders/p7/frxf61c540xgjd377fsyybr80000gn/T/atlas-test-k8hbkwgm/projects/prj_a4b15abb37ac/worktrees/run_d4b5c6d8297e/run_pro",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_server_binds_to_default_port_TC_APP_007::test_TC_APP_007_default_port",
+     "case_id": "TC-APP-007",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "AttributeError: module 'src.web.server' has no attribute 'uvicorn'\ntests/agentic_qe/test_server_binds_to_default_port_TC_APP_007.py:13: in test_TC_APP_007_default_port\n    with patch(\"src.web.server.uvicorn.run\") as mock_run:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/unittest/mock.py:1494: in __enter__\n    self.target = self.getter()\n                  ^^^^^^^^^^^^^\n/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/pkgutil.py:473: in resolve_name\n    result = getattr(result, p)\n             ^^^^^^^^^^^^^^^^^^\nE",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_startup_TC_APP_054::test_TC_APP_054_startup_info_printed",
+     "case_id": "TC-APP-054",
+     "classification": "test problem",
+     "class": "FIXTURE_DRIFT",
+     "evidence": "failed on setup with \"TypeError: list indices must be integers or slices, not str\"\ntests/agentic_qe/test_startup_TC_APP_054.py:16: in fixtures\n    case = data[\"cases\"][\"TC-APP-054\"]\n           ^^^^^^^^^^^^^\nE   TypeError: list indices must be integers or slices, not str",
+     "cause": "The test passes data or arguments the code does not accept, or reads data that is not there.",
+     "fix": "Correct the fixture or the call to match the real signature or schema. Forbidden: removing the request or the assertion.",
+     "pattern": "Fixture Outdated",
+     "healed": false
+    },
+    {
+     "test": "test_tool_calculate_portfolio_return_registered_TC_APP_006::test_TC_APP_006_calculate_portfolio_return_registered",
+     "case_id": "TC-APP-006",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "AttributeError: 'ASGITransport' object has no attribute '__enter__'. Did you mean: '__aenter__'?\ntests/agentic_qe/test_tool_calculate_portfolio_return_registered_TC_APP_006.py:10: in test_TC_APP_006_calculate_portfolio_return_registered\n    with httpx.Client(transport=transport, base_url=\"http://test\") as client:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n../.venv/lib/python3.14/site-packages/httpx/_client.py:1287: in __enter__\n    self._transport.__enter__()\n    ^^^^^^^^^^^^^^^^^^^^^^^^^\nE   AttributeError: 'ASGITransport' object has no attribute '__enter__'. Did you m",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    },
+    {
+     "test": "test_tools_returns_categorized_data_TC_APP_003::test_TC_APP_003_tools_returns_categorized_data",
+     "case_id": "TC-APP-003",
+     "classification": "defect",
+     "class": "DEFECT",
+     "evidence": "AttributeError: 'ASGITransport' object has no attribute '__enter__'. Did you mean: '__aenter__'?\ntests/agentic_qe/test_tools_returns_categorized_data_TC_APP_003.py:10: in test_TC_APP_003_tools_returns_categorized_data\n    with httpx.Client(transport=transport, base_url=\"http://test\") as client:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n../.venv/lib/python3.14/site-packages/httpx/_client.py:1287: in __enter__\n    self._transport.__enter__()\n    ^^^^^^^^^^^^^^^^^^^^^^^^^\nE   AttributeError: 'ASGITransport' object has no attribute '__enter__'. Did you mean: '__aenter__'?",
+     "cause": "The test ran and its assertion about the application's behaviour failed.",
+     "fix": "Fix the application so it meets the requirement. The test is not changed and stays failing until then. Forbidden: weakening the assertion.",
+     "pattern": "Real App Bug",
+     "healed": false
+    }
+   ],
+   "execution_summary": {
+    "text": "pytest: FAIL. 16 passed, 38 failed, 2 skipped. Failures by class: 20 defect, 1 test problem, 17 environment. Environment failures count as not passed.",
+    "source": "code",
+    "reason": "Agent summary refused: its text says 1 tests but the report has 54 or 56"
+   },
+   "failure_classes": {
+    "defect": 20,
+    "test problem": 1,
+    "environment": 17
+   },
+   "refused": "These items were judged REJECT: TC-APP-001, TC-APP-002, TC-APP-003, TC-APP-004, TC-APP-005, TC-APP-006, TC-APP-007, TC-APP-008, TC-APP-020, TC-APP-021, TC-APP-022, TC-APP-023 and more. Approving them needs a reason, and this one has 0 characters, fewer than 10. Write it in the reason field.",
+   "approved_with_reason": "Live test approver: approved with the REJECT items still listed after one send-back, to measure the later stages end to end. Not a release decision."
+  }
+ ],
+ "started": "2026-11-14T20:30:03.535631",
+ "status": "completed",
+ "error": "",
+ "total_seconds": 482.7,
+ "summary": {
+  "verdict": "FAIL",
+  "executed": 54,
+  "passed": 16,
+  "failed": 38,
+  "pass_rate": 29.6,
+  "requirements": 30,
+  "requirements_covered": 6,
+  "coverage": 20.0,
+  "gaps": [
+   "REQ-001",
+   "REQ-002",
+   "REQ-007",
+   "REQ-008",
+   "REQ-009",
+   "REQ-010",
+   "REQ-011",
+   "REQ-012",
+   "REQ-020",
+   "REQ-021",
+   "REQ-022",
+   "REQ-023",
+   "REQ-024",
+   "REQ-025",
+   "REQ-028"
+  ],
+  "defects": 20,
+  "failure_classes": {
+   "defect": 20,
+   "test problem": 1,
+   "environment": 17
+  }
+ },
+ "requirements": 30
+}

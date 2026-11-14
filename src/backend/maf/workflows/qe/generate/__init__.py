@@ -1,9 +1,12 @@
 """QE Test Generation Stage: Synthesizing executable deterministic test suites in isolated sandbox worktrees."""
 from __future__ import annotations
 
+import asyncio
 from pathlib import Path
 
 from backend.maf.engine import RunContext
+from backend.maf.workflows.shared import _analysis
+from backend.qe import execution
 from backend.maf.runtime import AgentCall
 from backend.maf.workflows.qe.generate.batch import synthesize
 from backend.maf.workflows.qe.generate.env import load_env, prepare_worktree
@@ -18,6 +21,8 @@ async def qe_generate(rc: RunContext, state: dict) -> dict:
     worktree = Path(state["worktree"])
     rc.log(f"[TEST_SYNTHESIS_STARTED] Synthesizing deterministic test suite for {len(state['cases'])} cases in sandbox...")
     call = AgentCall(rc.run_id, rc.project_id, "test-automation-engineer")
+    if state.get("install_deps"):  # the validity checks collect in the repository's own environment, so it must exist before them
+        await asyncio.to_thread(execution.install_dependencies, worktree, _analysis(rc.project_id), rc.log)
     env = await load_env(rc, state, worktree)
     suite, missing, partial = await synthesize(env)
     case_of = {c["id"]: c for c in state["cases"]}
