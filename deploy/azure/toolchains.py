@@ -15,43 +15,18 @@ Standard library only. ponytail: Linux x64 only (App Service B1); other platform
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import os
 import platform
 import shutil
 import subprocess
 import sys
-import tarfile
 import time
-import urllib.request
 from pathlib import Path
 
 ROOT = Path(os.environ.get("ATLAS_TOOLS_DIR", "/home/tools"))
-ALL = ("node", "java", "maven", "dotnet", "go", "chromium")
-
-# Pins checked 2026-11-14 against the vendors' own checksum files (nodejs.org SHASUMS256.txt, go.dev/dl JSON, the .NET
-# release-metadata JSON, the Adoptium assets API, archive.apache.org .sha512). To update: change version, url and digest together.
-# dir is the folder name under ROOT; strip is the number of leading path parts removed on extraction; bins are relative to dir.
-TOOLS = {
-    "node": {"dir": "node-22.12.0", "strip": 1, "bins": ["bin"], "check": "bin/node", "algo": "sha256",
-             "url": "https://nodejs.org/dist/v22.12.0/node-v22.12.0-linux-x64.tar.xz",
-             "digest": "22982235e1b71fa8850f82edd09cdae7e3f32df1764a9ec298c72d25ef2c164f"},
-    "java": {"dir": "jdk-21.0.13", "strip": 1, "bins": ["bin"], "check": "bin/java", "algo": "sha256", "env": {"JAVA_HOME": "."},
-             "url": "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.13%2B9/OpenJDK21U-jdk_x64_linux_hotspot_21.0.13_9.tar.gz",
-             "digest": "d7f5d5cf865a2902b70ff549b97586a7d3f234e016f041ab447ea740c7d66d1c"},
-    "maven": {"dir": "maven-3.9.9", "strip": 1, "bins": ["bin"], "check": "bin/mvn", "algo": "sha512",
-              "url": "https://archive.apache.org/dist/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.tar.gz",
-              "digest": "a555254d6b53d267965a3404ecb14e53c3827c09c3b94b5678835887ab404556bfaf78dcfe03ba76fa2508649dca8531c74bca4d5846513522404d48e8c4ac8b"},
-    "dotnet": {"dir": "dotnet-8.0.428", "strip": 0, "bins": ["."], "check": "dotnet", "algo": "sha512", "env": {"DOTNET_ROOT": "."},
-               "url": "https://builds.dotnet.microsoft.com/dotnet/Sdk/8.0.428/dotnet-sdk-8.0.428-linux-x64.tar.gz",
-               "digest": "33212bb99a2bf003973d41106c7e8fe94208a12958ff601d4a476be379403c85a7dc9183a6ec64dfb44ded7102965be09f35add1758e68e9251bae7891d7b7bf"},
-    "go": {"dir": "go-1.23.4", "strip": 1, "bins": ["bin"], "check": "bin/go", "algo": "sha256", "env": {"GOROOT": "."},
-           "url": "https://go.dev/dl/go1.23.4.linux-amd64.tar.gz",
-           "digest": "6924efde5de86fe277676e929dc9917d466efa02fb934197bc2eba35d5680971"},
-}
-# .NET without ICU (the base image may not have libicu), telemetry off. Kept here so the API process and a manual run agree.
-FIXED_ENV = {"DOTNET_CLI_TELEMETRY_OPTOUT": "1", "DOTNET_NOLOGO": "1", "DOTNET_SYSTEM_GLOBALIZATION_INVARIANT": "1"}
+from toolchain_pins import ALL, FIXED_ENV, TOOLS  # noqa: E402 - pinned versions and vendor hashes
+from toolchain_fetch import download, extract  # noqa: E402 - verified download and atomic extraction
 
 
 def log(message: str) -> None:
@@ -85,53 +60,6 @@ def tool_env(root: Path = ROOT, base_path: str | None = None) -> dict[str, str]:
     env["PLAYWRIGHT_BROWSERS_PATH"] = str(root / "ms-playwright")
     env["PATH"] = os.pathsep.join(paths + [base_path if base_path is not None else os.environ.get("PATH", "")])
     return env
-
-
-def download(url: str, algo: str, digest: str, target: Path) -> None:
-    """Stream url to target, hashing as it goes. The file is kept only if the digest matches the pinned one."""
-    hasher = hashlib.new(algo)
-    request = urllib.request.Request(url, headers={"User-Agent": "agentic-qe-toolchains"})
-    last: Exception | None = None
-    for attempt in range(1, 4):
-        hasher = hashlib.new(algo)
-        try:
-            size = 0
-            with urllib.request.urlopen(request, timeout=60) as response, target.open("wb") as out:
-                for chunk in iter(lambda: response.read(1 << 20), b""):
-                    hasher.update(chunk)
-                    out.write(chunk)
-                    size += len(chunk)
-                expected = int(response.headers.get("Content-Length") or size)
-            if size != expected:
-                raise OSError(f"connection closed after {size} of {expected} bytes")  # truncated: retried, not a checksum failure
-            if hasher.hexdigest() != digest:
-                target.unlink(missing_ok=True)
-                raise RuntimeError(f"{algo} mismatch for {url}: expected {digest[:16]}..., got {hasher.hexdigest()[:16]}... (file removed, not installed)")
-            return
-        except RuntimeError:
-            raise  # a wrong checksum is never retried into acceptance
-        except OSError as exc:
-            last = exc
-            log(f"download attempt {attempt} failed: {exc}")
-            time.sleep(5 * attempt)
-    raise RuntimeError(f"could not download {url}: {last}")
-
-
-def extract(archive: Path, destination: Path, strip: int) -> None:
-    """Unpack into destination, dropping `strip` leading path parts. Members that would land outside it are refused."""
-    destination.mkdir(parents=True)
-    base = destination.resolve()
-    with tarfile.open(archive) as tar:
-        members = []
-        for member in tar.getmembers():
-            parts = Path(member.name).parts[strip:]
-            if not parts:
-                continue
-            member.name = Path(*parts).as_posix()
-            if not (base / member.name).resolve().is_relative_to(base):
-                raise RuntimeError(f"refusing archive member outside the folder: {member.name}")
-            members.append(member)
-        tar.extractall(destination, members=members, filter="data" if hasattr(tarfile, "data_filter") else None)
 
 
 def install(name: str, root: Path) -> str:
