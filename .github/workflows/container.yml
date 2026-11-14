@@ -1,0 +1,40 @@
+name: Container image
+# Builds the Azure custom-container image and pushes it to GitHub Container Registry. Not triggered on main.
+on:
+  push:
+    branches: [feature/maf-harness-platform]
+    paths: ["deploy/azure/Dockerfile", "deploy/azure/container_start.py", "requirements.txt", "src/**", "prompts/**", "templates/**", "skills/**", "evals/**", ".dockerignore", ".github/workflows/container.yml"]
+  workflow_dispatch:
+concurrency:
+  group: container-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  image:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/sarveshtalele/agentic-qe
+          tags: |
+            type=sha,format=long
+            type=ref,event=branch
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: deploy/azure/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

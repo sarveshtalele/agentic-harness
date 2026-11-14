@@ -1,7 +1,7 @@
 # AZURE environment (web profile): enter these as App Service "Environment variables" in the portal.
 # Never put them in a file inside the zip. See docs/AZURE_DEPLOYMENT_GUIDE.md.
 
-# --- API web app ---
+# --- Application settings ---
 ATLAS_PROFILE=web
 ATLAS_DATA_DIR=/home/atlas/data
 ATLAS_ADMIN_USERNAME=
@@ -14,13 +14,15 @@ ATLAS_ALLOWED_HOSTS=
 ATLAS_ALLOWED_ORIGINS=
 ATLAS_MAX_SANDBOXES=5
 WEBSITES_ENABLE_APP_SERVICE_STORAGE=true
-WEBSITES_PORT=8000
 # Optional: send traces to Application Insights (eastus2) through OTLP
 OTEL_EXPORTER_OTLP_ENDPOINT=
 OTEL_SERVICE_NAME=agentic-qe-api
 
-# --- UI web app ---
-ATLAS_BACKEND_URL=
-ATLAS_DOWNLOADS_URL=
-WEBSITES_ENABLE_APP_SERVICE_STORAGE=true
+# --- Container web app (one app, one image: ghcr.io/sarveshtalele/agentic-qe) ---
+# The UI is the public port; the API listens on loopback inside the container, so there is no ATLAS_BACKEND_URL.
 WEBSITES_PORT=3000
+WEBSITES_CONTAINER_START_TIME_LIMIT=600
+# Private GHCR package only (set by the portal's Container tab; the password is a read:packages token, never stored in the repository):
+DOCKER_REGISTRY_SERVER_URL=https://ghcr.io
+DOCKER_REGISTRY_SERVER_USERNAME=
+DOCKER_REGISTRY_SERVER_PASSWORD=
