@@ -1,0 +1,408 @@
+{
+ "_capture": {
+  "agent_type": "coverage-auditor",
+  "agent_id": "run_ef20fac8939f:design",
+  "at": "2026-11-14T16:41:25.044971+00:00",
+  "sha256": "53493375ef17bb05accb08b49ec70d44239713954b42fb73bc886d2ae9655e60",
+  "note": "Recorded by Agentic QE Platform from the agent's own checked answer. Do not edit."
+ },
+ "kind": "design",
+ "verdicts": [
+  {
+   "id": "TC-APP-001",
+   "verdict": "COVERS",
+   "scenario": "SC-INTEGRATION-HEALTH-001",
+   "reason": "The case sends GET /api/health and expects the JSON response from server.py line 227, which is exactly what REQ-001 requires."
+  },
+  {
+   "id": "TC-APP-002",
+   "verdict": "COVERS",
+   "scenario": "SC-INTEGRATION-HEALTH-001",
+   "reason": "Precondition of empty _tools list matches code at server.py:227 where len is called on _tools, and expecting 0 verifies the edge case."
+  },
+  {
+   "id": "TC-APP-003",
+   "verdict": "COVERS",
+   "scenario": "SC-INTEGRATION-HEALTH-001",
+   "reason": "Verifies that the reported tools count equals the actual registered count, exercising server.py:227 with a non‑zero number."
+  },
+  {
+   "id": "TC-APP-004",
+   "verdict": "COVERS",
+   "scenario": "SC-INTEGRATION-HEALTH-001",
+   "reason": "Tests a high count boundary (1000 tools), confirming that server.py:227 handles large numbers without overflow or truncation."
+  },
+  {
+   "id": "TC-APP-005",
+   "verdict": "COVERS",
+   "scenario": "SC-INTEGRATION-CALC-ERRORS-001",
+   "reason": "Triggers a ValueError (e.g., missing 'operation') and expects the 400 response with 'invalid inputs:' prefix as required by REQ-006 at server.py:267."
+  },
+  {
+   "id": "TC-APP-006",
+   "verdict": "COVERS",
+   "scenario": "SC-INTEGRATION-CALC-ERRORS-001",
+   "reason": "Sends a division by zero request that raises ZeroDivisionError, and expects the exact error message from server.py:267."
+  },
+  {
+   "id": "TC-APP-007",
+   "verdict": "COVERS",
+   "scenario": "SC-INTEGRATION-CALC-ERRORS-001",
+   "reason": "Omits parameter 'b' to raise KeyError, expecting the 400 response with 'invalid inputs:' as coded at server.py:267."
+  },
+  {
+   "id": "TC-APP-008",
+   "verdict": "COVERS",
+   "scenario": "SC-INTEGRATION-CALC-ERRORS-001",
+   "reason": "Sends a string where an integer is expected, triggering TypeError and verifying the handler at server.py:267 returns the proper error prefix."
+  },
+  {
+   "id": "TC-APP-009",
+   "verdict": "COVERS",
+   "scenario": "SC-INTEGRATION-CALC-ERRORS-001",
+   "reason": "Instrumented RuntimeError simulates the unexpected exception path in server.py:273, returning 'calculation failed' as required by REQ-007."
+  },
+  {
+   "id": "TC-APP-010",
+   "verdict": "COVERS",
+   "scenario": "SC-INTEGRATION-CALC-ERRORS-001",
+   "reason": "Raises a generic Exception to exercise the catch‑all branch at server.py:273, confirming the generic 'calculation failed' response."
+  },
+  {
+   "id": "TC-APP-011",
+   "verdict": "COVERS",
+   "scenario": "SC-INTEGRATION-CALC-ERRORS-001",
+   "reason": "The case exercises an unexpected exception (IndexError) and expects HTTP 400 with error message \"calculation failed\", matching the generic handler at src/web/server.py:273 that catches any Exception not in the domain list."
+  },
+  {
+   "id": "TC-APP-012",
+   "verdict": "COVERS",
+   "scenario": "SC-INTEGRATION-CALC-ERRORS-001",
+   "reason": "The case exercises an unexpected exception (OSError) and expects HTTP 400 with error message \"calculation failed\", matching the generic handler at src/web/server.py:273 that catches any Exception not in the domain list."
+  },
+  {
+   "id": "TC-APP-013",
+   "verdict": "COVERS",
+   "scenario": "SC-INTEGRATION-SECURITY-PAYLOAD-RATE-001",
+   "reason": "The case sends a payload of exactly 16 KB (16384 bytes) and expects a success response, confirming that the 16 KB boundary is respected (not rejected) as per the code at src/web/server.py:150 that rejects only payloads larger than MAX_BODY."
+  },
+  {
+   "id": "TC-APP-014",
+   "verdict": "COVERS",
+   "scenario": "SC-INTEGRATION-SECURITY-PAYLOAD-RATE-001",
+   "reason": "The case sends a payload of 16385 bytes (one byte over 16 KB) and expects HTTP 413 with error \"payload too large\", directly testing the threshold at src/web/server.py:150."
+  },
+  {
+   "id": "TC-APP-015",
+   "verdict": "PARTIAL",
+   "scenario": "SC-INTEGRATION-SECURITY-PAYLOAD-RATE-001",
+   "reason": "The case tests an empty body, which checks behaviour outside the payload size limit (the 16 KB check is not triggered), but it does not assert any security requirement (the scenario targets payload size limit and rate limiting; the empty-body behaviour is not part of REQ-008 or REQ-009)."
+  },
+  {
+   "id": "TC-APP-016",
+   "verdict": "COVERS",
+   "scenario": "SC-INTEGRATION-SECURITY-PAYLOAD-RATE-001",
+   "reason": "The case sends a 100 KB payload and expects HTTP 413 with error \"payload too large\", clearly testing the payload size limit specified in REQ-008 and implemented at src/web/server.py:150."
+  },
+  {
+   "id": "TC-APP-017",
+   "verdict": "PARTIAL",
+   "scenario": "SC-INTEGRATION-SECURITY-PAYLOAD-RATE-001",
+   "reason": "The case sends 90 requests then one more and expects the 91st to be rate-limited, but the expected result says the 90th returns success (200) and the 91st returns 429; however, the requirement (REQ-009) and code (src/web/server.py:162) limit to 90 requests per window, so the 90th request may actually be the one that hits the limit and returns 429, making the expected result partially inaccurate."
+  },
+  {
+   "id": "TC-APP-018",
+   "verdict": "COVERS",
+   "scenario": "SC-INTEGRATION-SECURITY-PAYLOAD-RATE-001",
+   "reason": "The case sends 91 requests and expects the 91st to receive HTTP 429, directly verifying the rate limit threshold of 90 requests per 10 seconds per IP as specified in REQ-009 and coded at src/web/server.py:162-164."
+  },
+  {
+   "id": "TC-APP-019",
+   "verdict": "COVERS",
+   "scenario": "SC-INTEGRATION-SECURITY-PAYLOAD-RATE-001",
+   "reason": "The case sends 90 requests, waits 11 seconds (past the 10-second window), then sends a 91st request and expects it to succeed (200), verifying that the rate limit resets after the window expires, as implied by the sliding window logic at src/web/server.py:160-161."
+  },
+  {
+   "id": "TC-APP-020",
+   "verdict": "COVERS",
+   "scenario": "SC-INTEGRATION-SECURITY-PAYLOAD-RATE-001",
+   "reason": "The case sends 91 requests from IP A and 1 from IP B, expecting only IP A's 91st to be rate-limited, correctly testing per-IP rate limiting as required by REQ-009 and implemented via _client_ip and the _hits dict (src/web/server.py:154,159)."
+  },
+  {
+   "id": "TC-APP-021",
+   "verdict": "COVERS",
+   "scenario": "SC-UNIT-PORTFOLIO-ERRORS-001",
+   "reason": "The test calls sharpe_ratio with portfolio_std_dev=0.0 and expects the exact error dict {'error': 'Standard deviation cannot be zero'}, which matches the code path at src/tools/portfolio.py:177-178, covering the zero-divisor boundary for that scenario."
+  },
+  {
+   "id": "TC-APP-022",
+   "verdict": "COVERS",
+   "scenario": "SC-INTEGRATION-SECURITY-HEADERS-001",
+   "reason": "Sending GET /api/health checks that all six security headers are present in a successful response, directly covering the requirement at the Integration level."
+  },
+  {
+   "id": "TC-APP-023",
+   "verdict": "COVERS",
+   "scenario": "SC-INTEGRATION-SECURITY-HEADERS-001",
+   "reason": "OPTIONS on a 204 response verifies that all six security headers are sent even when there is no body, covering a boundary case for the requirement."
+  },
+  {
+   "id": "TC-APP-024",
+   "verdict": "COVERS",
+   "scenario": "SC-INTEGRATION-SECURITY-HEADERS-001",
+   "reason": "GET /api/nav with an invalid code triggers a 400, and the expected result checks that all six security headers are present, covering error responses as required."
+  },
+  {
+   "id": "TC-APP-025",
+   "verdict": "COVERS",
+   "scenario": "SC-INTEGRATION-SECURITY-HEADERS-001",
+   "reason": "GET to a non-existent route (404) checks that all six security headers are present on a 4xx response with no meaningful body, covering the negative scenario for the requirement."
+  },
+  {
+   "id": "TC-APP-026",
+   "verdict": "PARTIAL",
+   "scenario": "SC-INTEGRATION-NAV-VALIDATION-001",
+   "reason": "It tests a valid all-digit code but does not check the boundary length (9 characters) or any invalid code that should trigger 'invalid scheme code', missing the validation error path for REQ-011 (src/web/server.py:280)."
+  },
+  {
+   "id": "TC-APP-027",
+   "verdict": "PARTIAL",
+   "scenario": "SC-INTEGRATION-NAV-VALIDATION-001",
+   "reason": "It tests a valid q parameter but does not test invalid cases such as empty q or q longer than 80 characters, missing the error path for REQ-012 (src/web/server.py:284)."
+  },
+  {
+   "id": "TC-APP-028",
+   "verdict": "PARTIAL",
+   "scenario": "SC-INTEGRATION-FX-VALIDATION-001",
+   "reason": "It tests valid currency codes but does not test invalid codes that should trigger 'invalid currency code', missing the error path for REQ-013 (src/web/server.py:292)."
+  },
+  {
+   "id": "TC-APP-029",
+   "verdict": "PARTIAL",
+   "scenario": "SC-INTEGRATION-QUOTE-VALIDATION-001",
+   "reason": "It tests empty symbol but does not test other invalid symbols (e.g., spaces, special characters) that should also return 400 with 'invalid symbol' per REQ-014 (src/web/server.py:299)."
+  },
+  {
+   "id": "TC-APP-030",
+   "verdict": "COVERS",
+   "scenario": "SC-UNIT-PORTFOLIO-ERRORS-001",
+   "reason": "Calling sharpe_ratio with portfolio_std_dev=0 checks that the returned dict has the expected error key, directly covering REQ-015 (src/tools/portfolio.py:178) at Unit level."
+  },
+  {
+   "id": "TC-APP-031",
+   "verdict": "COVERS",
+   "scenario": "SC-UNIT-PORTFOLIO-ERRORS-001",
+   "reason": "Calls treynor_ratio with beta=0 and expects an error dict with 'Beta cannot be zero', matching REQ-016 (src/web/server.py:204) and the scenario's stated behaviour."
+  },
+  {
+   "id": "TC-APP-036",
+   "verdict": "COVERS",
+   "scenario": "SC-UNIT-SANITIZE-PARAMS-001",
+   "reason": "Calls _sanitize_params with a valid one‑key dict and expects the same dict returned without exception, directly exercising the positive path of REQ-021 (src/web/server.py:196-220)."
+  },
+  {
+   "id": "TC-APP-037",
+   "verdict": "COVERS",
+   "scenario": "SC-UNIT-SANITIZE-PARAMS-001",
+   "reason": "Calls _sanitize_params with a non‑dict argument and expects ValueError('invalid parameters'), covering the first clause of the REQ-021 error condition (src/web/server.py:198-199)."
+  },
+  {
+   "id": "TC-APP-038",
+   "verdict": "COVERS",
+   "scenario": "SC-UNIT-SANITIZE-PARAMS-001",
+   "reason": "Calls _sanitize_params with a dict of 31 keys (exceeding the 30‑key limit) and expects ValueError('invalid parameters'), covering the second clause of REQ-021 (src/web/server.py:198-199)."
+  },
+  {
+   "id": "TC-APP-039",
+   "verdict": "COVERS",
+   "scenario": "SC-UNIT-SANITIZE-PARAMS-001",
+   "reason": "Calls _sanitize_params with an empty dict and expects it returned without exception, confirming that 0 keys is accepted and not erroneously treated as invalid per REQ-021 (src/web/server.py:198-199)."
+  },
+  {
+   "id": "TC-APP-040",
+   "verdict": "PARTIAL",
+   "scenario": "SC-UNIT-PORTFOLIO-ERRORS-001",
+   "reason": "The case tests _sanitize_params with float('inf') (which belongs to REQ-021, not to the portfolio errors scenario) and its test data describes a mismatched scenario, so it only partially relates to SC-UNIT-PORTFOLIO-ERRORS-001 by testing a finite‑number check that may also appear in portfolio functions."
+  },
+  {
+   "id": "TC-APP-041",
+   "verdict": "PARTIAL",
+   "scenario": "SC-UNIT-PORTFOLIO-ERRORS-001",
+   "reason": "This case tests a 41‑character parameter name, which exercises the key‑length boundary in _sanitize_params (REQ-021) rather than a portfolio edge case, so it only partially covers the portfolio errors scenario."
+  },
+  {
+   "id": "TC-APP-042",
+   "verdict": "PARTIAL",
+   "scenario": "SC-UNIT-PORTFOLIO-ERRORS-001",
+   "reason": "Same as TC-APP-041: calling _sanitize_params with a 41‑character key tests REQ-021's name‑length limit, not a portfolio calculation error, thus only partially relates to the scenario."
+  },
+  {
+   "id": "TC-APP-043",
+   "verdict": "COVERS",
+   "scenario": "SC-INTEGRATION-CALC-ERRORS-001",
+   "reason": "Sends a POST with malformed JSON '{invalid: json' to /api/calc and expects HTTP 400 with error 'invalid JSON', directly exercising REQ-003 (src/web/server.py:247)."
+  },
+  {
+   "id": "TC-APP-044",
+   "verdict": "COVERS",
+   "scenario": "SC-INTEGRATION-CALC-ERRORS-001",
+   "reason": "Sends a POST with an empty body to /api/calc and expects HTTP 400 with error 'invalid JSON', testing a boundary of REQ-003 (src/web/server.py:247)."
+  },
+  {
+   "id": "TC-APP-045",
+   "verdict": "COVERS",
+   "scenario": "SC-INTEGRATION-CALC-ERRORS-001",
+   "reason": "The case sends malformed JSON (trailing garbage) and expects HTTP 400 with error 'invalid JSON', which exercises REQ-003 (src/web/server.py:247)."
+  },
+  {
+   "id": "TC-APP-046",
+   "verdict": "COVERS",
+   "scenario": "SC-INTEGRATION-CALC-ERRORS-001",
+   "reason": "The case sends a whitespace-only body, which is not valid JSON, and expects HTTP 400 with error 'invalid JSON', covering REQ-003 (src/web/server.py:247)."
+  },
+  {
+   "id": "TC-APP-047",
+   "verdict": "PARTIAL",
+   "scenario": "SC-INTEGRATION-CALC-ERRORS-001",
+   "reason": "This positive case tests a successful calculation, but the scenario is about error handling, and a success path does not exercise any error condition required by REQ-003, REQ-004, REQ-005, REQ-006, or REQ-007."
+  },
+  {
+   "id": "TC-APP-048",
+   "verdict": "COVERS",
+   "scenario": "SC-INTEGRATION-CALC-ERRORS-001",
+   "reason": "The case sends an empty calculator name and expects HTTP 400 with 'unknown calculator' and available list, covering REQ-004 (src/web/server.py:253)."
+  },
+  {
+   "id": "TC-APP-049",
+   "verdict": "COVERS",
+   "scenario": "SC-INTEGRATION-CALC-ERRORS-001",
+   "reason": "The case sends a 41-character calculator name (exceeding the 40-char limit implicitly enforced by the calculator lookup) and expects HTTP 400 with 'unknown calculator' and available list, covering REQ-004 (src/web/server.py:253)."
+  },
+  {
+   "id": "TC-APP-050",
+   "verdict": "COVERS",
+   "scenario": "SC-INTEGRATION-CALC-ERRORS-001",
+   "reason": "The case sends 'xyzzy' (a calculator not in CALCULATORS) and expects HTTP 400 with 'unknown calculator' error and available list, covering REQ-004 (src/web/server.py:253)."
+  },
+  {
+   "id": "TC-APP-051",
+   "verdict": "PARTIAL",
+   "scenario": "SC-INTEGRATION-CALC-ERRORS-001",
+   "reason": "This positive case tests a successful calculation, but the scenario is about error handling, and a success path does not exercise any error condition required by REQ-003, REQ-004, REQ-005, REQ-006, or REQ-007."
+  },
+  {
+   "id": "TC-APP-052",
+   "verdict": "COVERS",
+   "scenario": "SC-INTEGRATION-CALC-ERRORS-001",
+   "reason": "The case sends parameter 'rate' with string 'Inf' and expects HTTP 400 with error ''rate' must be a finite number', which exercises REQ-005 via sanitization failure (src/web/server.py:259, citing ValueError from line 208)."
+  },
+  {
+   "id": "TC-APP-053",
+   "verdict": "COVERS",
+   "scenario": "SC-INTEGRATION-CALC-ERRORS-001",
+   "reason": "The case sends parameter 'rate' exceeding 1e13 and expects HTTP 400 with error ''rate' is out of range', exercising REQ-005 via sanitization failure (src/web/server.py:259, citing ValueError from line 210)."
+  },
+  {
+   "id": "TC-APP-054",
+   "verdict": "COVERS",
+   "scenario": "SC-INTEGRATION-CALC-ERRORS-001",
+   "reason": "The case sends parameter 'years' exceeding its cap (121 > 120) and expects HTTP 400 with error ''years' must be ≤ 120', exercising REQ-005 via sanitization failure (src/web/server.py:259, citing ValueError from line 213)."
+  },
+  {
+   "id": "TC-APP-055",
+   "verdict": "COVERS",
+   "scenario": "SC-UNIT-SANITIZE-PARAMS-001",
+   "reason": "Exercises _sanitize_params with all finite numeric values (5.0, 10) and expects no exception, matching the positive branch for finite numbers in src/web/server.py:206-214."
+  },
+  {
+   "id": "TC-APP-056",
+   "verdict": "COVERS",
+   "scenario": "SC-UNIT-SANITIZE-PARAMS-001",
+   "reason": "Uses NaN as a parameter value and expects ValueError with the exact message from src/web/server.py:208, directly testing REQ-022."
+  },
+  {
+   "id": "TC-APP-057",
+   "verdict": "COVERS",
+   "scenario": "SC-UNIT-SANITIZE-PARAMS-001",
+   "reason": "Uses Inf as a parameter value and expects ValueError with the exact message from src/web/server.py:208, covering the non‑finite branch."
+  },
+  {
+   "id": "TC-APP-058",
+   "verdict": "COVERS",
+   "scenario": "SC-UNIT-SANITIZE-PARAMS-001",
+   "reason": "Uses -Inf as a parameter value and expects ValueError with the exact message from src/web/server.py:208, covering the negative infinity case."
+  },
+  {
+   "id": "TC-APP-059",
+   "verdict": "COVERS",
+   "scenario": "SC-UNIT-SANITIZE-PARAMS-001",
+   "reason": "Passes value exactly at the boundary 1e13 and expects no exception, directly testing REQ-023's allowed limit in src/web/server.py:209."
+  },
+  {
+   "id": "TC-APP-060",
+   "verdict": "COVERS",
+   "scenario": "SC-UNIT-SANITIZE-PARAMS-001",
+   "reason": "Passes value just above 1e13 (1e13+1) and expects ValueError with the message from src/web/server.py:210, testing the out‑of‑range branch."
+  },
+  {
+   "id": "TC-APP-061",
+   "verdict": "COVERS",
+   "scenario": "SC-UNIT-SANITIZE-PARAMS-001",
+   "reason": "Passes negative value just below -1e13 (-1e13-1) and expects ValueError with the message from src/web/server.py:210, covering the negative out‑of‑range branch."
+  },
+  {
+   "id": "TC-APP-062",
+   "verdict": "PARTIAL",
+   "scenario": "SC-UNIT-SANITIZE-PARAMS-001",
+   "reason": "Tests within‑range behavior at zero, but the case name says 'boundary of 0' while REQ-023 only concerns absolute value > 1e13; zero is not a relevant boundary for REQ-023, so it partially covers the finite‑number branch but not a missing boundary."
+  },
+  {
+   "id": "TC-APP-063",
+   "verdict": "COVERS",
+   "scenario": "SC-UNIT-SANITIZE-PARAMS-001",
+   "reason": "Passes years exactly at cap 120 and expects no exception, testing the allowed limit for REQ-024 in src/web/server.py:212-213."
+  },
+  {
+   "id": "TC-APP-064",
+   "verdict": "COVERS",
+   "scenario": "SC-UNIT-SANITIZE-PARAMS-001",
+   "reason": "Passes years just above cap (121) and expects ValueError with the exact message from src/web/server.py:213, covering the cap‑exceeded branch."
+  },
+  {
+   "id": "TC-APP-065",
+   "verdict": "COVERS",
+   "scenario": "SC-UNIT-SANITIZE-PARAMS-001",
+   "reason": "The case exercises _sanitize_params with years=2400, which exceeds the cap of 120, and expects the ValueError with the exact message in REQ-024 (src/web/server.py:213), so it covers the cap violation behaviour at Unit level."
+  },
+  {
+   "id": "TC-APP-066",
+   "verdict": "PARTIAL",
+   "scenario": "SC-UNIT-SANITIZE-PARAMS-001",
+   "reason": "The case tests a non-numeric string value for years, which bypasses the cap check and triggers the non-numeric check (REQ-025 string length or REQ-024 non-numeric), but the expected result is vague ('Some ValueError') and does not confirm the correct error path, missing the precise requirement behaviour."
+  },
+  {
+   "id": "TC-APP-067",
+   "verdict": "COVERS",
+   "scenario": "SC-UNIT-SANITIZE-PARAMS-001",
+   "reason": "The case tests a key of exactly 40 characters (boundary for REQ-025 key length, src/web/server.py:202-203) and expects no exception, which correctly exercises the acceptable boundary at Unit level."
+  },
+  {
+   "id": "TC-APP-068",
+   "verdict": "COVERS",
+   "scenario": "SC-UNIT-SANITIZE-PARAMS-001",
+   "reason": "The case tests a key of 41 characters (exceeds the 40-character limit in REQ-025, src/web/server.py:202-203) and expects ValueError('invalid parameter name'), directly covering the invalid key length rejection at Unit level."
+  },
+  {
+   "id": "TC-APP-069",
+   "verdict": "PARTIAL",
+   "scenario": "SC-UNIT-SANITIZE-PARAMS-001",
+   "reason": "The case tests a string value of 41 characters, but the expected result is vague ('ValueError raised (specific message not defined)') and does not confirm the correct error message from REQ-025 (src/web/server.py:217 says \"'k' is too long\"), so it misses the precise rejection behaviour."
+  },
+  {
+   "id": "TC-APP-070",
+   "verdict": "COVERS",
+   "scenario": "SC-UNIT-SANITIZE-PARAMS-001",
+   "reason": "The case tests a non-string integer key, and expects ValueError('invalid parameter name') from REQ-025 (src/web/server.py:202-203), correctly covering the invalid key type rejection at Unit level."
+  }
+ ]
+}

@@ -11,9 +11,11 @@ def coverage_gaps(requirements: list[dict], cases: list[dict]) -> list[str]:
     """Each P0/P1 requirement gets 1 Positive and 2 Negative (boundary counts). An Exception case is required only when the requirement states error behaviour."""
     gaps = []
     for requirement in requirements:
-        if requirement.get("priority") == "P2":
-            continue
         kinds = [c["type"] for c in cases if c["requirement_id"] == requirement["id"]]
+        if requirement.get("priority") not in ("P0", "P1"):
+            if not kinds:  # a lower priority asks for less, but a requirement with a budget needs at least one case
+                gaps.append(f"{requirement['id']}: no case")
+            continue
         if "Positive" not in kinds:
             gaps.append(f"{requirement['id']}: no Positive case")
         if sum(k.startswith("Negative") for k in kinds) < 2:
@@ -69,7 +71,11 @@ def limit_cases(cases: list[dict], requirements: list[dict], limit: int) -> tupl
     of = lambda c: priority.get(c["requirement_id"], "P2")
     order = sorted(range(len(cases)), key=lambda i: (PRIORITY_RANK.get(of(cases[i]), 2), cases[i].get("priority", "P2"), i))
     p0 = sum(of(c) == "P0" for c in cases)
-    keep = set(order[: max(limit, p0)])
+    first = {}
+    for i, c in enumerate(cases):
+        first.setdefault(c["requirement_id"], i)
+    # the limit never takes a requirement's last case: that would open a coverage gap the plan and the plugin check depend on
+    keep = set(order[: max(limit, p0)]) | set(first.values())
     kept = [c for i, c in enumerate(cases) if i in keep]
     left = [c for i, c in enumerate(cases) if i not in keep]
     by_priority: dict[str, int] = {}

@@ -1,0 +1,238 @@
+{
+ "requirements": [
+  {
+   "id": "REQ-001",
+   "title": "Health endpoint returns status and tool count",
+   "text": "System returns a JSON response with status 'ok' and the tools count when a GET request is sent to /api/health.",
+   "priority": "P1",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 227,
+   "quote": "    return JSONResponse({\"status\": \"ok\", \"tools\": len(mcp._tool_manager._tools)})"
+  },
+  {
+   "id": "REQ-002",
+   "title": "List tools endpoint returns categorized tools",
+   "text": "System returns a JSON response with count, categories, and tools when a GET request is sent to /api/tools.",
+   "priority": "P2",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 240,
+   "quote": "    return JSONResponse({\"count\": len(tools), \"categories\": categories, \"tools\": tools})"
+  },
+  {
+   "id": "REQ-003",
+   "title": "Run calculator with invalid JSON returns 400",
+   "text": "System returns a 400 JSON response with error message 'invalid JSON' when a POST request with malformed body is sent to /api/calc.",
+   "priority": "P1",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 247,
+   "quote": "        return JSONResponse({\"error\": \"invalid JSON\"}, status_code=400)"
+  },
+  {
+   "id": "REQ-004",
+   "title": "Run calculator with unknown calculator name returns 400",
+   "text": "System returns a 400 JSON response with error message including 'unknown calculator' and list of available calculators when a POST request with an unrecognized 'calculator' field is sent to /api/calc.",
+   "priority": "P1",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 253,
+   "quote": "            {\"error\": f\"unknown calculator '{name}'\", \"available\": list(CALCULATORS)},"
+  },
+  {
+   "id": "REQ-005",
+   "title": "Run calculator with invalid parameters returns 400",
+   "text": "System returns a 400 JSON response with the sanitization error message when sanitizing parameters fails in a POST request to /api/calc.",
+   "priority": "P1",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 259,
+   "quote": "        return JSONResponse({\"error\": str(e)}, status_code=400)"
+  },
+  {
+   "id": "REQ-006",
+   "title": "Run calculator with domain errors returns 400",
+   "text": "System returns a 400 JSON response with error message prefixed 'invalid inputs:' when the calculator function raises ValueError, ZeroDivisionError, KeyError, or TypeError.",
+   "priority": "P1",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 267,
+   "quote": "        return JSONResponse({\"error\": f\"invalid inputs: {e}\"}, status_code=400)"
+  },
+  {
+   "id": "REQ-007",
+   "title": "Run calculator with unexpected error returns 400",
+   "text": "System returns a 400 JSON response with error message 'calculation failed' when the calculator function raises an unexpected exception.",
+   "priority": "P1",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 273,
+   "quote": "        return JSONResponse({\"error\": \"calculation failed\"}, status_code=400)"
+  },
+  {
+   "id": "REQ-008",
+   "title": "Payload too large returns 413",
+   "text": "System returns a 413 JSON response with error 'payload too large' when a POST request to an /api endpoint has a body larger than 16 KB.",
+   "priority": "P0",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 151,
+   "quote": "                return await _send_json(send, 413, b'{\"error\":\"payload too large\"}')"
+  },
+  {
+   "id": "REQ-009",
+   "title": "Rate limit exceeded returns 429",
+   "text": "System returns a 429 JSON response with error 'rate limit exceeded, slow down' when more than 90 requests per 10 seconds are sent from the same client IP to the /api path.",
+   "priority": "P0",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 164,
+   "quote": "                    send, 429, b'{\"error\":\"rate limit exceeded, slow down\"}'"
+  },
+  {
+   "id": "REQ-010",
+   "title": "Security headers are added to every HTTP response",
+   "text": "System adds a predefined set of HTTP security headers (including x-content-type-options, referrer-policy, permissions-policy, strict-transport-security, cross-origin-opener-policy, and content-security-policy) to every HTTP response.",
+   "priority": "P1",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 171,
+   "quote": "                message[\"headers\"].extend(SEC_HEADERS)"
+  },
+  {
+   "id": "REQ-011",
+   "title": "Query parameter 'code' validation in api_nav",
+   "text": "System returns a 400 JSON response with error 'invalid scheme code' when the 'code' query parameter in a GET request to /api/nav is not all digits or is longer than 9 characters.",
+   "priority": "P2",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 280,
+   "quote": "            return JSONResponse({\"error\": \"invalid scheme code\"}, status_code=400)"
+  },
+  {
+   "id": "REQ-012",
+   "title": "Query parameter 'q' validation in api_nav",
+   "text": "System returns a 400 JSON response with error 'query must be 1–80 characters' when the 'q' query parameter in a GET request to /api/nav is empty or longer than 80 characters.",
+   "priority": "P2",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 284,
+   "quote": "        return JSONResponse({\"error\": \"query must be 1–80 characters\"}, status_code=400)"
+  },
+  {
+   "id": "REQ-013",
+   "title": "Invalid currency code in api_fx returns 400",
+   "text": "System returns a 400 JSON response with error 'invalid currency code' when the 'base' or 'symbols' query parameters in a GET request to /api/fx do not match the currency code pattern.",
+   "priority": "P2",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 292,
+   "quote": "        return JSONResponse({\"error\": \"invalid currency code\"}, status_code=400)"
+  },
+  {
+   "id": "REQ-014",
+   "title": "Invalid symbol in api_quote returns 400",
+   "text": "System returns a 400 JSON response with error 'invalid symbol' when the 'symbol' query parameter in a GET request to /api/quote does not match the symbol regex pattern.",
+   "priority": "P2",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 299,
+   "quote": "        return JSONResponse({\"error\": \"invalid symbol\"}, status_code=400)"
+  },
+  {
+   "id": "REQ-015",
+   "title": "Sharpe ratio returns error when standard deviation is zero",
+   "text": "System returns a dict with 'error' key set to 'Standard deviation cannot be zero' when the sharpe_ratio function is called with a portfolio_std_dev of 0.",
+   "priority": "P2",
+   "source_file": "repo/src/tools/portfolio.py",
+   "line_number": 178,
+   "quote": "        return {\"error\": \"Standard deviation cannot be zero\"}"
+  },
+  {
+   "id": "REQ-016",
+   "title": "Treynor ratio returns error when beta is zero",
+   "text": "System returns a dict with 'error' key set to 'Beta cannot be zero' when the treynor_ratio function is called with a beta of 0.",
+   "priority": "P2",
+   "source_file": "repo/src/tools/portfolio.py",
+   "line_number": 204,
+   "quote": "        return {\"error\": \"Beta cannot be zero\"}"
+  },
+  {
+   "id": "REQ-017",
+   "title": "Information ratio returns error when tracking error is zero",
+   "text": "System returns a dict with 'error' key set to 'Tracking error cannot be zero' when the information_ratio function is called with a tracking_error of 0.",
+   "priority": "P2",
+   "source_file": "repo/src/tools/portfolio.py",
+   "line_number": 249,
+   "quote": "        return {\"error\": \"Tracking error cannot be zero\"}"
+  },
+  {
+   "id": "REQ-018",
+   "title": "Sortino ratio returns error when downside deviation is zero",
+   "text": "System returns a dict with 'error' key set to 'Downside deviation cannot be zero' when the sortino_ratio function is called with a downside_deviation of 0.",
+   "priority": "P2",
+   "source_file": "repo/src/tools/portfolio.py",
+   "line_number": 275,
+   "quote": "        return {\"error\": \"Downside deviation cannot be zero\"}"
+  },
+  {
+   "id": "REQ-019",
+   "title": "Portfolio expected return returns error on length mismatch",
+   "text": "System returns a dict with 'error' key set to 'Weights and returns must have same length' when the portfolio_expected_return function is called with weights and returns lists of different lengths.",
+   "priority": "P2",
+   "source_file": "repo/src/tools/portfolio.py",
+   "line_number": 22,
+   "quote": "        return {\"error\": \"Weights and returns must have same length\"}"
+  },
+  {
+   "id": "REQ-020",
+   "title": "Portfolio risk returns error on dimensions mismatch",
+   "text": "System returns a dict with 'error' key set to 'Dimensions mismatch' when the portfolio_risk function is called with weights, std_devs, and correlations lists of mismatched sizes.",
+   "priority": "P2",
+   "source_file": "repo/src/tools/portfolio.py",
+   "line_number": 51,
+   "quote": "        return {\"error\": \"Dimensions mismatch\"}"
+  },
+  {
+   "id": "REQ-021",
+   "title": "Parameter sanitization rejects invalid params object",
+   "text": "System raises ValueError('invalid parameters') when _sanitize_params receives a non-dict argument or a dict with more than 30 keys.",
+   "priority": "P1",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 199,
+   "quote": "        raise ValueError(\"invalid parameters\")"
+  },
+  {
+   "id": "REQ-022",
+   "title": "Parameter sanitization rejects non-finite numbers",
+   "text": "System raises ValueError when a parameter value is a float or int with non-finite value (NaN, Inf, -Inf).",
+   "priority": "P1",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 208,
+   "quote": "                raise ValueError(f\"'{k}' must be a finite number\")"
+  },
+  {
+   "id": "REQ-023",
+   "title": "Parameter sanitization rejects out of range numbers",
+   "text": "System raises ValueError when a parameter value has an absolute value greater than 1e13.",
+   "priority": "P1",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 210,
+   "quote": "                raise ValueError(f\"'{k}' is out of range\")"
+  },
+  {
+   "id": "REQ-024",
+   "title": "Parameter sanitization rejects values exceeding per-parameter caps",
+   "text": "System raises ValueError when a parameter value exceeds its defined cap (e.g., years > 120, months > 2400) in PARAM_CAPS.",
+   "priority": "P1",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 213,
+   "quote": "                raise ValueError(f\"'{k}' must be ≤ {cap}\")"
+  },
+  {
+   "id": "REQ-025",
+   "title": "Parameter sanitization rejects long parameter names and string values",
+   "text": "System raises ValueError('invalid parameter name') when a parameter key is longer than 40 characters, and raises ValueError when a string parameter value is longer than 40 characters.",
+   "priority": "P1",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 203,
+   "quote": "            raise ValueError(\"invalid parameter name\")"
+  },
+  {
+   "id": "REQ-026",
+   "title": "Server runs on port from PORT env var",
+   "text": "System (main function) starts the web server on the port specified by the PORT environment variable, defaulting to 7860.",
+   "priority": "P2",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 354,
+   "quote": "    port = int(os.environ.get(\"PORT\", \"7860\"))"
+  }
+ ]
+}

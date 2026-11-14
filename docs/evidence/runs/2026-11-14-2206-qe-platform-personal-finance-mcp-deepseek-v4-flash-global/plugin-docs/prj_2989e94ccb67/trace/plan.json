@@ -1,0 +1,54 @@
+{
+ "stage": "plan",
+ "snapshot": {
+  "req": {
+   "REQ-001": "a8d766ccc9ac0beaa64ab681c3b5fc3eacc3ae6ca3d87f270eb3058da18a92d5",
+   "REQ-002": "30e6984553589f631ef13020b55e56832880e3b7c375480dac5d133f37a6af98",
+   "REQ-003": "8a755df8a03f39f1976f830d8a82d01506ee1cac6ae375ff4535df59b28a1bf5",
+   "REQ-004": "37c933c075926300d8f988c9dc5db85eb30e5aa59ebdffab39052bf2307531e5",
+   "REQ-005": "d6f8b850a47d8fd459c731482ac387409e1b89778400f7f88f6a970a0662a08c",
+   "REQ-006": "3d545cf780445d9fead2bc8a47ad9a0cd6eae224ee0b711ace18c77a4e7c28dd",
+   "REQ-007": "de056a67a0a3f649a0b4f5413fea3889031eed12ff7fa8925c45fe5401287b38",
+   "REQ-008": "3b303a81ee117bb1e2d8175ba51fb6739cda75da781bdea392a8dbb81be49b69",
+   "REQ-009": "0baf4bb5ad2d6dfc62d752738509505feb2ca62de8451d44c274649436c49726",
+   "REQ-010": "761c29a85d278603f7ed1871626a0f26e35bf5e74ce78c47cd55a001f7e821e2",
+   "REQ-011": "09ac828f60b53495ddeb8ef74c47cf9e837895a00d53ec61ab16325e881096ca",
+   "REQ-012": "95331c58480209b38dfc61475d10bad95477d44bd8445a01012522bf6559e624",
+   "REQ-013": "8a8971cb173889a1527b3880ea1906ba85eb363716faf89df262a4e00e1e978e",
+   "REQ-014": "03ff6330e7f290c5932c12778ec37bf273d23dca5f98e05a62c2ebfd22d11971",
+   "REQ-015": "06c6dd5d11100077980e207db1312ad3cafc3581073f9a158ff19251cf98ebb8",
+   "REQ-016": "102050e6f44b05b094a519574ad633de2e458311aa5bb05f2ceb571cc067989d",
+   "REQ-017": "c059d669f8fa299cd30e5d6c6cc218de90fa9d7a9166029eea23b6c986a1df31",
+   "REQ-018": "3fb0018bf132506f6d576375223d37df8a1e1612855ce4607a3f00114b8ced9e",
+   "REQ-019": "e74bbc27177ca9ff09cda545bb24d12cc7af905e73f348673e69570a050a2482",
+   "REQ-020": "4b423a7c62917f26a5f3b93a422d856d5f465c8cfd05548e1593ac9a92bac079",
+   "REQ-021": "2ba927e6943cd20e14d11c49f6cd95c8b4b74e740b6cabe3ae1fbc1027bb9f25",
+   "REQ-022": "ec47d37028fd22857e09296bbbc9892c186024cd03c928b4531ede2e27de3e11",
+   "REQ-023": "cef858b86378737503cfe96b9cc38dfaac1402e4fd57c652c7e03e4ee085516e",
+   "REQ-024": "3a91a9bbec61f23b97c87c92f4d7e0457bee45fd9a392880de1c03aa14f481ed",
+   "REQ-025": "6be6ad089291a0a0840f2f9b47b8a0e1e6b8af134ffa34888c2fd0d2f5f5b37d",
+   "REQ-026": "cf8c1cd256e4fc4f60035ac2bfc44657218967f1832c3cdf5289e63db67fdb2c"
+  },
+  "scn": {
+   "unit-portfolio-errors": "0bf9ad5fd61140bccace745152e74c489edad5c883535c1d6b9c50b2cbdaf9a7",
+   "unit-sanitize-params": "a38b5ccdbe35404d1e1ee8d7de66c7e4548f20f23ff5102865335e59d574c256",
+   "integration-health": "f7abebd2a641e8fd2f70b2a61cd78576b122ac84a74acff6a6ae4dd2dab9804e",
+   "integration-calc-errors": "31b222e7b61a2ae5c604cfd7df7c439c3bd106a12b7027343123c2fbb97e955e",
+   "integration-security-payload-rate": "fb19b969eb6f2cac759f9d398dd780903ba9632885b1d68fcefb294bf14885f3",
+   "integration-security-headers": "10a2f174f9c27651edcd7c2699372d1fbddc86f251c1e609a11315ed2a52b247",
+   "integration-nav-validation": "f1cadfcb55d2a4bad6c6732555195edc7c4aa4de53049a363b2eb20f2d469df2",
+   "integration-fx-validation": "2d364ffb5651706ace0187adcb9786f2dd3a3f5be150ddeb0ba454188f28e139",
+   "integration-quote-validation": "7528ed0f2591e1a18617c4d5e20e55f30b66ab9b339d4d79ed49dc5b2f9eefd6"
+  }
+ },
+ "last_check": {
+  "stage": "plan",
+  "upstream": 26,
+  "carried": 26,
+  "changed": 0,
+  "dropped_with_reason": 2,
+  "dropped_without_reason": 0,
+  "new": 9,
+  "verdict": "PASS"
+ }
+}

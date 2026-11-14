@@ -1,0 +1,2337 @@
+{
+ "_capture": {
+  "agent_type": "confidence-reviewer",
+  "agent_id": "run_ef20fac8939f:design",
+  "at": "2026-11-14T16:41:25.044235+00:00",
+  "sha256": "1209183edf2af676505c876b1c76bf77e5130e98d7505ce75750aeead06c1d9b",
+  "note": "Recorded by Agentic QE Platform from the agent's own checked answer. Do not edit."
+ },
+ "kind": "design",
+ "items": [
+  {
+   "tc_id": "TC-APP-001",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 226,
+    "symbol": "health"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20,
+    "total": 100
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [
+    "unknown dimension total"
+   ],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-002",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 226,
+    "symbol": "health"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20,
+    "total": 100
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [
+    "unknown dimension total"
+   ],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-003",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 226,
+    "symbol": "health"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20,
+    "total": 100
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [
+    "unknown dimension total"
+   ],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-004",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 226,
+    "symbol": "health"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20,
+    "total": 100
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [
+    "unknown dimension total"
+   ],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-005",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 267,
+    "symbol": "run_calc"
+   },
+   "scores": {
+    "source_proven": 20,
+    "correct_target": 25,
+    "expected_derivable": 15,
+    "fixture_validity": 20
+   },
+   "claimed_total": 80,
+   "total": 80,
+   "verdict": "REVISE",
+   "scored_verdict": "REVISE",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [
+    {
+     "dimension": "source_proven",
+     "evidence": "src/web/server.py:267",
+     "fix": "The source shows a catch for ValueError, ZeroDivisionError, KeyError, TypeError returning 'invalid inputs: {e}'. But the test expects 'invalid inputs: ...' with ellipsis; the source does not produce an ellipsis. Change expected result to match the actual source format or justify the ellipsis.",
+     "file": "src/web/server.py",
+     "line": 267
+    },
+    {
+     "dimension": "expected_derivable",
+     "evidence": "src/web/server.py:265",
+     "fix": "The test's trigger (missing 'operation' field) causes a KeyError for 'operation' lookup (not a ValueError), but the expected result is 'invalid inputs: ...'. The source returns f\"invalid inputs: {e}\" with the actual error. Derive the exact expected string from the code. For example, missing 'operation' would give KeyError: 'operation', so expected error should be 'invalid inputs: \\\"'operation'\\\"' or similar.",
+     "file": "src/web/server.py",
+     "line": 265
+    }
+   ],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-006",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 267,
+    "symbol": "run_calc"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 20,
+    "fixture_validity": 20
+   },
+   "claimed_total": 95,
+   "total": 95,
+   "verdict": "REVISE",
+   "scored_verdict": "REVISE",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [
+    {
+     "dimension": "expected_derivable",
+     "evidence": "src/web/server.py:267",
+     "fix": "The source returns f\"invalid inputs: {e}\" where e is the ZeroDivisionError. String representation of ZeroDivisionError('division by zero') is 'division by zero', so the full error would be 'invalid inputs: division by zero' (with a colon as shown). The test expects JSON {\"error\": \"invalid inputs: division by zero\"}. This matches. However, the oracle is 'derived' but the source provides exact behavior; it should be 'specified'. Change oracle to 'specified'.",
+     "file": "src/web/server.py",
+     "line": 267
+    }
+   ],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-007",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 267,
+    "symbol": "run_calc"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 15,
+    "fixture_validity": 20
+   },
+   "claimed_total": 90,
+   "total": 90,
+   "verdict": "REVISE",
+   "scored_verdict": "REVISE",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [
+    {
+     "dimension": "expected_derivable",
+     "evidence": "src/web/server.py:267",
+     "fix": "The test expects JSON {\"error\": \"invalid inputs: 'b'\"}. The source returns f\"invalid inputs: {e}\" where e is the KeyError for missing 'b'. The string representation of KeyError('b') is \"'b'\", so the full error would be \"invalid inputs: 'b'\". This matches. Oracle is 'derived' but source makes it exact; change oracle to 'specified'.",
+     "file": "src/web/server.py",
+     "line": 267
+    }
+   ],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-008",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 267,
+    "symbol": "run_calc"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 15,
+    "fixture_validity": 20
+   },
+   "claimed_total": 90,
+   "total": 90,
+   "verdict": "REVISE",
+   "scored_verdict": "REVISE",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [
+    {
+     "dimension": "expected_derivable",
+     "evidence": "src/web/server.py:267",
+     "fix": "The test expects 'invalid inputs: ...' with ellipsis. The source does not use ellipsis; it returns the exact exception string. Derive the expected result precisely. For example, adding a string and integer raises TypeError like \"unsupported operand type(s) for +: 'str' and 'int'\", so expected error should be \"invalid inputs: unsupported operand type(s) for +: 'str' and 'int'\".",
+     "file": "src/web/server.py",
+     "line": 267
+    }
+   ],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-009",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 273,
+    "symbol": "run_calc"
+   },
+   "scores": {
+    "source_proven": 25,
+    "correct_target": 25,
+    "expected_derivable": 20,
+    "fixture_validity": 10
+   },
+   "claimed_total": 80,
+   "total": 80,
+   "verdict": "REVISE",
+   "scored_verdict": "REVISE",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [
+    {
+     "dimension": "source_proven",
+     "evidence": "src/web/server.py:273",
+     "fix": "The source shows a generic catch for Exception returning 'calculation failed'. The test expects this. However, the precondition says 'instrumented to raise RuntimeError'. That is acceptable but the test_data says 'any valid JSON body that the calculator will process'. This is vague; should state specific calculator and params. Provide a concrete example to make test repeatable.",
+     "file": "src/web/server.py",
+     "line": 273
+    },
+    {
+     "dimension": "fixture_validity",
+     "evidence": "src/web/server.py:249",
+     "fix": "The test_data says 'any valid JSON body that the calculator will process' but different calculators may exist. The code requires a known calculator name (line 249-255). Without specifying which calculator and params, the request may fail with 'unknown calculator'. Provide a concrete, valid calculator name and params to reach the calculator function.",
+     "file": "src/web/server.py",
+     "line": 249
+    }
+   ],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-010",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 273,
+    "symbol": "run_calc"
+   },
+   "scores": {
+    "source_proven": 25,
+    "correct_target": 25,
+    "expected_derivable": 20,
+    "fixture_validity": 10
+   },
+   "claimed_total": 80,
+   "total": 80,
+   "verdict": "REVISE",
+   "scored_verdict": "REVISE",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [
+    {
+     "dimension": "source_proven",
+     "evidence": "src/web/server.py:273",
+     "fix": "The source shows catch for Exception returning 'calculation failed'. The test expects this. The precondition says 'instrumented to raise Exception'. That is fine. But the test_data says 'any valid JSON body that triggers the generic exception' without specifying which calculator. Provide concrete calculator name and params.",
+     "file": "src/web/server.py",
+     "line": 273
+    },
+    {
+     "dimension": "fixture_validity",
+     "evidence": "src/web/server.py:249",
+     "fix": "Same as C5: need a concrete calculator and params to reach the exception. Without it, the test may fail due to unknown calculator.",
+     "file": "src/web/server.py",
+     "line": 249
+    }
+   ],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-011",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 273,
+    "symbol": "run_calc"
+   },
+   "scores": {
+    "source_proven": 25,
+    "correct_target": 25,
+    "expected_derivable": 20,
+    "fixture_validity": 10
+   },
+   "claimed_total": 80,
+   "total": 80,
+   "verdict": "REVISE",
+   "scored_verdict": "REVISE",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [
+    {
+     "dimension": "source_proven",
+     "evidence": "src/web/server.py:273",
+     "fix": "The source shows catch for Exception returning 'calculation failed'. The test expects this. The precondition says 'instrumented to raise IndexError'. That is fine. The test_data says 'a valid JSON body that causes IndexError' without specifying which calculator. Provide concrete calculator name and params.",
+     "file": "src/web/server.py",
+     "line": 273
+    },
+    {
+     "dimension": "fixture_validity",
+     "evidence": "src/web/server.py:249",
+     "fix": "Need concrete calculator name and params to reach the exception. Without it, may get 'unknown calculator' error.",
+     "file": "src/web/server.py",
+     "line": 249
+    }
+   ],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-012",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 273,
+    "symbol": "run_calc"
+   },
+   "scores": {
+    "source_proven": 25,
+    "correct_target": 25,
+    "expected_derivable": 20,
+    "fixture_validity": 10
+   },
+   "claimed_total": 80,
+   "total": 80,
+   "verdict": "REVISE",
+   "scored_verdict": "REVISE",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [
+    {
+     "dimension": "source_proven",
+     "evidence": "src/web/server.py:273",
+     "fix": "The source shows catch for Exception returning 'calculation failed'. The test expects this. The precondition says 'raises OSError'. That is fine. The test_data says 'a valid JSON body' without specifying which calculator. Provide concrete calculator name and params.",
+     "file": "src/web/server.py",
+     "line": 273
+    },
+    {
+     "dimension": "fixture_validity",
+     "evidence": "src/web/server.py:249",
+     "fix": "Need concrete calculator name and params to reach the exception. Without it, may get 'unknown calculator' error.",
+     "file": "src/web/server.py",
+     "line": 249
+    }
+   ],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-013",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 150,
+    "symbol": "SecurityMiddleware.__call__"
+   },
+   "scores": {
+    "source_proven": 25,
+    "correct_target": 25,
+    "expected_derivable": 10,
+    "fixture_validity": 15,
+    "total": 75
+   },
+   "claimed_total": 0,
+   "total": 75,
+   "verdict": "REVISE",
+   "scored_verdict": "REVISE",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [
+    {
+     "dimension": "source_proven",
+     "evidence": "src/web/server.py:150-151",
+     "fix": "The code checks content-length > MAX_BODY but does not assert that a payload of exactly 16384 bytes would be accepted. Confirm that MAX_BODY is 16384 (or test if the code treats 16384 as <= limit). Provide a spec or config value.",
+     "file": "src/web/server.py",
+     "line": 150
+    },
+    {
+     "dimension": "expected_derivable",
+     "evidence": "src/web/server.py:150",
+     "fix": "The boundary (exactly 16 KB) is not derived from code; the code only rejects > MAX_BODY. If MAX_BODY is 16384, then 16384 should be accepted. Specify the numeric value of MAX_BODY (e.g., 16384) so that the expected result is provably correct.",
+     "file": "src/web/server.py",
+     "line": 150
+    },
+    {
+     "dimension": "fixture_validity",
+     "evidence": "src/web/server.py:150",
+     "fix": "The test sends a body of 16384 bytes, but the code only checks content-length header, not actual body size. To be valid, the test should ensure that the content-length header matches the body length. Either confirm that the test client sets correct content-length or mention that the test uses HTTP (e.g., httpx) which sets it automatically.",
+     "file": "src/web/server.py",
+     "line": 150
+    }
+   ],
+   "problems": [
+    "unknown dimension total",
+    "total 0 does not equal the sum of the scores (75); the sum is used"
+   ],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-014",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 150,
+    "symbol": "SecurityMiddleware.__call__"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20,
+    "total": 100
+   },
+   "claimed_total": 0,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [
+    "unknown dimension total",
+    "total 0 does not equal the sum of the scores (100); the sum is used"
+   ],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-015",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 150,
+    "symbol": "SecurityMiddleware.__call__"
+   },
+   "scores": {
+    "source_proven": 20,
+    "correct_target": 25,
+    "expected_derivable": 10,
+    "fixture_validity": 15,
+    "total": 70
+   },
+   "claimed_total": 0,
+   "total": 70,
+   "verdict": "REVISE",
+   "scored_verdict": "REVISE",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [
+    {
+     "dimension": "source_proven",
+     "evidence": "src/web/server.py:150",
+     "fix": "The code does not enforce an empty-body check. An empty body would likely cause a parsing error elsewhere, not in SecurityMiddleware. The expected result (400) is not proven from the shown source. The test relies on behavior outside the code shown, so source_proven should be lower.",
+     "file": "src/web/server.py",
+     "line": 150
+    },
+    {
+     "dimension": "expected_derivable",
+     "evidence": "src/web/server.py:149-150",
+     "fix": "The expected result (HTTP 400) is not derivable from the code. If content-length is 0, the code skips the > MAX_BODY check and then goes to rate limiting and the ASGI app. There is no explicit JSON parse that returns 400 in the shown code. Specify that the 400 is returned by the downstream app, or remove the oracle as 'specified' and rely on a requirement.",
+     "file": "src/web/server.py",
+     "line": 149
+    },
+    {
+     "dimension": "fixture_validity",
+     "evidence": "src/web/server.py:149",
+     "fix": "An empty body may have no content-length header or content-length:0. The test should specify that the test client sets content-length:0, otherwise the code might not enter the body-size branch at all. The test_data as 'empty body' is ambiguous.",
+     "file": "src/web/server.py",
+     "line": 149
+    }
+   ],
+   "problems": [
+    "unknown dimension total",
+    "total 0 does not equal the sum of the scores (70); the sum is used"
+   ],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-016",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 150,
+    "symbol": "SecurityMiddleware.__call__"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20,
+    "total": 100
+   },
+   "claimed_total": 0,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [
+    "unknown dimension total",
+    "total 0 does not equal the sum of the scores (100); the sum is used"
+   ],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-017",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 162,
+    "symbol": "SecurityMiddleware.__call__"
+   },
+   "scores": {
+    "source_proven": 20,
+    "correct_target": 25,
+    "expected_derivable": 10,
+    "fixture_validity": 15,
+    "total": 70
+   },
+   "claimed_total": 0,
+   "total": 70,
+   "verdict": "REVISE",
+   "scored_verdict": "REVISE",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [
+    {
+     "dimension": "source_proven",
+     "evidence": "src/web/server.py:162",
+     "fix": "The code checks len(q) >= RATE_LIMIT after appending? Actually, at line 162, len(q) is checked before appending (line 166). For the 90th request, len(q) becomes 90 after appending? Wait: the code checks len(q) >= RATE_LIMIT before appending. So the first request after 89 stored hits would have len(q)=89, passes, appends. The 91st request would have len(q)=90, fails. The test expects the 90th to succeed and 91st to fail, which matches the code behavior. However, the precondition '90 requests within 10 seconds' is fine, but the test steps say 'Send 90 requests ... then one more' – that totals 91, not 90. The code would reject on the 91st. The oracle is derived correctly, but the scenario description says 'Send exactly 90 requests ... then one more request' – that is 91 requests total, and the expected says '90th request success; 91st returns 429'. That is consistent, but the test_data count says '91 consecutive requests', which is correct. No flaw in derivation itself, but the scenario description could be clarified. However, the main issue is that the code uses a global _hits dict that persists across tests, so test ordering matters. This affects fixture_validity because the test preconditions cannot guarantee a fresh rate-limit state without reset. Deduct from fixture_validity.",
+     "file": "src/web/server.py",
+     "line": 162
+    },
+    {
+     "dimension": "expected_derivable",
+     "evidence": "src/web/server.py:162-164",
+     "fix": "The expected result '91st returns 429' is derivable from code if we assume no previous hits. The 90th request success is derivable because len(q) before 90th is 89. However, the oracle type is 'specified', but the requirement REQ-009 states 'more than 90 requests per 10 seconds' triggers 429, which means the 91st request fails. The test uses oracle 'specified', which matches the requirement. But the test writes '91st request returns 429' which is correct. No deduction.",
+     "file": "src/web/server.py",
+     "line": 162
+    },
+    {
+     "dimension": "fixture_validity",
+     "evidence": "src/web/server.py:159",
+     "fix": "The code uses a global _hits dict that accumulates across tests. Without resetting the state between test runs, the 90-request limit could be affected by previous test cases. Add a reset mechanism or use a fresh test environment. The test data assumes a clean state, which is not guaranteed in a test suite.",
+     "file": "src/web/server.py",
+     "line": 159
+    }
+   ],
+   "problems": [
+    "unknown dimension total",
+    "total 0 does not equal the sum of the scores (70); the sum is used"
+   ],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-018",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 162,
+    "symbol": "SecurityMiddleware.__call__"
+   },
+   "scores": {
+    "source_proven": 25,
+    "correct_target": 25,
+    "expected_derivable": 20,
+    "fixture_validity": 15,
+    "total": 85
+   },
+   "claimed_total": 0,
+   "total": 85,
+   "verdict": "REVISE",
+   "scored_verdict": "REVISE",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [
+    {
+     "dimension": "source_proven",
+     "evidence": "src/web/server.py:162",
+     "fix": "The test expects the 91st request to be limited, but the code checks before appending. So if the 91st request sees len(q)=90, it will be rejected, which matches. However, the code does not enforce a maximum per IP in a way that stores timestamps; it uses a deque. The test steps 'send 91 requests as quickly as possible' might not ensure all 91 are within 10 seconds; they could exceed the window if sent too slowly. The source_proven score is reduced because the test assumes fast sending, but timing is not controlled.",
+     "file": "src/web/server.py",
+     "line": 162
+    },
+    {
+     "dimension": "expected_derivable",
+     "evidence": "src/web/server.py:162-164",
+     "fix": "The oracle is 'derived', but the derivation is slightly off: the code rejects when len(q) >= RATE_LIMIT, so the 91st request (90 stored + 1 new) should be rejected. That matches. However, the test expects the 91st request to be the last (91st) which is correct. No deduction.",
+     "file": "src/web/server.py",
+     "line": 162
+    },
+    {
+     "dimension": "fixture_validity",
+     "evidence": "src/web/server.py:159",
+     "fix": "Same as C13: global state _hits persists across tests. The test data assumes a clean state, but without reset, prior tests may have polluted the deque. Add state isolation.",
+     "file": "src/web/server.py",
+     "line": 159
+    }
+   ],
+   "problems": [
+    "unknown dimension total",
+    "total 0 does not equal the sum of the scores (85); the sum is used"
+   ],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-019",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 160,
+    "symbol": "SecurityMiddleware.__call__"
+   },
+   "scores": {
+    "source_proven": 25,
+    "correct_target": 25,
+    "expected_derivable": 15,
+    "fixture_validity": 10,
+    "total": 75
+   },
+   "claimed_total": 0,
+   "total": 75,
+   "verdict": "REVISE",
+   "scored_verdict": "REVISE",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [
+    {
+     "dimension": "source_proven",
+     "evidence": "src/web/server.py:160-161",
+     "fix": "The code prunes the deque of entries older than RATE_WINDOW. The test assumes RATE_WINDOW is exactly 10 seconds, but the code uses a constant RATE_WINDOW not shown in the excerpt. The test must confirm the value. If RATE_WINDOW is 10.0 seconds, waiting 11 seconds should clear all entries. However, the pruning happens only on the next request, so the 91st request after 11 seconds will prune entries, then len(q) will be 0 (if window is cleared), so the request succeeds. That is derivable, but only if RATE_WINDOW <= 10 seconds. The test assumes a precise window, but the constant is not shown. Deduct from source_proven.",
+     "file": "src/web/server.py",
+     "line": 160
+    },
+    {
+     "dimension": "expected_derivable",
+     "evidence": "src/web/server.py:160",
+     "fix": "The expected result (200 after waiting 11 seconds) assumes that after 11 seconds, all previous entries are pruned. This is derivable only if RATE_WINDOW is exactly 10 seconds. If RATE_WINDOW is smaller, say 5 seconds, then the request would always succeed. The test should specify the actual RATE_WINDOW value or derive from source.",
+     "file": "src/web/server.py",
+     "line": 160
+    },
+    {
+     "dimension": "fixture_validity",
+     "evidence": "src/web/server.py:159",
+     "fix": "Global _hits state persists; prior tests may have added entries for the same IP, causing the 90 requests to exceed limit or the deque to contain entries from earlier tests. Without isolation, the test may fail due to interference. Also, the test_data mentions '90 requests' but the steps say 'send 90 POST requests quickly', which may take time; the 11-second wait may not be exact if the test execution has overhead.",
+     "file": "src/web/server.py",
+     "line": 159
+    }
+   ],
+   "problems": [
+    "unknown dimension total",
+    "total 0 does not equal the sum of the scores (75); the sum is used"
+   ],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-020",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 159,
+    "symbol": "SecurityMiddleware.__call__"
+   },
+   "scores": {
+    "source_proven": 25,
+    "correct_target": 25,
+    "expected_derivable": 20,
+    "fixture_validity": 10,
+    "total": 80
+   },
+   "claimed_total": 0,
+   "total": 80,
+   "verdict": "REVISE",
+   "scored_verdict": "REVISE",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [
+    {
+     "dimension": "source_proven",
+     "evidence": "src/web/server.py:159",
+     "fix": "The code differentiates by IP via _hits dict keyed by _client_ip(scope). The test expects IP A to be limited and IP B to be fine. This is proven by the code. However, the test does not specify how clients are simulated; the ASGI scope's 'client' field or X-Forwarded-For header must be set. Without showing that the test can set different IPs, the source_proven is reduced.",
+     "file": "src/web/server.py",
+     "line": 159
+    },
+    {
+     "dimension": "expected_derivable",
+     "evidence": "src/web/server.py:159-162",
+     "fix": "The oracle is 'derived'; the derivation is straightforward: each IP has its own deque, so separate limits. However, the test expects IP A's 91st request to fail, but if the 91 requests are sent within 10 seconds, then after 90, the 91st will see len(q)=90 >= RATE_LIMIT. That is correct. But the test does not ensure timing; if requests take too long, the window may expire. Deduct for lack of timing guarantee.",
+     "file": "src/web/server.py",
+     "line": 159
+    },
+    {
+     "dimension": "fixture_validity",
+     "evidence": "src/web/server.py:159",
+     "fix": "Global state _hits persists; the IP A's deque may already have entries from previous tests. Without reset, IP A might be limited earlier. Also, the test does not define how to simulate two client IPs in a single test client. The test data mentions 'simulate client IP A' and 'simulate client IP B', but no mechanism is provided. This makes the fixture potentially invalid.",
+     "file": "src/web/server.py",
+     "line": 159
+    }
+   ],
+   "problems": [
+    "unknown dimension total",
+    "total 0 does not equal the sum of the scores (80); the sum is used"
+   ],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-021",
+   "kind": "design",
+   "file": "src/tools/portfolio.py",
+   "component": {
+    "file": "src/tools/portfolio.py",
+    "line": 173,
+    "symbol": "sharpe_ratio"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed"
+  },
+  {
+   "tc_id": "TC-APP-022",
+   "kind": "design",
+   "file": "",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 168,
+    "symbol": "send_wrapper"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-023",
+   "kind": "design",
+   "file": "",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 168,
+    "symbol": "send_wrapper"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 20,
+    "fixture_validity": 20
+   },
+   "claimed_total": 95,
+   "total": 95,
+   "verdict": "REVISE",
+   "scored_verdict": "REVISE",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [
+    {
+     "dimension": "expected_derivable",
+     "evidence": "src/web/server.py:171",
+     "fix": "The expected result should explicitly reference the code guarantee that headers are injected for every http.response.start message, including 204, to make the oracle derivable from the source.",
+     "file": "src/web/server.py",
+     "line": 171
+    }
+   ],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-024",
+   "kind": "design",
+   "file": "",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 168,
+    "symbol": "send_wrapper"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-025",
+   "kind": "design",
+   "file": "",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 168,
+    "symbol": "send_wrapper"
+   },
+   "scores": {
+    "source_proven": 20,
+    "correct_target": 25,
+    "expected_derivable": 20,
+    "fixture_validity": 20
+   },
+   "claimed_total": 85,
+   "total": 85,
+   "verdict": "REVISE",
+   "scored_verdict": "REVISE",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [
+    {
+     "dimension": "source_proven",
+     "evidence": "src/web/server.py:144",
+     "fix": "The test sends GET to /nonexistent-route. The source does not show a catch-all route, so it is unknown whether Starlette's router returns 404 or a static file serves the request. The behavior is not provable from code. Either add a catch-all route or target a route that is guaranteed to return 404.",
+     "file": "src/web/server.py",
+     "line": 144
+    },
+    {
+     "dimension": "expected_derivable",
+     "evidence": "src/web/server.py:168",
+     "fix": "The expected result assumes that a 404 response receives the security headers, but without a defined handler for undefined paths, this derivation is not justified. The middleware injects headers into any http.response.start message, but it is not confirmed that the router produces that message for undefined paths.",
+     "file": "src/web/server.py",
+     "line": 168
+    }
+   ],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-026",
+   "kind": "design",
+   "file": "",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 279,
+    "symbol": "api_nav"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-027",
+   "kind": "design",
+   "file": "",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 283,
+    "symbol": "api_nav"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-028",
+   "kind": "design",
+   "file": "",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 291,
+    "symbol": "api_fx"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-029",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 296,
+    "symbol": "api_quote"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed",
+   "round": 2,
+   "first_round": {
+    "total": 0,
+    "verdict": "REJECT",
+    "flaws": [
+     {
+      "dimension": "source_proven",
+      "evidence": "",
+      "fix": "The requirement REQ-014 (line 298-299) specifies a 400 error for an invalid symbol, but the test case expects a 200 with a 'quote' field for a valid symbol. The source does not prove that a valid symbol produces a successful response; it only shows the error branch. Provide equivalent evidence (e.g., code or specification) for the positive scenario.",
+      "file": "",
+      "line": null
+     },
+     {
+      "dimension": "correct_target",
+      "evidence": "src/web/server.py:296",
+      "fix": "The test is labeled 'Integration' and tests the /api/quote endpoint. The component is the api_quote function at line 296, which only returns the error response. The positive scenario is not implemented in the shown source; the test targets no existing positive path. Redesign the test or point to the actual positive handling code.",
+      "file": "src/web/server.py",
+      "line": 296
+     },
+     {
+      "dimension": "expected_derivable",
+      "evidence": "",
+      "fix": "The expected result (200 + 'quote' field) is not derived from any code or specification in the evidence. The only specification shown is REQ-014 which covers the error case. Provide a specification or code that defines the successful response format.",
+      "file": "",
+      "line": null
+     },
+     {
+      "dimension": "fixture_validity",
+      "evidence": "",
+      "fix": "The test data 'symbol=AAPL' is syntactically valid, but without a proven target, validity cannot be confirmed against real constraints. Ensure the symbol passes _SYMBOL_RE and that a valid response is defined.",
+      "file": "",
+      "line": null
+     }
+    ]
+   }
+  },
+  {
+   "tc_id": "TC-APP-030",
+   "kind": "design",
+   "file": "src/tools/portfolio.py",
+   "component": {
+    "file": "src/tools/portfolio.py",
+    "line": 173,
+    "symbol": "sharpe_ratio"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-031",
+   "kind": "design",
+   "file": "src/tools/portfolio.py",
+   "component": {
+    "file": "src/tools/portfolio.py",
+    "line": 201,
+    "symbol": "treynor_ratio"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-036",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 196,
+    "symbol": "_sanitize_params"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 0,
+    "fixture_validity": 20
+   },
+   "claimed_total": 75,
+   "total": 75,
+   "verdict": "REVISE",
+   "scored_verdict": "REVISE",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [
+    {
+     "dimension": "expected_derivable",
+     "evidence": "src/web/server.py:196",
+     "fix": "expected_result is vague; 'without raising an exception' is testable, acceptable.",
+     "file": "src/web/server.py",
+     "line": 196
+    }
+   ],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-037",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 196,
+    "symbol": "_sanitize_params"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 0,
+    "fixture_validity": 20
+   },
+   "claimed_total": 75,
+   "total": 75,
+   "verdict": "REVISE",
+   "scored_verdict": "REVISE",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [
+    {
+     "dimension": "expected_derivable",
+     "evidence": "src/web/server.py:199",
+     "fix": "Expected result matches requirement REQ-021, no issue.",
+     "file": "src/web/server.py",
+     "line": 199
+    }
+   ],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-038",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 196,
+    "symbol": "_sanitize_params"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 0,
+    "fixture_validity": 20
+   },
+   "claimed_total": 75,
+   "total": 75,
+   "verdict": "REVISE",
+   "scored_verdict": "REVISE",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [
+    {
+     "dimension": "expected_derivable",
+     "evidence": "src/web/server.py:198",
+     "fix": "Boundary (31 keys) is derivable from code condition 'len(params) > 30'; score should be 25.",
+     "file": "src/web/server.py",
+     "line": 198
+    }
+   ],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-039",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 196,
+    "symbol": "_sanitize_params"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 0,
+    "fixture_validity": 20
+   },
+   "claimed_total": 75,
+   "total": 75,
+   "verdict": "REVISE",
+   "scored_verdict": "REVISE",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [
+    {
+     "dimension": "expected_derivable",
+     "evidence": "src/web/server.py:196",
+     "fix": "Empty dict not explicitly handled but derivable: len({}) <= 30 and isinstance({}, dict) is true, so no error; acceptable.",
+     "file": "src/web/server.py",
+     "line": 196
+    }
+   ],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-040",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 196,
+    "symbol": "_sanitize_params"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 0,
+    "fixture_validity": 20,
+    "total": 75
+   },
+   "claimed_total": 0,
+   "total": 75,
+   "verdict": "REVISE",
+   "scored_verdict": "REVISE",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [
+    {
+     "dimension": "expected_derivable",
+     "evidence": "src/web/server.py:207-208",
+     "fix": "The test data 'params={\"amount\": \"a string\"}' does not match the step that calls with float('inf'). The expected result 'ValueError...\"amount\" must be a finite number' is derivable from lines 207-208 for float('inf'), but the test_data description contains an irrelevant phrase about a string. Either remove the conflicting test_data description or align steps and data consistently.",
+     "file": "src/web/server.py",
+     "line": 207
+    }
+   ],
+   "problems": [
+    "unknown dimension total",
+    "total 0 does not equal the sum of the scores (75); the sum is used"
+   ],
+   "status": "reviewed",
+   "round": 2,
+   "first_round": {
+    "total": 5,
+    "verdict": "REJECT",
+    "flaws": [
+     {
+      "dimension": "source_proven",
+      "evidence": "",
+      "fix": "No evidence in the provided source that a function portfolio_return exists; the source shows _sanitize_params and API handlers, not portfolio calculation.",
+      "file": "",
+      "line": null
+     },
+     {
+      "dimension": "correct_target",
+      "evidence": "",
+      "fix": "There is no component in the evidence that implements portfolio_return; cannot link to a file and line.",
+      "file": "",
+      "line": null
+     },
+     {
+      "dimension": "expected_derivable",
+      "evidence": "",
+      "fix": "Expected result 0.15 is mathematically derivable if function existed, but requirement REQ-015 is not in the evidence; no code or specification shown to derive the expected output from.",
+      "file": "",
+      "line": null
+     },
+     {
+      "dimension": "fixture_validity",
+      "evidence": "src/web/server.py:196-220",
+      "fix": "The test data (weights and returns as Python lists) is valid for a typical portfolio function, but without the function signature and type constraints, fixture validity cannot be fully assured.",
+      "file": "src/web/server.py",
+      "line": 196
+     }
+    ]
+   }
+  },
+  {
+   "tc_id": "TC-APP-041",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 196,
+    "symbol": "_sanitize_params"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20,
+    "total": 100
+   },
+   "claimed_total": 0,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [
+    "unknown dimension total",
+    "total 0 does not equal the sum of the scores (100); the sum is used"
+   ],
+   "status": "reviewed",
+   "round": 2,
+   "first_round": {
+    "total": 5,
+    "verdict": "REJECT",
+    "flaws": [
+     {
+      "dimension": "source_proven",
+      "evidence": "",
+      "fix": "No evidence of portfolio_return function in the provided source; source shown is _sanitize_params and API handlers.",
+      "file": "",
+      "line": null
+     },
+     {
+      "dimension": "correct_target",
+      "evidence": "",
+      "fix": "No component in the evidence that implements the behavior for weights and returns; cannot assign a file and line.",
+      "file": "",
+      "line": null
+     },
+     {
+      "dimension": "expected_derivable",
+      "evidence": "",
+      "fix": "Expected result 0.2 is mathematically derivable if function existed, but requirement REQ-016 is absent; no code or spec to derive from.",
+      "file": "",
+      "line": null
+     },
+     {
+      "dimension": "fixture_validity",
+      "evidence": "src/web/server.py:196-220",
+      "fix": "Test data is plausible, but without the function's type constraints, validity is uncertain.",
+      "file": "src/web/server.py",
+      "line": 196
+     }
+    ]
+   }
+  },
+  {
+   "tc_id": "TC-APP-042",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 196,
+    "symbol": "_sanitize_params"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20,
+    "total": 100
+   },
+   "claimed_total": 0,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [
+    "unknown dimension total",
+    "total 0 does not equal the sum of the scores (100); the sum is used"
+   ],
+   "status": "reviewed",
+   "round": 2,
+   "first_round": {
+    "total": 5,
+    "verdict": "REJECT",
+    "flaws": [
+     {
+      "dimension": "source_proven",
+      "evidence": "",
+      "fix": "No portfolio_return function or dimension-mismatch logic in the provided source; source shows _sanitize_params and API handlers.",
+      "file": "",
+      "line": null
+     },
+     {
+      "dimension": "correct_target",
+      "evidence": "",
+      "fix": "No component in evidence implements dimension-mismatch detection; cannot link to a file and line.",
+      "file": "",
+      "line": null
+     },
+     {
+      "dimension": "expected_derivable",
+      "evidence": "",
+      "fix": "Expected result is a ValueError for dimension mismatch, but requirement REQ-017 is not in evidence; no code or spec to derive the error from.",
+      "file": "",
+      "line": null
+     },
+     {
+      "dimension": "fixture_validity",
+      "evidence": "src/web/server.py:196-220",
+      "fix": "Test data (two weights, three returns) is plausible for a dimension-mismatch test, but without the function signature, validity cannot be fully confirmed.",
+      "file": "src/web/server.py",
+      "line": 196
+     }
+    ]
+   }
+  },
+  {
+   "tc_id": "TC-APP-043",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 243,
+    "symbol": "run_calc"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed"
+  },
+  {
+   "tc_id": "TC-APP-044",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 243,
+    "symbol": "run_calc"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed"
+  },
+  {
+   "tc_id": "TC-APP-045",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 243,
+    "symbol": "run_calc"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed"
+  },
+  {
+   "tc_id": "TC-APP-046",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 243,
+    "symbol": "run_calc"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed"
+  },
+  {
+   "tc_id": "TC-APP-047",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 243,
+    "symbol": "run_calc"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 10,
+    "fixture_validity": 20
+   },
+   "claimed_total": 85,
+   "total": 85,
+   "verdict": "REVISE",
+   "scored_verdict": "REVISE",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [
+    {
+     "dimension": "expected_derivable",
+     "evidence": "src/web/server.py:264",
+     "fix": "The expected result is 'derived' but the code shows the result depends on signature matching and parameter sanitization. Specify the actual computation logic or provide a reference to the 'simple' calculator's output for the given inputs to make the expectation derivable.",
+     "file": "src/web/server.py",
+     "line": 264
+    }
+   ],
+   "problems": [],
+   "status": "reviewed"
+  },
+  {
+   "tc_id": "TC-APP-048",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 243,
+    "symbol": "run_calc"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed"
+  },
+  {
+   "tc_id": "TC-APP-049",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 243,
+    "symbol": "run_calc"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed"
+  },
+  {
+   "tc_id": "TC-APP-050",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 243,
+    "symbol": "run_calc"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed"
+  },
+  {
+   "tc_id": "TC-APP-051",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 243,
+    "symbol": "run_calc"
+   },
+   "scores": {
+    "source_proven": 20,
+    "correct_target": 25,
+    "expected_derivable": 10,
+    "fixture_validity": 20
+   },
+   "claimed_total": 75,
+   "total": 75,
+   "verdict": "REVISE",
+   "scored_verdict": "REVISE",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [
+    {
+     "dimension": "source_proven",
+     "evidence": "src/web/server.py:259",
+     "fix": "Prove that a request with valid parameters that pass sanitization results in HTTP 200. The source shows only the error path returning 400; the success path yields a JSONResponse with a 'result' field, but no explicit 200 in the source shown. To raise score, show a source line where success returns 200 or document that JSONResponse defaults to 200.",
+     "file": "src/web/server.py",
+     "line": 259
+    },
+    {
+     "dimension": "expected_derivable",
+     "evidence": "src/web/server.py:259",
+     "fix": "The expected result 'HTTP 200 and a JSON response containing a 'result' field' is not derivable from the code shown because there is no explicit 200 status. The code returns JSONResponse – which may default to 200 – but this is not proven by the evidence. Either add a source showing the default or adjust the expectation.",
+     "file": "src/web/server.py",
+     "line": 259
+    }
+   ],
+   "problems": [],
+   "status": "reviewed"
+  },
+  {
+   "tc_id": "TC-APP-052",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 196,
+    "symbol": "_sanitize_params"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed"
+  },
+  {
+   "tc_id": "TC-APP-053",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 209,
+    "symbol": "_sanitize_params"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed"
+  },
+  {
+   "tc_id": "TC-APP-054",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 211,
+    "symbol": "_sanitize_params"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed"
+  },
+  {
+   "tc_id": "TC-APP-055",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 196,
+    "symbol": "_sanitize_params"
+   },
+   "scores": {
+    "source_proven": 20,
+    "correct_target": 25,
+    "expected_derivable": 10,
+    "fixture_validity": 20
+   },
+   "claimed_total": 75,
+   "total": 75,
+   "verdict": "REVISE",
+   "scored_verdict": "REVISE",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [
+    {
+     "dimension": "source_proven",
+     "evidence": "src/web/server.py:208",
+     "fix": "Prove that calling _sanitize_params with all finite numeric values returns normally with no exception. The source shows the function raises exceptions for non-finite, out-of-range, or capped values, but does not explicitly show that it returns normally for valid inputs. To raise score, cite a line where the function returns normally (e.g., line 220 shows return clean).",
+     "file": "src/web/server.py",
+     "line": 208
+    },
+    {
+     "dimension": "expected_derivable",
+     "evidence": "src/web/server.py:208",
+     "fix": "The expected result 'No exception raised; function returns normally' is not fully derivable from the code shown because the function could still raise an exception for other validation failures (e.g., out-of-range or capped values) if the test data triggers them. Since the test_data uses rate=5.0 and years=10, the out-of-range check (line 209) and cap check (line 211) will pass, so the expectation is derivable. However, the positive path is not explicitly shown as success; to raise score, cite line 220 as 'return clean'.",
+     "file": "src/web/server.py",
+     "line": 208
+    }
+   ],
+   "problems": [],
+   "status": "reviewed"
+  },
+  {
+   "tc_id": "TC-APP-056",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 207,
+    "symbol": "_sanitize_params"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed"
+  },
+  {
+   "tc_id": "TC-APP-057",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 207,
+    "symbol": "_sanitize_params"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed"
+  },
+  {
+   "tc_id": "TC-APP-058",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 207,
+    "symbol": "_sanitize_params"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed"
+  },
+  {
+   "tc_id": "TC-APP-059",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 196,
+    "symbol": "_sanitize_params"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": null,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [
+    "total None does not equal the sum of the scores (100); the sum is used",
+    "verdict  does not follow the rule for 100 (APPROVED); the rule is used"
+   ],
+   "status": "reviewed"
+  },
+  {
+   "tc_id": "TC-APP-060",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 196,
+    "symbol": "_sanitize_params"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": null,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [
+    "total None does not equal the sum of the scores (100); the sum is used",
+    "verdict  does not follow the rule for 100 (APPROVED); the rule is used"
+   ],
+   "status": "reviewed"
+  },
+  {
+   "tc_id": "TC-APP-061",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 196,
+    "symbol": "_sanitize_params"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": null,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [
+    "total None does not equal the sum of the scores (100); the sum is used",
+    "verdict  does not follow the rule for 100 (APPROVED); the rule is used"
+   ],
+   "status": "reviewed"
+  },
+  {
+   "tc_id": "TC-APP-062",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 196,
+    "symbol": "_sanitize_params"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": null,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [
+    "total None does not equal the sum of the scores (100); the sum is used",
+    "verdict  does not follow the rule for 100 (APPROVED); the rule is used"
+   ],
+   "status": "reviewed"
+  },
+  {
+   "tc_id": "TC-APP-063",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 196,
+    "symbol": "_sanitize_params"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": null,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [
+    "total None does not equal the sum of the scores (100); the sum is used",
+    "verdict  does not follow the rule for 100 (APPROVED); the rule is used"
+   ],
+   "status": "reviewed"
+  },
+  {
+   "tc_id": "TC-APP-064",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 196,
+    "symbol": "_sanitize_params"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": null,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [
+    "total None does not equal the sum of the scores (100); the sum is used",
+    "verdict  does not follow the rule for 100 (APPROVED); the rule is used"
+   ],
+   "status": "reviewed"
+  },
+  {
+   "tc_id": "TC-APP-065",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 196,
+    "symbol": "_sanitize_params"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": null,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [
+    "total None does not equal the sum of the scores (100); the sum is used",
+    "verdict  does not follow the rule for 100 (APPROVED); the rule is used"
+   ],
+   "status": "reviewed"
+  },
+  {
+   "tc_id": "TC-APP-066",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 196,
+    "symbol": "_sanitize_params"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 10,
+    "fixture_validity": 20
+   },
+   "claimed_total": null,
+   "total": 85,
+   "verdict": "REVISE",
+   "scored_verdict": "REVISE",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [
+    {
+     "dimension": "expected_derivable",
+     "evidence": "src/web/server.py:196",
+     "fix": "Specify the exact expected behavior for non-numeric years, e.g., ValueError: 'years' must be a finite number from the code.",
+     "file": "src/web/server.py",
+     "line": 196
+    }
+   ],
+   "problems": [
+    "total None does not equal the sum of the scores (85); the sum is used",
+    "verdict  does not follow the rule for 85 (REVISE); the rule is used"
+   ],
+   "status": "reviewed"
+  },
+  {
+   "tc_id": "TC-APP-067",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 196,
+    "symbol": "_sanitize_params"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed"
+  },
+  {
+   "tc_id": "TC-APP-068",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 196,
+    "symbol": "_sanitize_params"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed"
+  },
+  {
+   "tc_id": "TC-APP-069",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 196,
+    "symbol": "_sanitize_params"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 15,
+    "fixture_validity": 20
+   },
+   "claimed_total": 90,
+   "total": 90,
+   "verdict": "REVISE",
+   "scored_verdict": "REVISE",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [
+    {
+     "dimension": "expected_derivable",
+     "evidence": "src/web/server.py:216",
+     "fix": "The expected result is vague ('ValueError raised (specific message not defined...)'); specify the exact behavior: the implementation raises ValueError(\"'{k}' is too long\") for string values longer than 40 characters.",
+     "file": "src/web/server.py",
+     "line": 216
+    }
+   ],
+   "problems": [],
+   "status": "reviewed"
+  },
+  {
+   "tc_id": "TC-APP-070",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 196,
+    "symbol": "_sanitize_params"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 15,
+    "fixture_validity": 20
+   },
+   "claimed_total": 90,
+   "total": 90,
+   "verdict": "REVISE",
+   "scored_verdict": "REVISE",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [
+    {
+     "dimension": "expected_derivable",
+     "evidence": "src/web/server.py:202",
+     "fix": "The expected result is uncertain ('ValueError raised ... or TypeError; ... depends on implementation'). The source clearly raises ValueError('invalid parameter name') for non-string keys. Specify that exact behavior.",
+     "file": "src/web/server.py",
+     "line": 202
+    }
+   ],
+   "problems": [],
+   "status": "reviewed"
+  }
+ ]
+}

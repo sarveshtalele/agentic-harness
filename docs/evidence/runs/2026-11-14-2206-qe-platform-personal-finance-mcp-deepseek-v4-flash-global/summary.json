@@ -1,0 +1,165 @@
+{
+ "repo": "https://github.com/sarveshtalele/personal-finance-mcp.git",
+ "model": "deepseek-v4-flash-global",
+ "run_id": "run_ef20fac8939f",
+ "gates": [
+  {
+   "gate": 0,
+   "seconds": 0.0,
+   "title": "Gate 0: confirm intake scope",
+   "summary": "Mode: brownfield. Source: git https://github.com/sarveshtalele/personal-finance-mcp.git at aff44ea06f. Files: 88. Languages: Python, JavaScript, CSS. Agents read this project's repository and documents only. Generated code lands on a separate branch. Approving Gate 0 lets the platform run this repository's dependency installers (pip, npm) in the sandbox, only to collect and compile the generated tests. No test body is run; you download the tests and run them on your own systems.",
+   "plugin_check": null,
+   "design_audit": null,
+   "trace": null,
+   "validation": null
+  },
+  {
+   "gate": 1,
+   "seconds": 51.2,
+   "title": "Gate 1: approve requirements",
+   "summary": "26 requirements with verified evidence. agentic-qe Gate 1 check: PASS. Trace: 0 upstream items carried 0, 0 changed, 0 dropped with reason, 0 dropped without reason, 0 new. Tokens: 109,562 used of 50,000,000, 49,890,438 left.",
+   "plugin_check": {
+    "ok": true,
+    "gaps": [],
+    "missing": [],
+    "validator": {
+     "validator": "1.6.0",
+     "gate": 1,
+     "ok": true,
+     "errors": [],
+     "warnings": [],
+     "metrics": {
+      "requirements": 26,
+      "scenarios": 0,
+      "cases": 0,
+      "test_files": 0,
+      "results": 0,
+      "repo_test_files": 11,
+      "repo_tests": 137,
+      "existing": 11,
+      "generated": 0,
+      "manual": 0
+     },
+     "suspects": [],
+     "duplicates": [],
+     "brief": "Gate 1 validation: PASS (0 errors, 0 warnings)."
+    },
+    "error": null,
+    "app": "prj_2989e94ccb67",
+    "dropped": []
+   },
+   "design_audit": null,
+   "trace": {
+    "stage": "requirements",
+    "upstream": 0,
+    "carried": 0,
+    "changed": 0,
+    "dropped_with_reason": 0,
+    "dropped_without_reason": 0,
+    "new": 0,
+    "verdict": "PASS"
+   },
+   "validation": null
+  },
+  {
+   "gate": 2,
+   "seconds": 10.3,
+   "title": "Gate 2: approve test plan",
+   "summary": "Deterministic score 100, independent review 85 (REVISE). agentic-qe Gate 2 check: PASS. Trace: 26 upstream items carried 26, 0 changed, 2 dropped with reason, 0 dropped without reason, 9 new. Tokens: 128,230 used of 50,000,000, 49,871,770 left.",
+   "plugin_check": {
+    "ok": true,
+    "gaps": [],
+    "missing": [],
+    "validator": {
+     "validator": "1.6.0",
+     "gate": 2,
+     "ok": true,
+     "errors": [],
+     "warnings": [
+      {
+       "check": "plan.requirements",
+       "message": "P2/P3 requirements with no plan scenario",
+       "ids": [
+        "REQ-002",
+        "REQ-026"
+       ]
+      }
+     ],
+     "metrics": {
+      "requirements": 26,
+      "scenarios": 9,
+      "cases": 0,
+      "test_files": 0,
+      "results": 0,
+      "repo_test_files": 11,
+      "repo_tests": 137,
+      "existing": 11,
+      "generated": 0,
+      "manual": 0,
+      "plan_by_area_level": {
+       "Calculator endpoint error handling (/api/calc)": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "FX endpoint currency code validation (/api/fx)": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Health endpoint (/api/health)": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "NAV endpoint parameter validation (/api/nav)": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Parameter sanitization validator (_sanitize_params)": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Portfolio calculation edge cases (zero divisors, dimension mismatches)": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Quote endpoint symbol validation (/api/quote)": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Security headers on all responses": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Security: payload size limit and rate limiting": {
+        "Integration": 1,
+        "Unit": 0
+       }
+      }
+     },
+     "suspects": [],
+     "duplicates": [],
+     "brief": "Gate 2 validation: PASS (0 errors, 1 warnings)."
+    },
+    "error": null,
+    "app": "prj_2989e94ccb67"
+   },
+   "design_audit": null,
+   "trace": {
+    "stage": "plan",
+    "upstream": 26,
+    "carried": 26,
+    "changed": 0,
+    "dropped_with_reason": 2,
+    "dropped_without_reason": 0,
+    "new": 9,
+    "verdict": "PASS"
+   },
+   "validation": null
+  }
+ ],
+ "started": "2026-11-14T22:06:03.132117",
+ "status": "failed",
+ "error": "design: design did not carry the earlier items forward: requirement REQ-018 has no case in design and no written reason. Add one for it, or name it with a reason. requirement REQ-019 has no case in design and no written reason. Add one for it, or name it with a reason. requirement REQ-020 has no case in design and no written reason. Add one for it, or name it with a reason.",
+ "total_seconds": 322.0,
+ "summary": null,
+ "requirements": 26
+}

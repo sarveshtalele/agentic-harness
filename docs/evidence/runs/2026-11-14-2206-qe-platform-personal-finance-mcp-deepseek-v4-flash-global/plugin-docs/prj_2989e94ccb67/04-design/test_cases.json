@@ -1,0 +1,1155 @@
+{
+ "cases": [
+  {
+   "tc_id": "TC-APP-001",
+   "requirement_id": "REQ-001",
+   "planScenarioIds": [
+    "SC-INTEGRATION-HEALTH-001"
+   ],
+   "scenario": "GET /api/health returns status ok and tools count",
+   "type": "Positive",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running with MCP tool manager initialized",
+   "test_data": "No request body",
+   "steps": [
+    "Send GET request to /api/health"
+   ],
+   "expected_result": "HTTP 200; JSON response {\"status\": \"ok\", \"tools\": <tools_count>} where tools_count is an integer ≥ 0"
+  },
+  {
+   "tc_id": "TC-APP-002",
+   "requirement_id": "REQ-001",
+   "planScenarioIds": [
+    "SC-INTEGRATION-HEALTH-001"
+   ],
+   "scenario": "GET /api/health returns tools count 0 when no tools registered",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running but MCP tool manager has an empty _tools list",
+   "test_data": "No request body",
+   "steps": [
+    "Send GET request to /api/health"
+   ],
+   "expected_result": "HTTP 200; JSON response {\"status\": \"ok\", \"tools\": 0}"
+  },
+  {
+   "tc_id": "TC-APP-003",
+   "requirement_id": "REQ-001",
+   "planScenarioIds": [
+    "SC-INTEGRATION-HEALTH-001"
+   ],
+   "scenario": "GET /api/health returns tools count equal to number of registered tools",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running with exactly 5 tools registered in MCP tool manager",
+   "test_data": "No request body",
+   "steps": [
+    "Send GET request to /api/health"
+   ],
+   "expected_result": "HTTP 200; JSON response {\"status\": \"ok\", \"tools\": 5}"
+  },
+  {
+   "tc_id": "TC-APP-004",
+   "requirement_id": "REQ-001",
+   "planScenarioIds": [
+    "SC-INTEGRATION-HEALTH-001"
+   ],
+   "scenario": "GET /api/health returns tools count when many tools registered",
+   "type": "Negative (Boundary)",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running with 1000 tools registered (large count)",
+   "test_data": "No request body",
+   "steps": [
+    "Send GET request to /api/health"
+   ],
+   "expected_result": "HTTP 200; JSON response {\"status\": \"ok\", \"tools\": 1000}"
+  },
+  {
+   "tc_id": "TC-APP-005",
+   "requirement_id": "REQ-006",
+   "planScenarioIds": [
+    "SC-INTEGRATION-CALC-ERRORS-001"
+   ],
+   "scenario": "Calculator raises ValueError with meaningful message",
+   "type": "Positive",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running; the calculator function is instrumented to raise ValueError",
+   "test_data": "POST /api/calc with JSON body that causes a ValueError in the calculator",
+   "steps": [
+    "Send a POST request to /api/calc with a body that triggers a ValueError (e.g., missing required field 'operation')",
+    "Receive the response"
+   ],
+   "expected_result": "HTTP status 400; body is JSON {\"error\": \"invalid inputs: ...\"} where the message starts with 'invalid inputs:' and includes the error detail"
+  },
+  {
+   "tc_id": "TC-APP-006",
+   "requirement_id": "REQ-006",
+   "planScenarioIds": [
+    "SC-INTEGRATION-CALC-ERRORS-001"
+   ],
+   "scenario": "Calculator raises ZeroDivisionError",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running",
+   "test_data": "POST /api/calc with JSON body {\"operation\": \"divide\", \"a\": 10, \"b\": 0}",
+   "steps": [
+    "Send a POST request to /api/calc with body {\"operation\": \"divide\", \"a\": 10, \"b\": 0}",
+    "Receive the response"
+   ],
+   "expected_result": "HTTP status 400; body is JSON {\"error\": \"invalid inputs: division by zero\"}"
+  },
+  {
+   "tc_id": "TC-APP-007",
+   "requirement_id": "REQ-006",
+   "planScenarioIds": [
+    "SC-INTEGRATION-CALC-ERRORS-001"
+   ],
+   "scenario": "Calculator raises KeyError when referencing missing parameter",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running; the calculator expects a parameter that is missing",
+   "test_data": "POST /api/calc with JSON body {\"operation\": \"add\", \"a\": 5} (missing 'b')",
+   "steps": [
+    "Send a POST request to /api/calc with body {\"operation\": \"add\", \"a\": 5}",
+    "Receive the response"
+   ],
+   "expected_result": "HTTP status 400; body is JSON {\"error\": \"invalid inputs: 'b'\"}"
+  },
+  {
+   "tc_id": "TC-APP-008",
+   "requirement_id": "REQ-006",
+   "planScenarioIds": [
+    "SC-INTEGRATION-CALC-ERRORS-001"
+   ],
+   "scenario": "Calculator raises TypeError due to wrong input type",
+   "type": "Exception",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running; the calculator tries to add a string and integer",
+   "test_data": "POST /api/calc with JSON body {\"operation\": \"add\", \"a\": \"abc\", \"b\": 5}",
+   "steps": [
+    "Send a POST request to /api/calc with body {\"operation\": \"add\", \"a\": \"abc\", \"b\": 5}",
+    "Receive the response"
+   ],
+   "expected_result": "HTTP status 400; body is JSON {\"error\": \"invalid inputs: ...\"} with message starting with 'invalid inputs:' and containing the TypeError detail"
+  },
+  {
+   "tc_id": "TC-APP-009",
+   "requirement_id": "REQ-007",
+   "planScenarioIds": [
+    "SC-INTEGRATION-CALC-ERRORS-001"
+   ],
+   "scenario": "Calculator raises an unexpected exception (e.g., RuntimeError)",
+   "type": "Positive",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running; the calculator is instrumented to raise RuntimeError('unexpected')",
+   "test_data": "POST /api/calc with any valid JSON body that the calculator will process",
+   "steps": [
+    "Send a POST request to /api/calc with a valid JSON body",
+    "Receive the response"
+   ],
+   "expected_result": "HTTP status 400; body is JSON {\"error\": \"calculation failed\"}"
+  },
+  {
+   "tc_id": "TC-APP-010",
+   "requirement_id": "REQ-007",
+   "planScenarioIds": [
+    "SC-INTEGRATION-CALC-ERRORS-001"
+   ],
+   "scenario": "Calculator raises a generic Exception instance",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running; the calculator raises Exception('generic')",
+   "test_data": "POST /api/calc with a valid JSON body that triggers the generic exception",
+   "steps": [
+    "Send a POST request to /api/calc with a valid JSON body",
+    "Receive the response"
+   ],
+   "expected_result": "HTTP status 400; body is JSON {\"error\": \"calculation failed\"}"
+  },
+  {
+   "tc_id": "TC-APP-011",
+   "requirement_id": "REQ-007",
+   "planScenarioIds": [
+    "SC-INTEGRATION-CALC-ERRORS-001"
+   ],
+   "scenario": "Calculator raises an IndexError (not in the listed domain errors)",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running; the calculator is instrumented to raise IndexError('list index out of range')",
+   "test_data": "POST /api/calc with a valid JSON body that causes IndexError",
+   "steps": [
+    "Send a POST request to /api/calc with a valid JSON body",
+    "Receive the response"
+   ],
+   "expected_result": "HTTP status 400; body is JSON {\"error\": \"calculation failed\"}"
+  },
+  {
+   "tc_id": "TC-APP-012",
+   "requirement_id": "REQ-007",
+   "planScenarioIds": [
+    "SC-INTEGRATION-CALC-ERRORS-001"
+   ],
+   "scenario": "Calculator raises an OSError (unexpected exception type)",
+   "type": "Exception",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running; the calculator raises OSError('disk error')",
+   "test_data": "POST /api/calc with a valid JSON body",
+   "steps": [
+    "Send a POST request to /api/calc with a valid JSON body",
+    "Receive the response"
+   ],
+   "expected_result": "HTTP status 400; body is JSON {\"error\": \"calculation failed\"}"
+  },
+  {
+   "tc_id": "TC-APP-013",
+   "requirement_id": "REQ-008",
+   "planScenarioIds": [
+    "SC-INTEGRATION-SECURITY-PAYLOAD-RATE-001"
+   ],
+   "scenario": "Send a POST request with payload size exactly 16384 bytes (16 KB)",
+   "type": "Positive",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running",
+   "test_data": "A payload (string) of exactly 16384 bytes: 'a' * 16384",
+   "steps": [
+    "Send a POST request to any /api endpoint with Content-Type application/json and a body of exactly 16384 bytes",
+    "Receive the response"
+   ],
+   "expected_result": "HTTP status 200 (or appropriate success) because the payload is not larger than 16 KB"
+  },
+  {
+   "tc_id": "TC-APP-014",
+   "requirement_id": "REQ-008",
+   "planScenarioIds": [
+    "SC-INTEGRATION-SECURITY-PAYLOAD-RATE-001"
+   ],
+   "scenario": "Send a POST request with payload size 16385 bytes (one more than 16 KB)",
+   "type": "Negative (Boundary)",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running",
+   "test_data": "A payload of exactly 16385 bytes: 'a' * 16385",
+   "steps": [
+    "Send a POST request to any /api endpoint with Content-Type application/json and a body of 16385 bytes",
+    "Receive the response"
+   ],
+   "expected_result": "HTTP status 413; body is JSON {\"error\": \"payload too large\"}"
+  },
+  {
+   "tc_id": "TC-APP-015",
+   "requirement_id": "REQ-008",
+   "planScenarioIds": [
+    "SC-INTEGRATION-SECURITY-PAYLOAD-RATE-001"
+   ],
+   "scenario": "Send a POST request with empty body (0 bytes)",
+   "type": "Negative (Boundary)",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running",
+   "test_data": "Empty body (0 bytes)",
+   "steps": [
+    "Send a POST request to any /api endpoint with Content-Type application/json and an empty body",
+    "Receive the response"
+   ],
+   "expected_result": "HTTP status 400 (invalid JSON) but not 413"
+  },
+  {
+   "tc_id": "TC-APP-016",
+   "requirement_id": "REQ-008",
+   "planScenarioIds": [
+    "SC-INTEGRATION-SECURITY-PAYLOAD-RATE-001"
+   ],
+   "scenario": "Send a POST request with extremely large payload (100 KB)",
+   "type": "Exception",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running",
+   "test_data": "A payload of 100,000 bytes: 'a' * 100000",
+   "steps": [
+    "Send a POST request to any /api endpoint with Content-Type application/json and a body of 100,000 bytes",
+    "Receive the response"
+   ],
+   "expected_result": "HTTP status 413; body is JSON {\"error\": \"payload too large\"}"
+  },
+  {
+   "tc_id": "TC-APP-017",
+   "requirement_id": "REQ-009",
+   "planScenarioIds": [
+    "SC-INTEGRATION-SECURITY-PAYLOAD-RATE-001"
+   ],
+   "scenario": "Send exactly 90 requests within 10 seconds from the same IP, then one more request",
+   "type": "Positive",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running; client IP is fixed (e.g., 127.0.0.1)",
+   "test_data": "91 consecutive POST requests to any /api endpoint, each with a small body, sent as fast as possible",
+   "steps": [
+    "Send 90 POST requests to any /api endpoint in rapid succession (within 10 seconds)",
+    "Send one more POST request immediately after",
+    "Receive the response for the 91st request"
+   ],
+   "expected_result": "The 90th request returns success (200); the 91st request returns HTTP status 429; body is JSON {\"error\": \"rate limit exceeded, slow down\"}"
+  },
+  {
+   "tc_id": "TC-APP-018",
+   "requirement_id": "REQ-009",
+   "planScenarioIds": [
+    "SC-INTEGRATION-SECURITY-PAYLOAD-RATE-001"
+   ],
+   "scenario": "Send 91 requests within 10 seconds and verify the 91st is rate-limited",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running; client IP is fixed (e.g., 127.0.0.1)",
+   "test_data": "91 POST requests to any /api endpoint in quick succession",
+   "steps": [
+    "Send 91 POST requests to any /api endpoint as quickly as possible",
+    "Record the response of the last (91st) request"
+   ],
+   "expected_result": "The 91st request receives HTTP 429 and body {\"error\": \"rate limit exceeded, slow down\"}"
+  },
+  {
+   "tc_id": "TC-APP-019",
+   "requirement_id": "REQ-009",
+   "planScenarioIds": [
+    "SC-INTEGRATION-SECURITY-PAYLOAD-RATE-001"
+   ],
+   "scenario": "Send 90 requests then wait 11 seconds and send another request; rate limit should reset",
+   "type": "Negative (Boundary)",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running; client IP is fixed",
+   "test_data": "90 requests followed by 11-second pause, then 1 more request",
+   "steps": [
+    "Send 90 POST requests to any /api endpoint quickly",
+    "Wait 11 seconds",
+    "Send one more POST request to any /api endpoint",
+    "Receive the response"
+   ],
+   "expected_result": "The 91st request (after waiting) should succeed with 200 status (not 429)"
+  },
+  {
+   "tc_id": "TC-APP-020",
+   "requirement_id": "REQ-009",
+   "planScenarioIds": [
+    "SC-INTEGRATION-SECURITY-PAYLOAD-RATE-001"
+   ],
+   "scenario": "Send 91 requests with different IP addresses and ensure only the exceeding client gets limited",
+   "type": "Exception",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running; two different client IPs are simulated",
+   "test_data": "From IP A: 91 requests; from IP B: 1 request",
+   "steps": [
+    "Simulate client IP A and send 91 requests quickly",
+    "Simulate client IP B and send 1 request",
+    "Receive responses for both"
+   ],
+   "expected_result": "IP A's 91st request receives 429; IP B's single request receives 200"
+  },
+  {
+   "tc_id": "TC-APP-021",
+   "requirement_id": "REQ-015",
+   "planScenarioIds": [
+    "SC-UNIT-PORTFOLIO-ERRORS-001"
+   ],
+   "scenario": "Sharpe ratio returns error dict when portfolio_std_dev is 0",
+   "type": "Negative (Boundary)",
+   "level": "Unit",
+   "priority": "P2",
+   "precondition": "The sharpe_ratio function is importable from src/tools/portfolio.py",
+   "test_data": "portfolio_std_dev=0 (float zero)",
+   "steps": [
+    "Call sharpe_ratio(portfolio_return=0.05, portfolio_std_dev=0.0)",
+    "Capture the returned dict"
+   ],
+   "expected_result": "Returned dict equals {\"error\": \"Standard deviation cannot be zero\"}"
+  },
+  {
+   "tc_id": "TC-APP-022",
+   "requirement_id": "REQ-010",
+   "planScenarioIds": [
+    "SC-INTEGRATION-SECURITY-HEADERS-001"
+   ],
+   "scenario": "Positive: all required security headers are present in a normal response",
+   "type": "Positive",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running",
+   "test_data": "GET /api/health",
+   "steps": [
+    "Send GET request to /api/health using TestClient",
+    "Collect all response headers"
+   ],
+   "expected_result": "Response status is 200 and headers contain every key from the predefined set: x-content-type-options, referrer-policy, permissions-policy, strict-transport-security, cross-origin-opener-policy, content-security-policy."
+  },
+  {
+   "tc_id": "TC-APP-023",
+   "requirement_id": "REQ-010",
+   "planScenarioIds": [
+    "SC-INTEGRATION-SECURITY-HEADERS-001"
+   ],
+   "scenario": "Negative (Boundary): response with no content (204) still receives all security headers",
+   "type": "Negative (Boundary)",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running, endpoint returns 204 (e.g., OPTIONS on /api/health)",
+   "test_data": "OPTIONS /api/health",
+   "steps": [
+    "Send OPTIONS request to /api/health using TestClient",
+    "Collect all response headers"
+   ],
+   "expected_result": "Response status is 204 (or equivalent) and all six security headers (x-content-type-options, referrer-policy, permissions-policy, strict-transport-security, cross-origin-opener-policy, content-security-policy) are present in the response headers."
+  },
+  {
+   "tc_id": "TC-APP-024",
+   "requirement_id": "REQ-010",
+   "planScenarioIds": [
+    "SC-INTEGRATION-SECURITY-HEADERS-001"
+   ],
+   "scenario": "Negative (Boundary): error response (400) still receives all security headers",
+   "type": "Negative (Boundary)",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running",
+   "test_data": "GET /api/nav?code=abc",
+   "steps": [
+    "Send GET request to /api/nav?code=abc using TestClient",
+    "Collect all response headers"
+   ],
+   "expected_result": "Response status is 400 and all six security headers (x-content-type-options, referrer-policy, permissions-policy, strict-transport-security, cross-origin-opener-policy, content-security-policy) are present in the response headers."
+  },
+  {
+   "tc_id": "TC-APP-025",
+   "requirement_id": "REQ-010",
+   "planScenarioIds": [
+    "SC-INTEGRATION-SECURITY-HEADERS-001"
+   ],
+   "scenario": "Negative: response with null or missing body still includes all headers",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running",
+   "test_data": "GET /nonexistent-route",
+   "steps": [
+    "Send GET request to a non-existent route using TestClient",
+    "Collect all response headers"
+   ],
+   "expected_result": "Response status is 404 and all six security headers (x-content-type-options, referrer-policy, permissions-policy, strict-transport-security, cross-origin-opener-policy, content-security-policy) are present in the response headers."
+  },
+  {
+   "tc_id": "TC-APP-026",
+   "requirement_id": "REQ-011",
+   "planScenarioIds": [
+    "SC-INTEGRATION-NAV-VALIDATION-001"
+   ],
+   "scenario": "Positive: valid all-digit code returns a successful response",
+   "type": "Positive",
+   "level": "Integration",
+   "priority": "P2",
+   "precondition": "Server is running",
+   "test_data": "GET /api/nav?code=123456789",
+   "steps": [
+    "Send GET request to /api/nav?code=123456789 using TestClient",
+    "Verify status code and body"
+   ],
+   "expected_result": "Response status is 200 and body does not contain error 'invalid scheme code'."
+  },
+  {
+   "tc_id": "TC-APP-027",
+   "requirement_id": "REQ-012",
+   "planScenarioIds": [
+    "SC-INTEGRATION-NAV-VALIDATION-001"
+   ],
+   "scenario": "Positive: valid q parameter within length limits",
+   "type": "Positive",
+   "level": "Integration",
+   "priority": "P2",
+   "precondition": "Server is running",
+   "test_data": "GET /api/nav?q=hello",
+   "steps": [
+    "Send GET request to /api/nav?q=hello using TestClient",
+    "Verify status code and body"
+   ],
+   "expected_result": "Response status is 200 and body does not contain error 'query must be 1–80 characters'."
+  },
+  {
+   "tc_id": "TC-APP-028",
+   "requirement_id": "REQ-013",
+   "planScenarioIds": [
+    "SC-INTEGRATION-FX-VALIDATION-001"
+   ],
+   "scenario": "Positive: valid currency codes for base and symbols",
+   "type": "Positive",
+   "level": "Integration",
+   "priority": "P2",
+   "precondition": "Server is running",
+   "test_data": "GET /api/fx?base=USD&symbols=EUR",
+   "steps": [
+    "Send GET request to /api/fx?base=USD&symbols=EUR using TestClient",
+    "Verify status code and body"
+   ],
+   "expected_result": "Response status is 200 and body does not contain error 'invalid currency code'."
+  },
+  {
+   "tc_id": "TC-APP-029",
+   "requirement_id": "REQ-014",
+   "planScenarioIds": [
+    "SC-INTEGRATION-QUOTE-VALIDATION-001"
+   ],
+   "scenario": "Empty symbol query parameter returns 400",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P2",
+   "precondition": "Server is running",
+   "test_data": "symbol=",
+   "steps": [
+    "Send a GET request to /api/quote?symbol="
+   ],
+   "expected_result": "Response status 400 and JSON body with error 'invalid symbol'"
+  },
+  {
+   "tc_id": "TC-APP-030",
+   "requirement_id": "REQ-015",
+   "planScenarioIds": [
+    "SC-UNIT-PORTFOLIO-ERRORS-001"
+   ],
+   "scenario": "sharpe_ratio called with portfolio_std_dev = 0 returns error",
+   "type": "Positive",
+   "level": "Unit",
+   "priority": "P2",
+   "precondition": "None",
+   "test_data": "portfolio_std_dev=0, risk_free_rate=0.02, portfolio_return=0.1",
+   "steps": [
+    "Call sharpe_ratio(portfolio_return=0.1, risk_free_rate=0.02, portfolio_std_dev=0)"
+   ],
+   "expected_result": "Return value is a dict with key 'error' and value 'Standard deviation cannot be zero'"
+  },
+  {
+   "tc_id": "TC-APP-031",
+   "requirement_id": "REQ-016",
+   "planScenarioIds": [
+    "SC-UNIT-PORTFOLIO-ERRORS-001"
+   ],
+   "scenario": "treynor_ratio called with beta = 0 returns error",
+   "type": "Positive",
+   "level": "Unit",
+   "priority": "P2",
+   "precondition": "None",
+   "test_data": "beta=0, risk_free_rate=0.02, portfolio_return=0.1",
+   "steps": [
+    "Call treynor_ratio(portfolio_return=0.1, risk_free_rate=0.02, beta=0)"
+   ],
+   "expected_result": "Return value is a dict with key 'error' and value 'Beta cannot be zero'"
+  },
+  {
+   "tc_id": "TC-APP-036",
+   "requirement_id": "REQ-021",
+   "planScenarioIds": [
+    "SC-UNIT-SANITIZE-PARAMS-001"
+   ],
+   "scenario": "_sanitize_params with valid dict returns sanitized dict",
+   "type": "Positive",
+   "level": "Unit",
+   "priority": "P1",
+   "precondition": "_sanitize_params function is imported",
+   "test_data": "params = {\"key1\": \"value1\"}",
+   "steps": [
+    "Call _sanitize_params({\"key1\": \"value1\"})"
+   ],
+   "expected_result": "Returns a dict identical to input without raising an exception"
+  },
+  {
+   "tc_id": "TC-APP-037",
+   "requirement_id": "REQ-021",
+   "planScenarioIds": [
+    "SC-UNIT-SANITIZE-PARAMS-001"
+   ],
+   "scenario": "_sanitize_params with non-dict argument raises ValueError",
+   "type": "Exception",
+   "level": "Unit",
+   "priority": "P1",
+   "precondition": "_sanitize_params function is imported",
+   "test_data": "params = \"not a dict\"",
+   "steps": [
+    "Call _sanitize_params(\"not a dict\")"
+   ],
+   "expected_result": "Raises ValueError with message \"invalid parameters\""
+  },
+  {
+   "tc_id": "TC-APP-038",
+   "requirement_id": "REQ-021",
+   "planScenarioIds": [
+    "SC-UNIT-SANITIZE-PARAMS-001"
+   ],
+   "scenario": "_sanitize_params with dict having 31 keys raises ValueError",
+   "type": "Negative (Boundary)",
+   "level": "Unit",
+   "priority": "P1",
+   "precondition": "_sanitize_params function is imported",
+   "test_data": "A dictionary with 31 keys, each key being a string and value a number (e.g., {\"k1\": 1, \"k2\": 2, ... \"k31\": 31})",
+   "steps": [
+    "Call _sanitize_params({\"k1\": 1, \"k2\": 2, ..., \"k31\": 31})"
+   ],
+   "expected_result": "Raises ValueError with message \"invalid parameters\""
+  },
+  {
+   "tc_id": "TC-APP-039",
+   "requirement_id": "REQ-021",
+   "planScenarioIds": [
+    "SC-UNIT-SANITIZE-PARAMS-001"
+   ],
+   "scenario": "_sanitize_params with empty dict (0 keys) returns empty dict",
+   "type": "Negative (Boundary)",
+   "level": "Unit",
+   "priority": "P1",
+   "precondition": "_sanitize_params function is imported",
+   "test_data": "params = {}",
+   "steps": [
+    "Call _sanitize_params({})"
+   ],
+   "expected_result": "Returns an empty dict without raising an exception"
+  },
+  {
+   "tc_id": "TC-APP-040",
+   "requirement_id": "REQ-015",
+   "planScenarioIds": [
+    "SC-UNIT-PORTFOLIO-ERRORS-001"
+   ],
+   "scenario": "Negative: _sanitize_params raises ValueError when parameter value is float('inf')",
+   "type": "Negative",
+   "level": "Unit",
+   "priority": "P1",
+   "precondition": "_sanitize_params function is importable from src.web.server",
+   "test_data": "params={'amount': 'a string'}, error: a string is not a number, but for a numeric-type parameter with value float('inf')",
+   "steps": [
+    "Import _sanitize_params from src.web.server",
+    "Call _sanitize_params({'amount': float('inf')})"
+   ],
+   "expected_result": "ValueError is raised with message \"'amount' must be a finite number\""
+  },
+  {
+   "tc_id": "TC-APP-041",
+   "requirement_id": "REQ-016",
+   "planScenarioIds": [
+    "SC-UNIT-PORTFOLIO-ERRORS-001"
+   ],
+   "scenario": "Negative: parameter key length exceeds 40 characters",
+   "type": "Negative",
+   "level": "Unit",
+   "priority": "P1",
+   "precondition": "_sanitize_params function is importable",
+   "test_data": "args={'a'*41: 'abc'}",
+   "steps": [
+    "Call _sanitize_params({'a'*41: 'abc'})"
+   ],
+   "expected_result": "ValueError is raised with message 'invalid parameter name'"
+  },
+  {
+   "tc_id": "TC-APP-042",
+   "requirement_id": "REQ-017",
+   "planScenarioIds": [
+    "SC-UNIT-PORTFOLIO-ERRORS-001"
+   ],
+   "scenario": "Negative (Boundary): parameter name 41 characters raises ValueError",
+   "type": "Negative (Boundary)",
+   "level": "Unit",
+   "priority": "P1",
+   "precondition": "_sanitize_params function is importable from src.web.server",
+   "test_data": "params={'a' * 41: 'value'}",
+   "steps": [
+    "Call _sanitize_params(params={'a' * 41: 'value'})"
+   ],
+   "expected_result": "ValueError('invalid parameter name')"
+  },
+  {
+   "tc_id": "TC-APP-043",
+   "requirement_id": "REQ-003",
+   "planScenarioIds": [
+    "SC-INTEGRATION-CALC-ERRORS-001"
+   ],
+   "scenario": "POST /api/calc with malformed JSON body",
+   "type": "Positive",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and healthy",
+   "test_data": "Body: '{invalid: json'",
+   "steps": [
+    "Send POST request to /api/calc with Content-Type: application/json and body '{invalid: json'"
+   ],
+   "expected_result": "HTTP 400 and JSON response with error field 'invalid JSON'"
+  },
+  {
+   "tc_id": "TC-APP-044",
+   "requirement_id": "REQ-003",
+   "planScenarioIds": [
+    "SC-INTEGRATION-CALC-ERRORS-001"
+   ],
+   "scenario": "POST /api/calc with empty body",
+   "type": "Negative (Boundary)",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and healthy",
+   "test_data": "Body: empty string",
+   "steps": [
+    "Send POST request to /api/calc with Content-Type: application/json and empty body"
+   ],
+   "expected_result": "HTTP 400 and JSON response with error field 'invalid JSON'"
+  },
+  {
+   "tc_id": "TC-APP-045",
+   "requirement_id": "REQ-003",
+   "planScenarioIds": [
+    "SC-INTEGRATION-CALC-ERRORS-001"
+   ],
+   "scenario": "POST /api/calc with body containing trailing garbage",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and healthy",
+   "test_data": "Body: '{\"calculator\":\"simple\",\"parameters\":{\"rate\":5}}\"garbage'",
+   "steps": [
+    "Send POST request to /api/calc with Content-Type: application/json and body '{\"calculator\":\"simple\",\"parameters\":{\"rate\":5}}\"garbage'"
+   ],
+   "expected_result": "HTTP 400 and JSON response with error field 'invalid JSON'"
+  },
+  {
+   "tc_id": "TC-APP-046",
+   "requirement_id": "REQ-003",
+   "planScenarioIds": [
+    "SC-INTEGRATION-CALC-ERRORS-001"
+   ],
+   "scenario": "POST /api/calc with whitespace-only body",
+   "type": "Exception",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and healthy",
+   "test_data": "Body: '   ' (three spaces)",
+   "steps": [
+    "Send POST request to /api/calc with Content-Type: application/json and body '   '"
+   ],
+   "expected_result": "HTTP 400 and JSON response with error field 'invalid JSON'"
+  },
+  {
+   "tc_id": "TC-APP-047",
+   "requirement_id": "REQ-004",
+   "planScenarioIds": [
+    "SC-INTEGRATION-CALC-ERRORS-001"
+   ],
+   "scenario": "POST /api/calc with valid known calculator name",
+   "type": "Positive",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and healthy; 'simple' calculator is registered",
+   "test_data": "{\"calculator\": \"simple\", \"parameters\": {\"rate\": 5, \"years\": 10}}",
+   "steps": [
+    "Send POST request to /api/calc with Content-Type: application/json and the specified body"
+   ],
+   "expected_result": "HTTP 200 and a JSON response containing a 'result' field (no error)"
+  },
+  {
+   "tc_id": "TC-APP-048",
+   "requirement_id": "REQ-004",
+   "planScenarioIds": [
+    "SC-INTEGRATION-CALC-ERRORS-001"
+   ],
+   "scenario": "POST /api/calc with empty calculator name",
+   "type": "Negative (Boundary)",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and healthy",
+   "test_data": "{\"calculator\": \"\", \"parameters\": {\"rate\": 5, \"years\": 10}}",
+   "steps": [
+    "Send POST request to /api/calc with Content-Type: application/json and the specified body"
+   ],
+   "expected_result": "HTTP 400 and JSON response with 'error' field containing 'unknown calculator' and 'available' field listing all calculator names"
+  },
+  {
+   "tc_id": "TC-APP-049",
+   "requirement_id": "REQ-004",
+   "planScenarioIds": [
+    "SC-INTEGRATION-CALC-ERRORS-001"
+   ],
+   "scenario": "POST /api/calc with a calculator name of 41 characters",
+   "type": "Negative (Boundary)",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and healthy",
+   "test_data": "{\"calculator\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\", \"parameters\": {\"rate\": 5, \"years\": 10}}",
+   "steps": [
+    "Send POST request to /api/calc with Content-Type: application/json and the specified body"
+   ],
+   "expected_result": "HTTP 400 and JSON response with 'error' field containing 'unknown calculator' and 'available' field listing all calculator names"
+  },
+  {
+   "tc_id": "TC-APP-050",
+   "requirement_id": "REQ-004",
+   "planScenarioIds": [
+    "SC-INTEGRATION-CALC-ERRORS-001"
+   ],
+   "scenario": "POST /api/calc with 'xyzzy' calculator name (not in CALCULATORS)",
+   "type": "Exception",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and healthy; 'xyzzy' is not a registered calculator",
+   "test_data": "{\"calculator\": \"xyzzy\", \"parameters\": {\"rate\": 5, \"years\": 10}}",
+   "steps": [
+    "Send POST request to /api/calc with Content-Type: application/json and the specified body"
+   ],
+   "expected_result": "HTTP 400 and JSON response with 'error' field 'unknown calculator 'xyzzy'' and 'available' field listing all calculator names"
+  },
+  {
+   "tc_id": "TC-APP-051",
+   "requirement_id": "REQ-005",
+   "planScenarioIds": [
+    "SC-INTEGRATION-CALC-ERRORS-001"
+   ],
+   "scenario": "POST /api/calc with valid parameters that pass sanitization",
+   "type": "Positive",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and healthy",
+   "test_data": "{\"calculator\": \"simple\", \"parameters\": {\"rate\": 5, \"years\": 10}}",
+   "steps": [
+    "Send POST request to /api/calc with Content-Type: application/json and the specified body"
+   ],
+   "expected_result": "HTTP 200 and a JSON response containing a 'result' field (no error)"
+  },
+  {
+   "tc_id": "TC-APP-052",
+   "requirement_id": "REQ-005",
+   "planScenarioIds": [
+    "SC-INTEGRATION-CALC-ERRORS-001"
+   ],
+   "scenario": "POST /api/calc with a parameter that is a non-finite number (Inf)",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and healthy",
+   "test_data": "{\"calculator\": \"simple\", \"parameters\": {\"rate\": \"Inf\", \"years\": 10}}",
+   "steps": [
+    "Send POST request to /api/calc with Content-Type: application/json and the specified body"
+   ],
+   "expected_result": "HTTP 400 and JSON response with error field \"'rate' must be a finite number\""
+  },
+  {
+   "tc_id": "TC-APP-053",
+   "requirement_id": "REQ-005",
+   "planScenarioIds": [
+    "SC-INTEGRATION-CALC-ERRORS-001"
+   ],
+   "scenario": "POST /api/calc with a parameter out of range (> 1e13)",
+   "type": "Negative (Boundary)",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and healthy",
+   "test_data": "{\"calculator\": \"simple\", \"parameters\": {\"rate\": 100000000000000, \"years\": 10}}",
+   "steps": [
+    "Send POST request to /api/calc with Content-Type: application/json and the specified body"
+   ],
+   "expected_result": "HTTP 400 and JSON response with error field \"'rate' is out of range\""
+  },
+  {
+   "tc_id": "TC-APP-054",
+   "requirement_id": "REQ-005",
+   "planScenarioIds": [
+    "SC-INTEGRATION-CALC-ERRORS-001"
+   ],
+   "scenario": "POST /api/calc with a parameter exceeding its cap (years > 120)",
+   "type": "Exception",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and healthy; 'years' cap is 120",
+   "test_data": "{\"calculator\": \"simple\", \"parameters\": {\"rate\": 5, \"years\": 121}}",
+   "steps": [
+    "Send POST request to /api/calc with Content-Type: application/json and the specified body"
+   ],
+   "expected_result": "HTTP 400 and JSON response with error field \"'years' must be ≤ 120\""
+  },
+  {
+   "tc_id": "TC-APP-055",
+   "requirement_id": "REQ-022",
+   "planScenarioIds": [
+    "SC-UNIT-SANITIZE-PARAMS-001"
+   ],
+   "scenario": "_sanitize_params with all finite numeric values",
+   "type": "Positive",
+   "level": "Unit",
+   "priority": "P1",
+   "precondition": "_sanitize_params function is imported",
+   "test_data": "params = {'rate': 5.0, 'years': 10}",
+   "steps": [
+    "Call _sanitize_params(params, {})"
+   ],
+   "expected_result": "No exception raised; function returns normally"
+  },
+  {
+   "tc_id": "TC-APP-056",
+   "requirement_id": "REQ-022",
+   "planScenarioIds": [
+    "SC-UNIT-SANITIZE-PARAMS-001"
+   ],
+   "scenario": "_sanitize_params with NaN value",
+   "type": "Negative",
+   "level": "Unit",
+   "priority": "P1",
+   "precondition": "_sanitize_params function is imported; math module provides float('nan')",
+   "test_data": "params = {'rate': float('nan'), 'years': 10}",
+   "steps": [
+    "Call _sanitize_params(params, {})"
+   ],
+   "expected_result": "ValueError raised with message \"'rate' must be a finite number\""
+  },
+  {
+   "tc_id": "TC-APP-057",
+   "requirement_id": "REQ-022",
+   "planScenarioIds": [
+    "SC-UNIT-SANITIZE-PARAMS-001"
+   ],
+   "scenario": "_sanitize_params with Inf value",
+   "type": "Negative",
+   "level": "Unit",
+   "priority": "P1",
+   "precondition": "_sanitize_params function is imported; math module provides float('inf')",
+   "test_data": "params = {'rate': float('inf'), 'years': 10}",
+   "steps": [
+    "Call _sanitize_params(params, {})"
+   ],
+   "expected_result": "ValueError raised with message \"'rate' must be a finite number\""
+  },
+  {
+   "tc_id": "TC-APP-058",
+   "requirement_id": "REQ-022",
+   "planScenarioIds": [
+    "SC-UNIT-SANITIZE-PARAMS-001"
+   ],
+   "scenario": "_sanitize_params with -Inf value",
+   "type": "Exception",
+   "level": "Unit",
+   "priority": "P1",
+   "precondition": "_sanitize_params function is imported; math module provides float('-inf')",
+   "test_data": "params = {'rate': float('-inf'), 'years': 10}",
+   "steps": [
+    "Call _sanitize_params(params, {})"
+   ],
+   "expected_result": "ValueError raised with message \"'rate' must be a finite number\""
+  },
+  {
+   "tc_id": "TC-APP-059",
+   "requirement_id": "REQ-023",
+   "planScenarioIds": [
+    "SC-UNIT-SANITIZE-PARAMS-001"
+   ],
+   "scenario": "_sanitize_params with value exactly 1e13 (within range)",
+   "type": "Positive",
+   "level": "Unit",
+   "priority": "P1",
+   "precondition": "_sanitize_params function is imported; caps dict is empty",
+   "test_data": "params = {'rate': 1e13, 'years': 10}",
+   "steps": [
+    "Call _sanitize_params(params, {})"
+   ],
+   "expected_result": "No exception raised"
+  },
+  {
+   "tc_id": "TC-APP-060",
+   "requirement_id": "REQ-023",
+   "planScenarioIds": [
+    "SC-UNIT-SANITIZE-PARAMS-001"
+   ],
+   "scenario": "_sanitize_params with value just above 1e13 (1e13 + 1)",
+   "type": "Negative (Boundary)",
+   "level": "Unit",
+   "priority": "P1",
+   "precondition": "_sanitize_params function is imported; caps dict is empty",
+   "test_data": "params = {'rate': 10000000000001, 'years': 10}",
+   "steps": [
+    "Call _sanitize_params(params, {})"
+   ],
+   "expected_result": "ValueError raised with message \"'rate' is out of range\""
+  },
+  {
+   "tc_id": "TC-APP-061",
+   "requirement_id": "REQ-023",
+   "planScenarioIds": [
+    "SC-UNIT-SANITIZE-PARAMS-001"
+   ],
+   "scenario": "_sanitize_params with negative value just below -1e13 (-1e13 - 1)",
+   "type": "Negative (Boundary)",
+   "level": "Unit",
+   "priority": "P1",
+   "precondition": "_sanitize_params function is imported; caps dict is empty",
+   "test_data": "params = {'rate': -10000000000001, 'years': 10}",
+   "steps": [
+    "Call _sanitize_params(params, {})"
+   ],
+   "expected_result": "ValueError raised with message \"'rate' is out of range\""
+  },
+  {
+   "tc_id": "TC-APP-062",
+   "requirement_id": "REQ-023",
+   "planScenarioIds": [
+    "SC-UNIT-SANITIZE-PARAMS-001"
+   ],
+   "scenario": "_sanitize_params with value exactly 0 (within range, boundary of 0)",
+   "type": "Exception",
+   "level": "Unit",
+   "priority": "P1",
+   "precondition": "_sanitize_params function is imported; caps dict is empty",
+   "test_data": "params = {'rate': 0, 'years': 0}",
+   "steps": [
+    "Call _sanitize_params(params, {})"
+   ],
+   "expected_result": "No exception raised"
+  },
+  {
+   "tc_id": "TC-APP-063",
+   "requirement_id": "REQ-024",
+   "planScenarioIds": [
+    "SC-UNIT-SANITIZE-PARAMS-001"
+   ],
+   "scenario": "_sanitize_params with value at cap (years = 120)",
+   "type": "Positive",
+   "level": "Unit",
+   "priority": "P1",
+   "precondition": "_sanitize_params function is imported; PARAM_CAPS = {'years': 120}",
+   "test_data": "params = {'rate': 5, 'years': 120}",
+   "steps": [
+    "Call _sanitize_params(params, {'years': 120})"
+   ],
+   "expected_result": "No exception raised"
+  },
+  {
+   "tc_id": "TC-APP-064",
+   "requirement_id": "REQ-024",
+   "planScenarioIds": [
+    "SC-UNIT-SANITIZE-PARAMS-001"
+   ],
+   "scenario": "_sanitize_params with value just above cap (years = 121)",
+   "type": "Negative (Boundary)",
+   "level": "Unit",
+   "priority": "P1",
+   "precondition": "_sanitize_params function is imported; PARAM_CAPS = {'years': 120}",
+   "test_data": "params = {'rate': 5, 'years': 121}",
+   "steps": [
+    "Call _sanitize_params(params, {'years': 120})"
+   ],
+   "expected_result": "ValueError raised with message \"'years' must be ≤ 120\""
+  },
+  {
+   "tc_id": "TC-APP-065",
+   "requirement_id": "REQ-024",
+   "planScenarioIds": [
+    "SC-UNIT-SANITIZE-PARAMS-001"
+   ],
+   "scenario": "_sanitize_params with value far above cap (years = 2400)",
+   "type": "Negative",
+   "level": "Unit",
+   "priority": "P1",
+   "precondition": "_sanitize_params function is imported; PARAM_CAPS = {'years': 120}",
+   "test_data": "params = {'rate': 5, 'years': 2400}",
+   "steps": [
+    "Call _sanitize_params(params, {'years': 120})"
+   ],
+   "expected_result": "ValueError raised with message \"'years' must be ≤ 120\""
+  },
+  {
+   "tc_id": "TC-APP-066",
+   "requirement_id": "REQ-024",
+   "planScenarioIds": [
+    "SC-UNIT-SANITIZE-PARAMS-001"
+   ],
+   "scenario": "_sanitize_params with a non-numeric parameter value (string instead of number) that bypasses cap check",
+   "type": "Exception",
+   "level": "Unit",
+   "priority": "P1",
+   "precondition": "_sanitize_params function is imported; PARAM_CAPS = {'years': 120}",
+   "test_data": "params = {'rate': 5, 'years': 'abc'}",
+   "steps": [
+    "Call _sanitize_params(params, {'years': 120})"
+   ],
+   "expected_result": "Some ValueError raised (likely about non-numeric value) as per sanitization logic"
+  },
+  {
+   "tc_id": "TC-APP-067",
+   "requirement_id": "REQ-025",
+   "planScenarioIds": [
+    "SC-UNIT-SANITIZE-PARAMS-001"
+   ],
+   "scenario": "_sanitize_params with key length exactly 40 characters",
+   "type": "Positive",
+   "level": "Unit",
+   "priority": "P1",
+   "precondition": "_sanitize_params function is imported",
+   "test_data": "params = {'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa': 5.0}",
+   "steps": [
+    "Call _sanitize_params({'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa': 5.0}, {})"
+   ],
+   "expected_result": "No exception raised"
+  },
+  {
+   "tc_id": "TC-APP-068",
+   "requirement_id": "REQ-025",
+   "planScenarioIds": [
+    "SC-UNIT-SANITIZE-PARAMS-001"
+   ],
+   "scenario": "_sanitize_params with key length 41 characters",
+   "type": "Negative (Boundary)",
+   "level": "Unit",
+   "priority": "P1",
+   "precondition": "_sanitize_params function is imported",
+   "test_data": "params = {'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa': 5.0}",
+   "steps": [
+    "Call _sanitize_params({'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa': 5.0}, {})"
+   ],
+   "expected_result": "ValueError raised with message \"invalid parameter name\""
+  },
+  {
+   "tc_id": "TC-APP-069",
+   "requirement_id": "REQ-025",
+   "planScenarioIds": [
+    "SC-UNIT-SANITIZE-PARAMS-001"
+   ],
+   "scenario": "_sanitize_params with string parameter value length 41 characters",
+   "type": "Negative (Boundary)",
+   "level": "Unit",
+   "priority": "P1",
+   "precondition": "_sanitize_params function is imported",
+   "test_data": "params = {'name': 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'}",
+   "steps": [
+    "Call _sanitize_params({'name': 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'}, {})"
+   ],
+   "expected_result": "ValueError raised (specific message not defined in requirement for string value length)"
+  },
+  {
+   "tc_id": "TC-APP-070",
+   "requirement_id": "REQ-025",
+   "planScenarioIds": [
+    "SC-UNIT-SANITIZE-PARAMS-001"
+   ],
+   "scenario": "_sanitize_params with a non-string key (integer key)",
+   "type": "Exception",
+   "level": "Unit",
+   "priority": "P1",
+   "precondition": "_sanitize_params function is imported",
+   "test_data": "params = {5: 10.0}",
+   "steps": [
+    "Call _sanitize_params({5: 10.0}, {})"
+   ],
+   "expected_result": "ValueError raised with message \"invalid parameter name\" (or TypeError; behavior depends on implementation, but requirement specifies error behaviour)"
+  }
+ ]
+}

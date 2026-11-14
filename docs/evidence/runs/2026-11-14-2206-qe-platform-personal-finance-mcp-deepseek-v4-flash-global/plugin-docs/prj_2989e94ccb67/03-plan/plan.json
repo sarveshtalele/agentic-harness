@@ -1,0 +1,116 @@
+{
+ "strategy": "Test the personal-finance-mcp server using pytest (the only detected test runner). Unit tests cover pure logic functions (portfolio calculations, parameter sanitization) in isolation. Integration tests cover HTTP API endpoints by starting the ASGI server with httpx TestClient, verifying status codes, payloads, and error scenarios for every /api route. E2E is skipped because the application has no UI and no browser interaction. All P0 and P1 requirements are mapped, and each scenario is assigned to the lowest suitable level without duplication across levels.",
+ "scenarios": [
+  {
+   "id": "SC-UNIT-PORTFOLIO-ERRORS-001",
+   "area": "Portfolio calculation edge cases (zero divisors, dimension mismatches)",
+   "title": "Portfolio calculation edge cases (zero divisors, dimension mismatches)",
+   "level": "Unit",
+   "priority": "P2",
+   "requirementIds": [
+    "REQ-015",
+    "REQ-016",
+    "REQ-017",
+    "REQ-018",
+    "REQ-019",
+    "REQ-020"
+   ]
+  },
+  {
+   "id": "SC-UNIT-SANITIZE-PARAMS-001",
+   "area": "Parameter sanitization validator (_sanitize_params)",
+   "title": "Parameter sanitization validator (_sanitize_params)",
+   "level": "Unit",
+   "priority": "P1",
+   "requirementIds": [
+    "REQ-021",
+    "REQ-022",
+    "REQ-023",
+    "REQ-024",
+    "REQ-025"
+   ]
+  },
+  {
+   "id": "SC-INTEGRATION-HEALTH-001",
+   "area": "Health endpoint (/api/health)",
+   "title": "Health endpoint (/api/health)",
+   "level": "Integration",
+   "priority": "P1",
+   "requirementIds": [
+    "REQ-001"
+   ]
+  },
+  {
+   "id": "SC-INTEGRATION-CALC-ERRORS-001",
+   "area": "Calculator endpoint error handling (/api/calc)",
+   "title": "Calculator endpoint error handling (/api/calc)",
+   "level": "Integration",
+   "priority": "P1",
+   "requirementIds": [
+    "REQ-003",
+    "REQ-004",
+    "REQ-005",
+    "REQ-006",
+    "REQ-007"
+   ]
+  },
+  {
+   "id": "SC-INTEGRATION-SECURITY-PAYLOAD-RATE-001",
+   "area": "Security: payload size limit and rate limiting",
+   "title": "Security: payload size limit and rate limiting",
+   "level": "Integration",
+   "priority": "P0",
+   "requirementIds": [
+    "REQ-008",
+    "REQ-009"
+   ]
+  },
+  {
+   "id": "SC-INTEGRATION-SECURITY-HEADERS-001",
+   "area": "Security headers on all responses",
+   "title": "Security headers on all responses",
+   "level": "Integration",
+   "priority": "P1",
+   "requirementIds": [
+    "REQ-010"
+   ]
+  },
+  {
+   "id": "SC-INTEGRATION-NAV-VALIDATION-001",
+   "area": "NAV endpoint parameter validation (/api/nav)",
+   "title": "NAV endpoint parameter validation (/api/nav)",
+   "level": "Integration",
+   "priority": "P2",
+   "requirementIds": [
+    "REQ-011",
+    "REQ-012"
+   ]
+  },
+  {
+   "id": "SC-INTEGRATION-FX-VALIDATION-001",
+   "area": "FX endpoint currency code validation (/api/fx)",
+   "title": "FX endpoint currency code validation (/api/fx)",
+   "level": "Integration",
+   "priority": "P2",
+   "requirementIds": [
+    "REQ-013"
+   ]
+  },
+  {
+   "id": "SC-INTEGRATION-QUOTE-VALIDATION-001",
+   "area": "Quote endpoint symbol validation (/api/quote)",
+   "title": "Quote endpoint symbol validation (/api/quote)",
+   "level": "Integration",
+   "priority": "P2",
+   "requirementIds": [
+    "REQ-014"
+   ]
+  }
+ ],
+ "skippedLevels": [
+  {
+   "level": "E2E",
+   "reason": "This application provides a JSON API server with no graphical user interface. There are no web pages to navigate, no browser-based user journeys, and no interactive forms. E2E browser testing (Playwright) is not applicable."
+  }
+ ]
+}

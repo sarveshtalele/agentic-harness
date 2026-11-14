@@ -1,0 +1,69 @@
+{
+ "validator": "1.6.0",
+ "gate": 2,
+ "ok": true,
+ "errors": [],
+ "warnings": [
+  {
+   "check": "plan.requirements",
+   "message": "P2/P3 requirements with no plan scenario",
+   "ids": [
+    "REQ-002",
+    "REQ-026"
+   ]
+  }
+ ],
+ "metrics": {
+  "requirements": 26,
+  "scenarios": 9,
+  "cases": 0,
+  "test_files": 0,
+  "results": 0,
+  "repo_test_files": 11,
+  "repo_tests": 137,
+  "existing": 11,
+  "generated": 0,
+  "manual": 0,
+  "plan_by_area_level": {
+   "Calculator endpoint error handling (/api/calc)": {
+    "Integration": 1,
+    "Unit": 0
+   },
+   "FX endpoint currency code validation (/api/fx)": {
+    "Integration": 1,
+    "Unit": 0
+   },
+   "Health endpoint (/api/health)": {
+    "Integration": 1,
+    "Unit": 0
+   },
+   "NAV endpoint parameter validation (/api/nav)": {
+    "Integration": 1,
+    "Unit": 0
+   },
+   "Parameter sanitization validator (_sanitize_params)": {
+    "Integration": 0,
+    "Unit": 1
+   },
+   "Portfolio calculation edge cases (zero divisors, dimension mismatches)": {
+    "Integration": 0,
+    "Unit": 1
+   },
+   "Quote endpoint symbol validation (/api/quote)": {
+    "Integration": 1,
+    "Unit": 0
+   },
+   "Security headers on all responses": {
+    "Integration": 1,
+    "Unit": 0
+   },
+   "Security: payload size limit and rate limiting": {
+    "Integration": 1,
+    "Unit": 0
+   }
+  }
+ },
+ "suspects": [],
+ "duplicates": [],
+ "brief": "Gate 2 validation: PASS (0 errors, 1 warnings)."
+}

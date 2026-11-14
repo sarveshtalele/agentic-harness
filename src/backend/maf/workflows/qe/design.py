@@ -89,7 +89,7 @@ async def qe_design(rc: RunContext, state: dict) -> dict:
     cases = [case for case, _ in pairs]
     # batches number their cases separately, so ids are assigned here
     _number_cases(cases)
-    checks = lambda found: model.coverage_gaps(state["requirements"], found) + [why for _, why in model.case_problems(state["requirements"], found)]
+    checks = lambda found: model.coverage_gaps(designed, found) + [why for _, why in model.case_problems(state["requirements"], found)]
     gaps, dupes = checks(cases), model.duplicate_scenarios(cases)
     if gaps or dupes:
         rc.log(f"Design checks found gaps {gaps} and duplicates {dupes}; revising", kind="warning")
@@ -107,7 +107,7 @@ async def qe_design(rc: RunContext, state: dict) -> dict:
         refused = model.case_problems(state["requirements"], cases)  # still of the wrong type after the revision, so the case is refused
         pairs = [p for p in pairs if not any(p[0] is case for case, _ in refused)]
         cases = [case for case, _ in pairs]
-        gaps = model.coverage_gaps(state["requirements"], cases) + [f"refused {why}" for _, why in refused]
+        gaps = model.coverage_gaps(designed, cases) + [f"refused {why}" for _, why in refused]
     _number_cases(cases)
     records = {case["id"]: {**record, "tc_id": case["id"]} for case, record in pairs}
     # final safety check: after the quota nothing should be cut here, and if something is, it is reported

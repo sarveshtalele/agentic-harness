@@ -81,14 +81,15 @@ def test_async_tests_are_found_and_the_pytest_option_is_command_line_only(tmp_pa
 # case limits
 
 
-def test_case_limit_keeps_all_p0_then_p1_and_reports_what_was_left():
+def test_case_limit_keeps_all_p0_then_p1_and_every_requirements_first_case():
+    """Owner rule (QE v2, 2026-11-14): the limit never takes a requirement's last case, so R2 keeps TC-1; its second case is cut."""
     reqs = [{"id": "R0", "priority": "P0"}, {"id": "R1", "priority": "P1"}, {"id": "R2", "priority": "P2"}]
     cases = [{"id": f"TC-{n}", "requirement_id": r, "priority": "P2"} for n, r in enumerate(["R2", "R1", "R0", "R2", "R0", "R1"], 1)]
     kept, info = model.limit_cases(cases, reqs, 4)
-    assert [c["id"] for c in kept] == ["TC-2", "TC-3", "TC-5", "TC-6"] and info["left_out"] == ["TC-1", "TC-4"] and info["left_out_by_priority"] == {"P2": 2}
-    assert info["message"].startswith("2 cases left out") and not info["p0_over_limit"]
+    assert [c["id"] for c in kept] == ["TC-1", "TC-2", "TC-3", "TC-5", "TC-6"] and info["left_out"] == ["TC-4"] and info["left_out_by_priority"] == {"P2": 1}
+    assert info["message"].startswith("1 cases left out") and not info["p0_over_limit"] and info["requirements_without_cases"] == []
     kept, info = model.limit_cases(cases, reqs, 1)
-    assert {c["id"] for c in kept} == {"TC-3", "TC-5"} and info["p0_over_limit"] and "never cut" in info["message"]
+    assert {c["id"] for c in kept} == {"TC-1", "TC-2", "TC-3", "TC-5"} and info["p0_over_limit"] and "never cut" in info["message"]
     kept, info = model.limit_cases(cases, reqs, 60)
     assert len(kept) == 6 and info["left_out_count"] == 0 and info["message"].startswith("No cases left out")
 
