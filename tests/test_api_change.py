@@ -89,7 +89,7 @@ def test_brownfield_qe_lifecycle_g0_to_g5_is_not_executed_and_the_tests_download
             payload = approval["payload"]
             assert payload["summary"]["verdict"] == "NOT EXECUTED" and "Verdict NOT EXECUTED" in approval["summary"]
             assert (payload["summary"]["requirements"], payload["summary"]["cases"], payload["summary"]["tests"], payload["summary"]["valid"], payload["summary"]["needs_review"]) == (1, 4, 4, 4, 0), payload["summary"]
-            assert payload["summary"]["by_check"] == {"V3": 0, "V4": 0, "V5": 0, "V6": 0}
+            assert payload["summary"]["by_check"] == {"V2b": 0, "V3": 0, "V4": 0, "V5": 0, "V6": 0}
             row = payload["matrix_rows"][0]
             assert row["covered"] and [c["test_file"] for c in row["cases"]][0].startswith("tests/agentic_qe/") and {c["result"] for c in row["cases"]} == {"valid"}
             assert payload["tests_zip"] == f"/api/runs/{run['id']}/tests.zip" and payload["run_command"] == "python -m pytest tests/agentic_qe"

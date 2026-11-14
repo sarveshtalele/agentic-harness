@@ -1,0 +1,232 @@
+{
+ "datasets": {
+  "boundary": {
+   "string": {
+    "empty": "",
+    "whitespaceOnly": "   \t\n  ",
+    "maxLength1024": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "specialCharacters": "<script>alert('xss')</script>' OR 1=1; -- 🚀 漢字",
+    "unicodeEmoji": "🔥💻🧪🎯✨"
+   },
+   "json": {
+    "emptyObject": {},
+    "emptyArray": [],
+    "deeplyNested": {
+     "l1": {
+      "l2": {
+       "l3": {
+        "l4": {
+         "value": "deep"
+        }
+       }
+      }
+     }
+    },
+    "nullFields": {
+     "name": null,
+     "count": null
+    }
+   }
+  },
+  "pagination": {
+   "firstPage": {
+    "items": [
+     "item-1",
+     "item-2",
+     "item-3",
+     "item-4",
+     "item-5",
+     "item-6",
+     "item-7",
+     "item-8",
+     "item-9",
+     "item-10"
+    ],
+    "pageIndex": 0,
+    "pageSize": 10,
+    "totalItems": 25,
+    "totalPages": 3,
+    "hasNextPage": true,
+    "hasPrevPage": false
+   },
+   "lastPage": {
+    "items": [
+     "item-21",
+     "item-22",
+     "item-23",
+     "item-24",
+     "item-25"
+    ],
+    "pageIndex": 2,
+    "pageSize": 10,
+    "totalItems": 25,
+    "totalPages": 3,
+    "hasNextPage": false,
+    "hasPrevPage": true
+   },
+   "empty": {
+    "items": [],
+    "pageIndex": 0,
+    "pageSize": 10,
+    "totalItems": 0,
+    "totalPages": 0,
+    "hasNextPage": false,
+    "hasPrevPage": false
+   }
+  }
+ },
+ "cases": {
+  "TC-APP-009": {
+   "data": "{\"expr\": \"2+2\", \"trailing garbage\"}",
+   "uses": []
+  },
+  "TC-APP-010": {
+   "data": "",
+   "uses": [
+    "boundary.json"
+   ]
+  },
+  "TC-APP-011": {
+   "data": "{\"years\": 100}",
+   "uses": []
+  },
+  "TC-APP-012": {
+   "data": "{\"years\": 120}",
+   "uses": [
+    "boundary.json"
+   ]
+  },
+  "TC-APP-013": {
+   "data": "{\"years\": 121}",
+   "uses": [
+    "boundary.json"
+   ]
+  },
+  "TC-APP-014": {
+   "data": "{\"years\": 200}",
+   "uses": []
+  },
+  "TC-APP-015": {
+   "data": "POST /api/calc with body {\"operation\": \"divide\", \"a\": 1, \"b\": 0} (triggers ZeroDivisionError)",
+   "uses": []
+  },
+  "TC-APP-016": {
+   "data": "POST /api/calc with body {\"operation\": \"sqrt\", \"a\": -1} (triggers ValueError)",
+   "uses": []
+  },
+  "TC-APP-017": {
+   "data": "POST /api/calc with body that causes unexpected error (e.g., {\"operation\": \"crash\"})",
+   "uses": []
+  },
+  "TC-APP-018": {
+   "data": "POST /api/calc with body that causes unexpected RuntimeError",
+   "uses": []
+  },
+  "TC-APP-019": {
+   "data": "POST /api/calc with body that causes unexpected RuntimeError",
+   "uses": []
+  },
+  "TC-APP-020": {
+   "data": "POST /api/calc with body that causes unexpected RuntimeError",
+   "uses": []
+  },
+  "TC-APP-021": {
+   "data": "\"123456789\"",
+   "uses": [
+    "pagination"
+   ]
+  },
+  "TC-APP-022": {
+   "data": "\"abc123\"",
+   "uses": [
+    "boundary.string"
+   ]
+  },
+  "TC-APP-023": {
+   "data": "'a'",
+   "uses": []
+  },
+  "TC-APP-024": {
+   "data": "'a' * 81",
+   "uses": [
+    "boundary.string"
+   ]
+  },
+  "TC-APP-025": {
+   "data": "'USD'",
+   "uses": []
+  },
+  "TC-APP-026": {
+   "data": "'US1'",
+   "uses": [
+    "boundary.string"
+   ]
+  },
+  "TC-APP-027": {
+   "data": "'AAPL'",
+   "uses": []
+  },
+  "TC-APP-028": {
+   "data": "'aapl'",
+   "uses": [
+    "boundary.string"
+   ]
+  },
+  "TC-APP-029": {
+   "data": "None",
+   "uses": []
+  },
+  "TC-APP-030": {
+   "data": "None",
+   "uses": []
+  },
+  "TC-APP-031": {
+   "data": "a string of binary garbage that is not valid JSON",
+   "uses": []
+  },
+  "TC-APP-032": {
+   "data": "None",
+   "uses": []
+  },
+  "TC-APP-033": {
+   "data": "{\"value\": 0000-MASKED}",
+   "uses": []
+  },
+  "TC-APP-034": {
+   "data": "{\"value\": 0000-MASKED}",
+   "uses": [
+    "boundary.json"
+   ]
+  },
+  "TC-APP-035": {
+   "data": "{\"value\": 0000-MASKED}",
+   "uses": [
+    "boundary.json"
+   ]
+  },
+  "TC-APP-036": {
+   "data": "{\"value\": -0000-MASKED}",
+   "uses": []
+  },
+  "TC-APP-037": {
+   "data": "A JSON payload of exactly 16384 bytes (e.g., a string of 16384 characters).",
+   "uses": [
+    "pagination"
+   ]
+  },
+  "TC-APP-038": {
+   "data": "A JSON payload of 16385 bytes.",
+   "uses": [
+    "pagination"
+   ]
+  },
+  "TC-APP-039": {
+   "data": "A JSON payload of 100000 bytes.",
+   "uses": []
+  },
+  "TC-APP-040": {
+   "data": "An empty body (0 bytes).",
+   "uses": []
+  }
+ }
+}

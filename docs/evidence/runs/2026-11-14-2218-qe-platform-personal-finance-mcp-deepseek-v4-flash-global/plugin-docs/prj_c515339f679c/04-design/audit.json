@@ -1,0 +1,252 @@
+{
+ "_capture": {
+  "agent_type": "coverage-auditor",
+  "agent_id": "run_ddee03acb3cd:design",
+  "at": "2026-11-14T16:55:41.290094+00:00",
+  "sha256": "108c167a4b750552c9f867284b14ce40570b3b60b35960413c5dfd6e79b97a51",
+  "note": "Recorded by Agentic QE Platform from the agent's own checked answer. Do not edit."
+ },
+ "kind": "design",
+ "verdicts": [
+  {
+   "id": "TC-APP-001",
+   "verdict": "COVERS",
+   "scenario": "SC-I-006-001",
+   "reason": "The case sends GET /api/health and expects status 200 with status 'ok' and tools > 0, directly matching the requirement's quote at src/web/server.py:227."
+  },
+  {
+   "id": "TC-APP-002",
+   "verdict": "COVERS",
+   "scenario": "SC-I-006-001",
+   "reason": "The case sends GET /api/health with zero tools and expects status 200, status 'ok', and tools=0, which validates the boundary described by the requirement's quote at src/web/server.py:227."
+  },
+  {
+   "id": "TC-APP-003",
+   "verdict": "COVERS",
+   "scenario": "SC-I-006-001",
+   "reason": "The case sends GET /api/health with 1000 tools and expects status 200, status 'ok', and tools=1000, confirming the endpoint handles large counts, consistent with src/web/server.py:227."
+  },
+  {
+   "id": "TC-APP-004",
+   "verdict": "PARTIAL",
+   "scenario": "SC-I-006-001",
+   "reason": "The case exercises a server crash (invalid state) and expects a 500 error, but the scenario only specifies a positive health check (status 'ok' and tools count), and the code at src/web/server.py:227 would raise an AttributeError rather than returning a 500 JSON error, so the expected result does not match actual behavior."
+  },
+  {
+   "id": "TC-APP-005",
+   "verdict": "COVERS",
+   "scenario": "SC-I-007-001",
+   "reason": "The case sends GET /api/tools with multiple tools and expects 200 with count, categories, and tool objects, directly matching the requirement statement and src/web/server.py:240."
+  },
+  {
+   "id": "TC-APP-006",
+   "verdict": "COVERS",
+   "scenario": "SC-I-007-001",
+   "reason": "The case sends GET /api/tools with zero tools and expects 200 with count=0, empty categories and tools, testing the boundary of the requirement at src/web/server.py:240."
+  },
+  {
+   "id": "TC-APP-007",
+   "verdict": "COVERS",
+   "scenario": "SC-I-007-001",
+   "reason": "The case sends GET /api/tools with one tool and expects 200 with count=1, one category entry, and one tool object, testing the lower boundary of the requirement at src/web/server.py:240."
+  },
+  {
+   "id": "TC-APP-008",
+   "verdict": "PARTIAL",
+   "scenario": "SC-I-007-001",
+   "reason": "The case simulates a crash by setting _tools to None and expects a 500 error, but the scenario only covers the normal tool listing response (200 with count, categories, tools), and the code at src/web/server.py:231 would raise an AttributeError, not a controlled 500 JSON response."
+  },
+  {
+   "id": "TC-APP-009",
+   "verdict": "COVERS",
+   "scenario": "SC-I-008-001",
+   "reason": "The case sends malformed JSON (trailing garbage) to POST /api/calc and expects 400 with error 'invalid JSON', directly matching the requirement quote at src/web/server.py:247."
+  },
+  {
+   "id": "TC-APP-010",
+   "verdict": "COVERS",
+   "scenario": "SC-I-008-001",
+   "reason": "The case sends an empty body to POST /api/calc and expects 400 with error 'invalid JSON', testing a boundary of malformed input, consistent with the requirement at src/web/server.py:247."
+  },
+  {
+   "id": "TC-APP-011",
+   "verdict": "COVERS",
+   "scenario": "SC-U-001-001",
+   "reason": "Calls validation with years=100, which is under the cap, and asserts no exception, covering the nominal path of the bounds and caps scenario."
+  },
+  {
+   "id": "TC-APP-012",
+   "verdict": "COVERS",
+   "scenario": "SC-U-001-001",
+   "reason": "Calls validation with years=120, exactly the cap, and asserts no exception, covering the on-boundary case."
+  },
+  {
+   "id": "TC-APP-013",
+   "verdict": "COVERS",
+   "scenario": "SC-U-001-001",
+   "reason": "Calls validation with years=121, one above cap, and asserts ValueError with the message from the requirement (src/web/server.py:213)."
+  },
+  {
+   "id": "TC-APP-014",
+   "verdict": "COVERS",
+   "scenario": "SC-U-001-001",
+   "reason": "Calls validation with years=200, far above cap, and asserts ValueError, covering the cap-violation branch."
+  },
+  {
+   "id": "TC-APP-015",
+   "verdict": "PARTIAL",
+   "scenario": "SC-I-009-001",
+   "reason": "Tests that division by zero returns a 400 error with 'invalid inputs: division by zero', but the scenario requires domain error wrapping for all of ValueError, ZeroDivisionError, KeyError, and TypeError; a single ZeroDivisionError case does not exercise the full set."
+  },
+  {
+   "id": "TC-APP-016",
+   "verdict": "COVERS",
+   "scenario": "SC-I-009-001",
+   "reason": "Tests sqrt(-1) which raises ValueError and expects 400 with 'invalid inputs: ...', covering the ValueError branch and the wrapping pattern."
+  },
+  {
+   "id": "TC-APP-017",
+   "verdict": "COVERS",
+   "scenario": "SC-I-010-001",
+   "reason": "Triggers an unexpected exception and checks that the response is 400 with 'calculation failed', covering the hiding of internal details for a general unexpected error."
+  },
+  {
+   "id": "TC-APP-018",
+   "verdict": "COVERS",
+   "scenario": "SC-I-010-001",
+   "reason": "Explicitly asserts that the error message is exactly 'calculation failed' with no exception type or message leaked, covering the no-leak aspect of hiding."
+  },
+  {
+   "id": "TC-APP-019",
+   "verdict": "COVERS",
+   "scenario": "SC-I-010-001",
+   "reason": "Checks that the status code is 400 and not 500, covering the requirement that unexpected exceptions return a 400."
+  },
+  {
+   "id": "TC-APP-020",
+   "verdict": "COVERS",
+   "scenario": "SC-I-010-001",
+   "reason": "Asserts no stack trace or internal paths appear in the response, covering the no-leak requirement for unexpected exceptions."
+  },
+  {
+   "id": "TC-APP-021",
+   "verdict": "PARTIAL",
+   "scenario": "SC-U-002-001",
+   "reason": "The case only tests a numeric code of length 9, but REQ-009 (src/web/server.py:280) requires both non-numeric and longer-than-9 to be rejected, so the positive test does not cover the two negative conditions that form the scenario's boundary and error path."
+  },
+  {
+   "id": "TC-APP-022",
+   "verdict": "PARTIAL",
+   "scenario": "SC-U-002-001",
+   "reason": "The case tests non-numeric code but does not test a numeric code longer than 9 characters, which is another part of the validation required by REQ-009 (src/web/server.py:279)."
+  },
+  {
+   "id": "TC-APP-023",
+   "verdict": "COVERS",
+   "scenario": "SC-U-003-001",
+   "reason": "The case exercises the valid boundary (exactly 1 character) for query length, matching the positive requirement of REQ-010 (src/web/server.py:283)."
+  },
+  {
+   "id": "TC-APP-024",
+   "verdict": "COVERS",
+   "scenario": "SC-U-003-001",
+   "reason": "The case tests the invalid boundary of 81 characters (exceeding the 80-character limit), directly covering the negative condition in REQ-010 (src/web/server.py:283)."
+  },
+  {
+   "id": "TC-APP-025",
+   "verdict": "COVERS",
+   "scenario": "SC-U-004-001",
+   "reason": "The case applies the currency code regex to a valid 3-letter uppercase string 'USD', which matches the pattern used in REQ-011 (src/web/server.py:291)."
+  },
+  {
+   "id": "TC-APP-026",
+   "verdict": "COVERS",
+   "scenario": "SC-U-004-001",
+   "reason": "The case tests a currency code with a digit 'US1' that should fail the regex, covering the negative validation in REQ-011 (src/web/server.py:291)."
+  },
+  {
+   "id": "TC-APP-027",
+   "verdict": "COVERS",
+   "scenario": "SC-U-005-001",
+   "reason": "The case applies the symbol regex to a valid uppercase symbol 'AAPL', covering the positive pattern match required by REQ-012 (src/web/server.py:298)."
+  },
+  {
+   "id": "TC-APP-028",
+   "verdict": "COVERS",
+   "scenario": "SC-U-005-001",
+   "reason": "The case tests a lowercase symbol 'aapl' that fails the regex, covering the negative validation in REQ-012 (src/web/server.py:298)."
+  },
+  {
+   "id": "TC-APP-029",
+   "verdict": "COVERS",
+   "scenario": "SC-I-016-001",
+   "reason": "The case sends a GET to /api/health and checks all six security headers are present on a successful response, matching the requirement in REQ-015 (src/web/server.py:171)."
+  },
+  {
+   "id": "TC-APP-030",
+   "verdict": "COVERS",
+   "scenario": "SC-I-016-001",
+   "reason": "The case sends a GET to a non-existent endpoint and verifies all six security headers are present on a 404 response, covering the requirement that headers appear on every response (REQ-015, src/web/server.py:171)."
+  },
+  {
+   "id": "TC-APP-031",
+   "verdict": "COVERS",
+   "scenario": "SC-I-016-001",
+   "reason": "The case sends a malformed POST request to /api/calculate and checks that all six required security headers appear on the 400 response, directly verifying REQ-015 from src/web/server.py:171."
+  },
+  {
+   "id": "TC-APP-032",
+   "verdict": "COVERS",
+   "scenario": "SC-I-016-001",
+   "reason": "The case checks a 405 response from an OPTIONS request to /api/health and verifies all six security headers, which exercises the header middleware before method routing as required by REQ-015 from src/web/server.py:171."
+  },
+  {
+   "id": "TC-APP-033",
+   "verdict": "COVERS",
+   "scenario": "SC-U-001-001",
+   "reason": "The case calls validate_numeric_param with a value of 1e13 and expects True, covering the boundary of the absolute range from REQ-005 (src/web/server.py:210)."
+  },
+  {
+   "id": "TC-APP-034",
+   "verdict": "COVERS",
+   "scenario": "SC-U-001-001",
+   "reason": "The case calls validate_numeric_param with 1e13 - 1 and expects True, testing the just-below boundary of REQ-005 from src/web/server.py:210."
+  },
+  {
+   "id": "TC-APP-035",
+   "verdict": "COVERS",
+   "scenario": "SC-U-001-001",
+   "reason": "The case calls validate_numeric_param with 1e13 + 1 and expects a ValueError with 'out of range', exactly testing the exceeding-boundary error of REQ-005 from src/web/server.py:210."
+  },
+  {
+   "id": "TC-APP-036",
+   "verdict": "COVERS",
+   "scenario": "SC-U-001-001",
+   "reason": "The case calls validate_numeric_param with -1e13 and expects a ValueError with 'out of range', covering the negative absolute boundary of REQ-005 from src/web/server.py:210."
+  },
+  {
+   "id": "TC-APP-037",
+   "verdict": "COVERS",
+   "scenario": "SC-I-015-001",
+   "reason": "The case sends a POST /api/calc with exactly 16384 bytes and expects status 200, testing the boundary condition of REQ-013 from src/web/server.py:151."
+  },
+  {
+   "id": "TC-APP-038",
+   "verdict": "COVERS",
+   "scenario": "SC-I-015-001",
+   "reason": "The case sends a POST /api/calc with 16385 bytes and expects 413 with 'payload too large', testing the just-above boundary of REQ-013 from src/web/server.py:151."
+  },
+  {
+   "id": "TC-APP-039",
+   "verdict": "COVERS",
+   "scenario": "SC-I-015-001",
+   "reason": "The case sends a POST /api/calc with 100000 bytes and expects 413 with 'payload too large', confirming REQ-013 from src/web/server.py:151 rejects oversized payloads."
+  },
+  {
+   "id": "TC-APP-040",
+   "verdict": "COVERS",
+   "scenario": "SC-I-015-001",
+   "reason": "The case sends a zero-length body and expects a non-413 status (e.g., 400), confirming that the 16 KB limit does not apply to empty bodies as per REQ-013 from src/web/server.py:151."
+  }
+ ]
+}

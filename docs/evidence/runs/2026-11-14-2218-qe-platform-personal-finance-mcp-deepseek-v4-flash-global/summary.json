@@ -1,0 +1,764 @@
+{
+ "repo": "https://github.com/sarveshtalele/personal-finance-mcp.git",
+ "model": "deepseek-v4-flash-global",
+ "run_id": "run_ddee03acb3cd",
+ "gates": [
+  {
+   "gate": 0,
+   "seconds": 0.0,
+   "title": "Gate 0: confirm intake scope",
+   "summary": "Mode: brownfield. Source: git https://github.com/sarveshtalele/personal-finance-mcp.git at aff44ea06f. Files: 88. Languages: Python, JavaScript, CSS. Agents read this project's repository and documents only. Generated code lands on a separate branch. Approving Gate 0 lets the platform run this repository's dependency installers (pip, npm) in the sandbox, only to collect and compile the generated tests. No test body is run; you download the tests and run them on your own systems.",
+   "plugin_check": null,
+   "design_audit": null,
+   "trace": null,
+   "validation": null
+  },
+  {
+   "gate": 1,
+   "seconds": 27.3,
+   "title": "Gate 1: approve requirements",
+   "summary": "13 requirements with verified evidence. agentic-qe Gate 1 check: PASS. Trace: 0 upstream items carried 0, 0 changed, 0 dropped with reason, 0 dropped without reason, 0 new. Tokens: 63,565 used of 50,000,000, 49,936,435 left.",
+   "plugin_check": {
+    "ok": true,
+    "gaps": [],
+    "missing": [],
+    "validator": {
+     "validator": "1.6.0",
+     "gate": 1,
+     "ok": true,
+     "errors": [],
+     "warnings": [],
+     "metrics": {
+      "requirements": 13,
+      "scenarios": 0,
+      "cases": 0,
+      "test_files": 0,
+      "results": 0,
+      "repo_test_files": 11,
+      "repo_tests": 137,
+      "existing": 11,
+      "generated": 0,
+      "manual": 0
+     },
+     "suspects": [],
+     "duplicates": [],
+     "brief": "Gate 1 validation: PASS (0 errors, 0 warnings)."
+    },
+    "error": null,
+    "app": "prj_c515339f679c",
+    "dropped": [
+     "REQ-004",
+     "REQ-014"
+    ]
+   },
+   "design_audit": null,
+   "trace": {
+    "stage": "requirements",
+    "upstream": 0,
+    "carried": 0,
+    "changed": 0,
+    "dropped_with_reason": 0,
+    "dropped_without_reason": 0,
+    "new": 0,
+    "verdict": "PASS"
+   },
+   "validation": null
+  },
+  {
+   "gate": 2,
+   "seconds": 11.4,
+   "title": "Gate 2: approve test plan",
+   "summary": "Deterministic score 100, independent review 94 (REVISE). agentic-qe Gate 2 check: PASS. Trace: 13 upstream items carried 13, 0 changed, 0 dropped with reason, 0 dropped without reason, 16 new. Tokens: 78,929 used of 50,000,000, 49,921,071 left.",
+   "plugin_check": {
+    "ok": true,
+    "gaps": [],
+    "missing": [],
+    "validator": {
+     "validator": "1.6.0",
+     "gate": 2,
+     "ok": true,
+     "errors": [],
+     "warnings": [],
+     "metrics": {
+      "requirements": 13,
+      "scenarios": 16,
+      "cases": 0,
+      "test_files": 0,
+      "results": 0,
+      "repo_test_files": 11,
+      "repo_tests": 137,
+      "existing": 11,
+      "generated": 0,
+      "manual": 0,
+      "plan_by_area_level": {
+       "Calculator endpoint: domain error wrapping": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator endpoint: malformed JSON body": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator endpoint: unexpected exception hiding": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator input validation: bounds and caps (pure logic)": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Currency code regex validation (pure logic)": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "FX endpoint: invalid currency code": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Health check endpoint": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "NAV endpoint: invalid query length": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "NAV endpoint: invalid scheme code": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Query length validation (pure logic)": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Quote endpoint: invalid symbol": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Request body size limit": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Scheme code validation (pure logic)": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Security headers present on every response": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Symbol regex validation (pure logic)": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Tool listing endpoint": {
+        "Integration": 1,
+        "Unit": 0
+       }
+      }
+     },
+     "suspects": [],
+     "duplicates": [],
+     "brief": "Gate 2 validation: PASS (0 errors, 0 warnings)."
+    },
+    "error": null,
+    "app": "prj_c515339f679c"
+   },
+   "design_audit": null,
+   "trace": {
+    "stage": "plan",
+    "upstream": 13,
+    "carried": 13,
+    "changed": 0,
+    "dropped_with_reason": 0,
+    "dropped_without_reason": 0,
+    "new": 16,
+    "verdict": "PASS"
+   },
+   "validation": null
+  },
+  {
+   "gate": 3,
+   "seconds": 155.9,
+   "title": "Gate 3: approve test design and data",
+   "summary": "33 cases. Case budget 40 of 40 (ATLAS_MAX_CASES), decided before design; 2 excess cases dropped before review. Remaining gaps: ['REQ-005: no Positive case', 'REQ-005: needs 2 Negative cases', 'REQ-006: no Positive case', 'REQ-006: needs 2 Negative cases', \"refused REQ-003: case 'POST /api/calc with null body returns 400 with 'invalid JSON' has test data 'null body (no Content-Type header)', a string, but the requirement states its input type as object. Use a value of that type, or state the error behaviour in the requirement first\", 'refused REQ-005: case \\'Numeric parameter value equals ABS_MAX (1e13) is accepted\\' has test data \"JSON object with key \\'value\\' and value 10000000000000 (1e13)\", a string, but the requirement states its input type as object. Use a value of that type, or state the error behaviour in the requirement first', 'refused REQ-005: case \\'Numeric parameter value exceeds ABS_MAX (1e13) raises ValueE\\' has test data \"JSON object with key \\'value\\' and value 10000000000001 (1e13 \", a string, but the requirement states its input type as object. Use a value of that type, or state the error behaviour in the requirement first', 'refused REQ-005: case \\'Numeric parameter value equals negative ABS_MAX (-1e13) is a\\' has test data \"JSON object with key \\'value\\' and value -10000000000000 (-1e1\", a string, but the requirement states its input type as object. Use a value of that type, or state the error behaviour in the requirement first', 'refused REQ-006: case \\'Capped parameter years equals cap (120) is accepted\\' has test data \"JSON object with key \\'years\\' and value 120\", a string, but the requirement states its input type as object. Use a value of that type, or state the error behaviour in the requirement first', 'refused REQ-006: case \\'Capped parameter years just below cap (119) is accepted\\' has test data \"JSON object with key \\'years\\' and value 119\", a string, but the requirement states its input type as object. Use a value of that type, or state the error behaviour in the requirement first', 'refused REQ-006: case \\'Capped parameter years exceeds cap (121) raises ValueError\\' has test data \"JSON object with key \\'years\\' and value 121\", a string, but the requirement states its input type as object. Use a value of that type, or state the error behaviour in the requirement first']. agentic-qe Gate 3 check: FAIL (plan scenarios with no designed case (12 of 16 designed): SC-U-002-001, SC-I-012-001, SC-I-013-001, SC-I-014-001; cases the coverage auditor says do not cover their scenario: TC-APP-018 (PARTIAL), TC-APP-019 (PARTIAL), TC-APP-022 (PARTIAL), TC-APP-023 (PARTIAL), TC-APP-026 (MISSES), TC-APP-027 (PARTIAL), TC-APP-028 (PARTIAL), TC-APP-030 (PARTIAL)). Trace: 62 upstream items carried 62, 0 changed, 0 dropped with reason, 0 dropped without reason, 0 new. Tokens: 407,301 used of 50,000,000, 49,592,699 left.",
+   "plugin_check": {
+    "ok": false,
+    "gaps": [
+     "plan scenarios with no designed case (12 of 16 designed): SC-U-002-001, SC-I-012-001, SC-I-013-001, SC-I-014-001",
+     "cases the coverage auditor says do not cover their scenario: TC-APP-018 (PARTIAL), TC-APP-019 (PARTIAL), TC-APP-022 (PARTIAL), TC-APP-023 (PARTIAL), TC-APP-026 (MISSES), TC-APP-027 (PARTIAL), TC-APP-028 (PARTIAL), TC-APP-030 (PARTIAL)"
+    ],
+    "missing": [
+     "SC-U-002-001",
+     "SC-I-012-001",
+     "SC-I-013-001",
+     "SC-I-014-001",
+     "TC-APP-018 (PARTIAL)",
+     "TC-APP-019 (PARTIAL)",
+     "TC-APP-022 (PARTIAL)",
+     "TC-APP-023 (PARTIAL)",
+     "TC-APP-026 (MISSES)",
+     "TC-APP-027 (PARTIAL)",
+     "TC-APP-028 (PARTIAL)",
+     "TC-APP-030 (PARTIAL)"
+    ],
+    "validator": {
+     "validator": "1.6.0",
+     "gate": 3,
+     "ok": false,
+     "errors": [
+      {
+       "check": "design.coverage",
+       "message": "plan scenarios with no designed case (12 of 16 designed)",
+       "ids": [
+        "SC-I-012-001",
+        "SC-I-013-001",
+        "SC-I-014-001",
+        "SC-U-002-001"
+       ]
+      },
+      {
+       "check": "design.areas",
+       "message": "plan areas with no designed case at all",
+       "ids": [
+        "FX endpoint: invalid currency code",
+        "NAV endpoint: invalid query length",
+        "Quote endpoint: invalid symbol",
+        "Scheme code validation (pure logic)"
+       ]
+      }
+     ],
+     "warnings": [],
+     "metrics": {
+      "requirements": 13,
+      "scenarios": 16,
+      "cases": 33,
+      "test_files": 0,
+      "results": 0,
+      "repo_test_files": 11,
+      "repo_tests": 137,
+      "existing": 11,
+      "generated": 0,
+      "manual": 0,
+      "plan_by_area_level": {
+       "Calculator endpoint: domain error wrapping": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator endpoint: malformed JSON body": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator endpoint: unexpected exception hiding": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator input validation: bounds and caps (pure logic)": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Currency code regex validation (pure logic)": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "FX endpoint: invalid currency code": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Health check endpoint": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "NAV endpoint: invalid query length": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "NAV endpoint: invalid scheme code": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Query length validation (pure logic)": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Quote endpoint: invalid symbol": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Request body size limit": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Scheme code validation (pure logic)": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Security headers present on every response": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Symbol regex validation (pure logic)": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Tool listing endpoint": {
+        "Integration": 1,
+        "Unit": 0
+       }
+      },
+      "design_coverage_by_area": {
+       "Calculator endpoint: domain error wrapping": 100,
+       "Calculator endpoint: malformed JSON body": 100,
+       "Calculator endpoint: unexpected exception hiding": 100,
+       "Calculator input validation: bounds and caps (pure logic)": 100,
+       "Currency code regex validation (pure logic)": 100,
+       "FX endpoint: invalid currency code": 0,
+       "Health check endpoint": 100,
+       "NAV endpoint: invalid query length": 0,
+       "NAV endpoint: invalid scheme code": 100,
+       "Query length validation (pure logic)": 100,
+       "Quote endpoint: invalid symbol": 0,
+       "Request body size limit": 100,
+       "Scheme code validation (pure logic)": 0,
+       "Security headers present on every response": 100,
+       "Symbol regex validation (pure logic)": 100,
+       "Tool listing endpoint": 100
+      },
+      "cases_per_scenario": {
+       "mean": 2.75
+      },
+      "similarity_median": 0.163
+     },
+     "suspects": [
+      {
+       "case": "TC-APP-006",
+       "scenario": "SC-I-007-001",
+       "similarity": 0.057,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-007",
+       "scenario": "SC-I-007-001",
+       "similarity": 0.049,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-008",
+       "scenario": "SC-I-007-001",
+       "similarity": 0,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-009",
+       "scenario": "SC-I-009-001",
+       "similarity": 0.043,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-010",
+       "scenario": "SC-I-009-001",
+       "similarity": 0,
+       "audit": "COVERS"
+      }
+     ],
+     "duplicates": [],
+     "brief": "Gate 3 validation: FAIL (2 errors, 0 warnings).\n- plan scenarios with no designed case (12 of 16 designed): SC-I-012-001, SC-I-013-001, SC-I-014-001, SC-U-002-001\n- plan areas with no designed case at all: FX endpoint: invalid currency code, NAV endpoint: invalid query length, Quote endpoint: invalid symbol, Scheme code validation (pure logic)\nAudit these case/scenario pairs first (low similarity): TC-APP-006, TC-APP-007, TC-APP-008, TC-APP-009, TC-APP-010"
+    },
+    "error": null
+   },
+   "design_audit": {
+    "app": "prj_c515339f679c",
+    "reviewed": 33,
+    "audited": 33,
+    "counts": {
+     "COVERS": 25,
+     "PARTIAL": 7,
+     "MISSES": 1
+    },
+    "first_audit": {
+     "COVERS": 22,
+     "PARTIAL": 6,
+     "MISSES": 5
+    },
+    "redesigned": 5,
+    "unaudited": []
+   },
+   "trace": {
+    "stage": "data",
+    "upstream": 62,
+    "carried": 62,
+    "changed": 0,
+    "dropped_with_reason": 0,
+    "dropped_without_reason": 0,
+    "new": 0,
+    "verdict": "PASS"
+   },
+   "validation": null,
+   "refused": "These items were judged REJECT: TC-APP-024, TC-APP-025, TC-APP-026, TC-APP-027. Approving them needs a reason, and this one has 0 characters, fewer than 10. Write it in the reason field.",
+   "sent_back": true
+  },
+  {
+   "gate": 3,
+   "seconds": 216.3,
+   "title": "Gate 3: approve test design and data",
+   "summary": "40 cases. Case budget 40 of 40 (ATLAS_MAX_CASES), decided before design; 3 excess cases dropped before review. Remaining gaps: none. agentic-qe Gate 3 check: FAIL (plan scenarios with no designed case (12 of 16 designed): SC-I-011-001, SC-I-012-001, SC-I-013-001, SC-I-014-001; cases the coverage auditor says do not cover their scenario: TC-APP-004 (PARTIAL), TC-APP-008 (PARTIAL), TC-APP-015 (PARTIAL), TC-APP-021 (PARTIAL), TC-APP-022 (PARTIAL)). Trace: 69 upstream items carried 69, 0 changed, 0 dropped with reason, 0 dropped without reason, 0 new. Tokens: 511,273 used of 50,000,000, 49,488,727 left.",
+   "plugin_check": {
+    "ok": false,
+    "gaps": [
+     "plan scenarios with no designed case (12 of 16 designed): SC-I-011-001, SC-I-012-001, SC-I-013-001, SC-I-014-001",
+     "cases the coverage auditor says do not cover their scenario: TC-APP-004 (PARTIAL), TC-APP-008 (PARTIAL), TC-APP-015 (PARTIAL), TC-APP-021 (PARTIAL), TC-APP-022 (PARTIAL)"
+    ],
+    "missing": [
+     "SC-I-011-001",
+     "SC-I-012-001",
+     "SC-I-013-001",
+     "SC-I-014-001",
+     "TC-APP-004 (PARTIAL)",
+     "TC-APP-008 (PARTIAL)",
+     "TC-APP-015 (PARTIAL)",
+     "TC-APP-021 (PARTIAL)",
+     "TC-APP-022 (PARTIAL)"
+    ],
+    "validator": {
+     "validator": "1.6.0",
+     "gate": 3,
+     "ok": false,
+     "errors": [
+      {
+       "check": "design.coverage",
+       "message": "plan scenarios with no designed case (12 of 16 designed)",
+       "ids": [
+        "SC-I-011-001",
+        "SC-I-012-001",
+        "SC-I-013-001",
+        "SC-I-014-001"
+       ]
+      },
+      {
+       "check": "design.areas",
+       "message": "plan areas with no designed case at all",
+       "ids": [
+        "FX endpoint: invalid currency code",
+        "NAV endpoint: invalid query length",
+        "NAV endpoint: invalid scheme code",
+        "Quote endpoint: invalid symbol"
+       ]
+      }
+     ],
+     "warnings": [],
+     "metrics": {
+      "requirements": 13,
+      "scenarios": 16,
+      "cases": 40,
+      "test_files": 0,
+      "results": 0,
+      "repo_test_files": 11,
+      "repo_tests": 137,
+      "existing": 11,
+      "generated": 0,
+      "manual": 0,
+      "plan_by_area_level": {
+       "Calculator endpoint: domain error wrapping": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator endpoint: malformed JSON body": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator endpoint: unexpected exception hiding": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Calculator input validation: bounds and caps (pure logic)": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Currency code regex validation (pure logic)": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "FX endpoint: invalid currency code": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Health check endpoint": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "NAV endpoint: invalid query length": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "NAV endpoint: invalid scheme code": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Query length validation (pure logic)": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Quote endpoint: invalid symbol": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Request body size limit": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Scheme code validation (pure logic)": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Security headers present on every response": {
+        "Integration": 1,
+        "Unit": 0
+       },
+       "Symbol regex validation (pure logic)": {
+        "Integration": 0,
+        "Unit": 1
+       },
+       "Tool listing endpoint": {
+        "Integration": 1,
+        "Unit": 0
+       }
+      },
+      "design_coverage_by_area": {
+       "Calculator endpoint: domain error wrapping": 100,
+       "Calculator endpoint: malformed JSON body": 100,
+       "Calculator endpoint: unexpected exception hiding": 100,
+       "Calculator input validation: bounds and caps (pure logic)": 100,
+       "Currency code regex validation (pure logic)": 100,
+       "FX endpoint: invalid currency code": 0,
+       "Health check endpoint": 100,
+       "NAV endpoint: invalid query length": 0,
+       "NAV endpoint: invalid scheme code": 0,
+       "Query length validation (pure logic)": 100,
+       "Quote endpoint: invalid symbol": 0,
+       "Request body size limit": 100,
+       "Scheme code validation (pure logic)": 100,
+       "Security headers present on every response": 100,
+       "Symbol regex validation (pure logic)": 100,
+       "Tool listing endpoint": 100
+      },
+      "cases_per_scenario": {
+       "mean": 3.33
+      },
+      "similarity_median": 0.269
+     },
+     "suspects": [
+      {
+       "case": "TC-APP-005",
+       "scenario": "SC-I-007-001",
+       "similarity": 0,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-006",
+       "scenario": "SC-I-007-001",
+       "similarity": 0,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-013",
+       "scenario": "SC-U-001-001",
+       "similarity": 0.062,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-014",
+       "scenario": "SC-U-001-001",
+       "similarity": 0.061,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-035",
+       "scenario": "SC-U-001-001",
+       "similarity": 0.065,
+       "audit": "COVERS"
+      },
+      {
+       "case": "TC-APP-036",
+       "scenario": "SC-U-001-001",
+       "similarity": 0.06,
+       "audit": "COVERS"
+      }
+     ],
+     "duplicates": [],
+     "brief": "Gate 3 validation: FAIL (2 errors, 0 warnings).\n- plan scenarios with no designed case (12 of 16 designed): SC-I-011-001, SC-I-012-001, SC-I-013-001, SC-I-014-001\n- plan areas with no designed case at all: FX endpoint: invalid currency code, NAV endpoint: invalid query length, NAV endpoint: invalid scheme code, Quote endpoint: invalid symbol\nAudit these case/scenario pairs first (low similarity): TC-APP-005, TC-APP-006, TC-APP-013, TC-APP-014, TC-APP-035, TC-APP-036"
+    },
+    "error": null
+   },
+   "design_audit": {
+    "app": "prj_c515339f679c",
+    "reviewed": 40,
+    "audited": 40,
+    "counts": {
+     "COVERS": 35,
+     "PARTIAL": 5,
+     "MISSES": 0
+    },
+    "first_audit": {
+     "COVERS": 35,
+     "PARTIAL": 5,
+     "MISSES": 0
+    },
+    "redesigned": 0,
+    "unaudited": []
+   },
+   "trace": {
+    "stage": "data",
+    "upstream": 69,
+    "carried": 69,
+    "changed": 0,
+    "dropped_with_reason": 0,
+    "dropped_without_reason": 0,
+    "new": 0,
+    "verdict": "PASS"
+   },
+   "validation": null
+  },
+  {
+   "gate": 4,
+   "seconds": 69.9,
+   "title": "Gate 4: approve generated tests",
+   "summary": "40 of 40 cases have tests, on branch atlas/qe-acb3cd. Validity: 35 of 40 tests valid; 5 need review (V2b 1, V3 0, V4 0, V5 4, V6 0). Trace: 69 upstream items carried 69, 0 changed, 0 dropped with reason, 0 dropped without reason, 40 new. Tokens: 624,884 used of 50,000,000, 49,375,116 left.",
+   "plugin_check": null,
+   "design_audit": null,
+   "trace": {
+    "stage": "generate",
+    "upstream": 69,
+    "carried": 69,
+    "changed": 0,
+    "dropped_with_reason": 0,
+    "dropped_without_reason": 0,
+    "new": 40,
+    "verdict": "PASS"
+   },
+   "validation": {
+    "total": 40,
+    "valid": 35,
+    "invalid": 5,
+    "V2b": 1,
+    "V3": 0,
+    "V4": 0,
+    "V5": 4,
+    "V6": 0
+   }
+  },
+  {
+   "gate": 5,
+   "seconds": 0.7,
+   "title": "Gate 5: approve release",
+   "summary": "Verdict NOT EXECUTED: the platform did not run these tests. 13 of 13 requirements have a valid test; 40 cases, 40 tests, 35 valid, 5 need review (failed checks: V3 0, V4 0, V5 4, V6 0). Download the tests at /api/runs/run_ddee03acb3cd/tests.zip and run them with `python -m pytest tests/agentic_qe`. Trace: 109 upstream items carried 109, 0 changed, 0 dropped with reason, 0 dropped without reason, 0 new. Tokens: 624,884 used of 50,000,000, 49,375,116 left.",
+   "plugin_check": {
+    "ok": null,
+    "error": null,
+    "not_applicable": [
+     "plan scenarios with no designed case (12 of 16 designed): SC-I-011-001, SC-I-012-001, SC-I-013-001, SC-I-014-001 (not applicable: tests are not executed here)",
+     "cases the coverage auditor says do not cover their scenario: TC-APP-004 (PARTIAL), TC-APP-008 (PARTIAL), TC-APP-015 (PARTIAL), TC-APP-021 (PARTIAL), TC-APP-022 (PARTIAL) (not applicable: tests are not executed here)",
+     "generated tests with no code confidence review: TC-APP-001, TC-APP-002, TC-APP-003, TC-APP-004, TC-APP-005, TC-APP-006, TC-APP-007, TC-APP-008, TC-APP-009, TC-APP-010, TC-APP-011, TC-APP-012, TC-APP-013, TC-APP-014, TC-APP-015, TC-APP-016, TC-APP-017, TC-APP-018, TC-APP-019, TC-APP-020, TC-APP-021, TC-APP-022, TC-APP-023, TC-APP-024, TC-APP-025 and 15 more (not applicable: tests are not executed here)",
+     "05-generation/confidence.json was not recorded from the confidence-reviewer agent (not applicable: tests are not executed here)",
+     "05-generation/audit.json missing: run the coverage-auditor agent on the generated tests (not applicable: tests are not executed here)",
+     "designed cases with no test result (0 of 40 executed): TC-APP-001, TC-APP-002, TC-APP-003, TC-APP-004, TC-APP-005, TC-APP-006, TC-APP-007, TC-APP-008, TC-APP-009, TC-APP-010, TC-APP-011, TC-APP-012, TC-APP-013, TC-APP-014, TC-APP-015, TC-APP-016, TC-APP-017, TC-APP-018, TC-APP-019, TC-APP-020, TC-APP-021, TC-APP-022, TC-APP-023, TC-APP-024, TC-APP-025 and 15 more (not applicable: tests are not executed here)",
+     "SC-I-011-001 (not applicable: tests are not executed here)",
+     "SC-I-012-001 (not applicable: tests are not executed here)",
+     "SC-I-013-001 (not applicable: tests are not executed here)",
+     "SC-I-014-001 (not applicable: tests are not executed here)",
+     "TC-APP-004 (PARTIAL) (not applicable: tests are not executed here)",
+     "TC-APP-008 (PARTIAL) (not applicable: tests are not executed here)",
+     "TC-APP-015 (PARTIAL) (not applicable: tests are not executed here)",
+     "TC-APP-021 (PARTIAL) (not applicable: tests are not executed here)",
+     "TC-APP-022 (PARTIAL) (not applicable: tests are not executed here)",
+     "TC-APP-001 (not applicable: tests are not executed here)",
+     "TC-APP-002 (not applicable: tests are not executed here)",
+     "TC-APP-003 (not applicable: tests are not executed here)",
+     "TC-APP-004 (not applicable: tests are not executed here)",
+     "TC-APP-005 (not applicable: tests are not executed here)",
+     "TC-APP-006 (not applicable: tests are not executed here)",
+     "TC-APP-007 (not applicable: tests are not executed here)",
+     "TC-APP-008 (not applicable: tests are not executed here)",
+     "TC-APP-009 (not applicable: tests are not executed here)",
+     "TC-APP-010 (not applicable: tests are not executed here)",
+     "TC-APP-011 (not applicable: tests are not executed here)",
+     "TC-APP-012 (not applicable: tests are not executed here)",
+     "TC-APP-013 (not applicable: tests are not executed here)",
+     "TC-APP-014 (not applicable: tests are not executed here)",
+     "TC-APP-015 (not applicable: tests are not executed here)",
+     "TC-APP-016 (not applicable: tests are not executed here)",
+     "TC-APP-017 (not applicable: tests are not executed here)",
+     "TC-APP-018 (not applicable: tests are not executed here)",
+     "TC-APP-019 (not applicable: tests are not executed here)",
+     "TC-APP-020 (not applicable: tests are not executed here)",
+     "TC-APP-021 (not applicable: tests are not executed here)",
+     "TC-APP-022 (not applicable: tests are not executed here)",
+     "TC-APP-023 (not applicable: tests are not executed here)",
+     "TC-APP-024 (not applicable: tests are not executed here)",
+     "TC-APP-025 (not applicable: tests are not executed here)",
+     "TC-APP-026 (not applicable: tests are not executed here)",
+     "TC-APP-027 (not applicable: tests are not executed here)",
+     "TC-APP-028 (not applicable: tests are not executed here)",
+     "TC-APP-029 (not applicable: tests are not executed here)",
+     "TC-APP-030 (not applicable: tests are not executed here)",
+     "TC-APP-031 (not applicable: tests are not executed here)",
+     "TC-APP-032 (not applicable: tests are not executed here)",
+     "TC-APP-033 (not applicable: tests are not executed here)",
+     "TC-APP-034 (not applicable: tests are not executed here)",
+     "TC-APP-035 (not applicable: tests are not executed here)",
+     "TC-APP-036 (not applicable: tests are not executed here)",
+     "TC-APP-037 (not applicable: tests are not executed here)",
+     "TC-APP-038 (not applicable: tests are not executed here)",
+     "TC-APP-039 (not applicable: tests are not executed here)",
+     "TC-APP-040 (not applicable: tests are not executed here)"
+    ],
+    "note": "not applicable: tests are not executed here"
+   },
+   "design_audit": null,
+   "trace": {
+    "stage": "sign",
+    "upstream": 109,
+    "carried": 109,
+    "changed": 0,
+    "dropped_with_reason": 0,
+    "dropped_without_reason": 0,
+    "new": 0,
+    "verdict": "PASS"
+   },
+   "validation": {
+    "total": 40,
+    "valid": 35,
+    "invalid": 5,
+    "V2b": 1,
+    "V3": 0,
+    "V4": 0,
+    "V5": 4,
+    "V6": 0
+   },
+   "defect_records": null,
+   "execution_summary": null,
+   "failure_classes": null
+  }
+ ],
+ "started": "2026-11-14T22:18:50.900192",
+ "status": "completed",
+ "error": "",
+ "total_seconds": 481.9,
+ "summary": {
+  "verdict": "NOT EXECUTED",
+  "reason": "The tests are downloaded and run on the team's own systems; the platform only collects and compiles them",
+  "requirements": 13,
+  "requirements_with_valid_test": 13,
+  "cases": 40,
+  "tests": 40,
+  "valid": 35,
+  "needs_review": 5,
+  "by_check": {
+   "V3": 0,
+   "V4": 0,
+   "V5": 4,
+   "V6": 0
+  },
+  "gaps": []
+ },
+ "requirements": 13
+}

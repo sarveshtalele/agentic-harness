@@ -1,0 +1,121 @@
+{
+ "requirements": [
+  {
+   "id": "REQ-001",
+   "title": "Health check endpoint returns status and tool count",
+   "text": "GET /api/health returns a JSON response with status \"ok\" and the number of registered tools.",
+   "priority": "P1",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 227,
+   "quote": "    return JSONResponse({\"status\": \"ok\", \"tools\": len(mcp._tool_manager._tools)})"
+  },
+  {
+   "id": "REQ-002",
+   "title": "List tools returns categorized tool catalog",
+   "text": "GET /api/tools returns a JSON response with count, categories, and an ordered list of tools with name, category, and description.",
+   "priority": "P1",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 240,
+   "quote": "    return JSONResponse({\"count\": len(tools), \"categories\": categories, \"tools\": tools})"
+  },
+  {
+   "id": "REQ-003",
+   "title": "Calculator endpoint rejects invalid JSON body",
+   "text": "POST /api/calc with malformed JSON body returns 400 with error 'invalid JSON'.",
+   "priority": "P2",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 247,
+   "quote": "        return JSONResponse({\"error\": \"invalid JSON\"}, status_code=400)"
+  },
+  {
+   "id": "REQ-005",
+   "title": "Calculator endpoint sanitizes and bounds numeric inputs",
+   "text": "POST /api/calc with a numeric parameter exceeding 1e13 in absolute value returns 400 with an error message.",
+   "priority": "P1",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 210,
+   "quote": "                raise ValueError(f\"'{k}' is out of range\")"
+  },
+  {
+   "id": "REQ-006",
+   "title": "Calculators enforce DoS-related parameter caps",
+   "text": "POST /api/calc with a capped parameter (e.g. years > 120) returns 400 with an error message specifying the max value.",
+   "priority": "P1",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 213,
+   "quote": "                raise ValueError(f\"'{k}' must be ≤ {cap}\")"
+  },
+  {
+   "id": "REQ-007",
+   "title": "Calculator wraps domain errors into 400 response",
+   "text": "POST /api/calc when the calculator function raises ValueError, ZeroDivisionError, KeyError, or TypeError returns 400 with 'invalid inputs: <message>'.",
+   "priority": "P2",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 267,
+   "quote": "        return JSONResponse({\"error\": f\"invalid inputs: {e}\"}, status_code=400)"
+  },
+  {
+   "id": "REQ-008",
+   "title": "Calculator hides unexpected exceptions from client",
+   "text": "POST /api/calc when an unexpected exception occurs returns 400 with 'calculation failed'.",
+   "priority": "P1",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 273,
+   "quote": "        return JSONResponse({\"error\": \"calculation failed\"}, status_code=400)"
+  },
+  {
+   "id": "REQ-009",
+   "title": "NAV endpoint validates scheme code",
+   "text": "GET /api/nav with code parameter that is non-numeric or longer than 9 characters returns 400 with error 'invalid scheme code'.",
+   "priority": "P2",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 280,
+   "quote": "            return JSONResponse({\"error\": \"invalid scheme code\"}, status_code=400)"
+  },
+  {
+   "id": "REQ-010",
+   "title": "NAV search query length validated",
+   "text": "GET /api/nav with q parameter that is empty or longer than 80 characters returns 400 with error 'query must be 1–80 characters'.",
+   "priority": "P2",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 284,
+   "quote": "        return JSONResponse({\"error\": \"query must be 1–80 characters\"}, status_code=400)"
+  },
+  {
+   "id": "REQ-011",
+   "title": "FX rate endpoint rejects invalid currency codes",
+   "text": "GET /api/fx with base or symbols not matching the currency code pattern returns 400 with error 'invalid currency code'.",
+   "priority": "P2",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 292,
+   "quote": "        return JSONResponse({\"error\": \"invalid currency code\"}, status_code=400)"
+  },
+  {
+   "id": "REQ-012",
+   "title": "Quote endpoint validates symbol format",
+   "text": "GET /api/quote with symbol not matching the symbol pattern returns 400 with error 'invalid symbol'.",
+   "priority": "P2",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 299,
+   "quote": "        return JSONResponse({\"error\": \"invalid symbol\"}, status_code=400)"
+  },
+  {
+   "id": "REQ-013",
+   "title": "API request body size limited",
+   "text": "POST /api/* with content-length greater than 16 KB returns 413 with error 'payload too large'.",
+   "priority": "P1",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 151,
+   "quote": "                return await _send_json(send, 413, b'{\"error\":\"payload too large\"}')"
+  },
+  {
+   "id": "REQ-015",
+   "title": "Security headers added to every HTTP response",
+   "text": "Every HTTP response from the server includes security headers: X-Content-Type-Options, Referrer-Policy, Permissions-Policy, Strict-Transport-Security, Cross-Origin-Opener-Policy, and Content-Security-Policy.",
+   "priority": "P1",
+   "source_file": "repo/src/web/server.py",
+   "line_number": 171,
+   "quote": "                message[\"headers\"].extend(SEC_HEADERS)"
+  }
+ ]
+}

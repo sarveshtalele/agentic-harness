@@ -1,0 +1,172 @@
+{
+ "strategy": "This plan covers all P0 and P1 requirements for the personal-finance-mcp server, focusing on the health check, tool listing, calculator input validation and error handling, NAV/search/fx/quote input validation, request body size limit, and security headers. Since the project is a Python API server (FastAPI-like) with no UI layer, E2E browser testing is skipped. Unit tests use pytest for pure logic (input sanitation, currency/symbol regex checks). Integration tests use pytest with httpx TestClient to hit the ASGI app and verify HTTP status codes, JSON bodies, and header presence. No duplicate scenarios exist across levels.",
+ "scenarios": [
+  {
+   "id": "SC-U-001-001",
+   "area": "Calculator input validation: bounds and caps (pure logic)",
+   "title": "Calculator input validation: bounds and caps (pure logic)",
+   "level": "Unit",
+   "priority": "P1",
+   "requirementIds": [
+    "REQ-005",
+    "REQ-006"
+   ]
+  },
+  {
+   "id": "SC-U-002-001",
+   "area": "Scheme code validation (pure logic)",
+   "title": "Scheme code validation (pure logic)",
+   "level": "Unit",
+   "priority": "P2",
+   "requirementIds": [
+    "REQ-009"
+   ]
+  },
+  {
+   "id": "SC-U-003-001",
+   "area": "Query length validation (pure logic)",
+   "title": "Query length validation (pure logic)",
+   "level": "Unit",
+   "priority": "P2",
+   "requirementIds": [
+    "REQ-010"
+   ]
+  },
+  {
+   "id": "SC-U-004-001",
+   "area": "Currency code regex validation (pure logic)",
+   "title": "Currency code regex validation (pure logic)",
+   "level": "Unit",
+   "priority": "P2",
+   "requirementIds": [
+    "REQ-011"
+   ]
+  },
+  {
+   "id": "SC-U-005-001",
+   "area": "Symbol regex validation (pure logic)",
+   "title": "Symbol regex validation (pure logic)",
+   "level": "Unit",
+   "priority": "P2",
+   "requirementIds": [
+    "REQ-012"
+   ]
+  },
+  {
+   "id": "SC-I-006-001",
+   "area": "Health check endpoint",
+   "title": "Health check endpoint",
+   "level": "Integration",
+   "priority": "P1",
+   "requirementIds": [
+    "REQ-001"
+   ]
+  },
+  {
+   "id": "SC-I-007-001",
+   "area": "Tool listing endpoint",
+   "title": "Tool listing endpoint",
+   "level": "Integration",
+   "priority": "P1",
+   "requirementIds": [
+    "REQ-002"
+   ]
+  },
+  {
+   "id": "SC-I-008-001",
+   "area": "Calculator endpoint: malformed JSON body",
+   "title": "Calculator endpoint: malformed JSON body",
+   "level": "Integration",
+   "priority": "P2",
+   "requirementIds": [
+    "REQ-003"
+   ]
+  },
+  {
+   "id": "SC-I-009-001",
+   "area": "Calculator endpoint: domain error wrapping",
+   "title": "Calculator endpoint: domain error wrapping",
+   "level": "Integration",
+   "priority": "P2",
+   "requirementIds": [
+    "REQ-007"
+   ]
+  },
+  {
+   "id": "SC-I-010-001",
+   "area": "Calculator endpoint: unexpected exception hiding",
+   "title": "Calculator endpoint: unexpected exception hiding",
+   "level": "Integration",
+   "priority": "P1",
+   "requirementIds": [
+    "REQ-008"
+   ]
+  },
+  {
+   "id": "SC-I-011-001",
+   "area": "NAV endpoint: invalid scheme code",
+   "title": "NAV endpoint: invalid scheme code",
+   "level": "Integration",
+   "priority": "P2",
+   "requirementIds": [
+    "REQ-009"
+   ]
+  },
+  {
+   "id": "SC-I-012-001",
+   "area": "NAV endpoint: invalid query length",
+   "title": "NAV endpoint: invalid query length",
+   "level": "Integration",
+   "priority": "P2",
+   "requirementIds": [
+    "REQ-010"
+   ]
+  },
+  {
+   "id": "SC-I-013-001",
+   "area": "FX endpoint: invalid currency code",
+   "title": "FX endpoint: invalid currency code",
+   "level": "Integration",
+   "priority": "P2",
+   "requirementIds": [
+    "REQ-011"
+   ]
+  },
+  {
+   "id": "SC-I-014-001",
+   "area": "Quote endpoint: invalid symbol",
+   "title": "Quote endpoint: invalid symbol",
+   "level": "Integration",
+   "priority": "P2",
+   "requirementIds": [
+    "REQ-012"
+   ]
+  },
+  {
+   "id": "SC-I-015-001",
+   "area": "Request body size limit",
+   "title": "Request body size limit",
+   "level": "Integration",
+   "priority": "P1",
+   "requirementIds": [
+    "REQ-013"
+   ]
+  },
+  {
+   "id": "SC-I-016-001",
+   "area": "Security headers present on every response",
+   "title": "Security headers present on every response",
+   "level": "Integration",
+   "priority": "P1",
+   "requirementIds": [
+    "REQ-015"
+   ]
+  }
+ ],
+ "skippedLevels": [
+  {
+   "level": "E2E",
+   "reason": "No browser UI or multi-screen customer journey exists; the server is a JSON API with no frontend. All scenarios are provable at Unit or Integration level."
+  }
+ ]
+}

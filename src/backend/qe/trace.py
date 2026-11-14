@@ -1,6 +1,8 @@
 """Traceability matrix and release score, ported from build-matrix.ts and the plugin's verdict rules."""
 from __future__ import annotations
 
+from backend.qe import validity
+
 import re
 
 CASE_ID = re.compile(r"TC[-_][\w-]*\d+", re.I)
@@ -83,4 +85,4 @@ def not_executed_summary(matrix: dict, cases: list[dict], tests: list[dict], val
     rows = matrix["rows"]
     return {"verdict": NOT_EXECUTED, "reason": "The tests are downloaded and run on the team's own systems; the platform only collects and compiles them",
             "requirements": len(rows), "requirements_with_valid_test": sum(r["covered"] for r in rows), "cases": len(cases), "tests": len(tests),
-            "valid": counts.get("valid", 0), "needs_review": counts.get("invalid", 0), "by_check": {k: counts.get(k, 0) for k in ("V3", "V4", "V5", "V6")}, "gaps": matrix["gaps"]}
+            "valid": counts.get("valid", 0), "needs_review": counts.get("invalid", 0), "by_check": {k: counts.get(k, 0) for k in validity.CHECKS}, "gaps": matrix["gaps"]}

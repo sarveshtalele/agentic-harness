@@ -1,0 +1,1201 @@
+{
+ "_capture": {
+  "agent_type": "confidence-reviewer",
+  "agent_id": "run_ddee03acb3cd:design",
+  "at": "2026-11-14T16:55:41.289131+00:00",
+  "sha256": "608a0acc9cd576b9b6552978dc87ff6976833ef3df3d386db4e8c94861d4d8c0",
+  "note": "Recorded by Agentic QE Platform from the agent's own checked answer. Do not edit."
+ },
+ "kind": "design",
+ "items": [
+  {
+   "tc_id": "TC-APP-001",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 226,
+    "symbol": "health"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-002",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 226,
+    "symbol": "health"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-003",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 226,
+    "symbol": "health"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 20,
+    "fixture_validity": 20
+   },
+   "claimed_total": 95,
+   "total": 95,
+   "verdict": "REVISE",
+   "scored_verdict": "REVISE",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [
+    {
+     "dimension": "expected_derivable",
+     "evidence": "src/web/server.py:227",
+     "fix": "The code just returns len(mcp._tool_manager._tools). Nothing in the source shows a boundary at 1000 or any capacity limit; the test's 'large number' is arbitrary. Either cite a requirement/configuration cap that justifies 1000 or reduce the number to a realistic max from the spec (e.g., the number of supported calculators).",
+     "file": "src/web/server.py",
+     "line": 227
+    }
+   ],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-004",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 226,
+    "symbol": "health"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 20,
+    "fixture_validity": 15
+   },
+   "claimed_total": 90,
+   "total": 90,
+   "verdict": "REVISE",
+   "scored_verdict": "REVISE",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [
+    {
+     "dimension": "expected_derivable",
+     "evidence": "src/web/server.py:227",
+     "fix": "The code does not explicitly handle `None` for _tools; it would raise an AttributeError (or TypeError) but not return status 500 with an error JSON. The expected result is therefore not derivable from the source shown. The test should either rely on documented error handling or the oracle should be 'derived' if such handling exists elsewhere.",
+     "file": "src/web/server.py",
+     "line": 227
+    },
+    {
+     "dimension": "fixture_validity",
+     "evidence": "src/web/server.py:227",
+     "fix": "Setting `mcp._tool_manager._tools to None` is an unnatural state; the real `_tool_manager` likely expects a dict. The test would crash before reaching the handler. Use a mock that raises an exception on attribute access, or adjust the state to something realistic (e.g., an empty dict that somehow causes the server to behave as specified).",
+     "file": "src/web/server.py",
+     "line": 227
+    }
+   ],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-005",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 230,
+    "symbol": "list_tools"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 20,
+    "fixture_validity": 20
+   },
+   "claimed_total": 95,
+   "total": 95,
+   "verdict": "REVISE",
+   "scored_verdict": "REVISE",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [
+    {
+     "dimension": "expected_derivable",
+     "evidence": "src/web/server.py:233",
+     "fix": "The test expects `categories` to be a list, but the source (line 237-239) builds a dict, not a list. The expected result does not match the code. Fix by correcting the expected type to dict, e.g., `{\"category_name\": count, ...}`.",
+     "file": "src/web/server.py",
+     "line": 233
+    }
+   ],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-006",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 230,
+    "symbol": "list_tools"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-007",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 230,
+    "symbol": "list_tools"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 20,
+    "fixture_validity": 20
+   },
+   "claimed_total": 95,
+   "total": 95,
+   "verdict": "REVISE",
+   "scored_verdict": "REVISE",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [
+    {
+     "dimension": "expected_derivable",
+     "evidence": "src/web/server.py:237",
+     "fix": "The test expects `categories` to be a list, but the source builds a dict. Correct the expected result to a dict with one key and value 1.",
+     "file": "src/web/server.py",
+     "line": 237
+    }
+   ],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-008",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 230,
+    "symbol": "list_tools"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 20,
+    "fixture_validity": 15
+   },
+   "claimed_total": 90,
+   "total": 90,
+   "verdict": "REVISE",
+   "scored_verdict": "REVISE",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [
+    {
+     "dimension": "expected_derivable",
+     "evidence": "src/web/server.py:231-232",
+     "fix": "Setting `_tools` to `None` would cause an AttributeError when iterating (`mcp._tool_manager._tools.items()`), not a 500 JSON error. The expected result is not derivable from the source shown. Either document the server's error-handling contract or change the oracle to 'derived' from an error-handling spec.",
+     "file": "src/web/server.py",
+     "line": 231
+    },
+    {
+     "dimension": "fixture_validity",
+     "evidence": "src/web/server.py:231",
+     "fix": "Setting `_tool_manager._tools` to `None` is unrealistic—the tool manager expects a dict. The handler will crash before it can produce a JSON response. Use a proper mock that simulates an internal error (e.g., a property that raises Exception) to trigger the intended fault path.",
+     "file": "src/web/server.py",
+     "line": 231
+    }
+   ],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-009",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 243,
+    "symbol": "run_calc"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-010",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 243,
+    "symbol": "run_calc"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-011",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 212,
+    "symbol": "_sanitize_params"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-012",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 212,
+    "symbol": "_sanitize_params"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-013",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 213,
+    "symbol": "_sanitize_params"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-014",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 213,
+    "symbol": "_sanitize_params"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-015",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 265,
+    "symbol": "run_calc"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-016",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 265,
+    "symbol": "run_calc"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-017",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 268,
+    "symbol": "run_calc"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-018",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 268,
+    "symbol": "run_calc"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-019",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 268,
+    "symbol": "run_calc"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-020",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 268,
+    "symbol": "run_calc"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-021",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 279,
+    "symbol": "api_nav"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-022",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 279,
+    "symbol": "api_nav"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-023",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 283,
+    "symbol": "api_nav"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-024",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 283,
+    "symbol": "api_nav"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-025",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 291,
+    "symbol": "api_fx"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-026",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 291,
+    "symbol": "api_fx"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-027",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 298,
+    "symbol": "api_quote"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-028",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 298,
+    "symbol": "api_quote"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-029",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 171,
+    "symbol": "send_wrapper"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-030",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 171,
+    "symbol": "send_wrapper"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-031",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 171,
+    "symbol": "send_wrapper"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 20,
+    "fixture_validity": 15
+   },
+   "claimed_total": 90,
+   "total": 90,
+   "verdict": "REVISE",
+   "scored_verdict": "REVISE",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [
+    {
+     "dimension": "expected_derivable",
+     "evidence": "src/web/server.py:171",
+     "fix": "The expected_result mentions 'Content-Security-Policy' but the source defines SEC_HEADERS with six headers at line 171; the exact header name should be verified against the constant definition, which may spell it differently.",
+     "file": "src/web/server.py",
+     "line": 171
+    },
+    {
+     "dimension": "fixture_validity",
+     "evidence": "src/web/server.py:148",
+     "fix": "Precondition and test_data mention 'binary garbage that is not valid JSON'. The code at line 148 reads Content-Type but does not parse JSON in the middleware; the test data should be valid for the ASGI scope (bytes) and the expected response may depend on the endpoint logic, not just the middleware. Clarify or adjust the test data to match the actual code path.",
+     "file": "src/web/server.py",
+     "line": 148
+    }
+   ],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-032",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 171,
+    "symbol": "send_wrapper"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 20,
+    "fixture_validity": 20
+   },
+   "claimed_total": 95,
+   "total": 95,
+   "verdict": "REVISE",
+   "scored_verdict": "REVISE",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [
+    {
+     "dimension": "expected_derivable",
+     "evidence": "src/web/server.py:171",
+     "fix": "The precondition and scenario claim the header middleware runs before method routing, but the code at line 168-172 shows headers are added in send_wrapper after the app (route) processes the request. The 405 is sent by the route handler, but the middleware adds headers to the start message; the expected status and header presence are correct but the precondition about order is not derivable from this code alone. Remove or reword the precondition to avoid implying a specific middleware ordering that is not shown.",
+     "file": "src/web/server.py",
+     "line": 171
+    }
+   ],
+   "problems": [],
+   "status": "reviewed",
+   "round": 1
+  },
+  {
+   "tc_id": "TC-APP-033",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 209,
+    "symbol": "_sanitize_params"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 20,
+    "fixture_validity": 20
+   },
+   "claimed_total": 95,
+   "total": 95,
+   "verdict": "REVISE",
+   "scored_verdict": "REVISE",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [
+    {
+     "dimension": "expected_derivable",
+     "evidence": "src/web/server.py:209",
+     "fix": "The value 1e13 (10000000000000) equals ABS_MAX, so the check 'abs(v) > ABS_MAX' is false for this input; the expected result should state that it passes (returns True/clean value), not that it raises an exception. Either the test data should exceed ABS_MAX to test the rejection boundary, or the expected result should reflect acceptance.",
+     "file": "src/web/server.py",
+     "line": 209
+    }
+   ],
+   "problems": [],
+   "status": "reviewed"
+  },
+  {
+   "tc_id": "TC-APP-034",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 209,
+    "symbol": "_sanitize_params"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed"
+  },
+  {
+   "tc_id": "TC-APP-035",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 209,
+    "symbol": "_sanitize_params"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 20,
+    "fixture_validity": 20
+   },
+   "claimed_total": 95,
+   "total": 95,
+   "verdict": "REVISE",
+   "scored_verdict": "REVISE",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [
+    {
+     "dimension": "expected_derivable",
+     "evidence": "src/web/server.py:209",
+     "fix": "The code raises ValueError with message containing 'out of range', not necessarily an exact string; the test should specify 'out of range' (or the entire message) and the oracle should be 'specified' since the code defines the error message, not that it is derived.",
+     "file": "src/web/server.py",
+     "line": 209
+    }
+   ],
+   "problems": [],
+   "status": "reviewed"
+  },
+  {
+   "tc_id": "TC-APP-036",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 209,
+    "symbol": "_sanitize_params"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 20,
+    "fixture_validity": 20
+   },
+   "claimed_total": 95,
+   "total": 95,
+   "verdict": "REVISE",
+   "scored_verdict": "REVISE",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [
+    {
+     "dimension": "expected_derivable",
+     "evidence": "src/web/server.py:209",
+     "fix": "The code raises ValueError with message containing 'out of range' for input -10000000000000; the test data is exactly at the boundary (abs(v)==ABS_MAX) so it does not trigger the rejection; change test data to -10000000000001 to actually exceed the boundary, or change expected result to acceptance if the boundary is inclusive. Also, the oracle should be 'specified' since the error message is defined in the code.",
+     "file": "src/web/server.py",
+     "line": 209
+    }
+   ],
+   "problems": [],
+   "status": "reviewed"
+  },
+  {
+   "tc_id": "TC-APP-037",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 151,
+    "symbol": "SecurityMiddleware.__call__"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 15,
+    "fixture_validity": 20
+   },
+   "claimed_total": 90,
+   "total": 90,
+   "verdict": "REVISE",
+   "scored_verdict": "REVISE",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [
+    {
+     "dimension": "expected_derivable",
+     "evidence": "src/web/server.py:151",
+     "fix": "The code checks 'int(cl) > MAX_BODY', where MAX_BODY is 16384. A payload of exactly 16384 bytes will pass the check and reach the app; the expected result (Status 200) is correct but the oracle 'metamorphic' is not justified—the result is directly specified by the code's behavior, so use 'specified'. Also clarify the nature of 'metamorphic' if intended as a relation between requests, but here there is no second request to compare.",
+     "file": "src/web/server.py",
+     "line": 151
+    }
+   ],
+   "problems": [],
+   "status": "reviewed"
+  },
+  {
+   "tc_id": "TC-APP-038",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 151,
+    "symbol": "SecurityMiddleware.__call__"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed"
+  },
+  {
+   "tc_id": "TC-APP-039",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 151,
+    "symbol": "SecurityMiddleware.__call__"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 25,
+    "fixture_validity": 20
+   },
+   "claimed_total": 100,
+   "total": 100,
+   "verdict": "APPROVED",
+   "scored_verdict": "APPROVED",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [],
+   "problems": [],
+   "status": "reviewed"
+  },
+  {
+   "tc_id": "TC-APP-040",
+   "kind": "design",
+   "file": "src/web/server.py",
+   "component": {
+    "file": "src/web/server.py",
+    "line": 150,
+    "symbol": "SecurityMiddleware.__call__"
+   },
+   "scores": {
+    "source_proven": 30,
+    "correct_target": 25,
+    "expected_derivable": 20,
+    "fixture_validity": 20
+   },
+   "claimed_total": 95,
+   "total": 95,
+   "verdict": "REVISE",
+   "scored_verdict": "REVISE",
+   "evidence": "verified",
+   "low": false,
+   "low_reason": "",
+   "flaws": [
+    {
+     "dimension": "expected_derivable",
+     "evidence": "src/web/server.py:150",
+     "fix": "An empty body (0 bytes) will result in 'cl.isdigit()' being false (since '' is not digit), so the check is skipped; the request goes through to the app, which will try to parse the empty body as JSON and likely return 400 'invalid JSON'. The expected result 'Status 400 (or other error) due to missing/invalid input, but not 413' is vague and not precise; the oracle should be 'derived' or 'specified' based on the error handling in run_calc (line 247). The expected result should be precise: Status 400 with error 'invalid JSON', as derived from the code at line 247.",
+     "file": "src/web/server.py",
+     "line": 150
+    }
+   ],
+   "problems": [],
+   "status": "reviewed"
+  }
+ ]
+}

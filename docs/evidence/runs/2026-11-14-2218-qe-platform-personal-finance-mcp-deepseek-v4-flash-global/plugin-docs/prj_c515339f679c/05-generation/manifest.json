@@ -1,0 +1,244 @@
+{
+ "files": [
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_health_TC_APP_001.py",
+   "caseIds": [
+    "TC-APP-001"
+   ]
+  },
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_health_TC_APP_002.py",
+   "caseIds": [
+    "TC-APP-002"
+   ]
+  },
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_health_TC_APP_003.py",
+   "caseIds": [
+    "TC-APP-003"
+   ]
+  },
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_health_TC_APP_004.py",
+   "caseIds": [
+    "TC-APP-004"
+   ]
+  },
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_tools_TC_APP_005.py",
+   "caseIds": [
+    "TC-APP-005"
+   ]
+  },
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_tools_TC_APP_006.py",
+   "caseIds": [
+    "TC-APP-006"
+   ]
+  },
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_tools_TC_APP_007.py",
+   "caseIds": [
+    "TC-APP-007"
+   ]
+  },
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_tools_TC_APP_008.py",
+   "caseIds": [
+    "TC-APP-008"
+   ]
+  },
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_calc_malformed_json_body_tc_app_009.py",
+   "caseIds": [
+    "TC-APP-009"
+   ]
+  },
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_calc_empty_json_body_tc_app_010.py",
+   "caseIds": [
+    "TC-APP-010"
+   ]
+  },
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_calc_years_within_cap_tc_app_011.py",
+   "caseIds": [
+    "TC-APP-011"
+   ]
+  },
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_calc_years_at_cap_tc_app_012.py",
+   "caseIds": [
+    "TC-APP-012"
+   ]
+  },
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_calc_years_above_cap_tc_app_013.py",
+   "caseIds": [
+    "TC-APP-013"
+   ]
+  },
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_calc_years_far_above_cap_tc_app_014.py",
+   "caseIds": [
+    "TC-APP-014"
+   ]
+  },
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_calc_division_by_zero_400_tc_app_015.py",
+   "caseIds": [
+    "TC-APP-015"
+   ]
+  },
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_calc_sqrt_negative_400_tc_app_016.py",
+   "caseIds": [
+    "TC-APP-016"
+   ]
+  },
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_calc_crash_tc_app_017.py",
+   "caseIds": [
+    "TC-APP-017"
+   ]
+  },
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_calc_crash_tc_app_018.py",
+   "caseIds": [
+    "TC-APP-018"
+   ]
+  },
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_calc_crash_tc_app_019.py",
+   "caseIds": [
+    "TC-APP-019"
+   ]
+  },
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_calc_crash_tc_app_020.py",
+   "caseIds": [
+    "TC-APP-020"
+   ]
+  },
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_scheme_code_tc_app_021.py",
+   "caseIds": [
+    "TC-APP-021"
+   ]
+  },
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_scheme_code_tc_app_022.py",
+   "caseIds": [
+    "TC-APP-022"
+   ]
+  },
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_query_length_tc_app_023.py",
+   "caseIds": [
+    "TC-APP-023"
+   ]
+  },
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_query_length_tc_app_024.py",
+   "caseIds": [
+    "TC-APP-024"
+   ]
+  },
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_ccy_re_TC_APP_025.py",
+   "caseIds": [
+    "TC-APP-025"
+   ]
+  },
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_ccy_re_TC_APP_026.py",
+   "caseIds": [
+    "TC-APP-026"
+   ]
+  },
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_symbol_re_TC_APP_027.py",
+   "caseIds": [
+    "TC-APP-027"
+   ]
+  },
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_symbol_re_TC_APP_028.py",
+   "caseIds": [
+    "TC-APP-028"
+   ]
+  },
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_security_headers_health_TC_APP_029.py",
+   "caseIds": [
+    "TC-APP-029"
+   ]
+  },
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_security_headers_404_TC_APP_030.py",
+   "caseIds": [
+    "TC-APP-030"
+   ]
+  },
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_security_headers_400_malformed_TC_APP_031.py",
+   "caseIds": [
+    "TC-APP-031"
+   ]
+  },
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_security_headers_405_TC_APP_032.py",
+   "caseIds": [
+    "TC-APP-032"
+   ]
+  },
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_validate_TC_APP_033.py",
+   "caseIds": [
+    "TC-APP-033"
+   ]
+  },
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_validate_TC_APP_034.py",
+   "caseIds": [
+    "TC-APP-034"
+   ]
+  },
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_validate_TC_APP_035.py",
+   "caseIds": [
+    "TC-APP-035"
+   ]
+  },
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_validate_TC_APP_036.py",
+   "caseIds": [
+    "TC-APP-036"
+   ]
+  },
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_api_body_TC_APP_037.py",
+   "caseIds": [
+    "TC-APP-037"
+   ]
+  },
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_api_body_TC_APP_038.py",
+   "caseIds": [
+    "TC-APP-038"
+   ]
+  },
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_api_body_TC_APP_039.py",
+   "caseIds": [
+    "TC-APP-039"
+   ]
+  },
+  {
+   "path": "worktrees/run_ddee03acb3cd/tests/agentic_qe/test_api_body_TC_APP_040.py",
+   "caseIds": [
+    "TC-APP-040"
+   ]
+  }
+ ]
+}

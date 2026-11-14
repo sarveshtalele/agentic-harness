@@ -1,0 +1,178 @@
+{
+ "validator": "1.6.0",
+ "gate": 5,
+ "ok": false,
+ "errors": [
+  {
+   "check": "design.coverage",
+   "message": "plan scenarios with no designed case (12 of 16 designed)",
+   "ids": [
+    "SC-I-011-001",
+    "SC-I-012-001",
+    "SC-I-013-001",
+    "SC-I-014-001"
+   ]
+  },
+  {
+   "check": "design.areas",
+   "message": "plan areas with no designed case at all",
+   "ids": [
+    "FX endpoint: invalid currency code",
+    "NAV endpoint: invalid query length",
+    "NAV endpoint: invalid scheme code",
+    "Quote endpoint: invalid symbol"
+   ]
+  },
+  {
+   "check": "results.coverage",
+   "message": "designed cases with no test result (0 of 40 executed)",
+   "ids": [
+    "TC-APP-001..TC-APP-040"
+   ]
+  }
+ ],
+ "warnings": [],
+ "metrics": {
+  "requirements": 13,
+  "scenarios": 16,
+  "cases": 40,
+  "test_files": 40,
+  "results": 0,
+  "repo_test_files": 62,
+  "repo_tests": 314,
+  "existing": 22,
+  "generated": 40,
+  "manual": 0,
+  "plan_by_area_level": {
+   "Calculator endpoint: domain error wrapping": {
+    "Integration": 1,
+    "Unit": 0
+   },
+   "Calculator endpoint: malformed JSON body": {
+    "Integration": 1,
+    "Unit": 0
+   },
+   "Calculator endpoint: unexpected exception hiding": {
+    "Integration": 1,
+    "Unit": 0
+   },
+   "Calculator input validation: bounds and caps (pure logic)": {
+    "Integration": 0,
+    "Unit": 1
+   },
+   "Currency code regex validation (pure logic)": {
+    "Integration": 0,
+    "Unit": 1
+   },
+   "FX endpoint: invalid currency code": {
+    "Integration": 1,
+    "Unit": 0
+   },
+   "Health check endpoint": {
+    "Integration": 1,
+    "Unit": 0
+   },
+   "NAV endpoint: invalid query length": {
+    "Integration": 1,
+    "Unit": 0
+   },
+   "NAV endpoint: invalid scheme code": {
+    "Integration": 1,
+    "Unit": 0
+   },
+   "Query length validation (pure logic)": {
+    "Integration": 0,
+    "Unit": 1
+   },
+   "Quote endpoint: invalid symbol": {
+    "Integration": 1,
+    "Unit": 0
+   },
+   "Request body size limit": {
+    "Integration": 1,
+    "Unit": 0
+   },
+   "Scheme code validation (pure logic)": {
+    "Integration": 0,
+    "Unit": 1
+   },
+   "Security headers present on every response": {
+    "Integration": 1,
+    "Unit": 0
+   },
+   "Symbol regex validation (pure logic)": {
+    "Integration": 0,
+    "Unit": 1
+   },
+   "Tool listing endpoint": {
+    "Integration": 1,
+    "Unit": 0
+   }
+  },
+  "design_coverage_by_area": {
+   "Calculator endpoint: domain error wrapping": 100,
+   "Calculator endpoint: malformed JSON body": 100,
+   "Calculator endpoint: unexpected exception hiding": 100,
+   "Calculator input validation: bounds and caps (pure logic)": 100,
+   "Currency code regex validation (pure logic)": 100,
+   "FX endpoint: invalid currency code": 0,
+   "Health check endpoint": 100,
+   "NAV endpoint: invalid query length": 0,
+   "NAV endpoint: invalid scheme code": 0,
+   "Query length validation (pure logic)": 100,
+   "Quote endpoint: invalid symbol": 0,
+   "Request body size limit": 100,
+   "Scheme code validation (pure logic)": 100,
+   "Security headers present on every response": 100,
+   "Symbol regex validation (pure logic)": 100,
+   "Tool listing endpoint": 100
+  },
+  "cases_per_scenario": {
+   "mean": 3.33
+  },
+  "similarity_median": 0.269,
+  "to_generate": 0,
+  "passed": 0,
+  "failed": 0
+ },
+ "suspects": [
+  {
+   "case": "TC-APP-005",
+   "scenario": "SC-I-007-001",
+   "similarity": 0,
+   "audit": "COVERS"
+  },
+  {
+   "case": "TC-APP-006",
+   "scenario": "SC-I-007-001",
+   "similarity": 0,
+   "audit": "COVERS"
+  },
+  {
+   "case": "TC-APP-013",
+   "scenario": "SC-U-001-001",
+   "similarity": 0.062,
+   "audit": "COVERS"
+  },
+  {
+   "case": "TC-APP-014",
+   "scenario": "SC-U-001-001",
+   "similarity": 0.061,
+   "audit": "COVERS"
+  },
+  {
+   "case": "TC-APP-035",
+   "scenario": "SC-U-001-001",
+   "similarity": 0.065,
+   "audit": "COVERS"
+  },
+  {
+   "case": "TC-APP-036",
+   "scenario": "SC-U-001-001",
+   "similarity": 0.06,
+   "audit": "COVERS"
+  }
+ ],
+ "duplicates": [],
+ "brief": "Gate 5 validation: FAIL (3 errors, 0 warnings).\n- plan scenarios with no designed case (12 of 16 designed): SC-I-011-001, SC-I-012-001, SC-I-013-001, SC-I-014-001\n- plan areas with no designed case at all: FX endpoint: invalid currency code, NAV endpoint: invalid query length, NAV endpoint: invalid scheme code, Quote endpoint: invalid symbol\n- designed cases with no test result (0 of 40 executed): TC-APP-001..TC-APP-040\nAudit these case/scenario pairs first (low similarity): TC-APP-005, TC-APP-006, TC-APP-013, TC-APP-014, TC-APP-035, TC-APP-036"
+}

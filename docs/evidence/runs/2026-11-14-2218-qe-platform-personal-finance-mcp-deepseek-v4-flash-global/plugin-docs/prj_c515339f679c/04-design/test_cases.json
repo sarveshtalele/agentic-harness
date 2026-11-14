@@ -1,0 +1,716 @@
+{
+ "cases": [
+  {
+   "tc_id": "TC-APP-001",
+   "requirement_id": "REQ-001",
+   "planScenarioIds": [
+    "SC-I-006-001"
+   ],
+   "scenario": "Health check with server running and at least one tool registered",
+   "type": "Positive",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "MCP server is initialized with at least one tool registered",
+   "test_data": "",
+   "steps": [
+    "Send GET request to /api/health"
+   ],
+   "expected_result": "Response status is 200; JSON body contains 'status' equal to 'ok' and 'tools' is an integer greater than 0"
+  },
+  {
+   "tc_id": "TC-APP-002",
+   "requirement_id": "REQ-001",
+   "planScenarioIds": [
+    "SC-I-006-001"
+   ],
+   "scenario": "Health check when tool manager has zero tools registered",
+   "type": "Negative (Boundary)",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "MCP server is initialized with an empty tool manager (no tools registered)",
+   "test_data": "",
+   "steps": [
+    "Send GET request to /api/health"
+   ],
+   "expected_result": "Response status is 200; JSON body contains 'status' equal to 'ok' and 'tools' equal to 0"
+  },
+  {
+   "tc_id": "TC-APP-003",
+   "requirement_id": "REQ-001",
+   "planScenarioIds": [
+    "SC-I-006-001"
+   ],
+   "scenario": "Health check with multiple tools registered (boundary for large count)",
+   "type": "Negative (Boundary)",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "MCP server is initialized with a large number of tools (e.g., 1000) registered",
+   "test_data": "",
+   "steps": [
+    "Send GET request to /api/health"
+   ],
+   "expected_result": "Response status is 200; JSON body contains 'status' equal to 'ok' and 'tools' equal to 1000"
+  },
+  {
+   "tc_id": "TC-APP-004",
+   "requirement_id": "REQ-001",
+   "planScenarioIds": [
+    "SC-I-006-001"
+   ],
+   "scenario": "Health check with server not initialized (simulated by directly calling the endpoint with no tools registered)",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P2",
+   "precondition": "MCP server is initialized but the tool manager is in an invalid state (e.g., None)",
+   "test_data": "",
+   "steps": [
+    "Set mcp._tool_manager._tools to None",
+    "Send GET request to /api/health"
+   ],
+   "expected_result": "Response status is 500; JSON body contains an error message"
+  },
+  {
+   "tc_id": "TC-APP-005",
+   "requirement_id": "REQ-002",
+   "planScenarioIds": [
+    "SC-I-007-001"
+   ],
+   "scenario": "List tools with server running and multiple tools registered",
+   "type": "Positive",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "MCP server is initialized with at least two tools in different categories",
+   "test_data": "",
+   "steps": [
+    "Send GET request to /api/tools"
+   ],
+   "expected_result": "Response status is 200; JSON body contains 'count' equal to number of registered tools, 'categories' is a non-empty list, 'tools' is a list of objects each with 'name', 'category', and 'description'"
+  },
+  {
+   "tc_id": "TC-APP-006",
+   "requirement_id": "REQ-002",
+   "planScenarioIds": [
+    "SC-I-007-001"
+   ],
+   "scenario": "List tools when no tools are registered",
+   "type": "Negative (Boundary)",
+   "level": "Integration",
+   "priority": "P2",
+   "precondition": "MCP server is initialized with zero tools registered",
+   "test_data": "",
+   "steps": [
+    "Send GET request to /api/tools"
+   ],
+   "expected_result": "Response status is 200; JSON body contains 'count' equal to 0, 'categories' is an empty list, 'tools' is an empty list"
+  },
+  {
+   "tc_id": "TC-APP-007",
+   "requirement_id": "REQ-002",
+   "planScenarioIds": [
+    "SC-I-007-001"
+   ],
+   "scenario": "List tools with a single tool registered",
+   "type": "Negative (Boundary)",
+   "level": "Integration",
+   "priority": "P2",
+   "precondition": "MCP server is initialized with exactly one tool registered",
+   "test_data": "",
+   "steps": [
+    "Send GET request to /api/tools"
+   ],
+   "expected_result": "Response status is 200; JSON body contains 'count' equal to 1, 'categories' list with one entry, 'tools' list with one object"
+  },
+  {
+   "tc_id": "TC-APP-008",
+   "requirement_id": "REQ-002",
+   "planScenarioIds": [
+    "SC-I-007-001"
+   ],
+   "scenario": "List tools when tool manager is in invalid state (None)",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P2",
+   "precondition": "MCP server is initialized but the tool manager has _tools set to None",
+   "test_data": "",
+   "steps": [
+    "Set mcp._tool_manager._tools to None",
+    "Send GET request to /api/tools"
+   ],
+   "expected_result": "Response status is 500; JSON body contains an error message"
+  },
+  {
+   "tc_id": "TC-APP-009",
+   "requirement_id": "REQ-003",
+   "planScenarioIds": [
+    "SC-I-008-001"
+   ],
+   "scenario": "Calculator endpoint with malformed JSON body",
+   "type": "Exception",
+   "level": "Integration",
+   "priority": "P2",
+   "precondition": "Server is running and accepting requests",
+   "test_data": "{\"expr\": \"2+2\", \"trailing garbage\"}",
+   "steps": [
+    "Send POST request to /api/calc with body set to the test data and Content-Type: application/json"
+   ],
+   "expected_result": "Response status is 400; JSON body contains 'error' equal to 'invalid JSON'"
+  },
+  {
+   "tc_id": "TC-APP-010",
+   "requirement_id": "REQ-003",
+   "planScenarioIds": [
+    "SC-I-008-001"
+   ],
+   "scenario": "Calculator endpoint with empty JSON body",
+   "type": "Negative (Boundary)",
+   "level": "Integration",
+   "priority": "P2",
+   "precondition": "Server is running and accepting requests",
+   "test_data": "",
+   "steps": [
+    "Send POST request to /api/calc with empty body and Content-Type: application/json"
+   ],
+   "expected_result": "Response status is 400; JSON body contains 'error' equal to 'invalid JSON'"
+  },
+  {
+   "tc_id": "TC-APP-011",
+   "requirement_id": "REQ-006",
+   "planScenarioIds": [
+    "SC-U-001-001"
+   ],
+   "scenario": "Positive: years parameter within cap (120) succeeds",
+   "type": "Positive",
+   "level": "Unit",
+   "priority": "P1",
+   "precondition": "Calculator function accepts parameters, cap validation is active",
+   "test_data": "{\"years\": 100}",
+   "steps": [
+    "Call the validation function with parameters {'years': 100} and cap {'years': 120}",
+    "Assert no exception raised"
+   ],
+   "expected_result": "Validation passes, no ValueError raised"
+  },
+  {
+   "tc_id": "TC-APP-012",
+   "requirement_id": "REQ-006",
+   "planScenarioIds": [
+    "SC-U-001-001"
+   ],
+   "scenario": "Negative (Boundary): years exactly at cap (120) succeeds",
+   "type": "Negative (Boundary)",
+   "level": "Unit",
+   "priority": "P1",
+   "precondition": "Calculator function accepts parameters, cap validation is active",
+   "test_data": "{\"years\": 120}",
+   "steps": [
+    "Call the validation function with parameters {'years': 120} and cap {'years': 120}",
+    "Assert no exception raised"
+   ],
+   "expected_result": "Validation passes, no ValueError raised"
+  },
+  {
+   "tc_id": "TC-APP-013",
+   "requirement_id": "REQ-006",
+   "planScenarioIds": [
+    "SC-U-001-001"
+   ],
+   "scenario": "Negative (Boundary): years one above cap (121) raises ValueError",
+   "type": "Negative (Boundary)",
+   "level": "Unit",
+   "priority": "P1",
+   "precondition": "Calculator function accepts parameters, cap validation is active",
+   "test_data": "{\"years\": 121}",
+   "steps": [
+    "Call the validation function with parameters {'years': 121} and cap {'years': 120}",
+    "Assert ValueError is raised"
+   ],
+   "expected_result": "ValueError raised with message containing \"'years' must be ≤ 120\""
+  },
+  {
+   "tc_id": "TC-APP-014",
+   "requirement_id": "REQ-006",
+   "planScenarioIds": [
+    "SC-U-001-001"
+   ],
+   "scenario": "Exception: years far above cap (200) raises ValueError with specific message",
+   "type": "Exception",
+   "level": "Unit",
+   "priority": "P1",
+   "precondition": "Calculator function accepts parameters, cap validation is active",
+   "test_data": "{\"years\": 200}",
+   "steps": [
+    "Call the validation function with parameters {'years': 200} and cap {'years': 120}",
+    "Assert ValueError is raised"
+   ],
+   "expected_result": "ValueError raised with message \"'years' must be ≤ 120\""
+  },
+  {
+   "tc_id": "TC-APP-015",
+   "requirement_id": "REQ-007",
+   "planScenarioIds": [
+    "SC-I-009-001"
+   ],
+   "scenario": "Positive: calculator ValueError wrapped in 400 response",
+   "type": "Positive",
+   "level": "Integration",
+   "priority": "P2",
+   "precondition": "Server is running, calculator can raise ValueError",
+   "test_data": "POST /api/calc with body {\"operation\": \"divide\", \"a\": 1, \"b\": 0} (triggers ZeroDivisionError)",
+   "steps": [
+    "Send POST request to /api/calc with body {\"operation\": \"divide\", \"a\": 1, \"b\": 0}",
+    "Check response status code and body"
+   ],
+   "expected_result": "Status 400, response body has key \"error\" with value starting with \"invalid inputs: division by zero\""
+  },
+  {
+   "tc_id": "TC-APP-016",
+   "requirement_id": "REQ-007",
+   "planScenarioIds": [
+    "SC-I-009-001"
+   ],
+   "scenario": "Negative: calculator ValueError wrapped in 400 response",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P2",
+   "precondition": "Server is running, calculator can raise ValueError",
+   "test_data": "POST /api/calc with body {\"operation\": \"sqrt\", \"a\": -1} (triggers ValueError)",
+   "steps": [
+    "Send POST request to /api/calc with body {\"operation\": \"sqrt\", \"a\": -1}",
+    "Check response status code and body"
+   ],
+   "expected_result": "Status 400, response body has key \"error\" with value starting with \"invalid inputs: \""
+  },
+  {
+   "tc_id": "TC-APP-017",
+   "requirement_id": "REQ-008",
+   "planScenarioIds": [
+    "SC-I-010-001"
+   ],
+   "scenario": "Positive: unexpected exception returns generic 400 message",
+   "type": "Positive",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running, calculator can raise an unexpected exception (e.g., RuntimeError)",
+   "test_data": "POST /api/calc with body that causes unexpected error (e.g., {\"operation\": \"crash\"})",
+   "steps": [
+    "Send POST request to /api/calc with body {\"operation\": \"crash\"}",
+    "Check response status code and body"
+   ],
+   "expected_result": "Status 400, response body has key \"error\" with value \"calculation failed\""
+  },
+  {
+   "tc_id": "TC-APP-018",
+   "requirement_id": "REQ-008",
+   "planScenarioIds": [
+    "SC-I-010-001"
+   ],
+   "scenario": "Negative (Boundary): unexpected exception does not leak exception type or message",
+   "type": "Negative (Boundary)",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running, calculator can raise an unexpected exception",
+   "test_data": "POST /api/calc with body that causes unexpected RuntimeError",
+   "steps": [
+    "Send POST request to /api/calc with body {\"operation\": \"crash\"}",
+    "Check response body does not contain exception type or message"
+   ],
+   "expected_result": "Response body key \"error\" is exactly \"calculation failed\", no other exception details"
+  },
+  {
+   "tc_id": "TC-APP-019",
+   "requirement_id": "REQ-008",
+   "planScenarioIds": [
+    "SC-I-010-001"
+   ],
+   "scenario": "Negative: unexpected exception returns 400, not 500 or other status",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running, calculator can raise an unexpected exception",
+   "test_data": "POST /api/calc with body that causes unexpected RuntimeError",
+   "steps": [
+    "Send POST request to /api/calc with body {\"operation\": \"crash\"}",
+    "Check response status code is 400, not 500 or any other"
+   ],
+   "expected_result": "Status code is 400"
+  },
+  {
+   "tc_id": "TC-APP-020",
+   "requirement_id": "REQ-008",
+   "planScenarioIds": [
+    "SC-I-010-001"
+   ],
+   "scenario": "Exception: unexpected exception returns generic message, no stack trace",
+   "type": "Exception",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running, calculator can raise an unexpected exception",
+   "test_data": "POST /api/calc with body that causes unexpected RuntimeError",
+   "steps": [
+    "Send POST request to /api/calc with body {\"operation\": \"crash\"}",
+    "Check response body does not contain stack trace or internal paths"
+   ],
+   "expected_result": "Response body key \"error\" is exactly \"calculation failed\", no stack trace or internal paths"
+  },
+  {
+   "tc_id": "TC-APP-021",
+   "requirement_id": "REQ-009",
+   "planScenarioIds": [
+    "SC-U-002-001"
+   ],
+   "scenario": "Positive: numeric code of length within limit (9) passes validation",
+   "type": "Positive",
+   "level": "Unit",
+   "priority": "P2",
+   "precondition": "Scheme code validation function is available",
+   "test_data": "\"123456789\"",
+   "steps": [
+    "Call validation function with code \"123456789\"",
+    "Assert no error returned"
+   ],
+   "expected_result": "Validation passes, no error"
+  },
+  {
+   "tc_id": "TC-APP-022",
+   "requirement_id": "REQ-009",
+   "planScenarioIds": [
+    "SC-U-002-001"
+   ],
+   "scenario": "Negative: non-numeric code returns 400 with error message",
+   "type": "Negative",
+   "level": "Unit",
+   "priority": "P2",
+   "precondition": "Scheme code validation function is available",
+   "test_data": "\"abc123\"",
+   "steps": [
+    "Call validation function with code \"abc123\"",
+    "Assert error message indicates invalid scheme code"
+   ],
+   "expected_result": "Validation returns error: 'invalid scheme code'"
+  },
+  {
+   "tc_id": "TC-APP-023",
+   "requirement_id": "REQ-010",
+   "planScenarioIds": [
+    "SC-U-003-001"
+   ],
+   "scenario": "Unit test: query length exactly 1 character is valid",
+   "type": "Positive",
+   "level": "Unit",
+   "priority": "P2",
+   "precondition": "None",
+   "test_data": "'a'",
+   "steps": [
+    "Call the pure validation function for query length with input string 'a'.",
+    "Assert that it returns without raising an exception."
+   ],
+   "expected_result": "The validation function does not raise an exception or return an error."
+  },
+  {
+   "tc_id": "TC-APP-024",
+   "requirement_id": "REQ-010",
+   "planScenarioIds": [
+    "SC-U-003-001"
+   ],
+   "scenario": "Unit test: query length 81 characters is invalid and raises exception or returns error",
+   "type": "Negative (Boundary)",
+   "level": "Unit",
+   "priority": "P2",
+   "precondition": "None",
+   "test_data": "'a' * 81",
+   "steps": [
+    "Call the pure validation function for query length with input string of exactly 81 characters.",
+    "Assert that it raises a ValueError or returns an error indicator."
+   ],
+   "expected_result": "The validation function raises a ValueError with message 'query must be 1–80 characters' or returns an error object indicating invalid length."
+  },
+  {
+   "tc_id": "TC-APP-025",
+   "requirement_id": "REQ-011",
+   "planScenarioIds": [
+    "SC-U-004-001"
+   ],
+   "scenario": "Unit test: valid 3-letter uppercase currency code passes regex",
+   "type": "Positive",
+   "level": "Unit",
+   "priority": "P2",
+   "precondition": "None",
+   "test_data": "'USD'",
+   "steps": [
+    "Call the currency code validation function or apply pattern _CCY_RE to input 'USD'.",
+    "Assert that the input matches the pattern."
+   ],
+   "expected_result": "The pattern _CCY_RE matches 'USD' and returns a match object."
+  },
+  {
+   "tc_id": "TC-APP-026",
+   "requirement_id": "REQ-011",
+   "planScenarioIds": [
+    "SC-U-004-001"
+   ],
+   "scenario": "Unit test: invalid currency code with digits fails regex",
+   "type": "Negative",
+   "level": "Unit",
+   "priority": "P2",
+   "precondition": "None",
+   "test_data": "'US1'",
+   "steps": [
+    "Call the currency code validation function or apply pattern _CCY_RE to input 'US1'.",
+    "Assert that the input does not match the pattern."
+   ],
+   "expected_result": "The pattern _CCY_RE does not match 'US1'; the validation function raises ValueError or returns error 'invalid currency code'."
+  },
+  {
+   "tc_id": "TC-APP-027",
+   "requirement_id": "REQ-012",
+   "planScenarioIds": [
+    "SC-U-005-001"
+   ],
+   "scenario": "Unit test: valid symbol like 'AAPL' passes regex",
+   "type": "Positive",
+   "level": "Unit",
+   "priority": "P2",
+   "precondition": "None",
+   "test_data": "'AAPL'",
+   "steps": [
+    "Call the symbol validation function or apply pattern _SYMBOL_RE to input 'AAPL'.",
+    "Assert that the input matches the pattern."
+   ],
+   "expected_result": "The pattern _SYMBOL_RE matches 'AAPL' and returns a match object."
+  },
+  {
+   "tc_id": "TC-APP-028",
+   "requirement_id": "REQ-012",
+   "planScenarioIds": [
+    "SC-U-005-001"
+   ],
+   "scenario": "Unit test: invalid symbol with lowercase letters fails regex",
+   "type": "Negative",
+   "level": "Unit",
+   "priority": "P2",
+   "precondition": "None",
+   "test_data": "'aapl'",
+   "steps": [
+    "Call the symbol validation function or apply pattern _SYMBOL_RE to input 'aapl'.",
+    "Assert that the input does not match the pattern."
+   ],
+   "expected_result": "The pattern _SYMBOL_RE does not match 'aapl'; the validation function raises ValueError or returns error 'invalid symbol'."
+  },
+  {
+   "tc_id": "TC-APP-029",
+   "requirement_id": "REQ-015",
+   "planScenarioIds": [
+    "SC-I-016-001"
+   ],
+   "scenario": "Verify all six security headers are present on a successful GET /api/health response",
+   "type": "Positive",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and SEC_HEADERS constant is defined with all six headers as per the source code at src/web/server.py line 171.",
+   "test_data": "None",
+   "steps": [
+    "Send a GET request to /api/health",
+    "Receive the response"
+   ],
+   "expected_result": "The response must include each of the six security headers: X-Content-Type-Options, Referrer-Policy, Permissions-Policy, Strict-Transport-Security, Cross-Origin-Opener-Policy, and Content-Security-Policy."
+  },
+  {
+   "tc_id": "TC-APP-030",
+   "requirement_id": "REQ-015",
+   "planScenarioIds": [
+    "SC-I-016-001"
+   ],
+   "scenario": "Verify all six security headers are present on a 404 response from a non-existent endpoint",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and SEC_HEADERS are applied to all responses, including error ones.",
+   "test_data": "None",
+   "steps": [
+    "Send a GET request to /api/nonexistent",
+    "Receive the response"
+   ],
+   "expected_result": "Response status is 404, and the response includes all six security headers: X-Content-Type-Options, Referrer-Policy, Permissions-Policy, Strict-Transport-Security, Cross-Origin-Opener-Policy, and Content-Security-Policy."
+  },
+  {
+   "tc_id": "TC-APP-031",
+   "requirement_id": "REQ-015",
+   "planScenarioIds": [
+    "SC-I-016-001"
+   ],
+   "scenario": "Verify all six security headers are present on a 400 response from a malformed POST request",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running and SEC_HEADERS are applied to all responses, including error ones.",
+   "test_data": "a string of binary garbage that is not valid JSON",
+   "steps": [
+    "Send a POST request to /api/calculate with Content-Type application/json and a malformed body that is not valid JSON",
+    "Receive the response"
+   ],
+   "expected_result": "Response status is 400, and the response includes all six security headers: X-Content-Type-Options, Referrer-Policy, Permissions-Policy, Strict-Transport-Security, Cross-Origin-Opener-Policy, and Content-Security-Policy."
+  },
+  {
+   "tc_id": "TC-APP-032",
+   "requirement_id": "REQ-015",
+   "planScenarioIds": [
+    "SC-I-016-001"
+   ],
+   "scenario": "Verify all six security headers are present on a 405 response from an OPTIONS request to a known endpoint",
+   "type": "Negative (Boundary)",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "Server is running; the /api/health endpoint does not allow OPTIONS method, but the header middleware runs before method routing.",
+   "test_data": "None",
+   "steps": [
+    "Send an OPTIONS request to /api/health",
+    "Receive the response"
+   ],
+   "expected_result": "Response status is 405, and the response includes all six security headers: X-Content-Type-Options, Referrer-Policy, Permissions-Policy, Strict-Transport-Security, Cross-Origin-Opener-Policy, and Content-Security-Policy."
+  },
+  {
+   "tc_id": "TC-APP-033",
+   "requirement_id": "REQ-005",
+   "planScenarioIds": [
+    "SC-U-001-001"
+   ],
+   "scenario": "Numeric input within valid absolute range (1e13)",
+   "type": "Positive",
+   "level": "Unit",
+   "priority": "P1",
+   "precondition": "The validation function 'validate_numeric_param' is loaded.",
+   "test_data": "{\"value\": 10000000000000}",
+   "steps": [
+    "Call validate_numeric_param(value=10000000000000).",
+    "Observe return value."
+   ],
+   "expected_result": "Returns True (validation passes)."
+  },
+  {
+   "tc_id": "TC-APP-034",
+   "requirement_id": "REQ-005",
+   "planScenarioIds": [
+    "SC-U-001-001"
+   ],
+   "scenario": "Numeric input just below the absolute maximum (1e13 - 1)",
+   "type": "Negative (Boundary)",
+   "level": "Unit",
+   "priority": "P1",
+   "precondition": "The validation function 'validate_numeric_param' is loaded.",
+   "test_data": "{\"value\": 9999999999999}",
+   "steps": [
+    "Call validate_numeric_param(value=9999999999999).",
+    "Observe return value."
+   ],
+   "expected_result": "Returns True (validation passes)."
+  },
+  {
+   "tc_id": "TC-APP-035",
+   "requirement_id": "REQ-005",
+   "planScenarioIds": [
+    "SC-U-001-001"
+   ],
+   "scenario": "Numeric input exceeding the absolute maximum (1e13 + 1)",
+   "type": "Negative (Boundary)",
+   "level": "Unit",
+   "priority": "P1",
+   "precondition": "The validation function 'validate_numeric_param' is loaded.",
+   "test_data": "{\"value\": 10000000000001}",
+   "steps": [
+    "Call validate_numeric_param(value=10000000000001).",
+    "Observe raised exception."
+   ],
+   "expected_result": "Raises ValueError with message containing 'out of range'."
+  },
+  {
+   "tc_id": "TC-APP-036",
+   "requirement_id": "REQ-005",
+   "planScenarioIds": [
+    "SC-U-001-001"
+   ],
+   "scenario": "Numeric input with negative value at the absolute minimum (-1e13) raises ValueError",
+   "type": "Exception",
+   "level": "Unit",
+   "priority": "P1",
+   "precondition": "The validation function 'validate_numeric_param' is loaded.",
+   "test_data": "{\"value\": -10000000000000}",
+   "steps": [
+    "Call validate_numeric_param(value=-10000000000000).",
+    "Observe raised exception."
+   ],
+   "expected_result": "Raises ValueError with message containing 'out of range'."
+  },
+  {
+   "tc_id": "TC-APP-037",
+   "requirement_id": "REQ-013",
+   "planScenarioIds": [
+    "SC-I-015-001"
+   ],
+   "scenario": "Request body size within limit (16 KB exactly)",
+   "type": "Positive",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "A test client is configured and the server is running.",
+   "test_data": "A JSON payload of exactly 16384 bytes (e.g., a string of 16384 characters).",
+   "steps": [
+    "Send POST /api/calc with Content-Length: 16384 and body of exactly 16384 bytes.",
+    "Observe response status and body."
+   ],
+   "expected_result": "Status 200 and valid JSON response (calculation result)."
+  },
+  {
+   "tc_id": "TC-APP-038",
+   "requirement_id": "REQ-013",
+   "planScenarioIds": [
+    "SC-I-015-001"
+   ],
+   "scenario": "Request body size just above the limit (16385 bytes)",
+   "type": "Negative (Boundary)",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "A test client is configured and the server is running.",
+   "test_data": "A JSON payload of 16385 bytes.",
+   "steps": [
+    "Send POST /api/calc with Content-Length: 16385 and body of 16385 bytes.",
+    "Observe response status and body."
+   ],
+   "expected_result": "Status 413 and JSON body with error 'payload too large'."
+  },
+  {
+   "tc_id": "TC-APP-039",
+   "requirement_id": "REQ-013",
+   "planScenarioIds": [
+    "SC-I-015-001"
+   ],
+   "scenario": "Request with a very large body (100000 bytes) is rejected",
+   "type": "Negative",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "A test client is configured and the server is running.",
+   "test_data": "A JSON payload of 100000 bytes.",
+   "steps": [
+    "Send POST /api/calc with Content-Length: 100000 and body of 100000 bytes.",
+    "Observe response status and body."
+   ],
+   "expected_result": "Status 413 and JSON body with error 'payload too large'."
+  },
+  {
+   "tc_id": "TC-APP-040",
+   "requirement_id": "REQ-013",
+   "planScenarioIds": [
+    "SC-I-015-001"
+   ],
+   "scenario": "Request with zero-length body is accepted",
+   "type": "Exception",
+   "level": "Integration",
+   "priority": "P1",
+   "precondition": "A test client is configured and the server is running.",
+   "test_data": "An empty body (0 bytes).",
+   "steps": [
+    "Send POST /api/calc with Content-Length: 0 and empty body.",
+    "Observe response status."
+   ],
+   "expected_result": "Status 400 (or other error) due to missing/invalid input, but not 413."
+  }
+ ]
+}

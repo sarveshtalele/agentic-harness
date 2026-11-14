@@ -173,6 +173,22 @@ intake G0 (documents, target repo) -> read documents (RAG) -> requirements G1 ->
 What still fails after the one send-back is shipped in `needs-review/`, with its message in `VALIDATION.md`.
 Limit (`ponytail:`): V2b reads Python tests; other languages are NOT CHECKED for V2b.
 
+## 8c. Live run 2026-11-14 22:18: the first brownfield run under v2 completed
+
+| Gate | Seconds | Result |
+|---|---|---|
+| G1 | 27 | 13 requirements; plugin check PASS; trace PASS |
+| G2 | 11 | plugin check PASS; trace PASS |
+| G3 | 156 + 216 | Sent back once for 4 REJECT cases. Then 40 cases; auditor 35 COVERS, 5 PARTIAL, 0 MISSES; trace PASS. Plugin check FAIL: 4 integration scenarios have no case at their level |
+| G4 | 70 | 35 of 40 tests valid (V2b 1, V5 4); trace PASS |
+| G5 | 1 | NOT EXECUTED; all 13 requirements have a valid test; zip and run command shown |
+
+Open items:
+- **Planned levels:** Design does not yet give a case for each level the plan lists for a requirement (the 4 integration
+  scenarios).
+- **Speed:** G3 after a send-back took 216 s, over the 180 s goal.
+- **Gate 5 counts:** the Gate 5 text left V2b out of the counts. Fixed: the shared check list is used everywhere.
+
 ## 9. Order, models and evidence
 
 Each step: Sonnet implements, Opus reviews against the brief, Sonnet fixes, then the full suite and CI must be green before
